@@ -229,7 +229,9 @@
     "overdueDays_one": "{{count}} gün gecikti",
     "overdueDays_other": "{{count}} gün gecikti",
     "offlineTitle": "İnternet yok",
-    "offlineBody": "Bu, cihazına kaydedilmiş son bilet. QR kodu dükkanda gösterebilirsin; bağlantı gelince güncellenir."
+    "offlineBody": "Bu, cihazına kaydedilmiş son bilet. QR kodu dükkanda gösterebilirsin; bağlantı gelince güncellenir.",
+    "address": "Adres",
+    "addressHint": "Basılı tut, kopyala; taksiciye gösterebilirsin."
   },
   "status": {
     "PENDING": "Bekliyor",
@@ -238,7 +240,8 @@
     "APPROVED": "Onaylandı",
     "CHECKED_IN": "Valiz dükkanda",
     "CHECKED_OUT": "Tamamlandı",
-    "CANCELLED": "İptal edildi"
+    "CANCELLED": "İptal edildi",
+    "UNUSED": "Kullanılmadı"
   },
   "partner": {
     "title": "Emanetler",
@@ -580,7 +583,8 @@
     "clear": "Aramayı temizle",
     "errors": {
       "too_many_requests": "Çok sık arama yaptın. Biraz sonra tekrar dene.",
-      "invalid_query": "Aramak için en az 3 harf yaz."
+      "invalid_query": "Aramak için en az 3 harf yaz.",
+      "geocode_unavailable": "Adres araması şu an yanıt vermiyor. Biraz sonra dene ya da listeden bir şehir seç."
     }
   },
   "modify": {
@@ -856,5 +860,12 @@
     "approvedBody": "Yeni toplam: {{total}}",
     "rejectedTitle": "Düzeltme reddedildi",
     "rejectedBody": "Rezervasyonun değişmedi. Bir sorun varsa dükkanla konuşabilirsin."
+  },
+  "setup": {
+    "title": "Dükkanını tamamla",
+    "photoTitle": "Dükkan fotoğrafı ekle",
+    "photoBody": "Fotoğraflı noktalar haritada daha çok seçiliyor.",
+    "hoursTitle": "Çalışma saatlerini gir",
+    "hoursBody": "Şu an varsayılan 09:00–20:00 görünüyor; misafirler bu saatlere göre geliyor."
   }
 }

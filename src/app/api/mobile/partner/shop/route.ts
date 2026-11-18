@@ -69,7 +69,20 @@ export async function GET(req: NextRequest) {
     select: { phone: true },
   });
 
-  const gallery = await shopGalleryService.list(shop.id);
+  const [gallery, weeklyRows] = await Promise.all([
+    shopGalleryService.list(shop.id),
+    prisma.shopWeeklyHours.count({ where: { shopId: shop.id } }),
+  ]);
+
+  /*
+    Kurulum ozeti (2026-11-18): prod'da 12 isletilen dukkandan 9'unun
+    fotografi yoktu ve 9'u hala sema varsayilani 09:00-20:00 saatindeydi
+    (haftalik program hic girilmemis). Esnaf panosu bunu "dukkanini tamamla"
+    listesi olarak gosterir. Saat "girilmis" = 7/24, haftalik program ya da
+    varsayilandan farkli acilis/kapanis.
+  */
+  const hoursConfigured =
+    shop.open247 || weeklyRows > 0 || shop.openingTime !== "09:00" || shop.closingTime !== "20:00";
 
   return NextResponse.json({
     ...shop,
@@ -77,6 +90,7 @@ export async function GET(req: NextRequest) {
     sealCount,
     phone: owner?.phone ?? null,
     gallery: gallery.map(toMobileGalleryImage),
+    setup: { hasPhoto: !!shop.image, hoursConfigured },
   });
 }
 

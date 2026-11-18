@@ -10,6 +10,7 @@ import { SealedBag } from "@/components/Illustrations";
 import { ShopSwitcher } from "@/components/ShopSwitcher";
 import { BookingRow } from "@/components/BookingRow";
 import { PartnerPulseCard } from "@/components/PartnerPulseCard";
+import { ShopSetupCard } from "@/components/ShopSetupCard";
 import { Segmented } from "@/components/Segmented";
 import { RowSkeleton } from "@/components/RowSkeleton";
 import { AppText, Button, CenterMessage } from "@/components/ui";
@@ -100,6 +101,7 @@ export default function PartnerBookingsScreen() {
       </View>
 
       <View style={{ paddingHorizontal: space.xl, paddingBottom: space.md, gap: space.md }}>
+        <ShopSetupCard />
         <PartnerPulseCard />
         <Segmented
           value={tab}
