@@ -229,7 +229,9 @@
     "overdueDays_one": "{{count}} Tag überfällig",
     "overdueDays_other": "{{count}} Tage überfällig",
     "offlineTitle": "Kein Internet",
-    "offlineBody": "Das ist das zuletzt gespeicherte Ticket. Du kannst den QR-Code im Laden zeigen; es aktualisiert sich, sobald du wieder online bist."
+    "offlineBody": "Das ist das zuletzt gespeicherte Ticket. Du kannst den QR-Code im Laden zeigen; es aktualisiert sich, sobald du wieder online bist.",
+    "address": "Adresse",
+    "addressHint": "Gedrückt halten zum Kopieren; du kannst sie einem Taxifahrer zeigen."
   },
   "status": {
     "PENDING": "Ausstehend",
@@ -238,7 +240,8 @@
     "APPROVED": "Bestätigt",
     "CHECKED_IN": "Gepäck im Laden",
     "CHECKED_OUT": "Abgeschlossen",
-    "CANCELLED": "Storniert"
+    "CANCELLED": "Storniert",
+    "UNUSED": "Nicht genutzt"
   },
   "partner": {
     "title": "Gepäck",
@@ -580,7 +583,8 @@
     "clear": "Suche löschen",
     "errors": {
       "too_many_requests": "Du suchst zu oft. Versuch es gleich noch einmal.",
-      "invalid_query": "Gib mindestens 3 Buchstaben ein, um zu suchen."
+      "invalid_query": "Gib mindestens 3 Buchstaben ein, um zu suchen.",
+      "geocode_unavailable": "Die Adresssuche antwortet gerade nicht. Versuch es gleich noch einmal oder wähl eine Stadt aus der Liste."
     }
   },
   "modify": {
@@ -856,5 +860,12 @@
     "approvedBody": "Neuer Gesamtpreis: {{total}}",
     "rejectedTitle": "Korrektur abgelehnt",
     "rejectedBody": "Deine Buchung hat sich nicht geändert. Wenn etwas nicht stimmt, sprich mit dem Laden."
+  },
+  "setup": {
+    "title": "Richte deinen Laden fertig ein",
+    "photoTitle": "Ladenfoto hinzufügen",
+    "photoBody": "Orte mit Foto werden auf der Karte öfter gewählt.",
+    "hoursTitle": "Öffnungszeiten eintragen",
+    "hoursBody": "Gerade steht der Standard 09:00–20:00; Gäste planen danach."
   }
 }
