@@ -77,13 +77,19 @@ export function isDisposableEmail(email: string): boolean {
  * Google girisi de geciyor), yani kod istemek ya da Google'in dogrulamasi durdurmuyor.
  * Yalnizca YENI kayitta bakilir; var olan hesaplar girmeye devam eder.
  */
-const BOT_PATTERN_LOCAL = /^[a-z]{4,}\.\d{5}$/;
+const BOT_PATTERN_LOCAL = /^[a-z]{4,}\d{5}$/;
 const GMAIL_DOMAINS = new Set(["gmail.com", "googlemail.com"]);
 
+/**
+ * Gmail noktalari ve `+etiket`i yok sayar: `adsoyad.12345`, `adsoyad12345` ve
+ * `adsoyad.12345+x` ayni kutuya gider. Kalip bu kanonik bicimde aranir; yoksa
+ * nokta kaldirarak ya da etiket ekleyerek engel asiliyordu.
+ */
 export function isBotPatternEmail(email: string): boolean {
   const [local, domain] = email.trim().toLowerCase().split("@");
   if (!local || !domain || !GMAIL_DOMAINS.has(domain)) return false;
-  return BOT_PATTERN_LOCAL.test(local);
+  const canonical = local.split("+")[0].replace(/\./g, "");
+  return BOT_PATTERN_LOCAL.test(canonical);
 }
 
 /** Yeni hesap acilmasina izin verilmeyen e-posta: gecici domain ya da bot kalibi. */
