@@ -1,10 +1,3 @@
-// Hermes Android'de `Intl.PluralRules` yok: i18next cogul bicimini tahmin ediyor,
-// Rusca "27 дня" (dogrusu "27 дней") yaziyordu. Yalnizca eksikse yuklenir; ONCE gelmeli.
-import "@formatjs/intl-pluralrules/polyfill.js";
-import "@formatjs/intl-pluralrules/locale-data/de.js";
-import "@formatjs/intl-pluralrules/locale-data/en.js";
-import "@formatjs/intl-pluralrules/locale-data/ru.js";
-import "@formatjs/intl-pluralrules/locale-data/tr.js";
 import i18n from "i18next";
 import { initReactI18next } from "react-i18next";
 import { getLocales } from "expo-localization";
