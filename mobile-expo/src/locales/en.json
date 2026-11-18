@@ -227,7 +227,9 @@
     "code": "Booking code",
     "overdue": "Pick-up time passed",
     "overdueDays_one": "{{count}} day overdue",
-    "overdueDays_other": "{{count}} days overdue"
+    "overdueDays_other": "{{count}} days overdue",
+    "offlineTitle": "No internet",
+    "offlineBody": "This is the last ticket saved on your phone. You can show the QR code at the shop; it updates when you're back online."
   },
   "status": {
     "PENDING": "Pending",
@@ -282,7 +284,8 @@
       "storage_unavailable": "Photo upload isn't available right now. Try again shortly.",
       "not_found": "Shop not found.",
       "no_shop": "We couldn't find an active shop for you.",
-      "limit": "You can add up to 8 gallery photos; delete one first."
+      "limit": "You can add up to 8 gallery photos; delete one first.",
+      "INVALID_SEALS": "The marked seal doesn't belong to this booking; refresh the page."
     },
     "myShop": "My shop",
     "photo": "Shop photo",
@@ -318,7 +321,11 @@
     "confirmCheckOutTitle": "Hand the bags back?",
     "confirmCheckOutBody_one": "{{count}} bag will be recorded as returned to the guest. This can't be undone.",
     "confirmCheckOutBody_other": "{{count}} bags will be recorded as returned to the guest. This can't be undone.",
-    "confirmYes": "Yes, record it"
+    "confirmYes": "Yes, record it",
+    "sealBroken": "Not intact",
+    "sealBrokenHint": "A seal that isn't intact is recorded; check the bag with the guest. You can still complete the pickup.",
+    "lateFeeCollect": "Late fee {{amount}}: collect it from the guest.",
+    "earlyRefundGive": "Early pickup: refund the guest {{amount}}."
   },
   "profile": {
     "title": "Profile",

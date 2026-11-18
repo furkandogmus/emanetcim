@@ -1,4 +1,4 @@
-import { useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Alert, KeyboardAvoidingView, Linking, Platform, RefreshControl, ScrollView, StyleSheet, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { router } from "expo-router";
@@ -19,6 +19,7 @@ import { formatMoney } from "@/lib/format";
 import { isActiveBooking, useBooking } from "@/lib/queries";
 import type { BookingDetail } from "@/lib/types";
 import { notify } from "@/lib/notify";
+import { loadOfflineTicket, saveOfflineTicket, type OfflineTicket } from "@/lib/offline-tickets";
 import { colors, space } from "@/theme/tokens";
 
 /** Misafirin iptal edebildigi durumlar: valiz henuz dukkana teslim edilmemis. */
@@ -65,12 +66,42 @@ export function BookingDetailView({ id, mode }: { id: string; mode: "guest" | "p
     onError: (e) => notify(t("bookings.cancelFailed"), errorMessage(e)),
   });
 
+  // Aktif rezervasyonun bileti cihaza yazilir; ag yoksa QR yine gosterilir.
+  const [offline, setOffline] = useState<OfflineTicket | null>(null);
+  useEffect(() => {
+    if (mode === "guest" && query.data) void saveOfflineTicket(query.data);
+  }, [mode, query.data]);
+  useEffect(() => {
+    if (mode === "guest" && query.isError) void loadOfflineTicket(id).then(setOffline);
+  }, [mode, query.isError, id]);
+
   if (query.isLoading) return <Loading />;
   if (query.isError || !query.data) {
+    if (offline) {
+      return (
+        <SafeAreaView style={styles.safe} edges={["top"]}>
+          <View style={styles.header}>
+            <IconButton label={t("common.back")} onPress={() => router.back()}>
+              <ArrowLeft size={20} color={colors.ink} />
+            </IconButton>
+          </View>
+          <ScrollView contentContainerStyle={styles.content}>
+            <Banner tone="warning" title={t("bookings.offlineTitle")} body={t("bookings.offlineBody")} />
+            <BookingTicket booking={offline} showQr />
+            <Button variant="secondary" title={t("common.retry")} onPress={() => query.refetch()} />
+          </ScrollView>
+        </SafeAreaView>
+      );
+    }
     return (
       <CenterMessage
         title={errorMessage(query.error)}
-        action={<Button variant="secondary" title={t("common.back")} onPress={() => router.back()} />}
+        action={
+          <View style={{ gap: space.sm }}>
+            <Button title={t("common.retry")} onPress={() => query.refetch()} />
+            <Button variant="secondary" title={t("common.back")} onPress={() => router.back()} />
+          </View>
+        }
       />
     );
   }
@@ -111,10 +142,11 @@ export function BookingDetailView({ id, mode }: { id: string; mode: "guest" | "p
           subtitle={mode === "partner" ? b.shopName : undefined}
         />
 
-        {/* Anahtar valiz sayilarini da tasir: revizyondan sonra muhur satirlari yeni sayidan kurulur. */}
-        {mode === "partner" ? (
-          <PartnerBookingActions key={`${b.status}-${b.bagCountS}-${b.bagCountM}-${b.bagCountXl}`} booking={b} />
-        ) : null}
+        {/*
+          Duzeltme muhur satirlarinin USTUNDE: tezgahta once valiz sayilir, sonra
+          muhurler yazilir. Aksi sirada duzeltme yazilmis muhurleri siliyordu;
+          artik PartnerBookingActions numaralari bagIndex'e gore koruyor.
+        */}
         {mode === "partner" && b.pendingBagRevision ? (
           <Banner
             tone="warning"
@@ -128,6 +160,7 @@ export function BookingDetailView({ id, mode }: { id: string; mode: "guest" | "p
         {mode === "partner" ? (
           <BagRevisionCard key={`rev-${b.status}-${b.bagCountS}-${b.bagCountM}-${b.bagCountXl}`} booking={b} />
         ) : null}
+        {mode === "partner" ? <PartnerBookingActions key={b.status} booking={b} /> : null}
 
 
         {mode === "guest" ? (
