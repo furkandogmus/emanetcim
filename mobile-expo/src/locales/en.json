@@ -467,7 +467,10 @@
     "occupancy": "Occupancy",
     "bagsOfCapacity": "{{bags}} / {{capacity}} bags",
     "shopToday": "Today {{arrivals}} arriving · {{pickups}} picking up",
-    "chartEmpty": "No paid bookings in the last 14 days"
+    "chartEmpty": "No paid bookings in the last 14 days",
+    "shopsLive": "In service",
+    "shopsPrelaunch": "Demand test · not taking bags",
+    "noBags": "Not taking bags"
   },
   "scan": {
     "open": "Scan QR",
