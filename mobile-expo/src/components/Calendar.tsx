@@ -8,6 +8,7 @@ import { formatMonth } from "@/lib/format";
 import { nextRange, type Picking } from "@/lib/date-range";
 import { cellOf } from "@/lib/time";
 import { colors, fonts, radius, space } from "@/theme/tokens";
+import { languageInfo } from "@/lib/languages";
 
 function startOfDay(d: Date) {
   const x = new Date(d);
@@ -53,7 +54,7 @@ export function RangeCalendar({
   const cells = useMemo(() => monthGrid(month), [month]);
 
   const weekdayLabels = useMemo(() => {
-    const fmt = new Intl.DateTimeFormat(i18n.language === "tr" ? "tr-TR" : "en-GB", { weekday: "narrow" });
+    const fmt = new Intl.DateTimeFormat(languageInfo(i18n.language).intl, { weekday: "narrow" });
     // 2024-01-01 bir pazartesi.
     return Array.from({ length: 7 }, (_, i) => fmt.format(new Date(2024, 0, 1 + i)));
   }, [i18n.language]);

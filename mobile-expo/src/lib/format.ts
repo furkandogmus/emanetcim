@@ -1,8 +1,9 @@
 import i18n from "./i18n";
 import { shiftedForFormat } from "./time";
+import { languageInfo } from "./languages";
 
 function locale() {
-  return i18n.language === "tr" ? "tr-TR" : "en-GB";
+  return languageInfo(i18n.language).intl;
 }
 
 /**

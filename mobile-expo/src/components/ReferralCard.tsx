@@ -9,6 +9,7 @@ import { errorMessage } from "@/lib/errors";
 import { SITE_ORIGIN } from "@/lib/images";
 import type { ReferralCode } from "@/lib/types";
 import { colors, fonts, radius, space } from "@/theme/tokens";
+import { languageInfo } from "@/lib/languages";
 
 /**
  * Kullanicinin davet kodu ve paylas dugmesi. Kod ve indirim orani sunucudan
@@ -31,7 +32,7 @@ export function ReferralCard({ audience }: { audience: "partner" | "guest" }) {
 
   async function share() {
     if (!data) return;
-    const lang = i18n.language === "tr" ? "tr" : "en";
+    const lang = languageInfo(i18n.language).site;
     const role = audience === "partner" ? "role=PARTNER&" : "";
     const url = `${SITE_ORIGIN}/${lang}/register?${role}ref=${encodeURIComponent(data.code)}`;
     const message = t(`referral.${audience}.shareMessage`, { code: data.code, pct: data.discountPct, url });
