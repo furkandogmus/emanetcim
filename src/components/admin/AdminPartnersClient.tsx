@@ -34,6 +34,8 @@ interface Shop {
   name: string;
   address: string | null;
   isActive: boolean;
+  /** Talep testi noktasi: haritada "acilinca haber ver" gosterir, valiz ALMAZ. */
+  isPrelaunch: boolean;
   rating: number;
   pricePerDay: number; // Decimal
   /** Bugünün çalışma saati: aralık metni, 7/24 ya da kapalı (izin/kapalı gün). */
@@ -78,6 +80,10 @@ export default function AdminPartnersClient({ shops: initialShops }: AdminPartne
   const tCommon = useTranslations("Common");
   const locale = useLocale();
   const [search, setSearch] = useState("");
+  // Talep testi noktalari valiz almiyor; gercek dukkanlarla ayni listede karisiyordu.
+  const [view, setView] = useState<"live" | "prelaunch">("live");
+  const liveCount = initialShops.filter((s) => !s.isPrelaunch).length;
+  const prelaunchCount = initialShops.length - liveCount;
 
   const [resetTarget, setResetTarget] = useState<{ id: string; name: string; phone: string | null } | null>(null);
   const [resetResult, setResetResult] = useState<{ ok: true; resetUrl: string } | { ok: false; error: string } | null>(null);
@@ -100,10 +106,12 @@ export default function AdminPartnersClient({ shops: initialShops }: AdminPartne
 
   useModalBehavior({ open: resetTarget !== null, onClose: closeResetModal });
 
-  const filteredShops = initialShops.filter(shop => 
-    shop.name.toLowerCase().includes(search.toLowerCase()) ||
-    shop.owner.name?.toLowerCase().includes(search.toLowerCase()) ||
-    shop.owner.phone?.includes(search)
+  const filteredShops = initialShops.filter(
+    (shop) =>
+      shop.isPrelaunch === (view === "prelaunch") &&
+      (shop.name.toLowerCase().includes(search.toLowerCase()) ||
+        shop.owner.name?.toLowerCase().includes(search.toLowerCase()) ||
+        shop.owner.phone?.includes(search)),
   );
 
   return (
@@ -119,7 +127,7 @@ export default function AdminPartnersClient({ shops: initialShops }: AdminPartne
             {t("shopManagement")}
           </h1>
           <p className="text-xs id-eyebrow text-gray-400 mt-2">
-            {initialShops.length} {t("activePartners")}
+            {liveCount} {t("activePartners")}
           </p>
           <Link
             href="/admin/partners/new"
@@ -142,6 +150,29 @@ export default function AdminPartnersClient({ shops: initialShops }: AdminPartne
           />
         </div>
       </header>
+
+      <div role="tablist" aria-label={t("shopManagement")} className="mb-4 inline-flex gap-1 rounded-2xl bg-white p-1 border border-gray-100 shadow-sm">
+        {(["live", "prelaunch"] as const).map((v) => (
+          <button
+            key={v}
+            type="button"
+            role="tab"
+            aria-selected={view === v}
+            onClick={() => setView(v)}
+            className={`px-4 py-2 rounded-xl text-sm font-bold transition-colors ${
+              view === v ? "bg-gray-900 text-white" : "text-gray-500 hover:text-gray-900"
+            }`}
+          >
+            {v === "live" ? t("shopsTabLive") : t("shopsTabPrelaunch")}{" "}
+            <span className={view === v ? "text-white/70" : "text-gray-400"}>
+              {v === "live" ? liveCount : prelaunchCount}
+            </span>
+          </button>
+        ))}
+      </div>
+      {view === "prelaunch" ? (
+        <p className="mb-4 text-sm text-gray-500">{t("shopsPrelaunchHint")}</p>
+      ) : null}
 
       <div className="bg-white rounded-4xl border border-gray-100 shadow-sm overflow-hidden text-sm">
         <div className="overflow-x-auto">
@@ -210,12 +241,18 @@ export default function AdminPartnersClient({ shops: initialShops }: AdminPartne
                       </div>
                     </td>
                     <td className="px-8 py-6">
-                      <div className={`px-3 py-1 rounded-full inline-flex items-center gap-2 text-[10px] font-black uppercase tracking-tighter ${
-                        shop.isActive ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'
-                      }`}>
-                        {shop.isActive ? <CheckCircle2 size={12} /> : <AlertCircle size={12} />}
-                        {shop.isActive ? t("active") : t("inactive")}
-                      </div>
+                      {shop.isPrelaunch ? (
+                        <div className="px-3 py-1 rounded-full inline-flex items-center gap-2 text-[10px] font-black uppercase tracking-tighter bg-gray-100 text-gray-500">
+                          {t("statusPrelaunch")}
+                        </div>
+                      ) : (
+                        <div className={`px-3 py-1 rounded-full inline-flex items-center gap-2 text-[10px] font-black uppercase tracking-tighter ${
+                          shop.isActive ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'
+                        }`}>
+                          {shop.isActive ? <CheckCircle2 size={12} /> : <AlertCircle size={12} />}
+                          {shop.isActive ? t("active") : t("inactive")}
+                        </div>
+                      )}
                     </td>
                     <td className="px-8 py-6 text-right">
                       <div className="flex items-center justify-end gap-2">

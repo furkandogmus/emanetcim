@@ -1293,7 +1293,11 @@
     "setPasswordDone": "Passwort gespeichert. Senden Sie diese Nachricht an den Benutzer:",
     "setPasswordCopy": "Nachricht kopieren",
     "setPasswordWhatsappMessage": "Hallo {name}, das neue Passwort für Ihr BagajPark-Konto lautet: {password}\nMelden Sie sich mit Telefonnummer oder E-Mail an: {url}",
-    "teamIssuesNav": "Fehlerverfolgung (Team)"
+    "teamIssuesNav": "Fehlerverfolgung (Team)",
+    "shopsTabLive": "In Betrieb",
+    "shopsTabPrelaunch": "Nachfragetest",
+    "statusPrelaunch": "Nachfragetest · kein Gepäck",
+    "shopsPrelaunchHint": "Diese Punkte erscheinen auf der Karte als „Benachrichtigen, wenn geöffnet“ und nehmen keine Buchungen an. Interessenzahlen stehen auf der Seite Nachfragetest."
   },
   "Auth": {
     "loginTitle": "Melden Sie sich bei BagajPark an",
