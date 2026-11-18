@@ -2,7 +2,7 @@ import { useState } from "react";
 import { KeyboardAvoidingView, Pressable, ScrollView, StyleSheet, View } from "react-native";
 import { TicketPercent, X } from "lucide-react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { router, useLocalSearchParams } from "expo-router";
+import { Redirect, router, useLocalSearchParams } from "expo-router";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useTranslation } from "react-i18next";
 
@@ -10,9 +10,9 @@ import { StackHeader } from "@/components/StackHeader";
 import { AppText, Banner, Button, Card, CenterMessage, Divider, Loading } from "@/components/ui";
 import { Input } from "@/components/Field";
 import { api, ApiError } from "@/lib/api";
+import { useAuth } from "@/lib/auth";
 import { errorMessage } from "@/lib/errors";
-import { formatDayTime, formatMoney, stayDays } from "@/lib/format";
-import { estimate } from "@/lib/pricing";
+import { formatDayTime, formatMoney } from "@/lib/format";
 import { keys, useShop } from "@/lib/queries";
 import { totalBags, useSearch } from "@/lib/search";
 import type { CheckoutQuote, CheckoutRequest, CheckoutResponse } from "@/lib/types";
@@ -24,6 +24,7 @@ export default function CheckoutScreen() {
   const search = useSearch();
   const queryClient = useQueryClient();
   const shopQuery = useShop(shopId);
+  const { state: authState } = useAuth();
   const [error, setError] = useState<string | null>(null);
   const [codeOpen, setCodeOpen] = useState(false);
   const [codeInput, setCodeInput] = useState("");
@@ -37,7 +38,7 @@ export default function CheckoutScreen() {
     onaylamadan once GERCEK saati gorsun; rezervasyon da ayni kuralla olusur.
   */
   const hoursQuote = useQuery({
-    enabled: !!shopId,
+    enabled: !!shopId && authState.status === "signedIn",
     queryKey: ["checkout", "hours", shopId, search.checkIn.toISOString(), search.checkOut.toISOString(), search.bags],
     queryFn: () =>
       api<CheckoutQuote>("/checkout/quote", {
@@ -87,6 +88,9 @@ export default function CheckoutScreen() {
     onError: (e) => setCodeError(errorMessage(e, "checkout")),
   });
 
+  // Derin baglantiyla girissiz gelinirse: rezervasyon hesap ister.
+  if (authState.status === "signedOut") return <Redirect href="/login" />;
+
   if (shopQuery.isLoading) return <Loading />;
   if (shopQuery.isError || !shopQuery.data) {
     return (
@@ -98,9 +102,6 @@ export default function CheckoutScreen() {
   }
 
   const shop = shopQuery.data;
-  // Gun sayisi dukkanin saatine oturtulmus anlardan: sunucu da onlarla fiyatlar.
-  const days = stayDays(shownIn, shownOut);
-  const price = estimate(shop, search.bags, days);
   const bagCount = totalBags(search.bags);
   const booking = {
     shopId: shop.id,
@@ -113,8 +114,13 @@ export default function CheckoutScreen() {
   // Onizleme baska bir sepet icin alinmissa (tarih/valiz degisti) gecersizdir.
   const quoteKey = JSON.stringify(booking);
   const applied = quote && quotedFor === quoteKey ? quote : null;
-  // Kesin tutar sunucudan; tahmin yalnizca onizleme gelene kadar.
-  const total = applied ? applied.total : (hoursQuote.data?.total ?? price.total);
+  /*
+    Fiyat YALNIZCA sunucudan (checkout/quote). Ekran eskiden kendi formuluyle
+    "tahmini toplam" gosteriyordu: carpanlar, sigorta ve saat oturtmasi iki yerde
+    yasiyordu ve ayrisinca misafir bir tutar gorup baska bir tutar oduyordu.
+  */
+  const priced = applied ?? hoursQuote.data ?? null;
+  const total = priced?.total ?? null;
 
   function applyCode() {
     const code = codeInput.trim();
@@ -179,24 +185,36 @@ export default function CheckoutScreen() {
 
         <Card style={{ gap: space.sm }}>
           <AppText variant="heading">{t("checkout.priceTitle")}</AppText>
-          {price.lines.map((l) => (
+          {!priced ? (
+            hoursQuote.isError && !closedAtTime ? (
+              <View style={{ gap: space.sm }}>
+                <AppText variant="body" style={{ color: colors.inkSecondary }}>
+                  {errorMessage(hoursQuote.error, "checkout")}
+                </AppText>
+                <Button variant="secondary" title={t("common.retry")} onPress={() => hoursQuote.refetch()} />
+              </View>
+            ) : (
+              [0, 1].map((i) => <View key={i} style={styles.lineSkeleton} />)
+            )
+          ) : null}
+          {(priced?.lines ?? []).map((l) => (
             <View key={l.size} style={styles.priceRow}>
               <AppText variant="body" style={{ flex: 1 }}>
                 {t("checkout.bagLine", {
                   count: l.count,
                   size: t(`bags.${l.size}`),
-                  days: t("common.day", { count: days }),
+                  days: t("common.day", { count: l.days }),
                 })}
               </AppText>
-              <AppText variant="body">{formatMoney(l.count * l.unit * days)}</AppText>
+              <AppText variant="body">{formatMoney(l.amount)}</AppText>
             </View>
           ))}
-          {price.insurance > 0 ? (
+          {priced?.insuranceFee ? (
             <View style={styles.priceRow}>
               <AppText variant="body" style={{ flex: 1 }}>
                 {t("checkout.insurance")}
               </AppText>
-              <AppText variant="body">{formatMoney(price.insurance)}</AppText>
+              <AppText variant="body">{formatMoney(priced.insuranceFee)}</AppText>
             </View>
           ) : null}
           {applied?.discount ? (
@@ -214,13 +232,12 @@ export default function CheckoutScreen() {
           <Divider />
           <View style={styles.priceRow}>
             <AppText variant="heading" style={{ flex: 1 }}>
-              {t("checkout.estimatedTotal")}
+              {t("checkout.total")}
             </AppText>
             <AppText variant="heading" style={{ fontFamily: fonts.display, fontSize: 22 }}>
-              {formatMoney(total)}
+              {total != null ? formatMoney(total) : "–"}
             </AppText>
           </View>
-          <AppText variant="caption">{t("checkout.estimateNote")}</AppText>
         </Card>
 
         <Card style={{ gap: space.md }}>
@@ -305,13 +322,13 @@ export default function CheckoutScreen() {
       {/* Onay aninda tutar gozden kaybolmasin: dukkan ekranindaki alt cubukla ayni duzen. */}
       <View style={styles.footer}>
         <View>
-          <AppText variant="caption">{t("checkout.estimatedTotal")}</AppText>
-          <AppText style={styles.footerTotal}>{formatMoney(total)}</AppText>
+          <AppText variant="caption">{t("checkout.total")}</AppText>
+          <AppText style={styles.footerTotal}>{total != null ? formatMoney(total) : "–"}</AppText>
         </View>
         <Button
           title={t("checkout.confirm")}
           loading={mutation.isPending}
-          disabled={bagCount === 0 || closedAtTime}
+          disabled={bagCount === 0 || closedAtTime || total == null}
           onPress={confirm}
           style={{ flex: 1 }}
         />
@@ -357,6 +374,7 @@ const styles = StyleSheet.create({
   content: { padding: space.xl, gap: space.lg },
   editRow: { flexDirection: "row", alignItems: "center", gap: space.md },
   priceRow: { flexDirection: "row", alignItems: "center", gap: space.md },
+  lineSkeleton: { height: 20, borderRadius: radius.inner, backgroundColor: colors.surfaceMuted },
   codeRow: { flexDirection: "row", alignItems: "center", gap: space.sm },
   codeInput: { flex: 1, fontFamily: fonts.monoMedium, letterSpacing: 1 },
   payNote: {

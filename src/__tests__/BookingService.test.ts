@@ -440,5 +440,39 @@ describe("BookingService Deep Logic", () => {
       expect(result.ok).toBe(false);
       expect((result as any).code).toBe("PRICE_INCREASE");
     });
+
+    it("onizleme (dryRun) ayni hesabi YAZMADAN doner; odenmisse degisimin engelli oldugunu soyler", async () => {
+      mockPrisma.booking.findUnique.mockResolvedValue({
+        id: "b1",
+        status: "PAID",
+        guestId: "g1",
+        totalPrice: 100,
+        couponDiscountAmount: 0,
+        referralDiscountAmount: 0,
+        bagCountS: 1, bagCountM: 0, bagCountXl: 0,
+        shop: { pricePerDay: 50 },
+      } as any);
+      mockPrisma.$transaction.mockClear();
+
+      const result = await service.modifyBooking(
+        "b1",
+        "g1",
+        {
+          checkInTime: new Date(),
+          checkOutTime: new Date(Date.now() + 3 * 24 * 60 * 60 * 1000),
+          bagCountS: 2,
+          bagCountM: 0,
+          bagCountXl: 0,
+        },
+        { dryRun: true },
+      );
+
+      expect(result.ok).toBe(true);
+      const preview = (result as any).preview;
+      expect(preview.newTotal).toBeGreaterThan(100);
+      expect(preview.priceChangeBlocked).toBe(true);
+      expect(preview.lines[0]).toMatchObject({ size: "s", count: 2 });
+      expect(mockPrisma.$transaction).not.toHaveBeenCalled();
+    });
   });
 });

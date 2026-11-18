@@ -38,17 +38,25 @@ export async function PUT(req: NextRequest, { params }: { params: Promise<{ id: 
 
   const { checkInTime, checkOutTime, bagCountS, bagCountM, bagCountXl } = parsed.data;
 
-  const result = await bookingService.modifyBooking(id, auth.user.id, {
-    checkInTime: new Date(checkInTime),
-    checkOutTime: new Date(checkOutTime),
-    bagCountS: bagCountS ?? b.bagCountS,
-    bagCountM: bagCountM ?? b.bagCountM,
-    bagCountXl: bagCountXl ?? b.bagCountXl,
-  });
+  // `?preview=1`: ayni kapilar ve ayni fiyat hesabi, yazmadan (degistirme ekraninin tutari).
+  const preview = req.nextUrl.searchParams.get("preview") === "1";
+  const result = await bookingService.modifyBooking(
+    id,
+    auth.user.id,
+    {
+      checkInTime: new Date(checkInTime),
+      checkOutTime: new Date(checkOutTime),
+      bagCountS: bagCountS ?? b.bagCountS,
+      bagCountM: bagCountM ?? b.bagCountM,
+      bagCountXl: bagCountXl ?? b.bagCountXl,
+    },
+    { dryRun: preview },
+  );
 
   if (!result.ok) {
     return NextResponse.json({ error: result.code || "modify_failed" }, { status: 400 });
   }
 
+  if (preview) return NextResponse.json(result.preview);
   return NextResponse.json({ success: true });
 }
