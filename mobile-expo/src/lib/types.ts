@@ -56,7 +56,12 @@ export type NearbyShop = Shop & {
   distanceKm: number;
   /** Yalnizca tarih filtresiyle aranirsa gelir. */
   bagsAvailable?: number;
+  /** Secilen saat dukkanin saatine oturtulduysa (ornegin alis kapanisa cekildi). */
+  hoursNotice?: HoursNotice | null;
 };
+
+export type HoursAdjustment = { at: string; reason: "opens" | "closes" };
+export type HoursNotice = { drop: HoursAdjustment | null; pickup: HoursAdjustment | null };
 
 export type ShopDetail = Shop & {
   /** Kapak (`image`) disindaki fotograflar, sirali. */
@@ -186,6 +191,10 @@ export type CheckoutQuote = {
   discount: { kind: "coupon" | "referral"; code: string; amount: number } | null;
   codeStatus: "applied" | "invalid" | "min_price" | "own_code" | "not_first_booking" | null;
   minPrice: number | null;
+  /** Dukkanin saatine oturtulmus anlar; rezervasyon bunlarla olusur. */
+  checkInTime?: string;
+  checkOutTime?: string;
+  hoursNotice?: HoursNotice | null;
 };
 
 export type CheckoutResponse = {

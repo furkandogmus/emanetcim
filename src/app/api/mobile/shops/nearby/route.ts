@@ -8,6 +8,8 @@ import { rateLimit } from "@/lib/rate-limit";
 import { getClientIp } from "@/lib/get-ip";
 import { toMobileShop } from "@/lib/mobile-dto";
 import { toDatetimeLocalValueInTimeZone } from "@/lib/datetime-local";
+import { snapStayToShopHours } from "@/lib/stay-days";
+import { loadScheduleParts } from "@/services/ShopScheduleService";
 
 const schema = z.object({
   lat: z.coerce.number(),
@@ -48,6 +50,13 @@ export async function GET(req: NextRequest) {
       checkOut: co,
       requestedBags,
       /*
+        Saat kapisi BURADA uygulanmaz (2026-11-18): misafirin sectigi anda kapali
+        olan dukkan eskiden listeden dusuyordu, misafir varligini bile bilmiyordu.
+        Artik listelenir ve saat dukkanin saatine oturtulur; ayni kural
+        rezervasyonda da uygulanir (checkout/intent).
+      */
+      ignoreOpenHours: true,
+      /*
         Web aramasiyla (`actions/search-shops.ts`) ayni gun kapisi: haftalik
         takvim ve kapanislar. Yoksa pazar gunu kapali ya da o tarihte izinli
         dukkan haritada cikiyor, misafir ancak odeme adiminda
@@ -58,14 +67,39 @@ export async function GET(req: NextRequest) {
         pickup: toDatetimeLocalValueInTimeZone(co).slice(0, 10),
       },
     });
-    return NextResponse.json(
-      results.slice((page - 1) * limit, page * limit).map((s) => ({
+    const pageHits = results.slice((page - 1) * limit, page * limit);
+    const schedules = await loadScheduleParts(
+      pageHits.map((s) => s.id),
+      toDatetimeLocalValueInTimeZone(ci).slice(0, 10),
+    );
+    const items = [];
+    for (const s of pageHits) {
+      let hoursNotice = null;
+      if (!s.isPrelaunch) {
+        const snapped = snapStayToShopHours(
+          {
+            open247: s.open247,
+            openingTime: s.openingTime,
+            closingTime: s.closingTime,
+            timeZone: s.timezone,
+            ...schedules.get(s.id),
+          },
+          ci,
+          co,
+        );
+        // Saatine oturtulamiyorsa (birakis kapanistan sonra, kalan sure cok kisa) listelenmez.
+        if (!snapped) continue;
+        if (snapped.drop || snapped.pickup) hoursNotice = { drop: snapped.drop ?? null, pickup: snapped.pickup ?? null };
+      }
+      items.push({
         ...toMobileShop(s),
         /* Aramaya OZGU alanlar: ortak govdeye girmez, listede anlamli. */
         distanceKm: s.distanceKm,
         bagsAvailable: s.bagsAvailable,
-      })),
-    );
+        hoursNotice,
+      });
+    }
+    return NextResponse.json(items);
   }
 
   const shops = await shopService.findNearby(lat, lng, radiusKm, page, limit);
