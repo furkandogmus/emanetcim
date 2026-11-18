@@ -12,10 +12,13 @@ export async function GET(req: NextRequest) {
   const roleErr = requireRole(auth.user, ["PARTNER"]);
   if (roleErr) return roleErr;
 
-  const shops = await prisma.shop.findMany({
+  const owned = await prisma.shop.findMany({
     where: { ownerId: auth.user.id, isActive: true },
     select: { id: true, timezone: true },
   });
+  // `?shop=` uygulamanin dukkan secimini izler (pano gibi); yoksa tum dukkanlar.
+  const requested = req.nextUrl.searchParams.get("shop");
+  const shops = requested && owned.some((s) => s.id === requested) ? owned.filter((s) => s.id === requested) : owned;
 
   if (shops.length === 0) {
     return NextResponse.json({ error: "no_shops" }, { status: 404 });
@@ -54,8 +57,14 @@ export async function GET(req: NextRequest) {
       where: baseWhere,
       _sum: { totalPrice: true },
     }),
+    /*
+      "Bugun" = bugun TESLIM ALINAN valizler (2026-11-18). Rezervasyonun
+      olusturuldugu gune bakiyordu; dukkanda tahsilatta para check-in aninda
+      alinir, yani dun yapilip bugun teslim alinan rezervasyon hicbir gunun
+      "bugun"unde gorunmuyordu ve yogun bir gunde sayi sifira yakin kaliyordu.
+    */
     prisma.booking.aggregate({
-      where: { ...baseWhere, createdAt: { gte: today } },
+      where: { ...baseWhere, checkedInAt: { gte: today } },
       _sum: { totalPrice: true },
     }),
     prisma.booking.findMany({
