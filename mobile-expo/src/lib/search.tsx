@@ -61,8 +61,18 @@ export function SearchProvider({ children }: { children: ReactNode }) {
     kaldi): on plandayken de dakikada bir bakilir.
   */
   useEffect(() => {
+    /*
+      Yalnizca BIRAKMA ileri kayar; secilen alis hala gecerliyse (yeni birakistan en az
+      bir saat sonra) korunur. Eskiden tum pencere varsayilana (4 saat) donuyordu:
+      "bugun 14:30 -> 3 gun sonra" secen misafirin cok gunluk secimi sessizce kayboluyordu.
+    */
     const freshen = () =>
-      setState((s) => (s.checkIn.getTime() < Date.now() ? { ...s, ...defaultWindow() } : s));
+      setState((s) => {
+        if (s.checkIn.getTime() >= Date.now()) return s;
+        const next = defaultWindow();
+        const keepPickup = s.checkOut.getTime() - next.checkIn.getTime() >= 60 * 60 * 1000;
+        return { ...s, checkIn: next.checkIn, checkOut: keepPickup ? s.checkOut : next.checkOut };
+      });
     freshen();
     const timer = setInterval(freshen, 60_000);
     const sub = AppState.addEventListener("change", (st) => st === "active" && freshen());
