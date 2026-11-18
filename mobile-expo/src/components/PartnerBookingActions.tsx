@@ -7,7 +7,7 @@ import { useTranslation } from "react-i18next";
 
 import { AppText, Banner, Button, Card } from "@/components/ui";
 import { Input } from "@/components/Field";
-import { api } from "@/lib/api";
+import { ApiError, api } from "@/lib/api";
 import { errorMessage } from "@/lib/errors";
 import { formatMoney } from "@/lib/format";
 import type { BookingDetail } from "@/lib/types";
@@ -47,14 +47,32 @@ const CHECK_IN_READY = new Set(["APPROVED", "PAID"]);
 export function PartnerBookingActions({ booking }: { booking: BookingDetail }) {
   const { t } = useTranslation();
   const queryClient = useQueryClient();
-  const [rows, setRows] = useState(() => buildSealRows(booking));
-  const [returned, setReturned] = useState<number[]>([]);
+  /*
+    Yazilan muhur numaralari bagIndex'e gore tutulur, satirlar valiz sayisindan
+    TURETILIR. Valiz sayisi duzeltilince satirlar yenilenir ama yazilmis numaralar
+    kalir; eskiden kart sayilara gore yeniden kuruluyor ve hepsi siliniyordu.
+  */
+  const [typed, setTyped] = useState<Record<number, string>>({});
+  const rows = buildSealRows(booking).map((r) => ({ ...r, sealNumber: typed[r.bagIndex] ?? "" }));
+  // Muhur basina karar: saglam ya da saglam degil (FAULTY, teslim yine tamamlanir).
+  const [sealState, setSealState] = useState<Record<number, "intact" | "broken">>({});
   const [error, setError] = useState<string | null>(null);
 
   const refresh = () => {
     void queryClient.invalidateQueries({ queryKey: ["bookings"] });
     void queryClient.invalidateQueries({ queryKey: ["partner"] });
   };
+
+  /*
+    Zayif baglantida istek zaman asimina ugrayabilir ama sunucu islemi yapmis
+    olabilir; tekrar denemek "durum uygun degil" hatasi verirdi. Ag hatasinda ya
+    da INVALID_STATUS'ta rezervasyon yeniden okunur: is olduysa basari gosterilir.
+  */
+  async function settledAs(e: unknown, done: string): Promise<boolean> {
+    if (!(e instanceof ApiError) || (e.code !== "network" && e.code !== "INVALID_STATUS")) return false;
+    const fresh = await api<BookingDetail>(`/bookings/${booking.id}`).catch(() => null);
+    return fresh?.status === done;
+  }
 
   const checkIn = useMutation({
     mutationFn: () => {
@@ -71,17 +89,44 @@ export function PartnerBookingActions({ booking }: { booking: BookingDetail }) {
       refresh();
       notify(t("partner.checkedInTitle"), t("partner.checkedInBody"));
     },
-    onError: (e) => setError(errorMessage(e, "partner")),
+    onError: async (e) => {
+      if (await settledAs(e, "CHECKED_IN")) {
+        setError(null);
+        refresh();
+        notify(t("partner.checkedInTitle"), t("partner.checkedInBody"));
+        return;
+      }
+      setError(errorMessage(e, "partner"));
+    },
   });
 
   const checkOut = useMutation({
-    mutationFn: () => api(`/bookings/${booking.id}/check-out`, { method: "POST" }),
-    onSuccess: () => {
+    mutationFn: () => {
+      const brokenSealNumbers = Object.entries(sealState)
+        .filter(([, v]) => v === "broken")
+        .map(([n]) => Number(n));
+      return api<{ ok: true; lateFee?: number; refundAmount?: number }>(`/bookings/${booking.id}/check-out`, {
+        method: "POST",
+        body: { brokenSealNumbers },
+      });
+    },
+    onSuccess: (res) => {
       setError(null);
       refresh();
-      notify(t("partner.checkedOutTitle"), t("partner.checkedOutBody"));
+      const parts = [t("partner.checkedOutBody")];
+      if (res.lateFee) parts.push(t("partner.lateFeeCollect", { amount: formatMoney(res.lateFee) }));
+      if (res.refundAmount) parts.push(t("partner.earlyRefundGive", { amount: formatMoney(res.refundAmount) }));
+      notify(t("partner.checkedOutTitle"), parts.join(" "));
     },
-    onError: (e) => setError(errorMessage(e, "partner")),
+    onError: async (e) => {
+      if (await settledAs(e, "CHECKED_OUT")) {
+        setError(null);
+        refresh();
+        notify(t("partner.checkedOutTitle"), t("partner.checkedOutBody"));
+        return;
+      }
+      setError(errorMessage(e, "partner"));
+    },
   });
 
   /*
@@ -142,7 +187,7 @@ export function PartnerBookingActions({ booking }: { booking: BookingDetail }) {
               value={r.sealNumber}
               onChangeText={(v) => {
                 const digits = v.replace(/\D/g, "").slice(0, 10);
-                setRows((prev) => prev.map((x) => (x.bagIndex === r.bagIndex ? { ...x, sealNumber: digits } : x)));
+                setTyped((prev) => ({ ...prev, [r.bagIndex]: digits }));
               }}
               placeholder={t("partner.sealNumber")}
               placeholderTextColor={colors.inkMuted}
@@ -164,7 +209,8 @@ export function PartnerBookingActions({ booking }: { booking: BookingDetail }) {
 
   if (booking.status === "CHECKED_IN") {
     const seals = booking.seals ?? [];
-    const allReturned = seals.every((s) => returned.includes(s.sealNumber));
+    const allDecided = seals.every((s) => sealState[s.sealNumber] !== undefined);
+    const preview = booking.checkoutPreview;
     return (
       <Card style={styles.card}>
         <AppText variant="heading">{t("partner.checkOutTitle")}</AppText>
@@ -172,34 +218,60 @@ export function PartnerBookingActions({ booking }: { booking: BookingDetail }) {
           {seals.length ? t("partner.checkOutSealsHint") : t("partner.checkOutHint")}
         </AppText>
         {seals.map((s) => {
-          const on = returned.includes(s.sealNumber);
+          const state = sealState[s.sealNumber];
+          const on = state === "intact";
+          const broken = state === "broken";
+          const set = (v: "intact" | "broken") =>
+            setSealState((prev) => {
+              const next = { ...prev };
+              if (next[s.sealNumber] === v) delete next[s.sealNumber];
+              else next[s.sealNumber] = v;
+              return next;
+            });
           return (
-            <Pressable
-              key={s.sealNumber}
-              accessibilityRole="checkbox"
-              accessibilityState={{ checked: on }}
-              onPress={() =>
-                setReturned((prev) =>
-                  on ? prev.filter((n) => n !== s.sealNumber) : [...prev, s.sealNumber],
-                )
-              }
-              style={[styles.sealCheck, on && styles.sealCheckOn]}
-            >
-              <View style={[styles.box, on && styles.boxOn]}>
-                {on ? <Check size={16} color={colors.white} /> : null}
-              </View>
-              <AppText variant="bodyMedium" style={{ flex: 1 }}>
-                {t("partner.sealIntact", { n: s.sealNumber })}
-              </AppText>
-              <AppText variant="caption">{t(`bags.${s.bagSize.toLowerCase()}`)}</AppText>
-            </Pressable>
+            <View key={s.sealNumber} style={[styles.sealCheck, on && styles.sealCheckOn, broken && styles.sealCheckBroken]}>
+              <Pressable
+                accessibilityRole="checkbox"
+                accessibilityState={{ checked: on }}
+                onPress={() => set("intact")}
+                style={styles.sealMain}
+              >
+                <View style={[styles.box, on && styles.boxOn]}>
+                  {on ? <Check size={16} color={colors.white} /> : null}
+                </View>
+                <View style={{ flex: 1 }}>
+                  <AppText variant="bodyMedium">{t("partner.sealIntact", { n: s.sealNumber })}</AppText>
+                  <AppText variant="caption">{t(`bags.${s.bagSize.toLowerCase()}`)}</AppText>
+                </View>
+              </Pressable>
+              <Pressable
+                accessibilityRole="checkbox"
+                accessibilityState={{ checked: broken }}
+                onPress={() => set("broken")}
+                hitSlop={8}
+                style={[styles.brokenChip, broken && styles.brokenChipOn]}
+              >
+                <AppText variant="caption" style={{ color: broken ? colors.danger : colors.inkSecondary }}>
+                  {t("partner.sealBroken")}
+                </AppText>
+              </Pressable>
+            </View>
           );
         })}
+        {Object.values(sealState).includes("broken") ? (
+          <Banner tone="warning" body={t("partner.sealBrokenHint")} />
+        ) : null}
+        {preview?.lateFeeTry ? (
+          <Banner tone="warning" body={t("partner.lateFeeCollect", { amount: formatMoney(preview.lateFeeTry) })} />
+        ) : null}
+        {preview?.earlyRefund ? (
+          <Banner tone="warning" body={t("partner.earlyRefundGive", { amount: formatMoney(preview.earlyRefund) })} />
+        ) : null}
         {error ? <Banner tone="danger" body={error} /> : null}
         <Button
           title={t("partner.checkOutCta")}
           loading={checkOut.isPending}
-          disabled={!allReturned}
+          disabled={!allDecided}
           onPress={confirmCheckOut}
         />
       </Card>
@@ -231,6 +303,16 @@ const styles = StyleSheet.create({
     borderColor: colors.border,
   },
   sealCheckOn: { borderColor: colors.success },
+  sealCheckBroken: { borderColor: colors.danger },
+  sealMain: { flex: 1, flexDirection: "row", alignItems: "center", gap: space.md },
+  brokenChip: {
+    paddingHorizontal: space.sm,
+    paddingVertical: 4,
+    borderRadius: radius.pill,
+    borderWidth: 1,
+    borderColor: colors.border,
+  },
+  brokenChipOn: { borderColor: colors.danger, backgroundColor: colors.dangerSoft },
   box: {
     width: 24,
     height: 24,

@@ -112,6 +112,8 @@ export type BookingDetail = BookingSummary & {
   hasDispute?: boolean;
   /** Esnafin onerdigi, misafir onayi bekleyen valiz duzeltmesi. */
   pendingBagRevision?: PendingBagRevision | null;
+  /** Yalnizca esnaf/admin ve CHECKED_IN: su an teslim edilirse gecikme ucreti ve erken iade. */
+  checkoutPreview?: { lateFeeTry: number; earlyRefund: number } | null;
 };
 
 export type PendingBagRevision = {
