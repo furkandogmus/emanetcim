@@ -46,7 +46,12 @@
     "passwordSubtitle": "Web sitesinde belirlediğin şifreyle gir.",
     "passwordLabel": "Şifre",
     "or": "ya da",
-    "continueWithGoogle": "Google ile devam et"
+    "continueWithGoogle": "Google ile devam et",
+    "signInCta": "Giriş yap",
+    "bookingsPromptTitle": "Rezervasyonların burada",
+    "bookingsPromptBody": "Rezervasyonlarını ve QR kodunu görmek için giriş yap.",
+    "profilePromptTitle": "Hesabın",
+    "profilePromptBody": "Giriş yaparak rezervasyon yapabilir, davet kodunu paylaşabilirsin. Dil seçimi giriş yapmadan da yukarıda."
   },
   "home": {
     "heroTitle": "Valizini bırak.\nŞehrin tadını çıkar.",
@@ -159,8 +164,6 @@
     "priceTitle": "Ücret",
     "bagLine": "{{count}} × {{size}} · {{days}}",
     "insurance": "Güvence bedeli",
-    "estimatedTotal": "Tahmini toplam",
-    "estimateNote": "Kesin tutarı sunucu hesaplar; onaydan sonra rezervasyonunda görürsün.",
     "payAtShop": "Ödeme, valizini bıraktığında dükkanda yapılır.",
     "confirm": "Rezervasyonu onayla",
     "errors": {
@@ -194,7 +197,8 @@
       "dropOpens": "Bırakış saatin dükkanın açılışına göre {{time}} oldu.",
       "pickupCloses": "Dükkan {{time}} itibarıyla kapanıyor; alış saatin {{time}} oldu. Valizini en geç bu saatte almalısın.",
       "pickupOpens": "Alış saatin dükkanın açılışına göre {{time}} oldu."
-    }
+    },
+    "total": "Toplam"
   },
   "success": {
     "title": "Rezervasyonun hazır",
@@ -594,7 +598,6 @@
     "bagsTitle": "Kaç valiz?",
     "currentTotal": "Şu anki tutar",
     "newTotal": "Tahmini yeni tutar",
-    "estimateNote": "Kesin tutarı sunucu hesaplar; kaydettikten sonra rezervasyonunda görünür.",
     "paidNote": "Ödemesi alınmış bir rezervasyonun tutarı değiştirilemez. Tutarı değiştiren bir değişiklik için iptal edip yeniden rezervasyon yap.",
     "noBags": "En az bir valiz seç.",
     "save": "Değişiklikleri kaydet",

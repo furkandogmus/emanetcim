@@ -1,6 +1,7 @@
 import { useQuery, type QueryClient } from "@tanstack/react-query";
 
 import { api } from "./api";
+import { useAuth } from "./auth";
 import { usePartnerShopSelection, withShop } from "./partner-shop";
 import type { AdminApplication, AdminStats, BookingDetail, ContactMessage, PartnerEarnings, PartnerSealsResponse, PartnerShop, BookingSummary, NearbyShop, PartnerBookingsResponse, ShopDetail, ShopReview, PartnerShopSettings, PartnerSchedule, PartnerDashboard, AdminOverview, AdminBookingFilter, AdminBookingCounts, AdminBookingsResponse, AdminBookingDetail, AdminShop, CityCoverage } from "./types";
 
@@ -24,9 +25,12 @@ export function useCities() {
 }
 
 export function useMyBookings() {
+  // Giris yapmadan gezen misafirde istek atilmaz (401 olurdu).
+  const { state } = useAuth();
   return useQuery({
     queryKey: keys.myBookings,
     queryFn: () => api<BookingSummary[]>("/bookings/me?limit=50"),
+    enabled: state.status === "signedIn",
   });
 }
 

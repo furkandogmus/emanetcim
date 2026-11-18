@@ -5,7 +5,8 @@ import { useAuth } from "@/lib/auth";
 /** Capa rota: oturuma ve role gore dogru gruba yonlendirir. */
 export default function Index() {
   const { state } = useAuth();
-  if (state.status !== "signedIn") return <Redirect href="/login" />;
+  // Giris yapmadan da gezilebilir: turist harita ve dukkanlari gorur, giris rezervasyonda istenir.
+  if (state.status !== "signedIn") return <Redirect href="/home" />;
   if (state.user.role === "PARTNER") return <Redirect href="/partner" />;
   if (state.user.role === "ADMIN") return <Redirect href="/admin" />;
   return <Redirect href="/home" />;

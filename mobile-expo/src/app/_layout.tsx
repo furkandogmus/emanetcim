@@ -1,7 +1,7 @@
 import "@/lib/intl-polyfills";
 import "@/lib/i18n";
 
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { AppState } from "react-native";
 import { Stack } from "expo-router";
 import * as SplashScreen from "expo-splash-screen";
@@ -43,6 +43,16 @@ const queryClient = new QueryClient({
   },
 });
 
+function useSearchKey(userId: string | null): string {
+  const [k, setK] = useState<{ n: number; userId: string | null }>({ n: 0, userId: null });
+  if (userId !== k.userId) {
+    // Girissizden girise geciste anahtar AYNI kalir (secim korunur); digerlerinde yenilenir.
+    const anonToUser = k.userId === null && userId !== null;
+    setK({ n: anonToUser ? k.n : k.n + 1, userId });
+  }
+  return `search-${k.n}`;
+}
+
 function RootNavigator() {
   const { state } = useAuth();
   const role = state.status === "signedIn" ? state.user.role : null;
@@ -81,18 +91,26 @@ function RootNavigator() {
     };
   }, [state.status, role]);
 
+  /*
+    Arama durumu kullaniciya ait: hesap degisince sifirlanir. AMA girissiz gezip
+    "Rezervasyon yap"ta giris yapan misafirin sectigi yer/tarih/valiz korunur:
+    anahtar yalnizca cikista yenilenir, girissizden girise geciste ayni kalir.
+  */
+  const searchKey = useSearchKey(state.status === "signedIn" ? state.user.id : null);
+
   if (state.status === "loading") return null;
 
   // Arama durumu kullaniciya ait: anahtar degisince sifirlanir, sonraki hesap oncekinin
   // konumunu ("Yakinimda" GPS dahil), tarihlerini ve valizlerini devralmaz.
   return (
-    <SearchProvider key={state.status === "signedIn" ? state.user.id : "anon"}>
+    <SearchProvider key={searchKey}>
       <Stack screenOptions={{ headerShown: false, contentStyle: { backgroundColor: colors.bg } }}>
         <Stack.Protected guard={state.status === "signedOut"}>
           <Stack.Screen name="login" />
           <Stack.Screen name="reset-password" />
         </Stack.Protected>
-        <Stack.Protected guard={role === "GUEST"}>
+        {/* Misafir alani girissiz de acik; rezervasyon, profil ve odeme girisi ister. */}
+        <Stack.Protected guard={role === "GUEST" || state.status === "signedOut"}>
           <Stack.Screen name="(guest)" />
         </Stack.Protected>
         <Stack.Protected guard={role === "ADMIN"}>
