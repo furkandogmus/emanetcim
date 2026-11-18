@@ -3,9 +3,10 @@ import { ScrollView, View } from "react-native";
 import { useTranslation } from "react-i18next";
 
 import { RangeCalendar } from "@/components/Calendar";
+import { ScrollArrows, useScrollArrows } from "@/components/ScrollArrows";
 import { AppText, Banner, Chip } from "@/components/ui";
 import { formatDay } from "@/lib/format";
-import { atWallMinutes as withMinutes, cellOf, fromCell, sameWallDay, wallMinutes as minutesOf } from "@/lib/time";
+import { atWallMinutes as withMinutes, cellOf, fromCell, nextSlot, sameWallDay, wallMinutes as minutesOf } from "@/lib/time";
 import { space } from "@/theme/tokens";
 
 const HOUR = 3600_000;
@@ -74,7 +75,12 @@ export function StayWindowPicker({
 
   /** `start`/`end` takvim hucresi (bkz. `cellOf`); anlara Istanbul saatiyle donulur. */
   function setRange(start: Date, end: Date) {
-    const ci = fromCell(start, minutesOf(checkIn));
+    let ci = fromCell(start, minutesOf(checkIn));
+    // Bugune donulunce onceki gunun saati (14:00) gecmiste kalabiliyor: ilk bos dilime kay.
+    if (ci.getTime() < Date.now()) {
+      const slot = nextSlot(new Date());
+      if (sameWallDay(slot, ci)) ci = slot;
+    }
     let co = fromCell(end, minutesOf(checkOut));
     if (co.getTime() - ci.getTime() < HOUR) co = new Date(ci.getTime() + 4 * HOUR);
     // 30. gunde alma saati birakmadan gec olursa sure 31 gune yuvarlanip reddediliyordu.
@@ -123,6 +129,7 @@ function TimeRow({
   onSelect: (m: number) => void;
 }) {
   const ref = useRef<ScrollView>(null);
+  const arrows = useScrollArrows(ref);
   // Secili saat ekranin solunda ikinci sirada dursun; ilk acilista da gorunsun.
   useEffect(() => {
     const idx = Math.max(0, optionsWith(selected).indexOf(selected) - 1);
@@ -131,9 +138,15 @@ function TimeRow({
 
   return (
     <View style={{ gap: space.sm }}>
-      <AppText variant="label">{title}</AppText>
+      <View style={{ flexDirection: "row", alignItems: "center", justifyContent: "space-between", gap: space.sm }}>
+        <AppText variant="label" style={{ flexShrink: 1 }}>
+          {title}
+        </AppText>
+        <ScrollArrows state={arrows} />
+      </View>
       <ScrollView
         ref={ref}
+        {...arrows.scrollProps}
         horizontal
         showsHorizontalScrollIndicator={false}
         contentContainerStyle={{ gap: CHIP_GAP }}

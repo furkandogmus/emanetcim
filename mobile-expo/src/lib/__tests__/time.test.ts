@@ -1,6 +1,6 @@
 import { describe, expect, it } from "@jest/globals";
 
-import { atWallMinutes, cellOf, fromCell, sameWallDay, wallInstant, wallMinutes, wallParts } from "@/lib/time";
+import { atWallMinutes, cellOf, fromCell, nextSlot, sameWallDay, wallInstant, wallMinutes, wallParts } from "@/lib/time";
 
 /**
  * Duvar saati telefonun değil İstanbul'un (UTC+3). Kural kırılırsa Londra'daki
@@ -63,5 +63,24 @@ describe("takvim hücresi", () => {
   it("fromCell hücreyi İstanbul saatindeki ana çevirir", () => {
     const cell = new Date(2026, 9, 19);
     expect(fromCell(cell, 18 * 60 + 30).toISOString()).toBe("2026-10-19T15:30:00.000Z");
+  });
+});
+
+describe("nextSlot", () => {
+  // 10:00 UTC = 13:00 TRT.
+  it("tam dilimde kalir", () => {
+    expect(nextSlot(new Date("2026-10-18T10:00:00Z")).toISOString()).toBe("2026-10-18T10:00:00.000Z");
+  });
+
+  it("dilim icindeyken bir sonraki yarim saate yuvarlar (13:05 -> 13:30)", () => {
+    expect(nextSlot(new Date("2026-10-18T10:05:00Z")).toISOString()).toBe("2026-10-18T10:30:00.000Z");
+  });
+
+  it("saniye gecmisse ayni dakikadaki dilimi atlar (13:30:20 -> 14:00)", () => {
+    expect(nextSlot(new Date("2026-10-18T10:30:20Z")).toISOString()).toBe("2026-10-18T11:00:00.000Z");
+  });
+
+  it("gece yarisini gecer (23:45 -> ertesi gun 00:00)", () => {
+    expect(nextSlot(new Date("2026-10-18T20:45:00Z")).toISOString()).toBe("2026-10-18T21:00:00.000Z");
   });
 });

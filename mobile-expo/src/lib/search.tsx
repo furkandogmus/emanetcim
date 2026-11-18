@@ -2,7 +2,7 @@ import { createContext, useContext, useEffect, useMemo, useState } from "react";
 import { AppState } from "react-native";
 import type { ReactNode } from "react";
 
-import { wallInstant, wallParts } from "./time";
+import { nextSlot, wallInstant, wallParts } from "./time";
 
 /** `radiusM`: sehir kartindan gelince sehrin tamami; yoksa haritanin varsayilani. */
 export type Place = { label: string; latitude: number; longitude: number; isCurrent?: boolean; radiusM?: number };
@@ -24,20 +24,20 @@ type SearchContextValue = SearchState & {
 };
 
 /**
- * Varsayilan: bir sonraki tam saat ile dort saat sonrasi, bir orta valiz.
- * Dukkanlarin cogu 09:00-20:00 acik; gece/sabaha karsi aranirsa bir sonraki
- * 09:00'a kayar -- yoksa misafir 01:00-05:00 gibi kimsenin acik olmadigi bir
- * aralikla haritaya gelir ve "nokta yok" gorur.
+ * Varsayilan: simdiden sonraki ilk yarim saatlik dilim (13:12 -> 13:30) ile dort saat
+ * sonrasi, bir orta valiz. Eskiden bir sonraki TAM saatti: 13:05'te acan misafir 13:30
+ * bosken 14:00 goruyordu. Dukkanlarin cogu 09:00-20:00 acik; gece/sabaha karsi
+ * aranirsa bir sonraki 09:00'a kayar -- yoksa misafir 01:00-05:00 gibi kimsenin acik
+ * olmadigi bir aralikla haritaya gelir ve "nokta yok" gorur.
  */
-export function defaultWindow() {
-  const now = wallParts(new Date());
-  let hour = now.hour + 1;
-  let day = now.day;
-  if (hour < 8 || hour > 18) {
-    if (hour > 18) day += 1;
-    hour = 9;
+export function defaultWindow(now = new Date()) {
+  const start = nextSlot(now);
+  const p = wallParts(start);
+  if (p.hour < 8 || p.hour >= 19) {
+    const day = p.hour >= 19 ? p.day + 1 : p.day;
+    const morning = wallInstant(p.year, p.month, day, 9);
+    return { checkIn: morning, checkOut: new Date(morning.getTime() + 4 * 60 * 60 * 1000) };
   }
-  const start = wallInstant(now.year, now.month, day, hour);
   return { checkIn: start, checkOut: new Date(start.getTime() + 4 * 60 * 60 * 1000) };
 }
 

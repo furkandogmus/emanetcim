@@ -13,7 +13,9 @@
     "bag_one": "{{count}} valiz",
     "bag_other": "{{count}} valiz",
     "ok": "Tamam",
-    "clear": "Temizle"
+    "clear": "Temizle",
+    "scrollBack": "Geri kaydır",
+    "scrollForward": "İleri kaydır"
   },
   "auth": {
     "title": "Giriş yap",

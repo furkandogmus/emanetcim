@@ -13,7 +13,9 @@
     "bag_one": "{{count}} Gepäckstück",
     "bag_other": "{{count}} Gepäckstücke",
     "ok": "OK",
-    "clear": "Löschen"
+    "clear": "Löschen",
+    "scrollBack": "Zurückblättern",
+    "scrollForward": "Weiterblättern"
   },
   "auth": {
     "title": "Anmelden",
