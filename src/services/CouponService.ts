@@ -206,6 +206,21 @@ export async function releaseCoupon(couponId: string): Promise<void> {
     .catch((err) => logger.error({ err, couponId }, 'coupon_claim_release_failed'));
 }
 
+/**
+ * Check-in OLMADAN iptal edilen rezervasyonun kupon hakkini geri verir
+ * (2026-11-18). Hak yalnizca olusturma basarisiz olunca geri veriliyordu:
+ * "rezervasyon yap, iptal et" dongusu kotali bir kuponu saniyeler icinde
+ * bitirebiliyordu. Sayac sifirin altina inmez.
+ */
+export async function releaseCouponByCode(code: string): Promise<void> {
+  await prisma.coupon
+    .updateMany({
+      where: { code: normalizeCouponCode(code), usedCount: { gt: 0 } },
+      data: { usedCount: { decrement: 1 } },
+    })
+    .catch((err) => logger.error({ err, code }, "coupon_release_on_cancel_failed"));
+}
+
 /** Kupon kodu her yerde AYNI biçimde saklanır: boşluksuz, büyük harf. */
 export function normalizeCouponCode(code: string): string {
   return code.trim().toUpperCase();
@@ -311,6 +326,10 @@ export class CouponService {
 
   preview(code: string, totalPrice: number): Promise<CouponPreview> {
     return previewCoupon(code, totalPrice);
+  }
+
+  releaseByCode(code: string): Promise<void> {
+    return releaseCouponByCode(code);
   }
 
   release(couponId: string): Promise<void> {
