@@ -119,7 +119,10 @@
     "emptyTitle": "{{place}} çevresinde henüz rezervasyon alan nokta yok",
     "countNear_one": "Yakınında {{count}} nokta",
     "countNear_other": "Yakınında {{count}} nokta",
-    "emptyTitleNear": "Yakınında henüz rezervasyon alan nokta yok"
+    "emptyTitleNear": "Yakınında henüz rezervasyon alan nokta yok",
+    "hoursCloses": "Kapanış {{time}} · valizini o saatten önce al",
+    "hoursOpens": "Açılış {{time}} · en erken bu saatte bırakabilirsin",
+    "hoursPickupOpens": "Alış en erken {{time}}"
   },
   "shop": {
     "open247": "7/24 açık",
@@ -168,7 +171,8 @@
       "shop_closed_on_date": "Dükkan seçtiğin tarihte kapalı.",
       "shop_not_found": "Bu nokta artık rezervasyon almıyor.",
       "no_bags": "En az bir valiz seç.",
-      "too_many_requests": "Çok fazla istek. Biraz sonra tekrar dene."
+      "too_many_requests": "Çok fazla istek. Biraz sonra tekrar dene.",
+      "shop_closed_at_time": "Dükkan seçtiğin saatte kapalı. Başka bir saat ya da nokta seç."
     },
     "code": {
       "prompt": "İndirim ya da davet kodun var mı?",
@@ -184,6 +188,12 @@
       "min_price": "Bu kod {{amount}} ve üzeri rezervasyonlarda geçerli.",
       "own_code": "Kendi davet kodunu kullanamazsın.",
       "not_first_booking": "Davet kodu yalnızca ilk rezervasyonda geçerli."
+    },
+    "hours": {
+      "title": "Saatler dükkana göre ayarlandı",
+      "dropOpens": "Bırakış saatin dükkanın açılışına göre {{time}} oldu.",
+      "pickupCloses": "Dükkan {{time}} itibarıyla kapanıyor; alış saatin {{time}} oldu. Valizini en geç bu saatte almalısın.",
+      "pickupOpens": "Alış saatin dükkanın açılışına göre {{time}} oldu."
     }
   },
   "success": {
