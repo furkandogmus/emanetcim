@@ -12,7 +12,15 @@ import { bookingService } from "@/services/BookingService";
  * `applyBagRevision` / `clearBagRevision`. Mobil misafir onceden bunu yalnizca
  * e-postadaki baglantiyla yapabiliyordu.
  */
-const schema = z.object({ action: z.enum(["approve", "reject"]) });
+/*
+  `expectedNewTotal`: misafirin kartta GORDUGU yeni toplam. Esnaf kart acikken
+  oneriyi yeniden yazarsa (+₺50 -> +₺500) eski karttaki "Onayla" yeni tutari
+  uygulamasin. Eski uygulama gondermez; o zaman eski davranis.
+*/
+const schema = z.object({
+  action: z.enum(["approve", "reject"]),
+  expectedNewTotal: z.number().nonnegative().optional(),
+});
 
 const CODE_TO_HTTP: Record<string, { status: number; error: string }> = {
   NOT_FOUND: { status: 404, error: "not_found" },
@@ -33,9 +41,20 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ id:
   if (!parsed.success) return NextResponse.json({ error: "invalid_data" }, { status: 400 });
 
   // Yalnizca rezervasyonun SAHIBI: onay misafirin, esnaf kendi onerisini onaylayamaz.
-  const booking = await prisma.booking.findUnique({ where: { id }, select: { guestId: true } });
+  const booking = await prisma.booking.findUnique({
+    where: { id },
+    select: { guestId: true, pendingBagRevision: true },
+  });
   if (!booking) return NextResponse.json({ error: "not_found" }, { status: 404 });
   if (booking.guestId !== auth.user.id) return NextResponse.json({ error: "forbidden" }, { status: 403 });
+
+  if (parsed.data.action === "approve" && parsed.data.expectedNewTotal !== undefined) {
+    const pending = booking.pendingBagRevision as { newTotal?: unknown } | null;
+    const current = typeof pending?.newTotal === "number" ? pending.newTotal : null;
+    if (current === null || Math.abs(current - parsed.data.expectedNewTotal) > 0.005) {
+      return NextResponse.json({ error: "revision_changed" }, { status: 409 });
+    }
+  }
 
   const actor = { id: auth.user.id, role: "GUEST" as const };
   const result =
