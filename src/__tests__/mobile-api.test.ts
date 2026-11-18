@@ -17,6 +17,12 @@ vi.mock("@/lib/db", () => ({
   },
 }));
 
+// shops/nearby fiyat araligi icin platform kurallarini okur; testte veritabani yok.
+vi.mock("@/lib/platform-settings", async () => {
+  const { DEFAULT_PRICING_RULES } = await import("@/lib/pricing-rules");
+  return { getPricingRules: vi.fn(async () => DEFAULT_PRICING_RULES) };
+});
+
 vi.mock("@/lib/netgsm", () => ({
   isNetgsmConfigured: vi.fn().mockReturnValue(false),
   normalizeTrGsm10: vi.fn((v: string) => v?.replace(/\D/g, "") ?? null),
