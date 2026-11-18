@@ -11,12 +11,15 @@ import { RowSkeleton } from "@/components/RowSkeleton";
 import { AppText, Button, CenterMessage } from "@/components/ui";
 import { errorMessage } from "@/lib/errors";
 import { isActiveBooking, useMyBookings } from "@/lib/queries";
+import { useAuth } from "@/lib/auth";
+import { SignInPrompt } from "@/components/SignInPrompt";
 import { colors, space } from "@/theme/tokens";
 
 export default function MyBookingsScreen() {
   const { t } = useTranslation();
   const query = useMyBookings();
   const [tab, setTab] = useState<"upcoming" | "past">("upcoming");
+  const { state } = useAuth();
 
   const all = query.data ?? [];
   const items = all
@@ -26,6 +29,10 @@ export default function MyBookingsScreen() {
         ? +new Date(a.checkInTime) - +new Date(b.checkInTime)
         : +new Date(b.checkInTime) - +new Date(a.checkInTime),
     );
+
+  if (state.status !== "signedIn") {
+    return <SignInPrompt title={t("auth.bookingsPromptTitle")} body={t("auth.bookingsPromptBody")} />;
+  }
 
   return (
     <SafeAreaView style={styles.safe} edges={["top"]}>

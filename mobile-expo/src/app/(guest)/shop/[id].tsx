@@ -1,3 +1,4 @@
+import { useEffect } from "react";
 import { ScrollView, StyleSheet, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { router, useLocalSearchParams } from "expo-router";
@@ -7,6 +8,8 @@ import { useTranslation } from "react-i18next";
 import { PhotoPager } from "@/components/PhotoPager";
 import { hoursLabel } from "@/components/ShopCard";
 import { AppText, Banner, Button, Card, CenterMessage, IconButton, Loading } from "@/components/ui";
+import { rememberCheckoutIntent, takeCheckoutIntent } from "@/lib/after-login";
+import { useAuth } from "@/lib/auth";
 import { errorMessage } from "@/lib/errors";
 import { formatDay, formatMoney, formatPriceRange, formatRating } from "@/lib/format";
 import { resolveImage } from "@/lib/images";
@@ -19,6 +22,24 @@ export default function ShopDetailScreen() {
   const { t } = useTranslation();
   const insets = useSafeAreaInsets();
   const query = useShop(id);
+  const { state } = useAuth();
+  const signedIn = state.status === "signedIn";
+
+  // Girissiz "Rezervasyon yap" -> giris -> geri donunce ayni dukkanin odemesine devam.
+  useEffect(() => {
+    if (signedIn && id && takeCheckoutIntent(id)) {
+      router.push({ pathname: "/checkout", params: { shopId: id } });
+    }
+  }, [signedIn, id]);
+
+  function book(shopId: string) {
+    if (!signedIn) {
+      rememberCheckoutIntent(shopId);
+      router.push("/login");
+      return;
+    }
+    router.push({ pathname: "/checkout", params: { shopId } });
+  }
 
   if (query.isLoading) return <Loading />;
   if (query.isError || !query.data) {
@@ -167,7 +188,7 @@ export default function ShopDetailScreen() {
           <Button
             title={t("shop.book")}
             style={{ flex: 1 }}
-            onPress={() => router.push({ pathname: "/checkout", params: { shopId: shop.id } })}
+            onPress={() => book(shop.id)}
           />
         </View>
       ) : null}

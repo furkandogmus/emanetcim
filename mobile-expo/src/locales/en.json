@@ -46,7 +46,12 @@
     "passwordSubtitle": "Use the password you set on the website.",
     "passwordLabel": "Password",
     "or": "or",
-    "continueWithGoogle": "Continue with Google"
+    "continueWithGoogle": "Continue with Google",
+    "signInCta": "Sign in",
+    "bookingsPromptTitle": "Your bookings live here",
+    "bookingsPromptBody": "Sign in to see your bookings and QR code.",
+    "profilePromptTitle": "Your account",
+    "profilePromptBody": "Sign in to book and share your invite code. You can change the language above without signing in."
   },
   "home": {
     "heroTitle": "Drop your bags.\nEnjoy the city.",
@@ -159,8 +164,6 @@
     "priceTitle": "Price",
     "bagLine": "{{count}} × {{size}} · {{days}}",
     "insurance": "Protection fee",
-    "estimatedTotal": "Estimated total",
-    "estimateNote": "The server calculates the final amount; you'll see it on your booking after confirming.",
     "payAtShop": "You pay at the shop when you drop off your bags.",
     "confirm": "Confirm booking",
     "errors": {
@@ -194,7 +197,8 @@
       "dropOpens": "Your drop-off is now {{time}}, when the shop opens.",
       "pickupCloses": "The shop closes at {{time}}, so your pickup is now {{time}}. Collect your bags by then.",
       "pickupOpens": "Your pickup is now {{time}}, when the shop opens."
-    }
+    },
+    "total": "Total"
   },
   "success": {
     "title": "You're booked",
@@ -594,7 +598,6 @@
     "bagsTitle": "How many bags?",
     "currentTotal": "Current total",
     "newTotal": "Estimated new total",
-    "estimateNote": "The server calculates the final amount; you'll see it on your booking after saving.",
     "paidNote": "The total of a paid booking can't change. To make a change that alters the price, cancel and book again.",
     "noBags": "Select at least one bag.",
     "save": "Save changes",
