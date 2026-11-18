@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Pressable, StyleSheet, View } from "react-native";
+import { Alert, Pressable, StyleSheet, View } from "react-native";
 import { Image } from "expo-image";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { Check } from "lucide-react-native";
@@ -9,6 +9,7 @@ import { AppText, Banner, Button, Card } from "@/components/ui";
 import { Input } from "@/components/Field";
 import { api } from "@/lib/api";
 import { errorMessage } from "@/lib/errors";
+import { formatMoney } from "@/lib/format";
 import type { BookingDetail } from "@/lib/types";
 import { notify } from "@/lib/notify";
 import { colors, fonts, radius, space } from "@/theme/tokens";
@@ -83,6 +84,33 @@ export function PartnerBookingActions({ booking }: { booking: BookingDetail }) {
     onError: (e) => setError(errorMessage(e, "partner")),
   });
 
+  /*
+    Manual saglayicida (dukkanda tahsilat) check-in, parayi "alindi" diye deftere
+    yazar ve geri alinamaz. Eskiden tek dokunusla, tutar gosterilmeden oluyordu.
+    Online odenmis (PAID) rezervasyonda tahsilat yok, yalnizca teslim.
+  */
+  const collects = booking.status === "APPROVED";
+  const amount = formatMoney(booking.totalPrice);
+  const bagCount = booking.bagCountS + booking.bagCountM + booking.bagCountXl;
+  function confirmCheckIn() {
+    Alert.alert(
+      t("partner.confirmCheckInTitle"),
+      collects
+        ? t("partner.confirmCheckInCash", { amount, count: bagCount })
+        : t("partner.confirmCheckInPaid", { count: bagCount }),
+      [
+        { text: t("common.cancel"), style: "cancel" },
+        { text: t("partner.confirmYes"), onPress: () => checkIn.mutate() },
+      ],
+    );
+  }
+  function confirmCheckOut() {
+    Alert.alert(t("partner.confirmCheckOutTitle"), t("partner.confirmCheckOutBody", { count: bagCount }), [
+      { text: t("common.cancel"), style: "cancel" },
+      { text: t("partner.confirmYes"), onPress: () => checkOut.mutate() },
+    ]);
+  }
+
   if (CHECK_IN_READY.has(booking.status)) {
     const filled = rows.filter((r) => r.sealNumber !== "").length;
     const partial = filled > 0 && filled !== rows.length;
@@ -125,10 +153,10 @@ export function PartnerBookingActions({ booking }: { booking: BookingDetail }) {
         {partial ? <Banner tone="warning" body={t("partner.sealsPartial")} /> : null}
         {error ? <Banner tone="danger" body={error} /> : null}
         <Button
-          title={t("partner.checkInCta")}
+          title={collects ? t("partner.checkInCtaCash", { amount }) : t("partner.checkInCta")}
           loading={checkIn.isPending}
           disabled={partial}
-          onPress={() => checkIn.mutate()}
+          onPress={confirmCheckIn}
         />
       </Card>
     );
@@ -172,7 +200,7 @@ export function PartnerBookingActions({ booking }: { booking: BookingDetail }) {
           title={t("partner.checkOutCta")}
           loading={checkOut.isPending}
           disabled={!allReturned}
-          onPress={() => checkOut.mutate()}
+          onPress={confirmCheckOut}
         />
       </Card>
     );
