@@ -26,6 +26,13 @@ const SHEET_PEEK = 150;
 
 type Viewport = { latitude: number; longitude: number; bounds: LngLatBounds };
 
+/** Yaricapi kapsayan kutu: sehir kartindan gelince il genis, sabit zoom 12 tek semti gosteriyordu. */
+function boundsFor(latitude: number, longitude: number, radiusM: number): LngLatBounds {
+  const dLat = radiusM / 111_000;
+  const dLng = radiusM / (111_000 * Math.cos((latitude * Math.PI) / 180));
+  return [longitude - dLng, latitude - dLat, longitude + dLng, latitude + dLat];
+}
+
 function radiusFor(bounds: LngLatBounds) {
   // Gorunen alanin yarim yuksekligi; 2-50 km arasina sikistirilir.
   const [, south, , north] = bounds;
@@ -40,7 +47,13 @@ export default function MapScreen() {
   const search = useSearch();
 
   const [center, setCenter] = useState(() =>
-    search.place ? { latitude: search.place.latitude, longitude: search.place.longitude, radiusM: DEFAULT_RADIUS_M } : null,
+    search.place
+      ? {
+          latitude: search.place.latitude,
+          longitude: search.place.longitude,
+          radiusM: search.place.radiusM ?? DEFAULT_RADIUS_M,
+        }
+      : null,
   );
   /*
     Kaydirilan bolge ref'te: her `onRegionDidChange`de state yazmak butun ekrani
@@ -65,8 +78,13 @@ export default function MapScreen() {
     if (!search.place || placeKey === lastPlaceKey.current) return;
     lastPlaceKey.current = placeKey;
     const { latitude, longitude } = search.place;
-    setCenter({ latitude, longitude, radiusM: DEFAULT_RADIUS_M });
-    camera.current?.jumpTo({ center: [longitude, latitude], zoom: 12 });
+    const radiusM = search.place.radiusM ?? DEFAULT_RADIUS_M;
+    setCenter({ latitude, longitude, radiusM });
+    if (radiusM > DEFAULT_RADIUS_M) {
+      camera.current?.fitBounds(boundsFor(latitude, longitude, radiusM), { padding: { bottom: SHEET_PEEK }, duration: 0 });
+    } else {
+      camera.current?.jumpTo({ center: [longitude, latitude], zoom: 12 });
+    }
     pendingRegion.current = null;
     setMoved(false);
     setSelectedId(null);
@@ -143,7 +161,14 @@ export default function MapScreen() {
           setMoved(true);
         }}
       >
-        <Camera ref={camera} initialViewState={{ center: [center.longitude, center.latitude], zoom: 12 }} />
+        <Camera
+          ref={camera}
+          initialViewState={
+            center.radiusM > DEFAULT_RADIUS_M
+              ? { bounds: boundsFor(center.latitude, center.longitude, center.radiusM), padding: { bottom: SHEET_PEEK } }
+              : { center: [center.longitude, center.latitude], zoom: 12 }
+          }
+        />
         {search.place.isCurrent ? <UserLocation /> : null}
         <ShopMarkers shops={shops} selectedId={selectedId} onSelect={selectShop} />
       </Map>

@@ -4,7 +4,8 @@ import type { ReactNode } from "react";
 
 import { wallInstant, wallParts } from "./time";
 
-export type Place = { label: string; latitude: number; longitude: number; isCurrent?: boolean };
+/** `radiusM`: sehir kartindan gelince sehrin tamami; yoksa haritanin varsayilani. */
+export type Place = { label: string; latitude: number; longitude: number; isCurrent?: boolean; radiusM?: number };
 export type Bags = { s: number; m: number; xl: number };
 
 // Sehir listesi sunucudan gelir (`useCities`, GET /cities): yalnizca dukkani olan sehirler.
