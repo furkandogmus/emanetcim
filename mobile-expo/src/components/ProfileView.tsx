@@ -8,6 +8,7 @@ import Constants from "expo-constants";
 import { ChevronRight, ExternalLink, X } from "lucide-react-native";
 import { useTranslation } from "react-i18next";
 
+import { Avatar } from "@/components/Avatar";
 import { ReferralCard } from "@/components/ReferralCard";
 import { AppText, Button, IconButton } from "@/components/ui";
 import { api, ApiError } from "@/lib/api";
@@ -15,7 +16,7 @@ import { useAuth } from "@/lib/auth";
 import { setAppLanguage } from "@/lib/i18n";
 import { SITE_ORIGIN } from "@/lib/images";
 import { notify } from "@/lib/notify";
-import { colors, fonts, radius, space } from "@/theme/tokens";
+import { colors, radius, space } from "@/theme/tokens";
 
 /** Sistem ayarindan donunce guncellensin diye uygulama one geldikce yeniden okunur. */
 function useNotificationPermission() {
@@ -110,9 +111,7 @@ export function ProfileView({ asTab = false }: { asTab?: boolean }) {
           onPress={() => router.push("/profile-edit")}
           style={({ pressed }) => [styles.identity, pressed && { backgroundColor: colors.surfaceMuted }]}
         >
-          <View style={styles.avatar}>
-            <AppText style={styles.avatarText}>{initials(user.name || user.email || "?")}</AppText>
-          </View>
+          <Avatar name={user.name || user.email || "?"} url={user.avatarUrl} size={52} />
           <View style={{ flex: 1, gap: 2 }}>
             <AppText variant="heading" numberOfLines={1}>
               {user.name || user.email}
@@ -253,15 +252,6 @@ const styles = StyleSheet.create({
     borderColor: colors.border,
     backgroundColor: colors.surface,
   },
-  avatar: {
-    width: 48,
-    height: 48,
-    borderRadius: 24,
-    backgroundColor: colors.brandSoft,
-    alignItems: "center",
-    justifyContent: "center",
-  },
-  avatarText: { fontFamily: fonts.display, fontSize: 18, color: colors.accent },
   group: {
     borderRadius: radius.card,
     borderWidth: 1,
@@ -274,7 +264,3 @@ const styles = StyleSheet.create({
 });
 
 /** "Test Misafir" -> "TM"; e-postada ilk harf. */
-function initials(name: string) {
-  const parts = name.normalize("NFC").split(/[\s@.]+/).filter(Boolean);
-  return ((parts[0]?.[0] ?? "") + (name.includes("@") ? "" : (parts[1]?.[0] ?? ""))).toLocaleUpperCase("tr-TR") || "?";
-}

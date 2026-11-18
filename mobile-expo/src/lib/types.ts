@@ -330,3 +330,12 @@ export type AdminShop = {
   arrivalsToday: number;
   pickupsToday: number;
 };
+
+/** `/cities`: dukkani olan sehirler (sunucu `toMobileCity`). */
+export type CityCoverage = {
+  name: string;
+  shopCount: number;
+  latitude: number;
+  longitude: number;
+  coverImage: string | null;
+};

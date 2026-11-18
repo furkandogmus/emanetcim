@@ -9,9 +9,10 @@ import { SealedBag } from "@/components/Illustrations";
 import { BookingRow } from "@/components/BookingRow";
 import { PartnerPulseCard } from "@/components/PartnerPulseCard";
 import { Segmented } from "@/components/Segmented";
-import { AppText, Button, CenterMessage, Loading } from "@/components/ui";
+import { RowSkeleton } from "@/components/RowSkeleton";
+import { AppText, Button, CenterMessage } from "@/components/ui";
 import { errorMessage } from "@/lib/errors";
-import { isActiveBooking, usePartnerBookings } from "@/lib/queries";
+import { isActiveBooking, usePartnerBookings, usePartnerDashboard } from "@/lib/queries";
 import { wallInstant, wallParts } from "@/lib/time";
 import type { PartnerBooking } from "@/lib/types";
 import { colors, space } from "@/theme/tokens";
@@ -60,8 +61,12 @@ export default function PartnerBookingsScreen() {
     }
   }, [query.data]);
 
+  // Cok dukkanli esnafta liste ustteki kartta secili dukkani izler: kart "dukkanda 0 valiz"
+  // derken liste baska dukkanin valizini gostermesin.
+  const dash = usePartnerDashboard().data;
+  const shopFilter = dash && dash.shops.length > 1 ? dash.shop.id : null;
   const items = (query.data?.items ?? [])
-    .filter((b) => bucket(b) === tab)
+    .filter((b) => (!shopFilter || b.shopId === shopFilter) && bucket(b) === tab)
     .sort((a, b) =>
       tab === "past"
         ? +new Date(b.checkInTime) - +new Date(a.checkInTime)
@@ -88,7 +93,7 @@ export default function PartnerBookingsScreen() {
       </View>
 
       {query.isLoading ? (
-        <Loading />
+        <RowSkeleton />
       ) : query.isError ? (
         <CenterMessage
           title={errorMessage(query.error)}

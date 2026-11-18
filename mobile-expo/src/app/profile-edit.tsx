@@ -1,14 +1,27 @@
 import { useState } from "react";
-import { KeyboardAvoidingView, Platform, ScrollView, StyleSheet, TextInput, View } from "react-native";
+import {
+  ActivityIndicator,
+  Alert,
+  KeyboardAvoidingView,
+  Platform,
+  Pressable,
+  ScrollView,
+  StyleSheet,
+  TextInput,
+  View,
+} from "react-native";
+import * as ImagePicker from "expo-image-picker";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { router } from "expo-router";
-import { X } from "lucide-react-native";
+import { Camera, X } from "lucide-react-native";
 import { useTranslation } from "react-i18next";
 
+import { Avatar } from "@/components/Avatar";
 import { AppText, Banner, Button, IconButton } from "@/components/ui";
 import { api } from "@/lib/api";
 import { useAuth } from "@/lib/auth";
 import { errorMessage } from "@/lib/errors";
+import { prepareAvatar } from "@/lib/shop-photo";
 import { colors, fonts, radius, space } from "@/theme/tokens";
 
 const MAX_NAME = 100;
@@ -32,7 +45,55 @@ export default function ProfileEditScreen() {
   const [phone, setPhone] = useState(user?.phone ?? "");
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [photoBusy, setPhotoBusy] = useState(false);
   if (!user) return null;
+
+  /** Fotograf formdan bagimsiz, secilir secilmez yuklenir: "Kaydet"i beklemez. */
+  async function pickPhoto() {
+    const res = await ImagePicker.launchImageLibraryAsync({
+      mediaTypes: ["images"],
+      allowsEditing: true,
+      aspect: [1, 1],
+      quality: 1,
+    });
+    if (res.canceled || !res.assets[0]) return;
+    setPhotoBusy(true);
+    setError(null);
+    try {
+      const file = await prepareAvatar(res.assets[0]);
+      const form = new FormData();
+      form.append("avatar", file as unknown as Blob);
+      await api("/auth/me", { method: "PUT", body: form });
+      await refreshUser().catch(() => undefined);
+    } catch (e) {
+      console.warn("avatar_upload_failed", e);
+      setError(errorMessage(e, "profileEdit"));
+    } finally {
+      setPhotoBusy(false);
+    }
+  }
+
+  async function removePhoto() {
+    setPhotoBusy(true);
+    setError(null);
+    try {
+      await api("/auth/me", { method: "PUT", body: { image: null } });
+      await refreshUser().catch(() => undefined);
+    } catch (e) {
+      setError(errorMessage(e, "profileEdit"));
+    } finally {
+      setPhotoBusy(false);
+    }
+  }
+
+  function photoMenu() {
+    if (!user?.avatarUrl) return void pickPhoto();
+    Alert.alert(t("profileEdit.photo"), undefined, [
+      { text: t("profileEdit.changePhoto"), onPress: () => void pickPhoto() },
+      { text: t("profileEdit.removePhoto"), style: "destructive", onPress: () => void removePhoto() },
+      { text: t("common.cancel"), style: "cancel" },
+    ]);
+  }
 
   const close = () => (router.canGoBack() ? router.back() : router.replace("/profile"));
 
@@ -92,6 +153,30 @@ export default function ProfileEditScreen() {
             </IconButton>
           </View>
 
+          <View style={styles.photoRow}>
+            <Pressable
+              accessibilityRole="button"
+              accessibilityLabel={user.avatarUrl ? t("profileEdit.changePhoto") : t("profileEdit.addPhoto")}
+              onPress={photoMenu}
+              disabled={photoBusy}
+            >
+              <Avatar name={user.name || user.email || "?"} url={user.avatarUrl} size={88} />
+              <View style={styles.photoBadge}>
+                {photoBusy ? (
+                  <ActivityIndicator size="small" color={colors.ink} />
+                ) : (
+                  <Camera size={16} color={colors.ink} />
+                )}
+              </View>
+            </Pressable>
+            <Button
+              variant="ghost"
+              title={user.avatarUrl ? t("profileEdit.changePhoto") : t("profileEdit.addPhoto")}
+              onPress={photoMenu}
+              disabled={photoBusy}
+            />
+          </View>
+
           {user.email ? (
             <View style={styles.field}>
               <AppText variant="label">{t("profileEdit.emailLabel")}</AppText>
@@ -140,7 +225,6 @@ export default function ProfileEditScreen() {
             <AppText variant="caption">{t("profileEdit.phoneHint")}</AppText>
           </View>
 
-
           {error ? <Banner tone="danger" body={error} /> : null}
           <Button title={t("profileEdit.save")} onPress={save} loading={busy} />
         </ScrollView>
@@ -150,6 +234,20 @@ export default function ProfileEditScreen() {
 }
 
 const styles = StyleSheet.create({
+  photoRow: { alignItems: "center", gap: space.xs },
+  photoBadge: {
+    position: "absolute",
+    right: -2,
+    bottom: -2,
+    width: 32,
+    height: 32,
+    borderRadius: 16,
+    backgroundColor: colors.surface,
+    borderWidth: 1,
+    borderColor: colors.border,
+    alignItems: "center",
+    justifyContent: "center",
+  },
   safe: { flex: 1, backgroundColor: colors.bg },
   content: { padding: space.xl, gap: space.lg },
   header: { flexDirection: "row", alignItems: "center", gap: space.md },

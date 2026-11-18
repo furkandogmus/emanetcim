@@ -12,7 +12,9 @@ import { PlaceSearch } from "@/components/PlaceSearch";
 import { StayWindowPicker, isStayWindowValid } from "@/components/StayWindowPicker";
 import { AppText, Banner, Button, IconButton } from "@/components/ui";
 import { CITY_IMAGES } from "@/lib/city-images";
-import { CITIES, totalBags, useSearch } from "@/lib/search";
+import { resolveImage } from "@/lib/images";
+import { useCities } from "@/lib/queries";
+import { totalBags, useSearch } from "@/lib/search";
 import type { Place } from "@/lib/search";
 import { colors, radius, space } from "@/theme/tokens";
 
@@ -38,6 +40,7 @@ export default function SearchWizard() {
   const [bags, setBags] = useState(search.bags);
   const [locating, setLocating] = useState(false);
   const [locationError, setLocationError] = useState(false);
+  const cityList = useCities().data ?? [];
 
   function choosePlace(place: Place) {
     search.setPlace(place);
@@ -120,33 +123,44 @@ export default function SearchWizard() {
             <AppText variant="bodyMedium">{locating ? t("search.locating") : t("search.useLocation")}</AppText>
           </Pressable>
           {locationError ? <Banner tone="warning" body={t("search.locationDenied")} /> : null}
-          <AppText variant="label" style={{ marginTop: space.sm, marginBottom: -space.sm }}>
-            {t("search.popular")}
-          </AppText>
-          <View style={styles.cityList}>
-            {CITIES.map((c, i) => (
-              <Pressable
-                key={c.label}
-                accessibilityRole="button"
-                onPress={() => choosePlace(c)}
-                style={({ pressed }) => [
-                  styles.cityRow,
-                  i > 0 && styles.cityDivider,
-                  pressed && { backgroundColor: colors.surfaceMuted },
-                ]}
-              >
-                {CITY_IMAGES[c.label] ? (
-                  <Image source={CITY_IMAGES[c.label].source} style={styles.cityThumb} contentFit="cover" />
-                ) : (
-                  <View style={styles.cityThumb} />
-                )}
-                <AppText variant="bodyMedium" style={{ flex: 1 }}>
-                  {c.label}
-                </AppText>
-                <ChevronRight size={18} color={colors.borderStrong} />
-              </Pressable>
-            ))}
-          </View>
+          {cityList.length > 0 ? (
+            <>
+              <AppText variant="label" style={{ marginTop: space.sm, marginBottom: -space.sm }}>
+                {t("search.popular")}
+              </AppText>
+              <View style={styles.cityList}>
+                {cityList.map((c, i) => {
+                  const remote = resolveImage(c.coverImage);
+                  const photo = CITY_IMAGES[c.name]?.source ?? (remote ? { uri: remote } : null);
+                  return (
+                    <Pressable
+                      key={c.name}
+                      accessibilityRole="button"
+                      onPress={() => choosePlace({ label: c.name, latitude: c.latitude, longitude: c.longitude })}
+                      style={({ pressed }) => [
+                        styles.cityRow,
+                        i > 0 && styles.cityDivider,
+                        pressed && { backgroundColor: colors.surfaceMuted },
+                      ]}
+                    >
+                      {photo ? (
+                        <Image source={photo} style={styles.cityThumb} contentFit="cover" />
+                      ) : (
+                        <View style={styles.cityThumb} />
+                      )}
+                      <View style={{ flex: 1 }}>
+                        <AppText variant="bodyMedium">{c.name}</AppText>
+                        <AppText variant="caption" style={{ fontSize: 13 }}>
+                          {t("home.citySpots", { count: c.shopCount })}
+                        </AppText>
+                      </View>
+                      <ChevronRight size={18} color={colors.borderStrong} />
+                    </Pressable>
+                  );
+                })}
+              </View>
+            </>
+          ) : null}
         </ScrollView>
       ) : null}
 

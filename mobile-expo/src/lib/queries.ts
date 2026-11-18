@@ -1,8 +1,8 @@
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, type QueryClient } from "@tanstack/react-query";
 
 import { api } from "./api";
 import { usePartnerShopSelection, withShop } from "./partner-shop";
-import type { AdminApplication, AdminStats, BookingDetail, ContactMessage, PartnerEarnings, PartnerSealsResponse, PartnerShop, BookingSummary, NearbyShop, PartnerBookingsResponse, ShopDetail, ShopReview, PartnerShopSettings, PartnerSchedule, PartnerDashboard, AdminOverview, AdminBookingFilter, AdminBookingCounts, AdminBookingsResponse, AdminBookingDetail, AdminShop } from "./types";
+import type { AdminApplication, AdminStats, BookingDetail, ContactMessage, PartnerEarnings, PartnerSealsResponse, PartnerShop, BookingSummary, NearbyShop, PartnerBookingsResponse, ShopDetail, ShopReview, PartnerShopSettings, PartnerSchedule, PartnerDashboard, AdminOverview, AdminBookingFilter, AdminBookingCounts, AdminBookingsResponse, AdminBookingDetail, AdminShop, CityCoverage } from "./types";
 
 export const keys = {
   myBookings: ["bookings", "me"] as const,
@@ -14,10 +14,31 @@ export const keys = {
   admin: ["admin"] as const,
 };
 
+/** Dukkani olan sehirler; yeni sehirde esnaf acilinca kendiliginden gelir. */
+export function useCities() {
+  return useQuery({
+    queryKey: ["cities"],
+    queryFn: () => api<{ cities: CityCoverage[] }>("/cities", { auth: false }).then((r) => r.cities),
+    staleTime: 10 * 60_000,
+  });
+}
+
 export function useMyBookings() {
   return useQuery({
     queryKey: keys.myBookings,
     queryFn: () => api<BookingSummary[]>("/bookings/me?limit=50"),
+  });
+}
+
+/**
+ * Satira dokunulur dokunulmaz (parmak kalkmadan) detay istegini baslatir: ekran
+ * acildiginda bilet cogu zaman hazir. 30 sn icinde cekildiyse tekrar gitmez.
+ */
+export function prefetchBooking(queryClient: QueryClient, id: string) {
+  void queryClient.prefetchQuery({
+    queryKey: keys.booking(id),
+    queryFn: () => api<BookingDetail>(`/bookings/${id}`),
+    staleTime: 30_000,
   });
 }
 

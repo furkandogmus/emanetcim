@@ -28,3 +28,17 @@ export async function prepareShopPhoto(asset: { uri: string; width: number; heig
   const out = await image.saveAsync({ format: SaveFormat.JPEG, compress: 0.82 });
   return { uri: out.uri, name: "shop.jpg", type: "image/jpeg" };
 }
+
+/**
+ * Profil fotografi: secici kareyi kirpar, burada 320 px JPEG'e iner (~25 KB). Sunucu
+ * avatari data URL olarak saklayip `/auth/me` ile donduruyor; telefonun 2 MB'lik
+ * fotografi her profil isteginde tasinmasin.
+ */
+export async function prepareAvatar(asset: { uri: string; width: number; height: number }): Promise<UploadFile> {
+  const ctx = ImageManipulator.manipulate(asset.uri);
+  if (Math.max(asset.width, asset.height) > 320)
+    ctx.resize(asset.width >= asset.height ? { width: 320 } : { height: 320 });
+  const image = await ctx.renderAsync();
+  const out = await image.saveAsync({ format: SaveFormat.JPEG, compress: 0.8 });
+  return { uri: out.uri, name: "avatar.jpg", type: "image/jpeg" };
+}

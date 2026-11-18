@@ -74,7 +74,9 @@ export async function PUT(req: NextRequest) {
     });
   }
 
-  const { name, phone } = await req.json().catch(() => ({ name: undefined, phone: undefined }));
+  const { name, phone, image } = await req
+    .json()
+    .catch(() => ({ name: undefined, phone: undefined, image: undefined }));
 
   const data: Record<string, unknown> = {};
 
@@ -112,6 +114,9 @@ export async function PUT(req: NextRequest) {
       data.phone = normalized;
     }
   }
+
+  // Yalnizca kaldirma: yeni fotograf multipart dalindan gelir.
+  if (image === null) data.image = null;
 
   if (Object.keys(data).length === 0) {
     return NextResponse.json({ error: "no_fields" }, { status: 400 });
