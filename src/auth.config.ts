@@ -150,6 +150,12 @@ export const authConfig: NextAuthConfig = {
         if (existingUser && (existingUser as PrismaUser).isBanned) {
           return false;
         }
+        // Yeni hesap: gecici domain ya da bot kalibi (adsoyad.NNNNN@gmail.com) Google
+        // ile de kayit olamaz. Bot hesaplari gercek Gmail; Google'in dogrulamasi durdurmuyor.
+        if (!existingUser && user.email) {
+          const { isBlockedSignupEmail } = await import("@/lib/disposable-emails");
+          if (isBlockedSignupEmail(user.email)) return false;
+        }
       }
       return true;
     },

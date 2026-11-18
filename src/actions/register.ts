@@ -13,7 +13,7 @@ import { z } from "zod";
 import { rateLimit } from "@/lib/rate-limit";
 import { generateVerificationToken } from "@/lib/tokens";
 import { sendVerificationEmail } from "@/lib/mail";
-import { isDisposableEmail } from "@/lib/disposable-emails";
+import { isBlockedSignupEmail } from "@/lib/disposable-emails";
 import { getLocale } from "next-intl/server";
 import { normalizeTrGsm10 } from "@/lib/netgsm";
 import {
@@ -71,7 +71,7 @@ export async function registerGuestAction(data: unknown) {
 
   const email = parsed.data.email.trim().toLowerCase();
   
-  if (isDisposableEmail(email)) {
+  if (isBlockedSignupEmail(email)) {
     return { success: false as const, error: "Errors.invalidEmail" };
   }
 
@@ -145,7 +145,7 @@ export async function registerPartnerApplicationAction(data: unknown) {
 
   const email = parsed.data.email?.trim().toLowerCase() || null;
   if (email) {
-    if (isDisposableEmail(email)) {
+    if (isBlockedSignupEmail(email)) {
       return { success: false as const, error: "Errors.invalidEmail" };
     }
     const exists = await prisma.user.findUnique({ where: { email } });

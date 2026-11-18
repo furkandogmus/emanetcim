@@ -10,6 +10,7 @@ import { notificationService } from "@/services/NotificationService";
 import { analyticsService } from "@/services/AnalyticsService";
 import { resolveServerSessionId } from "@/lib/analytics-server";
 import logger from "@/lib/logger";
+import { getClientIpOrNull } from "@/lib/client-ip";
 
 /**
  * Auth.js (v5) - Merkezi Kimlik Doğrulama Konfigürasyonu
@@ -56,6 +57,15 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
     // Yalnızca adapter GERÇEKTEN yeni bir User satırı yarattığında tetiklenir
     // (web Google girişi) — credentials kaydı registerGuestAction'da ayrıca ele alınıyor.
     async createUser({ user }) {
+      // Google kaydinda da IP tutulur: admin "IP engelle" yalnizca e-posta kaydinda calisiyordu.
+      if (user.id) {
+        const ip = await getClientIpOrNull().catch(() => null);
+        if (ip) {
+          await prisma.user
+            .update({ where: { id: user.id }, data: { lastIp: ip } })
+            .catch((err) => logger.warn({ err, userId: user.id }, "signup_ip_save_failed"));
+        }
+      }
       void notificationService
         .notifyAdminsForNewUser({
           name: user.name ?? null,
