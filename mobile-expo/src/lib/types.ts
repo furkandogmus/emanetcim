@@ -56,6 +56,8 @@ export type NearbyShop = Shop & {
   distanceKm: number;
   /** Yalnizca tarih filtresiyle aranirsa gelir. */
   bagsAvailable?: number;
+  /** Kucuk-buyuk valiz gunluk fiyati. Eski sunucu gondermez: o zaman `pricePerDay`. */
+  priceRange?: { min: number; max: number };
 };
 
 export type ShopDetail = Shop & {

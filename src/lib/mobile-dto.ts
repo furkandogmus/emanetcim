@@ -180,6 +180,18 @@ export function toMobileShop(s: ShopSummarySource, schedule?: MobileSchedule) {
  * ₺225 ve ayrıca ₺15 sigorta görüyor, sunucu ise hepsine ₺150 kesiyordu. Aradaki
  * fark yalnızca geliştirici loguna düşüyordu. Kural sunucuda; istemci onu okur.
  */
+/**
+ * Liste ve haritada gosterilen gunluk fiyat ARALIGI (en kucuk - en buyuk valiz).
+ * `pricePerDay` orta valizin taban fiyati; tek basina "valiz basi ₺250" diye
+ * gosterilince kucuk/buyuk valizin farkli fiyati ayni ekranda celisiyordu.
+ */
+export function toMobilePriceRange(pricePerDay: unknown, r: PricingRules) {
+  const base = moneyToNumber(pricePerDay);
+  const m = [r.bagMultipliers.S, r.bagMultipliers.M, r.bagMultipliers.XL];
+  const round = (n: number) => Math.round(n * 100) / 100;
+  return { min: round(base * Math.min(...m)), max: round(base * Math.max(...m)) };
+}
+
 export function toMobilePricing(r: PricingRules) {
   return {
     bagMultiplierS: r.bagMultipliers.S,
