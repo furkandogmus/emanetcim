@@ -364,6 +364,35 @@ describe("NotificationService", () => {
       );
     });
 
+    it("iOS Expo token'i FCM yapilandirmasi olmadan da Expo servisine gider; olu token silinir", async () => {
+      delete process.env.FIREBASE_SERVICE_ACCOUNT_JSON;
+      mockPrisma.mobilePushToken.findMany.mockResolvedValue([
+        { token: "ExponentPushToken[aaa]" },
+        { token: "ExponentPushToken[bbb]" },
+      ]);
+      const fetchSpy = vi.spyOn(globalThis, "fetch").mockResolvedValue(
+        new Response(
+          JSON.stringify({ data: [{ status: "ok" }, { status: "error", details: { error: "DeviceNotRegistered" } }] }),
+          { status: 200 },
+        ),
+      );
+
+      const result = await service.sendMobilePush("user-1", "Başlık", "Mesaj", "b1");
+
+      expect(result).toBe(true);
+      expect(mockSendEachForMulticast).not.toHaveBeenCalled();
+      const [url, init] = fetchSpy.mock.calls[0];
+      expect(String(url)).toBe("https://exp.host/--/api/v2/push/send");
+      expect(JSON.parse(String((init as RequestInit).body))).toEqual([
+        expect.objectContaining({ to: "ExponentPushToken[aaa]", title: "Başlık", body: "Mesaj", data: { bookingId: "b1" } }),
+        expect.objectContaining({ to: "ExponentPushToken[bbb]" }),
+      ]);
+      expect(mockPrisma.mobilePushToken.deleteMany).toHaveBeenCalledWith({
+        where: { token: { in: ["ExponentPushToken[bbb]"] } },
+      });
+      fetchSpy.mockRestore();
+    });
+
     it("token yoksa SKIPPED loglar", async () => {
       process.env.FIREBASE_SERVICE_ACCOUNT_JSON = JSON.stringify({ project_id: "p" });
       mockPrisma.mobilePushToken.findMany.mockResolvedValue([]);
