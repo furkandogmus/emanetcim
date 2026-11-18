@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Pressable, ScrollView, StyleSheet, View, useWindowDimensions } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { Image } from "expo-image";
@@ -13,6 +13,7 @@ import { BookingRow } from "@/components/BookingRow";
 import { LuggageTag, MapSnippet, SealedBag } from "@/components/Illustrations";
 import { InfoSheet } from "@/components/InfoSheet";
 import { RemoteImage } from "@/components/RemoteImage";
+import { ScrollArrows, useScrollArrows } from "@/components/ScrollArrows";
 import { CITY_IMAGES } from "@/lib/city-images";
 import { formatDayTime } from "@/lib/format";
 import { resolveImage } from "@/lib/images";
@@ -31,6 +32,8 @@ export default function HomeScreen() {
   const { height } = useWindowDimensions();
   const bookings = useMyBookings();
   const search = useSearch();
+  const cityStrip = useRef<ScrollView>(null);
+  const cityArrows = useScrollArrows(cityStrip);
   const cities = useCities();
   const active = (bookings.data ?? [])
     .filter((b) => isActiveBooking(b))
@@ -151,8 +154,13 @@ export default function HomeScreen() {
         {/* Sunucudan: yalnizca dukkani olan sehirler, cok noktasi olan once. Hata/bos ise bolum gizli. */}
         {cities.isLoading || (cities.data?.length ?? 0) > 0 ? (
           <View style={styles.section}>
-            <AppText variant="label">{t("home.citiesTitle")}</AppText>
+            <View style={styles.sectionHead}>
+              <AppText variant="label">{t("home.citiesTitle")}</AppText>
+              <ScrollArrows state={cityArrows} />
+            </View>
             <ScrollView
+              ref={cityStrip}
+              {...cityArrows.scrollProps}
               horizontal
               showsHorizontalScrollIndicator={false}
               contentContainerStyle={styles.cities}

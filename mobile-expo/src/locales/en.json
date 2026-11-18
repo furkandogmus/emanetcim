@@ -13,7 +13,9 @@
     "bag_one": "{{count}} bag",
     "bag_other": "{{count}} bags",
     "ok": "OK",
-    "clear": "Clear"
+    "clear": "Clear",
+    "scrollBack": "Scroll back",
+    "scrollForward": "Scroll forward"
   },
   "auth": {
     "title": "Sign in",
