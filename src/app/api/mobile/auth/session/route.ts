@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { isBlockedSignupEmail } from "@/lib/disposable-emails";
 import type { NextRequest } from "next/server";
 import { z } from "zod";
 import prisma from "@/lib/db";
@@ -92,6 +93,10 @@ export async function POST(req: NextRequest) {
         });
 
     if (!user) {
+      // Kodla kayit da ayni kurala tabi: bot kalibi ve gecici domain yeni hesap acamaz.
+      if (isEmail && isBlockedSignupEmail(normalizedIdentity)) {
+        return NextResponse.json({ error: "invalid_email" }, { status: 403 });
+      }
       user = await prisma.user.create({
         data: {
           email: isEmail ? normalizedIdentity : null,

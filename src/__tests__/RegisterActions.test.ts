@@ -42,7 +42,7 @@ vi.mock("@/lib/auth-password", () => ({
 }));
 vi.mock("@/lib/disposable-emails", () => ({
   isDisposableEmail: vi.fn((email) => email.endsWith("@tempmail.com")),
-  isBlockedSignupEmail: vi.fn((email) => email.endsWith("@tempmail.com") || /^[a-z]{4,}\.\d{5}@gmail\.com$/.test(email)),
+  isBlockedSignupEmail: vi.fn((email) => email.endsWith("@tempmail.com") || /^[a-z.]{4,}\d{5}@gmail\.com$/.test(email)),
 }));
 
 describe("Register Actions", () => {
