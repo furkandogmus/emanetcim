@@ -85,6 +85,8 @@ export async function POST(
     void notificationService
       .notifyCheckIn(recipient, id, booking.locale ?? DEFAULT_NOTIFICATION_LOCALE)
       .catch((err) => logger.error({ err, bookingId: id }, "mobile_checkin_notify_failed"));
+  } else {
+    notificationService.pushGuestOnly(id, "checkIn", booking.locale ?? DEFAULT_NOTIFICATION_LOCALE);
   }
 
   return NextResponse.json({ ok: true });
