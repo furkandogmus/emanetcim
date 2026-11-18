@@ -286,6 +286,17 @@ export class NotificationService implements INotificationService {
    * hatirlatma ya da onay isteyen valiz duzeltmesini yalnizca e-postadan ogreniyordu.
    * Ateşle-unut: e-postayi asla bekletmez ya da dusurmez.
    */
+  /**
+   * E-postasi olmayan (telefonla kayitli) misafir icin yalnizca push. Bildirim
+   * yontemleri push'u e-postanin yaninda gonderiyordu ve cagiranlar e-posta yoksa
+   * yontemi hic cagirmiyordu: telefonla kayitli misafir HICBIR bildirim almiyordu.
+   * Tek seferlik olaylar icin (onay, iptal, check-in/out, valiz duzeltmesi);
+   * hatirlatma isi tekrar kontrolunu e-posta kaydina gore yaptigi icin disarida.
+   */
+  pushGuestOnly(bookingId: string, event: GuestPushEvent, locale: string, vars: Omit<GuestPushVars, "shop"> = {}): void {
+    this.pushGuest(bookingId, event, locale, vars);
+  }
+
   private pushGuest(
     bookingId: string,
     event: GuestPushEvent,

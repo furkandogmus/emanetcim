@@ -340,6 +340,8 @@ export async function checkInAction(
         booking.id,
         booking.locale ?? DEFAULT_NOTIFICATION_LOCALE,
       );
+    } else {
+      notificationService.pushGuestOnly(booking.id, "checkIn", booking.locale ?? DEFAULT_NOTIFICATION_LOCALE);
     }
 
     revalidatePartnerPaths();
@@ -393,6 +395,8 @@ export async function checkOutAction(qrTokenOrBookingId: string) {
         booking.id,
         booking.locale ?? DEFAULT_NOTIFICATION_LOCALE,
       );
+    } else {
+      notificationService.pushGuestOnly(booking.id, "checkOut", booking.locale ?? DEFAULT_NOTIFICATION_LOCALE);
     }
 
     revalidatePartnerPaths();

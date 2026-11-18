@@ -52,6 +52,8 @@ export async function POST(
     void notificationService
       .notifyCheckOut(recipient, id, booking.locale ?? DEFAULT_NOTIFICATION_LOCALE)
       .catch((err) => logger.error({ err, bookingId: id }, "mobile_checkout_notify_failed"));
+  } else {
+    notificationService.pushGuestOnly(id, "checkOut", booking.locale ?? DEFAULT_NOTIFICATION_LOCALE);
   }
 
   return NextResponse.json({ 

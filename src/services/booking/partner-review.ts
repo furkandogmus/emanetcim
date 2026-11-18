@@ -130,6 +130,8 @@ export async function approveBooking(
       void notificationService
         .notifyBookingApproved(booking.guest.email, bookingId, booking.shop.name, opts.locale)
         .catch((err) => logger.error({ err, bookingId }, 'notify_booking_approved_failed'));
+    } else {
+      notificationService.pushGuestOnly(bookingId, 'approved', opts.locale ?? 'tr');
     }
 
     return { ok: true };
@@ -192,6 +194,8 @@ export async function rejectBooking(
       void notificationService
         .notifyBookingCancelled(booking.guest.email, bookingId, booking.shop.name, opts.locale)
         .catch((err) => logger.error({ err, bookingId }, 'notify_booking_cancelled_failed'));
+    } else {
+      notificationService.pushGuestOnly(bookingId, 'cancelled', opts.locale ?? 'tr');
     }
 
     return { ok: true };
