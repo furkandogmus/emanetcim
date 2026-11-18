@@ -1,4 +1,4 @@
-import { computeServiceTotalForStay } from "@/lib/bag-pricing";
+import { computeServiceTotalForStay, preciseSlotPrices } from "@/lib/bag-pricing";
 import type { PricingRules } from "@/lib/pricing-rules";
 import { DEFAULT_PRICING_RULES } from "@/lib/pricing-rules";
 
@@ -79,4 +79,29 @@ export function computeAuthoritativeCheckoutTotals(
     insuranceFee,
     subtotalBeforeCoupon,
   };
+}
+
+/**
+ * Odeme ekranindaki satirlar: boy basina adet, gun ve tutar. Mobil eskiden
+ * bunlari kendi formuluyle "tahmin" ediyordu; artik yalnizca bunu gosterir.
+ * Kaynak `computeAuthoritativeCheckoutTotals`in ayni girdileri.
+ */
+export function checkoutLineItems(
+  totals: ReturnType<typeof computeAuthoritativeCheckoutTotals>,
+  rules: PricingRules,
+): Array<{ size: "s" | "m" | "xl"; count: number; days: number; amount: number }> {
+  const p = preciseSlotPrices(totals.unitPrice, rules);
+  const rows: Array<["s" | "m" | "xl", number, number]> = [
+    ["s", totals.bagCountS, p.s],
+    ["m", totals.bagCountM, p.m],
+    ["xl", totals.bagCountXl, p.xl],
+  ];
+  return rows
+    .filter(([, count]) => count > 0)
+    .map(([size, count, unit]) => ({
+      size,
+      count,
+      days: totals.stayDays,
+      amount: Math.round(count * unit * totals.stayDays * 100) / 100,
+    }));
 }
