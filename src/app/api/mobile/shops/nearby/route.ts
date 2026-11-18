@@ -6,7 +6,7 @@ import { validateBookingStayWindow } from "@/lib/booking-server-price";
 import { getPricingRules } from "@/lib/platform-settings";
 import { rateLimit } from "@/lib/rate-limit";
 import { getClientIp } from "@/lib/get-ip";
-import { toMobileShop } from "@/lib/mobile-dto";
+import { toMobilePriceRange, toMobileShop } from "@/lib/mobile-dto";
 import { toDatetimeLocalValueInTimeZone } from "@/lib/datetime-local";
 
 const schema = z.object({
@@ -64,15 +64,20 @@ export async function GET(req: NextRequest) {
         /* Aramaya OZGU alanlar: ortak govdeye girmez, listede anlamli. */
         distanceKm: s.distanceKm,
         bagsAvailable: s.bagsAvailable,
+        priceRange: toMobilePriceRange(s.pricePerDay, rules),
       })),
     );
   }
 
-  const shops = await shopService.findNearby(lat, lng, radiusKm, page, limit);
+  const [shops, rules] = await Promise.all([
+    shopService.findNearby(lat, lng, radiusKm, page, limit),
+    getPricingRules(),
+  ]);
   return NextResponse.json(
     shops.map((s) => ({
       ...toMobileShop(s),
       distanceKm: s.distanceKm,
+      priceRange: toMobilePriceRange(s.pricePerDay, rules),
     })),
   );
 }

@@ -34,6 +34,17 @@ export function formatMoney(amount: number) {
   return `₺${n}`;
 }
 
+/**
+ * Gunluk fiyat araligi: kucuk valiz - buyuk valiz. Tabandaki tek fiyat (orta valiz)
+ * "valiz basi" diye gosterilince boy fiyatlariyla celisiyordu.
+ */
+export function formatPriceRange(range: { min: number; max: number }) {
+  const min = Math.round(range.min * 100) / 100;
+  const max = Math.round(range.max * 100) / 100;
+  if (min === max) return formatMoney(min);
+  return `${formatMoney(min)} – ${formatMoney(max)}`;
+}
+
 /** "Cum 16 Eki" -- Istanbul gunu, telefonun saat dilimi degil (`time.ts`). */
 export function formatDay(d: Date | string) {
   return dateFmt({ weekday: "short", day: "numeric", month: "short", timeZone: "UTC" }).format(shiftedForFormat(d));

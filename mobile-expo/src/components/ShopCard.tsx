@@ -5,7 +5,7 @@ import { useTranslation } from "react-i18next";
 import type { TFunction } from "i18next";
 
 import { AppText } from "@/components/ui";
-import { formatKm, formatMoney, formatRating } from "@/lib/format";
+import { formatKm, formatMoney, formatPriceRange, formatRating } from "@/lib/format";
 import { RemoteImage } from "@/components/RemoteImage";
 import { resolveImage } from "@/lib/images";
 import type { NearbyShop } from "@/lib/types";
@@ -100,7 +100,9 @@ export const ShopCard = memo(function ShopCard({
           </View>
         ) : (
           <>
-            <Text style={styles.price}>{formatMoney(shop.pricePerDay)}</Text>
+            <Text style={styles.price}>
+              {shop.priceRange ? formatPriceRange(shop.priceRange) : formatMoney(shop.pricePerDay)}
+            </Text>
             <Text style={styles.perDay}>{t("map.perDay")}</Text>
           </>
         )}
