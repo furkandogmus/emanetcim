@@ -114,3 +114,59 @@ export async function geocodePlace(
     return null;
   }
 }
+
+export type GeocodeListResult = { ok: true; places: GeocodedPlace[] } | { ok: false; reason: "upstream" };
+
+const listCache = new Map<string, { at: number; value: GeocodedPlace[] }>();
+
+/**
+ * Mobil yer aramasi: birden cok sonuc ve ulke filtresi (2026-11-18). Tek sonuc
+ * ve filtresiz arama "Hilton" ya da "Central Station" yazan turisti baska bir
+ * ulkeye atiyordu; Nominatim cokunce de "bulunamadi" deniyordu. Web aramasi
+ * `geocodePlace`i kullanmaya devam eder (talep testi noktalari yurt disinda da).
+ */
+export async function geocodePlaces(
+  query: string,
+  locale: string = "tr",
+  opts: { countryCodes?: string; limit?: number } = {},
+): Promise<GeocodeListResult> {
+  const q = query.trim();
+  if (q.length < GEOCODE_MIN_QUERY_LENGTH) return { ok: true, places: [] };
+  const limit = Math.min(10, Math.max(1, opts.limit ?? 5));
+  const key = `${locale}|${opts.countryCodes ?? ""}|${limit}|${q.toLocaleLowerCase("tr")}`;
+  const hit = listCache.get(key);
+  if (hit && Date.now() - hit.at < CACHE_TTL_MS) return { ok: true, places: hit.value };
+
+  const url = new URL("https://nominatim.openstreetmap.org/search");
+  url.searchParams.set("q", q);
+  url.searchParams.set("format", "jsonv2");
+  url.searchParams.set("limit", String(limit));
+  url.searchParams.set("accept-language", locale);
+  if (opts.countryCodes) url.searchParams.set("countrycodes", opts.countryCodes);
+
+  try {
+    const res = await fetchWithTimeout(
+      url.toString(),
+      {
+        headers: { "User-Agent": "bagajpark-search/1.0 (support@bagajpark.com)" },
+        next: { revalidate: 0 },
+      },
+      5000,
+      "geocode_search_list",
+    );
+    if (!res.ok) return { ok: false, reason: "upstream" };
+    const data = (await res.json()) as Array<{ lat?: string; lon?: string; display_name?: string }>;
+    if (!Array.isArray(data)) return { ok: false, reason: "upstream" };
+    const places = data
+      .map((d) => ({ lat: Number(d.lat), lng: Number(d.lon), label: d.display_name ?? q }))
+      .filter((p) => Number.isFinite(p.lat) && Number.isFinite(p.lng));
+    if (listCache.size >= CACHE_MAX) {
+      const oldest = listCache.keys().next().value;
+      if (oldest !== undefined) listCache.delete(oldest);
+    }
+    listCache.set(key, { at: Date.now(), value: places });
+    return { ok: true, places };
+  } catch {
+    return { ok: false, reason: "upstream" };
+  }
+}

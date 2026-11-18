@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
-import { geocodePlace, GEOCODE_MIN_QUERY_LENGTH } from "@/lib/geocode";
+import { geocodePlaces, GEOCODE_MIN_QUERY_LENGTH } from "@/lib/geocode";
 import { rateLimit } from "@/lib/rate-limit";
 import { getClientIp } from "@/lib/get-ip";
 import { resolveRequestLocale } from "@/lib/request-locale";
@@ -27,7 +27,13 @@ export async function GET(req: NextRequest) {
   }
 
   const locale = resolveRequestLocale(req.headers.get("accept-language"));
-  const place = await geocodePlace(q, locale);
-  if (!place) return NextResponse.json({ error: "not_found" }, { status: 404 });
-  return NextResponse.json(toMobileGeocodeResult(place));
+  // Rezervasyon alinan butun noktalar Turkiye'de: arama oraya sinirli, bes sonuc.
+  const result = await geocodePlaces(q, locale, { countryCodes: "tr", limit: 5 });
+  if (!result.ok) return NextResponse.json({ error: "geocode_unavailable" }, { status: 503 });
+  if (result.places.length === 0) return NextResponse.json({ error: "not_found" }, { status: 404 });
+  // Ust duzey alanlar eski uygulama icin (tek sonuc); yeni uygulama `items`i okur.
+  return NextResponse.json({
+    ...toMobileGeocodeResult(result.places[0]),
+    items: result.places.map(toMobileGeocodeResult),
+  });
 }

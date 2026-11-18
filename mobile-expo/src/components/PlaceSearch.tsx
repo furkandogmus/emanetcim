@@ -17,7 +17,7 @@ const MIN_CHARS = 3;
 type State =
   | { kind: "idle" }
   | { kind: "loading" }
-  | { kind: "found"; place: GeocodeResult }
+  | { kind: "found"; places: { label: string; latitude: number; longitude: number }[] }
   | { kind: "empty" }
   | { kind: "error"; message: string };
 
@@ -47,7 +47,7 @@ export function PlaceSearch({ onChoose }: { onChoose: (place: Place) => void }) 
     const settle = (next: State) => !stale && setResult({ q, state: next });
     const timer = setTimeout(() => {
       api<GeocodeResult>(`/geocode?q=${encodeURIComponent(q)}`, { auth: false })
-        .then((place) => settle({ kind: "found", place }))
+        .then((res) => settle({ kind: "found", places: res.items?.length ? res.items : [res] }))
         .catch((err: unknown) => {
           if (err instanceof ApiError && err.code === "not_found") settle({ kind: "empty" });
           else settle({ kind: "error", message: errorMessage(err, "placeSearch") });
@@ -99,27 +99,30 @@ export function PlaceSearch({ onChoose }: { onChoose: (place: Place) => void }) 
       ) : null}
       {state.kind === "empty" ? <Banner tone="warning" body={t("placeSearch.empty")} /> : null}
       {state.kind === "error" ? <Banner tone="danger" body={state.message} /> : null}
-      {state.kind === "found" ? (
-        <Pressable
-          accessibilityRole="button"
-          onPress={() =>
-            onChoose({
-              label: shortLabel(state.place.label),
-              latitude: state.place.latitude,
-              longitude: state.place.longitude,
-            })
-          }
-          style={({ pressed }) => [styles.result, pressed && { opacity: 0.7 }]}
-        >
-          <MapPin size={20} color={colors.accent} style={{ marginHorizontal: 12 }} />
-          <View style={{ flex: 1 }}>
-            <AppText variant="bodyMedium">{shortLabel(state.place.label)}</AppText>
-            <AppText variant="caption" numberOfLines={2}>
-              {state.place.label}
-            </AppText>
-          </View>
-        </Pressable>
-      ) : null}
+      {state.kind === "found"
+        ? state.places.map((place) => (
+            <Pressable
+              key={`${place.latitude},${place.longitude}`}
+              accessibilityRole="button"
+              onPress={() =>
+                onChoose({
+                  label: shortLabel(place.label),
+                  latitude: place.latitude,
+                  longitude: place.longitude,
+                })
+              }
+              style={({ pressed }) => [styles.result, pressed && { opacity: 0.7 }]}
+            >
+              <MapPin size={20} color={colors.accent} style={{ marginHorizontal: 12 }} />
+              <View style={{ flex: 1 }}>
+                <AppText variant="bodyMedium">{shortLabel(place.label)}</AppText>
+                <AppText variant="caption" numberOfLines={2}>
+                  {place.label}
+                </AppText>
+              </View>
+            </Pressable>
+          ))
+        : null}
     </View>
   );
 }
