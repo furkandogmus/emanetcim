@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { StyleSheet, Text, View } from "react-native";
 import { useTranslation } from "react-i18next";
 
@@ -14,12 +15,23 @@ const TONES: Record<BookingStatus, { bg: string; fg: string }> = {
   WAITING_APPROVAL: { bg: colors.warningSoft, fg: colors.warning },
 };
 
-export function StatusBadge({ status }: { status: BookingStatus }) {
+const NEVER_DROPPED = new Set<BookingStatus>(["APPROVED", "PAID", "PENDING", "WAITING_APPROVAL"]);
+
+/**
+ * `checkOutTime` verilirse: valiz hic birakilmadan bitis saati gecmis rezervasyon
+ * "Kullanilmadi" yazar. Durum sunucuda bilerek degismiyor (sure asimi taramasi
+ * yalnizca isaretler), ama gecmis sekmesinde yesil "Onaylandi" hala gecerli bir
+ * rezervasyon gibi okunuyordu.
+ */
+export function StatusBadge({ status, checkOutTime }: { status: BookingStatus; checkOutTime?: string }) {
   const { t } = useTranslation();
-  const tone = TONES[status] ?? TONES.PENDING;
+  // BookingRow ile ayni desen: an bir kez okunur, cizim saf kalir.
+  const [now] = useState(() => Date.now());
+  const unused = !!checkOutTime && NEVER_DROPPED.has(status) && new Date(checkOutTime).getTime() < now;
+  const tone = unused ? TONES.CHECKED_OUT : (TONES[status] ?? TONES.PENDING);
   return (
     <View style={[styles.badge, { backgroundColor: tone.bg }]}>
-      <Text style={[styles.text, { color: tone.fg }]}>{t(`status.${status}`)}</Text>
+      <Text style={[styles.text, { color: tone.fg }]}>{unused ? t("status.UNUSED") : t(`status.${status}`)}</Text>
     </View>
   );
 }

@@ -65,7 +65,7 @@ export const BookingRow = memo(function BookingRow({
           </AppText>
         ) : null}
         <View style={styles.meta}>
-          <StatusBadge status={booking.status} />
+          <StatusBadge status={booking.status} checkOutTime={booking.checkOutTime} />
           {highlight ? (
             <View style={styles.highlight}>
               <AppText variant="label" style={{ color: colors.white, fontSize: 12 }}>
