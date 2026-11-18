@@ -1,3 +1,6 @@
+import { snapStayToShopHours } from "@/lib/stay-days";
+import { loadScheduleParts } from "@/services/ShopScheduleService";
+import { toDatetimeLocalValueInTimeZone } from "@/lib/datetime-local";
 import { couponService } from "@/services/CouponService";
 import { referralService } from "@/services/ReferralService";
 import { resolveRequestLocale } from "@/lib/request-locale";
@@ -91,8 +94,24 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: "shop_not_found" }, { status: 404 });
   }
 
-  const checkInTime = new Date(parsed.data.checkInTime);
-  const checkOutTime = new Date(parsed.data.checkOutTime);
+  /*
+    Saat dukkanin saatine oturtulur (2026-11-18). Olusturma saati hic
+    denetlemiyordu; mobil arama kapali saatteki dukkanlari gizledigi icin
+    sorun gorunmuyordu. Arama artik onlari da listeliyor: alis 22:00 secilip
+    20:00'de kapanan dukkana rezervasyon acilmamali.
+  */
+  const requestedIn = new Date(parsed.data.checkInTime);
+  const schedule = (await loadScheduleParts([shop.id], toDatetimeLocalValueInTimeZone(requestedIn).slice(0, 10))).get(shop.id);
+  const snapped = snapStayToShopHours(
+    { open247: shop.open247, openingTime: shop.openingTime, closingTime: shop.closingTime, timeZone: shop.timezone, ...schedule },
+    requestedIn,
+    new Date(parsed.data.checkOutTime),
+  );
+  if (!snapped) {
+    return NextResponse.json({ error: "shop_closed_at_time" }, { status: 409 });
+  }
+  const checkInTime = snapped.checkIn;
+  const checkOutTime = snapped.checkOut;
   const rules = await getPricingRules();
   const totals = computeAuthoritativeCheckoutTotals(
     moneyToNumber(shop.pricePerDay),
@@ -234,5 +253,7 @@ export async function POST(req: NextRequest) {
     status: "APPROVED",
     // Istemci bunu `serverTotal` olarak okuyup ekranda gosteriyor.
     totalPrice: toplam,
+    checkInTime: checkInTime.toISOString(),
+    checkOutTime: checkOutTime.toISOString(),
   });
 }

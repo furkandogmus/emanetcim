@@ -8,6 +8,9 @@ import { computeAuthoritativeCheckoutTotals } from "@/lib/booking-server-price";
 import { getPricingRules } from "@/lib/platform-settings";
 import { moneyToNumber } from "@/lib/money";
 import { applyReferralDiscount } from "@/lib/referral-discount";
+import { snapStayToShopHours } from "@/lib/stay-days";
+import { loadScheduleParts } from "@/services/ShopScheduleService";
+import { toDatetimeLocalValueInTimeZone } from "@/lib/datetime-local";
 import { couponService } from "@/services/CouponService";
 import { referralService } from "@/services/ReferralService";
 
@@ -52,19 +55,39 @@ export async function POST(req: NextRequest) {
 
   const shop = await prisma.shop.findUnique({
     where: { id: d.shopId },
-    select: { pricePerDay: true, isActive: true, isTest: true, isPrelaunch: true },
+    select: {
+      id: true,
+      pricePerDay: true,
+      isActive: true,
+      isTest: true,
+      isPrelaunch: true,
+      open247: true,
+      openingTime: true,
+      closingTime: true,
+      timezone: true,
+    },
   });
   if (!shop?.isActive || shop.isTest || shop.isPrelaunch) {
     return NextResponse.json({ error: "shop_not_found" }, { status: 404 });
   }
+
+  // `intent` ile ayni oturtma: onizlenen saat ve tutar, olusacak rezervasyonunki.
+  const requestedIn = new Date(d.checkInTime);
+  const schedule = (await loadScheduleParts([shop.id], toDatetimeLocalValueInTimeZone(requestedIn).slice(0, 10))).get(shop.id);
+  const snapped = snapStayToShopHours(
+    { open247: shop.open247, openingTime: shop.openingTime, closingTime: shop.closingTime, timeZone: shop.timezone, ...schedule },
+    requestedIn,
+    new Date(d.checkOutTime),
+  );
+  if (!snapped) return NextResponse.json({ error: "shop_closed_at_time" }, { status: 409 });
 
   const totals = computeAuthoritativeCheckoutTotals(
     moneyToNumber(shop.pricePerDay),
     d.bagCountS,
     d.bagCountM,
     d.bagCountXl,
-    new Date(d.checkInTime),
-    new Date(d.checkOutTime),
+    snapped.checkIn,
+    snapped.checkOut,
     await getPricingRules(),
   );
   const subtotal = totals.subtotalBeforeCoupon;
@@ -97,5 +120,14 @@ export async function POST(req: NextRequest) {
     }
   }
 
-  return NextResponse.json({ subtotal, total, discount, codeStatus, minPrice: minPrice ?? null });
+  return NextResponse.json({
+    subtotal,
+    total,
+    discount,
+    codeStatus,
+    minPrice: minPrice ?? null,
+    checkInTime: snapped.checkIn.toISOString(),
+    checkOutTime: snapped.checkOut.toISOString(),
+    hoursNotice: snapped.drop || snapped.pickup ? { drop: snapped.drop ?? null, pickup: snapped.pickup ?? null } : null,
+  });
 }

@@ -4,7 +4,7 @@ import {
   toDatetimeLocalValueInTimeZone,
 } from "@/lib/datetime-local";
 import { MIN_BOOKING_STAY_MS } from "@/lib/booking-server-price";
-import { hoursForDate, type ShopSchedule } from "@/lib/shop-schedule";
+import { hoursForDate, isOpenAt, type ShopSchedule } from "@/lib/shop-schedule";
 
 /**
  * GUN BAZLI REZERVASYON.
@@ -122,4 +122,54 @@ export function searchWindowForDays(
   if (checkIn.getTime() < now.getTime()) checkIn = ceilTo5Min(now);
   if (checkOut.getTime() - checkIn.getTime() < MIN_BOOKING_STAY_MS) return null;
   return { checkIn, checkOut };
+}
+
+export type HoursAdjustment = { at: string; reason: "opens" | "closes" };
+
+/**
+ * Misafirin sectigi ANLARI dukkanin saatine oturtur (mobil saatli arama).
+ * Birakis acilistan once ise acilisa, alis kapanistan sonra ise kapanisa
+ * cekilir. Mobil arama bu dukkanlari eskiden hic listelemiyordu; rezervasyon
+ * olusturma ise saati hic denetlemiyordu, yani yalnizca listeye eklemek
+ * kapali saate rezervasyon acardi. O gun kapaliysa, birakis kapanistan
+ * sonraysa ya da kalan sure cok kisaysa null.
+ */
+export function snapStayToShopHours(
+  shop: ShopSchedule,
+  checkIn: Date,
+  checkOut: Date,
+): { checkIn: Date; checkOut: Date; drop?: HoursAdjustment; pickup?: HoursAdjustment } | null {
+  if (shop.open247) return { checkIn, checkOut };
+  const tz = shop.timeZone || PLATFORM_TIMEZONE;
+  const out: { checkIn: Date; checkOut: Date; drop?: HoursAdjustment; pickup?: HoursAdjustment } = {
+    checkIn,
+    checkOut,
+  };
+
+  if (!isOpenAt(shop, checkIn)) {
+    const local = toDatetimeLocalValueInTimeZone(checkIn, tz);
+    const day = local.slice(0, 10);
+    const h = hoursForDate(shop, day);
+    if (!h || local.slice(11, 16) > h.open) return null; // kapali gun ya da kapanistan sonra
+    const at = parseDatetimeLocalInTimeZone(`${day}T${h.open}`, tz);
+    if (!at) return null;
+    out.checkIn = at;
+    out.drop = { at: h.open, reason: "opens" };
+  }
+
+  if (!isOpenAt(shop, checkOut)) {
+    const local = toDatetimeLocalValueInTimeZone(checkOut, tz);
+    const day = local.slice(0, 10);
+    const h = hoursForDate(shop, day);
+    if (!h) return null;
+    const after = local.slice(11, 16) > h.close;
+    const hm = after ? h.close : h.open;
+    const at = parseDatetimeLocalInTimeZone(`${day}T${hm}`, tz);
+    if (!at) return null;
+    out.checkOut = at;
+    out.pickup = { at: hm, reason: after ? "closes" : "opens" };
+  }
+
+  if (out.checkOut.getTime() - out.checkIn.getTime() < MIN_BOOKING_STAY_MS) return null;
+  return out;
 }
