@@ -657,6 +657,17 @@ export async function updateShopAction(shopId: string, data: {
         ? data.longitude
         : null;
 
+  /*
+    Koordinat ARALIGI da dogrulanir (2026-11-18). Yalnizca `isFinite` bakiliyordu;
+    prod'da bir Antalya dukkaninin boylami ~3e16 olarak kaydedilmisti (ondalik
+    noktasi dusmus bir "30.71..."). Nokta haritada hic gorunmuyor, sehir merkezi
+    hesabini da bozuyordu. Kayit ve basvuru yollari zaten -90..90 / -180..180
+    araligini sart kosuyor; admin duzenlemesi tek istisnaydi.
+  */
+  if ((lat != null && Math.abs(lat) > 90) || (lng != null && Math.abs(lng) > 180)) {
+    return { success: false as const, error: "Errors.invalidData" };
+  }
+
   if (
     data.capacity !== undefined &&
     (!Number.isInteger(data.capacity) || data.capacity < 1 || data.capacity > 100_000)
