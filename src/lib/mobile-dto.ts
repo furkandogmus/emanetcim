@@ -456,3 +456,14 @@ export function toMobileAdminShop(s: AdminShopSource) {
     pickupsToday: s.pickupsToday,
   };
 }
+
+/** Ana sayfa "Populer sehirler" karti. */
+export function toMobileCity(c: import("@/services/CityCoverageService").CityCoverage) {
+  return {
+    name: c.name,
+    shopCount: c.shopCount,
+    latitude: c.latitude,
+    longitude: c.longitude,
+    coverImage: c.coverImage,
+  };
+}
