@@ -10,7 +10,9 @@ import type { Role } from "./types";
 /*
   Sunucu mobil bildirimi dogrudan FCM'e gonderir (`NotificationService.sendMobilePush`,
   firebase-admin). Bu yuzden Expo push token'i DEGIL, cihazin yerel token'i
-  (`getDevicePushTokenAsync`: Android'de FCM) kaydedilir. Esnafa yeni rezervasyon,
+  (`getDevicePushTokenAsync`: Android'de FCM) kaydedilir. iOS'ta yerel token APNs'indir
+  ve FCM onu almaz: orada Expo push token'i kaydedilir, sunucu onu Expo servisine
+  gonderir (`src/lib/expo-push.ts`), Expo da EAS'taki APNs anahtariyla iletir. Esnafa yeni rezervasyon,
   misafire onay/check-in/hatirlatma/valiz duzeltmesi gider; veride `bookingId` gelir.
 */
 
@@ -42,7 +44,10 @@ export async function registerForPush({ prompt = true }: { prompt?: boolean } = 
   const status = current.granted ? current : await Notifications.requestPermissionsAsync();
   if (!status.granted) return;
 
-  const { data: token } = await Notifications.getDevicePushTokenAsync();
+  const token =
+    Platform.OS === "ios"
+      ? (await Notifications.getExpoPushTokenAsync({ projectId: Constants.expoConfig?.extra?.eas?.projectId })).data
+      : (await Notifications.getDevicePushTokenAsync()).data;
   if (typeof token !== "string" || token === registeredToken) return;
   await api("/push/register", {
     method: "POST",

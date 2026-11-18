@@ -3,6 +3,7 @@ import { GUEST_PUSH_COPY, type GuestPushEvent, type GuestPushVars } from "@/lib/
 import prisma from "../lib/db";
 import { formatTryCurrency } from "@/lib/currency";
 import { fetchWithTimeout } from "@/lib/async-timeout";
+import { isExpoPushToken, sendExpoPush } from "@/lib/expo-push";
 import { renderEmailHtml, escapeEmailHtml, EMAIL_BRAND_COLOR } from "@/lib/email-template";
 import { bcp47ForUiLocale } from "@/lib/intl-locale";
 import { formatDateTimeInZone } from "@/lib/format-datetime";
@@ -344,44 +345,67 @@ export class NotificationService implements INotificationService {
 
     try {
       const tokens = await prisma.mobilePushToken.findMany({ where: { userId } });
+      /*
+        iOS cihazlar Expo push token'i kaydeder (ExponentPushToken[...]): iOS'ta yerel
+        token APNs'indir, FCM onu kabul etmez. Expo servisi APNs'e EAS'taki anahtarla
+        iletir; Android FCM'e dogrudan gitmeye devam eder.
+      */
+      const expoTokens = tokens.filter((t) => isExpoPushToken(t.token)).map((t) => t.token);
+      const fcmTokens = tokens.filter((t) => !isExpoPushToken(t.token)).map((t) => t.token);
+      const canFcm = !!serviceAccountJson && fcmTokens.length > 0;
 
-      if (serviceAccountJson && tokens.length > 0) {
-        const { initializeApp, getApps, cert } = await import("firebase-admin/app");
-        const { getMessaging } = await import("firebase-admin/messaging");
-
-        if (getApps().length === 0) {
-          initializeApp({ credential: cert(JSON.parse(serviceAccountJson)) });
-        }
-        const messaging = getMessaging();
-
-        const resp = await messaging.sendEachForMulticast({
-          tokens: tokens.map((t) => t.token),
-          notification: { title, body: message },
-          data: bookingId ? { bookingId } : undefined,
-        });
-
+      if (canFcm || expoTokens.length > 0) {
+        let successCount = 0;
         const staleTokens: string[] = [];
-        resp.responses.forEach((r, i) => {
-          if (r.success) return;
-          const code = r.error?.code;
-          if (
-            code === "messaging/registration-token-not-registered" ||
-            code === "messaging/invalid-registration-token"
-          ) {
-            staleTokens.push(tokens[i].token);
+
+        if (canFcm) {
+          const { initializeApp, getApps, cert } = await import("firebase-admin/app");
+          const { getMessaging } = await import("firebase-admin/messaging");
+
+          if (getApps().length === 0) {
+            initializeApp({ credential: cert(JSON.parse(serviceAccountJson!)) });
           }
-          logger.warn(
-            { err: r.error, userId, token: tokens[i].token },
-            "mobile_push_send_failed",
-          );
-        });
+          const messaging = getMessaging();
+
+          const resp = await messaging.sendEachForMulticast({
+            tokens: fcmTokens,
+            notification: { title, body: message },
+            data: bookingId ? { bookingId } : undefined,
+          });
+          successCount += resp.successCount;
+
+          resp.responses.forEach((r, i) => {
+            if (r.success) return;
+            const code = r.error?.code;
+            if (
+              code === "messaging/registration-token-not-registered" ||
+              code === "messaging/invalid-registration-token"
+            ) {
+              staleTokens.push(fcmTokens[i]);
+            }
+            logger.warn(
+              { err: r.error, userId, token: fcmTokens[i] },
+              "mobile_push_send_failed",
+            );
+          });
+        }
+
+        if (expoTokens.length > 0) {
+          const expo = await sendExpoPush(expoTokens, title, message, bookingId);
+          successCount += expo.successCount;
+          staleTokens.push(...expo.staleTokens);
+          for (const f of expo.failures) {
+            logger.warn({ err: f.error, userId, token: f.token }, "mobile_push_send_failed");
+          }
+        }
+
         if (staleTokens.length > 0) {
           await prisma.mobilePushToken.deleteMany({
             where: { token: { in: staleTokens } },
           });
         }
 
-        const anyOk = resp.successCount > 0;
+        const anyOk = successCount > 0;
         await prisma.notificationLog.create({
           data: {
             bookingId,
@@ -396,11 +420,8 @@ export class NotificationService implements INotificationService {
         return anyOk;
       }
 
-      const skipReason = !serviceAccountJson
-        ? "fcm_not_configured"
-        : tokens.length === 0
-          ? "no_tokens"
-          : "unknown";
+      // Buraya yalnizca Expo token'i olmayan ve FCM ile gonderilemeyen durumda gelinir.
+      const skipReason = !serviceAccountJson ? "fcm_not_configured" : "no_tokens";
       logger.info({ userId, title, skipReason }, "notification_mobile_push_skipped");
 
       await prisma.notificationLog.create({
