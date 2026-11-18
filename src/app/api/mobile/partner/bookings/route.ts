@@ -22,16 +22,38 @@ export async function GET(req: NextRequest) {
   const shopIds = shops.map((s) => s.id);
   const shopMap = new Map(shops.map((s) => [s.id, s.name]));
 
-  const [allBookings, total] = await Promise.all([
+  /*
+    AKTIFLER HER ZAMAN, gecmis sayfali (2026-11-18). Liste "en son olusturulan
+    100" idi: 100 rezervasyonu gecen dukkanda, eskiden yapilmis ama BUGUN
+    gelecek ya da hala dukkanda duran valiz listeden dusuyordu (ozet kart onu
+    sayarken liste gostermiyordu). Aktif = valiz dukkanda ya da bitisi bugun
+    sonrasi (son 24 saat dahil); gecmis bitise gore yeniden eskiye.
+  */
+  const recentCutoff = new Date(Date.now() - 24 * 60 * 60 * 1000);
+  const activeWhere = {
+    shopId: { in: shopIds },
+    OR: [{ status: "CHECKED_IN" as const }, { checkOutTime: { gte: recentCutoff } }],
+  };
+  const [active, history, total] = await Promise.all([
+    page === 1
+      ? prisma.booking.findMany({
+          where: activeWhere,
+          include: { guest: { select: { name: true } } },
+          orderBy: { checkInTime: "asc" },
+          // Tavan: bir dukkanin ayni anda 500 aktif rezervasyonu gercekci degil.
+          take: 500,
+        })
+      : Promise.resolve([]),
     prisma.booking.findMany({
-      where: { shopId: { in: shopIds } },
+      where: { shopId: { in: shopIds }, status: { not: "CHECKED_IN" }, checkOutTime: { lt: recentCutoff } },
       include: { guest: { select: { name: true } } },
-      orderBy: { createdAt: "desc" },
+      orderBy: { checkOutTime: "desc" },
       skip,
       take: limit,
     }),
     prisma.booking.count({ where: { shopId: { in: shopIds } } }),
   ]);
+  const allBookings = [...active, ...history];
 
   const results = allBookings.map((b) => ({
     id: b.id,
