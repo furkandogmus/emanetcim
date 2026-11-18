@@ -5,7 +5,7 @@ import { Luggage } from "lucide-react-native";
 import { useTranslation } from "react-i18next";
 
 import { AppText, Banner, Button, Card } from "@/components/ui";
-import { api } from "@/lib/api";
+import { api, ApiError } from "@/lib/api";
 import { errorMessage } from "@/lib/errors";
 import { formatMoney } from "@/lib/format";
 import { notify } from "@/lib/notify";
@@ -26,7 +26,8 @@ export function GuestBagRevisionCard({ booking }: { booking: BookingDetail }) {
     mutationFn: (action: "approve" | "reject") =>
       api<{ success: true; newTotal: number | null }>(`/bookings/${booking.id}/bag-revision`, {
         method: "POST",
-        body: { action },
+        // Gorulen tutar: arada degistiyse sunucu 409 `revision_changed` doner.
+        body: { action, expectedNewTotal: booking.pendingBagRevision?.newTotal },
       }),
     onSuccess: (res, action) => {
       setError(null);
@@ -37,7 +38,13 @@ export function GuestBagRevisionCard({ booking }: { booking: BookingDetail }) {
         notify(t("guestRevision.rejectedTitle"), t("guestRevision.rejectedBody"));
       }
     },
-    onError: (e) => setError(errorMessage(e, "bagRevision")),
+    onError: (e) => {
+      setError(errorMessage(e, "bagRevision"));
+      // Oneri degistiyse yenisi gelsin: misafir guncel tutari gorup karar versin.
+      if (e instanceof ApiError && e.code === "revision_changed") {
+        void queryClient.invalidateQueries({ queryKey: ["bookings"] });
+      }
+    },
   });
 
   if (!pending) return null;
