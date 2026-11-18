@@ -7,6 +7,7 @@ import * as SecureStore from "expo-secure-store";
 import { ApiError, api, clearTokens, loadTokens, saveTokens, setSessionExpiredHandler } from "./api";
 import { forgetGoogleAccount, pickGoogleIdToken } from "./google-auth";
 import { forgetPushRegistration, unregisterPush } from "./push";
+import { clearOfflineTickets } from "./offline-tickets";
 import type { MobileUser, SessionResponse } from "./types";
 
 type AuthState =
@@ -126,6 +127,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const signOut = useCallback(async () => {
     // Token oturum hala gecerliyken silinir; sonra sunucu tarafi iptal (en iyi caba).
     await unregisterPush();
+    await clearOfflineTickets();
     await forgetGoogleAccount();
     await api("/auth/logout", { method: "POST" }).catch(() => undefined);
     await clearTokens();
