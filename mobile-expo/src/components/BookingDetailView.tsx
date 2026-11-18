@@ -12,7 +12,7 @@ import { GuestBagRevisionCard } from "@/components/GuestBagRevisionCard";
 import { GuestDisputeCard } from "@/components/GuestDisputeCard";
 import { GuestReviewCard } from "@/components/GuestReviewCard";
 import { PartnerBookingActions } from "@/components/PartnerBookingActions";
-import { Banner, Button, CenterMessage, IconButton, Loading } from "@/components/ui";
+import { AppText, Banner, Button, CenterMessage, IconButton, Loading } from "@/components/ui";
 import { api } from "@/lib/api";
 import { errorMessage } from "@/lib/errors";
 import { formatMoney } from "@/lib/format";
@@ -20,16 +20,22 @@ import { isActiveBooking, useBooking } from "@/lib/queries";
 import type { BookingDetail } from "@/lib/types";
 import { notify } from "@/lib/notify";
 import { loadOfflineTicket, saveOfflineTicket, type OfflineTicket } from "@/lib/offline-tickets";
-import { colors, space } from "@/theme/tokens";
+import { colors, radius, space } from "@/theme/tokens";
 
 /** Misafirin iptal edebildigi durumlar: valiz henuz dukkana teslim edilmemis. */
 const CANCELLABLE = new Set(["PENDING", "WAITING_APPROVAL", "APPROVED", "PAID"]);
 /** `modifyBooking` (lifecycle.ts) yalnizca CHECKED_IN / CHECKED_OUT / CANCELLED'i reddeder. */
 const MODIFIABLE = CANCELLABLE;
 
+/** Koordinat yoksa adresle: koordinatsiz dukkanda yol tarifi hic yoktu. */
+function canNavigate(b: BookingDetail) {
+  return (b.latitude != null && b.longitude != null) || !!b.shopAddress;
+}
+
 function openDirections(b: BookingDetail) {
-  if (b.latitude == null || b.longitude == null) return;
-  const q = `${b.latitude},${b.longitude}`;
+  if (!canNavigate(b)) return;
+  const q =
+    b.latitude != null && b.longitude != null ? `${b.latitude},${b.longitude}` : encodeURIComponent(b.shopAddress!);
   const url =
     Platform.OS === "ios"
       ? `http://maps.apple.com/?daddr=${q}`
@@ -165,9 +171,18 @@ export function BookingDetailView({ id, mode }: { id: string; mode: "guest" | "p
 
         {mode === "guest" ? (
           <View style={{ gap: space.md }}>
-            {(isActiveBooking(b) && b.latitude != null && b.longitude != null) || b.shopPhone ? (
+            {isActiveBooking(b) && b.shopAddress ? (
+              <View style={styles.address}>
+                <AppText variant="label">{t("bookings.address")}</AppText>
+                <AppText variant="bodyMedium" selectable>
+                  {b.shopAddress}
+                </AppText>
+                <AppText variant="caption">{t("bookings.addressHint")}</AppText>
+              </View>
+            ) : null}
+            {(isActiveBooking(b) && canNavigate(b)) || b.shopPhone ? (
               <View style={styles.actionRow}>
-                {isActiveBooking(b) && b.latitude != null && b.longitude != null ? (
+                {isActiveBooking(b) && canNavigate(b) ? (
                   <Button
                     variant="secondary"
                     style={{ flex: 1 }}
@@ -213,6 +228,14 @@ export function BookingDetailView({ id, mode }: { id: string; mode: "guest" | "p
 }
 
 const styles = StyleSheet.create({
+  address: {
+    gap: 4,
+    padding: space.lg,
+    borderRadius: radius.card,
+    borderWidth: 1,
+    borderColor: colors.border,
+    backgroundColor: colors.surface,
+  },
   safe: { flex: 1, backgroundColor: colors.bg },
   header: { paddingHorizontal: space.xl, paddingTop: space.sm },
   content: { padding: space.xl, paddingTop: space.lg, gap: space.lg, paddingBottom: space.xxl * 2 },
