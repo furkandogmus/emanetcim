@@ -1,16 +1,19 @@
 import { useEffect, useRef, useState } from "react";
-import { FlatList, RefreshControl, StyleSheet, View } from "react-native";
+import { FlatList, Pressable, RefreshControl, StyleSheet, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { router, useIsFocused } from "expo-router";
 import { useQueryClient } from "@tanstack/react-query";
 import { useTranslation } from "react-i18next";
 
+import { Avatar } from "@/components/Avatar";
 import { SealedBag } from "@/components/Illustrations";
+import { ShopSwitcher } from "@/components/ShopSwitcher";
 import { BookingRow } from "@/components/BookingRow";
 import { PartnerPulseCard } from "@/components/PartnerPulseCard";
 import { Segmented } from "@/components/Segmented";
 import { RowSkeleton } from "@/components/RowSkeleton";
 import { AppText, Button, CenterMessage } from "@/components/ui";
+import { useAuth } from "@/lib/auth";
 import { errorMessage } from "@/lib/errors";
 import { isActiveBooking, usePartnerBookings, usePartnerDashboard } from "@/lib/queries";
 import { wallInstant, wallParts } from "@/lib/time";
@@ -34,6 +37,8 @@ export default function PartnerBookingsScreen() {
   const query = usePartnerBookings(useIsFocused());
   const queryClient = useQueryClient();
   const [tab, setTab] = useState<Tab>("today");
+  const { state } = useAuth();
+  const user = state.status === "signedIn" ? state.user : null;
 
   function refreshAll() {
     void query.refetch();
@@ -76,7 +81,22 @@ export default function PartnerBookingsScreen() {
   return (
     <SafeAreaView style={styles.safe} edges={["top"]}>
       <View style={styles.header}>
-        <AppText variant="title">{t("partner.title")}</AppText>
+        <View style={{ flex: 1, gap: space.sm }}>
+          <AppText variant="title">{t("partner.title")}</AppText>
+          <ShopSwitcher />
+        </View>
+        {/* Profil sag ustte: sekme cubugu uc ana ise kaldi (Emanetler, QR, Dukkanim). */}
+        {user ? (
+          <Pressable
+            accessibilityRole="button"
+            accessibilityLabel={t("profile.title")}
+            hitSlop={8}
+            onPress={() => router.push("/profile")}
+            style={{ alignSelf: "flex-start" }}
+          >
+            <Avatar name={user.name || user.email || "?"} url={user.avatarUrl} size={40} />
+          </Pressable>
+        ) : null}
       </View>
 
       <View style={{ paddingHorizontal: space.xl, paddingBottom: space.md, gap: space.md }}>
@@ -133,8 +153,8 @@ const styles = StyleSheet.create({
   safe: { flex: 1, backgroundColor: colors.bg },
   header: {
     flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "space-between",
+    alignItems: "flex-start",
+    gap: space.md,
     padding: space.xl,
     paddingBottom: space.lg,
   },

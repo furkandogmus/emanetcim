@@ -144,7 +144,8 @@
     "prices": "Bag prices",
     "perDay": "{{price}} / day",
     "reviews": "Reviews ({{count}})",
-    "noReviews": "No reviews yet."
+    "noReviews": "No reviews yet.",
+    "photoN": "Photo {{n}} of {{total}}"
   },
   "checkout": {
     "title": "Confirm",
@@ -213,11 +214,11 @@
     "CANCELLED": "Cancelled"
   },
   "partner": {
-    "title": "Bookings",
+    "title": "Bags",
     "today": "Today",
     "upcoming": "Upcoming",
     "past": "Past",
-    "empty": "No bookings in this list",
+    "empty": "No bags in this list",
     "guest": "Guest",
     "bags": "Bags",
     "total": "Total",
@@ -253,9 +254,10 @@
       "unsupported_type": "This file type is not supported; pick a JPEG, PNG or WebP.",
       "dimensions_too_large": "The photo resolution is too high.",
       "empty": "The photo could not be read; try again.",
-      "storage_unavailable": "Photo upload is not available right now.",
+      "storage_unavailable": "Photo upload isn't available right now. Try again shortly.",
       "not_found": "Shop not found.",
-      "no_shop": "We couldn't find an active shop for you."
+      "no_shop": "We couldn't find an active shop for you.",
+      "limit": "You can add up to 8 gallery photos; delete one first."
     },
     "myShop": "My shop",
     "photo": "Shop photo",
@@ -265,7 +267,23 @@
     "changePhoto": "Change photo",
     "photoSaved": "Photo saved.",
     "photoFailed": "Could not upload the photo",
-    "bagNumber": "Bag {{n}}"
+    "bagNumber": "Bag {{n}}",
+    "switchShop": "Shop: {{shop}}. Tap to change",
+    "chooseShop": "Choose shop",
+    "photos": "Photos",
+    "shopSection": "Shop",
+    "cover": "Cover",
+    "coverPhoto": "Cover photo",
+    "addPhotos": "Add photos",
+    "uploading": "Uploading {{done}}/{{total}}",
+    "photosSaved_one": "Photo added",
+    "photosSaved_other": "{{count}} photos added",
+    "photosHint": "The first tile is the cover guests see in the list. You can add {{max}} photos in total; guests swipe through all of them on your shop page.",
+    "changeCover": "Change cover",
+    "makeCover": "Make cover",
+    "deletePhoto": "Delete photo",
+    "deletePhotoTitle": "Delete this photo?",
+    "actionFailed": "Couldn't complete that"
   },
   "profile": {
     "title": "Profile",
@@ -761,7 +779,6 @@
     }
   },
   "pulse": {
-    "today": "Today · {{shop}}",
     "arrivals": "Arriving",
     "pickups": "Picking up",
     "inStorage": "Bags in shop",
@@ -769,11 +786,13 @@
     "failed": "Couldn't load today's summary. Tap to retry.",
     "a11y": "{{shop}}, today: {{arrivals}} guests arriving, {{pickups}} pick-ups, {{bags}} bags in the shop. Earned {{month}} this month.",
     "moreThanLastMonth": "{{pct}}% more than last month",
-    "lessThanLastMonth": "{{pct}}% less than last month"
+    "lessThanLastMonth": "{{pct}}% less than last month",
+    "todayLabel": "Today"
   },
   "tabs": {
     "explore": "Explore",
     "bookings": "Bookings",
-    "profile": "Profile"
+    "profile": "Profile",
+    "storage": "Bags"
   }
 }

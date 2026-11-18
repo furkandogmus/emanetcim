@@ -13,6 +13,7 @@ import { Image } from "expo-image";
 import { router } from "expo-router";
 import { useTranslation } from "react-i18next";
 
+import { LanguageButton } from "@/components/LanguageButton";
 import { BrandMark } from "@/components/BrandMark";
 import { GoogleButton } from "@/components/GoogleButton";
 import { AppText, Banner, Button } from "@/components/ui";
@@ -143,11 +144,15 @@ export default function LoginScreen() {
           <View style={[styles.hero, { height: Math.max(220, height * 0.32) }]}>
             <Image source={require("../../assets/hero.jpg")} style={StyleSheet.absoluteFill} contentFit="cover" />
             <View style={styles.scrim} />
-            <View style={[styles.brandPill, { marginTop: insets.top + space.md }]}>
-              <BrandMark size={20} />
-              <AppText variant="bodyMedium" style={{ fontFamily: fonts.displayMedium }}>
-                BagajPark
-              </AppText>
+            <View style={[styles.heroTop, { marginTop: insets.top + space.md }]}>
+              <View style={styles.brandPill}>
+                <BrandMark size={20} />
+                <AppText variant="bodyMedium" style={{ fontFamily: fonts.displayMedium }}>
+                  BagajPark
+                </AppText>
+              </View>
+              {/* Ilk ekranda: Turkce bilmeyen turist girisi kendi dilinde yapabilmeli. */}
+              <LanguageButton />
             </View>
             <AppText variant="display" style={styles.heroTitle}>
               {t("home.heroTitle")}
@@ -296,8 +301,8 @@ const styles = StyleSheet.create({
     left: 0,
     backgroundColor: "rgba(28,25,23,0.42)",
   },
+  heroTop: { flexDirection: "row", alignItems: "center", justifyContent: "space-between" },
   brandPill: {
-    alignSelf: "flex-start",
     flexDirection: "row",
     alignItems: "center",
     gap: space.sm,
