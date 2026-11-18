@@ -714,7 +714,7 @@
     "name": "Name des Ladens",
     "capacity": "Tageskapazität (Gepäckstücke)",
     "price": "Tagespreis (₺)",
-    "priceHint": "Tagespreis pro Gepäckstück; Gäste sehen diesen Betrag.",
+    "priceHint": "Tagespreis für ein mittleres Gepäckstück. Preise für klein und groß werden daraus berechnet; Gäste sehen alle drei.",
     "addressSection": "Adresse",
     "address": "Straße und Hausnummer",
     "district": "Bezirk",
