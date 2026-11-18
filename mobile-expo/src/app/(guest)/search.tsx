@@ -137,7 +137,7 @@ export default function SearchWizard() {
                     <Pressable
                       key={c.name}
                       accessibilityRole="button"
-                      onPress={() => choosePlace({ label: c.name, latitude: c.latitude, longitude: c.longitude })}
+                      onPress={() => choosePlace({ label: c.name, latitude: c.latitude, longitude: c.longitude, radiusM: c.radiusM })}
                       style={({ pressed }) => [
                         styles.cityRow,
                         i > 0 && styles.cityDivider,
