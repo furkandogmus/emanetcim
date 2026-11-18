@@ -161,8 +161,23 @@ export function snapStayToShopHours(
     const local = toDatetimeLocalValueInTimeZone(checkOut, tz);
     const day = local.slice(0, 10);
     const h = hoursForDate(shop, day);
+    const after = h ? local.slice(11, 16) > h.close : false;
+    /*
+      Alis acilistan ONCEYSE once bir onceki gunun kapanisina cekilir: acilisa
+      ileri almak kalisi uzatir, gun sayisi (ve fiyat) misafirin gordugunden
+      artabilirdi. Onceki kapanis birakistan yeterince sonra degilse acilisa.
+    */
+    if (h && !after) {
+      const prev = addDays(day, -1);
+      const ph = hoursForDate(shop, prev);
+      const prevClose = ph ? parseDatetimeLocalInTimeZone(`${prev}T${ph.close}`, tz) : null;
+      if (ph && prevClose && prevClose.getTime() - out.checkIn.getTime() >= MIN_BOOKING_STAY_MS) {
+        out.checkOut = prevClose;
+        out.pickup = { at: ph.close, reason: "closes" };
+        return out;
+      }
+    }
     if (!h) return null;
-    const after = local.slice(11, 16) > h.close;
     const hm = after ? h.close : h.open;
     const at = parseDatetimeLocalInTimeZone(`${day}T${hm}`, tz);
     if (!at) return null;

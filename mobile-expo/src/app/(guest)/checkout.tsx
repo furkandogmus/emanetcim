@@ -98,7 +98,8 @@ export default function CheckoutScreen() {
   }
 
   const shop = shopQuery.data;
-  const days = stayDays(search.checkIn, search.checkOut);
+  // Gun sayisi dukkanin saatine oturtulmus anlardan: sunucu da onlarla fiyatlar.
+  const days = stayDays(shownIn, shownOut);
   const price = estimate(shop, search.bags, days);
   const bagCount = totalBags(search.bags);
   const booking = {
@@ -112,7 +113,8 @@ export default function CheckoutScreen() {
   // Onizleme baska bir sepet icin alinmissa (tarih/valiz degisti) gecersizdir.
   const quoteKey = JSON.stringify(booking);
   const applied = quote && quotedFor === quoteKey ? quote : null;
-  const total = applied ? applied.total : price.total;
+  // Kesin tutar sunucudan; tahmin yalnizca onizleme gelene kadar.
+  const total = applied ? applied.total : (hoursQuote.data?.total ?? price.total);
 
   function applyCode() {
     const code = codeInput.trim();
