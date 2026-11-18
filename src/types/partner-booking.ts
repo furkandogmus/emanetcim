@@ -24,6 +24,8 @@ export type PartnerCheckOutErrorCode =
   | "NOT_FOUND"
   | "INVALID_STATUS"
   | "REFUND_FAILED"
+  /* "Saglam degil" isaretlenen muhur bu rezervasyona ait degil. */
+  | "INVALID_SEALS"
   | "UNKNOWN";
 
 export type PartnerCheckInResult =
@@ -31,7 +33,7 @@ export type PartnerCheckInResult =
   | { ok: false; code: PartnerCheckInErrorCode; message: string };
 
 export type PartnerCheckOutResult =
-  | { ok: true; refundPending?: boolean; refundAmount?: number }
+  | { ok: true; refundPending?: boolean; refundAmount?: number; lateFee?: number }
   | { ok: false; code: PartnerCheckOutErrorCode; message: string };
 
 export type CancelBookingErrorCode =

@@ -34,7 +34,12 @@ export async function POST(
     return NextResponse.json({ error: "forbidden" }, { status: 403 });
   }
 
-  const result = await bookingService.checkOut(id);
+  // Govde istege bagli: eski uygulama bos gonderir.
+  const body = (await req.json().catch(() => null)) as { brokenSealNumbers?: unknown } | null;
+  const brokenSealNumbers = Array.isArray(body?.brokenSealNumbers)
+    ? body.brokenSealNumbers.filter((n): n is number => Number.isInteger(n) && n > 0).slice(0, 50)
+    : [];
+  const result = await bookingService.checkOut(id, { brokenSealNumbers });
 
   if (!result.ok) {
     /* Ham servis METNI gonderilmez; istemci kodu kendi dilinde eslesir. */
@@ -56,9 +61,11 @@ export async function POST(
     notificationService.pushGuestOnly(id, "checkOut", booking.locale ?? DEFAULT_NOTIFICATION_LOCALE);
   }
 
-  return NextResponse.json({ 
-    ok: true, 
-    refundPending: result.refundPending, 
-    refundAmount: result.refundAmount 
+  return NextResponse.json({
+    ok: true,
+    refundPending: result.refundPending,
+    refundAmount: result.refundAmount,
+    // Tezgahta misafirden alinacak gecikme ucreti (0 ise alan yok).
+    lateFee: result.lateFee,
   });
 }
