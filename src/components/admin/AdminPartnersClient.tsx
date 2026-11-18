@@ -242,7 +242,7 @@ export default function AdminPartnersClient({ shops: initialShops }: AdminPartne
                     </td>
                     <td className="px-8 py-6">
                       {shop.isPrelaunch ? (
-                        <div className="px-3 py-1 rounded-full inline-flex items-center gap-2 text-[10px] font-black uppercase tracking-tighter bg-gray-100 text-gray-500">
+                        <div className="px-3 py-1 rounded-full inline-flex items-center gap-2 text-[10px] font-bold uppercase tracking-tight bg-gray-100 text-gray-500">
                           {t("statusPrelaunch")}
                         </div>
                       ) : (
