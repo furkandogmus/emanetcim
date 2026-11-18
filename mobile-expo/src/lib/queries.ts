@@ -164,9 +164,12 @@ export function usePartnerSchedule() {
 }
 
 export function usePartnerEarnings() {
+  const [shopId] = usePartnerShopSelection();
   return useQuery({
-    queryKey: ["partner", "earnings"],
-    queryFn: () => api<PartnerEarnings>("/partner/earnings/stats"),
+    queryKey: ["partner", "earnings", shopId ?? "default"],
+    // Pano gibi secili dukkani izler; kazanc ekrani tum dukkanlari topluyordu.
+    queryFn: () => api<PartnerEarnings>(withShop("/partner/earnings/stats", shopId)),
+    placeholderData: (prev) => prev,
   });
 }
 
