@@ -46,7 +46,12 @@
     "passwordSubtitle": "Nutze das Passwort, das du auf der Website festgelegt hast.",
     "passwordLabel": "Passwort",
     "or": "oder",
-    "continueWithGoogle": "Weiter mit Google"
+    "continueWithGoogle": "Weiter mit Google",
+    "signInCta": "Anmelden",
+    "bookingsPromptTitle": "Hier sind deine Buchungen",
+    "bookingsPromptBody": "Melde dich an, um deine Buchungen und deinen QR-Code zu sehen.",
+    "profilePromptTitle": "Dein Konto",
+    "profilePromptBody": "Melde dich an, um zu buchen und deinen Einladungscode zu teilen. Die Sprache kannst du oben auch ohne Anmeldung ändern."
   },
   "home": {
     "heroTitle": "Gepäck abgeben.\nStadt genießen.",
@@ -159,8 +164,6 @@
     "priceTitle": "Preis",
     "bagLine": "{{count}} × {{size}} · {{days}}",
     "insurance": "Schutzgebühr",
-    "estimatedTotal": "Geschätzter Gesamtpreis",
-    "estimateNote": "Den endgültigen Betrag berechnet der Server; du siehst ihn nach der Bestätigung in deiner Buchung.",
     "payAtShop": "Du zahlst im Laden, wenn du dein Gepäck abgibst.",
     "confirm": "Buchung bestätigen",
     "errors": {
@@ -194,7 +197,8 @@
       "dropOpens": "Deine Abgabe ist jetzt um {{time}}, wenn der Laden öffnet.",
       "pickupCloses": "Der Laden schließt um {{time}}, deine Abholung ist jetzt um {{time}}. Hol dein Gepäck bis dahin ab.",
       "pickupOpens": "Deine Abholung ist jetzt um {{time}}, wenn der Laden öffnet."
-    }
+    },
+    "total": "Gesamt"
   },
   "success": {
     "title": "Du bist gebucht",
@@ -594,7 +598,6 @@
     "bagsTitle": "Wie viele Gepäckstücke?",
     "currentTotal": "Aktueller Gesamtpreis",
     "newTotal": "Geschätzter neuer Gesamtpreis",
-    "estimateNote": "Den endgültigen Betrag berechnet der Server; du siehst ihn nach dem Speichern in deiner Buchung.",
     "paidNote": "Der Gesamtpreis einer bezahlten Buchung kann sich nicht ändern. Für eine Änderung, die den Preis beeinflusst, storniere und buche neu.",
     "noBags": "Wähle mindestens ein Gepäckstück.",
     "save": "Änderungen speichern",

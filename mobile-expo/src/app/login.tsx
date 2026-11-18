@@ -14,7 +14,8 @@ import { useTranslation } from "react-i18next";
 import { LanguageButton } from "@/components/LanguageButton";
 import { BrandMark } from "@/components/BrandMark";
 import { GoogleButton } from "@/components/GoogleButton";
-import { AppText, Banner, Button } from "@/components/ui";
+import { AppText, Banner, Button, IconButton } from "@/components/ui";
+import { X } from "lucide-react-native";
 import { Input } from "@/components/Field";
 import { useAuth } from "@/lib/auth";
 import { errorMessage } from "@/lib/errors";
@@ -149,8 +150,16 @@ export default function LoginScreen() {
                   BagajPark
                 </AppText>
               </View>
-              {/* Ilk ekranda: Turkce bilmeyen turist girisi kendi dilinde yapabilmeli. */}
-              <LanguageButton />
+              <View style={{ flexDirection: "row", alignItems: "center", gap: space.sm }}>
+                {/* Ilk ekranda: Turkce bilmeyen turist girisi kendi dilinde yapabilmeli. */}
+                <LanguageButton />
+                {/* Girissiz gezerken acildiysa ("Rezervasyon yap", Profil) geri donulebilmeli. */}
+                {router.canGoBack() ? (
+                  <IconButton label={t("common.cancel")} onPress={() => router.back()}>
+                    <X size={20} color={colors.ink} />
+                  </IconButton>
+                ) : null}
+              </View>
             </View>
             <AppText variant="display" style={styles.heroTitle}>
               {t("home.heroTitle")}
