@@ -29,8 +29,9 @@ API adresi derleme anında: `EXPO_PUBLIC_API_BASE_URL` (varsayılan emülatör i
   hata metni basılmaz: `errorMessage(err, "<namespace>")` kodu çevirir.
 - **Yanıt tipleri** `src/lib/types.ts` — kaynağı `../src/lib/mobile-dto.ts`. Orada alan
   değişirse burası da değişir.
-- **Fiyat** istemcide yalnızca tahmindir; çarpanlar ve sigorta `shops/[id]` yanıtındaki
-  `pricing`'den okunur, sabit yazılmaz (`checkout.tsx` içindeki gerekçe).
+- **Fiyat istemcide hesaplanmaz.** Ödeme ekranı `checkout/quote`, değiştirme ekranı
+  `bookings/[id]/modify?preview=1` yanıtını gösterir (satırlar, sigorta, toplam).
+  "Tahmini" tutar yazılmaz: iki ayrı formül ayrışınca misafir bir tutar görüp başkasını öder.
 - **Harita** MapLibre + OpenFreeMap "bright" (`src/lib/map-style.ts`) — web ile
   aynı altlık. Google Maps yok. OSM atfı her haritada sabit metin olarak görünür.
 - **Token yenileme** tek uçuşta (`src/lib/api.ts`): sunucu refresh token tekrarını oturum
