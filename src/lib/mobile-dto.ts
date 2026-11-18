@@ -480,6 +480,7 @@ export function toMobileCity(c: import("@/services/CityCoverageService").CityCov
     shopCount: c.shopCount,
     latitude: c.latitude,
     longitude: c.longitude,
+    radiusM: c.radiusM,
     coverImage: c.coverImage,
   };
 }

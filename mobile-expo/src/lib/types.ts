@@ -366,5 +366,7 @@ export type CityCoverage = {
   shopCount: number;
   latitude: number;
   longitude: number;
+  /** Merkezden sehrin en uzak dukkanina (m). Eski sunucu gondermez. */
+  radiusM?: number;
   coverImage: string | null;
 };
