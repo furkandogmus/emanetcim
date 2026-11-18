@@ -11,6 +11,7 @@ import { useTranslation } from "react-i18next";
 import { Avatar } from "@/components/Avatar";
 import { ChoiceSheet } from "@/components/ChoiceSheet";
 import { LANGUAGES } from "@/components/LanguageButton";
+import { isAppLanguage, languageInfo } from "@/lib/languages";
 import { ReferralCard } from "@/components/ReferralCard";
 import { AppText, Button, IconButton } from "@/components/ui";
 import { api, ApiError } from "@/lib/api";
@@ -36,7 +37,7 @@ function useNotificationPermission() {
 }
 
 function sitePage(path: string, lang: string) {
-  return `${SITE_ORIGIN}/${lang === "tr" ? "tr" : "en"}/${path}`;
+  return `${SITE_ORIGIN}/${languageInfo(lang).site}/${path}`;
 }
 
 /**
@@ -123,7 +124,7 @@ export function ProfileView({ asTab = false, embedded = false }: { asTab?: boole
         />
         <SettingsRow
           label={t("profile.language")}
-          value={i18n.language === "tr" ? "Türkçe" : "English"}
+          value={languageInfo(i18n.language).label}
           onPress={() => setLangOpen(true)}
         />
       </Section>
@@ -198,8 +199,8 @@ export function ProfileView({ asTab = false, embedded = false }: { asTab?: boole
         onClose={() => setLangOpen(false)}
         title="Dil · Language"
         choices={[...LANGUAGES]}
-        selected={i18n.language === "tr" ? "tr" : "en"}
-        onSelect={(v) => void setAppLanguage(v as "tr" | "en")}
+        selected={languageInfo(i18n.language).value}
+        onSelect={(v) => isAppLanguage(v) && void setAppLanguage(v)}
       />
     </>
   );

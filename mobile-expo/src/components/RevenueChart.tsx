@@ -6,6 +6,7 @@ import { useTranslation } from "react-i18next";
 import { AppText } from "@/components/ui";
 import { formatMoney } from "@/lib/format";
 import { colors, fonts, space } from "@/theme/tokens";
+import { languageInfo } from "@/lib/languages";
 
 type Point = { date: string; revenue: number; bookings: number };
 
@@ -29,7 +30,7 @@ export function RevenueChart({ series }: { series: Point[] }) {
   const sel = series[selected];
 
   const dayLabel = (iso: string) =>
-    new Date(`${iso}T12:00:00Z`).toLocaleDateString(i18n.language === "tr" ? "tr-TR" : "en-GB", {
+    new Date(`${iso}T12:00:00Z`).toLocaleDateString(languageInfo(i18n.language).intl, {
       day: "numeric",
       month: "short",
       timeZone: "UTC",

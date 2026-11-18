@@ -6,12 +6,10 @@ import { useTranslation } from "react-i18next";
 import { ChoiceSheet } from "@/components/ChoiceSheet";
 import { AppText } from "@/components/ui";
 import { setAppLanguage } from "@/lib/i18n";
+import { APP_LANGUAGES, isAppLanguage, languageInfo } from "@/lib/languages";
 import { colors, radius, space } from "@/theme/tokens";
 
-export const LANGUAGES = [
-  { value: "tr", label: "Türkçe" },
-  { value: "en", label: "English" },
-] as const;
+export const LANGUAGES = APP_LANGUAGES.map(({ value, label }) => ({ value, label }));
 
 /**
  * Giris ekraninin kosesindeki dil dugmesi. Telefon dili Turkce degilse uygulama zaten
@@ -21,19 +19,19 @@ export const LANGUAGES = [
 export function LanguageButton({ tone = "light" }: { tone?: "light" | "plain" }) {
   const { t, i18n } = useTranslation();
   const [open, setOpen] = useState(false);
-  const current = i18n.language === "tr" ? "tr" : "en";
+  const current = languageInfo(i18n.language);
   return (
     <>
       <Pressable
         accessibilityRole="button"
-        accessibilityLabel={`${t("profile.language")}: ${current === "tr" ? "Türkçe" : "English"}`}
+        accessibilityLabel={`${t("profile.language")}: ${current.label}`}
         onPress={() => setOpen(true)}
         hitSlop={6}
         style={({ pressed }) => [styles.pill, tone === "plain" && styles.plain, pressed && { opacity: 0.85 }]}
       >
         <Globe size={16} color={colors.ink} />
         <AppText variant="label" style={{ color: colors.ink }}>
-          {current.toUpperCase()}
+          {current.value.toUpperCase()}
         </AppText>
       </Pressable>
       <ChoiceSheet
@@ -41,8 +39,8 @@ export function LanguageButton({ tone = "light" }: { tone?: "light" | "plain" })
         onClose={() => setOpen(false)}
         title="Dil · Language"
         choices={[...LANGUAGES]}
-        selected={current}
-        onSelect={(v) => void setAppLanguage(v as "tr" | "en")}
+        selected={current.value}
+        onSelect={(v) => isAppLanguage(v) && void setAppLanguage(v)}
       />
     </>
   );
