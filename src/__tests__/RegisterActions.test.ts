@@ -42,6 +42,7 @@ vi.mock("@/lib/auth-password", () => ({
 }));
 vi.mock("@/lib/disposable-emails", () => ({
   isDisposableEmail: vi.fn((email) => email.includes("tempmail.com")),
+  isBlockedSignupEmail: vi.fn((email) => email.includes("tempmail.com") || /^[a-z]{4,}\.\d{5}@gmail\.com$/.test(email)),
 }));
 
 describe("Register Actions", () => {
@@ -69,6 +70,17 @@ describe("Register Actions", () => {
       });
       expect(result.success).toBe(false);
       expect(result.error).toBe("Errors.invalidEmail");
+    });
+
+    it("bot kalibindaki gmail adresiyle kayit acilmaz", async () => {
+      const result = await registerGuestAction({
+        email: "vickirose.45844@gmail.com",
+        name: "Vicki Rose",
+        password: "password123",
+      });
+      expect(result.success).toBe(false);
+      expect(result.error).toBe("Errors.invalidEmail");
+      expect(mockPrisma.user.create).not.toHaveBeenCalled();
     });
 
     it("should block if email already exists", async () => {

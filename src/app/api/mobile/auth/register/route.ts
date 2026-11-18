@@ -10,6 +10,7 @@ import {
 } from "@/lib/auth-password";
 import { normalizeTrGsm10 } from "@/lib/netgsm";
 import { rateLimit } from "@/lib/rate-limit";
+import { isBlockedSignupEmail } from "@/lib/disposable-emails";
 import { clientIp } from "@/lib/internal-api-guard";
 import { notificationService } from "@/services/NotificationService";
 import { analyticsService } from "@/services/AnalyticsService";
@@ -105,6 +106,8 @@ export async function POST(req: NextRequest) {
       user: toMobileUser(existing),
     });
   }
+
+  if (normalizedEmail && isBlockedSignupEmail(normalizedEmail)) return NextResponse.json({ error: "invalid_email" }, { status: 403 });
 
   const passwordHash = await hashPassword(password);
   const user = await prisma.user.create({
