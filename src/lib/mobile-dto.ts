@@ -62,7 +62,22 @@ type BookingDetailSource = BookingSummarySource & {
   seals: Array<{ sealNumber: number; bagIndex: number; bagSize: string }>;
   review?: { id: string } | null;
   dispute?: { id: string } | null;
+  pendingBagRevision?: unknown;
 };
+
+/**
+ * Esnafin onerdigi, misafir onayi bekleyen valiz duzeltmesi. Kayit JSON
+ * (`persistPendingRevision`); bozuk ya da eksikse `null` -- istemci karti hic cizmez.
+ */
+function toMobilePendingBagRevision(raw: unknown) {
+  if (!raw || typeof raw !== "object") return null;
+  const r = raw as Record<string, unknown>;
+  const n = (k: string) => (typeof r[k] === "number" ? (r[k] as number) : null);
+  const s = n("bagCountS"), m = n("bagCountM"), xl = n("bagCountXl");
+  const extra = n("extraAmount"), next = n("newTotal");
+  if (s == null || m == null || xl == null || extra == null || next == null) return null;
+  return { bagCountS: s, bagCountM: m, bagCountXl: xl, extraAmount: extra, newTotal: next };
+}
 
 export function toMobileBookingDetail(b: BookingDetailSource) {
   return {
@@ -81,6 +96,7 @@ export function toMobileBookingDetail(b: BookingDetailSource) {
     // yalnizca sunucunun 409'uyla ogreniyordu.
     hasReview: !!b.review,
     hasDispute: !!b.dispute,
+    pendingBagRevision: toMobilePendingBagRevision(b.pendingBagRevision),
   };
 }
 
