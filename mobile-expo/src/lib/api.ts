@@ -1,17 +1,18 @@
 import * as SecureStore from "expo-secure-store";
-import { getLocales } from "expo-localization";
 
 import { API_BASE_URL } from "./config";
 import i18n from "./i18n";
+import { languageInfo } from "./languages";
 
 /**
  * Sunucu bildirim dilini bu basliktan cozer (web'de de/fr/fa/ja da var). Turkce cihazda
  * profilden English secildiyse cihaz etiketi yanlis olur; o zaman uygulama dili gider.
  */
 function requestLanguage() {
-  const device = getLocales()[0];
-  if (i18n.language === "tr") return "tr-TR";
-  return device && device.languageCode !== "tr" ? device.languageTag : "en-GB";
+  // Once uygulama dili, sonra Ingilizce: sunucu tanimadigi dilde (ru) Turkceye
+  // dusuyordu; Rusca telefonla Ingilizce kullanan misafire e-posta Turkce gidiyordu.
+  const lang = languageInfo(i18n.language);
+  return `${lang.intl}, ${lang.value}, en;q=0.5`;
 }
 
 const ACCESS_KEY = "bp.accessToken";
