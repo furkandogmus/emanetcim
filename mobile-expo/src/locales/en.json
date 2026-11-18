@@ -39,9 +39,11 @@
       "invalid_credentials": "Wrong email or password.",
       "google_failed": "Couldn't sign in with Google. Try again later or use your email.",
       "play_services": "Google Play services is required. Update it and try again.",
-      "invalid_token": "We couldn't verify your Google sign-in. Try again.",
+      "invalid_token": "We couldn't verify your sign-in. Try again.",
       "email_not_verified": "This Google account's email isn't verified.",
-      "google_not_configured": "Google sign-in isn't available right now. You can sign in with your email."
+      "google_not_configured": "Google sign-in isn't available right now. You can sign in with your email.",
+      "apple_failed": "Couldn't sign in with Apple. Try again later or use your email.",
+      "apple_not_configured": "Sign in with Apple isn't available right now. You can sign in with your email."
     },
     "usePassword": "Sign in with password",
     "useCode": "Email me a code instead",
