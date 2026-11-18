@@ -1293,7 +1293,11 @@
     "setPasswordDone": "パスワードを保存しました。このメッセージをユーザーに送ってください:",
     "setPasswordCopy": "メッセージをコピー",
     "setPasswordWhatsappMessage": "{name} 様、BagajPark アカウントの新しいパスワード: {password}\n電話番号またはメールアドレスでログインできます: {url}",
-    "teamIssuesNav": "課題トラッカー（チーム）"
+    "teamIssuesNav": "課題トラッカー（チーム）",
+    "shopsTabLive": "営業中",
+    "shopsTabPrelaunch": "需要テスト",
+    "statusPrelaunch": "需要テスト · 荷物受付なし",
+    "shopsPrelaunchHint": "これらの地点は地図上で「開店時に通知」と表示され、予約は受け付けません。関心数は需要テストのページにあります。"
   },
   "Auth": {
     "loginTitle": "バガジパークにサインインする",
