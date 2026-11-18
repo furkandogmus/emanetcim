@@ -8,7 +8,7 @@ import { PhotoPager } from "@/components/PhotoPager";
 import { hoursLabel } from "@/components/ShopCard";
 import { AppText, Banner, Button, Card, CenterMessage, IconButton, Loading } from "@/components/ui";
 import { errorMessage } from "@/lib/errors";
-import { formatDay, formatMoney, formatRating } from "@/lib/format";
+import { formatDay, formatMoney, formatPriceRange, formatRating } from "@/lib/format";
 import { resolveImage } from "@/lib/images";
 import { useShop, useShopReviews } from "@/lib/queries";
 import { wallParts } from "@/lib/time";
@@ -158,7 +158,10 @@ export default function ShopDetailScreen() {
           <View>
             <AppText variant="caption">{t("shop.perDayLabel")}</AppText>
             <AppText variant="heading" style={{ fontFamily: fonts.display, fontSize: 22 }}>
-              {formatMoney(shop.pricePerDay)}
+              {formatPriceRange({
+                min: shop.pricePerDay * Math.min(shop.pricing.bagMultiplierS, shop.pricing.bagMultiplierM, shop.pricing.bagMultiplierXl),
+                max: shop.pricePerDay * Math.max(shop.pricing.bagMultiplierS, shop.pricing.bagMultiplierM, shop.pricing.bagMultiplierXl),
+              })}
             </AppText>
           </View>
           <Button
