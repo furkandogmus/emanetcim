@@ -1,24 +1,21 @@
-import { useRef } from "react";
-import { ActivityIndicator, Pressable, ScrollView, StyleSheet, View } from "react-native";
+import { ActivityIndicator, Pressable, StyleSheet, View } from "react-native";
 import { TrendingDown, TrendingUp } from "lucide-react-native";
 import { useTranslation } from "react-i18next";
 
-import { AppText, Card, Chip } from "@/components/ui";
+import { AppText, Card } from "@/components/ui";
 import { formatMoney } from "@/lib/format";
-import { usePartnerShopSelection } from "@/lib/partner-shop";
 import { usePartnerDashboard } from "@/lib/queries";
 import { colors, fonts, radius, space } from "@/theme/tokens";
 
 /**
  * Esnaf ana ekranindaki gunluk ozet: web panelinin "gunluk enstantane" blogu.
+ * Dukkan secimi kartin disinda (`ShopSwitcher`); kart secili dukkanin rakamlarini gosterir.
  * Rakamlar sunucudan (`partner/dashboard`), burada hesap yok. Hata listeyi
  * engellemez; tek satir ve dokununca yeniden dener.
  */
 export function PartnerPulseCard() {
   const { t } = useTranslation();
   const query = usePartnerDashboard();
-  const [, setShopId] = usePartnerShopSelection();
-  const chipsRef = useRef<ScrollView>(null);
 
   if (query.isLoading) {
     return (
@@ -51,25 +48,9 @@ export function PartnerPulseCard() {
 
   return (
     <Card style={styles.card}>
-      {d.shops.length > 1 ? (
-        <ScrollView ref={chipsRef} horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.shops}>
-          {d.shops.map((s) => (
-            <View
-              key={s.id}
-              // Secili dukkan satirin disinda kalmasin: yerlesince gorunur alana kaydir.
-              onLayout={(e) => {
-                if (s.id === d.shop.id) chipsRef.current?.scrollTo({ x: Math.max(0, e.nativeEvent.layout.x - 16), animated: false });
-              }}
-            >
-              <Chip soft label={s.name} selected={s.id === d.shop.id} onPress={() => setShopId(s.id)} />
-            </View>
-          ))}
-        </ScrollView>
-      ) : null}
-
       <View accessible accessibilityLabel={summary} style={{ gap: space.md }}>
         <AppText variant="label" numberOfLines={1}>
-          {t("pulse.today", { shop: d.shop.name })}
+          {t("pulse.todayLabel")}
         </AppText>
 
         <View style={styles.stats}>
@@ -113,7 +94,6 @@ function Stat({ value, label, emphasis }: { value: number; label: string; emphas
 const styles = StyleSheet.create({
   card: { gap: space.md },
   placeholder: { height: 168, alignItems: "center", justifyContent: "center" },
-  shops: { gap: space.sm },
   // Uc esit dolu karo yerine ince cizgiyle ayrilmis sayilar: vurgu yalnizca "dukkanda valiz"de.
   stats: { flexDirection: "row", alignItems: "stretch" },
   statRule: { width: 1, backgroundColor: colors.border, marginVertical: space.xs },

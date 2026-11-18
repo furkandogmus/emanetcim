@@ -20,7 +20,7 @@ export function LinkGroup({ children }: { children: ReactNode }) {
 }
 
 /** Bir alt ekrana giden satir. Ikon notr: satirlar turuncu dairelerle yarismasin. */
-export function LinkRow({ icon, label, onPress }: { icon: ReactNode; label: string; onPress: () => void }) {
+export function LinkRow({ icon, label, onPress }: { icon?: ReactNode; label: string; onPress: () => void }) {
   return (
     <Pressable
       accessibilityRole="link"
@@ -28,7 +28,7 @@ export function LinkRow({ icon, label, onPress }: { icon: ReactNode; label: stri
       onPress={onPress}
       style={({ pressed }) => [styles.row, pressed && { backgroundColor: colors.surfaceMuted }]}
     >
-      <View style={styles.icon}>{icon}</View>
+      {icon ? <View style={styles.icon}>{icon}</View> : null}
       <AppText variant="bodyMedium" style={{ flex: 1 }}>
         {label}
       </AppText>

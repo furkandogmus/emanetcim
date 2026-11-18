@@ -9,6 +9,8 @@ import { ChevronRight, ExternalLink, X } from "lucide-react-native";
 import { useTranslation } from "react-i18next";
 
 import { Avatar } from "@/components/Avatar";
+import { ChoiceSheet } from "@/components/ChoiceSheet";
+import { LANGUAGES } from "@/components/LanguageButton";
 import { ReferralCard } from "@/components/ReferralCard";
 import { AppText, Button, IconButton } from "@/components/ui";
 import { api, ApiError } from "@/lib/api";
@@ -41,12 +43,13 @@ function sitePage(path: string, lang: string) {
  * Profil icerigi. Rol sekmelerinde (misafir, esnaf) sekme olarak, yoneticide ve
  * derin baglantida `/profile` modali olarak acilir; `asTab` kapat dugmesini gizler.
  */
-export function ProfileView({ asTab = false }: { asTab?: boolean }) {
+export function ProfileView({ asTab = false, embedded = false }: { asTab?: boolean; embedded?: boolean }) {
   const { t, i18n } = useTranslation();
   const { state, signOut } = useAuth();
   const [signingOut, setSigningOut] = useState(false);
   const [deleting, setDeleting] = useState(false);
   const notifOn = useNotificationPermission();
+  const [langOpen, setLangOpen] = useState(false);
   if (state.status !== "signedIn") return null;
   const { user } = state;
   const isGuest = user.role === "GUEST";
@@ -80,115 +83,125 @@ export function ProfileView({ asTab = false }: { asTab?: boolean }) {
     }
   }
 
-  function chooseLanguage() {
-    Alert.alert(t("profile.language"), undefined, [
-      { text: "Türkçe", onPress: () => void setAppLanguage("tr") },
-      { text: "English", onPress: () => void setAppLanguage("en") },
-      { text: t("common.cancel"), style: "cancel" },
-    ]);
-  }
-
-  return (
-    <SafeAreaView style={styles.safe} edges={asTab ? ["top"] : undefined}>
-      <ScrollView contentContainerStyle={styles.content}>
-        <View style={styles.header}>
-          <AppText variant="title">{t("profile.title")}</AppText>
-          {asTab ? null : (
-            <IconButton
-              label={t("common.close")}
-              // Deep link ya da yeniden yuklemeyle tek ekran kalinca `back` hicbir sey yapmiyordu.
-              onPress={() => (router.canGoBack() ? router.back() : router.replace("/"))}
-            >
-              <X size={20} color={colors.ink} />
-            </IconButton>
+  const sections = (
+    <>
+      {/* Kimlik karti duzenleme ekranina gider: ayri bir "Profili duzenle" satiri gerekmez. */}
+      <Pressable
+        accessibilityRole="button"
+        accessibilityLabel={t("profileEdit.open")}
+        onPress={() => router.push("/profile-edit")}
+        style={({ pressed }) => [styles.identity, pressed && { backgroundColor: colors.surfaceMuted }]}
+      >
+        <Avatar name={user.name || user.email || "?"} url={user.avatarUrl} size={52} />
+        <View style={{ flex: 1, gap: 2 }}>
+          <AppText variant="heading" numberOfLines={1}>
+            {user.name || user.email}
+          </AppText>
+          {user.name && user.email ? (
+            <AppText variant="caption" numberOfLines={1}>
+              {user.email}
+            </AppText>
+          ) : null}
+          {user.phone ? (
+            <AppText variant="caption">{user.phone}</AppText>
+          ) : (
+            <AppText variant="caption" style={{ color: colors.accent }}>
+              {t("profile.addPhone")}
+            </AppText>
           )}
         </View>
+        <ChevronRight size={18} color={colors.inkMuted} />
+      </Pressable>
 
-        {/* Kimlik karti duzenleme ekranina gider: ayri bir "Profili duzenle" satiri gerekmez. */}
-        <Pressable
-          accessibilityRole="button"
-          accessibilityLabel={t("profileEdit.open")}
-          onPress={() => router.push("/profile-edit")}
-          style={({ pressed }) => [styles.identity, pressed && { backgroundColor: colors.surfaceMuted }]}
-        >
-          <Avatar name={user.name || user.email || "?"} url={user.avatarUrl} size={52} />
-          <View style={{ flex: 1, gap: 2 }}>
-            <AppText variant="heading" numberOfLines={1}>
-              {user.name || user.email}
-            </AppText>
-            {user.name && user.email ? (
-              <AppText variant="caption" numberOfLines={1}>
-                {user.email}
-              </AppText>
-            ) : null}
-            {user.phone ? (
-              <AppText variant="caption">{user.phone}</AppText>
-            ) : (
-              <AppText variant="caption" style={{ color: colors.accent }}>
-                {t("profile.addPhone")}
-              </AppText>
-            )}
-          </View>
-          <ChevronRight size={18} color={colors.inkMuted} />
-        </Pressable>
+      {isGuest ? <ReferralCard audience="guest" /> : null}
 
-        {isGuest ? <ReferralCard audience="guest" /> : null}
+      <Section title={t("profile.sections.account")}>
+        <SettingsRow
+          label={t("profile.notifications")}
+          value={notifOn == null ? undefined : notifOn ? t("profile.on") : t("profile.off")}
+          onPress={() => void Linking.openSettings().catch(() => undefined)}
+        />
+        <SettingsRow
+          label={t("profile.language")}
+          value={i18n.language === "tr" ? "Türkçe" : "English"}
+          onPress={() => setLangOpen(true)}
+        />
+      </Section>
 
-        <Section title={t("profile.sections.account")}>
-          {isGuest ? (
-            <SettingsRow label={t("profile.myBookings")} onPress={() => router.push("/bookings")} />
-          ) : null}
-          <SettingsRow
-            label={t("profile.notifications")}
-            value={notifOn == null ? undefined : notifOn ? t("profile.on") : t("profile.off")}
-            onPress={() => void Linking.openSettings().catch(() => undefined)}
-          />
-          <SettingsRow
-            label={t("profile.language")}
-            value={i18n.language === "tr" ? "Türkçe" : "English"}
-            onPress={chooseLanguage}
-          />
-        </Section>
+      <Section title={t("profile.sections.support")}>
+        <SettingsRow label={t("profile.faq")} external onPress={() => openSite("faq")} />
+        <SettingsRow label={t("profile.contact")} external onPress={() => openSite("contact")} />
+        <SettingsRow label={t("profile.terms")} external onPress={() => openSite("terms")} />
+        <SettingsRow label={t("profile.privacy")} external onPress={() => openSite("privacy")} />
+      </Section>
 
-        <Section title={t("profile.sections.support")}>
-          <SettingsRow label={t("profile.faq")} external onPress={() => openSite("faq")} />
-          <SettingsRow label={t("profile.contact")} external onPress={() => openSite("contact")} />
-          <SettingsRow label={t("profile.terms")} external onPress={() => openSite("terms")} />
-          <SettingsRow label={t("profile.privacy")} external onPress={() => openSite("privacy")} />
-        </Section>
-
-        <View style={{ gap: space.sm, marginTop: space.sm }}>
-          <Button
-            variant="secondary"
-            title={t("profile.signOut")}
-            // Cikis iki ag cagrisi bekler (bildirim kaydi + oturum iptali); zayif agda geri
-            // bildirim yoksa kullanici tekrar tekrar basiyordu.
-            loading={signingOut}
-            onPress={() => {
-              setSigningOut(true);
-              void signOut().finally(() => setSigningOut(false));
-            }}
-          />
-          <AppText variant="caption" style={{ textAlign: "center", fontSize: 13 }}>
-            {t("profile.signOutNote")}
-          </AppText>
-        </View>
-        {isGuest ? (
-          <Button
-            variant="ghost"
-            textColor={colors.danger}
-            title={t("profile.deleteAccount")}
-            loading={deleting}
-            onPress={confirmDelete}
-          />
-        ) : (
-          <Button variant="ghost" title={t("profile.deleteRequest")} onPress={() => openSite("contact")} />
-        )}
-        <AppText variant="caption" style={{ textAlign: "center", fontSize: 12 }}>
-          {t("profile.version", { version: Constants.expoConfig?.version ?? "" })}
+      <View style={{ gap: space.sm, marginTop: space.sm }}>
+        <Button
+          variant="secondary"
+          title={t("profile.signOut")}
+          // Cikis iki ag cagrisi bekler (bildirim kaydi + oturum iptali); zayif agda geri
+          // bildirim yoksa kullanici tekrar tekrar basiyordu.
+          loading={signingOut}
+          onPress={() => {
+            setSigningOut(true);
+            void signOut().finally(() => setSigningOut(false));
+          }}
+        />
+        <AppText variant="caption" style={{ textAlign: "center", fontSize: 13 }}>
+          {t("profile.signOutNote")}
         </AppText>
-      </ScrollView>
-    </SafeAreaView>
+      </View>
+      {isGuest ? (
+        <Button
+          variant="ghost"
+          textColor={colors.danger}
+          title={t("profile.deleteAccount")}
+          loading={deleting}
+          onPress={confirmDelete}
+        />
+      ) : (
+        <Button variant="ghost" title={t("profile.deleteRequest")} onPress={() => openSite("contact")} />
+      )}
+      <AppText variant="caption" style={{ textAlign: "center", fontSize: 12 }}>
+        {t("profile.version", { version: Constants.expoConfig?.version ?? "" })}
+      </AppText>
+    </>
+  );
+
+  return (
+    <>
+      {/* Dukkanim'a gomulu: baslik ve kaydirma o ekranin; burada yalnizca bolumler. */}
+      {embedded ? (
+        <View style={{ gap: space.xl }}>{sections}</View>
+      ) : (
+        <SafeAreaView style={styles.safe} edges={asTab ? ["top"] : undefined}>
+          <ScrollView contentContainerStyle={styles.content}>
+            <View style={styles.header}>
+              <AppText variant="title">{t("profile.title")}</AppText>
+              {asTab ? null : (
+                <IconButton
+                  label={t("common.close")}
+                  // Deep link ya da yeniden yuklemeyle tek ekran kalinca `back` hicbir sey yapmiyordu.
+                  onPress={() => (router.canGoBack() ? router.back() : router.replace("/"))}
+                >
+                  <X size={20} color={colors.ink} />
+                </IconButton>
+              )}
+            </View>
+
+            {sections}
+          </ScrollView>
+        </SafeAreaView>
+      )}
+      <ChoiceSheet
+        visible={langOpen}
+        onClose={() => setLangOpen(false)}
+        title="Dil · Language"
+        choices={[...LANGUAGES]}
+        selected={i18n.language === "tr" ? "tr" : "en"}
+        onSelect={(v) => void setAppLanguage(v as "tr" | "en")}
+      />
+    </>
   );
 }
 
