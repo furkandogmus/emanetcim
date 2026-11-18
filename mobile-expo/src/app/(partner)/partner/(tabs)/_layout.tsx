@@ -1,13 +1,14 @@
 import { StyleSheet, View } from "react-native";
 import { Tabs } from "expo-router";
-import { QrCode, Store, Ticket, User } from "lucide-react-native";
+import { Luggage, QrCode, Store } from "lucide-react-native";
 import { useTranslation } from "react-i18next";
 
 import { colors, fonts, shadow } from "@/theme/tokens";
 
 /**
- * Esnafin dort ana alani. "QR okut" ortada ve buyuk: gun icindeki asil is misafirin
- * QR'ini okutmak. Detay, muhur, kazanc ve ayar ekranlari sekme cubugunun ustunde acilir.
+ * Esnafin uc ana alani: Emanetler, ortada buyuk "QR okut" (gun icindeki asil is), Dukkanim.
+ * Profil ve hesap ayarlari Dukkanim'in altinda ve Emanetler'in sag ustundeki avatarda;
+ * dorduncu sekme kalabaligi kaldirildi. Detay, muhur, kazanc, ayar ekranlari cubugun ustunde.
  */
 export default function PartnerTabsLayout() {
   const { t } = useTranslation();
@@ -25,7 +26,7 @@ export default function PartnerTabsLayout() {
     >
       <Tabs.Screen
         name="index"
-        options={{ title: t("tabs.bookings"), tabBarIcon: ({ color }) => <Ticket size={20} color={color} /> }}
+        options={{ title: t("tabs.storage"), tabBarIcon: ({ color }) => <Luggage size={20} color={color} /> }}
       />
       <Tabs.Screen
         name="scan"
@@ -42,10 +43,6 @@ export default function PartnerTabsLayout() {
       <Tabs.Screen
         name="shop"
         options={{ title: t("partner.myShop"), tabBarIcon: ({ color }) => <Store size={20} color={color} /> }}
-      />
-      <Tabs.Screen
-        name="account"
-        options={{ title: t("tabs.profile"), tabBarIcon: ({ color }) => <User size={20} color={color} /> }}
       />
     </Tabs>
   );

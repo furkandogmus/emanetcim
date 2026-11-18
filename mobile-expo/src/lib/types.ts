@@ -59,6 +59,8 @@ export type NearbyShop = Shop & {
 };
 
 export type ShopDetail = Shop & {
+  /** Kapak (`image`) disindaki fotograflar, sirali. */
+  gallery?: string[];
   weeklyHours?: { weekday: number; isClosed: boolean; openingTime: string; closingTime: string }[];
   closures?: { startDate: string; endDate: string }[];
   pricing: {
@@ -111,7 +113,13 @@ export type BagRevisionRequest = { bagCountS: number; bagCountM: number; bagCoun
 export type BagRevisionResponse = { success: true; newTotal: number };
 
 /** `partner/shop` GET; yalnizca kullanilan alanlar. */
-export type PartnerShop = { id: string; name: string; image: string | null };
+export type PartnerShop = {
+  id: string;
+  name: string;
+  image: string | null;
+  /** Kapak disindaki fotograflar; `/partner/shop/images` ile eklenir/silinir. */
+  gallery?: { id: string; url: string }[];
+};
 
 /** `toMobileSealRequest` (mobile-dto.ts). Durum sunucuda serbest metin; bilinen degerler bunlar. */
 export type SealRequestStatus = "PENDING" | "SHIPPED" | "DELIVERED";

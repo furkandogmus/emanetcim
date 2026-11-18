@@ -1,160 +1,91 @@
-import { Pressable, ScrollView, StyleSheet, View } from "react-native";
+import type { ReactNode } from "react";
+import { RefreshControl, ScrollView, StyleSheet, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { Image } from "expo-image";
-import * as ImagePicker from "expo-image-picker";
 import { router } from "expo-router";
 import type { Href } from "expo-router";
-import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { ImagePlus, ShieldCheck, Wallet, Settings, Clock, Gift } from "lucide-react-native";
 import { useTranslation } from "react-i18next";
 
 import { LinkGroup, LinkRow } from "@/components/LinkRow";
-import { AppText, Button, CenterMessage, Loading } from "@/components/ui";
-import { api } from "@/lib/api";
-import { usePartnerShopSelection, withShop } from "@/lib/partner-shop";
+import { ProfileView } from "@/components/ProfileView";
+import { ShopPhotos } from "@/components/ShopPhotos";
+import { ShopSwitcher } from "@/components/ShopSwitcher";
+import { AppText, Button, CenterMessage } from "@/components/ui";
 import { errorMessage } from "@/lib/errors";
-import { resolveImage } from "@/lib/images";
-import { keys, usePartnerShop } from "@/lib/queries";
-import { notify } from "@/lib/notify";
-import { prepareShopPhoto } from "@/lib/shop-photo";
+import { usePartnerShopSelection } from "@/lib/partner-shop";
+import { usePartnerShop } from "@/lib/queries";
 import { colors, radius, space } from "@/theme/tokens";
 
 /**
- * Esnafin dukkan vitrin fotografi. Sistem fotograf secicisi kullanilir: izin
- * istemez (kamera/medya izinleri app.json'da engelli, Play veri formu degismez).
+ * Dukkanim: secili dukkanin fotograflari ve ayarlari, altinda esnafin kendi hesabi.
+ * Ayri "Profil" sekmesi yerine tek ekran: esnaf icin hesap, dukkanin bir parcasi.
  */
 export default function PartnerShopScreen() {
   const { t } = useTranslation();
-  const queryClient = useQueryClient();
   const [shopId] = usePartnerShopSelection();
   const query = usePartnerShop();
-
-  const upload = useMutation({
-    mutationFn: async (asset: ImagePicker.ImagePickerAsset) => {
-      const file = await prepareShopPhoto(asset);
-      const form = new FormData();
-      // RN FormData dosyayi { uri, name, type } nesnesiyle tasir.
-      form.append("file", file as unknown as Blob);
-      return api<{ url: string }>(withShop("/partner/shop/image", shopId), { method: "POST", body: form });
-    },
-    onSuccess: () => {
-      void queryClient.invalidateQueries({ queryKey: keys.partnerShop });
-      notify(t("partner.photoSaved"));
-    },
-    onError: (e) => notify(t("partner.photoFailed"), errorMessage(e, "partner")),
-  });
-
-  async function pick() {
-    const res = await ImagePicker.launchImageLibraryAsync({
-      mediaTypes: ["images"],
-      allowsEditing: true,
-      aspect: [4, 3],
-      // Kucultme ve JPEG'e cevirme `prepareShopPhoto`ta; burada kalite kaybi istemiyoruz.
-      quality: 1,
-    });
-    if (!res.canceled && res.assets[0]) upload.mutate(res.assets[0]);
-  }
-
-  const image = resolveImage(query.data?.image);
+  const go = (path: string) => router.push(path as Href);
 
   return (
     <SafeAreaView style={styles.safe} edges={["top"]}>
-      <View style={styles.header}>
-        <AppText variant="title">{t("partner.myShop")}</AppText>
-      </View>
+      <ScrollView
+        contentContainerStyle={styles.content}
+        refreshControl={
+          <RefreshControl refreshing={query.isRefetching} onRefresh={() => query.refetch()} tintColor={colors.accent} />
+        }
+      >
+        <View style={{ gap: space.sm }}>
+          <AppText variant="title">{t("partner.myShop")}</AppText>
+          <ShopSwitcher />
+        </View>
 
-      {query.isLoading ? (
-        <Loading />
-      ) : query.isError || !query.data ? (
-        <CenterMessage
-          title={errorMessage(query.error, "partner")}
-          action={<Button variant="secondary" title={t("common.retry")} onPress={() => query.refetch()} />}
-        />
-      ) : (
-        <ScrollView contentContainerStyle={styles.content}>
-          <AppText variant="heading">{query.data.name}</AppText>
-          {image ? (
-            <View style={{ gap: space.md }}>
-              <Image
-                source={{ uri: image }}
-                style={styles.photo}
-                contentFit="cover"
-                accessibilityLabel={t("partner.photo")}
-              />
-              <Button
-                variant="secondary"
-                title={t("partner.changePhoto")}
-                loading={upload.isPending}
-                onPress={() => void pick()}
-              />
-            </View>
-          ) : (
-            // Bos durum dokunulabilir: ayri bir buton ve yarim ekranlik bos kutu yerine tek hedef.
-            <Pressable
-              accessibilityRole="button"
-              accessibilityLabel={t("partner.addPhoto")}
-              disabled={upload.isPending}
-              onPress={() => void pick()}
-              style={({ pressed }) => [styles.empty, pressed && { backgroundColor: colors.surfaceMuted }]}
-            >
-              <ImagePlus size={24} color={colors.accent} strokeWidth={1.75} />
-              <AppText variant="bodyMedium" style={{ color: colors.accent }}>
-                {upload.isPending ? t("common.loading") : t("partner.addPhoto")}
-              </AppText>
-              <AppText variant="caption" style={{ textAlign: "center", fontSize: 13 }}>
-                {t("partner.photoHint")}
-              </AppText>
-            </Pressable>
-          )}
+        {query.isLoading ? (
+          // Dukkan degisirken ekran ziplamasin: fotograf izgarasi ve satirlar yerinde bekler.
+          <View style={styles.skeleton}>
+            {[0, 1, 2].map((i) => (
+              <View key={i} style={styles.skeletonTile} />
+            ))}
+          </View>
+        ) : query.isError || !query.data ? (
+          <CenterMessage
+            title={errorMessage(query.error, "partner")}
+            action={<Button variant="secondary" title={t("common.retry")} onPress={() => query.refetch()} />}
+          />
+        ) : (
+          <>
+            <Section title={t("partner.photos")}>
+              <ShopPhotos shop={query.data} shopId={shopId} />
+            </Section>
 
-          <LinkGroup>
-          <LinkRow
-            icon={<ShieldCheck size={18} color={colors.inkSecondary} />}
-            label={t("seals.open")}
-            onPress={() => router.push("/partner/seals" as Href)}
-          />
-          <LinkRow
-            icon={<Wallet size={18} color={colors.inkSecondary} />}
-            label={t("earnings.title")}
-            onPress={() => router.push("/partner/earnings" as Href)}
-          />
-          <LinkRow
-            icon={<Settings size={18} color={colors.inkSecondary} />}
-            label={t("shopSettings.title")}
-            onPress={() => router.push("/partner/settings" as Href)}
-          />
-          <LinkRow
-            icon={<Clock size={18} color={colors.inkSecondary} />}
-            label={t("schedule.title")}
-            onPress={() => router.push("/partner/schedule" as Href)}
-          />
-          <LinkRow
-            icon={<Gift size={18} color={colors.inkSecondary} />}
-            label={t("referral.title")}
-            onPress={() => router.push("/partner/referral" as Href)}
-          />
-          </LinkGroup>
-        </ScrollView>
-      )}
+            <Section title={t("partner.shopSection")}>
+              <LinkGroup>
+                <LinkRow label={t("schedule.title")} onPress={() => go("/partner/schedule")} />
+                <LinkRow label={t("shopSettings.title")} onPress={() => go("/partner/settings")} />
+                <LinkRow label={t("seals.open")} onPress={() => go("/partner/seals")} />
+                <LinkRow label={t("earnings.title")} onPress={() => go("/partner/earnings")} />
+                <LinkRow label={t("referral.title")} onPress={() => go("/partner/referral")} />
+              </LinkGroup>
+            </Section>
+          </>
+        )}
+
+        <ProfileView embedded />
+      </ScrollView>
     </SafeAreaView>
+  );
+}
+
+function Section({ title, children }: { title: string; children: ReactNode }) {
+  return (
+    <View style={{ gap: space.sm }}>
+      <AppText variant="label">{title}</AppText>
+      {children}
+    </View>
   );
 }
 
 const styles = StyleSheet.create({
   safe: { flex: 1, backgroundColor: colors.bg },
-  header: { padding: space.xl, paddingBottom: space.sm },
-  content: { padding: space.xl, gap: space.lg },
-  photo: { width: "100%", aspectRatio: 16 / 10, borderRadius: radius.card },
-  empty: {
-    alignItems: "center",
-    justifyContent: "center",
-    gap: space.xs,
-    paddingVertical: space.xl,
-    paddingHorizontal: space.xl,
-    borderRadius: radius.card,
-    borderWidth: 1.5,
-    borderStyle: "dashed",
-    borderColor: colors.borderStrong,
-    backgroundColor: colors.surface,
-  },
+  content: { padding: space.xl, gap: space.xl, paddingBottom: space.xxl * 2 },
+  skeleton: { flexDirection: "row", gap: space.sm, paddingTop: space.xl },
+  skeletonTile: { flex: 1, aspectRatio: 1, borderRadius: radius.inner + 2, backgroundColor: colors.surfaceMuted },
 });

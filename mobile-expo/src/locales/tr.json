@@ -144,7 +144,8 @@
     "prices": "Valiz fiyatları",
     "perDay": "{{price}} / gün",
     "reviews": "Yorumlar ({{count}})",
-    "noReviews": "Henüz yorum yok."
+    "noReviews": "Henüz yorum yok.",
+    "photoN": "Fotoğraf {{n}}/{{total}}"
   },
   "checkout": {
     "title": "Onayla",
@@ -213,11 +214,11 @@
     "CANCELLED": "İptal edildi"
   },
   "partner": {
-    "title": "Rezervasyonlar",
+    "title": "Emanetler",
     "today": "Bugün",
     "upcoming": "Yaklaşan",
     "past": "Geçmiş",
-    "empty": "Bu listede rezervasyon yok",
+    "empty": "Bu listede emanet yok",
     "guest": "Misafir",
     "bags": "Valizler",
     "total": "Toplam",
@@ -253,9 +254,10 @@
       "unsupported_type": "Bu dosya türü desteklenmiyor; JPEG, PNG ya da WebP seç.",
       "dimensions_too_large": "Fotoğrafın çözünürlüğü çok yüksek.",
       "empty": "Fotoğraf okunamadı, tekrar dene.",
-      "storage_unavailable": "Fotoğraf yükleme şu an kullanılamıyor.",
+      "storage_unavailable": "Fotoğraf yükleme şu an kullanılamıyor. Biraz sonra tekrar dene.",
       "not_found": "Dükkan bulunamadı.",
-      "no_shop": "Aktif bir dükkanın bulunamadı."
+      "no_shop": "Aktif bir dükkanın bulunamadı.",
+      "limit": "En fazla 8 galeri fotoğrafı eklenebilir; önce birini sil."
     },
     "myShop": "Dükkanım",
     "photo": "Dükkan fotoğrafı",
@@ -265,7 +267,23 @@
     "changePhoto": "Fotoğrafı değiştir",
     "photoSaved": "Fotoğraf kaydedildi.",
     "photoFailed": "Fotoğraf yüklenemedi",
-    "bagNumber": "{{n}}. valiz"
+    "bagNumber": "{{n}}. valiz",
+    "switchShop": "Dükkan: {{shop}}. Değiştirmek için dokun",
+    "chooseShop": "Dükkan seç",
+    "photos": "Fotoğraflar",
+    "shopSection": "Dükkan",
+    "cover": "Kapak",
+    "coverPhoto": "Kapak fotoğrafı",
+    "addPhotos": "Fotoğraf ekle",
+    "uploading": "{{done}}/{{total}} yükleniyor",
+    "photosSaved_one": "Fotoğraf eklendi",
+    "photosSaved_other": "{{count}} fotoğraf eklendi",
+    "photosHint": "İlk kare kapak: misafir listede onu görür. Toplam {{max}} fotoğraf ekleyebilirsin; misafir dükkan sayfasında hepsini kaydırarak görür.",
+    "changeCover": "Kapağı değiştir",
+    "makeCover": "Kapak yap",
+    "deletePhoto": "Fotoğrafı sil",
+    "deletePhotoTitle": "Bu fotoğraf silinsin mi?",
+    "actionFailed": "İşlem tamamlanamadı"
   },
   "profile": {
     "title": "Profil",
@@ -761,7 +779,6 @@
     }
   },
   "pulse": {
-    "today": "Bugün · {{shop}}",
     "arrivals": "Gelecek",
     "pickups": "Alınacak",
     "inStorage": "Dükkanda valiz",
@@ -769,11 +786,13 @@
     "failed": "Günlük özet yüklenemedi. Yeniden denemek için dokun.",
     "a11y": "{{shop}}, bugün: {{arrivals}} misafir gelecek, {{pickups}} valiz alınacak, dükkanda {{bags}} valiz var. Bu ay kazancın {{month}}.",
     "moreThanLastMonth": "Geçen aydan %{{pct}} fazla",
-    "lessThanLastMonth": "Geçen aydan %{{pct}} az"
+    "lessThanLastMonth": "Geçen aydan %{{pct}} az",
+    "todayLabel": "Bugün"
   },
   "tabs": {
     "explore": "Keşfet",
     "bookings": "Rezervasyonlar",
-    "profile": "Profil"
+    "profile": "Profil",
+    "storage": "Emanetler"
   }
 }

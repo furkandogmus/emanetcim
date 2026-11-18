@@ -1,10 +1,10 @@
 import { ScrollView, StyleSheet, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-import { Image } from "expo-image";
 import { router, useLocalSearchParams } from "expo-router";
 import { ArrowLeft, BadgeCheck, Star, Store } from "lucide-react-native";
 import { useTranslation } from "react-i18next";
 
+import { PhotoPager } from "@/components/PhotoPager";
 import { hoursLabel } from "@/components/ShopCard";
 import { AppText, Banner, Button, Card, CenterMessage, IconButton, Loading } from "@/components/ui";
 import { errorMessage } from "@/lib/errors";
@@ -31,7 +31,8 @@ export default function ShopDetailScreen() {
   }
 
   const shop = query.data;
-  const image = resolveImage(shop.image);
+  // Kapak once, galeri ardindan; kapak yoksa galeri yine gosterilir.
+  const photos = [shop.image, ...(shop.gallery ?? [])].filter((u): u is string => !!resolveImage(u));
   const hours = hoursLabel(shop, t);
   const weekdays = t("shop.weekdays", { returnObjects: true }) as string[];
   // Haftalik liste pazartesiden baslasin (API 0 = pazar).
@@ -42,9 +43,9 @@ export default function ShopDetailScreen() {
     <View style={styles.root}>
       <ScrollView contentContainerStyle={{ paddingBottom: 140 + insets.bottom }}>
         {/* Fotografsiz dukkanda 260px bos turuncu kutu yerine kisa, notr bir baslik. */}
-        <View style={[styles.photo, !image && { height: insets.top + 140, backgroundColor: colors.surfaceMuted }]}>
-          {image ? (
-            <Image source={{ uri: image }} style={StyleSheet.absoluteFill} contentFit="cover" />
+        <View style={[styles.photo, photos.length === 0 && { height: insets.top + 140, backgroundColor: colors.surfaceMuted }]}>
+          {photos.length > 0 ? (
+            <PhotoPager photos={photos} height={280} />
           ) : (
             <Store size={40} color={colors.borderStrong} strokeWidth={1.5} style={{ marginTop: insets.top }} />
           )}
