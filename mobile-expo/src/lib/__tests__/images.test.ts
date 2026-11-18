@@ -1,6 +1,6 @@
 import { describe, expect, it } from "@jest/globals";
 
-import { SITE_ORIGIN, resolveImage } from "@/lib/images";
+import { SITE_ORIGIN, resolveImage, thumbUrl } from "@/lib/images";
 
 describe("resolveImage", () => {
   it("mutlak ve data URL olduğu gibi kalır", () => {
@@ -19,5 +19,17 @@ describe("resolveImage", () => {
     expect(resolveImage("")).toBeNull();
     expect(resolveImage("javascript:alert(1)")).toBeNull();
     expect(resolveImage("shops/a.jpg")).toBeNull();
+  });
+});
+
+describe("thumbUrl", () => {
+  it("mutlak adresi gorsel ucuna, gerekli genisligin ustundeki ilk kabul edilen boyutla verir", () => {
+    const u = thumbUrl("https://cdn.example.com/shops/a.jpg", 64, 3);
+    expect(u).toContain("/_next/image?url=https%3A%2F%2Fcdn.example.com%2Fshops%2Fa.jpg&w=256&q=70");
+  });
+  it("goreli yolu oldugu gibi, data URL'yi dokunmadan birakir", () => {
+    expect(thumbUrl("/uploads/x.png", 400, 2)).toContain("url=%2Fuploads%2Fx.png&w=828");
+    expect(thumbUrl("data:image/png;base64,AA", 64)).toBe("data:image/png;base64,AA");
+    expect(thumbUrl(null, 64)).toBeNull();
   });
 });

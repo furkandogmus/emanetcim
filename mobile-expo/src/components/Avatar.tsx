@@ -1,7 +1,7 @@
 import { StyleSheet, View } from "react-native";
-import { Image } from "expo-image";
 
 import { AppText } from "@/components/ui";
+import { RemoteImage } from "@/components/RemoteImage";
 import { resolveImage } from "@/lib/images";
 import { colors, fonts } from "@/theme/tokens";
 
@@ -9,7 +9,7 @@ import { colors, fonts } from "@/theme/tokens";
 export function Avatar({ name, url, size = 48 }: { name: string; url?: string | null; size?: number }) {
   const src = resolveImage(url);
   const box = { width: size, height: size, borderRadius: size / 2 };
-  if (src) return <Image source={{ uri: src }} style={[styles.base, box]} contentFit="cover" transition={150} />;
+  if (src) return <RemoteImage src={url} width={size} style={[styles.base, box]} contentFit="cover" />;
   return (
     <View style={[styles.base, box]}>
       <AppText style={[styles.text, { fontSize: Math.round(size * 0.38) }]}>{initials(name)}</AppText>
