@@ -467,3 +467,13 @@ export function toMobileCity(c: import("@/services/CityCoverageService").CityCov
     coverImage: c.coverImage,
   };
 }
+
+/** Dukkan galerisindeki bir fotograf (esnaf yonetimi icin kimlikli). */
+export function toMobileGalleryImage(i: { id: string; url: string }) {
+  return { id: i.id, url: i.url };
+}
+
+/** Misafirin dukkan detayindaki galeri: yalnizca adresler, sirali. */
+export function toMobilePublicGallery(images: Array<{ url: string }>) {
+  return images.map((i) => i.url);
+}

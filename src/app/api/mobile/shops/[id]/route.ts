@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { ShopService } from "@/services/ShopService";
-import { toMobilePricing, toMobileShop } from "@/lib/mobile-dto";
+import { toMobilePricing, toMobilePublicGallery, toMobileShop } from "@/lib/mobile-dto";
+import { shopGalleryService } from "@/services/ShopGalleryService";
 import { getPricingRules } from "@/lib/platform-settings";
 import { loadScheduleParts } from "@/services/ShopScheduleService";
 
@@ -25,10 +26,16 @@ export async function GET(_req: Request, { params }: { params: Promise<{ id: str
     `pricing` yalnizca detayda: odeme ekrani bu uctan okuyor ve tahmini tutari
     sunucunun kurallariyla hesapliyor (bkz. `toMobilePricing`).
   */
-  const rules = await getPricingRules();
-  const parts = (await loadScheduleParts([s.id], new Date().toISOString().slice(0, 10))).get(s.id);
+  const [rules, scheduleParts, images] = await Promise.all([
+    getPricingRules(),
+    loadScheduleParts([s.id], new Date().toISOString().slice(0, 10)),
+    shopGalleryService.list(s.id),
+  ]);
+  const parts = scheduleParts.get(s.id);
   return NextResponse.json({
     ...toMobileShop(s, { weekly: parts?.weekly ?? [], closures: parts?.closures ?? [] }),
     pricing: toMobilePricing(rules),
+    // Kapak `image`da; galeri onun ardindan kaydirilir.
+    gallery: toMobilePublicGallery(images),
   });
 }
