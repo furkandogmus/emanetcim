@@ -227,7 +227,9 @@
     "code": "Buchungscode",
     "overdue": "Abholzeit überschritten",
     "overdueDays_one": "{{count}} Tag überfällig",
-    "overdueDays_other": "{{count}} Tage überfällig"
+    "overdueDays_other": "{{count}} Tage überfällig",
+    "offlineTitle": "Kein Internet",
+    "offlineBody": "Das ist das zuletzt gespeicherte Ticket. Du kannst den QR-Code im Laden zeigen; es aktualisiert sich, sobald du wieder online bist."
   },
   "status": {
     "PENDING": "Ausstehend",
@@ -282,7 +284,8 @@
       "storage_unavailable": "Der Foto-Upload ist gerade nicht verfügbar. Versuch es gleich noch einmal.",
       "not_found": "Laden nicht gefunden.",
       "no_shop": "Wir konnten keinen aktiven Laden für dich finden.",
-      "limit": "Du kannst bis zu 8 Galeriefotos hinzufügen; lösche zuerst eines."
+      "limit": "Du kannst bis zu 8 Galeriefotos hinzufügen; lösche zuerst eines.",
+      "INVALID_SEALS": "Das markierte Siegel gehört nicht zu dieser Buchung; lade die Seite neu."
     },
     "myShop": "Mein Laden",
     "photo": "Ladenfoto",
@@ -318,7 +321,11 @@
     "confirmCheckOutTitle": "Gepäck zurückgeben?",
     "confirmCheckOutBody_one": "{{count}} Gepäckstück wird als an den Gast zurückgegeben erfasst. Das lässt sich nicht rückgängig machen.",
     "confirmCheckOutBody_other": "{{count}} Gepäckstücke werden als an den Gast zurückgegeben erfasst. Das lässt sich nicht rückgängig machen.",
-    "confirmYes": "Ja, erfassen"
+    "confirmYes": "Ja, erfassen",
+    "sealBroken": "Nicht intakt",
+    "sealBrokenHint": "Ein nicht intaktes Siegel wird erfasst; prüf das Gepäck mit dem Gast. Die Abholung kannst du trotzdem abschließen.",
+    "lateFeeCollect": "Verspätungsgebühr {{amount}}: vom Gast kassieren.",
+    "earlyRefundGive": "Frühe Abholung: dem Gast {{amount}} erstatten."
   },
   "profile": {
     "title": "Profil",

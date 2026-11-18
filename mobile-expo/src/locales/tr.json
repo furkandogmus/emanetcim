@@ -227,7 +227,9 @@
     "code": "Rezervasyon kodu",
     "overdue": "Alma saati geçti",
     "overdueDays_one": "{{count}} gün gecikti",
-    "overdueDays_other": "{{count}} gün gecikti"
+    "overdueDays_other": "{{count}} gün gecikti",
+    "offlineTitle": "İnternet yok",
+    "offlineBody": "Bu, cihazına kaydedilmiş son bilet. QR kodu dükkanda gösterebilirsin; bağlantı gelince güncellenir."
   },
   "status": {
     "PENDING": "Bekliyor",
@@ -282,7 +284,8 @@
       "storage_unavailable": "Fotoğraf yükleme şu an kullanılamıyor. Biraz sonra tekrar dene.",
       "not_found": "Dükkan bulunamadı.",
       "no_shop": "Aktif bir dükkanın bulunamadı.",
-      "limit": "En fazla 8 galeri fotoğrafı eklenebilir; önce birini sil."
+      "limit": "En fazla 8 galeri fotoğrafı eklenebilir; önce birini sil.",
+      "INVALID_SEALS": "İşaretlenen mühür bu rezervasyona ait değil; sayfayı yenile."
     },
     "myShop": "Dükkanım",
     "photo": "Dükkan fotoğrafı",
@@ -318,7 +321,11 @@
     "confirmCheckOutTitle": "Valizleri teslim ediyor musun?",
     "confirmCheckOutBody_one": "{{count}} valiz misafire teslim edildi olarak kaydedilecek. Bu geri alınamaz.",
     "confirmCheckOutBody_other": "{{count}} valiz misafire teslim edildi olarak kaydedilecek. Bu geri alınamaz.",
-    "confirmYes": "Evet, kaydet"
+    "confirmYes": "Evet, kaydet",
+    "sealBroken": "Sağlam değil",
+    "sealBrokenHint": "Sağlam olmayan mühür kayda geçer; misafirle valizi birlikte kontrol et. Teslimi yine tamamlayabilirsin.",
+    "lateFeeCollect": "Gecikme ücreti {{amount}}: misafirden al.",
+    "earlyRefundGive": "Erken teslim: misafire {{amount}} iade et."
   },
   "profile": {
     "title": "Profil",
