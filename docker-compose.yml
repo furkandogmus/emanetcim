@@ -94,7 +94,14 @@ services:
       # imzali; farkli bir deger gecirmek tum mobil oturumlari dusurur.
       GOOGLE_IOS_CLIENT_ID: ${GOOGLE_IOS_CLIENT_ID:-}
       GOOGLE_ANDROID_CLIENT_ID: ${GOOGLE_ANDROID_CLIENT_ID:-}
-      APPLE_BUNDLE_ID: ${APPLE_BUNDLE_ID:-}
+      # Mobil uygulamanin paket kimligi (mobile-expo/app.json); gizli degil.
+      APPLE_BUNDLE_ID: ${APPLE_BUNDLE_ID:-com.bagajpark}
+      # Uygulama baglantisi dogrulamasi (src/lib/app-links.ts); bossa dosyalar 404.
+      ANDROID_APP_LINK_SHA256: ${ANDROID_APP_LINK_SHA256:-}
+      APPLE_TEAM_ID: ${APPLE_TEAM_ID:-}
+      # iOS bildirimleri Expo push uzerinden (src/lib/expo-push.ts); Expo'da push
+      # guvenligi acilmadikca bos kalabilir.
+      EXPO_ACCESS_TOKEN: ${EXPO_ACCESS_TOKEN:-}
       APPLE_ID: ${APPLE_ID:-}
       APPLE_SECRET: ${APPLE_SECRET:-}
       # Google Play inceleme hesabi (sabit OTP); bos -> kapali.
