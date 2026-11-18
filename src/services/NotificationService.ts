@@ -1,4 +1,5 @@
 import logger from "../lib/logger";
+import { GUEST_PUSH_COPY, type GuestPushEvent, type GuestPushVars } from "@/lib/guest-push-copy";
 import prisma from "../lib/db";
 import { formatTryCurrency } from "@/lib/currency";
 import { fetchWithTimeout } from "@/lib/async-timeout";
@@ -277,6 +278,29 @@ export class NotificationService implements INotificationService {
       logger.error({ error }, "[Notification] Push Failed");
       return false;
     }
+  }
+
+  /**
+   * Misafirin telefonuna e-postanin kisa esini gonderir (2026-11-18). Mobil push
+   * eskiden yalnizca esnafa "yeni rezervasyon" icin gidiyordu; misafir check-in,
+   * hatirlatma ya da onay isteyen valiz duzeltmesini yalnizca e-postadan ogreniyordu.
+   * Ateşle-unut: e-postayi asla bekletmez ya da dusurmez.
+   */
+  private pushGuest(
+    bookingId: string,
+    event: GuestPushEvent,
+    locale: string,
+    vars: Omit<GuestPushVars, "shop"> = {},
+  ): void {
+    void (async () => {
+      const booking = await prisma.booking.findUnique({
+        where: { id: bookingId },
+        select: { guestId: true, shop: { select: { name: true } } },
+      });
+      if (!booking?.guestId) return;
+      const { title, body } = pickLocale(GUEST_PUSH_COPY, locale)[event]({ shop: booking.shop.name, ...vars });
+      await this.sendMobilePush(booking.guestId, title, body, bookingId);
+    })().catch((err) => logger.warn({ err, bookingId, event }, "guest_push_failed"));
   }
 
   /**
@@ -770,6 +794,7 @@ export class NotificationService implements INotificationService {
 
   /** Esnaf rezervasyonu onayladiginda misafire onay e-postasi gonderir. */
   async notifyBookingApproved(email: string, bookingId: string, shopName: string, locale: string = "tr"): Promise<void> {
+    this.pushGuest(bookingId, "approved", locale);
     /*
       GOVDEYE GIREN DUKKAN ADI KACIRILIR (2026-08-31). `shopName` esnafin kendi
       yazdigi deger; kacirilmadan `<strong>${...}</strong>` icine girince esnaf,
@@ -847,6 +872,7 @@ export class NotificationService implements INotificationService {
 
   /** Talep reddedildiginde / rezervasyon iptal edildiginde misafire bildirim. */
   async notifyBookingCancelled(email: string, bookingId: string, shopName: string, locale: string = "tr"): Promise<void> {
+    this.pushGuest(bookingId, "cancelled", locale);
     /*
       GOVDEYE GIREN DUKKAN ADI KACIRILIR (2026-08-31). `shopName` esnafin kendi
       yazdigi deger; kacirilmadan `<strong>${...}</strong>` icine girince esnaf,
@@ -1299,6 +1325,7 @@ export class NotificationService implements INotificationService {
    * `Booking.locale`.
    */
   async notifyCheckIn(email: string, bookingId: string, locale: string): Promise<void> {
+    this.pushGuest(bookingId, "checkIn", locale);
     /**
      * NEDEN 6 DİL (2026-08-25'te ölçüldü): `tr`/`en` dışındaki 4 dil (`de`/`fr`/
      * `ja`/`fa`) hem başlık/gövdede hem de aşağıdaki mühür listesinde Türkçe'ye
@@ -1397,6 +1424,7 @@ export class NotificationService implements INotificationService {
   }
 
   async notifyCheckOut(email: string, bookingId: string, locale: string): Promise<void> {
+    this.pushGuest(bookingId, "checkOut", locale);
     const content = {
       tr: { subject: "İyi Yolculuklar! 👋", body: "Valiziniz size teslim edildi." },
       en: { subject: "Safe Travels! 👋", body: "Your luggage has been delivered to you." },
@@ -1448,6 +1476,7 @@ export class NotificationService implements INotificationService {
     });
     const shop = params.shopName;
     const girisMi = params.kind === "check-in";
+    this.pushGuest(bookingId, girisMi ? "reminderCheckIn" : "reminderCheckOut", locale, { time: when });
 
     const content = pickLocale(
       {
@@ -1593,6 +1622,7 @@ export class NotificationService implements INotificationService {
     params: { shopName: string; checkOutAt: Date; timeZone: string },
     locale: string,
   ) {
+    this.pushGuest(bookingId, "overdue", locale);
     const plannedAt = formatDateTimeInZone(params.checkOutAt, {
       locale: bcp47ForUiLocale(locale),
       timeZone: params.timeZone,
@@ -1691,6 +1721,7 @@ export class NotificationService implements INotificationService {
     const bcp47 = bcp47ForUiLocale(locale);
     const extra = formatTryCurrency(params.extraAmount, bcp47);
     const newTotal = formatTryCurrency(params.newTotal, bcp47);
+    this.pushGuest(bookingId, "bagRevision", locale, { total: newTotal });
     const baseUrl = getSiteBaseUrl();
     const link = `${baseUrl}/${locale}/bookings/${bookingId}`;
 
