@@ -64,6 +64,8 @@ type Shop = {
   latitude: number | null;
   longitude: number | null;
   pricePerDay?: number;
+  /** Boy fiyatları; pinde en küçüğü "+" ile yazılır (₺200+), taban fiyat değil. */
+  slotPrices?: { s: number; m: number; xl: number };
   /** Talep testi noktası: pin'de fiyat değil "Yakında" yazar. */
   isPrelaunch?: boolean;
 };
@@ -281,7 +283,12 @@ export default function SearchMap({
           */
           el.textContent = head.isPrelaunch
             ? t("prelaunchBadge")
-            : head.pricePerDay != null
+            : head.slotPrices
+              ? `${formatTryCurrency(Math.min(head.slotPrices.s, head.slotPrices.m, head.slotPrices.xl), locale, {
+                  minimumFractionDigits: 0,
+                  maximumFractionDigits: 0,
+                })}+`
+              : head.pricePerDay != null
               ? formatTryCurrency(head.pricePerDay, locale, {
                   minimumFractionDigits: 0,
                   maximumFractionDigits: 0,

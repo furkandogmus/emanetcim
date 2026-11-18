@@ -1,5 +1,7 @@
 import { getTranslations, setRequestLocale } from 'next-intl/server';
 import { shopService } from '@/services/ShopService';
+import { getPricingRules } from '@/lib/platform-settings';
+import { roundedSlotPrices } from '@/lib/bag-pricing';
 import SearchClient from '@/components/guest/SearchClient';
 import type { Metadata } from 'next';
 import {
@@ -109,7 +111,7 @@ export default async function SearchPage({
   }
   const { checkIn, checkOut } = stay;
 
-  const allShops = await shopService.findShopsForSearch({
+  const [hits, rules] = await Promise.all([shopService.findShopsForSearch({
     centerLat: center.lat,
     centerLng: center.lng,
     // `null` DEGIL: bkz. SEARCH_ALL_RADIUS_KM -- sinirsiz liste, aranan yere
@@ -120,7 +122,13 @@ export default async function SearchPage({
     requestedBags: 1,
     ignoreOpenHours: true,
     stayDays: { drop: dropDate, pickup: pickupDate },
-  });
+  }), getPricingRules()]);
+  /*
+    Boy fiyatlari ILK yuklemede de: yoksa liste "₺250'den" (orta valizin taban
+    fiyati) gosteriyordu, kucuk valiz ₺200 iken. Arama action'i (`search-shops.ts`)
+    zaten ekliyordu; iki tasiyici ayni govdeyi vermeli.
+  */
+  const allShops = hits.map((h) => ({ ...h, slotPrices: roundedSlotPrices(h.pricePerDay, rules) }));
 
   const nearbyShops = allShops.filter(s => s.distanceKm <= SEARCH_NEARBY_RADIUS_KM);
 
