@@ -1293,7 +1293,11 @@
     "setPasswordDone": "Şifre kaydedildi. Bu mesajı kullanıcıya iletin:",
     "setPasswordCopy": "Mesajı kopyala",
     "setPasswordWhatsappMessage": "Merhaba {name}, BagajPark hesabınızın yeni şifresi: {password}\nTelefon numaranız ya da e-postanızla giriş yapabilirsiniz: {url}",
-    "teamIssuesNav": "Sorun Takibi (Ekip)"
+    "teamIssuesNav": "Sorun Takibi (Ekip)",
+    "shopsTabLive": "Hizmette",
+    "shopsTabPrelaunch": "Talep testi",
+    "statusPrelaunch": "Talep testi · valiz almıyor",
+    "shopsPrelaunchHint": "Bu noktalar haritada \"açılınca haber ver\" olarak görünür ve rezervasyon almaz. Talep sayıları Talep testi sayfasında."
   },
   "Auth": {
     "loginTitle": "BagajPark'a Giriş Yap",

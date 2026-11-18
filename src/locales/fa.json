@@ -1293,7 +1293,11 @@
     "setPasswordDone": "رمز عبور ذخیره شد. این پیام را برای کاربر بفرستید:",
     "setPasswordCopy": "کپی پیام",
     "setPasswordWhatsappMessage": "سلام {name}، رمز عبور جدید حساب BagajPark شما: {password}\nبا شماره تلفن یا ایمیل خود وارد شوید: {url}",
-    "teamIssuesNav": "پیگیری مشکلات (تیم)"
+    "teamIssuesNav": "پیگیری مشکلات (تیم)",
+    "shopsTabLive": "فعال",
+    "shopsTabPrelaunch": "آزمون تقاضا",
+    "statusPrelaunch": "آزمون تقاضا · بدون پذیرش چمدان",
+    "shopsPrelaunchHint": "این نقاط روی نقشه با «وقتی باز شد خبرم کن» نمایش داده می‌شوند و رزرو نمی‌پذیرند. تعداد درخواست‌ها در صفحه آزمون تقاضا است."
   },
   "Auth": {
     "loginTitle": "ورود به BagajPark",
