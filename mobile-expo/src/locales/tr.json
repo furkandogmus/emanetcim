@@ -714,7 +714,7 @@
     "name": "Dükkan adı",
     "capacity": "Günlük valiz kapasitesi",
     "price": "Günlük fiyat (₺)",
-    "priceHint": "Valiz başına günlük fiyat; misafir bu tutarı görür.",
+    "priceHint": "Orta boy valizin günlük fiyatı. Küçük ve büyük valiz fiyatı bundan hesaplanır; misafir üç boyu ayrı görür.",
     "addressSection": "Adres",
     "address": "Açık adres",
     "district": "İlçe",

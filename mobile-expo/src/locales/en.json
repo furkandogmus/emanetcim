@@ -714,7 +714,7 @@
     "name": "Shop name",
     "capacity": "Daily bag capacity",
     "price": "Daily price (₺)",
-    "priceHint": "Daily price per bag; guests see this amount.",
+    "priceHint": "Daily price for a medium bag. Small and large bag prices are worked out from it; guests see all three.",
     "addressSection": "Address",
     "address": "Street address",
     "district": "District",
