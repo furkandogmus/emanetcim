@@ -119,7 +119,10 @@
     "emptyTitle": "No bookable spots near {{place}} yet",
     "countNear_one": "{{count}} spot near you",
     "countNear_other": "{{count}} spots near you",
-    "emptyTitleNear": "No bookable spots near you yet"
+    "emptyTitleNear": "No bookable spots near you yet",
+    "hoursCloses": "Closes {{time}} · pick up your bags before then",
+    "hoursOpens": "Opens {{time}} · drop off from then",
+    "hoursPickupOpens": "Pick up from {{time}}"
   },
   "shop": {
     "open247": "Open 24/7",
@@ -168,7 +171,8 @@
       "shop_closed_on_date": "The shop is closed on the date you picked.",
       "shop_not_found": "This spot is no longer taking bookings.",
       "no_bags": "Pick at least one bag.",
-      "too_many_requests": "Too many requests. Try again shortly."
+      "too_many_requests": "Too many requests. Try again shortly.",
+      "shop_closed_at_time": "The shop is closed at the time you picked. Choose another time or place."
     },
     "code": {
       "prompt": "Have a discount or invite code?",
@@ -184,6 +188,12 @@
       "min_price": "This code works on bookings of {{amount}} or more.",
       "own_code": "You can't use your own invite code.",
       "not_first_booking": "Invite codes only work on your first booking."
+    },
+    "hours": {
+      "title": "Times set to the shop's hours",
+      "dropOpens": "Your drop-off is now {{time}}, when the shop opens.",
+      "pickupCloses": "The shop closes at {{time}}, so your pickup is now {{time}}. Collect your bags by then.",
+      "pickupOpens": "Your pickup is now {{time}}, when the shop opens."
     }
   },
   "success": {

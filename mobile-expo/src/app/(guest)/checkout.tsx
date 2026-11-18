@@ -3,13 +3,13 @@ import { KeyboardAvoidingView, Pressable, ScrollView, StyleSheet, View } from "r
 import { TicketPercent, X } from "lucide-react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { router, useLocalSearchParams } from "expo-router";
-import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useTranslation } from "react-i18next";
 
 import { StackHeader } from "@/components/StackHeader";
 import { AppText, Banner, Button, Card, CenterMessage, Divider, Loading } from "@/components/ui";
 import { Input } from "@/components/Field";
-import { api } from "@/lib/api";
+import { api, ApiError } from "@/lib/api";
 import { errorMessage } from "@/lib/errors";
 import { formatDayTime, formatMoney, stayDays } from "@/lib/format";
 import { estimate } from "@/lib/pricing";
@@ -30,6 +30,33 @@ export default function CheckoutScreen() {
   const [quote, setQuote] = useState<CheckoutQuote | null>(null);
   const [codeError, setCodeError] = useState<string | null>(null);
   const [quotedFor, setQuotedFor] = useState<string | null>(null);
+
+  /*
+    Saatler dukkanin saatine oturtulur (sunucu, `snapStayToShopHours`): alis
+    kapanistan sonraysa kapanisa cekilir. Ekran acilir acilmaz sorulur ki misafir
+    onaylamadan once GERCEK saati gorsun; rezervasyon da ayni kuralla olusur.
+  */
+  const hoursQuote = useQuery({
+    enabled: !!shopId,
+    queryKey: ["checkout", "hours", shopId, search.checkIn.toISOString(), search.checkOut.toISOString(), search.bags],
+    queryFn: () =>
+      api<CheckoutQuote>("/checkout/quote", {
+        method: "POST",
+        body: {
+          shopId,
+          checkInTime: search.checkIn.toISOString(),
+          checkOutTime: search.checkOut.toISOString(),
+          bagCountS: search.bags.s,
+          bagCountM: search.bags.m,
+          bagCountXl: search.bags.xl,
+        },
+      }),
+    retry: false,
+  });
+  const notice = hoursQuote.data?.hoursNotice ?? null;
+  const closedAtTime = hoursQuote.error instanceof ApiError && hoursQuote.error.code === "shop_closed_at_time";
+  const shownIn = hoursQuote.data?.checkInTime ? new Date(hoursQuote.data.checkInTime) : search.checkIn;
+  const shownOut = hoursQuote.data?.checkOutTime ? new Date(hoursQuote.data.checkOutTime) : search.checkOut;
 
   const mutation = useMutation({
     mutationFn: (body: CheckoutRequest) =>
@@ -76,8 +103,8 @@ export default function CheckoutScreen() {
   const bagCount = totalBags(search.bags);
   const booking = {
     shopId: shop.id,
-    checkInTime: search.checkIn.toISOString(),
-    checkOutTime: search.checkOut.toISOString(),
+    checkInTime: shownIn.toISOString(),
+    checkOutTime: shownOut.toISOString(),
     bagCountS: search.bags.s,
     bagCountM: search.bags.m,
     bagCountXl: search.bags.xl,
@@ -121,9 +148,26 @@ export default function CheckoutScreen() {
           <Divider />
           <EditableRow
             label={t("checkout.when")}
-            value={`${formatDayTime(search.checkIn)}\n→ ${formatDayTime(search.checkOut)}`}
+            value={`${formatDayTime(shownIn)}\n→ ${formatDayTime(shownOut)}`}
             onEdit={() => router.push({ pathname: "/search", params: { step: "1", returnTo: "back" } })}
           />
+          {closedAtTime ? <Banner tone="danger" body={t("checkout.errors.shop_closed_at_time")} /> : null}
+          {notice ? (
+            <Banner
+              tone="warning"
+              title={t("checkout.hours.title")}
+              body={[
+                notice.drop ? t("checkout.hours.dropOpens", { time: notice.drop.at }) : null,
+                notice.pickup
+                  ? t(notice.pickup.reason === "closes" ? "checkout.hours.pickupCloses" : "checkout.hours.pickupOpens", {
+                      time: notice.pickup.at,
+                    })
+                  : null,
+              ]
+                .filter(Boolean)
+                .join(" ")}
+            />
+          ) : null}
           <EditableRow
             label={t("checkout.bags")}
             value={t("common.bag", { count: bagCount })}
@@ -265,7 +309,7 @@ export default function CheckoutScreen() {
         <Button
           title={t("checkout.confirm")}
           loading={mutation.isPending}
-          disabled={bagCount === 0}
+          disabled={bagCount === 0 || closedAtTime}
           onPress={confirm}
           style={{ flex: 1 }}
         />

@@ -1,6 +1,6 @@
 import { memo } from "react";
 import { Pressable, StyleSheet, Text, View } from "react-native";
-import { BadgeCheck, Star, Store } from "lucide-react-native";
+import { BadgeCheck, Clock, Star, Store } from "lucide-react-native";
 import { useTranslation } from "react-i18next";
 import type { TFunction } from "i18next";
 
@@ -83,7 +83,18 @@ export const ShopCard = memo(function ShopCard({
           </AppText>
         </View>
 
-        {hours ? (
+        {shop.hoursNotice?.pickup || shop.hoursNotice?.drop ? (
+          <View style={styles.metaRow}>
+            <Clock size={13} color={colors.warning} />
+            <AppText variant="caption" numberOfLines={2} style={{ fontSize: 13, color: colors.warning, flexShrink: 1 }}>
+              {shop.hoursNotice.pickup
+                ? t(shop.hoursNotice.pickup.reason === "closes" ? "map.hoursCloses" : "map.hoursPickupOpens", {
+                    time: shop.hoursNotice.pickup.at,
+                  })
+                : t("map.hoursOpens", { time: shop.hoursNotice.drop!.at })}
+            </AppText>
+          </View>
+        ) : hours ? (
           <View style={styles.metaRow}>
             <View style={styles.openDot} />
             <AppText variant="caption" style={{ fontSize: 13, color: colors.inkSecondary }}>

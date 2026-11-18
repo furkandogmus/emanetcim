@@ -119,7 +119,10 @@
     "emptyTitle": "Noch keine buchbaren Orte in der Nähe von {{place}}",
     "countNear_one": "{{count}} Ort in deiner Nähe",
     "countNear_other": "{{count}} Orte in deiner Nähe",
-    "emptyTitleNear": "Noch keine buchbaren Orte in deiner Nähe"
+    "emptyTitleNear": "Noch keine buchbaren Orte in deiner Nähe",
+    "hoursCloses": "Schließt {{time}} · Gepäck vorher abholen",
+    "hoursOpens": "Öffnet {{time}} · Abgabe ab dann",
+    "hoursPickupOpens": "Abholung ab {{time}}"
   },
   "shop": {
     "open247": "24/7 geöffnet",
@@ -168,7 +171,8 @@
       "shop_closed_on_date": "Der Laden ist an dem gewählten Datum geschlossen.",
       "shop_not_found": "Dieser Ort nimmt keine Buchungen mehr an.",
       "no_bags": "Wähle mindestens ein Gepäckstück.",
-      "too_many_requests": "Zu viele Anfragen. Versuch es gleich noch einmal."
+      "too_many_requests": "Zu viele Anfragen. Versuch es gleich noch einmal.",
+      "shop_closed_at_time": "Der Laden ist zur gewählten Zeit geschlossen. Wähle eine andere Zeit oder einen anderen Ort."
     },
     "code": {
       "prompt": "Hast du einen Rabatt- oder Einladungscode?",
@@ -184,6 +188,12 @@
       "min_price": "Dieser Code gilt für Buchungen ab {{amount}}.",
       "own_code": "Du kannst deinen eigenen Einladungscode nicht verwenden.",
       "not_first_booking": "Einladungscodes gelten nur für deine erste Buchung."
+    },
+    "hours": {
+      "title": "Zeiten an die Öffnungszeiten angepasst",
+      "dropOpens": "Deine Abgabe ist jetzt um {{time}}, wenn der Laden öffnet.",
+      "pickupCloses": "Der Laden schließt um {{time}}, deine Abholung ist jetzt um {{time}}. Hol dein Gepäck bis dahin ab.",
+      "pickupOpens": "Deine Abholung ist jetzt um {{time}}, wenn der Laden öffnet."
     }
   },
   "success": {
