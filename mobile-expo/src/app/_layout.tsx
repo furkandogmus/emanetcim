@@ -66,7 +66,19 @@ function RootNavigator() {
       })
       .catch(() => undefined);
     const sub = Notifications.addNotificationResponseReceivedListener((r) => openFromNotification(r, role));
-    return () => sub.remove();
+    /*
+      Uygulama ACIKKEN gelen bildirim ekrandaki veriyi tazeler: esnaf check-in
+      yapinca ya da valiz duzeltmesi onerince misafirin elindeki ekran eski
+      durumda kaliyordu (onay karti ancak asagi cekince cikiyordu).
+    */
+    const received = Notifications.addNotificationReceivedListener(() => {
+      void queryClient.invalidateQueries({ queryKey: ["bookings"] });
+      void queryClient.invalidateQueries({ queryKey: ["partner"] });
+    });
+    return () => {
+      sub.remove();
+      received.remove();
+    };
   }, [state.status, role]);
 
   if (state.status === "loading") return null;
