@@ -103,6 +103,16 @@ export type BookingDetail = BookingSummary & {
   /** Eski sunucu gondermez; o zaman tekrar gonderim 409 ile yakalanir. */
   hasReview?: boolean;
   hasDispute?: boolean;
+  /** Esnafin onerdigi, misafir onayi bekleyen valiz duzeltmesi. */
+  pendingBagRevision?: PendingBagRevision | null;
+};
+
+export type PendingBagRevision = {
+  bagCountS: number;
+  bagCountM: number;
+  bagCountXl: number;
+  extraAmount: number;
+  newTotal: number;
 };
 
 export type PartnerBooking = BookingSummary & { guestName: string };
@@ -165,6 +175,17 @@ export type CheckoutRequest = {
   bagCountS: number;
   bagCountM: number;
   bagCountXl: number;
+  couponCode?: string;
+  referralCode?: string;
+};
+
+/** `POST checkout/quote`: indirim kodu onizlemesi. Baglayici degil. */
+export type CheckoutQuote = {
+  subtotal: number;
+  total: number;
+  discount: { kind: "coupon" | "referral"; code: string; amount: number } | null;
+  codeStatus: "applied" | "invalid" | "min_price" | "own_code" | "not_first_booking" | null;
+  minPrice: number | null;
 };
 
 export type CheckoutResponse = {

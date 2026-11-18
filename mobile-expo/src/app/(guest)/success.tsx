@@ -1,3 +1,4 @@
+import { useEffect } from "react";
 import { StyleSheet, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { router, useLocalSearchParams } from "expo-router";
@@ -5,11 +6,19 @@ import { LuggageTag } from "@/components/Illustrations";
 import { useTranslation } from "react-i18next";
 
 import { AppText, Button } from "@/components/ui";
+import { registerForPush } from "@/lib/push";
 import { colors, space } from "@/theme/tokens";
 
 export default function SuccessScreen() {
   const { bookingId } = useLocalSearchParams<{ bookingId: string }>();
   const { t } = useTranslation();
+
+  // Bildirim izni burada istenir: misafir az once rezervasyon yapti, check-in ve
+  // hatirlatma bildiriminin neden geldigi belli. Ekran oturduktan sonra sorulur.
+  useEffect(() => {
+    const id = setTimeout(() => void registerForPush({ prompt: true }).catch(() => undefined), 900);
+    return () => clearTimeout(id);
+  }, []);
 
   return (
     <SafeAreaView style={styles.safe}>

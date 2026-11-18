@@ -169,6 +169,21 @@
       "shop_not_found": "Bu nokta artık rezervasyon almıyor.",
       "no_bags": "En az bir valiz seç.",
       "too_many_requests": "Çok fazla istek. Biraz sonra tekrar dene."
+    },
+    "code": {
+      "prompt": "İndirim ya da davet kodun var mı?",
+      "add": "Ekle",
+      "label": "İndirim kodu",
+      "placeholder": "KOD",
+      "hint": "Kupon ya da arkadaşının davet kodu",
+      "remove": "Kodu kaldır",
+      "saved": "{{amount}} indirim uygulandı",
+      "couponLine": "Kupon · {{code}}",
+      "referralLine": "Davet indirimi · {{code}}",
+      "invalid": "Bu kod geçerli değil ya da süresi dolmuş.",
+      "min_price": "Bu kod {{amount}} ve üzeri rezervasyonlarda geçerli.",
+      "own_code": "Kendi davet kodunu kullanamazsın.",
+      "not_first_booking": "Davet kodu yalnızca ilk rezervasyonda geçerli."
     }
   },
   "success": {
@@ -624,8 +639,10 @@
       "no_bag_counts": "Valiz sayısı gönderilmedi; tekrar dene.",
       "insufficient_capacity": "Dükkanında bu saatlerde bu kadar valize yer yok. Sayıyı azaltıp tekrar dene.",
       "seal_count_mismatch": "Valizler mühürlü; mühür sayısından fazla valiz kaydedilemez.",
-      "guest_approval_required": "Bu düzeltme için misafirin onayı gerekiyor."
-    }
+      "guest_approval_required": "Bu düzeltme için misafirin onayı gerekiyor.",
+      "no_pending_revision": "Bu düzeltme artık geçerli değil; sayfayı yenile."
+    },
+    "pendingBody": "Misafire {{count}} valiz, {{total}} toplam için onay isteği gitti. Onaylayana kadar rezervasyon değişmez."
   },
   "seals": {
     "open": "Mühürler",
@@ -794,5 +811,19 @@
     "bookings": "Rezervasyonlar",
     "profile": "Profil",
     "storage": "Emanetler"
+  },
+  "guestRevision": {
+    "title": "Valiz sayısı düzeltmesi",
+    "body": "{{shop}} getirdiğin valizleri saydı ve rezervasyonunu güncellemek istiyor.",
+    "bags": "Valizler",
+    "extra": "Ek tutar",
+    "newTotal": "Yeni toplam",
+    "approve": "Onayla",
+    "reject": "Reddet",
+    "note": "Reddedersen rezervasyonun olduğu gibi kalır.",
+    "approvedTitle": "Düzeltme onaylandı",
+    "approvedBody": "Yeni toplam: {{total}}",
+    "rejectedTitle": "Düzeltme reddedildi",
+    "rejectedBody": "Rezervasyonun değişmedi. Bir sorun varsa dükkanla konuşabilirsin."
   }
 }

@@ -10,8 +10,8 @@ import type { Role } from "./types";
 /*
   Sunucu mobil bildirimi dogrudan FCM'e gonderir (`NotificationService.sendMobilePush`,
   firebase-admin). Bu yuzden Expo push token'i DEGIL, cihazin yerel token'i
-  (`getDevicePushTokenAsync`: Android'de FCM) kaydedilir. Bugun tek gonderim:
-  esnafa yeni rezervasyon; veride `bookingId` gelir.
+  (`getDevicePushTokenAsync`: Android'de FCM) kaydedilir. Esnafa yeni rezervasyon,
+  misafire onay/check-in/hatirlatma/valiz duzeltmesi gider; veride `bookingId` gelir.
 */
 
 Notifications.setNotificationHandler({
@@ -25,7 +25,12 @@ Notifications.setNotificationHandler({
 
 let registeredToken: string | null = null;
 
-export async function registerForPush(): Promise<void> {
+/**
+ * `prompt: false`: izin yoksa SORMAZ, yalnizca zaten verilmisse token'i kaydeder.
+ * Misafire izin penceresi girişte degil, ilk rezervasyondan sonra cikar; o anda
+ * "neden bildirim" sorusunun cevabi belli.
+ */
+export async function registerForPush({ prompt = true }: { prompt?: boolean } = {}): Promise<void> {
   if (Platform.OS === "android") {
     await Notifications.setNotificationChannelAsync("default", {
       name: "BagajPark",
@@ -33,6 +38,7 @@ export async function registerForPush(): Promise<void> {
     });
   }
   const current = await Notifications.getPermissionsAsync();
+  if (!current.granted && (!prompt || !current.canAskAgain)) return;
   const status = current.granted ? current : await Notifications.requestPermissionsAsync();
   if (!status.granted) return;
 
