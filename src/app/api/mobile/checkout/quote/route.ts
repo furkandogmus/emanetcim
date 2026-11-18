@@ -4,7 +4,7 @@ import { z } from "zod";
 import prisma from "@/lib/db";
 import { rateLimit } from "@/lib/rate-limit";
 import { requireMobileUser } from "@/lib/mobile-auth";
-import { computeAuthoritativeCheckoutTotals } from "@/lib/booking-server-price";
+import { checkoutLineItems, computeAuthoritativeCheckoutTotals } from "@/lib/booking-server-price";
 import { getPricingRules } from "@/lib/platform-settings";
 import { moneyToNumber } from "@/lib/money";
 import { applyReferralDiscount } from "@/lib/referral-discount";
@@ -81,6 +81,7 @@ export async function POST(req: NextRequest) {
   );
   if (!snapped) return NextResponse.json({ error: "shop_closed_at_time" }, { status: 409 });
 
+  const rules = await getPricingRules();
   const totals = computeAuthoritativeCheckoutTotals(
     moneyToNumber(shop.pricePerDay),
     d.bagCountS,
@@ -88,7 +89,7 @@ export async function POST(req: NextRequest) {
     d.bagCountXl,
     snapped.checkIn,
     snapped.checkOut,
-    await getPricingRules(),
+    rules,
   );
   const subtotal = totals.subtotalBeforeCoupon;
 
@@ -120,7 +121,11 @@ export async function POST(req: NextRequest) {
     }
   }
 
+  // Odeme ekrani fiyati KENDISI hesaplamaz: satirlar, gun ve sigorta buradan.
   return NextResponse.json({
+    days: totals.stayDays,
+    lines: checkoutLineItems(totals, rules),
+    insuranceFee: totals.insuranceFee,
     subtotal,
     total,
     discount,

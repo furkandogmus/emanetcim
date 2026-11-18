@@ -2,7 +2,7 @@ import { useState } from "react";
 import { ScrollView, StyleSheet, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { router, useLocalSearchParams } from "expo-router";
-import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useTranslation } from "react-i18next";
 
 import { BagCounter } from "@/components/BagCounter";
@@ -11,11 +11,10 @@ import { StackHeader } from "@/components/StackHeader";
 import { AppText, Banner, Button, Card, CenterMessage, Divider, Loading } from "@/components/ui";
 import { api } from "@/lib/api";
 import { errorMessage } from "@/lib/errors";
-import { formatMoney, stayDays } from "@/lib/format";
-import { estimate } from "@/lib/pricing";
-import { useBooking, useShop } from "@/lib/queries";
+import { formatMoney } from "@/lib/format";
+import { useBooking } from "@/lib/queries";
 import { totalBags } from "@/lib/search";
-import type { BookingDetail, ModifyBookingRequest, ModifyBookingResponse } from "@/lib/types";
+import type { BookingDetail, ModifyBookingPreview, ModifyBookingRequest, ModifyBookingResponse } from "@/lib/types";
 import { notify } from "@/lib/notify";
 import { colors, fonts, space } from "@/theme/tokens";
 
@@ -40,7 +39,6 @@ export default function ModifyBookingScreen() {
 function ModifyForm({ booking: b }: { booking: BookingDetail }) {
   const { t } = useTranslation();
   const queryClient = useQueryClient();
-  const shopQuery = useShop(b.shopId);
   const [checkIn, setCheckIn] = useState(() => new Date(b.checkInTime));
   const [checkOut, setCheckOut] = useState(() => new Date(b.checkOutTime));
   const [bags, setBags] = useState({ s: b.bagCountS, m: b.bagCountM, xl: b.bagCountXl });
@@ -66,47 +64,33 @@ function ModifyForm({ booking: b }: { booking: BookingDetail }) {
     bags.m !== b.bagCountM ||
     bags.xl !== b.bagCountXl;
 
+  const body: ModifyBookingRequest = {
+    checkInTime: checkIn.toISOString(),
+    checkOutTime: checkOut.toISOString(),
+    bagCountS: bags.s,
+    bagCountM: bags.m,
+    bagCountXl: bags.xl,
+  };
   /*
-    Sunucu yeni tutardan rezervasyonda kilitli kupon/referans indirimini duser
-    (`modifyBooking`). O alanlar mobil DTO'da yok; indirim, mevcut rezervasyonun
-    tahmini ile sunucudaki `totalPrice` farkindan cikarilir. Bu olmadan kuponlu,
-    odenmis bir rezervasyonda tutari degistirmeyen bir saat kaydirmasi bile
-    "tutar degisir" uyarisi gosterirdi.
+    Yeni tutar YALNIZCA sunucudan: ayni `modifyBooking`, yazmadan (`?preview=1`).
+    Ekran eskiden fiyati kendi formuluyle, kilitli indirimi de fark hesabiyla
+    "tahmin" ediyordu; kapali saat ve odenmis rezervasyon kurali da ancak
+    kaydederken ogreniliyordu.
   */
-  const shop = shopQuery.data;
-  const lockedDiscount = shop
-    ? Math.max(
-        0,
-        estimate(
-          shop,
-          { s: b.bagCountS, m: b.bagCountM, xl: b.bagCountXl },
-          stayDays(new Date(b.checkInTime), new Date(b.checkOutTime)),
-        ).total - b.totalPrice,
-      )
-    : 0;
-  const newTotal =
-    shop && windowValid && bagCount > 0
-      ? Math.max(
-          0,
-          Math.round((estimate(shop, bags, stayDays(checkIn, checkOut)).total - lockedDiscount) * 100) / 100,
-        )
-      : null;
-  /*
-    Sunucu (`modifyBooking`) odemesi alinmis rezervasyonda tutarin DEGISMESINI
-    `PRICE_INCREASE` ile reddeder -- dusus dahil. PaymentLog istemcide gorunmez,
-    o yuzden uyari yalnizca PAID icin; diger durumda sunucu hatasi cevrilir.
-  */
-  const paidPriceChange = b.status === "PAID" && newTotal !== null && Math.abs(newTotal - b.totalPrice) > 0.005;
+  const preview = useQuery({
+    enabled: changed && windowValid && bagCount > 0,
+    queryKey: ["bookings", b.id, "modify-preview", body],
+    queryFn: () =>
+      api<ModifyBookingPreview>(`/bookings/${b.id}/modify?preview=1`, { method: "PUT", body }),
+    retry: false,
+  });
+  const newTotal = changed ? (preview.data?.newTotal ?? null) : null;
+  const paidPriceChange = !!preview.data?.priceChangeBlocked;
+  const previewError = changed && preview.isError ? errorMessage(preview.error, "modify") : null;
 
   function save() {
     setError(null);
-    mutation.mutate({
-      checkInTime: checkIn.toISOString(),
-      checkOutTime: checkOut.toISOString(),
-      bagCountS: bags.s,
-      bagCountM: bags.m,
-      bagCountXl: bags.xl,
-    });
+    mutation.mutate(body);
   }
 
   return (
@@ -148,12 +132,12 @@ function ModifyForm({ booking: b }: { booking: BookingDetail }) {
                   {formatMoney(newTotal)}
                 </AppText>
               </View>
-              <AppText variant="caption">{t("modify.estimateNote")}</AppText>
             </>
           ) : null}
         </Card>
 
         {paidPriceChange ? <Banner tone="warning" body={t("modify.paidNote")} /> : null}
+        {previewError ? <Banner tone="danger" body={previewError} /> : null}
         {error ? <Banner tone="danger" body={error} /> : null}
       </ScrollView>
 
@@ -161,7 +145,7 @@ function ModifyForm({ booking: b }: { booking: BookingDetail }) {
         <Button
           title={t("modify.save")}
           loading={mutation.isPending}
-          disabled={!changed || !windowValid || bagCount === 0}
+          disabled={!changed || !windowValid || bagCount === 0 || paidPriceChange || !!previewError || preview.isFetching}
           onPress={save}
         />
       </View>

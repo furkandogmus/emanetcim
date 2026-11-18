@@ -139,7 +139,8 @@ export interface IBookingService {
   modifyBooking(
     bookingId: string,
     guestId: string,
-    input: ModifyBookingInput
+    input: ModifyBookingInput,
+    opts?: { dryRun?: boolean },
   ): Promise<ModifyBookingResult>;
 }
 
@@ -346,8 +347,9 @@ export class BookingService implements IBookingService {
 
   async modifyBooking(bookingId: string,
     guestId: string,
-    input: ModifyBookingInput): Promise<ModifyBookingResult> {
-    return modifyBookingImpl(bookingId, guestId, input);
+    input: ModifyBookingInput,
+    opts?: { dryRun?: boolean }): Promise<ModifyBookingResult> {
+    return modifyBookingImpl(bookingId, guestId, input, opts);
   }
 }
 export const bookingService = new BookingService();

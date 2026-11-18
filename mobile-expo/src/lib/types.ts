@@ -194,6 +194,10 @@ export type CheckoutRequest = {
 
 /** `POST checkout/quote`: indirim kodu onizlemesi. Baglayici degil. */
 export type CheckoutQuote = {
+  /** Sunucunun hesapladigi satirlar: ekran fiyati KENDISI hesaplamaz. Eski sunucu gondermez. */
+  days?: number;
+  lines?: { size: "s" | "m" | "xl"; count: number; days: number; amount: number }[];
+  insuranceFee?: number;
   subtotal: number;
   total: number;
   discount: { kind: "coupon" | "referral"; code: string; amount: number } | null;
@@ -215,6 +219,16 @@ export type CheckoutResponse = {
  * `PUT bookings/[id]/modify`. Iki saat ZORUNLU; valiz sayisi verilmezse sunucu
  * mevcut sayiyi korur. Basarida yalnizca `{ success: true }` doner.
  */
+/** `PUT bookings/[id]/modify?preview=1`: sunucunun hesapladigi yeni tutar, yazmadan. */
+export type ModifyBookingPreview = {
+  days: number;
+  lines: { size: "s" | "m" | "xl"; count: number; days: number; amount: number }[];
+  insuranceFee: number;
+  newTotal: number;
+  oldTotal: number;
+  priceChangeBlocked: boolean;
+};
+
 export type ModifyBookingRequest = {
   checkInTime: string;
   checkOutTime: string;

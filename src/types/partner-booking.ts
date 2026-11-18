@@ -66,6 +66,16 @@ export type ModifyBookingErrorCode =
   | "PRICE_INCREASE"
   | "UNKNOWN";
 
+export type ModifyBookingPreview = {
+  days: number;
+  lines: Array<{ size: "s" | "m" | "xl"; count: number; days: number; amount: number }>;
+  insuranceFee: number;
+  newTotal: number;
+  oldTotal: number;
+  /** Odemesi alinmis rezervasyonda tutar degisemez (PRICE_INCREASE); onizleme bunu onceden soyler. */
+  priceChangeBlocked: boolean;
+};
+
 export type ModifyBookingResult =
-  | { ok: true }
+  | { ok: true; preview?: ModifyBookingPreview }
   | { ok: false; code: ModifyBookingErrorCode; message: string };

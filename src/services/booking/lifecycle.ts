@@ -12,7 +12,7 @@ import { getPricingRules } from '@/lib/platform-settings';
 import { moneyToNumber } from '@/lib/money';
 import { CancelBookingResult, ModifyBookingResult } from '@/types/partner-booking';
 import { findClosedStayDay, isClosedAtStayTimes } from '@/services/ShopScheduleService';
-import { computeAuthoritativeCheckoutTotals, validateBookingStayWindow } from '@/lib/booking-server-price';
+import { checkoutLineItems, computeAuthoritativeCheckoutTotals, validateBookingStayWindow } from '@/lib/booking-server-price';
 import { bookingEventService } from '@/services/BookingEventService';
 import { paymentService } from '@/services/PaymentService';
 import { couponService } from '@/services/CouponService';
@@ -195,7 +195,13 @@ export async function cancelBooking(bookingId: string): Promise<CancelBookingRes
 export async function modifyBooking(
   bookingId: string,
   guestId: string,
-  input: ModifyBookingInput
+  input: ModifyBookingInput,
+  /*
+    `dryRun`: butun kapilar ve fiyat hesabi calisir, yazmadan once doner. Mobil
+    degistirme ekrani yeni tutari KENDI formuluyle tahmin ediyordu (kilitli
+    indirimi bile fark hesabiyla tahmin ederek); artik bunu gosterir.
+  */
+  opts: { dryRun?: boolean } = {},
 ): Promise<ModifyBookingResult> {
   const rules = await getPricingRules();
 
@@ -329,6 +335,20 @@ export async function modifyBooking(
     Math.round((authTotals.subtotalBeforeCoupon - lockedDiscount) * 100) / 100
   );
   const oldTotal = moneyToNumber(booking.totalPrice);
+
+  if (opts.dryRun) {
+    return {
+      ok: true,
+      preview: {
+        days: authTotals.stayDays,
+        lines: checkoutLineItems(authTotals, rules),
+        insuranceFee: authTotals.insuranceFee,
+        newTotal,
+        oldTotal,
+        priceChangeBlocked: isPaidLike && Math.abs(newTotal - oldTotal) > 0.005,
+      },
+    };
+  }
 
   if (isPaidLike && Math.abs(newTotal - oldTotal) > 0.005) {
     return {
