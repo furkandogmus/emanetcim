@@ -106,6 +106,8 @@ export type BookingDetail = BookingSummary & {
   latitude: number | null;
   longitude: number | null;
   shopPhone: string;
+  /** "Adres, semt, sehir". Eski sunucu gondermez. */
+  shopAddress?: string;
   seals: { sealNumber: number; bagIndex: number; bagSize: string }[];
   /** Eski sunucu gondermez; o zaman tekrar gonderim 409 ile yakalanir. */
   hasReview?: boolean;
@@ -138,6 +140,8 @@ export type PartnerShop = {
   image: string | null;
   /** Kapak disindaki fotograflar; `/partner/shop/images` ile eklenir/silinir. */
   gallery?: { id: string; url: string }[];
+  /** Kurulum ozeti: eksikse panoda "dukkanini tamamla". Eski sunucu gondermez. */
+  setup?: { hasPhoto: boolean; hoursConfigured: boolean };
 };
 
 /** `toMobileSealRequest` (mobile-dto.ts). Durum sunucuda serbest metin; bilinen degerler bunlar. */
@@ -261,6 +265,8 @@ export type GeocodeResult = {
   label: string;
   latitude: number;
   longitude: number;
+  /** En fazla bes sonuc (Turkiye). Eski sunucu gondermez: o zaman ust duzey tek sonuc. */
+  items?: { label: string; latitude: number; longitude: number }[];
 };
 
 /** `CONTACT_MESSAGE_LIST_SELECT` (src/lib/contact-message-list.ts); yalnizca kullanilan alanlar. */

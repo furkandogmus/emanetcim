@@ -229,7 +229,9 @@
     "overdueDays_one": "{{count}} day overdue",
     "overdueDays_other": "{{count}} days overdue",
     "offlineTitle": "No internet",
-    "offlineBody": "This is the last ticket saved on your phone. You can show the QR code at the shop; it updates when you're back online."
+    "offlineBody": "This is the last ticket saved on your phone. You can show the QR code at the shop; it updates when you're back online.",
+    "address": "Address",
+    "addressHint": "Press and hold to copy; you can show it to a taxi driver."
   },
   "status": {
     "PENDING": "Pending",
@@ -238,7 +240,8 @@
     "APPROVED": "Confirmed",
     "CHECKED_IN": "Bags at the shop",
     "CHECKED_OUT": "Completed",
-    "CANCELLED": "Cancelled"
+    "CANCELLED": "Cancelled",
+    "UNUSED": "Not used"
   },
   "partner": {
     "title": "Bags",
@@ -580,7 +583,8 @@
     "clear": "Clear search",
     "errors": {
       "too_many_requests": "You're searching too often. Try again in a moment.",
-      "invalid_query": "Type at least 3 letters to search."
+      "invalid_query": "Type at least 3 letters to search.",
+      "geocode_unavailable": "Address search isn't responding right now. Try again shortly or pick a city from the list."
     }
   },
   "modify": {
@@ -856,5 +860,12 @@
     "approvedBody": "New total: {{total}}",
     "rejectedTitle": "Correction declined",
     "rejectedBody": "Your booking hasn't changed. If something's off, talk to the shop."
+  },
+  "setup": {
+    "title": "Finish setting up your shop",
+    "photoTitle": "Add a shop photo",
+    "photoBody": "Spots with photos get picked more often on the map.",
+    "hoursTitle": "Set your opening hours",
+    "hoursBody": "Right now it shows the default 09:00–20:00; guests plan around these hours."
   }
 }
