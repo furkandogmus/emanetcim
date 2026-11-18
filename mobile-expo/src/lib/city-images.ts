@@ -37,6 +37,13 @@ export const CITY_IMAGES: Record<string, CityImage> = {
     license: "CC BY-SA 2.0",
     url: "https://commons.wikimedia.org/wiki/File:The_Blue_Lagoon_(1105270821).jpg",
   },
+  // Il geneli: Datca limani (Bodrum ve Fethiye kendi fotografini kullanir).
+  Muğla: {
+    source: require("../../assets/cities/mugla.jpg"),
+    author: "Nevit Dilmen",
+    license: "CC BY-SA 3.0",
+    url: "https://commons.wikimedia.org/wiki/File:Datca_1410417_Nevit.jpg",
+  },
   İstanbul: {
     source: require("../../assets/cities/istanbul.jpg"),
     author: "Helge Høifødt",
