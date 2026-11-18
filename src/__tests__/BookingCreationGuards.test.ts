@@ -43,6 +43,7 @@ const { mockPrisma, mockGetPricingRules, RULES } = vi.hoisted(() => {
 vi.mock("@/lib/db", () => ({ default: mockPrisma }));
 vi.mock("@/services/ShopScheduleService", () => ({
   findClosedStayDay: vi.fn().mockResolvedValue(null),
+  isClosedAtStayTimes: vi.fn().mockResolvedValue(false),
 }));
 vi.mock("@/lib/platform-settings", () => ({ getPricingRules: mockGetPricingRules }));
 vi.mock("@/services/BookingEventService", () => ({
@@ -177,6 +178,13 @@ describe("createInitialBooking tarih kapıları", () => {
     await expect(
       createInitialBooking({ ...BASE_INPUT, checkOutTime: new Date(`${TOO_FAR_DAY}T18:00:00Z`) }),
     ).rejects.toBeInstanceOf(BookingRejectedError);
+  });
+
+  it("dükkan seçilen SAATTE kapalıysa reddedilir (gün açık olsa bile)", async () => {
+    const { isClosedAtStayTimes } = await import("@/services/ShopScheduleService");
+    vi.mocked(isClosedAtStayTimes).mockResolvedValueOnce(true);
+    await expect(createInitialBooking(BASE_INPUT)).rejects.toMatchObject({ code: "SHOP_CLOSED_ON_DATE" });
+    expect(mockPrisma.$transaction).not.toHaveBeenCalled();
   });
 
   it("geçerli aralık kapılardan geçer", async () => {

@@ -1,6 +1,6 @@
 import prisma from "@/lib/db";
 import { PLATFORM_TIMEZONE, toDatetimeLocalValueInTimeZone } from "@/lib/datetime-local";
-import { hoursForDate, type ClosureRange, type ShopSchedule, type WeeklyDay } from "@/lib/shop-schedule";
+import { hoursForDate, isOpenAt, type ClosureRange, type ShopSchedule, type WeeklyDay } from "@/lib/shop-schedule";
 
 export type ShopScheduleParts = { weekly: WeeklyDay[]; closures: ClosureRange[] };
 
@@ -201,6 +201,18 @@ export async function removeClosure(shopId: string, closureId: string): Promise<
  * Birakis ya da alis gunu dukkan kapaliysa o gun (`YYYY-MM-DD`), degilse null.
  * Istemci pencereyi kendisi kurdugu icin son savunma sunucuda.
  */
+/**
+ * Birakis ya da alis ANINDA dukkan kapali mi (gun acik ama saat disi). Gun
+ * kapisi (`findClosedStayDay`) yalnizca gune bakiyordu: 20:00'de kapanan
+ * dukkana 23:00 alis kabul ediliyordu. Mobil odeme saati zaten oturtuyor;
+ * bu kapi web, mobil degisiklik ve dogrudan cagrilar icin.
+ */
+export async function isClosedAtStayTimes(shopId: string, checkIn: Date, checkOut: Date): Promise<boolean> {
+  const current = await currentSchedule(shopId);
+  if (!current || current.open247) return false;
+  return !isOpenAt(current, checkIn) || !isOpenAt(current, checkOut);
+}
+
 export async function findClosedStayDay(
   shopId: string,
   checkIn: Date,

@@ -5,7 +5,7 @@
  * yasam dongusu adimini tasiyordu. Sinif cephe olarak kaldi; davranis ayni.
  */
 import { BookingInputInvalidError, BookingShopClosedError } from '@/services/booking/errors';
-import { findClosedStayDay } from '@/services/ShopScheduleService';
+import { findClosedStayDay, isClosedAtStayTimes } from '@/services/ShopScheduleService';
 import { retryOnWriteConflict } from '@/lib/tx-retry';
 import { Booking, BookingStatus, Prisma } from '@prisma/client';
 import prisma from '@/lib/db';
@@ -112,6 +112,9 @@ export async function createInitialBooking(data: CreateInitialBookingInput): Pro
 
   if (await findClosedStayDay(data.shopId, data.checkInTime, data.checkOutTime)) {
     throw new BookingShopClosedError();
+  }
+  if (await isClosedAtStayTimes(data.shopId, data.checkInTime, data.checkOutTime)) {
+    throw new BookingShopClosedError('Dükkan seçilen saatte kapalı.');
   }
 
   const newBags = totalBagCount(data.bagCountS, data.bagCountM, data.bagCountXl);
