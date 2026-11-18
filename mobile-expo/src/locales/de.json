@@ -39,9 +39,11 @@
       "invalid_credentials": "E-Mail oder Passwort ist falsch.",
       "google_failed": "Anmeldung mit Google fehlgeschlagen. Versuch es später noch einmal oder nutze deine E-Mail.",
       "play_services": "Google Play-Dienste sind erforderlich. Aktualisiere sie und versuch es erneut.",
-      "invalid_token": "Wir konnten deine Google-Anmeldung nicht bestätigen. Versuch es erneut.",
+      "invalid_token": "Wir konnten deine Anmeldung nicht bestätigen. Versuch es erneut.",
       "email_not_verified": "Die E-Mail-Adresse dieses Google-Kontos ist nicht bestätigt.",
-      "google_not_configured": "Die Anmeldung mit Google ist gerade nicht verfügbar. Du kannst dich mit deiner E-Mail anmelden."
+      "google_not_configured": "Die Anmeldung mit Google ist gerade nicht verfügbar. Du kannst dich mit deiner E-Mail anmelden.",
+      "apple_failed": "Anmeldung mit Apple fehlgeschlagen. Versuch es später noch einmal oder nutze deine E-Mail.",
+      "apple_not_configured": "Die Anmeldung mit Apple ist gerade nicht verfügbar. Du kannst dich mit deiner E-Mail anmelden."
     },
     "usePassword": "Mit Passwort anmelden",
     "useCode": "Stattdessen Code per E-Mail senden",
