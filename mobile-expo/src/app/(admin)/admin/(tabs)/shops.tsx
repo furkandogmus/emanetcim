@@ -1,4 +1,4 @@
-import { FlatList, Linking, Pressable, RefreshControl, StyleSheet, View } from "react-native";
+import { Linking, Pressable, RefreshControl, SectionList, StyleSheet, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { router } from "expo-router";
 import { ChevronRight, Phone, Star } from "lucide-react-native";
@@ -19,8 +19,16 @@ export default function AdminShopsScreen() {
   const { t } = useTranslation();
   const query = useAdminShops();
   const pending = useAdminOverview().data?.attention.pendingApplications ?? 0;
-  const shops = query.data ?? [];
+  const all = query.data ?? [];
+  // Talep testi noktalari valiz ALMIYOR: dolulukla ayni listede durunca gercek dukkanlarla
+  // karisiyordu. Sayim ve toplam yalnizca hizmetteki dukkanlar.
+  const shops = all.filter((s) => !s.isPrelaunch);
+  const prelaunch = all.filter((s) => s.isPrelaunch);
   const stored = shops.reduce((a, s) => a + s.bagsInStorage, 0);
+  const sections = [
+    { key: "live", title: prelaunch.length > 0 ? t("admin.shopsLive") : null, data: shops },
+    ...(prelaunch.length > 0 ? [{ key: "prelaunch", title: t("admin.shopsPrelaunch"), data: prelaunch }] : []),
+  ];
 
   return (
     <SafeAreaView style={styles.safe} edges={["top"]}>
@@ -39,10 +47,18 @@ export default function AdminShopsScreen() {
           action={<Button variant="secondary" title={t("common.retry")} onPress={() => query.refetch()} />}
         />
       ) : (
-        <FlatList
-          data={shops}
+        <SectionList
+          sections={sections}
           keyExtractor={(s) => s.id}
-          contentContainerStyle={[styles.list, shops.length === 0 && { flex: 1 }]}
+          stickySectionHeadersEnabled={false}
+          contentContainerStyle={[styles.list, all.length === 0 && { flex: 1 }]}
+          renderSectionHeader={({ section }) =>
+            section.title ? (
+              <AppText variant="label" style={styles.sectionTitle}>
+                {section.title}
+              </AppText>
+            ) : null
+          }
           refreshControl={
             <RefreshControl refreshing={query.isRefetching} onRefresh={() => query.refetch()} tintColor={colors.accent} />
           }
@@ -61,10 +77,43 @@ export default function AdminShopsScreen() {
             ) : null
           }
           ListEmptyComponent={<CenterMessage art={<MapSnippet width={112} />} title={t("admin.noShops")} />}
-          renderItem={({ item }) => <ShopRow shop={item} />}
+          renderItem={({ item }) => (item.isPrelaunch ? <PrelaunchRow shop={item} /> : <ShopRow shop={item} />)}
         />
       )}
     </SafeAreaView>
+  );
+}
+
+/** Talep testi noktasi: doluluk ve bugunku hareket yok, cunku valiz almiyor. */
+function PrelaunchRow({ shop: s }: { shop: AdminShop }) {
+  const { t } = useTranslation();
+  return (
+    <View style={[styles.card, styles.prelaunchCard]}>
+      <View style={styles.top}>
+        <View style={{ flex: 1, gap: 4 }}>
+          <AppText variant="heading" numberOfLines={1} style={{ color: colors.inkSecondary }}>
+            {s.name}
+          </AppText>
+          <View style={styles.meta}>
+            <View style={styles.tag}>
+              <AppText variant="caption" style={styles.tagText}>
+                {t("admin.noBags")}
+              </AppText>
+            </View>
+            {s.place ? (
+              <AppText variant="caption" numberOfLines={1} style={{ fontSize: 13, flexShrink: 1 }}>
+                {s.place}
+              </AppText>
+            ) : null}
+          </View>
+        </View>
+        {s.phone ? (
+          <IconButton label={t("admin.callShop")} onPress={() => void Linking.openURL(`tel:${s.phone}`).catch(() => undefined)}>
+            <Phone size={18} color={colors.ink} />
+          </IconButton>
+        ) : null}
+      </View>
+    </View>
   );
 }
 
@@ -135,6 +184,17 @@ const styles = StyleSheet.create({
   safe: { flex: 1, backgroundColor: colors.bg },
   header: { padding: space.xl, paddingBottom: space.lg, gap: 2 },
   list: { paddingHorizontal: space.xl, paddingBottom: space.xxl, gap: space.md },
+  sectionTitle: { marginTop: space.md },
+  prelaunchCard: { backgroundColor: colors.surfaceMuted, borderStyle: "dashed" },
+  tag: {
+    paddingHorizontal: space.sm,
+    paddingVertical: 2,
+    borderRadius: radius.pill,
+    borderWidth: 1,
+    borderColor: colors.border,
+    backgroundColor: colors.surface,
+  },
+  tagText: { fontSize: 12, color: colors.inkSecondary },
   pending: {
     flexDirection: "row",
     alignItems: "center",
