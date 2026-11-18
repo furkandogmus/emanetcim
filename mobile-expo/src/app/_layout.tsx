@@ -1,3 +1,4 @@
+import "@/lib/intl-polyfills";
 import "@/lib/i18n";
 
 import { useEffect } from "react";
