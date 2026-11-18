@@ -57,6 +57,9 @@ type BookingDetailSource = BookingSummarySource & {
     /* Sema `Float?`: koordinatsiz dukkan (henuz haritaya islenmemis) mumkun. */
     latitude: number | null;
     longitude: number | null;
+    address?: string | null;
+    district?: string | null;
+    city?: string | null;
     owner: { phone: string | null };
   };
   seals: Array<{ sealNumber: number; bagIndex: number; bagSize: string }>;
@@ -87,6 +90,8 @@ export function toMobileBookingDetail(b: BookingDetailSource) {
     latitude: b.shop.latitude,
     longitude: b.shop.longitude,
     shopPhone: b.shop.owner.phone ?? "",
+    // Turist taksiciye gosterebilsin; koordinatsiz dukkanda yol tarifi de buradan.
+    shopAddress: [b.shop.address, b.shop.district, b.shop.city].filter(Boolean).join(", "),
     seals: b.seals.map((s) => ({
       sealNumber: s.sealNumber,
       bagIndex: s.bagIndex,
