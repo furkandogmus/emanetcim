@@ -1,5 +1,5 @@
 import { useRef } from "react";
-import { Alert, Linking, Platform, ScrollView, StyleSheet, View } from "react-native";
+import { Alert, KeyboardAvoidingView, Linking, Platform, RefreshControl, ScrollView, StyleSheet, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { router } from "expo-router";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
@@ -8,12 +8,14 @@ import { useTranslation } from "react-i18next";
 
 import { BagRevisionCard } from "@/components/BagRevisionCard";
 import { BookingTicket } from "@/components/BookingTicket";
+import { GuestBagRevisionCard } from "@/components/GuestBagRevisionCard";
 import { GuestDisputeCard } from "@/components/GuestDisputeCard";
 import { GuestReviewCard } from "@/components/GuestReviewCard";
 import { PartnerBookingActions } from "@/components/PartnerBookingActions";
-import { Button, CenterMessage, IconButton, Loading } from "@/components/ui";
+import { Banner, Button, CenterMessage, IconButton, Loading } from "@/components/ui";
 import { api } from "@/lib/api";
 import { errorMessage } from "@/lib/errors";
+import { formatMoney } from "@/lib/format";
 import { isActiveBooking, useBooking } from "@/lib/queries";
 import type { BookingDetail } from "@/lib/types";
 import { notify } from "@/lib/notify";
@@ -91,7 +93,17 @@ export function BookingDetailView({ id, mode }: { id: string; mode: "guest" | "p
         </IconButton>
       </View>
 
-      <ScrollView ref={scrollRef} contentContainerStyle={styles.content}>
+      <KeyboardAvoidingView style={{ flex: 1 }} behavior="padding">
+      <ScrollView
+        ref={scrollRef}
+        contentContainerStyle={styles.content}
+        keyboardShouldPersistTaps="handled"
+        refreshControl={
+          <RefreshControl refreshing={query.isRefetching} onRefresh={() => query.refetch()} tintColor={colors.accent} />
+        }
+      >
+        {/* Onay bekleyen duzeltme bilet ve QR'in USTUNDE: misafirin yapmasi gereken tek is bu. */}
+        {mode === "guest" ? <GuestBagRevisionCard booking={b} /> : null}
         <BookingTicket
           booking={b}
           showQr={showQr}
@@ -102,6 +114,16 @@ export function BookingDetailView({ id, mode }: { id: string; mode: "guest" | "p
         {/* Anahtar valiz sayilarini da tasir: revizyondan sonra muhur satirlari yeni sayidan kurulur. */}
         {mode === "partner" ? (
           <PartnerBookingActions key={`${b.status}-${b.bagCountS}-${b.bagCountM}-${b.bagCountXl}`} booking={b} />
+        ) : null}
+        {mode === "partner" && b.pendingBagRevision ? (
+          <Banner
+            tone="warning"
+            title={t("bagRevision.approvalTitle")}
+            body={t("bagRevision.pendingBody", {
+              count: b.pendingBagRevision.bagCountS + b.pendingBagRevision.bagCountM + b.pendingBagRevision.bagCountXl,
+              total: formatMoney(b.pendingBagRevision.newTotal),
+            })}
+          />
         ) : null}
         {mode === "partner" ? (
           <BagRevisionCard key={`rev-${b.status}-${b.bagCountS}-${b.bagCountM}-${b.bagCountXl}`} booking={b} />
@@ -152,6 +174,7 @@ export function BookingDetailView({ id, mode }: { id: string; mode: "guest" | "p
           </View>
         ) : null}
       </ScrollView>
+      </KeyboardAvoidingView>
     </SafeAreaView>
   );
 }

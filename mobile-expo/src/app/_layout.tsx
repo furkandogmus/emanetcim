@@ -53,7 +53,7 @@ function RootNavigator() {
   // Oturum acikken cihaz bildirime kaydolur; izin reddi ya da ag hatasi uygulamayi durdurmaz.
   useEffect(() => {
     if (state.status !== "signedIn") return;
-    void registerForPush().catch(() => undefined);
+    void registerForPush({ prompt: role !== "GUEST" }).catch(() => undefined);
     // Uygulama kapaliyken dokunulan bildirim de acilsin.
     // Son yanit surec boyunca kalir: temizlenmezse cikis/giristen sonra ayni rezervasyon
     // (baska kullanicida 403) yeniden aciliyordu. Bir kez isle, sonra sil.

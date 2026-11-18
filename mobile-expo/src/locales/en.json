@@ -169,6 +169,21 @@
       "shop_not_found": "This spot is no longer taking bookings.",
       "no_bags": "Pick at least one bag.",
       "too_many_requests": "Too many requests. Try again shortly."
+    },
+    "code": {
+      "prompt": "Have a discount or invite code?",
+      "add": "Add",
+      "label": "Discount code",
+      "placeholder": "CODE",
+      "hint": "A coupon or a friend's invite code",
+      "remove": "Remove code",
+      "saved": "{{amount}} off applied",
+      "couponLine": "Coupon · {{code}}",
+      "referralLine": "Invite discount · {{code}}",
+      "invalid": "This code isn't valid or has expired.",
+      "min_price": "This code works on bookings of {{amount}} or more.",
+      "own_code": "You can't use your own invite code.",
+      "not_first_booking": "Invite codes only work on your first booking."
     }
   },
   "success": {
@@ -624,8 +639,10 @@
       "no_bag_counts": "No bag count was sent; try again.",
       "insufficient_capacity": "Your shop has no room for this many bags at these times. Lower the count and try again.",
       "seal_count_mismatch": "The bags are sealed; you cannot record more bags than seals.",
-      "guest_approval_required": "This correction needs the guest's approval."
-    }
+      "guest_approval_required": "This correction needs the guest's approval.",
+      "no_pending_revision": "This correction is no longer pending; refresh the page."
+    },
+    "pendingBody": "The guest was asked to approve {{count}} bags for {{total}} in total. The booking won't change until they approve."
   },
   "seals": {
     "open": "Seals",
@@ -794,5 +811,19 @@
     "bookings": "Bookings",
     "profile": "Profile",
     "storage": "Bags"
+  },
+  "guestRevision": {
+    "title": "Bag count correction",
+    "body": "{{shop}} counted the bags you brought and wants to update your booking.",
+    "bags": "Bags",
+    "extra": "Extra",
+    "newTotal": "New total",
+    "approve": "Approve",
+    "reject": "Decline",
+    "note": "If you decline, your booking stays as it is.",
+    "approvedTitle": "Correction approved",
+    "approvedBody": "New total: {{total}}",
+    "rejectedTitle": "Correction declined",
+    "rejectedBody": "Your booking hasn't changed. If something's off, talk to the shop."
   }
 }

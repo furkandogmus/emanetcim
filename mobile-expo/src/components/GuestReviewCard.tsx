@@ -1,15 +1,17 @@
 import { useState } from "react";
-import { Pressable, StyleSheet, TextInput, View } from "react-native";
+import { Pressable, StyleSheet, View } from "react-native";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { Star } from "lucide-react-native";
 import { useTranslation } from "react-i18next";
 
 import { AppText, Banner, Button, Card } from "@/components/ui";
+import { Input } from "@/components/Field";
 import { ApiError, api } from "@/lib/api";
 import { errorMessage } from "@/lib/errors";
 import { keys } from "@/lib/queries";
+import { maybeAskForStoreReview } from "@/lib/store-review";
 import type { BookingDetail, CreateReviewRequest, CreateReviewResponse } from "@/lib/types";
-import { colors, fonts, radius, space } from "@/theme/tokens";
+import { colors, space } from "@/theme/tokens";
 
 /** Sunucu `MAX_REVIEW_COMMENT_LENGTH` (ReviewService.ts); asilirsa uc 500 `server_error` doner. */
 const MAX_COMMENT = 2000;
@@ -32,9 +34,11 @@ export function GuestReviewCard({ booking, onOpen }: { booking: BookingDetail; o
   const submit = useMutation({
     mutationFn: (body: CreateReviewRequest) =>
       api<CreateReviewResponse>("/reviews", { method: "POST", body }),
-    onSuccess: () => {
+    onSuccess: (_res, body) => {
       setError(null);
       setDone("sent");
+      // Tesekkur metni gorunsun, sonra Play'in puan penceresi.
+      setTimeout(() => void maybeAskForStoreReview(body.rating).catch(() => undefined), 1200);
       void queryClient.invalidateQueries({ queryKey: ["bookings"] });
       // Dukkan puani yorumla birlikte yeniden hesaplanir (ReviewService).
       void queryClient.invalidateQueries({ queryKey: keys.shop(booking.shopId) });
@@ -90,7 +94,7 @@ export function GuestReviewCard({ booking, onOpen }: { booking: BookingDetail; o
           </Pressable>
         ))}
       </View>
-      <TextInput
+      <Input
         accessibilityLabel={t("review.commentLabel")}
         value={comment}
         onChangeText={setComment}
@@ -98,7 +102,6 @@ export function GuestReviewCard({ booking, onOpen }: { booking: BookingDetail; o
         placeholderTextColor={colors.inkMuted}
         maxLength={MAX_COMMENT}
         multiline
-        style={styles.input}
       />
       {error ? <Banner tone="danger" body={error} /> : null}
       <Button
@@ -119,17 +122,4 @@ export function GuestReviewCard({ booking, onOpen }: { booking: BookingDetail; o
 const styles = StyleSheet.create({
   card: { gap: space.md },
   stars: { flexDirection: "row", gap: space.sm, justifyContent: "center", paddingVertical: space.sm },
-  input: {
-    minHeight: 96,
-    borderRadius: radius.control,
-    borderWidth: 1,
-    borderColor: colors.border,
-    backgroundColor: colors.surface,
-    paddingHorizontal: space.md,
-    paddingVertical: space.md,
-    fontFamily: fonts.body,
-    fontSize: 15,
-    color: colors.ink,
-    textAlignVertical: "top",
-  },
 });

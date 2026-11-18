@@ -1,11 +1,12 @@
 import { useState } from "react";
-import { Pressable, StyleSheet, TextInput, View } from "react-native";
+import { Pressable, StyleSheet, View } from "react-native";
 import { Image } from "expo-image";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { Check } from "lucide-react-native";
 import { useTranslation } from "react-i18next";
 
 import { AppText, Banner, Button, Card } from "@/components/ui";
+import { Input } from "@/components/Field";
 import { api } from "@/lib/api";
 import { errorMessage } from "@/lib/errors";
 import type { BookingDetail } from "@/lib/types";
@@ -106,7 +107,8 @@ export function PartnerBookingActions({ booking }: { booking: BookingDetail }) {
                 {t(`bags.${r.bagSize.toLowerCase()}`)}
               </AppText>
             </View>
-            <TextInput
+            <Input
+              style={styles.sealInput}
               accessibilityLabelledBy={`seal-${r.bagIndex}`}
               accessibilityLabel={t("partner.sealNumber")}
               value={r.sealNumber}
@@ -117,7 +119,6 @@ export function PartnerBookingActions({ booking }: { booking: BookingDetail }) {
               placeholder={t("partner.sealNumber")}
               placeholderTextColor={colors.inkMuted}
               keyboardType="number-pad"
-              style={styles.input}
             />
           </View>
         ))}
@@ -191,18 +192,7 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "center",
   },
-  input: {
-    width: 124,
-    minHeight: 48,
-    borderRadius: radius.control,
-    borderWidth: 1,
-    borderColor: colors.border,
-    backgroundColor: colors.surface,
-    paddingHorizontal: space.md,
-    fontFamily: fonts.monoMedium,
-    fontSize: 16,
-    color: colors.ink,
-  },
+  sealInput: { width: 124, fontFamily: fonts.monoMedium },
   sealCheck: {
     flexDirection: "row",
     alignItems: "center",

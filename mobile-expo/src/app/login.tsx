@@ -1,10 +1,8 @@
 import { useState } from "react";
 import {
   KeyboardAvoidingView,
-  Platform,
   ScrollView,
   StyleSheet,
-  TextInput,
   View,
   useWindowDimensions,
 } from "react-native";
@@ -17,6 +15,7 @@ import { LanguageButton } from "@/components/LanguageButton";
 import { BrandMark } from "@/components/BrandMark";
 import { GoogleButton } from "@/components/GoogleButton";
 import { AppText, Banner, Button } from "@/components/ui";
+import { Input } from "@/components/Field";
 import { useAuth } from "@/lib/auth";
 import { errorMessage } from "@/lib/errors";
 import { GoogleSignInError, googleSignInAvailable } from "@/lib/google-auth";
@@ -107,7 +106,7 @@ export default function LoginScreen() {
       <AppText variant="label" nativeID="emailLabel">
         {t("auth.emailLabel")}
       </AppText>
-      <TextInput
+      <Input
         accessibilityLabelledBy="emailLabel"
         value={email}
         onChangeText={setEmail}
@@ -119,7 +118,6 @@ export default function LoginScreen() {
         autoCorrect={false}
         returnKeyType={step === "password" ? "next" : "send"}
         onSubmitEditing={onSubmit}
-        style={styles.input}
       />
     </View>
   );
@@ -131,7 +129,7 @@ export default function LoginScreen() {
 
   return (
     <View style={styles.safe}>
-      <KeyboardAvoidingView style={{ flex: 1 }} behavior={Platform.OS === "ios" ? "padding" : undefined}>
+      <KeyboardAvoidingView style={{ flex: 1 }} behavior="padding">
         <ScrollView
           contentContainerStyle={{
             flexGrow: 1,
@@ -202,7 +200,7 @@ export default function LoginScreen() {
                   <AppText variant="label" nativeID="passwordLabel">
                     {t("auth.passwordLabel")}
                   </AppText>
-                  <TextInput
+                  <Input
                     accessibilityLabelledBy="passwordLabel"
                     value={password}
                     onChangeText={setPassword}
@@ -212,7 +210,6 @@ export default function LoginScreen() {
                     textContentType="password"
                     returnKeyType="go"
                     onSubmitEditing={passwordSignIn}
-                    style={styles.input}
                   />
                 </View>
                 {error ? <Banner tone="danger" body={error} /> : null}
@@ -243,7 +240,7 @@ export default function LoginScreen() {
                   <AppText variant="label" nativeID="codeLabel">
                     {t("auth.codeLabel")}
                   </AppText>
-                  <TextInput
+                  <Input
                     accessibilityLabelledBy="codeLabel"
                     value={code}
                     onChangeText={(v) => setCode(v.replace(/\D/g, "").slice(0, 6))}
@@ -252,7 +249,7 @@ export default function LoginScreen() {
                     textContentType="oneTimeCode"
                     maxLength={6}
                     autoFocus
-                    style={[styles.input, styles.codeInput]}
+                    style={styles.codeInput}
                   />
                 </View>
                 {error ? <Banner tone="danger" body={error} /> : null}
@@ -321,17 +318,6 @@ const styles = StyleSheet.create({
     paddingBottom: space.xxl + space.sm,
   },
   field: { gap: space.sm },
-  input: {
-    minHeight: 52,
-    borderRadius: radius.control,
-    borderWidth: 1,
-    borderColor: colors.border,
-    backgroundColor: colors.surface,
-    paddingHorizontal: space.lg,
-    fontFamily: fonts.body,
-    fontSize: 17,
-    color: colors.ink,
-  },
   codeInput: {
     fontFamily: fonts.monoMedium,
     fontSize: 26,
