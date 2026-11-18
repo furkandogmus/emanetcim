@@ -3,7 +3,7 @@
     "name": "BagajPark",
     "slug": "bagajpark",
     "scheme": "bagajpark",
-    "version": "0.2.1",
+    "version": "0.3.0",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
     "userInterfaceStyle": "light",
@@ -12,7 +12,11 @@
       "bundleIdentifier": "com.bagajpark",
       "infoPlist": {
         "ITSAppUsesNonExemptEncryption": false
-      }
+      },
+      "usesAppleSignIn": true,
+      "associatedDomains": [
+        "applinks:bagajpark.com"
+      ]
     },
     "android": {
       "package": "com.bagajpark",
@@ -36,6 +40,23 @@
       "permissions": [
         "android.permission.ACCESS_COARSE_LOCATION",
         "android.permission.ACCESS_FINE_LOCATION"
+      ],
+      "intentFilters": [
+        {
+          "action": "VIEW",
+          "autoVerify": true,
+          "data": [
+            {
+              "scheme": "https",
+              "host": "bagajpark.com",
+              "pathPattern": "/.*/shop/.*"
+            }
+          ],
+          "category": [
+            "BROWSABLE",
+            "DEFAULT"
+          ]
+        }
       ]
     },
     "web": {
@@ -54,7 +75,17 @@
           "backgroundColor": "#FDFCFB"
         }
       ],
-      "expo-localization",
+      [
+        "expo-localization",
+        {
+          "supportedLocales": [
+            "tr",
+            "en",
+            "de",
+            "ru"
+          ]
+        }
+      ],
       "expo-image",
       [
         "expo-location",
@@ -86,7 +117,17 @@
           "color": "#EA580C"
         }
       ],
-      "@react-native-google-signin/google-signin"
+      "@react-native-google-signin/google-signin",
+      "expo-apple-authentication",
+      [
+        "expo-build-properties",
+        {
+          "android": {
+            "enableMinifyInReleaseBuilds": true,
+            "enableShrinkResourcesInReleaseBuilds": true
+          }
+        }
+      ]
     ],
     "experiments": {
       "typedRoutes": true
@@ -95,7 +136,8 @@
       "router": {},
       "eas": {
         "projectId": "e977b077-e469-4d63-a705-99b7ddd86346"
-      }
+      },
+      "appleSignIn": false
     },
     "owner": "furkandogmus",
     "runtimeVersion": {
