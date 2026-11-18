@@ -308,7 +308,17 @@
     "makeCover": "Kapak yap",
     "deletePhoto": "Fotoğrafı sil",
     "deletePhotoTitle": "Bu fotoğraf silinsin mi?",
-    "actionFailed": "İşlem tamamlanamadı"
+    "actionFailed": "İşlem tamamlanamadı",
+    "checkInCtaCash": "{{amount}} tahsil ettim, teslim aldım",
+    "confirmCheckInTitle": "Valizleri teslim alıyor musun?",
+    "confirmCheckInCash_one": "{{count}} valiz teslim alındı ve {{amount}} tahsil edildi olarak kaydedilecek. Bu geri alınamaz.",
+    "confirmCheckInCash_other": "{{count}} valiz teslim alındı ve {{amount}} tahsil edildi olarak kaydedilecek. Bu geri alınamaz.",
+    "confirmCheckInPaid_one": "{{count}} valiz teslim alındı olarak kaydedilecek. Ödeme zaten alınmış.",
+    "confirmCheckInPaid_other": "{{count}} valiz teslim alındı olarak kaydedilecek. Ödeme zaten alınmış.",
+    "confirmCheckOutTitle": "Valizleri teslim ediyor musun?",
+    "confirmCheckOutBody_one": "{{count}} valiz misafire teslim edildi olarak kaydedilecek. Bu geri alınamaz.",
+    "confirmCheckOutBody_other": "{{count}} valiz misafire teslim edildi olarak kaydedilecek. Bu geri alınamaz.",
+    "confirmYes": "Evet, kaydet"
   },
   "profile": {
     "title": "Profil",
@@ -653,7 +663,8 @@
       "insufficient_capacity": "Dükkanında bu saatlerde bu kadar valize yer yok. Sayıyı azaltıp tekrar dene.",
       "seal_count_mismatch": "Valizler mühürlü; mühür sayısından fazla valiz kaydedilemez.",
       "guest_approval_required": "Bu düzeltme için misafirin onayı gerekiyor.",
-      "no_pending_revision": "Bu düzeltme artık geçerli değil; sayfayı yenile."
+      "no_pending_revision": "Bu düzeltme artık geçerli değil; sayfayı yenile.",
+      "revision_changed": "Dükkan düzeltmeyi az önce değiştirdi. Güncel tutara bakıp yeniden karar ver."
     },
     "pendingBody": "Misafire {{count}} valiz, {{total}} toplam için onay isteği gitti. Onaylayana kadar rezervasyon değişmez."
   },

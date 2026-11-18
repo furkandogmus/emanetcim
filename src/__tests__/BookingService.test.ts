@@ -58,6 +58,7 @@ const { mockTx, mockPrisma, mockSealService, mockPaymentService } = vi.hoisted((
     mockPaymentService,
     mockSealService: {
       applyCheckInWithinTx: vi.fn().mockResolvedValue(true),
+      assertCheckInSealsUsable: vi.fn().mockResolvedValue(undefined),
       applyCheckOutReturnSealsWithinTx: vi.fn().mockResolvedValue(true),
     },
     mockPrisma: {
@@ -104,6 +105,7 @@ vi.mock("@/lib/shop-schedule", () => ({
 vi.mock("@/services/ShopScheduleService", () => ({
   loadScheduleParts: vi.fn().mockResolvedValue(new Map()),
   findClosedStayDay: vi.fn().mockResolvedValue(null),
+  isClosedAtStayTimes: vi.fn().mockResolvedValue(false),
 }));
 
 /**
@@ -344,6 +346,16 @@ describe("BookingService Deep Logic", () => {
 
         expect(result.ok).toBe(false);
         expect((result as any).code).toBe("SEAL_NOT_ASSIGNED");
+      });
+
+      it("geçersiz mühür TAHSİLATTAN ÖNCE reddedilir — para 'alındı' diye yazılmaz", async () => {
+        mockGetPricingRules.mockResolvedValue(BASE_PRICING_RULES);
+        mockSealService.assertCheckInSealsUsable.mockRejectedValueOnce(new Error("SEAL_FAULTY_INVALID:999"));
+        const res = await service.checkIn("b1", { sealAssignments: [], faultySealNumbers: [999] });
+        expect(res.ok).toBe(false);
+        expect(res.ok ? null : res.code).toBe("SEAL_FAULTY_INVALID");
+        expect(mockPaymentService.openIntent).not.toHaveBeenCalled();
+        expect(mockPaymentService.markCaptured).not.toHaveBeenCalled();
       });
 
       it("yalnızca BOZUK mühür bildirilse bile SealService çağrılır", async () => {

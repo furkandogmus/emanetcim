@@ -308,7 +308,17 @@
     "makeCover": "Make cover",
     "deletePhoto": "Delete photo",
     "deletePhotoTitle": "Delete this photo?",
-    "actionFailed": "Couldn't complete that"
+    "actionFailed": "Couldn't complete that",
+    "checkInCtaCash": "Collected {{amount}}, bags received",
+    "confirmCheckInTitle": "Receive the bags?",
+    "confirmCheckInCash_one": "{{count}} bag will be recorded as received and {{amount}} as collected. This can't be undone.",
+    "confirmCheckInCash_other": "{{count}} bags will be recorded as received and {{amount}} as collected. This can't be undone.",
+    "confirmCheckInPaid_one": "{{count}} bag will be recorded as received. Payment is already taken.",
+    "confirmCheckInPaid_other": "{{count}} bags will be recorded as received. Payment is already taken.",
+    "confirmCheckOutTitle": "Hand the bags back?",
+    "confirmCheckOutBody_one": "{{count}} bag will be recorded as returned to the guest. This can't be undone.",
+    "confirmCheckOutBody_other": "{{count}} bags will be recorded as returned to the guest. This can't be undone.",
+    "confirmYes": "Yes, record it"
   },
   "profile": {
     "title": "Profile",
@@ -653,7 +663,8 @@
       "insufficient_capacity": "Your shop has no room for this many bags at these times. Lower the count and try again.",
       "seal_count_mismatch": "The bags are sealed; you cannot record more bags than seals.",
       "guest_approval_required": "This correction needs the guest's approval.",
-      "no_pending_revision": "This correction is no longer pending; refresh the page."
+      "no_pending_revision": "This correction is no longer pending; refresh the page.",
+      "revision_changed": "The shop just changed the correction. Check the new amount and decide again."
     },
     "pendingBody": "The guest was asked to approve {{count}} bags for {{total}} in total. The booking won't change until they approve."
   },

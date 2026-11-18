@@ -128,6 +128,15 @@ export async function checkIn(
      * alınmadı). Ters sıra ise `CHECKED_IN` ama ödemesiz bırakırdı — düzeltmeye
      * çalıştığımız hatanın ta kendisi.
      */
+    // Muhurler tahsilattan ONCE dogrulanir: yanlis bir numara parayi "alindi" diye yazdirmasin.
+    if (seals?.sealAssignments?.length || seals?.faultySealNumbers?.length) {
+      await sealService.assertCheckInSealsUsable({
+        shopId: existing.shopId,
+        assignments: seals.sealAssignments ?? [],
+        faultySealNumbers: seals.faultySealNumbers ?? [],
+      });
+    }
+
     const alreadyCaptured = await paymentService.hasCapturedPayment(bookingId);
     if (!alreadyCaptured) {
       if (paymentService.capabilities.capturesOnline) {
