@@ -1,5 +1,6 @@
 import { memo, useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { FlatList, Pressable, StyleSheet, Text, View, useWindowDimensions } from "react-native";
+import { FlatList, PixelRatio, Pressable, StyleSheet, Text, View, useWindowDimensions } from "react-native";
+import { Image } from "expo-image";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { Camera, Map, Marker, UserLocation } from "@maplibre/maplibre-react-native";
 import type { CameraRef, LngLatBounds } from "@maplibre/maplibre-react-native";
@@ -12,6 +13,7 @@ import { MapSnippet } from "@/components/Illustrations";
 import { ShopCard } from "@/components/ShopCard";
 import { AppText, Button, CenterMessage, IconButton, Loading } from "@/components/ui";
 import { errorMessage } from "@/lib/errors";
+import { thumbUrl } from "@/lib/images";
 import { formatDay, formatMoney } from "@/lib/format";
 import { MAP_ATTRIBUTION, useMapStyle } from "@/lib/map-style";
 import { useNearbyShops } from "@/lib/queries";
@@ -98,6 +100,16 @@ export default function MapScreen() {
     [query.data],
   );
   const selected = shops.find((s) => s.id === selectedId) ?? null;
+
+  // Sonuclar gelince kart kucuk resimleri arka planda diske iner: liste kaydirilirken
+  // her kart bos kutu olarak acilmaz. Ayni adres ikinci kez indirilmez.
+  useEffect(() => {
+    const urls = shops
+      .slice(0, 20)
+      .map((s) => thumbUrl(s.image, 64, PixelRatio.get()))
+      .filter((u): u is string => !!u);
+    if (urls.length) void Image.prefetch(urls, "memory-disk").catch(() => undefined);
+  }, [shops]);
 
   if (!search.place || !center) return <Redirect href="/search" />;
 

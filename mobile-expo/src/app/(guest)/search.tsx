@@ -12,6 +12,7 @@ import { PlaceSearch } from "@/components/PlaceSearch";
 import { StayWindowPicker, isStayWindowValid } from "@/components/StayWindowPicker";
 import { AppText, Banner, Button, IconButton } from "@/components/ui";
 import { CITY_IMAGES } from "@/lib/city-images";
+import { RemoteImage } from "@/components/RemoteImage";
 import { resolveImage } from "@/lib/images";
 import { useCities } from "@/lib/queries";
 import { totalBags, useSearch } from "@/lib/search";
@@ -130,8 +131,8 @@ export default function SearchWizard() {
               </AppText>
               <View style={styles.cityList}>
                 {cityList.map((c, i) => {
-                  const remote = resolveImage(c.coverImage);
-                  const photo = CITY_IMAGES[c.name]?.source ?? (remote ? { uri: remote } : null);
+                  const local = CITY_IMAGES[c.name]?.source;
+                  const hasRemote = !local && resolveImage(c.coverImage) != null;
                   return (
                     <Pressable
                       key={c.name}
@@ -143,8 +144,10 @@ export default function SearchWizard() {
                         pressed && { backgroundColor: colors.surfaceMuted },
                       ]}
                     >
-                      {photo ? (
-                        <Image source={photo} style={styles.cityThumb} contentFit="cover" />
+                      {local ? (
+                        <Image source={local} style={styles.cityThumb} contentFit="cover" />
+                      ) : hasRemote ? (
+                        <RemoteImage src={c.coverImage} width={48} style={styles.cityThumb} contentFit="cover" />
                       ) : (
                         <View style={styles.cityThumb} />
                       )}

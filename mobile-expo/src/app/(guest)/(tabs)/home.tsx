@@ -12,6 +12,7 @@ import { BrandMark } from "@/components/BrandMark";
 import { BookingRow } from "@/components/BookingRow";
 import { LuggageTag, MapSnippet, SealedBag } from "@/components/Illustrations";
 import { InfoSheet } from "@/components/InfoSheet";
+import { RemoteImage } from "@/components/RemoteImage";
 import { CITY_IMAGES } from "@/lib/city-images";
 import { formatDayTime } from "@/lib/format";
 import { resolveImage } from "@/lib/images";
@@ -161,8 +162,7 @@ export default function HomeScreen() {
                 ? [0, 1, 2].map((i) => <View key={i} style={styles.cityCard} />)
                 : cities.data!.map((c) => {
                     const local = CITY_IMAGES[c.name]?.source;
-                    const remote = resolveImage(c.coverImage);
-                    const photo = local ?? (remote ? { uri: remote } : null);
+                    const photo = local ?? (resolveImage(c.coverImage) ? c.coverImage : null);
                     return (
                       <Pressable
                         key={c.name}
@@ -176,7 +176,11 @@ export default function HomeScreen() {
                       >
                         {photo ? (
                           <>
-                            <Image source={photo} style={StyleSheet.absoluteFill} contentFit="cover" />
+                            {local ? (
+                              <Image source={local} style={StyleSheet.absoluteFill} contentFit="cover" />
+                            ) : (
+                              <RemoteImage src={c.coverImage} width={132} style={StyleSheet.absoluteFill} contentFit="cover" />
+                            )}
                             <View style={styles.cityScrim} />
                           </>
                         ) : (

@@ -1,12 +1,12 @@
 import { memo } from "react";
 import { Pressable, StyleSheet, Text, View } from "react-native";
-import { Image } from "expo-image";
 import { BadgeCheck, Star, Store } from "lucide-react-native";
 import { useTranslation } from "react-i18next";
 import type { TFunction } from "i18next";
 
 import { AppText } from "@/components/ui";
 import { formatKm, formatMoney, formatRating } from "@/lib/format";
+import { RemoteImage } from "@/components/RemoteImage";
 import { resolveImage } from "@/lib/images";
 import type { NearbyShop } from "@/lib/types";
 import { colors, fonts, radius, space } from "@/theme/tokens";
@@ -54,7 +54,7 @@ export const ShopCard = memo(function ShopCard({
     >
       <View style={styles.photo}>
         {image ? (
-          <Image source={{ uri: image }} style={StyleSheet.absoluteFill} contentFit="cover" transition={150} />
+          <RemoteImage src={shop.image} width={64} style={StyleSheet.absoluteFill} contentFit="cover" />
         ) : (
           <Store size={24} color={colors.borderStrong} strokeWidth={1.5} />
         )}
