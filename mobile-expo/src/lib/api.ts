@@ -68,6 +68,41 @@ export function setSessionExpiredHandler(fn: () => void) {
 const REQUEST_TIMEOUT_MS = 12_000;
 const UPLOAD_TIMEOUT_MS = 60_000;
 
+/** `fetch` ve XHR yanitlarinin ortak, kullandigimiz kadarlik yuzu. */
+type HttpResponse = { status: number; ok: boolean; text(): Promise<string>; json(): Promise<unknown> };
+
+/**
+ * Dosya yuklemesi XHR ile: Expo'nun genel `fetch`i (expo/fetch) React Native'in
+ * `{ uri, name, type }` dosya parcasini tanimiyor ve istek sunucuya hic gitmeden
+ * "Unsupported FormDataPart implementation" ile dusuyordu; esnafin vitrin fotografi
+ * ve profil fotografi bu yuzden "sunucuya ulasilamadi" veriyordu (2026-11-18,
+ * emulatorde). RN'nin yerel XHR'si bu parcayi dosyadan okuyup gonderiyor.
+ */
+function uploadWithXhr(
+  url: string,
+  init: { method: string; headers: Record<string, string>; body: FormData },
+  ms: number,
+): Promise<HttpResponse> {
+  return new Promise((resolve, reject) => {
+    const xhr = new XMLHttpRequest();
+    xhr.open(init.method, url);
+    for (const [k, v] of Object.entries(init.headers)) xhr.setRequestHeader(k, v);
+    xhr.timeout = ms;
+    xhr.onload = () => {
+      const text = xhr.responseText ?? "";
+      resolve({
+        status: xhr.status,
+        ok: xhr.status >= 200 && xhr.status < 300,
+        text: async () => text,
+        json: async () => JSON.parse(text),
+      });
+    };
+    xhr.onerror = () => reject(new Error("network"));
+    xhr.ontimeout = () => reject(new Error("timeout"));
+    xhr.send(init.body);
+  });
+}
+
 function fetchWithTimeout(url: string, init: RequestInit, ms = REQUEST_TIMEOUT_MS): Promise<Response> {
   const controller = new AbortController();
   const timer = setTimeout(() => controller.abort(), ms);
@@ -130,14 +165,15 @@ export async function api<T>(path: string, opts: RequestOptions = {}): Promise<T
     const isForm = body instanceof FormData;
     if (body !== undefined && !isForm) headers["Content-Type"] = "application/json";
     if (auth && accessToken) headers.Authorization = `Bearer ${accessToken}`;
-    return fetchWithTimeout(`${API_BASE_URL}${path}`, {
-      method,
-      headers,
-      body: body === undefined ? undefined : isForm ? body : JSON.stringify(body),
-    }, isForm ? UPLOAD_TIMEOUT_MS : REQUEST_TIMEOUT_MS);
+    if (isForm) return uploadWithXhr(`${API_BASE_URL}${path}`, { method, headers, body }, UPLOAD_TIMEOUT_MS);
+    return fetchWithTimeout(
+      `${API_BASE_URL}${path}`,
+      { method, headers, body: body === undefined ? undefined : JSON.stringify(body) },
+      REQUEST_TIMEOUT_MS,
+    ) as Promise<HttpResponse>;
   };
 
-  let res: Response;
+  let res: HttpResponse;
   try {
     res = await send();
   } catch {
