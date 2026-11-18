@@ -128,7 +128,8 @@
             "extraProguardRules": "-keep class org.maplibre.** { *; }\n-dontwarn org.maplibre.**"
           }
         }
-      ]
+      ],
+      "./plugins/with-optional-portrait"
     ],
     "experiments": {
       "typedRoutes": true
