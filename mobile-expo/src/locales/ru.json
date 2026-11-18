@@ -17,7 +17,9 @@
     "bag_many": "{{count}} мест багажа",
     "bag_other": "{{count}} места багажа",
     "ok": "ОК",
-    "clear": "Очистить"
+    "clear": "Очистить",
+    "scrollBack": "Прокрутить назад",
+    "scrollForward": "Прокрутить вперёд"
   },
   "auth": {
     "title": "Вход",

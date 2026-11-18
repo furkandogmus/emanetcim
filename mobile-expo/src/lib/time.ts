@@ -36,6 +36,21 @@ export function atWallMinutes(d: Date, minutes: number): Date {
   return wallInstant(p.year, p.month, p.day, Math.floor(minutes / 60), minutes % 60);
 }
 
+/** Saat seridinin adimi: yarim saat. */
+export const SLOT_MINUTES = 30;
+
+/**
+ * `now`dan sonraki (ya da tam ona denk gelen) ilk yarim saatlik dilim, Istanbul saatiyle.
+ * 13:00 -> 13:00, 13:01 -> 13:30, 23:45 -> ertesi gun 00:00.
+ */
+export function nextSlot(now: Date): Date {
+  const p = wallParts(now);
+  const exact = now.getSeconds() === 0 && now.getMilliseconds() === 0;
+  const m = p.hour * 60 + p.minute + (exact ? 0 : 1);
+  const up = Math.ceil(m / SLOT_MINUTES) * SLOT_MINUTES;
+  return wallInstant(p.year, p.month, p.day, Math.floor(up / 60), up % 60);
+}
+
 export function wallMinutes(d: Date): number {
   const p = wallParts(d);
   return p.hour * 60 + p.minute;
