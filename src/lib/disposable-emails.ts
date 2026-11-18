@@ -70,3 +70,23 @@ export function isDisposableEmail(email: string): boolean {
   
   return false;
 }
+
+/**
+ * Bot kayit kalibi (2026-11-18, prod'da goruldu): `adsoyad.NNNNN@gmail.com` —
+ * kucuk harf ad+soyad, nokta, tam bes rakam. Gercek Gmail hesaplari (dogrulamali
+ * Google girisi de geciyor), yani kod istemek ya da Google'in dogrulamasi durdurmuyor.
+ * Yalnizca YENI kayitta bakilir; var olan hesaplar girmeye devam eder.
+ */
+const BOT_PATTERN_LOCAL = /^[a-z]{4,}\.\d{5}$/;
+const GMAIL_DOMAINS = new Set(["gmail.com", "googlemail.com"]);
+
+export function isBotPatternEmail(email: string): boolean {
+  const [local, domain] = email.trim().toLowerCase().split("@");
+  if (!local || !domain || !GMAIL_DOMAINS.has(domain)) return false;
+  return BOT_PATTERN_LOCAL.test(local);
+}
+
+/** Yeni hesap acilmasina izin verilmeyen e-posta: gecici domain ya da bot kalibi. */
+export function isBlockedSignupEmail(email: string): boolean {
+  return isDisposableEmail(email) || isBotPatternEmail(email);
+}

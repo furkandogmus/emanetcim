@@ -5,6 +5,7 @@ import { createRemoteJWKSet, jwtVerify } from "jose";
 import prisma from "@/lib/db";
 import { signAccessToken, signRefreshToken } from "@/lib/mobile-auth";
 import { rateLimit } from "@/lib/rate-limit";
+import { isBlockedSignupEmail } from "@/lib/disposable-emails";
 import { clientIp } from "@/lib/internal-api-guard";
 import { notificationService } from "@/services/NotificationService";
 import { analyticsService } from "@/services/AnalyticsService";
@@ -56,6 +57,7 @@ export async function POST(req: NextRequest) {
 
     let user = await prisma.user.findUnique({ where: { email } });
     if (!user) {
+      if (isBlockedSignupEmail(email)) return NextResponse.json({ error: "invalid_email" }, { status: 403 });
       user = await prisma.user.create({
         data: { email, name, image: picture, role: "GUEST", emailVerified: new Date() },
       });

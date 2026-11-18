@@ -5,6 +5,7 @@ import { createRemoteJWKSet, jwtVerify } from "jose";
 import prisma from "@/lib/db";
 import { signAccessToken, signRefreshToken } from "@/lib/mobile-auth";
 import { rateLimit } from "@/lib/rate-limit";
+import { isBlockedSignupEmail } from "@/lib/disposable-emails";
 import { clientIp } from "@/lib/internal-api-guard";
 import { notificationService } from "@/services/NotificationService";
 import { analyticsService } from "@/services/AnalyticsService";
@@ -86,6 +87,7 @@ export async function POST(req: NextRequest) {
       // eklemek) — bu durumda "yeni kullanıcı" bildirimi YANLIŞ olur; yalnızca
       // gerçekten yeni bir hesap yaratılınca gönderilmeli.
       const existedBefore = email ? !!(await prisma.user.findUnique({ where: { email } })) : false;
+      if (email && !existedBefore && isBlockedSignupEmail(email)) return NextResponse.json({ error: "invalid_email" }, { status: 403 });
       if (email) {
         user = await prisma.user.upsert({
           where: { email },
