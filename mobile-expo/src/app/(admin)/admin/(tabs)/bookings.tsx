@@ -1,11 +1,11 @@
 import { memo, useCallback, useEffect, useState } from "react";
-import { FlatList, Pressable, RefreshControl, ScrollView, StyleSheet, TextInput, View } from "react-native";
+import { FlatList, Pressable, RefreshControl, ScrollView, StyleSheet, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { router, useLocalSearchParams } from "expo-router";
-import { Search, X } from "lucide-react-native";
 import { useTranslation } from "react-i18next";
 
 import { LuggageTag } from "@/components/Illustrations";
+import { SearchBox } from "@/components/SearchBox";
 import { StatusBadge } from "@/components/StatusBadge";
 import { AppText, Button, CenterMessage, Chip, Loading } from "@/components/ui";
 import { errorMessage } from "@/lib/errors";
@@ -55,7 +55,7 @@ export default function AdminBookingsScreen() {
     <SafeAreaView style={styles.safe} edges={["top"]}>
       <View style={styles.header}>
         <AppText variant="title">{t("admin.tabs.bookings")}</AppText>
-        <SearchBox onSearch={setQ} />
+        <SearchBox placeholder={t("admin.searchPlaceholder")} onSearch={setQ} />
       </View>
 
       <View>
@@ -103,41 +103,6 @@ export default function AdminBookingsScreen() {
         />
       )}
     </SafeAreaView>
-  );
-}
-
-/**
- * Yazilan metin burada tutulur: her tusta liste degil yalnizca kutu yeniden cizilir.
- * Istek, yazma durduktan 300 ms sonra gider.
- */
-function SearchBox({ onSearch }: { onSearch: (q: string) => void }) {
-  const { t } = useTranslation();
-  const [text, setText] = useState("");
-  useEffect(() => {
-    const id = setTimeout(() => onSearch(text), 300);
-    return () => clearTimeout(id);
-  }, [text, onSearch]);
-
-  return (
-    <View style={styles.search}>
-      <Search size={18} color={colors.inkMuted} />
-      <TextInput
-        value={text}
-        onChangeText={setText}
-        placeholder={t("admin.searchPlaceholder")}
-        placeholderTextColor={colors.inkMuted}
-        autoCapitalize="none"
-        autoCorrect={false}
-        returnKeyType="search"
-        accessibilityLabel={t("admin.searchPlaceholder")}
-        style={styles.searchInput}
-      />
-      {text ? (
-        <Pressable accessibilityRole="button" accessibilityLabel={t("common.clear")} hitSlop={13} onPress={() => setText("")}>
-          <X size={18} color={colors.inkMuted} />
-        </Pressable>
-      ) : null}
-    </View>
   );
 }
 
@@ -199,18 +164,6 @@ const Row = memo(function Row({
 const styles = StyleSheet.create({
   safe: { flex: 1, backgroundColor: colors.bg },
   header: { padding: space.xl, paddingBottom: space.md, gap: space.md },
-  search: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: space.sm,
-    minHeight: 48,
-    paddingHorizontal: space.md,
-    borderRadius: radius.control,
-    borderWidth: 1,
-    borderColor: colors.border,
-    backgroundColor: colors.surface,
-  },
-  searchInput: { flex: 1, fontFamily: fonts.body, fontSize: 16, color: colors.ink, paddingVertical: space.sm },
   chips: { paddingHorizontal: space.xl, gap: space.sm, paddingBottom: space.md },
   list: { paddingHorizontal: space.xl, paddingBottom: space.xxl },
   // Satirlar tek kartta: kenarlar paylasilir, ilk ve son kose yuvarlanir.

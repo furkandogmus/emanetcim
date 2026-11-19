@@ -3,7 +3,7 @@ import { useQuery, type QueryClient } from "@tanstack/react-query";
 import { api } from "./api";
 import { useAuth } from "./auth";
 import { usePartnerShopSelection, withShop } from "./partner-shop";
-import type { AdminApplication, AdminStats, BookingDetail, ContactMessage, PartnerEarnings, PartnerSealsResponse, PartnerShop, BookingSummary, NearbyShop, PartnerBookingsResponse, ShopDetail, ShopReview, PartnerShopSettings, PartnerSchedule, PartnerDashboard, AdminOverview, AdminBookingFilter, AdminBookingCounts, AdminBookingsResponse, AdminBookingDetail, AdminShop, CityCoverage } from "./types";
+import type { AdminApplication, AdminStats, BookingDetail, ContactMessage, PartnerEarnings, PartnerSealsResponse, PartnerShop, BookingSummary, NearbyShop, PartnerBookingsResponse, ShopDetail, ShopReview, PartnerShopSettings, PartnerSchedule, PartnerDashboard, AdminOverview, AdminBookingFilter, AdminBookingCounts, AdminBookingsResponse, AdminBookingDetail, AdminShop, AdminShopDetail, AdminUser, CityCoverage } from "./types";
 
 export const keys = {
   myBookings: ["bookings", "me"] as const,
@@ -227,5 +227,23 @@ export function useAdminShops() {
   return useQuery({
     queryKey: [...keys.admin, "shops"],
     queryFn: () => api<{ shops: AdminShop[] }>("/admin/shops").then((r) => r.shops),
+  });
+}
+
+export function useAdminShop(id: string) {
+  return useQuery({
+    queryKey: [...keys.admin, "shop", id],
+    queryFn: () => api<AdminShopDetail>(`/admin/shops/${encodeURIComponent(id)}`),
+    enabled: !!id,
+  });
+}
+
+export function useAdminUsers(q: string) {
+  const term = q.trim();
+  return useQuery({
+    queryKey: [...keys.admin, "users", term],
+    queryFn: () =>
+      api<{ users: AdminUser[] }>(`/admin/users${term ? `?q=${encodeURIComponent(term)}` : ""}`).then((r) => r.users),
+    placeholderData: (prev) => prev,
   });
 }

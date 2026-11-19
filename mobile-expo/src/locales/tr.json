@@ -404,7 +404,9 @@
       "invalid_action": "Geçersiz işlem.",
       "email_send_failed": "E-posta gönderilemedi; cevap kaydedilmedi. Biraz sonra tekrar dene.",
       "too_many_requests": "Çok fazla cevap gönderildi; biraz bekle.",
-      "invalid_input": "Cevap gönderilemedi: alıcı adresi ya da metin geçersiz."
+      "invalid_input": "Cevap gönderilemedi: alıcı adresi ya da metin geçersiz.",
+      "cannot_ban_self": "Kendi hesabını engelleyemezsin.",
+      "invalid_data": "Girilen değer geçersiz."
     },
     "deleteMessage": "Mesajı sil",
     "replyLabel": "E-postayla cevap",
@@ -508,7 +510,86 @@
     "chartEmpty": "Son 14 günde ödenmiş rezervasyon yok",
     "shopsLive": "Hizmette",
     "shopsPrelaunch": "Talep testi · valiz almıyor",
-    "noBags": "Valiz almıyor"
+    "noBags": "Valiz almıyor",
+    "shopSearchPlaceholder": "Dükkan, semt ya da telefon ara",
+    "shopFilter": {
+      "all": "Tümü",
+      "issues": "Sorunlu",
+      "inactive": "Pasif",
+      "test": "Test"
+    },
+    "noShopsMatch": "Bu filtreye uyan dükkan yok",
+    "verified": "Doğrulanmış",
+    "inactive": "Pasif",
+    "testRecord": "Test kaydı",
+    "shopIssue": {
+      "inactive": "Misafire kapalı",
+      "noLocation": "Konum yok: aramada çıkmaz",
+      "noCityPage": "Şehir sayfasında yok",
+      "noPhoto": "Fotoğraf yok"
+    },
+    "openOnWeb": "Web panelinde aç",
+    "shopSaved": "Kaydedildi",
+    "confirm": {
+      "isActive": {
+        "title": "{{name}} misafire kapatılsın mı?",
+        "body": "Dükkan aramada, haritada ve şehir sayfalarında görünmez; yeni rezervasyon alamaz. Mevcut rezervasyonlar sürer.",
+        "cta": "Kapat"
+      },
+      "isTest": {
+        "title": "{{name}} test kaydı yapılsın mı?",
+        "body": "Kayıt misafirin gördüğü her yerden ve istatistiklerden düşer. Esnaf paneli çalışmaya devam eder.",
+        "cta": "Test kaydı yap"
+      }
+    },
+    "shopSince": "{{date}} tarihinden beri",
+    "prelaunchNote": "Talep testi noktası: haritada görünür, valiz almaz.",
+    "visibilityIssues": "Misafire görünürlük sorunları",
+    "visibility": "Görünürlük",
+    "flag": {
+      "isActive": "Misafire açık",
+      "isVerified": "Doğrulanmış rozeti",
+      "isTest": "Test kaydı"
+    },
+    "flagHint": {
+      "isActive": "Aramada görünür, rezervasyon alır",
+      "isVerified": "Misafire güven rozeti gösterilir",
+      "isTest": "Misafirin gördüğü her yerden gizlenir"
+    },
+    "listedOn": "Şehir sayfaları: {{cities}}",
+    "today": "Bugün",
+    "arrivals": "Gelecek",
+    "pickups": "Teslim",
+    "pricing": "Fiyat ve kapasite",
+    "invalidNumber": "Geçerli bir sayı girin",
+    "save": "Kaydet",
+    "hoursLine": "Çalışma saati {{open}}–{{close}} · değişiklik esnaf panelinden",
+    "open247": "7/24 açık",
+    "owner": "Dükkan sahibi",
+    "showOnMap": "Haritada göster",
+    "recentBookings_one": "Son rezervasyonlar ({{count}})",
+    "recentBookings_other": "Son rezervasyonlar ({{count}})",
+    "noBookingsYet": "Henüz rezervasyon yok",
+    "users": "Kullanıcılar",
+    "userSearchPlaceholder": "Ad, e-posta ya da telefon ara",
+    "userBanned": "Kullanıcı engellendi",
+    "userUnbanned": "Engel kaldırıldı",
+    "banTitle": "{{name}} engellensin mi?",
+    "banBody": "Açık oturumları hemen kapanır ve yeniden giriş yapamaz. Engeli istediğin zaman kaldırabilirsin.",
+    "banConfirm": "Engelle",
+    "noUsers": "Kullanıcı bulunamadı",
+    "role": {
+      "USER": "Misafir",
+      "PARTNER": "Esnaf",
+      "ADMIN": "Yönetici"
+    },
+    "userBookings_one": "{{count}} rezervasyon",
+    "userBookings_other": "{{count}} rezervasyon",
+    "userShops_one": "{{count}} dükkan",
+    "userShops_other": "{{count}} dükkan",
+    "bannedTag": "Engelli",
+    "ban": "Engelle",
+    "unban": "Engeli kaldır"
   },
   "scan": {
     "open": "QR okut",

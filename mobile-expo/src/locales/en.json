@@ -404,7 +404,9 @@
       "invalid_action": "Invalid action.",
       "email_send_failed": "The email could not be sent; the reply was not saved. Try again shortly.",
       "too_many_requests": "Too many replies sent; please wait a bit.",
-      "invalid_input": "Reply could not be sent: invalid recipient or text."
+      "invalid_input": "Reply could not be sent: invalid recipient or text.",
+      "cannot_ban_self": "You can't ban your own account.",
+      "invalid_data": "The value entered is invalid."
     },
     "deleteMessage": "Delete message",
     "replyLabel": "Reply by email",
@@ -508,7 +510,86 @@
     "chartEmpty": "No paid bookings in the last 14 days",
     "shopsLive": "In service",
     "shopsPrelaunch": "Demand test · not taking bags",
-    "noBags": "Not taking bags"
+    "noBags": "Not taking bags",
+    "shopSearchPlaceholder": "Search shop, area or phone",
+    "shopFilter": {
+      "all": "All",
+      "issues": "Issues",
+      "inactive": "Inactive",
+      "test": "Test"
+    },
+    "noShopsMatch": "No shops match this filter",
+    "verified": "Verified",
+    "inactive": "Inactive",
+    "testRecord": "Test record",
+    "shopIssue": {
+      "inactive": "Hidden from guests",
+      "noLocation": "No location: not in search",
+      "noCityPage": "Not on a city page",
+      "noPhoto": "No photo"
+    },
+    "openOnWeb": "Open in web panel",
+    "shopSaved": "Saved",
+    "confirm": {
+      "isActive": {
+        "title": "Hide {{name}} from guests?",
+        "body": "The shop disappears from search, the map and city pages and takes no new bookings. Existing bookings continue.",
+        "cta": "Hide"
+      },
+      "isTest": {
+        "title": "Mark {{name}} as a test record?",
+        "body": "It drops out of everything guests see and out of statistics. The partner panel keeps working.",
+        "cta": "Mark as test"
+      }
+    },
+    "shopSince": "Since {{date}}",
+    "prelaunchNote": "Demand test point: shown on the map, takes no bags.",
+    "visibilityIssues": "Guest visibility issues",
+    "visibility": "Visibility",
+    "flag": {
+      "isActive": "Open to guests",
+      "isVerified": "Verified badge",
+      "isTest": "Test record"
+    },
+    "flagHint": {
+      "isActive": "Shown in search, takes bookings",
+      "isVerified": "Guests see a trust badge",
+      "isTest": "Hidden everywhere guests look"
+    },
+    "listedOn": "City pages: {{cities}}",
+    "today": "Today",
+    "arrivals": "Arriving",
+    "pickups": "Pick-ups",
+    "pricing": "Price and capacity",
+    "invalidNumber": "Enter a valid number",
+    "save": "Save",
+    "hoursLine": "Hours {{open}}–{{close}} · changed from the partner panel",
+    "open247": "Open 24/7",
+    "owner": "Shop owner",
+    "showOnMap": "Show on map",
+    "recentBookings_one": "Recent bookings ({{count}})",
+    "recentBookings_other": "Recent bookings ({{count}})",
+    "noBookingsYet": "No bookings yet",
+    "users": "Users",
+    "userSearchPlaceholder": "Search name, email or phone",
+    "userBanned": "User banned",
+    "userUnbanned": "Ban lifted",
+    "banTitle": "Ban {{name}}?",
+    "banBody": "Their open sessions end right away and they can't sign in again. You can lift the ban at any time.",
+    "banConfirm": "Ban",
+    "noUsers": "No users found",
+    "role": {
+      "USER": "Guest",
+      "PARTNER": "Partner",
+      "ADMIN": "Admin"
+    },
+    "userBookings_one": "{{count}} booking",
+    "userBookings_other": "{{count}} bookings",
+    "userShops_one": "{{count}} shop",
+    "userShops_other": "{{count}} shops",
+    "bannedTag": "Banned",
+    "ban": "Ban",
+    "unban": "Lift ban"
   },
   "scan": {
     "open": "Scan QR",
