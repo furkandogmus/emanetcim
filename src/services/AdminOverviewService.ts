@@ -1,3 +1,4 @@
+import { OPERATING_SHOP_FILTER } from "@/lib/public-shop-filter";
 import prisma from "@/lib/db";
 import { moneyToNumber } from "@/lib/money";
 import { EARNING_BOOKING_STATUSES } from "@/lib/platform-split";
@@ -76,7 +77,8 @@ export class AdminOverviewService {
     const [revenue, bookings, activeShops] = await Promise.all([
       prisma.booking.aggregate({ where: { status: { in: [...EARNING_BOOKING_STATUSES] } }, _sum: { totalPrice: true } }),
       prisma.booking.count(),
-      prisma.shop.count({ where: { isActive: true } }),
+      // Talep testi noktalari ve test kayitlari esnaf degil: sayi 12 yerine 504 diyordu (2026-11-19).
+      prisma.shop.count({ where: OPERATING_SHOP_FILTER }),
     ]);
     const value = { revenue: moneyToNumber(revenue._sum.totalPrice), bookings, activeShops };
     this.totalsCache = { at: now.getTime(), value };
