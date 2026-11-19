@@ -251,7 +251,10 @@ describe("kimlik dogrulama uclarinin kapilari", () => {
       "Rol yazan her guncelleme `tokenVersion` da artirmali; aksi halde eski " +
         "rolu tasiyan token'lar gecerli kalir:\n" + missing.join("\n"),
     ).toEqual([]);
-    expect(src).toMatch(/data:\s*\{\s*isBanned,\s*tokenVersion:\s*\{\s*increment:\s*1\s*\}\s*\}/);
+    // Yasaklama govdesi web ve mobil icin ortak serviste (2026-11-19).
+    expect(read("src/services/AdminUserService.ts")).toMatch(
+      /data:\s*\{\s*isBanned,\s*tokenVersion:\s*\{\s*increment:\s*1\s*\}\s*\}/,
+    );
   });
 
   it("web oturumu rolu/yasagi periyodik olarak veritabanina karsi dogrular", () => {

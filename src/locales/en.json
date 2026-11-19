@@ -1867,7 +1867,8 @@
     "shopClosedOnDate": "The shop is closed on one of the selected days; please choose another day.",
     "userNotFound": "User not found.",
     "userNotGuest": "This account is not a guest; only guest accounts can be converted to partners.",
-    "passwordTooShort": "Password must be at least 8 characters."
+    "passwordTooShort": "Password must be at least 8 characters.",
+    "cannotBanSelf": "You can't ban your own account."
   },
   "Emails": {
     "verificationSubject": "Verify Your Email",

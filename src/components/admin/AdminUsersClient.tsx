@@ -140,7 +140,11 @@ export default function AdminUsersClient({
   const handleToggleBan = async (id: string, currentBan: boolean) => {
     setLoadingId(id);
     try {
-      await toggleUserBanAction(id, !currentBan);
+      const res = await toggleUserBanAction(id, !currentBan);
+      if (!res.success) {
+        toast.error(tErrors(res.error));
+        return;
+      }
       setUsers(prev => prev.map(u => u.id === id ? { ...u, isBanned: !currentBan } : u));
       toast.success(currentBan ? t("userUnbanned") : t("userBanned"));
     } catch (caughtError: unknown) {

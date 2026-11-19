@@ -1,4 +1,4 @@
-import type { Prisma, Shop } from '@prisma/client';
+import { Prisma, type Shop } from '@prisma/client';
 import { writeAuditLog } from "@/lib/audit-log";
 import { Role } from '@prisma/client';
 import prisma from '@/lib/db';
@@ -322,6 +322,25 @@ export type RejectShopResult =
 
 /** Basvuru karari veren admin; IP tasiyicidan gelir (web action / mobil uc). */
 export type ApplicationActor = { userId: string | null; ip: string | null };
+
+/** Admin'in bir dukkanda degistirebildigi alanlar (web duzenleme ekrani + mobil admin). */
+export type AdminShopUpdate = {
+  name?: string;
+  address?: string;
+  latitude?: number;
+  longitude?: number;
+  capacity?: number;
+  pricePerDay?: number;
+  isActive?: boolean;
+  /** Kamuya acik yuzeylerden dusurur; esnaf akislari calisir (`public-shop-filter.ts`). */
+  isTest?: boolean;
+  /** Misafire "Dogrulanmis" rozeti: admin bilincli verir, kaydi tutulur. */
+  isVerified?: boolean;
+};
+
+export type AdminShopUpdateResult =
+  | { ok: true }
+  | { ok: false; error: "Errors.invalidData" | "Errors.notFound" };
 
 /**
  * ShopService - SOLID: Single Responsibility
@@ -1145,6 +1164,77 @@ export class ShopService implements IShopService {
       });
     }
     return result;
+  }
+
+  /*
+    Admin dukkan duzenlemesi: web action'i ve mobil admin ucu ayni kurali
+    kullanir (2026-11-19'a kadar govde web action'indaydi). Dogrulama hatalari
+    FIRLATILMAZ, doner: Next 16 server action hatasini istemciye kirpar.
+  */
+  async adminUpdateShop(
+    shopId: string,
+    data: AdminShopUpdate,
+    actor: ApplicationActor,
+  ): Promise<AdminShopUpdateResult> {
+    const invalid = { ok: false, error: "Errors.invalidData" } as const;
+    if (data.name !== undefined && !String(data.name).trim()) return invalid;
+
+    const coord = (v: number | undefined) =>
+      v === undefined ? undefined : typeof v === "number" && Number.isFinite(v) ? v : null;
+    const lat = coord(data.latitude);
+    const lng = coord(data.longitude);
+    // Aralik da dogrulanir: prod'da bir boylam ~3e16 kaydedilmisti (dusmus ondalik, 2026-11-18).
+    if ((lat != null && Math.abs(lat) > 90) || (lng != null && Math.abs(lng) > 180)) return invalid;
+
+    if (
+      data.capacity !== undefined &&
+      (!Number.isInteger(data.capacity) || data.capacity < 1 || data.capacity > 100_000)
+    ) {
+      return invalid;
+    }
+
+    let pricePerDay: Prisma.Decimal | undefined;
+    if (data.pricePerDay !== undefined) {
+      if (!Number.isFinite(data.pricePerDay) || data.pricePerDay < 1 || data.pricePerDay > 1_000_000) {
+        return invalid;
+      }
+      pricePerDay = new Prisma.Decimal(data.pricePerDay);
+    }
+
+    const exists = await prisma.shop.findUnique({ where: { id: shopId }, select: { id: true } });
+    if (!exists) return { ok: false, error: "Errors.notFound" };
+
+    const shop = await prisma.shop.update({
+      where: { id: shopId },
+      data: {
+        name: data.name,
+        address: data.address,
+        latitude: lat,
+        longitude: lng,
+        capacity: data.capacity,
+        pricePerDay,
+        isActive: data.isActive,
+        isTest: data.isTest,
+        isVerified: data.isVerified,
+      },
+      select: { name: true },
+    });
+
+    // Gorunurluk ve guven bayraklari misafire verilen iddialar: kim, ne zaman.
+    const flags = (["isActive", "isTest", "isVerified"] as const).filter((k) => data[k] !== undefined);
+    if (flags.length > 0) {
+      logger.info({ shopId, shopName: shop.name, ...Object.fromEntries(flags.map((k) => [k, data[k]])) }, "admin_shop_flags_changed");
+    }
+    writeAuditLog({
+      actorUserId: actor.userId,
+      actorRole: "ADMIN",
+      action: "shop.admin_update",
+      entityType: "Shop",
+      entityId: shopId,
+      ip: actor.ip,
+      metadata: { fields: Object.keys(data).filter((k) => data[k as keyof AdminShopUpdate] !== undefined) },
+    });
+    return { ok: true };
   }
 }
 
