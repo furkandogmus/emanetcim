@@ -1,6 +1,9 @@
+import prisma from "@/lib/db";
+import { distanceKm } from "@/lib/geo";
 import logger from "@/lib/logger";
+import { OPERATING_SHOP_FILTER } from "@/lib/public-shop-filter";
 import { getActiveShopsOrderedByDistanceKm } from "@/lib/shop-distance-postgis";
-import type { STORAGE_CITIES } from "@/lib/storage-cities";
+import { normalizeCityName, type StorageCity } from "@/lib/storage-cities";
 
 export type CityStoragePoint = {
   id: string;
@@ -30,16 +33,32 @@ const MAX_POINTS = 24;
  * ve sayfa yine üretilmeli. Boş liste bölümü gizler, ISR sonra doldurur.
  */
 export async function getCityStoragePoints(
-  city: Pick<(typeof STORAGE_CITIES)[number], "slug" | "lat" | "lng" | "pointsRadiusKm">,
+  city: StorageCity,
 ): Promise<CityStoragePoint[]> {
   try {
-    const rows = await getActiveShopsOrderedByDistanceKm({
-      centerLat: city.lat,
-      centerLng: city.lng,
-      radiusKm: city.pointsRadiusKm,
-    });
+    const [rows, provinceShops] = await Promise.all([
+      getActiveShopsOrderedByDistanceKm({
+        centerLat: city.lat,
+        centerLng: city.lng,
+        radiusKm: city.pointsRadiusKm,
+      }),
+      city.province ? operatingShopsInProvince(city.province) : Promise.resolve([]),
+    ]);
+    const seen = new Set(rows.map(({ shop }) => shop.id));
+    const all = [
+      ...rows,
+      ...provinceShops
+        .filter((s) => !seen.has(s.id))
+        .map((shop) => ({
+          shop,
+          distanceKm:
+            shop.latitude != null && shop.longitude != null
+              ? distanceKm(city.lat, city.lng, shop.latitude, shop.longitude)
+              : Number.POSITIVE_INFINITY,
+        })),
+    ].sort((a, b) => a.distanceKm - b.distanceKm);
     return sortCityStoragePoints(
-      rows.map(({ shop }) => ({
+      all.map(({ shop }) => ({
         id: shop.id,
         name: shop.name,
         district: shop.district,
@@ -58,4 +77,14 @@ export function sortCityStoragePoints(points: CityStoragePoint[]): CityStoragePo
     ...points.filter((p) => !p.isPrelaunch),
     ...points.filter((p) => p.isPrelaunch),
   ];
+}
+
+/** İl adı yazımı serbest ("antalya ", "Antalya"), bu yüzden eşleşme bellekte. */
+async function operatingShopsInProvince(province: string) {
+  const shops = await prisma.shop.findMany({
+    where: { ...OPERATING_SHOP_FILTER, latitude: { not: null }, longitude: { not: null } },
+    select: { id: true, name: true, district: true, isPrelaunch: true, city: true, latitude: true, longitude: true },
+  });
+  const want = normalizeCityName(province);
+  return shops.filter((s) => s.city != null && normalizeCityName(s.city) === want);
 }

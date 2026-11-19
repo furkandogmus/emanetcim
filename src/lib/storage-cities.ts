@@ -1,3 +1,5 @@
+import { distanceKm } from "@/lib/geo";
+
 /**
  * SEO şehir sayfaları: URL slug + harita merkezi (yakın arama / mesafe).
  * Metinler i18n `CityStorage.{slug}.*` altında.
@@ -5,11 +7,17 @@
  * `pointsRadiusKm`: şehir sayfasındaki nokta listesinin yarıçapı. Merkezden
  * ölçülüyor, yani ilçeye yayılan yerlerde şehir çapından geniş tutuldu: Bodrum
  * Yalıkavak ~18 km, İstanbul Havalimanı merkeze 36 km (Sabiha Gökçen 31 km).
+ *
+ * `province`: il sayfası, o ildeki İŞLEYEN dükkanları yarıçap dışında da listeler.
+ * Antalya'nın 25 km'si Alanya'yı (~115 km) ve Manavgat'ı (~70 km) dışarıda
+ * bırakıyordu; iki gerçek esnaf hiçbir şehir sayfasında görünmüyordu (2026-11-19).
+ * İlçe sayfalarına (Bodrum, Fethiye) verilmez: Muğla ikisini birbirine katardı.
  */
 export const STORAGE_CITIES = [
   {
     slug: "istanbul",
     country: "TR",
+    province: "İstanbul",
     pointsRadiusKm: 40,
     lat: 41.0082,
     lng: 28.9784,
@@ -18,6 +26,7 @@ export const STORAGE_CITIES = [
   {
     slug: "ankara",
     country: "TR",
+    province: "Ankara",
     pointsRadiusKm: 20,
     lat: 39.9334,
     lng: 32.8597,
@@ -26,6 +35,7 @@ export const STORAGE_CITIES = [
   {
     slug: "izmir",
     country: "TR",
+    province: "İzmir",
     pointsRadiusKm: 20,
     lat: 38.4237,
     lng: 27.1428,
@@ -34,6 +44,7 @@ export const STORAGE_CITIES = [
   {
     slug: "antalya",
     country: "TR",
+    province: "Antalya",
     pointsRadiusKm: 25,
     lat: 36.8969,
     lng: 30.7133,
@@ -142,6 +153,34 @@ export function isStorageCityIndexed(city: { country: string }): boolean {
 }
 
 export const INDEXED_STORAGE_CITIES = STORAGE_CITIES.filter(isStorageCityIndexed);
+
+export type StorageCity = {
+  slug: string;
+  lat: number;
+  lng: number;
+  pointsRadiusKm: number;
+  province?: string;
+};
+
+export function normalizeCityName(name: string): string {
+  return name.trim().toLocaleLowerCase("tr");
+}
+
+/** Dükkanı listeleyen şehir sayfaları (`getCityStoragePoints` ile aynı kural). */
+export function storageCitiesListingShop(
+  shop: { city: string | null; latitude: number | null; longitude: number | null; isPrelaunch: boolean },
+  cities: readonly StorageCity[] = STORAGE_CITIES,
+): string[] {
+  if (shop.latitude == null || shop.longitude == null) return [];
+  const city = shop.city ? normalizeCityName(shop.city) : null;
+  return cities
+    .filter(
+      (c) =>
+        distanceKm(c.lat, c.lng, shop.latitude!, shop.longitude!) <= c.pointsRadiusKm ||
+        (!shop.isPrelaunch && c.province != null && city === normalizeCityName(c.province)),
+    )
+    .map((c) => c.slug);
+}
 
 export function getStorageCity(slug: string) {
   return STORAGE_CITIES.find((c) => c.slug === slug);
