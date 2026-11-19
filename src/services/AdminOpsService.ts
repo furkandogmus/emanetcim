@@ -182,12 +182,19 @@ export class AdminOpsService {
       capacity: true,
       rating: true,
       isPrelaunch: true,
+      isActive: true,
+      isTest: true,
+      isVerified: true,
+      image: true,
+      latitude: true,
+      longitude: true,
       owner: { select: { phone: true } },
     } as const;
     const [realShops, prelaunchShops, stored, arrivals, pickups] = await Promise.all([
       // Gercek dukkanlar tavansiz. Eskiden tek sorgu siralamasiz `take: 300` idi ve
       // 490 talep testi noktasi arasinda gercek esnaflar rastgele dusuyordu (2026-11-19).
-      prisma.shop.findMany({ where: { isActive: true, isPrelaunch: false }, select }),
+      // Pasif gercek dukkanlar da gelir: mobil admin onlari yeniden acabilsin.
+      prisma.shop.findMany({ where: { isPrelaunch: false }, select }),
       // Sayfalama gelene kadar tavan: binlerce noktada yanit MB'larca olmasin.
       prisma.shop.findMany({
         where: { isActive: true, isPrelaunch: true },
@@ -226,6 +233,63 @@ export class AdminOpsService {
         pickupsToday: pick.get(s.id) ?? 0,
       }))
       .sort((a, b) => b.bagsInStorage / Math.max(1, b.capacity) - a.bagsInStorage / Math.max(1, a.capacity));
+  }
+
+  /** Mobil admin dukkan karti: kimlik, bayraklar, sahip, doluluk ve son rezervasyonlar. */
+  async shopDetail(id: string, now: Date = new Date()) {
+    const today = dayRangeInTimeZone(PLATFORM_TIMEZONE, now);
+    const shop = await prisma.shop.findUnique({
+      where: { id },
+      select: {
+        id: true,
+        name: true,
+        address: true,
+        district: true,
+        city: true,
+        capacity: true,
+        rating: true,
+        pricePerDay: true,
+        isActive: true,
+        isTest: true,
+        isVerified: true,
+        isPrelaunch: true,
+        image: true,
+        latitude: true,
+        longitude: true,
+        open247: true,
+        openingTime: true,
+        closingTime: true,
+        createdAt: true,
+        owner: { select: { id: true, name: true, email: true, phone: true } },
+        _count: { select: { bookings: true, reviews: true } },
+      },
+    });
+    if (!shop) return null;
+    const [stored, arrivals, pickups, recent] = await Promise.all([
+      prisma.booking.aggregate({
+        where: { shopId: id, status: "CHECKED_IN" },
+        _sum: { bagCountS: true, bagCountM: true, bagCountXl: true },
+      }),
+      prisma.booking.count({
+        where: { shopId: id, status: { in: ["APPROVED", "PAID"] }, checkInTime: { gte: today.start, lt: today.end } },
+      }),
+      prisma.booking.count({
+        where: { shopId: id, status: "CHECKED_IN", checkOutTime: { gte: today.start, lt: today.end } },
+      }),
+      prisma.booking.findMany({
+        where: { shopId: id },
+        orderBy: { createdAt: "desc" },
+        take: 5,
+        select: ADMIN_BOOKING_LIST_SELECT,
+      }),
+    ]);
+    return {
+      shop,
+      bagsInStorage: (stored._sum.bagCountS ?? 0) + (stored._sum.bagCountM ?? 0) + (stored._sum.bagCountXl ?? 0),
+      arrivalsToday: arrivals,
+      pickupsToday: pickups,
+      recent,
+    };
   }
 }
 

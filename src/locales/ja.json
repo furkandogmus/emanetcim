@@ -1803,7 +1803,8 @@
     "shopClosedOnDate": "選択した日のいずれかは休業日です。別の日を選んでください。",
     "userNotFound": "ユーザーが見つかりません。",
     "userNotGuest": "このアカウントはゲストではありません。パートナーに変更できるのはゲストアカウントのみです。",
-    "passwordTooShort": "パスワードは8文字以上にしてください。"
+    "passwordTooShort": "パスワードは8文字以上にしてください。",
+    "cannotBanSelf": "自分のアカウントは停止できません。"
   },
   "Emails": {
     "verificationSubject": "メールアドレスを確認してください",
