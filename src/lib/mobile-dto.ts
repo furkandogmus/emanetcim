@@ -5,6 +5,22 @@ import { storageCitiesListingShop } from "@/lib/storage-cities";
 import type { PartnerDashboardSnapshot } from "@/services/PartnerDashboardService";
 
 /**
+ * Adres + semt + il; adreste zaten gecen parca tekrar eklenmez. Esnaf adresi cogu zaman
+ * "..., Beyoglu, Istanbul" diye yaziyor ve ekranda "Beyoglu, Istanbul" iki kez cikiyordu.
+ */
+export function fullAddress(
+  address: string | null | undefined,
+  district: string | null | undefined,
+  city: string | null | undefined,
+): string {
+  const base = (address ?? "").trim();
+  const has = (part: string) => base.toLocaleLowerCase("tr").includes(part.trim().toLocaleLowerCase("tr"));
+  return [base, ...[district, city].filter((p): p is string => !!p && !!p.trim() && !has(p))]
+    .filter(Boolean)
+    .join(", ");
+}
+
+/**
  * Mobil istemciye giden GÖVDE biçimleri — tek yer.
  *
  * NEDEN VAR (2026-08-25'te ölçüldü): aynı alan-alan eşleme iki uçta ayrı ayrı
@@ -93,7 +109,7 @@ export function toMobileBookingDetail(b: BookingDetailSource) {
     longitude: b.shop.longitude,
     shopPhone: b.shop.owner.phone ?? "",
     // Turist taksiciye gosterebilsin; koordinatsiz dukkanda yol tarifi de buradan.
-    shopAddress: [b.shop.address, b.shop.district, b.shop.city].filter(Boolean).join(", "),
+    shopAddress: fullAddress(b.shop.address, b.shop.district, b.shop.city),
     seals: b.seals.map((s) => ({
       sealNumber: s.sealNumber,
       bagIndex: s.bagIndex,
@@ -196,7 +212,13 @@ export function toMobilePriceRange(pricePerDay: unknown, r: PricingRules) {
   const base = moneyToNumber(pricePerDay);
   const m = [r.bagMultipliers.S, r.bagMultipliers.M, r.bagMultipliers.XL];
   const round = (n: number) => Math.round(n * 100) / 100;
-  return { min: round(base * Math.min(...m)), max: round(base * Math.max(...m)) };
+  return {
+    min: round(base * Math.min(...m)),
+    max: round(base * Math.max(...m)),
+    // Liste ve pinde gosterilen tek fiyat: orta boy valizin gunlugu (2026-11-19, aralik
+    // kartin yarisini kapliyor ve dukkan adini kesiyordu).
+    medium: round(base * r.bagMultipliers.M),
+  };
 }
 
 export function toMobilePricing(r: PricingRules) {
@@ -396,7 +418,7 @@ type PartnerDashboardSource = Pick<
   PartnerDashboardSnapshot,
   "todayArrivals" | "todayPickups" | "bagsInStorage" | "monthNet" | "prevMonthNet" | "monthChangePct"
 >;
-type ShopRef = { id: string; name: string };
+type ShopRef = { id: string; name: string; isActive?: boolean };
 
 /**
  * Esnafin gunluk dukkan ozeti. Web panelinin "gunluk enstantane" blogu ile ayni
@@ -407,7 +429,7 @@ export function toMobilePartnerDashboard(s: PartnerDashboardSource, shop: ShopRe
   return {
     /** Ozetin ait oldugu dukkan; cok dukkanli esnafta kart hangisi oldugunu soyler. */
     shop: { id: shop.id, name: shop.name },
-    shops: shops.map((x) => ({ id: x.id, name: x.name })),
+    shops: shops.map((x) => ({ id: x.id, name: x.name, isActive: x.isActive ?? true })),
     todayArrivals: s.todayArrivals,
     todayPickups: s.todayPickups,
     bagsInStorage: s.bagsInStorage,
@@ -467,7 +489,7 @@ export function toMobileAdminBookingRow(b: AdminBookingRowSource) {
 
 /** `admin/bookings/[id]`: destek hattinda gereken her sey; QR token'i TASIMAZ. */
 export function toMobileAdminBookingDetail({ booking: b, events }: AdminBookingDetailSource) {
-  const place = [b.shop.address, b.shop.district, b.shop.city].filter(Boolean).join(", ");
+  const place = fullAddress(b.shop.address, b.shop.district, b.shop.city);
   return {
     ...toMobileAdminBookingRow(b),
     guest: {
