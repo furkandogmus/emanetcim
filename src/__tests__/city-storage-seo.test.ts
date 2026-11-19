@@ -2,6 +2,8 @@ import { describe, it, expect, vi } from "vitest";
 import fs from "node:fs";
 
 vi.mock("@/lib/logger", () => ({ default: { warn: vi.fn(), info: vi.fn() } }));
+const { shopFindMany } = vi.hoisted(() => ({ shopFindMany: vi.fn() }));
+vi.mock("@/lib/db", () => ({ default: { shop: { findMany: shopFindMany } } }));
 vi.mock("@/lib/shop-distance-postgis", () => ({
   getActiveShopsOrderedByDistanceKm: vi.fn(),
 }));
@@ -9,6 +11,7 @@ vi.mock("@/lib/shop-distance-postgis", () => ({
 import {
   INDEXED_STORAGE_CITIES,
   isStorageCityIndexed,
+  storageCitiesListingShop,
   STORAGE_CITIES,
 } from "@/lib/storage-cities";
 import { retiredLocaleRedirectPath, RETIRED_LOCALES } from "@/lib/retired-locales";
@@ -94,8 +97,51 @@ describe("sehir sayfasi nokta listesi", () => {
     );
   });
 
+  it("il sayfasi, yaricap disindaki ayni ildeki isleyen dukkani da listeler", async () => {
+    // Prod 2026-11-19: Alanya ve Manavgat esnafi Antalya'nin 25 km'si disindaydi.
+    const antalya = STORAGE_CITIES.find((c) => c.slug === "antalya")!;
+    vi.mocked(getActiveShopsOrderedByDistanceKm).mockResolvedValueOnce(
+      [row("muratpasa", false, 2), row("yakinda", true, 3)] as never,
+    );
+    shopFindMany.mockResolvedValueOnce([
+      { id: "muratpasa", name: "m", district: null, isPrelaunch: false, city: "Antalya", latitude: 36.89, longitude: 30.71 },
+      { id: "alanya", name: "a", district: "Alanya", isPrelaunch: false, city: "antalya ", latitude: 36.55, longitude: 32.0 },
+      { id: "manavgat", name: "g", district: "Manavgat", isPrelaunch: false, city: "Antalya", latitude: 36.79, longitude: 31.45 },
+      { id: "mugla", name: "x", district: null, isPrelaunch: false, city: "Muğla", latitude: 37.0, longitude: 27.4 },
+    ]);
+    const points = await getCityStoragePoints(antalya);
+    expect(points.map((p) => p.id)).toEqual(["muratpasa", "manavgat", "alanya", "yakinda"]);
+  });
+
+  it("ilce sayfasi il eslesmesi yapmaz", async () => {
+    shopFindMany.mockClear();
+    vi.mocked(getActiveShopsOrderedByDistanceKm).mockResolvedValueOnce([] as never);
+    await getCityStoragePoints(bodrum);
+    expect(shopFindMany).not.toHaveBeenCalled();
+  });
+
   it("veritabani yoksa sayfayi dusurmez, bos liste doner", async () => {
     vi.mocked(getActiveShopsOrderedByDistanceKm).mockRejectedValueOnce(new Error("no db"));
     await expect(getCityStoragePoints(bodrum)).resolves.toEqual([]);
+  });
+});
+
+describe("storageCitiesListingShop (admin gorunurluk sutunu)", () => {
+  const shop = (city: string | null, latitude: number | null, longitude: number | null, isPrelaunch = false) => ({
+    city, latitude, longitude, isPrelaunch,
+  });
+
+  it("yaricap icindeki ve ayni ildeki dukkani il sayfasina baglar", () => {
+    expect(storageCitiesListingShop(shop("Antalya", 36.89, 30.71))).toEqual(["antalya"]);
+    expect(storageCitiesListingShop(shop("Antalya", 36.55, 32.0))).toEqual(["antalya"]);
+  });
+
+  it("il eslesmesi talep testi noktasina uygulanmaz; konumsuz dukkan hicbir sayfada yok", () => {
+    expect(storageCitiesListingShop(shop("Antalya", 36.55, 32.0, true))).toEqual([]);
+    expect(storageCitiesListingShop(shop("Antalya", null, null))).toEqual([]);
+  });
+
+  it("sayfasi olmayan ildeki dukkan bos doner", () => {
+    expect(storageCitiesListingShop(shop("Eskişehir", 39.77, 30.52))).toEqual([]);
   });
 });
