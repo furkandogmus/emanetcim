@@ -282,7 +282,6 @@ const styles = StyleSheet.create({
     gap: space.md,
     minHeight: 52,
     paddingHorizontal: space.lg,
-    marginBottom: space.md,
     borderRadius: radius.card,
     borderWidth: 1,
     borderColor: colors.brand,
