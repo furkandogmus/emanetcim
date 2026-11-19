@@ -1297,7 +1297,18 @@
     "shopsTabLive": "Hizmette",
     "shopsTabPrelaunch": "Talep testi",
     "statusPrelaunch": "Talep testi · valiz almıyor",
-    "shopsPrelaunchHint": "Bu noktalar haritada \"açılınca haber ver\" olarak görünür ve rezervasyon almaz. Talep sayıları Talep testi sayfasında."
+    "shopsPrelaunchHint": "Bu noktalar haritada \"açılınca haber ver\" olarak görünür ve rezervasyon almaz. Talep sayıları Talep testi sayfasında.",
+    "shopsTabTest": "Test kayıtları",
+    "shopsTestHint": "Test kayıtları misafire hiçbir yerde görünmez; rezervasyon geçmişi korunur.",
+    "shopsVisibility": "Misafire görünürlük",
+    "shopsVisibilityTest": "Gizli (test)",
+    "shopsVisibilityIssueCount": "{count, plural, one {# dükkanın görünürlük sorunu var} other {# dükkanın görünürlük sorunu var}}",
+    "shopsIssue": {
+      "inactive": "Pasif: misafire kapalı",
+      "noLocation": "Konum yok: arama ve haritada çıkmaz",
+      "noCityPage": "Hiçbir şehir sayfasında yok",
+      "noPhoto": "Fotoğraf yok"
+    }
   },
   "Auth": {
     "loginTitle": "BagajPark'a Giriş Yap",
