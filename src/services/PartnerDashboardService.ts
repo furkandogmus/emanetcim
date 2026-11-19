@@ -60,11 +60,13 @@ class PartnerDashboardService {
 
     const [arrivals, pickups, inStorage, monthAgg, prevAgg, handled] =
       await Promise.all([
-        // Bugun GELECEK: odenmis ama henuz teslim alinmamis.
+        // Bugun GELECEK: onayli ya da odenmis, henuz teslim alinmamis. Yalnizca PAID
+        // sayiliyordu; "dukkanda ode" rezervasyonu APPROVED kaldigi icin esnaf bugunku
+        // misafiri "0 gelecek" goruyordu (2026-11-19). Admin ozetiyle ayni tanim.
         prisma.booking.count({
           where: {
             shopId,
-            status: "PAID",
+            status: { in: ["APPROVED", "PAID"] },
             checkInTime: { gte: today.start, lt: today.end },
           },
         }),
