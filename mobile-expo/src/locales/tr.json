@@ -83,7 +83,8 @@
       "notDroppedTitle": "Valizin henüz dükkanda değil",
       "notDroppedBody": "Valizini {{shop}} noktasına bıraktığında alma kodun burada açılır. Bırakma: {{time}}.",
       "openBooking": "Rezervasyonu aç"
-    }
+    },
+    "atShopLabel": "Valizin dükkanda"
   },
   "search": {
     "locationTitle": "Nereye gidiyorsun?",
@@ -101,7 +102,8 @@
     "prevMonth": "Önceki ay",
     "nextMonth": "Sonraki ay",
     "step": "Adım {{current}}/{{total}}",
-    "dropOffInPast": "Bırakma saati geçmişte kaldı. Yeni bir saat seç."
+    "dropOffInPast": "Bırakma saati geçmişte kaldı. Yeni bir saat seç.",
+    "locationUnavailable": "Konumun alınamadı. Bir adres ara ya da listeden şehir seç."
   },
   "bags": {
     "s": "Küçük (S)",
@@ -120,9 +122,7 @@
     "empty": "Bu bölgede uygun nokta bulamadık. Haritayı kaydırıp tekrar dene.",
     "searchHere": "Bu bölgede ara",
     "comingSoon": "Yakında",
-    "perDay": "/ gün",
     "available": "~{{count}} yer",
-    "distance": "{{km}} km",
     "verified": "Doğrulanmış",
     "editSearch": "Aramayı düzenle",
     "emptyTitle": "{{place}} çevresinde henüz rezervasyon alan nokta yok",
@@ -131,7 +131,8 @@
     "emptyTitleNear": "Yakınında henüz rezervasyon alan nokta yok",
     "hoursCloses": "Kapanış {{time}} · valizini o saatten önce al",
     "hoursOpens": "Açılış {{time}} · en erken bu saatte bırakabilirsin",
-    "hoursPickupOpens": "Alış en erken {{time}}"
+    "hoursPickupOpens": "Alış en erken {{time}}",
+    "perDayMedium": "orta boy / gün"
   },
   "shop": {
     "open247": "7/24 açık",
@@ -142,7 +143,6 @@
     "prelaunch": "Bu nokta henüz rezervasyon almıyor. Açıldığında burada göreceksin.",
     "restroom": "Tuvalet var",
     "book": "Bu noktayı rezerve et",
-    "perDayLabel": "Valiz başı günlük",
     "weekdays": [
       "Pazar",
       "Pazartesi",
@@ -157,7 +157,8 @@
     "perDay": "{{price}} / gün",
     "reviews": "Yorumlar ({{count}})",
     "noReviews": "Henüz yorum yok.",
-    "photoN": "Fotoğraf {{n}}/{{total}}"
+    "photoN": "Fotoğraf {{n}}/{{total}}",
+    "perDayMediumLabel": "Orta boy valiz, günlük"
   },
   "checkout": {
     "title": "Onayla",
@@ -208,7 +209,8 @@
     "title": "Rezervasyonun hazır",
     "body": "Dükkana gittiğinde QR kodunu göster, valizini bırak.",
     "viewBooking": "Rezervasyonu gör",
-    "home": "Ana sayfa"
+    "home": "Ana sayfa",
+    "dropOffAt": "Bırakma: {{day}}, {{time}}"
   },
   "bookings": {
     "title": "Rezervasyonlarım",
@@ -336,7 +338,8 @@
     "sealBroken": "Sağlam değil",
     "sealBrokenHint": "Sağlam olmayan mühür kayda geçer; misafirle valizi birlikte kontrol et. Teslimi yine tamamlayabilirsin.",
     "lateFeeCollect": "Gecikme ücreti {{amount}}: misafirden al.",
-    "earlyRefundGive": "Erken teslim: misafire {{amount}} iade et."
+    "earlyRefundGive": "Erken teslim: misafire {{amount}} iade et.",
+    "shopPending": "Onay bekliyor"
   },
   "profile": {
     "title": "Profil",

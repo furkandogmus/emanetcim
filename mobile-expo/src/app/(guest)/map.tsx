@@ -269,13 +269,8 @@ const ShopMarkers = memo(function ShopMarkers({
         if (s.latitude == null || s.longitude == null) return null;
         // Web haritasiyla ayni: pinde gunluk fiyat. Talep testi noktasindaki fiyat
         // sema varsayilani, gercek degil; orada "Yakinda" yazar.
-        // Pinde aralik sigmaz: en ucuz boy ve "+" (ornegin ₺200+).
-        const from = s.priceRange?.min ?? s.pricePerDay;
-        const label = s.isPrelaunch
-          ? t("map.comingSoon")
-          : s.priceRange && s.priceRange.min !== s.priceRange.max
-            ? `${formatMoney(from)}+`
-            : formatMoney(from);
+        // Kartla ayni tek fiyat: orta boy valizin gunlugu.
+        const label = s.isPrelaunch ? t("map.comingSoon") : formatMoney(s.priceRange?.medium ?? s.pricePerDay);
         const selected = s.id === selectedId;
         return (
           <Marker

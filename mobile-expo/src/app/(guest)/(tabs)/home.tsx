@@ -4,7 +4,7 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { Image } from "expo-image";
 import { router } from "expo-router";
 import { useQueryClient } from "@tanstack/react-query";
-import * as Location from "expo-location";
+import { getDevicePosition } from "@/lib/location";
 import { ChevronRight, Search } from "lucide-react-native";
 import { useTranslation } from "react-i18next";
 
@@ -38,7 +38,6 @@ export default function HomeScreen() {
   const active = (bookings.data ?? [])
     .filter((b) => isActiveBooking(b))
     .sort((a, b) => +new Date(a.checkInTime) - +new Date(b.checkInTime));
-  const next = active[0];
   // "Nasil calisir" adimlari bu iki kayda gore canli: QR'i hazir olan teslim, dukkandaki valiz.
   const toDrop = active.find((b) => b.status !== "CHECKED_IN");
   const atShop = active.find((b) => b.status === "CHECKED_IN");
@@ -50,23 +49,14 @@ export default function HomeScreen() {
     if (locating) return;
     setLocating(true);
     try {
-      const perm = await Location.requestForegroundPermissionsAsync();
-      if (perm.status !== "granted") {
+      const res = await getDevicePosition();
+      // Konum yoksa arama sihirbazi acilir: orada sehir ya da adres secilebilir.
+      if (!res.ok) {
         router.push("/search");
         return;
       }
-      const pos =
-        (await Location.getLastKnownPositionAsync()) ??
-        (await Location.getCurrentPositionAsync({ accuracy: Location.Accuracy.Balanced }));
-      search.setPlace({
-        label: t("map.nearYou"),
-        latitude: pos.coords.latitude,
-        longitude: pos.coords.longitude,
-        isCurrent: true,
-      });
+      search.setPlace({ label: t("map.nearYou"), ...res.position, isCurrent: true });
       router.push("/map");
-    } catch {
-      router.push("/search");
     } finally {
       setLocating(false);
     }
@@ -137,25 +127,33 @@ export default function HomeScreen() {
           </AppText>
         </Pressable>
 
-        {next ? (
-          <View style={styles.section}>
+        {/* Iki ayri durum, iki ayri baslik: dukkandaki valiz "siradaki birakma" degil
+            (2026-11-19 emulatorde gecikmis bir emanet "Siradaki birakman" diye gorunuyordu). */}
+        {[atShop, toDrop].filter((b): b is BookingSummary => !!b).map((b, i) => (
+          <View key={b.id} style={styles.section}>
             <View style={styles.sectionHead}>
-              <AppText variant="label">{t("home.nextLabel")}</AppText>
-              <Pressable accessibilityRole="link" hitSlop={8} onPress={() => router.push("/bookings")}>
-                <AppText variant="label" style={{ color: colors.accent }}>
-                  {t("home.allBookings")}
-                </AppText>
-              </Pressable>
+              <AppText variant="label" style={{ flex: 1 }}>
+                {t(b.status === "CHECKED_IN" ? "home.atShopLabel" : "home.nextLabel")}
+              </AppText>
+              {i === 0 ? (
+                <Pressable accessibilityRole="link" hitSlop={8} onPress={() => router.push("/bookings")}>
+                  <AppText variant="label" style={{ color: colors.accent }}>
+                    {t("home.allBookings")}
+                  </AppText>
+                </Pressable>
+              ) : null}
             </View>
-            <BookingRow booking={next} title={next.shopName} onPress={() => router.push(`/bookings/${next.id}`)} />
+            <BookingRow booking={b} title={b.shopName} onPress={() => router.push(`/bookings/${b.id}`)} />
           </View>
-        ) : null}
+        ))}
 
         {/* Sunucudan: yalnizca dukkani olan sehirler, cok noktasi olan once. Hata/bos ise bolum gizli. */}
         {cities.isLoading || (cities.data?.length ?? 0) > 0 ? (
           <View style={styles.section}>
             <View style={styles.sectionHead}>
-              <AppText variant="label">{t("home.citiesTitle")}</AppText>
+              <AppText variant="label" style={{ flex: 1 }}>
+                {t("home.citiesTitle")}
+              </AppText>
               <ScrollArrows state={cityArrows} />
             </View>
             <ScrollView

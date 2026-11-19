@@ -57,7 +57,8 @@ export type NearbyShop = Shop & {
   /** Yalnizca tarih filtresiyle aranirsa gelir. */
   bagsAvailable?: number;
   /** Kucuk-buyuk valiz gunluk fiyati. Eski sunucu gondermez: o zaman `pricePerDay`. */
-  priceRange?: { min: number; max: number };
+  /** `medium`: orta boy valizin gunlugu; liste ve pinde gosterilen tek fiyat (eski sunucuda yok). */
+  priceRange?: { min: number; max: number; medium?: number };
   /** Secilen saat dukkanin saatine oturtulduysa (ornegin alis kapanisa cekildi). */
   hoursNotice?: HoursNotice | null;
 };
@@ -338,7 +339,8 @@ export type PartnerEarnings = {
 /** `toMobilePartnerDashboard` (../src/lib/mobile-dto.ts). */
 export type PartnerDashboard = {
   shop: { id: string; name: string };
-  shops: { id: string; name: string }[];
+  /** `isActive` eski sunucuda yok: yoksa aktif say. */
+  shops: { id: string; name: string; isActive?: boolean }[];
   todayArrivals: number;
   todayPickups: number;
   bagsInStorage: number;
