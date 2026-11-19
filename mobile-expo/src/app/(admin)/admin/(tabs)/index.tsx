@@ -3,11 +3,11 @@ import { Linking, Pressable, RefreshControl, ScrollView, StyleSheet, View } from
 import { SafeAreaView } from "react-native-safe-area-context";
 import { router } from "expo-router";
 import type { Href } from "expo-router";
-import { ChevronRight, ExternalLink, User } from "lucide-react-native";
+import { ChevronRight, ExternalLink, User, Users } from "lucide-react-native";
 import { useTranslation } from "react-i18next";
 
 import { LuggageTag, MapSnippet } from "@/components/Illustrations";
-import { LinkGroup } from "@/components/LinkRow";
+import { LinkGroup, LinkRow } from "@/components/LinkRow";
 import { RevenueChart } from "@/components/RevenueChart";
 import { StatusBadge } from "@/components/StatusBadge";
 import { AppText, Button, Card, CenterMessage, IconButton, Loading } from "@/components/ui";
@@ -132,6 +132,13 @@ function Dashboard({
         <LinkGroup>
           <AttentionRow label={t("admin.openDisputes")} value={a.openDisputes} onPress={() => openWeb("disputes")} />
           <AttentionRow label={t("admin.overdueBookings")} value={a.overdueBookings} onPress={() => openBookings("overdue")} />
+        </LinkGroup>
+        <LinkGroup>
+          <LinkRow
+            icon={<Users size={18} color={colors.inkSecondary} />}
+            label={t("admin.users")}
+            onPress={() => router.push("/admin/users")}
+          />
         </LinkGroup>
       </Section>
 

@@ -1,3 +1,4 @@
+import type { ReactNode } from "react";
 import { StyleSheet, View } from "react-native";
 import { router } from "expo-router";
 import { ArrowLeft } from "lucide-react-native";
@@ -11,7 +12,18 @@ import { colors, space } from "@/theme/tokens";
  * satir), sagda dugmeyle ayni genislikte bosluk. Eskiden dort ayri bicim vardi ve 44'luk
  * bosluk 40'lik dugmeyle eslesmedigi icin baslik 2 px kayiyordu.
  */
-export function StackHeader({ title, subtitle, onBack }: { title?: string; subtitle?: string; onBack?: () => void }) {
+export function StackHeader({
+  title,
+  subtitle,
+  onBack,
+  right,
+}: {
+  title?: string;
+  subtitle?: string;
+  onBack?: () => void;
+  /** Sagdaki tek eylem (ornegin "webde ac"); yoksa baslik ortada kalsin diye bos alan. */
+  right?: ReactNode;
+}) {
   const { t } = useTranslation();
   const back = onBack ?? (() => (router.canGoBack() ? router.back() : router.replace("/")));
   return (
@@ -31,7 +43,7 @@ export function StackHeader({ title, subtitle, onBack }: { title?: string; subti
           </AppText>
         ) : null}
       </View>
-      <View style={styles.spacer} />
+      {right ?? <View style={styles.spacer} />}
     </View>
   );
 }

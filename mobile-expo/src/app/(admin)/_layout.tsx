@@ -8,6 +8,8 @@ export default function AdminLayout() {
       <Stack.Screen name="admin/(tabs)" />
       <Stack.Screen name="admin/applications" />
       <Stack.Screen name="admin/booking/[id]" />
+      <Stack.Screen name="admin/shop/[id]" />
+      <Stack.Screen name="admin/users" />
     </Stack>
   );
 }
