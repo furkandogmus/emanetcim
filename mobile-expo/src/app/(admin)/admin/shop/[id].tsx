@@ -13,7 +13,7 @@ import { StatusBadge } from "@/components/StatusBadge";
 import { AppText, Banner, Button, Card, CenterMessage, IconButton, Loading } from "@/components/ui";
 import { api } from "@/lib/api";
 import { errorMessage } from "@/lib/errors";
-import { formatDay, formatDayTime, formatMoney } from "@/lib/format";
+import { formatDay, formatDayTime } from "@/lib/format";
 import { SITE_ORIGIN } from "@/lib/images";
 import { notify } from "@/lib/notify";
 import { keys, useAdminShop } from "@/lib/queries";
@@ -68,14 +68,16 @@ function Detail({ shop: s }: { shop: AdminShopDetail }) {
   const queryClient = useQueryClient();
   const [price, setPrice] = useState(String(s.pricePerDay));
   const [capacity, setCapacity] = useState(String(s.capacity));
+  // Basari penceresi yerine dugme "Kaydedildi" der: Android'de bos govdeli Alert kocaman kaliyordu.
+  const [saved, setSaved] = useState(false);
 
   const update = useMutation({
     mutationFn: (patch: AdminShopPatch) =>
       api<AdminShopDetail>(`/admin/shops/${encodeURIComponent(s.id)}`, { method: "PATCH", body: patch }),
-    onSuccess: (next) => {
+    onSuccess: (next, patch) => {
       queryClient.setQueryData([...keys.admin, "shop", s.id], next);
       for (const k of ["shops", "overview"]) void queryClient.invalidateQueries({ queryKey: [...keys.admin, k] });
-      notify(t("admin.shopSaved"));
+      if (patch.pricePerDay !== undefined) setSaved(true);
     },
     onError: (e) => notify(t("admin.actionFailed"), errorMessage(e, "admin")),
   });
@@ -108,15 +110,17 @@ function Detail({ shop: s }: { shop: AdminShopDetail }) {
     <KeyboardAvoidingView style={{ flex: 1 }} behavior={Platform.OS === "ios" ? "padding" : undefined}>
       <ScrollView contentContainerStyle={styles.content} keyboardShouldPersistTaps="handled">
         <View style={{ gap: 4 }}>
-          <View style={styles.titleLine}>
-            <AppText variant="title" style={{ flexShrink: 1 }}>
-              {s.name}
-            </AppText>
-            {s.isVerified ? <BadgeCheck size={20} color={colors.accent} /> : null}
-          </View>
-          {s.address || s.place ? (
-            <AppText variant="caption">{[s.address, s.place].filter(Boolean).join(" · ")}</AppText>
+          <AppText variant="title">{s.name}</AppText>
+          {s.isVerified ? (
+            <View style={styles.titleLine}>
+              <BadgeCheck size={14} color={colors.accent} />
+              <AppText variant="caption" style={{ color: colors.accent }}>
+                {t("admin.verified")}
+              </AppText>
+            </View>
           ) : null}
+          {/* Adres cogu zaman semt ve ili zaten iceriyor; ikisini birden yazmak tekrar ediyordu. */}
+          {s.address || s.place ? <AppText variant="caption">{s.address || s.place}</AppText> : null}
           <AppText variant="caption">{t("admin.shopSince", { date: formatDay(s.createdAt) })}</AppText>
         </View>
 
@@ -178,21 +182,27 @@ function Detail({ shop: s }: { shop: AdminShopDetail }) {
                 style={{ flex: 1 }}
                 label={t("admin.factPrice")}
                 value={price}
-                onChangeText={setPrice}
+                onChangeText={(v) => {
+                  setPrice(v);
+                  setSaved(false);
+                }}
                 keyboardType="decimal-pad"
-                hint={priceValid ? formatMoney(priceNum) : t("admin.invalidNumber")}
+                hint={priceValid ? undefined : t("admin.invalidNumber")}
               />
               <Field
                 style={{ flex: 1 }}
                 label={t("admin.factCapacity")}
                 value={capacity}
-                onChangeText={setCapacity}
+                onChangeText={(v) => {
+                  setCapacity(v);
+                  setSaved(false);
+                }}
                 keyboardType="number-pad"
-                hint={capValid ? t("common.bag", { count: capNum }) : t("admin.invalidNumber")}
+                hint={capValid ? undefined : t("admin.invalidNumber")}
               />
             </View>
             <Button
-              title={t("admin.save")}
+              title={saved && !dirty ? t("admin.shopSaved") : t("admin.save")}
               disabled={!dirty || !priceValid || !capValid}
               loading={update.isPending && update.variables?.pricePerDay !== undefined}
               onPress={() => update.mutate({ pricePerDay: priceNum, capacity: capNum })}
@@ -217,7 +227,9 @@ function Detail({ shop: s }: { shop: AdminShopDetail }) {
                 <Button variant="secondary" title={t("admin.call")} icon={<Phone size={16} color={colors.ink} />} onPress={() => open(`tel:${s.owner.phone}`)} style={{ flex: 1 }} />
               ) : null}
               {wa ? (
-                <Button variant="secondary" title="WhatsApp" icon={<MessageCircle size={16} color={colors.ink} />} onPress={() => open(`https://wa.me/${wa}`)} style={{ flex: 1 }} />
+                <IconButton label="WhatsApp" onPress={() => open(`https://wa.me/${wa}`)}>
+                  <MessageCircle size={18} color={colors.ink} />
+                </IconButton>
               ) : null}
               {s.owner.email ? (
                 <IconButton label={t("admin.email")} onPress={() => open(`mailto:${s.owner.email}`)}>
@@ -325,7 +337,7 @@ function Fact({ label, value }: { label: string; value: string }) {
 const styles = StyleSheet.create({
   safe: { flex: 1, backgroundColor: colors.bg },
   content: { padding: space.xl, paddingBottom: space.xxl, gap: space.xl },
-  titleLine: { flexDirection: "row", alignItems: "center", gap: space.sm },
+  titleLine: { flexDirection: "row", alignItems: "center", gap: 4 },
   toggle: { flexDirection: "row", alignItems: "center", gap: space.md, paddingVertical: space.md },
   toggleDivider: { borderBottomWidth: 1, borderBottomColor: colors.border },
   facts: { flexDirection: "row", gap: space.sm },
