@@ -6,7 +6,7 @@ import { useTranslation } from "react-i18next";
 import { StatusBadge } from "@/components/StatusBadge";
 import { AppText } from "@/components/ui";
 import { prefetchBooking } from "@/lib/queries";
-import { formatDayTime, formatMoney, formatMonthShort, formatTime } from "@/lib/format";
+import { formatMoney, formatMonthShort, formatStayRange } from "@/lib/format";
 import { shiftedForFormat } from "@/lib/time";
 import type { BookingSummary } from "@/lib/types";
 import { colors, fonts, radius, space } from "@/theme/tokens";
@@ -53,11 +53,11 @@ export const BookingRow = memo(function BookingRow({
       </View>
 
       <View style={{ flex: 1, gap: 4 }}>
-        <AppText variant="heading" numberOfLines={1}>
+        <AppText variant="heading" numberOfLines={2}>
           {title}
         </AppText>
         <AppText variant="caption" numberOfLines={1}>
-          {formatTime(booking.checkInTime)} → {formatDayTime(booking.checkOutTime)}
+          {formatStayRange(booking.checkInTime, booking.checkOutTime)}
         </AppText>
         {overdueMs > 0 ? (
           <AppText variant="label" style={{ color: colors.danger, fontSize: 13 }}>

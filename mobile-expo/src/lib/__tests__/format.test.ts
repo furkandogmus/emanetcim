@@ -1,6 +1,6 @@
 import { describe, expect, it } from "@jest/globals";
 
-import { formatKm, formatPriceRange, stayDays, initial } from "@/lib/format";
+import { formatDistance, formatKm, formatStayRange, stayDays, initial } from "@/lib/format";
 
 const at = (iso: string) => new Date(iso);
 
@@ -41,12 +41,23 @@ describe("initial", () => {
   });
 });
 
-describe("formatPriceRange", () => {
-  it("kucuk ve buyuk valiz fiyatini aralik olarak yazar", () => {
-    expect(formatPriceRange({ min: 200, max: 375 })).toMatch(/200.*375/);
+
+describe("formatStayRange", () => {
+  it("ayni Istanbul gununde tarihi tekrar yazmaz", () => {
+    expect(formatStayRange("2026-11-19T14:30:00Z", "2026-11-19T18:30:00Z")).not.toMatch(/19/);
   });
-  it("esitse tek fiyat; kayan nokta artigi yuvarlanir", () => {
-    expect(formatPriceRange({ min: 250, max: 250 })).not.toContain("–");
-    expect(formatPriceRange({ min: 250 * 0.8, max: 250 * 0.8000000001 })).not.toContain("–");
+  it("farkli gunde alma tarihini yazar", () => {
+    expect(formatStayRange("2026-11-19T14:30:00Z", "2026-11-21T08:00:00Z")).toMatch(/21/);
+  });
+});
+
+describe("formatDistance", () => {
+  it("1 km altini metreyle yazar", () => {
+    expect(formatDistance(0.04)).toBe("40 m");
+    expect(formatDistance(0)).toBe("10 m");
+    expect(formatDistance(0.456)).toBe("460 m");
+  });
+  it("1 km ve ustunu km ile yazar", () => {
+    expect(formatDistance(2)).toMatch(/^2[.,]0 km$/);
   });
 });

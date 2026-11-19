@@ -83,7 +83,8 @@
       "notDroppedTitle": "Your bag isn't at the shop yet",
       "notDroppedBody": "Once you drop your bag at {{shop}}, your pick-up code opens here. Drop-off: {{time}}.",
       "openBooking": "Open booking"
-    }
+    },
+    "atShopLabel": "Your bags at the shop"
   },
   "search": {
     "locationTitle": "Where are you going?",
@@ -101,7 +102,8 @@
     "prevMonth": "Previous month",
     "nextMonth": "Next month",
     "step": "Step {{current}} of {{total}}",
-    "dropOffInPast": "That drop-off time has passed. Pick a new time."
+    "dropOffInPast": "That drop-off time has passed. Pick a new time.",
+    "locationUnavailable": "We couldn't get your location. Search an address or pick a city from the list."
   },
   "bags": {
     "s": "Small (S)",
@@ -120,9 +122,7 @@
     "empty": "No available spots here. Move the map and try again.",
     "searchHere": "Search this area",
     "comingSoon": "Coming soon",
-    "perDay": "/ day",
     "available": "~{{count}} free",
-    "distance": "{{km}} km",
     "verified": "Verified",
     "editSearch": "Edit search",
     "emptyTitle": "No bookable spots near {{place}} yet",
@@ -131,7 +131,8 @@
     "emptyTitleNear": "No bookable spots near you yet",
     "hoursCloses": "Closes {{time}} · pick up your bags before then",
     "hoursOpens": "Opens {{time}} · drop off from then",
-    "hoursPickupOpens": "Pick up from {{time}}"
+    "hoursPickupOpens": "Pick up from {{time}}",
+    "perDayMedium": "medium / day"
   },
   "shop": {
     "open247": "Open 24/7",
@@ -142,7 +143,6 @@
     "prelaunch": "This spot isn't taking bookings yet. You'll see it here when it opens.",
     "restroom": "Restroom available",
     "book": "Book this spot",
-    "perDayLabel": "Per bag, per day",
     "weekdays": [
       "Sunday",
       "Monday",
@@ -157,7 +157,8 @@
     "perDay": "{{price}} / day",
     "reviews": "Reviews ({{count}})",
     "noReviews": "No reviews yet.",
-    "photoN": "Photo {{n}} of {{total}}"
+    "photoN": "Photo {{n}} of {{total}}",
+    "perDayMediumLabel": "Medium bag, per day"
   },
   "checkout": {
     "title": "Confirm",
@@ -208,7 +209,8 @@
     "title": "You're booked",
     "body": "Show your QR code at the shop and drop off your bags.",
     "viewBooking": "View booking",
-    "home": "Home"
+    "home": "Home",
+    "dropOffAt": "Drop-off: {{day}}, {{time}}"
   },
   "bookings": {
     "title": "My bookings",
@@ -336,7 +338,8 @@
     "sealBroken": "Not intact",
     "sealBrokenHint": "A seal that isn't intact is recorded; check the bag with the guest. You can still complete the pickup.",
     "lateFeeCollect": "Late fee {{amount}}: collect it from the guest.",
-    "earlyRefundGive": "Early pickup: refund the guest {{amount}}."
+    "earlyRefundGive": "Early pickup: refund the guest {{amount}}.",
+    "shopPending": "Awaiting approval"
   },
   "profile": {
     "title": "Profile",

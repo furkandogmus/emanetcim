@@ -11,7 +11,7 @@ import { AppText, Banner, Button, Card, CenterMessage, IconButton, Loading } fro
 import { rememberCheckoutIntent, takeCheckoutIntent } from "@/lib/after-login";
 import { useAuth } from "@/lib/auth";
 import { errorMessage } from "@/lib/errors";
-import { formatDay, formatMoney, formatPriceRange, formatRating } from "@/lib/format";
+import { formatDay, formatMoney, formatRating } from "@/lib/format";
 import { resolveImage } from "@/lib/images";
 import { useShop, useShopReviews } from "@/lib/queries";
 import { wallParts } from "@/lib/time";
@@ -41,7 +41,19 @@ export default function ShopDetailScreen() {
     router.push({ pathname: "/checkout", params: { shopId } });
   }
 
-  if (query.isLoading) return <Loading />;
+  // Yuklenirken de geri dugmesi: iOS'ta donanim geri tusu yok, bos ekranda kalinirdi.
+  if (query.isLoading) {
+    return (
+      <View style={{ flex: 1, backgroundColor: colors.bg }}>
+        <View style={{ position: "absolute", top: insets.top + space.sm, left: space.lg, zIndex: 1 }}>
+          <IconButton label={t("common.back")} onPress={() => router.back()}>
+            <ArrowLeft size={20} color={colors.ink} />
+          </IconButton>
+        </View>
+        <Loading />
+      </View>
+    );
+  }
   if (query.isError || !query.data) {
     return (
       <CenterMessage
@@ -177,12 +189,9 @@ export default function ShopDetailScreen() {
       {!shop.isPrelaunch ? (
         <View style={[styles.cta, { paddingBottom: insets.bottom + space.md }]}>
           <View>
-            <AppText variant="caption">{t("shop.perDayLabel")}</AppText>
+            <AppText variant="caption">{t("shop.perDayMediumLabel")}</AppText>
             <AppText variant="heading" style={{ fontFamily: fonts.display, fontSize: 22 }}>
-              {formatPriceRange({
-                min: shop.pricePerDay * Math.min(shop.pricing.bagMultiplierS, shop.pricing.bagMultiplierM, shop.pricing.bagMultiplierXl),
-                max: shop.pricePerDay * Math.max(shop.pricing.bagMultiplierS, shop.pricing.bagMultiplierM, shop.pricing.bagMultiplierXl),
-              })}
+              {formatMoney(Math.round(shop.pricePerDay * shop.pricing.bagMultiplierM * 100) / 100)}
             </AppText>
           </View>
           <Button

@@ -58,7 +58,7 @@ export function PartnerPulseCard() {
           <View style={styles.statRule} />
           <Stat value={d.todayPickups} label={t("pulse.pickups")} />
           <View style={styles.statRule} />
-          <Stat value={d.bagsInStorage} label={t("pulse.inStorage")} emphasis />
+          <Stat value={d.bagsInStorage} label={t("pulse.inStorage")} emphasis={d.bagsInStorage > 0} />
         </View>
 
         <View style={styles.month}>

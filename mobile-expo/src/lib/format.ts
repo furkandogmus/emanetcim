@@ -34,17 +34,6 @@ export function formatMoney(amount: number) {
   return `₺${n}`;
 }
 
-/**
- * Gunluk fiyat araligi: kucuk valiz - buyuk valiz. Tabandaki tek fiyat (orta valiz)
- * "valiz basi" diye gosterilince boy fiyatlariyla celisiyordu.
- */
-export function formatPriceRange(range: { min: number; max: number }) {
-  const min = Math.round(range.min * 100) / 100;
-  const max = Math.round(range.max * 100) / 100;
-  if (min === max) return formatMoney(min);
-  return `${formatMoney(min)} – ${formatMoney(max)}`;
-}
-
 /** "Cum 16 Eki" -- Istanbul gunu, telefonun saat dilimi degil (`time.ts`). */
 export function formatDay(d: Date | string) {
   return dateFmt({ weekday: "short", day: "numeric", month: "short", timeZone: "UTC" }).format(shiftedForFormat(d));
@@ -56,6 +45,12 @@ export function formatDayTime(d: Date | string) {
   return `${formatDay(date)}, ${formatTime(date)}`;
 }
 
+/** Kalis araligi: ayni gun ise yalnizca saatler ("17:30 → 21:30"); tarih tile'da zaten yaziyor. */
+export function formatStayRange(checkIn: Date | string, checkOut: Date | string) {
+  const sameDay = formatDay(checkIn) === formatDay(checkOut);
+  return `${formatTime(checkIn)} → ${sameDay ? formatTime(checkOut) : formatDayTime(checkOut)}`;
+}
+
 export function formatTime(d: Date | string) {
   return dateFmt({ hour: "2-digit", minute: "2-digit", timeZone: "UTC" }).format(shiftedForFormat(d));
 }
@@ -63,6 +58,12 @@ export function formatTime(d: Date | string) {
 /** Takvim hucresi (yerel `Date(y, m, 1)`) alir; saat dilimi kaydirmasi yok. */
 export function formatMonth(d: Date) {
   return dateFmt({ month: "long", year: "numeric" }).format(d);
+}
+
+/** Mesafe birimiyle: 1 km altinda metre ("0.0 km" yerine "40 m"), 10 m'ye yuvarlanir. */
+export function formatDistance(km: number) {
+  if (km < 1) return `${Math.max(10, Math.round((km * 1000) / 10) * 10)} m`;
+  return `${formatKm(km)} km`;
 }
 
 export function formatKm(km: number) {

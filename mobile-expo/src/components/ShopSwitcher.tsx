@@ -42,7 +42,10 @@ export function ShopSwitcher() {
         visible={open}
         onClose={() => setOpen(false)}
         title={t("partner.chooseShop")}
-        choices={d.shops.map((s) => ({ value: s.id, label: s.name }))}
+        choices={d.shops.map((s) => ({
+          value: s.id,
+          label: s.isActive === false ? `${s.name} · ${t("partner.shopPending")}` : s.name,
+        }))}
         selected={d.shop.id}
         onSelect={setShopId}
       />

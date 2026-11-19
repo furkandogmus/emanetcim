@@ -83,7 +83,8 @@
       "notDroppedTitle": "Dein Gepäck ist noch nicht im Laden",
       "notDroppedBody": "Sobald du dein Gepäck bei {{shop}} abgegeben hast, erscheint hier dein Abholcode. Abgabe: {{time}}.",
       "openBooking": "Buchung öffnen"
-    }
+    },
+    "atShopLabel": "Dein Gepäck im Laden"
   },
   "search": {
     "locationTitle": "Wohin geht's?",
@@ -101,7 +102,8 @@
     "prevMonth": "Vorheriger Monat",
     "nextMonth": "Nächster Monat",
     "step": "Schritt {{current}} von {{total}}",
-    "dropOffInPast": "Diese Abgabezeit ist vorbei. Wähle eine neue Zeit."
+    "dropOffInPast": "Diese Abgabezeit ist vorbei. Wähle eine neue Zeit.",
+    "locationUnavailable": "Dein Standort konnte nicht ermittelt werden. Suche eine Adresse oder wähle eine Stadt aus der Liste."
   },
   "bags": {
     "s": "Klein (S)",
@@ -120,9 +122,7 @@
     "empty": "Hier gibt es keine freien Orte. Verschiebe die Karte und versuch es erneut.",
     "searchHere": "In diesem Bereich suchen",
     "comingSoon": "Demnächst",
-    "perDay": "/ Tag",
     "available": "~{{count}} frei",
-    "distance": "{{km}} km",
     "verified": "Geprüft",
     "editSearch": "Suche ändern",
     "emptyTitle": "Noch keine buchbaren Orte in der Nähe von {{place}}",
@@ -131,7 +131,8 @@
     "emptyTitleNear": "Noch keine buchbaren Orte in deiner Nähe",
     "hoursCloses": "Schließt {{time}} · Gepäck vorher abholen",
     "hoursOpens": "Öffnet {{time}} · Abgabe ab dann",
-    "hoursPickupOpens": "Abholung ab {{time}}"
+    "hoursPickupOpens": "Abholung ab {{time}}",
+    "perDayMedium": "mittel / Tag"
   },
   "shop": {
     "open247": "24/7 geöffnet",
@@ -142,7 +143,6 @@
     "prelaunch": "Dieser Ort nimmt noch keine Buchungen an. Du siehst ihn hier, sobald er öffnet.",
     "restroom": "Toilette vorhanden",
     "book": "Diesen Ort buchen",
-    "perDayLabel": "Pro Gepäckstück und Tag",
     "weekdays": [
       "Sonntag",
       "Montag",
@@ -157,7 +157,8 @@
     "perDay": "{{price}} / Tag",
     "reviews": "Bewertungen ({{count}})",
     "noReviews": "Noch keine Bewertungen.",
-    "photoN": "Foto {{n}} von {{total}}"
+    "photoN": "Foto {{n}} von {{total}}",
+    "perDayMediumLabel": "Mittleres Gepäck pro Tag"
   },
   "checkout": {
     "title": "Bestätigen",
@@ -208,7 +209,8 @@
     "title": "Du bist gebucht",
     "body": "Zeig deinen QR-Code im Laden und gib dein Gepäck ab.",
     "viewBooking": "Buchung ansehen",
-    "home": "Start"
+    "home": "Start",
+    "dropOffAt": "Abgabe: {{day}}, {{time}}"
   },
   "bookings": {
     "title": "Meine Buchungen",
@@ -336,7 +338,8 @@
     "sealBroken": "Nicht intakt",
     "sealBrokenHint": "Ein nicht intaktes Siegel wird erfasst; prüf das Gepäck mit dem Gast. Die Abholung kannst du trotzdem abschließen.",
     "lateFeeCollect": "Verspätungsgebühr {{amount}}: vom Gast kassieren.",
-    "earlyRefundGive": "Frühe Abholung: dem Gast {{amount}} erstatten."
+    "earlyRefundGive": "Frühe Abholung: dem Gast {{amount}} erstatten.",
+    "shopPending": "Wartet auf Freigabe"
   },
   "profile": {
     "title": "Profil",
