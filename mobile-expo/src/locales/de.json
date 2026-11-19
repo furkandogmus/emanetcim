@@ -572,14 +572,12 @@
     "noBookingsYet": "Noch keine Buchungen",
     "users": "Nutzer",
     "userSearchPlaceholder": "Name, E-Mail oder Telefon suchen",
-    "userBanned": "Nutzer gesperrt",
-    "userUnbanned": "Sperre aufgehoben",
     "banTitle": "{{name}} sperren?",
     "banBody": "Offene Sitzungen enden sofort und eine erneute Anmeldung ist nicht möglich. Die Sperre lässt sich jederzeit aufheben.",
     "banConfirm": "Sperren",
     "noUsers": "Keine Nutzer gefunden",
     "role": {
-      "USER": "Gast",
+      "GUEST": "Gast",
       "PARTNER": "Partner",
       "ADMIN": "Admin"
     },

@@ -572,14 +572,12 @@
     "noBookingsYet": "Henüz rezervasyon yok",
     "users": "Kullanıcılar",
     "userSearchPlaceholder": "Ad, e-posta ya da telefon ara",
-    "userBanned": "Kullanıcı engellendi",
-    "userUnbanned": "Engel kaldırıldı",
     "banTitle": "{{name}} engellensin mi?",
     "banBody": "Açık oturumları hemen kapanır ve yeniden giriş yapamaz. Engeli istediğin zaman kaldırabilirsin.",
     "banConfirm": "Engelle",
     "noUsers": "Kullanıcı bulunamadı",
     "role": {
-      "USER": "Misafir",
+      "GUEST": "Misafir",
       "PARTNER": "Esnaf",
       "ADMIN": "Yönetici"
     },
