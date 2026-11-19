@@ -174,21 +174,26 @@ export class AdminOpsService {
   /** Aktif dukkanlar, su an icerideki valizle doluluk sirasina gore. */
   async shopsOccupancy(now: Date = new Date()) {
     const today = dayRangeInTimeZone(PLATFORM_TIMEZONE, now);
-    const [shops, stored, arrivals, pickups] = await Promise.all([
+    const select = {
+      id: true,
+      name: true,
+      district: true,
+      city: true,
+      capacity: true,
+      rating: true,
+      isPrelaunch: true,
+      owner: { select: { phone: true } },
+    } as const;
+    const [realShops, prelaunchShops, stored, arrivals, pickups] = await Promise.all([
+      // Gercek dukkanlar tavansiz. Eskiden tek sorgu siralamasiz `take: 300` idi ve
+      // 490 talep testi noktasi arasinda gercek esnaflar rastgele dusuyordu (2026-11-19).
+      prisma.shop.findMany({ where: { isActive: true, isPrelaunch: false }, select }),
+      // Sayfalama gelene kadar tavan: binlerce noktada yanit MB'larca olmasin.
       prisma.shop.findMany({
-        where: { isActive: true },
-        // Sayfalama gelene kadar tavan: binlerce dukkanda yanit MB'larca olmasin.
-        take: 300,
-        select: {
-          id: true,
-          name: true,
-          district: true,
-          city: true,
-          capacity: true,
-          rating: true,
-          isPrelaunch: true,
-          owner: { select: { phone: true } },
-        },
+        where: { isActive: true, isPrelaunch: true },
+        orderBy: [{ city: "asc" }, { name: "asc" }],
+        take: 1000,
+        select,
       }),
       prisma.booking.groupBy({
         by: ["shopId"],
@@ -213,7 +218,7 @@ export class AdminOpsService {
     const arr = new Map(arrivals.map((a) => [a.shopId, a._count._all]));
     const pick = new Map(pickups.map((p) => [p.shopId, p._count._all]));
 
-    return shops
+    return [...realShops, ...prelaunchShops]
       .map((s) => ({
         ...s,
         bagsInStorage: bags.get(s.id) ?? 0,

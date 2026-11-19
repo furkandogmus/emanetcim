@@ -31,7 +31,7 @@ export async function GET(req: NextRequest) {
       where: { status: { in: [...EARNING_BOOKING_STATUSES] } },
       _sum: { totalPrice: true },
     }),
-    prisma.shop.count(),
+    prisma.shop.count({ where: { isPrelaunch: false, isTest: false } }),
     prisma.shop.count({ where: { isActive: false } }),
     prisma.contactMessage.count({ where: { isRead: false } }),
   ]);
