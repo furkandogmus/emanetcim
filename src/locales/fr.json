@@ -1297,7 +1297,18 @@
     "shopsTabLive": "En service",
     "shopsTabPrelaunch": "Test de demande",
     "statusPrelaunch": "Test de demande · pas de bagages",
-    "shopsPrelaunchHint": "Ces points apparaissent sur la carte comme « me prévenir à l'ouverture » et ne prennent pas de réservations. Les demandes sont sur la page Test de demande."
+    "shopsPrelaunchHint": "Ces points apparaissent sur la carte comme « me prévenir à l'ouverture » et ne prennent pas de réservations. Les demandes sont sur la page Test de demande.",
+    "shopsTabTest": "Fiches de test",
+    "shopsTestHint": "Les fiches de test ne sont jamais montrées aux clients ; leur historique de réservations est conservé.",
+    "shopsVisibility": "Visibilité client",
+    "shopsVisibilityTest": "Masqué (test)",
+    "shopsVisibilityIssueCount": "{count, plural, one {# boutique a un problème de visibilité} other {# boutiques ont un problème de visibilité}}",
+    "shopsIssue": {
+      "inactive": "Inactive : masquée aux clients",
+      "noLocation": "Pas de position : absente de la recherche et de la carte",
+      "noCityPage": "Sur aucune page ville",
+      "noPhoto": "Pas de photo"
+    }
   },
   "Auth": {
     "loginTitle": "Connectez-vous à BagajPark",

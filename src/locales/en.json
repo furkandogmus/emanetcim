@@ -1297,7 +1297,18 @@
     "shopsTabLive": "In service",
     "shopsTabPrelaunch": "Demand test",
     "statusPrelaunch": "Demand test · no bags",
-    "shopsPrelaunchHint": "These points show as \"notify me when open\" on the map and take no bookings. Interest counts are on the Demand test page."
+    "shopsPrelaunchHint": "These points show as \"notify me when open\" on the map and take no bookings. Interest counts are on the Demand test page.",
+    "shopsTabTest": "Test records",
+    "shopsTestHint": "Test records are never shown to guests; their booking history is kept.",
+    "shopsVisibility": "Guest visibility",
+    "shopsVisibilityTest": "Hidden (test)",
+    "shopsVisibilityIssueCount": "{count, plural, one {# shop has a visibility issue} other {# shops have visibility issues}}",
+    "shopsIssue": {
+      "inactive": "Inactive: hidden from guests",
+      "noLocation": "No location: not in search or map",
+      "noCityPage": "Not on any city page",
+      "noPhoto": "No photo"
+    }
   },
   "Auth": {
     "loginTitle": "Sign in to BagajPark",

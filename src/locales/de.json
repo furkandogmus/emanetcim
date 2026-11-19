@@ -1297,7 +1297,18 @@
     "shopsTabLive": "In Betrieb",
     "shopsTabPrelaunch": "Nachfragetest",
     "statusPrelaunch": "Nachfragetest · kein Gepäck",
-    "shopsPrelaunchHint": "Diese Punkte erscheinen auf der Karte als „Benachrichtigen, wenn geöffnet“ und nehmen keine Buchungen an. Interessenzahlen stehen auf der Seite Nachfragetest."
+    "shopsPrelaunchHint": "Diese Punkte erscheinen auf der Karte als „Benachrichtigen, wenn geöffnet“ und nehmen keine Buchungen an. Interessenzahlen stehen auf der Seite Nachfragetest.",
+    "shopsTabTest": "Testeinträge",
+    "shopsTestHint": "Testeinträge sind für Gäste nirgends sichtbar; ihre Buchungshistorie bleibt erhalten.",
+    "shopsVisibility": "Sichtbarkeit für Gäste",
+    "shopsVisibilityTest": "Verborgen (Test)",
+    "shopsVisibilityIssueCount": "{count, plural, one {# Laden hat ein Sichtbarkeitsproblem} other {# Läden haben Sichtbarkeitsprobleme}}",
+    "shopsIssue": {
+      "inactive": "Inaktiv: für Gäste verborgen",
+      "noLocation": "Kein Standort: nicht in Suche und Karte",
+      "noCityPage": "Auf keiner Stadtseite",
+      "noPhoto": "Kein Foto"
+    }
   },
   "Auth": {
     "loginTitle": "Melden Sie sich bei BagajPark an",
