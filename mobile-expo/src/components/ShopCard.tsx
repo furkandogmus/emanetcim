@@ -5,7 +5,7 @@ import { useTranslation } from "react-i18next";
 import type { TFunction } from "i18next";
 
 import { AppText } from "@/components/ui";
-import { formatKm, formatMoney, formatPriceRange, formatRating } from "@/lib/format";
+import { formatDistance, formatMoney, formatRating } from "@/lib/format";
 import { RemoteImage } from "@/components/RemoteImage";
 import { resolveImage } from "@/lib/images";
 import type { NearbyShop } from "@/lib/types";
@@ -37,7 +37,7 @@ export const ShopCard = memo(function ShopCard({
   const hours = hoursLabel(shop, t);
   const facts = [
     shop.district || shop.city || null,
-    t("map.distance", { km: formatKm(shop.distanceKm) }),
+    formatDistance(shop.distanceKm),
     shop.bagsAvailable !== undefined && !shop.isPrelaunch ? t("map.available", { count: shop.bagsAvailable }) : null,
   ].filter(Boolean);
 
@@ -62,7 +62,7 @@ export const ShopCard = memo(function ShopCard({
 
       <View style={styles.body}>
         <View style={styles.titleRow}>
-          <AppText variant="heading" numberOfLines={1} style={{ flexShrink: 1 }}>
+          <AppText variant="heading" numberOfLines={2} style={{ flexShrink: 1 }}>
             {shop.name}
           </AppText>
           {shop.isVerified && !shop.isPrelaunch ? (
@@ -111,10 +111,8 @@ export const ShopCard = memo(function ShopCard({
           </View>
         ) : (
           <>
-            <Text style={styles.price}>
-              {shop.priceRange ? formatPriceRange(shop.priceRange) : formatMoney(shop.pricePerDay)}
-            </Text>
-            <Text style={styles.perDay}>{t("map.perDay")}</Text>
+            <Text style={styles.price}>{formatMoney(shop.priceRange?.medium ?? shop.pricePerDay)}</Text>
+            <Text style={styles.perDay}>{t("map.perDayMedium")}</Text>
           </>
         )}
       </View>
@@ -149,9 +147,9 @@ const styles = StyleSheet.create({
   ratingText: { fontFamily: fonts.bodySemibold, fontSize: 13, color: colors.ink },
   dot: { fontFamily: fonts.body, fontSize: 13, color: colors.inkMuted },
   openDot: { width: 6, height: 6, borderRadius: 3, backgroundColor: colors.success, marginRight: 2 },
-  right: { alignItems: "flex-end", alignSelf: "flex-start", paddingTop: 2 },
+  right: { alignItems: "flex-end", alignSelf: "flex-start", paddingTop: 2, maxWidth: 96 },
   price: { fontFamily: fonts.display, fontSize: 18, lineHeight: 22, color: colors.ink, fontVariant: ["tabular-nums"] },
-  perDay: { fontFamily: fonts.body, fontSize: 12, color: colors.inkMuted },
+  perDay: { fontFamily: fonts.body, fontSize: 12, color: colors.inkMuted, textAlign: "right" },
   soon: { backgroundColor: colors.surfaceMuted, borderRadius: radius.pill, paddingHorizontal: 8, paddingVertical: 3 },
   soonText: { fontFamily: fonts.bodyMedium, fontSize: 12, color: colors.inkSecondary },
 });

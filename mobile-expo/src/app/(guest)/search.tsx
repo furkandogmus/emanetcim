@@ -2,7 +2,7 @@ import { useState } from "react";
 import { Pressable, ScrollView, StyleSheet, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { router, useLocalSearchParams } from "expo-router";
-import * as Location from "expo-location";
+import { getDevicePosition, type LocationFailure } from "@/lib/location";
 import { Image } from "expo-image";
 import { ArrowLeft, ChevronRight, LocateFixed, X } from "lucide-react-native";
 import { useTranslation } from "react-i18next";
@@ -40,7 +40,7 @@ export default function SearchWizard() {
   const [checkOut, setCheckOut] = useState(search.checkOut);
   const [bags, setBags] = useState(search.bags);
   const [locating, setLocating] = useState(false);
-  const [locationError, setLocationError] = useState(false);
+  const [locationError, setLocationError] = useState<LocationFailure | null>(null);
   const cityList = useCities().data ?? [];
 
   function choosePlace(place: Place) {
@@ -50,27 +50,11 @@ export default function SearchWizard() {
 
   async function useMyLocation() {
     setLocating(true);
-    setLocationError(false);
-    try {
-      const perm = await Location.requestForegroundPermissionsAsync();
-      if (perm.status !== "granted") {
-        setLocationError(true);
-        return;
-      }
-      const pos =
-        (await Location.getLastKnownPositionAsync()) ??
-        (await Location.getCurrentPositionAsync({ accuracy: Location.Accuracy.Balanced }));
-      choosePlace({
-        label: t("map.nearYou"),
-        latitude: pos.coords.latitude,
-        longitude: pos.coords.longitude,
-        isCurrent: true,
-      });
-    } catch {
-      setLocationError(true);
-    } finally {
-      setLocating(false);
-    }
+    setLocationError(null);
+    const res = await getDevicePosition();
+    setLocating(false);
+    if (!res.ok) return setLocationError(res.reason);
+    choosePlace({ label: t("map.nearYou"), ...res.position, isCurrent: true });
   }
 
   const windowValid = isStayWindowValid(checkIn, checkOut);
@@ -123,7 +107,12 @@ export default function SearchWizard() {
             </View>
             <AppText variant="bodyMedium">{locating ? t("search.locating") : t("search.useLocation")}</AppText>
           </Pressable>
-          {locationError ? <Banner tone="warning" body={t("search.locationDenied")} /> : null}
+          {locationError ? (
+            <Banner
+              tone="warning"
+              body={t(locationError === "denied" ? "search.locationDenied" : "search.locationUnavailable")}
+            />
+          ) : null}
           {cityList.length > 0 ? (
             <>
               <AppText variant="label" style={{ marginTop: space.sm, marginBottom: -space.sm }}>

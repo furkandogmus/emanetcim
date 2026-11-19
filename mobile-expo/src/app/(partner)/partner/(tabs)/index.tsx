@@ -100,53 +100,60 @@ export default function PartnerBookingsScreen() {
         ) : null}
       </View>
 
-      <View style={{ paddingHorizontal: space.xl, paddingBottom: space.md, gap: space.md }}>
-        <ShopSetupCard />
-        <PartnerPulseCard />
-        <Segmented
-          value={tab}
-          onChange={setTab}
-          options={[
-            { value: "today", label: t("partner.today") },
-            { value: "upcoming", label: t("partner.upcoming") },
-            { value: "past", label: t("partner.past") },
-          ]}
-        />
-      </View>
-
-      {query.isLoading ? (
-        <RowSkeleton />
-      ) : query.isError ? (
-        <CenterMessage
-          title={errorMessage(query.error)}
-          action={<Button variant="secondary" title={t("common.retry")} onPress={() => query.refetch()} />}
-        />
-      ) : (
-        <FlatList
-          data={items}
-          keyExtractor={(b) => b.id}
-          contentContainerStyle={[styles.list, items.length === 0 && { flex: 1 }]}
-          refreshControl={
-            <RefreshControl refreshing={query.isRefetching} onRefresh={refreshAll} tintColor={colors.accent} />
-          }
-          renderItem={({ item }) => (
-            <BookingRow
-              booking={item}
-              title={item.guestName || t("partner.guest")}
-              highlight={fresh.has(item.id) ? t("partner.new") : undefined}
-              onPress={() => {
-                setFresh((prev) => {
-                  const next = new Set(prev);
-                  next.delete(item.id);
-                  return next;
-                });
-                router.push(`/partner/${item.id}`);
-              }}
+      {/* Kartlar listenin basliginda: sabit dururken listeye ekranin %15'i kaliyordu
+          (2026-11-19, Pixel 8 emulatorde iki kart + sekmeler). Artik sayfa tek parca kayar. */}
+      <FlatList
+        data={query.isLoading || query.isError ? [] : items}
+        keyExtractor={(b) => b.id}
+        contentContainerStyle={styles.list}
+        refreshControl={
+          <RefreshControl refreshing={query.isRefetching} onRefresh={refreshAll} tintColor={colors.accent} />
+        }
+        ListHeaderComponent={
+          <View style={{ gap: space.md }}>
+            <ShopSetupCard />
+            <PartnerPulseCard />
+            <Segmented
+              value={tab}
+              onChange={setTab}
+              options={[
+                { value: "today", label: t("partner.today") },
+                { value: "upcoming", label: t("partner.upcoming") },
+                { value: "past", label: t("partner.past") },
+              ]}
             />
-          )}
-          ListEmptyComponent={<CenterMessage art={<SealedBag size={64} />} title={t("partner.empty")} />}
-        />
-      )}
+          </View>
+        }
+        renderItem={({ item }) => (
+          <BookingRow
+            booking={item}
+            title={item.guestName || t("partner.guest")}
+            highlight={fresh.has(item.id) ? t("partner.new") : undefined}
+            onPress={() => {
+              setFresh((prev) => {
+                const next = new Set(prev);
+                next.delete(item.id);
+                return next;
+              });
+              router.push(`/partner/${item.id}`);
+            }}
+          />
+        )}
+        ListEmptyComponent={
+          query.isLoading ? (
+            <RowSkeleton />
+          ) : query.isError ? (
+            <CenterMessage
+              title={errorMessage(query.error)}
+              action={<Button variant="secondary" title={t("common.retry")} onPress={() => query.refetch()} />}
+            />
+          ) : (
+            <View style={styles.empty}>
+              <CenterMessage art={<SealedBag size={64} />} title={t("partner.empty")} />
+            </View>
+          )
+        }
+      />
     </SafeAreaView>
   );
 }
@@ -160,5 +167,6 @@ const styles = StyleSheet.create({
     padding: space.xl,
     paddingBottom: space.lg,
   },
-  list: { padding: space.xl, paddingTop: space.sm, gap: space.md, paddingBottom: space.xxl },
+  list: { paddingHorizontal: space.xl, gap: space.md, paddingBottom: space.xxl },
+  empty: { minHeight: 220 },
 });
