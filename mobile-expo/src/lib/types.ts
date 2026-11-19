@@ -387,10 +387,66 @@ export type AdminShop = {
   capacity: number;
   rating: number | null;
   isPrelaunch: boolean;
+  isActive: boolean;
+  isTest: boolean;
+  isVerified: boolean;
+  /** Misafirden saklayan durumlar (sunucu `shopVisibilityIssues`); talep testi ve test kaydinda bos. */
+  issues: ShopVisibilityIssue[];
   phone: string;
   bagsInStorage: number;
   arrivalsToday: number;
   pickupsToday: number;
+};
+
+export type ShopVisibilityIssue = "inactive" | "noLocation" | "noCityPage" | "noPhoto";
+
+/** `/admin/shops/:id` (sunucu `toMobileAdminShopDetail`). */
+export type AdminShopDetail = {
+  id: string;
+  name: string;
+  address: string;
+  place: string;
+  capacity: number;
+  rating: number;
+  pricePerDay: number;
+  isActive: boolean;
+  isTest: boolean;
+  isVerified: boolean;
+  isPrelaunch: boolean;
+  hasPhoto: boolean;
+  latitude: number | null;
+  longitude: number | null;
+  /** null = 7/24 acik. */
+  hours: { open: string; close: string } | null;
+  createdAt: string;
+  owner: { id: string; name: string; email: string; phone: string };
+  bookingCount: number;
+  reviewCount: number;
+  bagsInStorage: number;
+  arrivalsToday: number;
+  pickupsToday: number;
+  /** Dukkani listeleyen sehir sayfalarinin slug'lari. */
+  cityPages: string[];
+  issues: ShopVisibilityIssue[];
+  recent: AdminBookingRow[];
+};
+
+export type AdminShopPatch = Partial<
+  Pick<AdminShopDetail, "name" | "address" | "capacity" | "pricePerDay" | "isActive" | "isTest" | "isVerified">
+>;
+
+/** `/admin/users` satiri (sunucu `toMobileAdminUser`). */
+export type AdminUser = {
+  id: string;
+  name: string;
+  email: string;
+  phone: string;
+  role: Role;
+  isBanned: boolean;
+  isTest: boolean;
+  bookingCount: number;
+  shopCount: number;
+  createdAt: string;
 };
 
 /** `/cities`: dukkani olan sehirler (sunucu `toMobileCity`). */
