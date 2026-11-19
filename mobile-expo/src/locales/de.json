@@ -404,7 +404,9 @@
       "invalid_action": "Ungültige Aktion.",
       "email_send_failed": "Die E-Mail konnte nicht gesendet werden; die Antwort wurde nicht gespeichert. Versuch es gleich noch einmal.",
       "too_many_requests": "Zu viele Antworten gesendet; bitte warte einen Moment.",
-      "invalid_input": "Die Antwort konnte nicht gesendet werden: ungültiger Empfänger oder Text."
+      "invalid_input": "Die Antwort konnte nicht gesendet werden: ungültiger Empfänger oder Text.",
+      "cannot_ban_self": "Du kannst dein eigenes Konto nicht sperren.",
+      "invalid_data": "Der eingegebene Wert ist ungültig."
     },
     "deleteMessage": "Nachricht löschen",
     "replyLabel": "Per E-Mail antworten",
@@ -508,7 +510,86 @@
     "chartEmpty": "Keine bezahlten Buchungen in den letzten 14 Tagen",
     "shopsLive": "In Betrieb",
     "shopsPrelaunch": "Nachfragetest · nimmt kein Gepäck an",
-    "noBags": "Nimmt kein Gepäck an"
+    "noBags": "Nimmt kein Gepäck an",
+    "shopSearchPlaceholder": "Laden, Viertel oder Telefon suchen",
+    "shopFilter": {
+      "all": "Alle",
+      "issues": "Probleme",
+      "inactive": "Inaktiv",
+      "test": "Test"
+    },
+    "noShopsMatch": "Keine Läden für diesen Filter",
+    "verified": "Verifiziert",
+    "inactive": "Inaktiv",
+    "testRecord": "Testeintrag",
+    "shopIssue": {
+      "inactive": "Für Gäste verborgen",
+      "noLocation": "Kein Standort: nicht in der Suche",
+      "noCityPage": "Auf keiner Stadtseite",
+      "noPhoto": "Kein Foto"
+    },
+    "openOnWeb": "Im Webpanel öffnen",
+    "shopSaved": "Gespeichert",
+    "confirm": {
+      "isActive": {
+        "title": "{{name}} für Gäste verbergen?",
+        "body": "Der Laden verschwindet aus Suche, Karte und Stadtseiten und nimmt keine neuen Buchungen an. Bestehende Buchungen laufen weiter.",
+        "cta": "Verbergen"
+      },
+      "isTest": {
+        "title": "{{name}} als Testeintrag markieren?",
+        "body": "Der Eintrag verschwindet aus allem, was Gäste sehen, und aus den Statistiken. Das Partnerpanel funktioniert weiter.",
+        "cta": "Als Test markieren"
+      }
+    },
+    "shopSince": "Seit {{date}}",
+    "prelaunchNote": "Nachfragetest-Punkt: auf der Karte sichtbar, nimmt kein Gepäck an.",
+    "visibilityIssues": "Probleme bei der Sichtbarkeit für Gäste",
+    "visibility": "Sichtbarkeit",
+    "flag": {
+      "isActive": "Für Gäste offen",
+      "isVerified": "Verifiziert-Abzeichen",
+      "isTest": "Testeintrag"
+    },
+    "flagHint": {
+      "isActive": "In der Suche sichtbar, nimmt Buchungen an",
+      "isVerified": "Gäste sehen ein Vertrauensabzeichen",
+      "isTest": "Überall verborgen, wo Gäste suchen"
+    },
+    "listedOn": "Stadtseiten: {{cities}}",
+    "today": "Heute",
+    "arrivals": "Ankünfte",
+    "pickups": "Abholungen",
+    "pricing": "Preis und Kapazität",
+    "invalidNumber": "Gültige Zahl eingeben",
+    "save": "Speichern",
+    "hoursLine": "Öffnungszeit {{open}}–{{close}} · Änderung im Partnerpanel",
+    "open247": "Rund um die Uhr geöffnet",
+    "owner": "Ladeninhaber",
+    "showOnMap": "Auf Karte zeigen",
+    "recentBookings_one": "Letzte Buchungen ({{count}})",
+    "recentBookings_other": "Letzte Buchungen ({{count}})",
+    "noBookingsYet": "Noch keine Buchungen",
+    "users": "Nutzer",
+    "userSearchPlaceholder": "Name, E-Mail oder Telefon suchen",
+    "userBanned": "Nutzer gesperrt",
+    "userUnbanned": "Sperre aufgehoben",
+    "banTitle": "{{name}} sperren?",
+    "banBody": "Offene Sitzungen enden sofort und eine erneute Anmeldung ist nicht möglich. Die Sperre lässt sich jederzeit aufheben.",
+    "banConfirm": "Sperren",
+    "noUsers": "Keine Nutzer gefunden",
+    "role": {
+      "USER": "Gast",
+      "PARTNER": "Partner",
+      "ADMIN": "Admin"
+    },
+    "userBookings_one": "{{count}} Buchung",
+    "userBookings_other": "{{count}} Buchungen",
+    "userShops_one": "{{count}} Laden",
+    "userShops_other": "{{count}} Läden",
+    "bannedTag": "Gesperrt",
+    "ban": "Sperren",
+    "unban": "Sperre aufheben"
   },
   "scan": {
     "open": "QR scannen",

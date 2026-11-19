@@ -1,11 +1,13 @@
-import { Linking, Pressable, RefreshControl, SectionList, StyleSheet, View } from "react-native";
+import { useState } from "react";
+import { Linking, Pressable, RefreshControl, ScrollView, SectionList, StyleSheet, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { router } from "expo-router";
-import { ChevronRight, Phone, Star } from "lucide-react-native";
+import { AlertCircle, BadgeCheck, ChevronRight, Phone, Star } from "lucide-react-native";
 import { useTranslation } from "react-i18next";
 
 import { MapSnippet } from "@/components/Illustrations";
-import { AppText, Button, CenterMessage, IconButton, Loading } from "@/components/ui";
+import { SearchBox } from "@/components/SearchBox";
+import { AppText, Button, CenterMessage, Chip, IconButton, Loading } from "@/components/ui";
 import { errorMessage } from "@/lib/errors";
 import { useAdminOverview, useAdminShops } from "@/lib/queries";
 import type { AdminShop } from "@/lib/types";
@@ -15,16 +17,36 @@ import { colors, radius, space } from "@/theme/tokens";
 /** Doluluk bu oranin ustundeyse cubuk turuncu: o dukkana yeni rezervasyon yonlendirmek riskli. */
 const BUSY = 0.8;
 
+type ShopFilter = "all" | "issues" | "inactive" | "test";
+
+const FILTERS: Record<ShopFilter, (s: AdminShop) => boolean> = {
+  all: (s) => !s.isTest,
+  issues: (s) => !s.isTest && s.issues.length > 0,
+  inactive: (s) => !s.isTest && !s.isActive,
+  test: (s) => s.isTest,
+};
+
+function matches(s: AdminShop, q: string) {
+  const term = q.trim().toLocaleLowerCase("tr");
+  return !term || [s.name, s.place, s.phone].some((v) => v.toLocaleLowerCase("tr").includes(term));
+}
+
 export default function AdminShopsScreen() {
   const { t } = useTranslation();
   const query = useAdminShops();
   const pending = useAdminOverview().data?.attention.pendingApplications ?? 0;
+  const [filter, setFilter] = useState<ShopFilter>("all");
+  const [q, setQ] = useState("");
   const all = query.data ?? [];
   // Talep testi noktalari valiz ALMIYOR: dolulukla ayni listede durunca gercek dukkanlarla
   // karisiyordu. Sayim ve toplam yalnizca hizmetteki dukkanlar.
-  const shops = all.filter((s) => !s.isPrelaunch);
-  const prelaunch = all.filter((s) => s.isPrelaunch);
-  const stored = shops.reduce((a, s) => a + s.bagsInStorage, 0);
+  const real = all.filter((s) => !s.isPrelaunch);
+  const live = real.filter((s) => s.isActive && !s.isTest);
+  const shops = real.filter((s) => FILTERS[filter](s) && matches(s, q));
+  // Talep testi noktalari yalnizca "Tumu" altinda ve aramayla; filtreler gercek dukkan icin.
+  const prelaunch = filter === "all" ? all.filter((s) => s.isPrelaunch && matches(s, q)) : [];
+  const stored = live.reduce((a, s) => a + s.bagsInStorage, 0);
+  const count = (f: ShopFilter) => real.filter(FILTERS[f]).length;
   const sections = [
     { key: "live", title: prelaunch.length > 0 ? t("admin.shopsLive") : null, data: shops },
     ...(prelaunch.length > 0 ? [{ key: "prelaunch", title: t("admin.shopsPrelaunch"), data: prelaunch }] : []),
@@ -35,9 +57,26 @@ export default function AdminShopsScreen() {
       <View style={styles.header}>
         <AppText variant="title">{t("admin.tabs.shops")}</AppText>
         {query.data ? (
-          <AppText variant="caption">{t("admin.shopsSummary", { count: shops.length, bags: stored })}</AppText>
+          <AppText variant="caption">{t("admin.shopsSummary", { count: live.length, bags: stored })}</AppText>
         ) : null}
+        <SearchBox placeholder={t("admin.shopSearchPlaceholder")} onSearch={setQ} />
       </View>
+      {query.data ? (
+        <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.chips} style={{ flexGrow: 0 }}>
+          {(Object.keys(FILTERS) as ShopFilter[]).map((f) => {
+            const n = count(f);
+            if (f === "test" && n === 0) return null;
+            return (
+              <Chip
+                key={f}
+                label={`${t(`admin.shopFilter.${f}`)} ${n}`}
+                selected={filter === f}
+                onPress={() => setFilter(f)}
+              />
+            );
+          })}
+        </ScrollView>
+      ) : null}
 
       {query.isLoading ? (
         <Loading />
@@ -51,7 +90,7 @@ export default function AdminShopsScreen() {
           sections={sections}
           keyExtractor={(s) => s.id}
           stickySectionHeadersEnabled={false}
-          contentContainerStyle={[styles.list, all.length === 0 && { flex: 1 }]}
+          contentContainerStyle={[styles.list, shops.length + prelaunch.length === 0 && { flex: 1 }]}
           renderSectionHeader={({ section }) =>
             section.title ? (
               <AppText variant="label" style={styles.sectionTitle}>
@@ -76,7 +115,9 @@ export default function AdminShopsScreen() {
               </Pressable>
             ) : null
           }
-          ListEmptyComponent={<CenterMessage art={<MapSnippet width={112} />} title={t("admin.noShops")} />}
+          ListEmptyComponent={
+            <CenterMessage art={<MapSnippet width={112} />} title={t(q || filter !== "all" ? "admin.noShopsMatch" : "admin.noShops")} />
+          }
           renderItem={({ item }) => (item.isPrelaunch ? <PrelaunchRow shop={item} /> : <ShopRow shop={item} />)}
         />
       )}
@@ -123,12 +164,20 @@ function ShopRow({ shop: s }: { shop: AdminShop }) {
   const busy = ratio >= BUSY;
 
   return (
-    <View style={styles.card}>
+    <Pressable
+      accessibilityRole="button"
+      accessibilityLabel={s.name}
+      onPress={() => router.push(`/admin/shop/${s.id}`)}
+      style={({ pressed }) => [styles.card, !s.isActive && styles.inactiveCard, pressed && { backgroundColor: colors.surfaceMuted }]}
+    >
       <View style={styles.top}>
         <View style={{ flex: 1, gap: 2 }}>
-          <AppText variant="heading" numberOfLines={1}>
-            {s.name}
-          </AppText>
+          <View style={styles.titleLine}>
+            <AppText variant="heading" numberOfLines={1} style={{ flexShrink: 1 }}>
+              {s.name}
+            </AppText>
+            {s.isVerified ? <BadgeCheck size={16} color={colors.accent} accessibilityLabel={t("admin.verified")} /> : null}
+          </View>
           <View style={styles.meta}>
             {s.rating ? (
               <>
@@ -171,22 +220,54 @@ function ShopRow({ shop: s }: { shop: AdminShop }) {
         </View>
       </View>
 
+      {!s.isActive || s.isTest || s.issues.length > 0 ? (
+        <View style={styles.tags}>
+          {!s.isActive ? <Tag label={t("admin.inactive")} warn /> : null}
+          {s.isTest ? <Tag label={t("admin.testRecord")} /> : null}
+          {s.issues
+            .filter((i) => i !== "inactive")
+            .map((i) => (
+              <Tag key={i} label={t(`admin.shopIssue.${i}`)} warn={i !== "noPhoto"} />
+            ))}
+        </View>
+      ) : null}
+
       <View style={styles.today}>
-        <AppText variant="caption" style={{ fontSize: 13 }}>
+        <AppText variant="caption" style={{ fontSize: 13, flex: 1 }}>
           {t("admin.shopToday", { arrivals: s.arrivalsToday, pickups: s.pickupsToday })}
         </AppText>
+        <ChevronRight size={16} color={colors.inkMuted} />
       </View>
+    </Pressable>
+  );
+}
+
+function Tag({ label, warn }: { label: string; warn?: boolean }) {
+  return (
+    <View style={[styles.tag, warn && styles.tagWarn]}>
+      {warn ? <AlertCircle size={12} color={colors.accent} /> : null}
+      <AppText variant="caption" style={[styles.tagText, warn && { color: colors.accent }]}>
+        {label}
+      </AppText>
     </View>
   );
 }
 
 const styles = StyleSheet.create({
   safe: { flex: 1, backgroundColor: colors.bg },
-  header: { padding: space.xl, paddingBottom: space.lg, gap: 2 },
+  header: { padding: space.xl, paddingBottom: space.md, gap: space.sm },
+  chips: { paddingHorizontal: space.xl, gap: space.sm, paddingBottom: space.md },
+  titleLine: { flexDirection: "row", alignItems: "center", gap: 6 },
+  inactiveCard: { borderStyle: "dashed" },
+  tags: { flexDirection: "row", flexWrap: "wrap", gap: space.sm },
+  tagWarn: { flexDirection: "row", alignItems: "center", gap: 4, borderColor: colors.brand, backgroundColor: colors.brandSoft },
   list: { paddingHorizontal: space.xl, paddingBottom: space.xxl, gap: space.md },
   sectionTitle: { marginTop: space.md },
   prelaunchCard: { backgroundColor: colors.surfaceMuted, borderStyle: "dashed" },
   tag: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 4,
     paddingHorizontal: space.sm,
     paddingVertical: 2,
     borderRadius: radius.pill,
@@ -220,5 +301,5 @@ const styles = StyleSheet.create({
   barLine: { flexDirection: "row", justifyContent: "space-between" },
   track: { height: 6, borderRadius: 3, backgroundColor: colors.surfaceMuted, overflow: "hidden" },
   fill: { height: 6, borderRadius: 3, backgroundColor: colors.inkSecondary },
-  today: { paddingTop: space.sm, borderTopWidth: 1, borderTopColor: colors.border },
+  today: { flexDirection: "row", alignItems: "center", paddingTop: space.sm, borderTopWidth: 1, borderTopColor: colors.border },
 });
