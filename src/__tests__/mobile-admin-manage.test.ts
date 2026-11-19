@@ -82,3 +82,14 @@ describe("shopVisibilityIssues", () => {
       "noPhoto",
     ]));
 });
+
+describe("fullAddress", () => {
+  it("adreste gecen semt ve ili tekrar eklemez", async () => {
+    const { fullAddress } = await import("@/lib/mobile-dto");
+    expect(fullAddress("Galata Kulesi Sk. No:12, Beyoğlu, İstanbul", "Beyoğlu", "İstanbul")).toBe(
+      "Galata Kulesi Sk. No:12, Beyoğlu, İstanbul",
+    );
+    expect(fullAddress("Atatürk Cd. 5", "Muratpaşa", "Antalya")).toBe("Atatürk Cd. 5, Muratpaşa, Antalya");
+    expect(fullAddress(null, "Kepez", "Antalya")).toBe("Kepez, Antalya");
+  });
+});
