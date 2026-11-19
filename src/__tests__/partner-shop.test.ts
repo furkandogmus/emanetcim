@@ -7,8 +7,8 @@ vi.mock("@/lib/db", () => ({ default: { shop: { findMany: mockFindMany } } }));
 import { resolvePartnerShops } from "@/lib/partner-shop";
 
 const OWN = [
-  { id: "new", name: "Yeni" },
-  { id: "old", name: "Eski" },
+  { id: "new", name: "Yeni", isActive: true },
+  { id: "old", name: "Eski", isActive: true },
 ];
 
 beforeEach(() => {
@@ -25,11 +25,19 @@ describe("resolvePartnerShops", () => {
   });
 
   it("istenen dükkan kendisininse onu seçer", async () => {
-    expect((await resolvePartnerShops("p1", "old")).activeShop).toEqual({ id: "old", name: "Eski" });
+    expect((await resolvePartnerShops("p1", "old")).activeShop).toEqual({ id: "old", name: "Eski", isActive: true });
   });
 
   it("başkasının dükkan kimliği varsayılana düşer, o dükkana erişim vermez", async () => {
-    expect((await resolvePartnerShops("p1", "someone-elses")).activeShop).toEqual({ id: "new", name: "Yeni" });
+    expect((await resolvePartnerShops("p1", "someone-elses")).activeShop).toEqual({ id: "new", name: "Yeni", isActive: true });
+  });
+
+  it("istek yoksa en yeni AKTİF dükkanı seçer", async () => {
+    mockFindMany.mockResolvedValueOnce([
+      { id: "pending", name: "Başvuru", isActive: false },
+      { id: "live", name: "Hizmette", isActive: true },
+    ]);
+    expect((await resolvePartnerShops("p1")).activeShop).toEqual({ id: "live", name: "Hizmette", isActive: true });
   });
 
   it("dükkanı yoksa activeShop null", async () => {

@@ -20,7 +20,8 @@ import prisma from "@/lib/db";
  * deterministik olarak en yeni dükkan.
  */
 
-export type PartnerShopRef = { id: string; name: string };
+/** `isActive`: onay bekleyen basvuru ayirt edilsin (dukkan seciminde "Onay bekliyor"). */
+export type PartnerShopRef = { id: string; name: string; isActive: boolean };
 
 /** Sıralama SABİT: `findFirst`in plan-bağımlı davranışının yerine geçer. */
 const SHOP_ORDER = { createdAt: "desc" } as const;
@@ -37,15 +38,19 @@ export async function resolvePartnerShops(
   ownerId: string,
   requestedShopId?: string | null,
 ): Promise<{ shops: PartnerShopRef[]; activeShop: PartnerShopRef | null }> {
-  const shops = await prisma.shop.findMany({
+  const rows = await prisma.shop.findMany({
     where: { ownerId },
     orderBy: SHOP_ORDER,
-    select: { id: true, name: true },
+    select: { id: true, name: true, isActive: true },
   });
+  const shops = rows;
 
+  // Varsayilan: en yeni AKTIF dukkan. Uc dukkanli esnaf onay bekleyen yeni basvurusuyla
+  // aciliyordu; misafiri ve valizi olan dukkan ikinci siradaydi (2026-11-19, emulator).
   const requested = requestedShopId?.trim();
-  const activeShop =
-    (requested ? shops.find((s) => s.id === requested) : undefined) ?? shops[0] ?? null;
+  const fallback = rows.find((s) => s.isActive) ?? rows[0];
+  const pick = (requested ? rows.find((s) => s.id === requested) : undefined) ?? fallback;
+  const activeShop = pick ?? null;
 
   return { shops, activeShop };
 }
