@@ -1867,7 +1867,8 @@
     "shopClosedOnDate": "Dükkan seçtiğiniz günlerden birinde kapalı; lütfen başka bir gün seçin.",
     "userNotFound": "Kullanıcı bulunamadı.",
     "userNotGuest": "Bu hesap misafir değil; yalnızca misafir hesapları esnafa çevrilebilir.",
-    "passwordTooShort": "Şifre en az 8 karakter olmalı."
+    "passwordTooShort": "Şifre en az 8 karakter olmalı.",
+    "cannotBanSelf": "Kendi hesabınızı engelleyemezsiniz."
   },
   "Emails": {
     "verificationSubject": "E-postanızı Doğrulayın",

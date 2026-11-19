@@ -32,6 +32,7 @@ import { useModalBehavior } from "@/lib/hooks/useModalBehavior";
 import AdminSetPasswordDialog, { type SetPasswordTarget } from "@/components/admin/AdminSetPasswordDialog";
 import Money from "@/components/common/Money";
 import { formatDecimal } from "@/lib/currency";
+import { shopVisibilityIssues } from "@/lib/shop-visibility";
 
 interface Shop {
   id: string;
@@ -99,22 +100,6 @@ function viewOf(shop: Pick<Shop, "isTest" | "isPrelaunch">): ShopView {
   return shop.isPrelaunch ? "prelaunch" : "live";
 }
 
-type VisibilityIssue = "inactive" | "noLocation" | "noCityPage" | "noPhoto";
-
-/**
- * Gercek bir dukkani misafirden saklayan ya da zayiflatan durumlar.
- * Sira onem sirasi: pasif dukkan hicbir yerde yok; konumsuz dukkan arama ve
- * haritada yok; sehir sayfasi olmayan yalnizca konumla bulunur.
- */
-function visibilityIssues(shop: Shop): VisibilityIssue[] {
-  const issues: VisibilityIssue[] = [];
-  if (!shop.isActive) issues.push("inactive");
-  if (shop.latitude == null || shop.longitude == null) issues.push("noLocation");
-  else if (shop.cityPages.length === 0) issues.push("noCityPage");
-  if (!shop.image) issues.push("noPhoto");
-  return issues;
-}
-
 const ISSUE_ICON = {
   inactive: EyeOff,
   noLocation: MapPin,
@@ -127,7 +112,7 @@ function VisibilityCell({ shop, cityLabel }: { shop: Shop; cityLabel: (slug: str
   if (shop.isTest) {
     return <span className="text-xs font-bold text-gray-400">{t("shopsVisibilityTest")}</span>;
   }
-  const issues = visibilityIssues(shop);
+  const issues = shopVisibilityIssues(shop);
   return (
     <div className="flex flex-col gap-1.5">
       {shop.isActive && shop.cityPages.length > 0 ? (
@@ -168,7 +153,7 @@ export default function AdminPartnersClient({ shops: initialShops }: AdminPartne
   for (const s of initialShops) counts[viewOf(s)] += 1;
   const activeLiveCount = initialShops.filter((s) => viewOf(s) === "live" && s.isActive).length;
   const hiddenLiveCount = initialShops.filter(
-    (s) => viewOf(s) === "live" && visibilityIssues(s).length > 0,
+    (s) => viewOf(s) === "live" && shopVisibilityIssues(s).length > 0,
   ).length;
 
   const [resetTarget, setResetTarget] = useState<{ id: string; name: string; phone: string | null } | null>(null);
