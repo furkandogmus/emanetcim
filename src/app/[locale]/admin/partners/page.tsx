@@ -5,6 +5,7 @@ import prisma from "@/lib/db";
 import { hoursForDate } from "@/lib/shop-schedule";
 import { todayInZone } from "@/lib/stay-days";
 import { loadScheduleParts } from "@/services/ShopScheduleService";
+import { storageCitiesListingShop } from "@/lib/storage-cities";
 import AdminPartnersClient from "@/components/admin/AdminPartnersClient";
 
 export default async function AdminPartnersPage({
@@ -20,31 +21,27 @@ export default async function AdminPartnersPage({
     redirect(`/${locale}/login`);
   }
 
-  // Son 200 dükkan (admin pagination için yeterli — bkz. admin/users/page.tsx
-  // aynı desen; 2026-09-10'da bulundu: bu ekran tek istisna olarak sınırsızdı).
-  const shops = await prisma.shop.findMany({
-    orderBy: [
-      { isActive: "asc" }, // Önce pasifler (onay bekleyenler veya deaktive edilenler)
-      { createdAt: "desc" },
-    ],
-    take: 200,
-    include: {
-      owner: {
-        select: {
-          id: true,
-          name: true,
-          email: true,
-          phone: true,
-        },
-      },
-      _count: {
-        select: {
-          bookings: true,
-          reviews: true,
-        },
-      },
-    },
-  });
+  const include = {
+    owner: { select: { id: true, name: true, email: true, phone: true } },
+    _count: { select: { bookings: true, reviews: true } },
+  } as const;
+  // Gercek dukkanlar SINIRSIZ: eskiden tek sorgu `take: 200` ile 490 talep testi
+  // noktasiyla birlikte kesiliyordu ve en eski kayitlar (iki test dukkani) hic
+  // gorunmuyordu (2026-11-19). Talep testi noktalari ayri sorguda.
+  const [realShops, prelaunchShops] = await Promise.all([
+    prisma.shop.findMany({
+      where: { isPrelaunch: false },
+      orderBy: [{ isActive: "asc" }, { createdAt: "desc" }],
+      include,
+    }),
+    prisma.shop.findMany({
+      where: { isPrelaunch: true },
+      orderBy: [{ city: "asc" }, { name: "asc" }],
+      take: 2000,
+      include,
+    }),
+  ]);
+  const shops = [...realShops, ...prelaunchShops];
 
   // Decimal alanları number’a çeviriyoruz (build hatası ve serileştirme için)
   const parts = await loadScheduleParts(
@@ -62,10 +59,11 @@ export default async function AdminPartnersPage({
       : shop.open247
         ? ({ kind: "open247" } as const)
         : ({ kind: "range", text: `${hours.open} – ${hours.close}` } as const);
-    return { ...shop, hoursToday };
+    return { ...shop, hoursToday, cityPages: storageCitiesListingShop(shop) };
   }).map((shop) => ({
     ...shop,
     pricePerDay: Number(shop.pricePerDay),
+    pricePerHour: Number(shop.pricePerHour),
     rating: shop.rating || 0,
     latitude: shop.latitude || null,
     longitude: shop.longitude || null,

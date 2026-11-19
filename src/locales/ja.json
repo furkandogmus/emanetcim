@@ -1297,7 +1297,18 @@
     "shopsTabLive": "営業中",
     "shopsTabPrelaunch": "需要テスト",
     "statusPrelaunch": "需要テスト · 荷物受付なし",
-    "shopsPrelaunchHint": "これらの地点は地図上で「開店時に通知」と表示され、予約は受け付けません。関心数は需要テストのページにあります。"
+    "shopsPrelaunchHint": "これらの地点は地図上で「開店時に通知」と表示され、予約は受け付けません。関心数は需要テストのページにあります。",
+    "shopsTabTest": "テスト登録",
+    "shopsTestHint": "テスト登録はゲストに一切表示されません。予約履歴は保持されます。",
+    "shopsVisibility": "ゲストへの表示",
+    "shopsVisibilityTest": "非表示（テスト）",
+    "shopsVisibilityIssueCount": "{count, plural, other {#件の店舗に表示の問題があります}}",
+    "shopsIssue": {
+      "inactive": "無効：ゲストに非表示",
+      "noLocation": "位置情報なし：検索と地図に出ません",
+      "noCityPage": "どの都市ページにもありません",
+      "noPhoto": "写真なし"
+    }
   },
   "Auth": {
     "loginTitle": "バガジパークにサインインする",

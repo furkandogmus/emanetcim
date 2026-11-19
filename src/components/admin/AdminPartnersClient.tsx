@@ -19,7 +19,11 @@ import {
   Check,
   X,
   Loader2,
-  UserPlus
+  UserPlus,
+  MapPin,
+  EyeOff,
+  ImageOff,
+  Globe
 } from "lucide-react";
 import { Link } from "@/i18n/routing";
 import { motion, AnimatePresence } from "framer-motion";
@@ -36,6 +40,15 @@ interface Shop {
   isActive: boolean;
   /** Talep testi noktasi: haritada "acilinca haber ver" gosterir, valiz ALMAZ. */
   isPrelaunch: boolean;
+  /** Test/demo kaydi: misafire hicbir yerde gorunmez. */
+  isTest: boolean;
+  city: string | null;
+  district: string | null;
+  image: string | null;
+  latitude: number | null;
+  longitude: number | null;
+  /** Dukkani listeleyen sehir sayfalarinin slug'lari. */
+  cityPages: string[];
   rating: number;
   pricePerDay: number; // Decimal
   /** Bugünün çalışma saati: aralık metni, 7/24 ya da kapalı (izin/kapalı gün). */
@@ -73,17 +86,90 @@ function resetErrorMessage(
   return t("resetError");
 }
 
+type ShopView = "live" | "test" | "prelaunch";
+
+const TAB_LABEL = {
+  live: "shopsTabLive",
+  test: "shopsTabTest",
+  prelaunch: "shopsTabPrelaunch",
+} as const;
+
+function viewOf(shop: Pick<Shop, "isTest" | "isPrelaunch">): ShopView {
+  if (shop.isTest) return "test";
+  return shop.isPrelaunch ? "prelaunch" : "live";
+}
+
+type VisibilityIssue = "inactive" | "noLocation" | "noCityPage" | "noPhoto";
+
+/**
+ * Gercek bir dukkani misafirden saklayan ya da zayiflatan durumlar.
+ * Sira onem sirasi: pasif dukkan hicbir yerde yok; konumsuz dukkan arama ve
+ * haritada yok; sehir sayfasi olmayan yalnizca konumla bulunur.
+ */
+function visibilityIssues(shop: Shop): VisibilityIssue[] {
+  const issues: VisibilityIssue[] = [];
+  if (!shop.isActive) issues.push("inactive");
+  if (shop.latitude == null || shop.longitude == null) issues.push("noLocation");
+  else if (shop.cityPages.length === 0) issues.push("noCityPage");
+  if (!shop.image) issues.push("noPhoto");
+  return issues;
+}
+
+const ISSUE_ICON = {
+  inactive: EyeOff,
+  noLocation: MapPin,
+  noCityPage: Globe,
+  noPhoto: ImageOff,
+} as const;
+
+function VisibilityCell({ shop, cityLabel }: { shop: Shop; cityLabel: (slug: string) => string }) {
+  const t = useTranslations("Admin");
+  if (shop.isTest) {
+    return <span className="text-xs font-bold text-gray-400">{t("shopsVisibilityTest")}</span>;
+  }
+  const issues = visibilityIssues(shop);
+  return (
+    <div className="flex flex-col gap-1.5">
+      {shop.isActive && shop.cityPages.length > 0 ? (
+        <p className="text-xs font-bold text-gray-600 flex items-center gap-1.5">
+          <Globe size={12} className="text-green-600" />
+          {shop.cityPages.map(cityLabel).join(", ")}
+        </p>
+      ) : null}
+      {issues.map((issue) => {
+        const Icon = ISSUE_ICON[issue];
+        return (
+          <p
+            key={issue}
+            className={`text-xs font-bold flex items-center gap-1.5 ${
+              issue === "noPhoto" ? "text-gray-500" : "text-amber-700"
+            }`}
+          >
+            <Icon size={12} />
+            {t(`shopsIssue.${issue}`)}
+          </p>
+        );
+      })}
+    </div>
+  );
+}
+
 export default function AdminPartnersClient({ shops: initialShops }: AdminPartnersClientProps) {
   const t = useTranslations("Admin");
   const tSchedule = useTranslations("Partner.schedule");
   const tErrors = useTranslations("Errors");
   const tCommon = useTranslations("Common");
+  const tCity = useTranslations("CityStorage");
   const locale = useLocale();
   const [search, setSearch] = useState("");
   // Talep testi noktalari valiz almiyor; gercek dukkanlarla ayni listede karisiyordu.
-  const [view, setView] = useState<"live" | "prelaunch">("live");
-  const liveCount = initialShops.filter((s) => !s.isPrelaunch).length;
-  const prelaunchCount = initialShops.length - liveCount;
+  const [view, setView] = useState<ShopView>("live");
+  const counts: Record<ShopView, number> = { live: 0, test: 0, prelaunch: 0 };
+  for (const s of initialShops) counts[viewOf(s)] += 1;
+  const activeLiveCount = initialShops.filter((s) => viewOf(s) === "live" && s.isActive).length;
+  const hiddenLiveCount = initialShops.filter(
+    (s) => viewOf(s) === "live" && visibilityIssues(s).length > 0,
+  ).length;
 
   const [resetTarget, setResetTarget] = useState<{ id: string; name: string; phone: string | null } | null>(null);
   const [resetResult, setResetResult] = useState<{ ok: true; resetUrl: string } | { ok: false; error: string } | null>(null);
@@ -106,12 +192,14 @@ export default function AdminPartnersClient({ shops: initialShops }: AdminPartne
 
   useModalBehavior({ open: resetTarget !== null, onClose: closeResetModal });
 
+  const q = search.trim().toLocaleLowerCase("tr");
   const filteredShops = initialShops.filter(
     (shop) =>
-      shop.isPrelaunch === (view === "prelaunch") &&
-      (shop.name.toLowerCase().includes(search.toLowerCase()) ||
-        shop.owner.name?.toLowerCase().includes(search.toLowerCase()) ||
-        shop.owner.phone?.includes(search)),
+      viewOf(shop) === view &&
+      (q === "" ||
+        [shop.name, shop.owner.name, shop.city, shop.district, shop.address]
+          .some((v) => v?.toLocaleLowerCase("tr").includes(q)) ||
+        shop.owner.phone?.includes(search.trim())),
   );
 
   return (
@@ -127,8 +215,14 @@ export default function AdminPartnersClient({ shops: initialShops }: AdminPartne
             {t("shopManagement")}
           </h1>
           <p className="text-xs id-eyebrow text-gray-400 mt-2">
-            {liveCount} {t("activePartners")}
+            {activeLiveCount} {t("activePartners")}
           </p>
+          {hiddenLiveCount > 0 ? (
+            <p className="mt-2 inline-flex items-center gap-1.5 text-sm font-bold text-amber-700">
+              <AlertCircle size={14} />
+              {t("shopsVisibilityIssueCount", { count: hiddenLiveCount })}
+            </p>
+          ) : null}
           <Link
             href="/admin/partners/new"
             className="mt-4 inline-flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-bold text-white bg-orange-600 hover:bg-orange-700 transition-colors"
@@ -152,7 +246,7 @@ export default function AdminPartnersClient({ shops: initialShops }: AdminPartne
       </header>
 
       <div role="tablist" aria-label={t("shopManagement")} className="mb-4 inline-flex gap-1 rounded-2xl bg-white p-1 border border-gray-100 shadow-sm">
-        {(["live", "prelaunch"] as const).map((v) => (
+        {(["live", "test", "prelaunch"] as const).map((v) => (
           <button
             key={v}
             type="button"
@@ -163,15 +257,15 @@ export default function AdminPartnersClient({ shops: initialShops }: AdminPartne
               view === v ? "bg-gray-900 text-white" : "text-gray-500 hover:text-gray-900"
             }`}
           >
-            {v === "live" ? t("shopsTabLive") : t("shopsTabPrelaunch")}{" "}
-            <span className={view === v ? "text-white/70" : "text-gray-400"}>
-              {v === "live" ? liveCount : prelaunchCount}
-            </span>
+            {t(TAB_LABEL[v])}{" "}
+            <span className={view === v ? "text-white/70" : "text-gray-400"}>{counts[v]}</span>
           </button>
         ))}
       </div>
       {view === "prelaunch" ? (
         <p className="mb-4 text-sm text-gray-500">{t("shopsPrelaunchHint")}</p>
+      ) : view === "test" ? (
+        <p className="mb-4 text-sm text-gray-500">{t("shopsTestHint")}</p>
       ) : null}
 
       <div className="bg-white rounded-4xl border border-gray-100 shadow-sm overflow-hidden text-sm">
@@ -183,6 +277,7 @@ export default function AdminPartnersClient({ shops: initialShops }: AdminPartne
                 <th className="px-8 py-5 id-eyebrow text-gray-400">{t("owner")}</th>
                 <th className="px-8 py-5 id-eyebrow text-gray-400">{t("performance")}</th>
                 <th className="px-8 py-5 id-eyebrow text-gray-400">{t("status")}</th>
+                <th className="px-8 py-5 id-eyebrow text-gray-400">{t("shopsVisibility")}</th>
                 <th className="px-8 py-5 id-eyebrow text-gray-400 text-right">{t("actions")}</th>
               </tr>
             </thead>
@@ -200,6 +295,12 @@ export default function AdminPartnersClient({ shops: initialShops }: AdminPartne
                       <div className="flex flex-col gap-1">
                         <p className="truncate max-w-[200px] font-bold text-gray-900">{shop.name}</p>
                         <p className="text-xs text-gray-400 font-medium truncate max-w-[200px]">{shop.address}</p>
+                        {shop.city || shop.district ? (
+                          <p className="text-xs font-bold text-gray-500 flex items-center gap-1">
+                            <MapPin size={12} />
+                            {[shop.district, shop.city].filter(Boolean).join(", ")}
+                          </p>
+                        ) : null}
                         <p className="id-eyebrow text-orange-600">
                           <Money amount={Number(shop.pricePerDay || 0)} /> / {t("day")}
                         </p>
@@ -253,6 +354,9 @@ export default function AdminPartnersClient({ shops: initialShops }: AdminPartne
                           {shop.isActive ? t("active") : t("inactive")}
                         </div>
                       )}
+                    </td>
+                    <td className="px-8 py-6">
+                      <VisibilityCell shop={shop} cityLabel={(slug) => tCity(`${slug}.label`)} />
                     </td>
                     <td className="px-8 py-6 text-right">
                       <div className="flex items-center justify-end gap-2">
