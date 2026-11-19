@@ -52,7 +52,7 @@ describe("mobil esnaf ozeti", () => {
     expect(mockSnapshot).toHaveBeenCalledWith("s1", "Europe/Istanbul", 0.1);
     expect(await res.json()).toEqual({
       shop: { id: "s1", name: "A" },
-      shops: [{ id: "s1", name: "A" }],
+      shops: [{ id: "s1", name: "A", isActive: true }],
       todayArrivals: 3,
       todayPickups: 2,
       bagsInStorage: 5,

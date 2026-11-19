@@ -86,3 +86,12 @@ describe("panel enstantanesi", () => {
     ).resolves.toBeDefined();
   });
 });
+
+describe("bugun gelecek", () => {
+  it("dukkanda odenecek (APPROVED) rezervasyonu da sayar", async () => {
+    stubAggregates({});
+    await partnerDashboardService.getSnapshot("s1", "Europe/Istanbul", 0);
+    const arrivalsWhere = mockPrisma.booking.count.mock.calls[0][0].where;
+    expect(arrivalsWhere.status).toEqual({ in: ["APPROVED", "PAID"] });
+  });
+});
