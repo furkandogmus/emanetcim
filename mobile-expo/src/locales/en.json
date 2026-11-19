@@ -572,14 +572,12 @@
     "noBookingsYet": "No bookings yet",
     "users": "Users",
     "userSearchPlaceholder": "Search name, email or phone",
-    "userBanned": "User banned",
-    "userUnbanned": "Ban lifted",
     "banTitle": "Ban {{name}}?",
     "banBody": "Their open sessions end right away and they can't sign in again. You can lift the ban at any time.",
     "banConfirm": "Ban",
     "noUsers": "No users found",
     "role": {
-      "USER": "Guest",
+      "GUEST": "Guest",
       "PARTNER": "Partner",
       "ADMIN": "Admin"
     },

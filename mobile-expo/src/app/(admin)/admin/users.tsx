@@ -34,10 +34,8 @@ export default function AdminUsersScreen() {
   const ban = useMutation({
     mutationFn: ({ id, isBanned }: { id: string; isBanned: boolean }) =>
       api(`/admin/users/${encodeURIComponent(id)}`, { method: "PATCH", body: { isBanned } }),
-    onSuccess: (_r, { isBanned }) => {
-      void queryClient.invalidateQueries({ queryKey: [...keys.admin, "users"] });
-      notify(isBanned ? t("admin.userBanned") : t("admin.userUnbanned"));
-    },
+    // Basari penceresi yok: "Engelli" etiketi ve dugme metni degisiyor, bu yeterli geri bildirim.
+    onSuccess: () => void queryClient.invalidateQueries({ queryKey: [...keys.admin, "users"] }),
     onError: (e) => notify(t("admin.actionFailed"), errorMessage(e, "admin")),
   });
 
@@ -97,19 +95,19 @@ export default function AdminUsersScreen() {
                         .join(" · ")}
                     </AppText>
                   </View>
-                  {u.phone ? (
-                    <IconButton label={t("admin.call")} onPress={() => open(`tel:${u.phone}`)}>
-                      <Phone size={18} color={colors.ink} />
-                    </IconButton>
-                  ) : null}
-                  {u.email ? (
-                    <IconButton label={t("admin.email")} onPress={() => open(`mailto:${u.email}`)}>
-                      <Mail size={18} color={colors.ink} />
-                    </IconButton>
-                  ) : null}
                 </View>
                 <View style={styles.bottom}>
                   <View style={styles.tags}>
+                    {u.phone ? (
+                      <IconButton label={t("admin.call")} onPress={() => open(`tel:${u.phone}`)}>
+                        <Phone size={18} color={colors.ink} />
+                      </IconButton>
+                    ) : null}
+                    {u.email ? (
+                      <IconButton label={t("admin.email")} onPress={() => open(`mailto:${u.email}`)}>
+                        <Mail size={18} color={colors.ink} />
+                      </IconButton>
+                    ) : null}
                     {u.isBanned ? <Tag label={t("admin.bannedTag")} warn /> : null}
                     {u.isTest ? <Tag label={t("admin.testRecord")} /> : null}
                   </View>
@@ -156,7 +154,7 @@ const styles = StyleSheet.create({
   banned: { borderStyle: "dashed", backgroundColor: colors.surfaceMuted },
   top: { flexDirection: "row", alignItems: "center", gap: space.sm },
   bottom: { flexDirection: "row", alignItems: "center", justifyContent: "space-between", gap: space.md },
-  tags: { flexDirection: "row", gap: space.sm, flex: 1 },
+  tags: { flexDirection: "row", alignItems: "center", gap: space.sm, flex: 1 },
   tag: {
     paddingHorizontal: space.sm,
     paddingVertical: 2,
