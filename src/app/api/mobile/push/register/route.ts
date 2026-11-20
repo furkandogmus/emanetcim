@@ -2,7 +2,7 @@ import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
 import { z } from "zod";
 import prisma from "@/lib/db";
-import { requireMobileUser } from "@/lib/mobile-auth";
+import { forbidWhileImpersonating, requireMobileUser } from "@/lib/mobile-auth";
 import { toMobileDevice } from "@/lib/mobile-dto";
 
 const schema = z.object({
@@ -26,6 +26,9 @@ export async function GET(req: NextRequest) {
 export async function POST(req: NextRequest) {
   const auth = await requireMobileUser(req);
   if ("error" in auth) return auth.error;
+  // Yoneticinin cihazi goruntuledigi kullanicinin bildirimlerini almamali.
+  const blocked = forbidWhileImpersonating(auth.user);
+  if (blocked) return blocked;
   const body = await req.json().catch(() => null);
   const parsed = schema.safeParse(body);
   if (!parsed.success) return NextResponse.json({ error: "invalid" }, { status: 400 });
