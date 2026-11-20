@@ -39,7 +39,10 @@ export const ShopCard = memo(function ShopCard({
     shop.district || shop.city || null,
     formatDistance(shop.distanceKm),
     shop.bagsAvailable !== undefined && !shop.isPrelaunch ? t("map.available", { count: shop.bagsAvailable }) : null,
-  ].filter(Boolean);
+  ]
+    .filter((f): f is string => Boolean(f))
+    // Satir yalnizca " · " arasinda kirilsin: "~60" ile "yer" ayri satira dusmesin.
+    .map((f) => f.replace(/ /g, " "));
 
   return (
     <Pressable
@@ -78,7 +81,7 @@ export const ShopCard = memo(function ShopCard({
               <Text style={styles.dot}>·</Text>
             </>
           ) : null}
-          <AppText variant="caption" numberOfLines={1} style={{ flexShrink: 1, fontSize: 13 }}>
+          <AppText variant="caption" numberOfLines={2} style={{ flexShrink: 1, fontSize: 13 }}>
             {facts.join(" · ")}
           </AppText>
         </View>

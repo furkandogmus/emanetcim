@@ -51,6 +51,12 @@ export function formatStayRange(checkIn: Date | string, checkOut: Date | string)
   return `${formatTime(checkIn)} → ${sameDay ? formatTime(checkOut) : formatDayTime(checkOut)}`;
 }
 
+/** Tarihli kalis: ayni gun ise tarih bir kez ("20 Kas Cum, 08:30 → 12:30"). */
+export function formatStayWindow(checkIn: Date | string, checkOut: Date | string) {
+  const sameDay = formatDay(checkIn) === formatDay(checkOut);
+  return `${formatDayTime(checkIn)}\n→ ${sameDay ? formatTime(checkOut) : formatDayTime(checkOut)}`;
+}
+
 export function formatTime(d: Date | string) {
   return dateFmt({ hour: "2-digit", minute: "2-digit", timeZone: "UTC" }).format(shiftedForFormat(d));
 }

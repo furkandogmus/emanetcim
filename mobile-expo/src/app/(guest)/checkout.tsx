@@ -12,7 +12,7 @@ import { Input } from "@/components/Field";
 import { api, ApiError } from "@/lib/api";
 import { useAuth } from "@/lib/auth";
 import { errorMessage } from "@/lib/errors";
-import { formatDayTime, formatMoney } from "@/lib/format";
+import { formatMoney, formatStayWindow } from "@/lib/format";
 import { keys, useShop } from "@/lib/queries";
 import { totalBags, useSearch } from "@/lib/search";
 import type { CheckoutQuote, CheckoutRequest, CheckoutResponse } from "@/lib/types";
@@ -156,7 +156,7 @@ export default function CheckoutScreen() {
           <Divider />
           <EditableRow
             label={t("checkout.when")}
-            value={`${formatDayTime(shownIn)}\n→ ${formatDayTime(shownOut)}`}
+            value={formatStayWindow(shownIn, shownOut)}
             onEdit={() => router.push({ pathname: "/search", params: { step: "1", returnTo: "back" } })}
           />
           {closedAtTime ? <Banner tone="danger" body={t("checkout.errors.shop_closed_at_time")} /> : null}
