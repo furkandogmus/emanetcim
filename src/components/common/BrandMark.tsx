@@ -4,7 +4,7 @@ import Image from "next/image";
 const ASPECT = 420 / 520;
 
 /**
- * BagajPark marka işareti: turuncu valiz + renkli konum pini (2026-10-18).
+ * BagajPark marka işareti: turuncu valiz + turuncu konum pini (2026-11-20; önce pin renkliydi).
  *
  * Eski işaret turuncu kare içinde lucide `Package` idi ve sekiz yerde ayrı ayrı
  * çiziliyordu; logo değişince hepsi tek tek elden geçiyordu. Artık tek bileşen.
