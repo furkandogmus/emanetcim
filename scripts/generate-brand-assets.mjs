@@ -21,17 +21,25 @@ const WHITE = { r: 255, g: 255, b: 255, alpha: 1 };
 const CLEAR = { r: 0, g: 0, b: 0, alpha: 0 };
 const WARM_BG = { r: 253, g: 252, b: 251, alpha: 1 }; // mobil tokens.bg (#FDFCFB)
 
+const ORANGE = { r: 234, g: 88, b: 12, alpha: 1 }; // #EA580C
+/**
+ * Uygulama ikonu için ters renkli işaret: turuncu zemin üstünde beyaz valiz.
+ * Beyaz zeminli ikon başlatıcıda beyaz bir daire içinde küçük bir işaret gibi
+ * duruyordu; Chrome, Gmail gibi zemini kendi rengiyle dolduran ikonların yanında sönük.
+ */
+const MARK_ON_ORANGE = MARK.replaceAll("#EA580C", "#TMP").replaceAll("#fff", "#EA580C").replaceAll("#TMP", "#fff");
+
 /** İşareti `height` px yüksekliğinde PNG tamponu olarak çizer. */
-function markPng(height) {
-  return sharp(Buffer.from(MARK), { density: Math.max(72, (height / 520) * 72 * 4) })
+function markPng(height, svg = MARK) {
+  return sharp(Buffer.from(svg), { density: Math.max(72, (height / 520) * 72 * 4) })
     .resize({ height: Math.round(height), width: Math.round(height * ASPECT), fit: "contain", background: CLEAR })
     .png()
     .toBuffer();
 }
 
 /** `size` kare tuval, ortasında tuval yüksekliğinin `ratio` kadarı işaret. */
-async function squareIcon(size, ratio, background) {
-  const mark = await markPng(size * ratio);
+async function squareIcon(size, ratio, background, svg = MARK) {
+  const mark = await markPng(size * ratio, svg);
   return sharp({ create: { width: size, height: size, channels: 4, background } })
     .composite([{ input: mark, gravity: "center" }])
     .png()
@@ -117,11 +125,11 @@ const out = {
   "src/app/[locale]/apple-icon.png": () => squareIcon(180, 0.78, WHITE),
   "public/og-image.png": ogImage,
   // Mobil (Expo)
-  "mobile-expo/assets/icon.png": () => squareIcon(1024, 0.78, WHITE),
+  "mobile-expo/assets/icon.png": () => squareIcon(1024, 0.66, ORANGE, MARK_ON_ORANGE),
   // Adaptif ikon: arka plan app.json'da beyaz; ön plan 108dp'nin ortadaki 66dp'si güvenli.
-  // İşaretin en uzak noktası (tekerlek) merkezden yüksekliğin 0,494'ü kadar; 0,62'de
-  // 66dp'lik güvenli dairenin tam içinde kalır. 0,56 yuvarlak ikonda küçük duruyordu.
-  "mobile-expo/assets/android-icon-foreground.png": () => squareIcon(1024, 0.62, CLEAR),
+  // Zemin app.json'da turuncu. Görünen daire 108dp'nin 72dp'si; işaret 0,46'da bu
+  // dairenin yüksekliğinin ~%70'i, 0,62'de dikeyde taşıyormuş gibi duruyordu.
+  "mobile-expo/assets/android-icon-foreground.png": () => squareIcon(1024, 0.46, CLEAR, MARK_ON_ORANGE),
   "mobile-expo/assets/splash-icon.png": () => squareIcon(512, 0.9, CLEAR),
   "mobile-expo/assets/favicon.png": () => squareIcon(48, 0.92, CLEAR),
   // Android bildirim küçük ikonu: rozetle aynı tek renkli siluet (sistem boyar).
