@@ -119,7 +119,9 @@ const out = {
   // Mobil (Expo)
   "mobile-expo/assets/icon.png": () => squareIcon(1024, 0.78, WHITE),
   // Adaptif ikon: arka plan app.json'da beyaz; ön plan 108dp'nin ortadaki 66dp'si güvenli.
-  "mobile-expo/assets/android-icon-foreground.png": () => squareIcon(1024, 0.56, CLEAR),
+  // İşaretin en uzak noktası (tekerlek) merkezden yüksekliğin 0,494'ü kadar; 0,62'de
+  // 66dp'lik güvenli dairenin tam içinde kalır. 0,56 yuvarlak ikonda küçük duruyordu.
+  "mobile-expo/assets/android-icon-foreground.png": () => squareIcon(1024, 0.62, CLEAR),
   "mobile-expo/assets/splash-icon.png": () => squareIcon(512, 0.9, CLEAR),
   "mobile-expo/assets/favicon.png": () => squareIcon(48, 0.92, CLEAR),
   // Android bildirim küçük ikonu: rozetle aynı tek renkli siluet (sistem boyar).
