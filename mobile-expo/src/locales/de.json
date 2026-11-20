@@ -19,7 +19,10 @@
   },
   "auth": {
     "title": "Anmelden",
-    "subtitle": "Wir senden dir einen 6-stelligen Code per E-Mail.",
+    "identityLabel": "E-Mail oder Telefon",
+    "identityPlaceholder": "du@beispiel.de oder 05xx xxx xx xx",
+    "invalidIdentity": "Gib eine gültige E-Mail-Adresse oder Telefonnummer ein.",
+    "subtitle": "Wir senden dir einen 6-stelligen Code per E-Mail oder SMS. Partnerläden: nutzt eure registrierte Telefonnummer.",
     "emailLabel": "E-Mail",
     "emailPlaceholder": "du@beispiel.de",
     "sendCode": "Code senden",
@@ -28,7 +31,7 @@
     "codeLabel": "Bestätigungscode",
     "verify": "Anmelden",
     "resend": "Code erneut senden",
-    "changeEmail": "E-Mail ändern",
+    "changeEmail": "E-Mail / Telefon ändern",
     "invalidEmail": "Gib eine gültige E-Mail-Adresse ein.",
     "errors": {
       "invalid_code": "Der Code ist falsch oder abgelaufen.",
@@ -46,8 +49,8 @@
       "apple_not_configured": "Die Anmeldung mit Apple ist gerade nicht verfügbar. Du kannst dich mit deiner E-Mail anmelden."
     },
     "usePassword": "Mit Passwort anmelden",
-    "useCode": "Stattdessen Code per E-Mail senden",
-    "passwordSubtitle": "Nutze das Passwort, das du auf der Website festgelegt hast.",
+    "useCode": "Mit Code anmelden",
+    "passwordSubtitle": "Nutze deine E-Mail oder Telefonnummer und das Passwort von der Website.",
     "passwordLabel": "Passwort",
     "or": "oder",
     "continueWithGoogle": "Weiter mit Google",

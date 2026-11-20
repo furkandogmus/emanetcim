@@ -22,9 +22,8 @@ import { useAuth } from "@/lib/auth";
 import { errorMessage } from "@/lib/errors";
 import { AppleSignInError, appleSignInAvailable } from "@/lib/apple-auth";
 import { GoogleSignInError, googleSignInAvailable } from "@/lib/google-auth";
+import { identityLabel, parseIdentity } from "@/lib/identity";
 import { colors, fonts, radius, space } from "@/theme/tokens";
-
-const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
 export default function LoginScreen() {
   const { t } = useTranslation();
@@ -51,16 +50,16 @@ export default function LoginScreen() {
   const [error, setError] = useState<string | null>(null);
 
   async function sendCode() {
-    const value = email.trim().toLowerCase();
-    if (!EMAIL_RE.test(value)) {
-      setError(t("auth.invalidEmail"));
+    const id = parseIdentity(email);
+    if (!id) {
+      setError(t("auth.invalidIdentity"));
       return;
     }
     setBusy(true);
     setError(null);
     try {
-      await requestCode(value);
-      setEmail(value);
+      await requestCode(id);
+      setEmail(identityLabel(id));
       setCode("");
       setStep("code");
     } catch (e) {
@@ -75,7 +74,7 @@ export default function LoginScreen() {
     setError(null);
     try {
       // Basarili olursa Stack.Protected kendiliginden dogru gruba gecirir.
-      await verifyCode(email, code);
+      await verifyCode(parseIdentity(email)!, code);
     } catch (e) {
       setError(errorMessage(e, "auth"));
       setBusy(false);
@@ -83,15 +82,15 @@ export default function LoginScreen() {
   }
 
   async function passwordSignIn() {
-    const value = email.trim().toLowerCase();
-    if (!EMAIL_RE.test(value)) {
-      setError(t("auth.invalidEmail"));
+    const id = parseIdentity(email);
+    if (!id) {
+      setError(t("auth.invalidIdentity"));
       return;
     }
     setBusy(true);
     setError(null);
     try {
-      await signInWithPassword(value, password);
+      await signInWithPassword(id, password);
     } catch (e) {
       setError(errorMessage(e, "auth"));
       setBusy(false);
@@ -128,17 +127,18 @@ export default function LoginScreen() {
   const emailField = (onSubmit: () => void) => (
     <View style={styles.field}>
       <AppText variant="label" nativeID="emailLabel">
-        {t("auth.emailLabel")}
+        {t("auth.identityLabel")}
       </AppText>
       <Input
         accessibilityLabelledBy="emailLabel"
         value={email}
         onChangeText={setEmail}
-        placeholder={t("auth.emailPlaceholder")}
+        placeholder={t("auth.identityPlaceholder")}
         placeholderTextColor={colors.inkMuted}
+        // E-posta klavyesi: Android'de rakam satiri ve @ ikisi de var; esnaf telefonunu da yazar.
         keyboardType="email-address"
         autoCapitalize="none"
-        autoComplete="email"
+        autoComplete="username"
         autoCorrect={false}
         returnKeyType={step === "password" ? "next" : "send"}
         onSubmitEditing={onSubmit}
@@ -263,7 +263,8 @@ export default function LoginScreen() {
                     setError(null);
                     router.push({
                       pathname: "/reset-password",
-                      params: { email: email.trim().toLowerCase() },
+                      // Sifre sifirlama e-postayla; telefon yazildiysa alan bos gelir.
+                      params: { email: email.includes("@") ? email.trim().toLowerCase() : "" },
                     });
                   }}
                 />

@@ -19,7 +19,10 @@
   },
   "auth": {
     "title": "Sign in",
-    "subtitle": "We'll email you a 6-digit code.",
+    "identityLabel": "Email or phone",
+    "identityPlaceholder": "you@example.com or 05xx xxx xx xx",
+    "invalidIdentity": "Enter a valid email address or phone number.",
+    "subtitle": "We'll send a 6-digit code to your email or phone. Shop partners: use your registered phone number.",
     "emailLabel": "Email",
     "emailPlaceholder": "you@example.com",
     "sendCode": "Send code",
@@ -28,7 +31,7 @@
     "codeLabel": "Verification code",
     "verify": "Sign in",
     "resend": "Resend code",
-    "changeEmail": "Change email",
+    "changeEmail": "Change email / phone",
     "invalidEmail": "Enter a valid email address.",
     "errors": {
       "invalid_code": "The code is wrong or has expired.",
@@ -46,8 +49,8 @@
       "apple_not_configured": "Sign in with Apple isn't available right now. You can sign in with your email."
     },
     "usePassword": "Sign in with password",
-    "useCode": "Email me a code instead",
-    "passwordSubtitle": "Use the password you set on the website.",
+    "useCode": "Sign in with a code",
+    "passwordSubtitle": "Use your email or phone number and the password you set on the website.",
     "passwordLabel": "Password",
     "or": "or",
     "continueWithGoogle": "Continue with Google",
