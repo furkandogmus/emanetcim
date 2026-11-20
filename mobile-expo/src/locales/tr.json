@@ -430,6 +430,11 @@
       "partners": "Esnaflar",
       "platform-settings": "Platform ayarları"
     },
+    "appUsersTitle": "Uygulama kullanıcıları",
+    "appUsersDay": "Son 24 saat",
+    "appUsersWeek": "Son 7 gün",
+    "appUsersMonth": "Son 30 gün",
+    "appUsersFoot": "Uygulamayı açan tekil cihaz. Toplam {{total}} cihaz; son 30 günde {{signedIn}} tanesinde giriş yapılmış.",
     "todayTitle": "Bugün",
     "todayArrivals": "Gelecek",
     "todayPickups": "Alınacak",

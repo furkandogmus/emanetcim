@@ -77,6 +77,7 @@ class AccountPrivacyService {
         sonradan eklenmis ve silme yolu guncellenmemisti.
       */
       prisma.mobilePushToken.deleteMany({ where: { userId } }),
+      prisma.mobileInstall.deleteMany({ where: { userId } }),
       /*
         Satir SILINMIYOR, alanlari bosaltiliyor: rezervasyon gecmisi ve esnafin
         hakedis defteri bu id'ye bagli. Bu yuzden `onDelete: Cascade` bagli

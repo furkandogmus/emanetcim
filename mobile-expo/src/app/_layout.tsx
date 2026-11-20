@@ -19,6 +19,7 @@ import { GeistMono_500Medium } from "@expo-google-fonts/geist-mono";
 import { Geist_400Regular, Geist_500Medium, Geist_600SemiBold } from "@expo-google-fonts/geist";
 
 import { ApiError } from "@/lib/api";
+import { pingAppOpen } from "@/lib/app-ping";
 import { AuthProvider, useAuth } from "@/lib/auth";
 import { openFromNotification, registerForPush } from "@/lib/push";
 import { SearchProvider } from "@/lib/search";
@@ -60,6 +61,17 @@ function RootNavigator() {
   useEffect(() => {
     if (state.status !== "loading") void SplashScreen.hideAsync().catch(() => undefined);
   }, [state.status]);
+
+  // Tekil kullanici sayaci: gunde bir; giris yapilinca hesap cihaza baglansin diye bir kez daha.
+  const userId = state.status === "signedIn" ? state.user.id : null;
+  useEffect(() => {
+    if (state.status === "loading") return;
+    void pingAppOpen(userId).catch(() => undefined);
+    const sub = AppState.addEventListener("change", (st) => {
+      if (st === "active") void pingAppOpen(userId).catch(() => undefined);
+    });
+    return () => sub.remove();
+  }, [state.status, userId]);
 
   // Oturum acikken cihaz bildirime kaydolur; izin reddi ya da ag hatasi uygulamayi durdurmaz.
   useEffect(() => {
