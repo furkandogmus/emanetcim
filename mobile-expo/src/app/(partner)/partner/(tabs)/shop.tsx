@@ -10,6 +10,7 @@ import { ProfileView } from "@/components/ProfileView";
 import { ShopPhotos } from "@/components/ShopPhotos";
 import { ShopSwitcher } from "@/components/ShopSwitcher";
 import { AppText, Button, CenterMessage } from "@/components/ui";
+import { SEALS_ENABLED } from "@/lib/config";
 import { errorMessage } from "@/lib/errors";
 import { usePartnerShopSelection } from "@/lib/partner-shop";
 import { usePartnerShop } from "@/lib/queries";
@@ -60,7 +61,7 @@ export default function PartnerShopScreen() {
               <LinkGroup>
                 <LinkRow label={t("schedule.title")} onPress={() => go("/partner/schedule")} />
                 <LinkRow label={t("shopSettings.title")} onPress={() => go("/partner/settings")} />
-                <LinkRow label={t("seals.open")} onPress={() => go("/partner/seals")} />
+                {SEALS_ENABLED ? <LinkRow label={t("seals.open")} onPress={() => go("/partner/seals")} /> : null}
                 <LinkRow label={t("earnings.title")} onPress={() => go("/partner/earnings")} />
                 <LinkRow label={t("referral.title")} onPress={() => go("/partner/referral")} />
               </LinkGroup>
