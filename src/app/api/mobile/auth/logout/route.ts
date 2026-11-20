@@ -21,6 +21,8 @@ import logger from "@/lib/logger";
 export async function POST(req: NextRequest) {
   const auth = await requireMobileUser(req);
   if ("error" in auth) return auth.error;
+  // Yonetici goruntulemeden cikarken hedefin kendi cihazlari dusurulmez.
+  if (auth.user.impersonatedBy) return NextResponse.json({ success: true });
 
   try {
     await revokeAllUserSessions(auth.user.id);

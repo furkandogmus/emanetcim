@@ -66,6 +66,40 @@ export class AdminUserService {
     });
     return { ok: true };
   }
+
+  /*
+    "Bu kullanici olarak gir" (destek). Kural burada, token'i uc imzalar.
+    ADMIN hedef reddedilir: bir yonetici digerinin yetkisini devralmamali.
+  */
+  async startImpersonation(targetId: string, actor: AdminActor) {
+    const target = await prisma.user.findUnique({
+      where: { id: targetId },
+      select: {
+        id: true,
+        email: true,
+        name: true,
+        phone: true,
+        role: true,
+        image: true,
+        emailVerified: true,
+        isBanned: true,
+        tokenVersion: true,
+      },
+    });
+    if (!target) return { ok: false, error: "not_found" } as const;
+    if (target.role === "ADMIN") return { ok: false, error: "cannot_impersonate_admin" } as const;
+    if (target.isBanned) return { ok: false, error: "user_banned" } as const;
+
+    writeAuditLog({
+      actorUserId: actor.userId,
+      actorRole: "ADMIN",
+      action: "admin.impersonate.start",
+      entityType: "User",
+      entityId: target.id,
+      ip: actor.ip,
+    });
+    return { ok: true, target } as const;
+  }
 }
 
 export const adminUserService = new AdminUserService();

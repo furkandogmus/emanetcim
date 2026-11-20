@@ -9,6 +9,7 @@ import {
   audienceAllows,
   hasForeignClaims,
 } from "./jwt-audience";
+import { writeAuditLog } from "./audit-log";
 
 const secret = () => {
   const s = process.env.MOBILE_JWT_SECRET ?? process.env.AUTH_SECRET;
@@ -18,6 +19,8 @@ const secret = () => {
 
 const ACCESS_TTL = "15m";
 const REFRESH_TTL = "30d";
+/** Yonetici "kullanici olarak gir" oturumu; yenilenmez, sure dolunca admin yeniden baslatir. */
+export const IMPERSONATION_TTL_SECONDS = 30 * 60;
 
 export type MobileJwtClaims = {
   sub: string;
@@ -26,7 +29,32 @@ export type MobileJwtClaims = {
   tv?: number; // tokenVersion
   /** Yalniz refresh token'larda: tekrar-kullanim (replay) tespiti icin -- bkz. refresh-token-store.ts. */
   jti?: string;
+  /** Yalniz yonetici goruntuleme token'larinda: oturumu baslatan ADMIN'in id'si. */
+  imp?: string;
 };
+
+/**
+ * Yonetici destek oturumu: hedefin access token'i + `imp` (admin id). Refresh token
+ * BILEREK yok; `requireMobileUser` her istekte admini yeniden dogrular.
+ */
+export async function signImpersonationToken(
+  targetUserId: string,
+  role: Role,
+  adminId: string,
+  tokenVersion?: number,
+) {
+  const tv = await resolveTokenVersion(targetUserId, tokenVersion);
+  const expiresAt = new Date(Date.now() + IMPERSONATION_TTL_SECONDS * 1000);
+  const token = await new SignJWT({ role, type: "access", tv, imp: adminId })
+    .setProtectedHeader({ alg: "HS256" })
+    .setIssuer(JWT_ISSUER)
+    .setAudience(JWT_AUDIENCE.mobile)
+    .setSubject(targetUserId)
+    .setIssuedAt()
+    .setExpirationTime(Math.floor(expiresAt.getTime() / 1000))
+    .sign(secret());
+  return { token, expiresAt };
+}
 
 /**
  * `tokenVersion` cagirandan GECIRILEBILIR (2026-08-31).
@@ -125,7 +153,15 @@ export type MobileActor = {
   id: string;
   role: Role;
   email: string | null;
+  /** Bir yonetici bu kullanici olarak goruntuluyorsa o yoneticinin id'si. */
+  impersonatedBy?: string;
 };
+
+/** Yonetici goruntuleme oturumunda kapali uclar (hesap silme, push kaydi, cikis iptali). */
+export function forbidWhileImpersonating(user: MobileActor) {
+  if (!user.impersonatedBy) return null;
+  return NextResponse.json({ error: "not_allowed_while_impersonating" }, { status: 403 });
+}
 
 export async function requireMobileUser(req: NextRequest) {
   const header = req.headers.get("authorization");
@@ -150,6 +186,28 @@ export async function requireMobileUser(req: NextRequest) {
     if (user.isBanned) throw new Error("user banned");
     if (user.tokenVersion !== (claims.tv ?? 0)) throw new Error("token version mismatch");
     const actor: MobileActor = { id: user.id, role: user.role, email: user.email };
+    if (claims.imp !== undefined) {
+      // Yetkisi alinan ya da yasaklanan yonetici acik goruntuleme oturumunu da aninda kaybeder.
+      if (typeof claims.imp !== "string" || !claims.imp) throw new Error("bad imp claim");
+      // Oturum suresince ADMIN'e yukseltilen hedef de goruntulenemez.
+      if (user.role === "ADMIN") throw new Error("impersonating admin");
+      const admin = await prisma.user.findUnique({
+        where: { id: claims.imp },
+        select: { role: true, isBanned: true },
+      });
+      if (!admin || admin.role !== "ADMIN" || admin.isBanned) throw new Error("impersonator invalid");
+      actor.impersonatedBy = claims.imp;
+      if (req.method !== "GET" && req.method !== "HEAD") {
+        writeAuditLog({
+          actorUserId: claims.imp,
+          actorRole: "ADMIN",
+          action: "admin.impersonate.request",
+          entityType: "User",
+          entityId: user.id,
+          metadata: { method: req.method, path: new URL(req.url).pathname },
+        });
+      }
+    }
     return { user: actor } as const;
   } catch {
     return { error: NextResponse.json({ error: "unauthorized" }, { status: 401 }) } as const;
@@ -176,6 +234,8 @@ export async function getMobileSession() {
   try {
     const claims = await verifyMobileToken(token);
     if (claims.type !== "access") return null;
+    // Bu yardimciyi web yonetici uclari kullaniyor; goruntuleme token'i orada hic gecmez.
+    if (claims.imp !== undefined) return null;
     const user = await prisma.user.findUnique({
       where: { id: claims.sub },
       select: { role: true, isBanned: true, tokenVersion: true },
