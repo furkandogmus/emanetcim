@@ -161,6 +161,12 @@ const nextConfig: NextConfig = {
         source: "/:path*",
         headers: securityHeaders,
       },
+      {
+        // `.mjs` MapLibre worker'i (scripts/copy-maplibre-worker.mjs): modul worker
+        // yalnizca JS MIME ile calisir, nosniff de acik. Bkz. nginx/conf.d/default.conf.
+        source: "/maplibre/:file*",
+        headers: [{ key: "Content-Type", value: "text/javascript; charset=utf-8" }],
+      },
     ];
   },
 };
