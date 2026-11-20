@@ -36,7 +36,7 @@ function turkishSections(companyLegalName: string, paymentMode: PaymentCopyMode)
           "Hizmet bedelinin güvenli tahsilatını ve İş Ortağı ile mahsuplaşma süreçlerini yürütür.",
           "Rezervasyon süresince ortaya çıkabilecek aksaklıklarda müşteri desteği sağlar.",
         ],
-        "2.3. Sorumluluk Sınırları: Platform, eşyaları bizzat muhafaza eden taraf değil, muhafaza eden ile alanı birleştiren teknolojik altyapıdır. Eşyaların fiziksel güvenliğinden (sözleşmede belirtilen limitler dahilinde) mühürleme kurallarına uyulması şartıyla İş Ortağı ve ilgili sigorta/güvence kapsamı sorumludur. Emanet kabul edilmeyen eşyaların (yanıcı, yasa dışı vb.) depolanması kesinlikle yasaktır.",
+        "2.3. Sorumluluk Sınırları: Platform, eşyaları bizzat muhafaza eden taraf değil, muhafaza eden ile alanı birleştiren teknolojik altyapıdır. Eşyaların fiziksel güvenliğinden (sözleşmede belirtilen limitler dahilinde) mühürleme kurallarına uyulması şartıyla İş Ortağı ve Platformun bu şartlar kapsamındaki güvencesi sorumludur. Emanet kabul edilmeyen eşyaların (yanıcı, yasa dışı vb.) depolanması kesinlikle yasaktır.",
       ],
     },
     {
@@ -178,7 +178,7 @@ function englishSections(companyLegalName: string, paymentMode: PaymentCopyMode)
           "handles the secure collection of the service fee and settlement with the Partner;",
           "provides customer support for any problem that arises during a booking.",
         ],
-        "2.3. Limits of responsibility: the Platform does not store belongings itself; it is the technology that connects the party storing them with the space. Provided the sealing rules are followed, the Partner and the applicable insurance/guarantee cover are responsible for the physical safety of the belongings, within the limits stated in these terms. Storing items that are not accepted (flammable, illegal, etc.) is strictly prohibited.",
+        "2.3. Limits of responsibility: the Platform does not store belongings itself; it is the technology that connects the party storing them with the space. Provided the sealing rules are followed, the Partner and the Platform's guarantee under these terms are responsible for the physical safety of the belongings, within the limits stated in these terms. Storing items that are not accepted (flammable, illegal, etc.) is strictly prohibited.",
       ],
     },
     {
