@@ -8,31 +8,15 @@ import { Link } from "@/i18n/routing";
 import { socialMetadata } from "@/lib/social-metadata";
 import { getPaymentCopyMode } from "@/lib/payment-copy";
 import { TERMS_COPY, termsLanguageFor, termsSections } from "@/lib/legal/terms-content";
+import { getLegalEntity, legalEntityDisplay } from "@/lib/legal/entity";
 
 /**
  * Metin `src/lib/legal/terms-content.ts`te: Turkce baglayici, diger diller Ingilizce
  * kolaylik cevirisini (ustte "Turkce metin gecerlidir" notuyla) gorur.
  */
 
-/**
- * Sozlesmenin TARAFI disaridan verilir.
- *
- * NEDEN: 1.1'de "[Sirket Tam Unvani]" yer tutucusu DOLDURULMAMIS halde yayinda
- * duruyordu; sayfa sitemap'te ve footer'dan linkli, yani baglayici oldugu one
- * surulen bir metnin taraflarindan biri belirsizdi. Tescilli unvan uydurulamaz,
- * bu yuzden deger ortam degiskeninden okunur ve verilmediginde o paragraf HIC
- * cizilmez: eksik bir taraf tanimi, YANLIS bir taraf tanimindan iyidir. Kalici
- * dogru ev `src/lib/config.ts` icinde `contact`/`branding` yanindaki bir alandir;
- * orasi bu degisikligin kapsami disinda oldugu icin degisken burada okunuyor.
- */
-const COMPANY_LEGAL_NAME = process.env.NEXT_PUBLIC_COMPANY_LEGAL_NAME?.trim() || "";
-
-if (!COMPANY_LEGAL_NAME && process.env.NODE_ENV !== "test") {
-  console.warn(
-    "[terms] NEXT_PUBLIC_COMPANY_LEGAL_NAME tanimsiz -- sozlesmenin 1.1 " +
-      "(Sirket / Hizmet Saglayici) paragrafi cizilmiyor.",
-  );
-}
+// Taraf tanimi (1.1) `legal/entity.ts`ten gelir; unvan yoksa uretimde paragraf cizilmez.
+const COMPANY_LEGAL_NAME = legalEntityDisplay(getLegalEntity(), "legalName") ?? "";
 
 export async function generateMetadata({
   params,
