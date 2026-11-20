@@ -430,6 +430,11 @@
       "partners": "Partner",
       "platform-settings": "Plattform-Einstellungen"
     },
+    "appUsersTitle": "App-Nutzer",
+    "appUsersDay": "Letzte 24 Stunden",
+    "appUsersWeek": "Letzte 7 Tage",
+    "appUsersMonth": "Letzte 30 Tage",
+    "appUsersFoot": "Eindeutige Geräte, die die App geöffnet haben. Insgesamt {{total}} Geräte; {{signedIn}} davon in den letzten 30 Tagen angemeldet.",
     "todayTitle": "Heute",
     "todayArrivals": "Ankünfte",
     "todayPickups": "Abholungen",

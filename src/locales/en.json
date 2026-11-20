@@ -1602,7 +1602,7 @@
   },
   "Privacy": {
     "title": "Privacy Policy",
-    "lastUpdated": "April 24, 2026",
+    "lastUpdated": "November 20, 2026",
     "commitmentTitle": "Our Privacy Commitment",
     "commitmentBody": "At BagajPark, the security of our users' personal data is our top priority. Your data is protected using modern encryption standards and processes compliant with GDPR and local regulations.",
     "q1": "What Data Do We Collect?",
@@ -1610,7 +1610,7 @@
     "q2": "How is Your Data Used?",
     "a2": "Collected data is used solely to process your bookings, ensure security, manage communication with shop owners, and fulfill our legal obligations.",
     "q3": "Cookies and Tracking",
-    "a3": "We use cookies and similar technologies to improve your experience, keep your session secure, and analyze usage statistics.",
+    "a3": "We use cookies and similar technologies to improve your experience, keep your session secure, and analyze usage statistics. The mobile app creates a random app ID on installation to count how many people use it; no advertising ID or device hardware ID is used.",
     "q4": "Data Sharing and Third Parties",
     "a4": "Your data is never shared or sold to third parties, except for our business partners essential for service delivery (service provider, map services) and legal authorities.",
     "q5": "Data Retention",

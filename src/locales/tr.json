@@ -1602,7 +1602,7 @@
   },
   "Privacy": {
     "title": "Gizlilik Politikası",
-    "lastUpdated": "24 Nisan 2026",
+    "lastUpdated": "20 Kasım 2026",
     "commitmentTitle": "Gizlilik Taahhüdümüz",
     "commitmentBody": "BagajPark olarak, kullanıcılarımızın kişisel verilerinin güvenliği bizim için en yüksek önceliktir. Verileriniz, modern şifreleme standartları ve KVKK uyumlu süreçlerle korunmaktadır.",
     "q1": "Hangi Verileri Topluyoruz?",
@@ -1610,7 +1610,7 @@
     "q2": "Verileriniz Nasıl Kullanılıyor?",
     "a2": "Toplanan veriler yalnızca rezervasyon işlemlerinizi gerçekleştirmek, güvenliği sağlamak, dükkan sahipleriyle iletişimi yönetmek ve yasal yükümlülüklerimizi yerine getirmek amacıyla kullanılır.",
     "q3": "Çerezler ve Takip Teknolojileri",
-    "a3": "Uygulama deneyiminizi iyileştirmek, oturumunuzu güvenli tutmak ve kullanım istatistiklerini analiz etmek için çerezler ve benzeri teknolojiler kullanıyoruz.",
+    "a3": "Uygulama deneyiminizi iyileştirmek, oturumunuzu güvenli tutmak ve kullanım istatistiklerini analiz etmek için çerezler ve benzeri teknolojiler kullanıyoruz. Mobil uygulama, kaç kişinin kullandığını saymak için kurulumda rastgele bir uygulama kimliği oluşturur; reklam kimliği ya da cihaz donanım kimliği kullanılmaz.",
     "q4": "Veri Paylaşımı ve Üçüncü Taraflar",
     "a4": "Verileriniz, hizmetin ifası için gerekli olan iş ortaklarımız (hizmet sağlayıcı, harita servisleri) ve yasal merciler dışında hiçbir üçüncü şahıs veya kurumla paylaşılmaz ve satılmaz.",
     "q5": "Veri Saklama Süresi",

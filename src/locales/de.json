@@ -1556,7 +1556,7 @@
   },
   "Privacy": {
     "title": "Datenschutzrichtlinie",
-    "lastUpdated": "03.04.2024",
+    "lastUpdated": "20.11.2026",
     "commitmentTitle": "Datenschutzverpflichtung",
     "commitmentBody": "Ihre Daten werden verschlüsselt.",
     "q1": "Datenerfassung",
@@ -1564,7 +1564,7 @@
     "q2": "Verwendung",
     "a2": "Reservierungen und Sicherheit.",
     "q3": "Kekse",
-    "a3": "Erfahrungssteigerung.",
+    "a3": "Erfahrungssteigerung. Die mobile App erzeugt bei der Installation eine zufällige App-ID, um die Zahl der Nutzer zu zählen; Werbe-IDs oder Hardware-Kennungen werden nicht verwendet.",
     "q4": "Teilen",
     "a4": "Kein Teilen außer service provider.",
     "q5": "Zurückbehaltung",

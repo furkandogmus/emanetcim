@@ -450,6 +450,11 @@
       "partners": "Партнёры",
       "platform-settings": "Настройки платформы"
     },
+    "appUsersTitle": "Пользователи приложения",
+    "appUsersDay": "За 24 часа",
+    "appUsersWeek": "За 7 дней",
+    "appUsersMonth": "За 30 дней",
+    "appUsersFoot": "Уникальные устройства, открывшие приложение. Всего {{total}}; с входом в аккаунт за 30 дней: {{signedIn}}.",
     "todayTitle": "Сегодня",
     "todayArrivals": "Приезжают",
     "todayPickups": "Забирают",

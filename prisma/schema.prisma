@@ -41,6 +41,7 @@ model User {
   legalAcceptances         LegalAcceptance[]
   pushSubscriptions        PushSubscription[]
   mobilePushTokens         MobilePushToken[]
+  mobileInstalls           MobileInstall[]
   reviews                  Review[]
   sessions                 Session[]
   shops                    Shop[]
@@ -743,6 +744,22 @@ model MobilePushToken {
   updatedAt  DateTime @updatedAt
   user       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 
+  @@index([userId])
+}
+
+/// Mobil uygulamayi acan cihazlar (tekil kullanici sayaci). `installId` uygulamanin
+/// kurulumda urettigi rastgele kimlik; reklam kimligi ya da cihaz donanim kimligi DEGIL.
+/// Kayit girissiz de tutulur; giris yapilmissa son gorulen kullanici yazilir.
+model MobileInstall {
+  installId   String   @id
+  userId      String?
+  platform    String // ios, android
+  appVersion  String?
+  firstSeenAt DateTime @default(now())
+  lastSeenAt  DateTime @default(now())
+  user        User?    @relation(fields: [userId], references: [id], onDelete: SetNull)
+
+  @@index([lastSeenAt])
   @@index([userId])
 }
 
