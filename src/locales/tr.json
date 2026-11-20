@@ -1615,7 +1615,7 @@
     "q1": "Hangi Verileri Topluyoruz?",
     "a1": "Hizmet sunabilmek için ad-soyad, e-posta, telefon numarası ve rezervasyon esnasında konum verilerinizi topluyoruz. Ödeme bilgileriniz doğrudan lisanslı ödeme kuruluşu (hizmet sağlayıcı) tarafından işlenir, sunucularımızda saklanmaz.",
     "q2": "Verileriniz Nasıl Kullanılıyor?",
-    "a2": "Toplanan veriler yalnızca rezervasyon işlemlerinizi gerçekleştirmek, güvenliği sağlamak, dükkan sahipleriyle iletişimi yönetmek ve yasal yükümlülüklerimizi yerine getirmek amacıyla kullanılır.",
+    "a2": "Toplanan veriler yalnızca rezervasyon işlemlerinizi gerçekleştirmek, güvenliği sağlamak, dükkan sahipleriyle iletişimi yönetmek ve yasal yükümlülüklerimizi yerine getirmek amacıyla kullanılır. Destek amacıyla yöneticilerimiz hesabınızı sizin adınıza görüntüleyebilir; bu erişimin her biri kayıt altına alınır.",
     "q3": "Çerezler ve Takip Teknolojileri",
     "a3": "Uygulama deneyiminizi iyileştirmek, oturumunuzu güvenli tutmak ve kullanım istatistiklerini analiz etmek için çerezler ve benzeri teknolojiler kullanıyoruz. Mobil uygulama, kaç kişinin kullandığını saymak için kurulumda rastgele bir uygulama kimliği oluşturur; reklam kimliği ya da cihaz donanım kimliği kullanılmaz.",
     "q4": "Veri Paylaşımı ve Üçüncü Taraflar",
