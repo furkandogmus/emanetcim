@@ -23,7 +23,10 @@
   },
   "auth": {
     "title": "Вход",
-    "subtitle": "Мы отправим тебе 6-значный код на почту.",
+    "identityLabel": "Почта или телефон",
+    "identityPlaceholder": "you@example.com или 05xx xxx xx xx",
+    "invalidIdentity": "Введи корректный адрес почты или номер телефона.",
+    "subtitle": "Мы отправим 6-значный код на почту или телефон. Партнёрам: укажи номер, с которым ты зарегистрирован.",
     "emailLabel": "Эл. почта",
     "emailPlaceholder": "you@example.com",
     "sendCode": "Отправить код",
@@ -32,7 +35,7 @@
     "codeLabel": "Код подтверждения",
     "verify": "Войти",
     "resend": "Отправить код ещё раз",
-    "changeEmail": "Изменить почту",
+    "changeEmail": "Изменить почту / телефон",
     "invalidEmail": "Введи корректный адрес эл. почты.",
     "errors": {
       "invalid_code": "Код неверный или истёк.",
@@ -50,8 +53,8 @@
       "apple_not_configured": "Вход через Apple сейчас недоступен. Можно войти по почте."
     },
     "usePassword": "Войти с паролем",
-    "useCode": "Лучше пришли код на почту",
-    "passwordSubtitle": "Используй пароль, который ты задал на сайте.",
+    "useCode": "Войти по коду",
+    "passwordSubtitle": "Используй почту или номер телефона и пароль, заданный на сайте.",
     "passwordLabel": "Пароль",
     "or": "или",
     "continueWithGoogle": "Продолжить через Google",

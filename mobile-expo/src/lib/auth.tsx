@@ -1,6 +1,7 @@
 import { createContext, useCallback, useContext, useEffect, useMemo, useState } from "react";
 import type { ReactNode } from "react";
 import { useQueryClient } from "@tanstack/react-query";
+import type { Identity } from "./identity";
 
 import * as SecureStore from "expo-secure-store";
 
@@ -18,9 +19,9 @@ type AuthState =
 
 type AuthContextValue = {
   state: AuthState;
-  requestCode: (email: string) => Promise<void>;
-  verifyCode: (email: string, code: string) => Promise<MobileUser>;
-  signInWithPassword: (email: string, password: string) => Promise<MobileUser>;
+  requestCode: (id: Identity) => Promise<void>;
+  verifyCode: (id: Identity, code: string) => Promise<MobileUser>;
+  signInWithPassword: (id: Identity, password: string) => Promise<MobileUser>;
   /** Kullanici hesap seciciyi kapatirsa `null`. */
   signInWithGoogle: () => Promise<MobileUser | null>;
   signInWithApple: () => Promise<MobileUser | null>;
@@ -88,8 +89,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     })();
   }, [queryClient]);
 
-  const requestCode = useCallback(async (email: string) => {
-    await api("/auth/otp", { method: "POST", body: { email }, auth: false });
+  // E-posta ya da telefon (esnaf); telefonda kod SMS ile gider.
+  const requestCode = useCallback(async (id: Identity) => {
+    await api("/auth/otp", { method: "POST", body: id, auth: false });
   }, []);
 
   const startSession = useCallback(async (body: Record<string, string>, path = "/auth/session") => {
@@ -101,14 +103,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }, []);
 
   const verifyCode = useCallback(
-    (email: string, code: string) => startSession({ email, code }),
+    (id: Identity, code: string) => startSession({ ...id, code }),
     [startSession],
   );
 
   // Web'de sifre belirlemis kullanicilar ve Play inceleme hesabi icin: OTP
   // e-postasina erisemeyen biri de girebilmeli.
   const signInWithPassword = useCallback(
-    (email: string, password: string) => startSession({ email, password }),
+    (id: Identity, password: string) => startSession({ ...id, password }),
     [startSession],
   );
 
