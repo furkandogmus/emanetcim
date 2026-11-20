@@ -119,7 +119,8 @@ const Row = memo(function Row({
 }) {
   const { t } = useTranslation();
   const open = ["PENDING", "WAITING_APPROVAL", "APPROVED", "PAID", "CHECKED_IN"].includes(b.status);
-  const lateDays = open ? Math.floor((now - new Date(b.checkOutTime).getTime()) / DAY) : 0;
+  const lateMs = open ? now - new Date(b.checkOutTime).getTime() : 0;
+  const lateDays = Math.floor(lateMs / DAY);
 
   return (
     <Pressable
@@ -143,11 +144,15 @@ const Row = memo(function Row({
           </AppText>
         </View>
         <AppText variant="caption" numberOfLines={1} style={{ fontSize: 13 }}>
-          {b.shopName} · {formatDayTime(b.checkInTime)}
+          {b.shopName}
         </AppText>
-        {lateDays >= 1 ? (
+        <AppText variant="caption" style={{ fontSize: 13 }}>
+          {formatDayTime(b.checkInTime)}
+        </AppText>
+        {/* "Gecikmis" filtresi alis saati gecen her kaydi sayar; bir gunden kisa gecikme de etiketsiz kalmasin. */}
+        {lateMs > 0 ? (
           <AppText variant="label" style={{ color: colors.danger, fontSize: 12 }}>
-            {t("admin.lateDays", { count: lateDays })}
+            {lateDays >= 1 ? t("admin.lateDays", { count: lateDays }) : t("admin.lateToday")}
           </AppText>
         ) : null}
       </View>

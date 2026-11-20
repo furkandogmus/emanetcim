@@ -466,6 +466,7 @@
     "noBookingsInFilter": "No bookings in this list",
     "lateDays_one": "{{count}} day late",
     "lateDays_other": "{{count}} days late",
+    "lateToday": "Overdue",
     "lateBody": "The pickup time has passed and the bag was not collected. Call the guest or the shop.",
     "disputeOpen": "There is an open dispute for this booking.",
     "guest": "Guest",

@@ -142,7 +142,7 @@
     "rulesBody": "Dükkanda kapıdan kayıt alınmaz. Rezervasyonunu buradan yap, dükkanda QR kodunu göster.",
     "prelaunch": "Bu nokta henüz rezervasyon almıyor. Açıldığında burada göreceksin.",
     "restroom": "Tuvalet var",
-    "book": "Bu noktayı rezerve et",
+    "book": "Rezervasyon yap",
     "weekdays": [
       "Pazar",
       "Pazartesi",
@@ -466,6 +466,7 @@
     "noBookingsInFilter": "Bu listede rezervasyon yok",
     "lateDays_one": "{{count}} gün gecikti",
     "lateDays_other": "{{count}} gün gecikti",
+    "lateToday": "Süresi geçti",
     "lateBody": "Çıkış saati geçti ve valiz teslim edilmedi. Misafiri ya da dükkanı ara.",
     "disputeOpen": "Bu rezervasyon için açık bir uyuşmazlık var.",
     "guest": "Misafir",

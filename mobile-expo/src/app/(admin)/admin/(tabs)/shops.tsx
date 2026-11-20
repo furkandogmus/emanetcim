@@ -173,7 +173,7 @@ function ShopRow({ shop: s }: { shop: AdminShop }) {
       <View style={styles.top}>
         <View style={{ flex: 1, gap: 2 }}>
           <View style={styles.titleLine}>
-            <AppText variant="heading" numberOfLines={1} style={{ flexShrink: 1 }}>
+            <AppText variant="heading" numberOfLines={2} style={{ flexShrink: 1 }}>
               {s.name}
             </AppText>
             {s.isVerified ? <BadgeCheck size={16} color={colors.accent} accessibilityLabel={t("admin.verified")} /> : null}
