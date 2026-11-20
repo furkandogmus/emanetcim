@@ -1,11 +1,13 @@
 import { NextRequest, NextResponse } from "next/server";
 import { clientIpFromRequest } from "@/lib/client-ip";
 import { accountPrivacyService } from "@/services/AccountPrivacyService";
-import { requireMobileUser } from "@/lib/mobile-auth";
+import { forbidWhileImpersonating, requireMobileUser } from "@/lib/mobile-auth";
 
 async function handleDeleteRequest(req: NextRequest) {
   const auth = await requireMobileUser(req);
   if ("error" in auth) return auth.error;
+  const blocked = forbidWhileImpersonating(auth.user);
+  if (blocked) return blocked;
   const user = auth.user;
 
   /*

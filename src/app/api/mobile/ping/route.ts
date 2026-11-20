@@ -33,7 +33,8 @@ export async function POST(req: NextRequest) {
   let userId: string | undefined;
   if (req.headers.get("authorization")) {
     const auth = await requireMobileUser(req);
-    if (!("error" in auth)) userId = auth.user.id;
+    // Goruntuleme oturumu yoneticinin cihazini hedef kullaniciya baglamaz.
+    if (!("error" in auth) && !auth.user.impersonatedBy) userId = auth.user.id;
   }
 
   await mobileInstallService.recordOpen({ installId, platform, appVersion, userId });

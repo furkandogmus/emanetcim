@@ -30,6 +30,8 @@ export async function POST(req: NextRequest) {
   try {
     const claims = await verifyMobileToken(parsed.data.refreshToken);
     if (claims.type !== "refresh") throw new Error("bad type");
+    // Yonetici goruntuleme oturumu asla yenilenmez (imp tasiyan refresh hic basilmaz).
+    if (claims.imp !== undefined) throw new Error("impersonation token");
     const user = await prisma.user.findUnique({ where: { id: claims.sub } });
     if (!user) throw new Error("user gone");
     if (user.isBanned) throw new Error("user banned");
