@@ -30,6 +30,7 @@ const ERASED = new Set([
   "LegalAcceptance",
   "PushSubscription",
   "MobilePushToken",
+  "MobileInstall",
 ]);
 
 /**

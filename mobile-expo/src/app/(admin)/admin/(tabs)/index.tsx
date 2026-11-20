@@ -114,6 +114,23 @@ function Dashboard({
         </Card>
       </Section>
 
+      {data.appUsers ? (
+        <Section title={t("admin.appUsersTitle")}>
+          <Card style={{ gap: space.md }}>
+            <View style={styles.usersRow}>
+              <Figure label={t("admin.appUsersDay")} value={data.appUsers.day} />
+              <View style={styles.rule} />
+              <Figure label={t("admin.appUsersWeek")} value={data.appUsers.week} />
+              <View style={styles.rule} />
+              <Figure label={t("admin.appUsersMonth")} value={data.appUsers.month} />
+            </View>
+            <AppText variant="caption" style={{ fontSize: 13 }}>
+              {t("admin.appUsersFoot", { total: data.appUsers.total, signedIn: data.appUsers.signedInMonth })}
+            </AppText>
+          </Card>
+        </Section>
+      ) : null}
+
       <Section title={t("admin.waiting")}>
         <View style={styles.tiles}>
           <QueueTile
@@ -255,6 +272,18 @@ function Stat({
   );
 }
 
+/** Tiklanmayan sayi: tekil kullanici karti. */
+function Figure({ label, value }: { label: string; value: number }) {
+  return (
+    <View style={styles.stat} accessible accessibilityLabel={`${label}: ${value}`}>
+      <AppText style={styles.statValue}>{value}</AppText>
+      <AppText variant="caption" numberOfLines={2} style={styles.statLabel}>
+        {label}
+      </AppText>
+    </View>
+  );
+}
+
 function Total({ label, value }: { label: string; value: string }) {
   return (
     <View style={{ flex: 1, gap: 2 }}>
@@ -321,6 +350,7 @@ const styles = StyleSheet.create({
   content: { padding: space.xl, paddingTop: space.sm, gap: space.xl, paddingBottom: space.xxl },
   sectionHead: { flexDirection: "row", justifyContent: "space-between", alignItems: "center" },
   todayCard: { flexDirection: "row", paddingHorizontal: space.sm },
+  usersRow: { flexDirection: "row" },
   rule: { width: 1, backgroundColor: colors.border, marginVertical: space.xs },
   stat: { flex: 1, alignItems: "center", gap: 2, paddingHorizontal: 2 },
   statValue: { fontFamily: fonts.display, fontSize: 24, lineHeight: 30, color: colors.ink, fontVariant: ["tabular-nums"] },

@@ -3,6 +3,7 @@ import { NextRequest } from "next/server";
 import { toMobileAdminOverview } from "@/lib/mobile-dto";
 import { requireMobileUser, requireRole } from "@/lib/mobile-auth";
 import { adminOverviewService } from "@/services/AdminOverviewService";
+import { mobileInstallService } from "@/services/MobileInstallService";
 
 /**
  * Mobil yonetim ana ekrani: bugun, 14 gunluk seri, dikkat isteyenler ve son
@@ -14,5 +15,9 @@ export async function GET(req: NextRequest) {
   const forbid = requireRole(auth.user, ["ADMIN"]);
   if (forbid) return forbid;
 
-  return NextResponse.json(toMobileAdminOverview(await adminOverviewService.overview()));
+  const [overview, appUsers] = await Promise.all([
+    adminOverviewService.overview(),
+    mobileInstallService.activeCounts(),
+  ]);
+  return NextResponse.json(toMobileAdminOverview(overview, appUsers));
 }

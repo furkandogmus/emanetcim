@@ -1556,7 +1556,7 @@
   },
   "Privacy": {
     "title": "politique de confidentialité",
-    "lastUpdated": "03.04.2024",
+    "lastUpdated": "20.11.2026",
     "commitmentTitle": "Engagement de confidentialité",
     "commitmentBody": "Vos données sont cryptées.",
     "q1": "Collecte de données",
@@ -1564,7 +1564,7 @@
     "q2": "Usage",
     "a2": "Réservations et sécurité.",
     "q3": "Cookies",
-    "a3": "Amélioration de l'expérience.",
+    "a3": "Amélioration de l'expérience. L'application mobile crée un identifiant aléatoire à l'installation pour compter ses utilisateurs ; aucun identifiant publicitaire ni identifiant matériel n'est utilisé.",
     "q4": "Partage",
     "a4": "Pas de partage sauf service provider.",
     "q5": "Rétention",
