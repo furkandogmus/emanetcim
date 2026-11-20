@@ -9,6 +9,7 @@ import { AppText, Banner, Button, Card } from "@/components/ui";
 import { Input } from "@/components/Field";
 import { ApiError, api } from "@/lib/api";
 import { errorMessage } from "@/lib/errors";
+import { SEALS_ENABLED } from "@/lib/config";
 import { formatMoney } from "@/lib/format";
 import type { BookingDetail } from "@/lib/types";
 import { notify } from "@/lib/notify";
@@ -53,7 +54,7 @@ export function PartnerBookingActions({ booking }: { booking: BookingDetail }) {
     kalir; eskiden kart sayilara gore yeniden kuruluyor ve hepsi siliniyordu.
   */
   const [typed, setTyped] = useState<Record<number, string>>({});
-  const rows = buildSealRows(booking).map((r) => ({ ...r, sealNumber: typed[r.bagIndex] ?? "" }));
+  const rows = (SEALS_ENABLED ? buildSealRows(booking) : []).map((r) => ({ ...r, sealNumber: typed[r.bagIndex] ?? "" }));
   // Muhur basina karar: saglam ya da saglam degil (FAULTY, teslim yine tamamlanir).
   const [sealState, setSealState] = useState<Record<number, "intact" | "broken">>({});
   const [error, setError] = useState<string | null>(null);
@@ -162,7 +163,7 @@ export function PartnerBookingActions({ booking }: { booking: BookingDetail }) {
     return (
       <Card style={styles.card}>
         <AppText variant="heading">{t("partner.checkInTitle")}</AppText>
-        <AppText variant="caption">{t("partner.checkInHint")}</AppText>
+        <AppText variant="caption">{t(SEALS_ENABLED ? "partner.checkInHint" : "partner.checkInHintNoSeals")}</AppText>
         {rows.map((r) => (
           <View key={r.bagIndex} style={styles.sealRow}>
             <View style={styles.bagThumb}>
