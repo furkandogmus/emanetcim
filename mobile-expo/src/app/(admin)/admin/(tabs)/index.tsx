@@ -159,7 +159,10 @@ function Dashboard({
                     {b.guestName || t("partner.guest")}
                   </AppText>
                   <AppText variant="caption" numberOfLines={1} style={{ fontSize: 13 }}>
-                    {b.shopName} · {formatDayTime(b.createdAt)}
+                    {b.shopName}
+                  </AppText>
+                  <AppText variant="caption" style={{ fontSize: 13 }}>
+                    {formatDayTime(b.createdAt)}
                   </AppText>
                 </View>
                 <View style={{ alignItems: "flex-end", gap: 4 }}>

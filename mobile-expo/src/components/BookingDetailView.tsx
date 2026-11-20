@@ -81,7 +81,18 @@ export function BookingDetailView({ id, mode }: { id: string; mode: "guest" | "p
     if (mode === "guest" && query.isError) void loadOfflineTicket(id).then(setOffline);
   }, [mode, query.isError, id]);
 
-  if (query.isLoading) return <Loading />;
+  if (query.isLoading) {
+    return (
+      <SafeAreaView style={styles.safe} edges={["top"]}>
+        <View style={styles.header}>
+          <IconButton label={t("common.back")} onPress={() => router.back()}>
+            <ArrowLeft size={20} color={colors.ink} />
+          </IconButton>
+        </View>
+        <Loading />
+      </SafeAreaView>
+    );
+  }
   if (query.isError || !query.data) {
     if (offline) {
       return (

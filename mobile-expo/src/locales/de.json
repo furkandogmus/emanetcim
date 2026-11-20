@@ -142,7 +142,7 @@
     "rulesBody": "Der Laden nimmt keine Laufkundschaft an. Buche hier und zeig deinen QR-Code im Laden.",
     "prelaunch": "Dieser Ort nimmt noch keine Buchungen an. Du siehst ihn hier, sobald er öffnet.",
     "restroom": "Toilette vorhanden",
-    "book": "Diesen Ort buchen",
+    "book": "Jetzt buchen",
     "weekdays": [
       "Sonntag",
       "Montag",
@@ -466,6 +466,7 @@
     "noBookingsInFilter": "Keine Buchungen in dieser Liste",
     "lateDays_one": "{{count}} Tag zu spät",
     "lateDays_other": "{{count}} Tage zu spät",
+    "lateToday": "Überfällig",
     "lateBody": "Die Abholzeit ist vorbei und das Gepäck wurde nicht abgeholt. Ruf den Gast oder den Laden an.",
     "disputeOpen": "Für diese Buchung gibt es eine offene Beschwerde.",
     "guest": "Gast",
