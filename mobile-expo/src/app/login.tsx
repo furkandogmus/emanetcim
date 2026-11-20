@@ -55,6 +55,11 @@ export default function LoginScreen() {
       setError(t("auth.invalidIdentity"));
       return;
     }
+    // SMS entegrasyonu yok: telefona kod gonderilmez, telefonla giris yalnizca sifreyle.
+    if ("phone" in id) {
+      switchTo("password");
+      return;
+    }
     setBusy(true);
     setError(null);
     try {
@@ -146,6 +151,9 @@ export default function LoginScreen() {
     </View>
   );
 
+  const parsed = parseIdentity(email);
+  const isPhone = parsed !== null && "phone" in parsed;
+
   const switchTo = (next: "email" | "password") => {
     setStep(next);
     setError(null);
@@ -231,7 +239,9 @@ export default function LoginScreen() {
             ) : step === "password" ? (
               <>
                 <AppText variant="title">{t("auth.title")}</AppText>
-                <AppText variant="caption">{t("auth.passwordSubtitle")}</AppText>
+                <AppText variant="caption">
+                  {isPhone ? t("auth.phoneNeedsPassword") : t("auth.passwordSubtitle")}
+                </AppText>
                 {emailField(() => undefined)}
                 <View style={styles.field}>
                   <AppText variant="label" nativeID="passwordLabel">
@@ -268,7 +278,9 @@ export default function LoginScreen() {
                     });
                   }}
                 />
-                <Button variant="ghost" title={t("auth.useCode")} onPress={() => switchTo("email")} />
+                {isPhone ? null : (
+                  <Button variant="ghost" title={t("auth.useCode")} onPress={() => switchTo("email")} />
+                )}
               </>
             ) : (
               <>
