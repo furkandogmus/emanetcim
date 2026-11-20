@@ -3,7 +3,7 @@
     "name": "BagajPark",
     "slug": "bagajpark",
     "scheme": "bagajpark",
-    "version": "0.3.2",
+    "version": "0.3.3",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
     "userInterfaceStyle": "light",
@@ -98,7 +98,7 @@
         "expo-image-picker",
         {
           "photosPermission": false,
-          "cameraPermission": false,
+          "cameraPermission": "Misafirin rezervasyon QR kodunu okutmak için kamerayı kullanıyoruz.",
           "microphonePermission": false
         }
       ],
