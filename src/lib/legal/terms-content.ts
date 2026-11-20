@@ -54,7 +54,9 @@ function turkishSections(companyLegalName: string, paymentMode: PaymentCopyMode)
         "4.1. Bagaj İçeriğine İlişkin Sorumluluk: Kullanıcı, teslim ettiği bagajın içeriğinin T.C. yasalarına uygun olduğunu kabul eder. Yasa dışı içeriklerden doğacak sorumluluk Kullanıcı'ya aittir. Yanıcı, patlayıcı, bozulabilir gıda veya kötü koku yayan nesnelerin teslimi yasaktır.",
         "4.2. Değerli Eşya Kısıtlaması: Nakit para, mücevher, pasaport, antika ve benzeri yüksek maddi/manevi değere sahip eşyaların bagaj içerisinde bırakılması yasaktır. Bu tür eşyaların kaybından BagajPark veya İş Ortağı sorumlu tutulamaz.",
         "4.3. Teslimat ve Mühürleme Süreci: Kullanıcı, bagajını İş Ortağına teslim ederken BagajPark Güvenlik Mührü'nün usulüne uygun takıldığını kontrol etmekle yükümlüdür. Mühürsüz veya hatalı mühürlenmiş bagajlar için sunulan güvence kapsamı geçersizdir.",
-        "4.4. Zamanında Teslim Alma ve Gecikme: Kullanıcı, İş Ortağının çalışma saatlerine uymak zorundadır. Rezervasyon süresi aşıldığında, ek saat/gün bedeli Kullanıcı'nın kayıtlı ödeme yönteminden otomatik olarak tahsil edilir.",
+        paymentMode === "online"
+          ? "4.4. Zamanında Teslim Alma ve Gecikme: Kullanıcı, İş Ortağının çalışma saatlerine uymak zorundadır. Rezervasyon süresi aşıldığında, ek saat/gün bedeli Kullanıcı'nın kayıtlı ödeme yönteminden otomatik olarak tahsil edilir."
+          : "4.4. Zamanında Teslim Alma ve Gecikme: Kullanıcı, İş Ortağının çalışma saatlerine uymak zorundadır. Rezervasyon süresi aşıldığında, ek saat/gün bedeli bagaj teslim alınırken İş Ortağının noktasında ödenir.",
         // 4.5 / 8.2 / 10.3: bu uc cumle "ödeme yalnızca uygulama üzerinden kart ile"
         // diyordu; urun su an DUKKANDA TAHSILAT ile calisiyor, yani sozlesme kullaniciyi
         // yapamayacagi bir sey icin taahhut altina sokuyordu. Cancellation/FAQ/Partners
@@ -70,7 +72,9 @@ function turkishSections(companyLegalName: string, paymentMode: PaymentCopyMode)
       paragraphs: [
         "5.1. Denetim ve Güvenlik Yetkisi: Şirket veya İş Ortağı, makul bir şüphe durumunda veya kamu güvenliği gerektirdiğinde içeriği kontrol etme veya resmi makamlara bildirme yetkisine sahiptir. Şüpheli bagajları gerekçe göstermeksizin reddetme hakkı saklıdır.",
         "5.2. Operasyonel ve Teknik Müdahale: Güvenlik için gerekli görüldüğünde ek mühürleme standartları getirme yetkisine sahiptir. Teknik arıza veya bakım durumunda hizmeti geçici durdurabilir.",
-        "5.3. Fiyatlandırma ve Ödeme Yetkisi: Şirket fiyatları ve komisyonları güncelleme hakkına sahiptir. Süre aşımı durumunda otomatik tahsilat yetkisine sahiptir.",
+        paymentMode === "online"
+          ? "5.3. Fiyatlandırma ve Ödeme Yetkisi: Şirket fiyatları ve komisyonları güncelleme hakkına sahiptir. Süre aşımı durumunda otomatik tahsilat yetkisine sahiptir."
+          : "5.3. Fiyatlandırma ve Ödeme Yetkisi: Şirket fiyatları ve komisyonları güncelleme hakkına sahiptir. Süre aşımı bedeli 4.4. maddede düzenlenen şekilde ödenir.",
         "5.4. İçerik ve Veri Yönetimi: Kullanıcı yorumlarını denetleme, hakaret içerenleri silme ve sözleşme ihlali durumunda hesapları tazminatsız kapatma yetkisi Şirket'tedir.",
         "5.5. Eşyaların Tasfiyesi (Rehin Hakkı): Teslim alınmayan eşyalar üzerinde Şirket'in hapis (alıkoyma) hakkı vardır. Belirli süreyi aşan ve alınmayan eşyaları tasfiye etme veya ilgili birimlere devretme yetkisine sahiptir.",
       ],
@@ -98,8 +102,12 @@ function turkishSections(companyLegalName: string, paymentMode: PaymentCopyMode)
         paymentMode === "online"
           ? "8.2. Ödeme Yöntemleri ve Güvenlik: Tüm ödemeler yalnızca Platform üzerinden kart ile yapılır. Ödemeler BDDK lisanslı güvenli aracılar üzerinden SSL şifreleme ile gerçekleştirilir; kart bilgileri BagajPark sunucularında saklanmaz."
           : "8.2. Ödeme Yöntemleri ve Güvenlik: Hizmet bedeli, bagajın teslimi sırasında doğrudan İş Ortağının noktasında tahsil edilir. Platform şu aşamada kart ile online tahsilat yapmaz; bu nedenle kart bilgisi ne istenir ne de saklanır.",
-        "8.3. Süre Aşımı ve Eksik Kullanım: Rezervasyon süresi aşılırsa ek ücret otomatik tahsil edilir. Erken teslim alımlarda kullanılmayan süre için iade yapılmaz.",
-        "8.4. Vergi ve Fatura: Ücretlere yasal vergiler dahildir. E-arşiv fatura kullanıcının e-posta adresine iletilir.",
+        paymentMode === "online"
+          ? "8.3. Süre Aşımı ve Eksik Kullanım: Rezervasyon süresi aşılırsa ek ücret otomatik tahsil edilir. Erken teslim alımlarda kullanılmayan süre için iade yapılmaz."
+          : "8.3. Süre Aşımı ve Eksik Kullanım: Rezervasyon süresi aşılırsa ek ücret, bagaj teslim alınırken İş Ortağının noktasında tahsil edilir. Erken teslim alımlarda kullanılmayan süre için iade yapılmaz.",
+        paymentMode === "online"
+          ? "8.4. Vergi ve Fatura: Ücretlere yasal vergiler dahildir. E-arşiv fatura kullanıcının e-posta adresine iletilir."
+          : "8.4. Vergi ve Fatura: Ücretlere yasal vergiler dahildir. Hizmet bedeline ilişkin fatura veya mali belge, bedeli tahsil eden İş Ortağı tarafından düzenlenir.",
       ],
     },
     {
@@ -196,7 +204,9 @@ function englishSections(companyLegalName: string, paymentMode: PaymentCopyMode)
         "4.1. Contents of the luggage: the User accepts that the contents of the luggage they hand over comply with the laws of the Republic of Türkiye. The User is responsible for any illegal contents. Flammable or explosive items, perishable food and items that give off strong odours may not be handed over.",
         "4.2. Valuables: cash, jewellery, passports, antiques and other items of high material or sentimental value must not be left in luggage. Neither BagajPark nor the Partner can be held responsible for the loss of such items.",
         "4.3. Drop-off and sealing: when handing luggage to the Partner, the User must check that the BagajPark Security Seal has been attached correctly. The guarantee does not apply to luggage that is unsealed or incorrectly sealed.",
-        "4.4. Timely pick-up and delays: the User must respect the Partner's opening hours. If the booking period is exceeded, the fee for the extra hours or days is charged automatically to the User's registered payment method.",
+        paymentMode === "online"
+          ? "4.4. Timely pick-up and delays: the User must respect the Partner's opening hours. If the booking period is exceeded, the fee for the extra hours or days is charged automatically to the User's registered payment method."
+          : "4.4. Timely pick-up and delays: the User must respect the Partner's opening hours. If the booking period is exceeded, the fee for the extra hours or days is paid at the Partner's location when the luggage is collected.",
         paymentMode === "online"
           ? "4.5. Bookings and payment: the User agrees to pay only through the BagajPark app and not to pay the Partner in cash."
           : "4.5. Bookings and payment: the User agrees to pay the service fee at the Partner's point when handing over the luggage; a booking made through the Platform does not remove this payment obligation.",
@@ -207,7 +217,9 @@ function englishSections(companyLegalName: string, paymentMode: PaymentCopyMode)
       paragraphs: [
         "5.1. Inspection and security: where there is reasonable suspicion, or where public safety requires it, the Company or the Partner may inspect the contents or notify the authorities. The right to refuse suspicious luggage without giving a reason is reserved.",
         "5.2. Operational and technical measures: the Company may introduce additional sealing standards where needed for security, and may suspend the service temporarily for technical faults or maintenance.",
-        "5.3. Pricing and payment: the Company may update prices and commissions, and may charge automatically when a booking period is exceeded.",
+        paymentMode === "online"
+          ? "5.3. Pricing and payment: the Company may update prices and commissions, and may charge automatically when a booking period is exceeded."
+          : "5.3. Pricing and payment: the Company may update prices and commissions. Any overstay fee is paid as set out in clause 4.4.",
         "5.4. Content and data: the Company may moderate User reviews, remove offensive ones and close accounts without compensation if these terms are breached.",
         "5.5. Unclaimed belongings (right of retention): the Company has a right of retention over belongings that are not collected. It may dispose of belongings not collected after a set period or hand them over to the relevant authorities.",
       ],
@@ -235,8 +247,12 @@ function englishSections(companyLegalName: string, paymentMode: PaymentCopyMode)
         paymentMode === "online"
           ? "8.2. Payment methods and security: all payments are made by card through the Platform only. Payments are processed by secure intermediaries licensed by the Turkish Banking Regulation and Supervision Agency (BDDK) using SSL encryption; card details are not stored on BagajPark servers."
           : "8.2. Payment methods and security: the service fee is collected directly at the Partner's point when the luggage is handed over. At this stage the Platform does not take card payments online, so card details are neither requested nor stored.",
-        "8.3. Overstay and unused time: if the booking period is exceeded, the additional fee is charged automatically. No refund is given for unused time when luggage is collected early.",
-        "8.4. Taxes and invoices: prices include statutory taxes. An e-archive invoice is sent to the User's email address.",
+        paymentMode === "online"
+          ? "8.3. Overstay and unused time: if the booking period is exceeded, the additional fee is charged automatically. No refund is given for unused time when luggage is collected early."
+          : "8.3. Overstay and unused time: if the booking period is exceeded, the additional fee is collected at the Partner's location when the luggage is picked up. No refund is given for unused time when luggage is collected early.",
+        paymentMode === "online"
+          ? "8.4. Taxes and invoices: prices include statutory taxes. An e-archive invoice is sent to the User's email address."
+          : "8.4. Taxes and invoices: prices include statutory taxes. The invoice or receipt for the service fee is issued by the Partner who collects it.",
       ],
     },
     {
