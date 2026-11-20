@@ -26,7 +26,7 @@ const open = (url: string) => void Linking.openURL(url).catch(() => undefined);
 export default function AdminUsersScreen() {
   const { t } = useTranslation();
   const queryClient = useQueryClient();
-  const { state } = useAuth();
+  const { state, startImpersonation } = useAuth();
   const myId = state.status === "signedIn" ? state.user.id : null;
   const [q, setQ] = useState("");
   const query = useAdminUsers(q);
@@ -44,6 +44,19 @@ export default function AdminUsersScreen() {
     Alert.alert(t("admin.banTitle", { name: u.name || u.email }), t("admin.banBody"), [
       { text: t("common.cancel"), style: "cancel" },
       { text: t("admin.banConfirm"), style: "destructive", onPress: () => ban.mutate({ id: u.id, isBanned: true }) },
+    ]);
+  }
+
+  // Basarida rol degisir; Stack.Protected hedefin paneline gecirir, bu ekran kendiliginden kapanir.
+  const viewAs = useMutation({
+    mutationFn: (id: string) => startImpersonation(id),
+    onError: (e) => notify(t("admin.actionFailed"), errorMessage(e, "admin")),
+  });
+
+  function confirmViewAs(u: AdminUser) {
+    Alert.alert(t("admin.impersonateTitle", { name: u.name || u.email || u.phone }), t("admin.impersonateBody"), [
+      { text: t("common.cancel"), style: "cancel" },
+      { text: t("admin.impersonateConfirm"), onPress: () => viewAs.mutate(u.id) },
     ]);
   }
 
@@ -120,6 +133,15 @@ export default function AdminUsersScreen() {
                     />
                   ) : null}
                 </View>
+                {u.role !== "ADMIN" && !u.isBanned ? (
+                  <Button
+                    variant="secondary"
+                    title={t("admin.impersonate")}
+                    loading={viewAs.isPending && viewAs.variables === u.id}
+                    disabled={viewAs.isPending}
+                    onPress={() => confirmViewAs(u)}
+                  />
+                ) : null}
               </View>
             );
           }}

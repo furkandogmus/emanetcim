@@ -414,7 +414,10 @@
       "too_many_requests": "Zu viele Antworten gesendet; bitte warte einen Moment.",
       "invalid_input": "Die Antwort konnte nicht gesendet werden: ungültiger Empfänger oder Text.",
       "cannot_ban_self": "Du kannst dein eigenes Konto nicht sperren.",
-      "invalid_data": "Der eingegebene Wert ist ungültig."
+      "invalid_data": "Der eingegebene Wert ist ungültig.",
+      "cannot_impersonate_admin": "Du kannst dich nicht als Administrator anmelden.",
+      "user_banned": "Als gesperrter Nutzer ist keine Anmeldung möglich.",
+      "not_allowed_while_impersonating": "Diese Aktion ist in der Nutzeransicht nicht möglich."
     },
     "deleteMessage": "Nachricht löschen",
     "replyLabel": "Per E-Mail antworten",
@@ -601,7 +604,11 @@
     "userShops_other": "{{count}} Läden",
     "bannedTag": "Gesperrt",
     "ban": "Sperren",
-    "unban": "Sperre aufheben"
+    "unban": "Sperre aufheben",
+    "impersonate": "Als dieser Nutzer anmelden",
+    "impersonateTitle": "Als {{name}} anmelden?",
+    "impersonateBody": "Die App wechselt 30 Minuten lang in das Konto dieses Nutzers, und jede Änderung wird protokolliert. Das Konto kann nicht gelöscht werden. Über die Leiste oben kannst du jederzeit zurück.",
+    "impersonateConfirm": "Anmelden"
   },
   "scan": {
     "open": "QR scannen",
@@ -967,5 +974,12 @@
     "photoBody": "Orte mit Foto werden auf der Karte öfter gewählt.",
     "hoursTitle": "Öffnungszeiten eintragen",
     "hoursBody": "Gerade steht der Standard 09:00–20:00; Gäste planen danach."
+  },
+  "impersonation": {
+    "banner": "Ansicht als {{name}}",
+    "exit": "Beenden",
+    "exitLabel": "Nutzeransicht beenden und zum Admin-Konto zurückkehren",
+    "endedTitle": "Nutzeransicht beendet",
+    "endedBody": "Die Zeit ist abgelaufen oder der Zugriff wurde beendet; du bist wieder im Admin-Konto."
   }
 }

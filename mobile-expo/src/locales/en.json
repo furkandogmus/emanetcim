@@ -414,7 +414,10 @@
       "too_many_requests": "Too many replies sent; please wait a bit.",
       "invalid_input": "Reply could not be sent: invalid recipient or text.",
       "cannot_ban_self": "You can't ban your own account.",
-      "invalid_data": "The value entered is invalid."
+      "invalid_data": "The value entered is invalid.",
+      "cannot_impersonate_admin": "You cannot sign in as an administrator.",
+      "user_banned": "You cannot sign in as a banned user.",
+      "not_allowed_while_impersonating": "This action is not available while viewing as a user."
     },
     "deleteMessage": "Delete message",
     "replyLabel": "Reply by email",
@@ -601,7 +604,11 @@
     "userShops_other": "{{count}} shops",
     "bannedTag": "Banned",
     "ban": "Ban",
-    "unban": "Lift ban"
+    "unban": "Lift ban",
+    "impersonate": "Sign in as this user",
+    "impersonateTitle": "Sign in as {{name}}?",
+    "impersonateBody": "For 30 minutes the app switches to this user's panel and every change you make is logged. The account cannot be deleted. You can exit any time from the bar at the top.",
+    "impersonateConfirm": "Sign in"
   },
   "scan": {
     "open": "Scan QR",
@@ -967,5 +974,12 @@
     "photoBody": "Spots with photos get picked more often on the map.",
     "hoursTitle": "Set your opening hours",
     "hoursBody": "Right now it shows the default 09:00–20:00; guests plan around these hours."
+  },
+  "impersonation": {
+    "banner": "Viewing as {{name}}",
+    "exit": "Exit",
+    "exitLabel": "Exit user view and return to your admin account",
+    "endedTitle": "User view ended",
+    "endedBody": "Time ran out or access ended; you are back in your admin account."
   }
 }

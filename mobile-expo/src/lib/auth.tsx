@@ -5,7 +5,20 @@ import type { Identity } from "./identity";
 
 import * as SecureStore from "expo-secure-store";
 
-import { ApiError, api, clearTokens, loadTokens, saveTokens, setSessionExpiredHandler } from "./api";
+import {
+  ApiError,
+  api,
+  clearTokens,
+  isImpersonating,
+  loadTokens,
+  saveTokens,
+  setImpersonationEndedHandler,
+  setImpersonationToken,
+  setSessionExpiredHandler,
+} from "./api";
+import i18n from "./i18n";
+import { msUntilExpiry, type ImpersonationResponse } from "./impersonation";
+import { notify } from "./notify";
 import { pickAppleCredential } from "./apple-auth";
 import { forgetGoogleAccount, pickGoogleIdToken } from "./google-auth";
 import { forgetPushRegistration, unregisterPush } from "./push";
@@ -16,6 +29,9 @@ type AuthState =
   | { status: "loading" }
   | { status: "signedOut" }
   | { status: "signedIn"; user: MobileUser };
+
+/** Yonetici baska bir kullanici olarak goruntuluyorsa o kullanici ve oturumun bitisi. */
+export type Impersonation = { user: MobileUser; expiresAt: string };
 
 type AuthContextValue = {
   state: AuthState;
@@ -28,6 +44,11 @@ type AuthContextValue = {
   signOut: () => Promise<void>;
   /** Profil degisikliginden sonra: PUT /auth/me yalnizca { success } doner. */
   refreshUser: () => Promise<MobileUser>;
+  impersonating: Impersonation | null;
+  /** Yalniz ADMIN: hedef kullanicinin paneline gecer (token yalnizca bellekte). */
+  startImpersonation: (userId: string) => Promise<void>;
+  /** Admin oturumuna doner; admin token'lari hic silinmemistir. */
+  stopImpersonation: () => Promise<void>;
 };
 
 const AuthContext = createContext<AuthContextValue | null>(null);
@@ -56,7 +77,62 @@ async function lastKnownUser(): Promise<MobileUser | null> {
 
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [state, setState] = useState<AuthState>({ status: "loading" });
+  const [impersonating, setImpersonating] = useState<Impersonation | null>(null);
   const queryClient = useQueryClient();
+
+  // Kimlikler arasinda veri sizmasin: onbellek ve cevrimdisi biletler her geciste silinir.
+  const resetIdentityData = useCallback(async () => {
+    queryClient.clear();
+    await clearOfflineTickets().catch(() => undefined);
+  }, [queryClient]);
+
+  const stopImpersonation = useCallback(async () => {
+    if (!isImpersonating()) return;
+    setImpersonationToken(null);
+    setImpersonating(null);
+    await resetIdentityData();
+    try {
+      const user = await api<MobileUser>("/auth/me");
+      void rememberUser(user);
+      setState({ status: "signedIn", user });
+    } catch (e) {
+      // 401'de oturum-sona-erdi isleyicisi zaten giris ekranina gecirdi.
+      if (e instanceof ApiError && e.status === 401) return;
+      const cached = await lastKnownUser();
+      setState(cached ? { status: "signedIn", user: cached } : { status: "signedOut" });
+    }
+  }, [resetIdentityData]);
+
+  const startImpersonation = useCallback(
+    async (userId: string) => {
+      const res = await api<ImpersonationResponse>(`/admin/users/${encodeURIComponent(userId)}/impersonate`, {
+        method: "POST",
+      });
+      await resetIdentityData();
+      setImpersonationToken(res.accessToken);
+      setImpersonating({ user: res.user, expiresAt: res.expiresAt });
+      // `rememberUser` BILEREK yok: onbellekteki kullanici admin olarak kalir.
+      setState({ status: "signedIn", user: res.user });
+    },
+    [resetIdentityData],
+  );
+
+  // 401 (sure doldu, admin yetkisi alindi) ve zamanlayici ayni yoldan cikar.
+  const endImpersonation = useCallback(() => {
+    if (!isImpersonating()) return;
+    void stopImpersonation().catch(() => undefined);
+    notify(i18n.t("impersonation.endedTitle"), i18n.t("impersonation.endedBody"));
+  }, [stopImpersonation]);
+  useEffect(() => {
+    setImpersonationEndedHandler(endImpersonation);
+  }, [endImpersonation]);
+
+  const expiresAt = impersonating?.expiresAt;
+  useEffect(() => {
+    if (!expiresAt) return;
+    const timer = setTimeout(endImpersonation, msUntilExpiry(expiresAt));
+    return () => clearTimeout(timer);
+  }, [expiresAt, endImpersonation]);
 
   useEffect(() => {
     setSessionExpiredHandler(() => {
@@ -133,12 +209,17 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const refreshUser = useCallback(async () => {
     const user = await api<MobileUser>("/auth/me");
-    void rememberUser(user);
+    if (!isImpersonating()) void rememberUser(user);
     setState({ status: "signedIn", user });
     return user;
   }, []);
 
   const signOut = useCallback(async () => {
+    // Goruntulemede "cikis" admini disari atmaz, admin push kaydini da silmez.
+    if (isImpersonating()) {
+      await stopImpersonation();
+      return;
+    }
     // Token oturum hala gecerliyken silinir; sonra sunucu tarafi iptal (en iyi caba).
     await unregisterPush();
     await clearOfflineTickets();
@@ -150,11 +231,35 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     // kisinin rezervasyonlari / davet kodu bir an (ya da staleTime boyunca) gorunur.
     queryClient.clear();
     setState({ status: "signedOut" });
-  }, [queryClient]);
+  }, [queryClient, stopImpersonation]);
 
   const value = useMemo(
-    () => ({ state, requestCode, verifyCode, signInWithPassword, signInWithGoogle, signInWithApple, signOut, refreshUser }),
-    [state, requestCode, verifyCode, signInWithPassword, signInWithGoogle, signInWithApple, signOut, refreshUser],
+    () => ({
+      state,
+      requestCode,
+      verifyCode,
+      signInWithPassword,
+      signInWithGoogle,
+      signInWithApple,
+      signOut,
+      refreshUser,
+      impersonating,
+      startImpersonation,
+      stopImpersonation,
+    }),
+    [
+      state,
+      requestCode,
+      verifyCode,
+      signInWithPassword,
+      signInWithGoogle,
+      signInWithApple,
+      signOut,
+      refreshUser,
+      impersonating,
+      startImpersonation,
+      stopImpersonation,
+    ],
   );
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 }

@@ -36,6 +36,24 @@ export class ApiError extends Error {
 let accessToken: string | null = null;
 let refreshToken: string | null = null;
 let onSessionExpired: (() => void) | null = null;
+/*
+  Yonetici "kullanici olarak gir" token'i. Yalnizca bellekte: SecureStore'daki admin
+  token'lari dokunulmadan kalir, uygulama yeniden acilinca admin oturumu doner.
+*/
+let impersonationToken: string | null = null;
+let onImpersonationEnded: (() => void) | null = null;
+
+export function setImpersonationToken(token: string | null) {
+  impersonationToken = token;
+}
+
+export function isImpersonating() {
+  return impersonationToken !== null;
+}
+
+export function setImpersonationEndedHandler(fn: () => void) {
+  onImpersonationEnded = fn;
+}
 
 export async function loadTokens() {
   accessToken = await SecureStore.getItemAsync(ACCESS_KEY);
@@ -165,7 +183,8 @@ export async function api<T>(path: string, opts: RequestOptions = {}): Promise<T
     // FormData (dosya yukleme) icin Content-Type'i fetch koyar: sinir (boundary) dahil.
     const isForm = body instanceof FormData;
     if (body !== undefined && !isForm) headers["Content-Type"] = "application/json";
-    if (auth && accessToken) headers.Authorization = `Bearer ${accessToken}`;
+    const bearer = impersonationToken ?? accessToken;
+    if (auth && bearer) headers.Authorization = `Bearer ${bearer}`;
     if (isForm) return uploadWithXhr(`${API_BASE_URL}${path}`, { method, headers, body }, UPLOAD_TIMEOUT_MS);
     return fetchWithTimeout(
       `${API_BASE_URL}${path}`,
@@ -174,6 +193,8 @@ export async function api<T>(path: string, opts: RequestOptions = {}): Promise<T
     ) as Promise<HttpResponse>;
   };
 
+  // Gonderim anindaki kimlik: yanit gelmeden goruntulemeden cikilirsa 401 admin'e yazilmasin.
+  const sentWithImpersonation = auth && impersonationToken !== null;
   let res: HttpResponse;
   try {
     res = await send();
@@ -181,7 +202,11 @@ export async function api<T>(path: string, opts: RequestOptions = {}): Promise<T
     throw new ApiError(0, "network");
   }
 
-  if (res.status === 401 && auth && refreshToken) {
+  // Goruntuleme token'i yenilenmez; 401 admin oturumunu degil goruntulemeyi bitirir.
+  if (res.status === 401 && sentWithImpersonation) {
+    onImpersonationEnded?.();
+    throw new ApiError(401, "impersonation_ended");
+  } else if (res.status === 401 && auth && refreshToken) {
     const outcome = await refreshOnce();
     if (outcome === "ok") {
       res = await send();

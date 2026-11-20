@@ -46,7 +46,7 @@ function sitePage(path: string, lang: string) {
  */
 export function ProfileView({ asTab = false, embedded = false }: { asTab?: boolean; embedded?: boolean }) {
   const { t, i18n } = useTranslation();
-  const { state, signOut } = useAuth();
+  const { state, signOut, impersonating } = useAuth();
   const [signingOut, setSigningOut] = useState(false);
   const [deleting, setDeleting] = useState(false);
   const notifOn = useNotificationPermission();
@@ -152,7 +152,8 @@ export function ProfileView({ asTab = false, embedded = false }: { asTab?: boole
           {t("profile.signOutNote")}
         </AppText>
       </View>
-      {isGuest ? (
+      {/* Yonetici goruntulemesinde hesap silme sunulmaz (sunucu da 403 doner). */}
+      {impersonating ? null : isGuest ? (
         <Button
           variant="ghost"
           textColor={colors.danger}

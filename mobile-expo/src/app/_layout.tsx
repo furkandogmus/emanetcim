@@ -22,6 +22,7 @@ import { ApiError } from "@/lib/api";
 import { pingAppOpen } from "@/lib/app-ping";
 import { AuthProvider, useAuth } from "@/lib/auth";
 import { openFromNotification, registerForPush } from "@/lib/push";
+import { ImpersonationFrame } from "@/components/ImpersonationBanner";
 import { SearchProvider } from "@/lib/search";
 import { colors } from "@/theme/tokens";
 
@@ -55,8 +56,10 @@ function useSearchKey(userId: string | null): string {
 }
 
 function RootNavigator() {
-  const { state } = useAuth();
+  const { state, impersonating } = useAuth();
   const role = state.status === "signedIn" ? state.user.role : null;
+  // Goruntulemede cihaz hedef kullaniciya baglanmaz ve onun bildirimlerine kaydolmaz.
+  const viewingAs = impersonating !== null;
 
   useEffect(() => {
     if (state.status !== "loading") void SplashScreen.hideAsync().catch(() => undefined);
@@ -65,17 +68,17 @@ function RootNavigator() {
   // Tekil kullanici sayaci: gunde bir; giris yapilinca hesap cihaza baglansin diye bir kez daha.
   const userId = state.status === "signedIn" ? state.user.id : null;
   useEffect(() => {
-    if (state.status === "loading") return;
+    if (state.status === "loading" || viewingAs) return;
     void pingAppOpen(userId).catch(() => undefined);
     const sub = AppState.addEventListener("change", (st) => {
       if (st === "active") void pingAppOpen(userId).catch(() => undefined);
     });
     return () => sub.remove();
-  }, [state.status, userId]);
+  }, [state.status, userId, viewingAs]);
 
   // Oturum acikken cihaz bildirime kaydolur; izin reddi ya da ag hatasi uygulamayi durdurmaz.
   useEffect(() => {
-    if (state.status !== "signedIn") return;
+    if (state.status !== "signedIn" || viewingAs) return;
     void registerForPush({ prompt: role !== "GUEST" }).catch(() => undefined);
     // Uygulama kapaliyken dokunulan bildirim de acilsin.
     // Son yanit surec boyunca kalir: temizlenmezse cikis/giristen sonra ayni rezervasyon
@@ -101,7 +104,7 @@ function RootNavigator() {
       sub.remove();
       received.remove();
     };
-  }, [state.status, role]);
+  }, [state.status, role, viewingAs]);
 
   /*
     Arama durumu kullaniciya ait: hesap degisince sifirlanir. AMA girissiz gezip
@@ -157,7 +160,11 @@ export default function RootLayout() {
       <QueryClientProvider client={queryClient}>
         <AuthProvider>
           <StatusBar style="dark" />
-          {fontsLoaded ? <RootNavigator /> : null}
+          {fontsLoaded ? (
+            <ImpersonationFrame>
+              <RootNavigator />
+            </ImpersonationFrame>
+          ) : null}
         </AuthProvider>
       </QueryClientProvider>
     </GestureHandlerRootView>
