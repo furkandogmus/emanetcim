@@ -4,7 +4,7 @@
  *
  *   node scripts/generate-brand-assets.mjs
  *
- * NEDEN BETİK: logo 2026-10-18'de valiz + renkli konum pini işaretine geçti.
+ * NEDEN BETİK: logo 2026-10-18'de valiz + konum pini işaretine geçti (2026-11-20: tamamen turuncu).
  * Favicon, PWA ikonları, bildirim rozeti, paylaşım görseli ve mobil uygulama
  * ikonları elle kırpılırsa birbirinden ayrışıyor; logo değişince bu betik
  * yeniden çalıştırılır, çıktılar commit'lenir.
@@ -40,7 +40,7 @@ async function squareIcon(size, ratio, background) {
 
 /**
  * Android bildirim rozeti yalnızca alfa kanalını kullanır (sistem beyaza boyar).
- * Renkten ayıklamak gökkuşağının turuncu dilimini de yakalıyordu; bu yüzden
+ * Renkten ayıklamak turuncu pini valizle birleştirirdi; bu yüzden
  * rozet şekilden çizilir: dolu valiz, pin oyuk, pinin göbeği yine dolu.
  */
 const PIN = "M167.22 298.94 L230.30 385.66 A12 12 0 0 0 249.70 385.66 L312.78 298.94 A90 90 0 1 0 167.22 298.94 Z";
