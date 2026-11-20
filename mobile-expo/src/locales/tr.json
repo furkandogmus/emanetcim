@@ -414,7 +414,10 @@
       "too_many_requests": "Çok fazla cevap gönderildi; biraz bekle.",
       "invalid_input": "Cevap gönderilemedi: alıcı adresi ya da metin geçersiz.",
       "cannot_ban_self": "Kendi hesabını engelleyemezsin.",
-      "invalid_data": "Girilen değer geçersiz."
+      "invalid_data": "Girilen değer geçersiz.",
+      "cannot_impersonate_admin": "Bir yönetici olarak giremezsin.",
+      "user_banned": "Engelli bir kullanıcı olarak girilemez.",
+      "not_allowed_while_impersonating": "Bu işlem kullanıcı olarak görüntülerken yapılamaz."
     },
     "deleteMessage": "Mesajı sil",
     "replyLabel": "E-postayla cevap",
@@ -601,7 +604,11 @@
     "userShops_other": "{{count}} dükkan",
     "bannedTag": "Engelli",
     "ban": "Engelle",
-    "unban": "Engeli kaldır"
+    "unban": "Engeli kaldır",
+    "impersonate": "Bu kullanıcı olarak gir",
+    "impersonateTitle": "{{name}} olarak girilsin mi?",
+    "impersonateBody": "Uygulama 30 dakika boyunca bu kullanıcının paneline geçer ve yaptığın her değişiklik kayda geçer. Hesap silinemez. Üstteki şeritten istediğin an çıkabilirsin.",
+    "impersonateConfirm": "Gir"
   },
   "scan": {
     "open": "QR okut",
@@ -967,5 +974,12 @@
     "photoBody": "Fotoğraflı noktalar haritada daha çok seçiliyor.",
     "hoursTitle": "Çalışma saatlerini gir",
     "hoursBody": "Şu an varsayılan 09:00–20:00 görünüyor; misafirler bu saatlere göre geliyor."
+  },
+  "impersonation": {
+    "banner": "{{name}} olarak görüntülüyorsun",
+    "exit": "Çık",
+    "exitLabel": "Kullanıcı görünümünden çık, yönetici hesabına dön",
+    "endedTitle": "Kullanıcı görünümü bitti",
+    "endedBody": "Süre doldu ya da erişim sona erdi; yönetici hesabına döndün."
   }
 }
