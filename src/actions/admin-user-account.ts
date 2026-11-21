@@ -49,6 +49,7 @@ export async function adminConvertGuestToPartnerAction(
     city: input.city,
     district: input.district,
     ...coords,
+    actor: { id: auth.actor.id, role: auth.actor.role },
   });
   if (!result.ok) {
     const error = {

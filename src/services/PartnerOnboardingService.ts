@@ -1,5 +1,5 @@
 import prisma from "@/lib/db";
-import { Role } from "@prisma/client";
+import { Prisma, Role } from "@prisma/client";
 import { normalizeTrGsm10 } from "@/lib/netgsm";
 
 /**
@@ -21,6 +21,48 @@ import { normalizeTrGsm10 } from "@/lib/netgsm";
  * (`approveShopAction`) geçmeden aramada görünmez.
  */
 
+/** Denetim kaydında işlemi başlatan yönetici (yoksa kayıt aktörsüz yazılır). */
+export type OnboardingActor = { id: string; role: string } | null;
+
+/**
+ * Doğrulanmamış MİSAFİR hesabın tuttuğu telefonu esnaf için serbest bırakır.
+ *
+ * NEDEN (bulgu 18): profil ucu (`PUT /auth/me`) telefonun sahibini doğrulamıyor (SMS yok).
+ * Bir misafir esnafın numarasını profiline yazınca adminin esnaf açması
+ * `phone_already_registered` ile düşüyordu. Telefon tekil kalır (telefonla girişte iki hesap
+ * aynı numarayı taşırsa gerçek sahibi giremiyordu); numara PARTNER/ADMIN hesaptaysa
+ * dokunulmaz. Aynı transaction'da misafirin telefonu boşaltılır ve denetim izi yazılır.
+ */
+async function releaseGuestPhone(
+  tx: Prisma.TransactionClient,
+  holderId: string,
+  phone: string,
+  actor: OnboardingActor,
+): Promise<void> {
+  const cleared = await tx.user.updateMany({
+    where: { id: holderId, role: Role.GUEST, phone },
+    data: { phone: null },
+  });
+  // Yarışta numara el değiştirdiyse tekil kısıt zaten düşürür; burada açıkça reddet.
+  if (cleared.count === 0) throw new PhoneHeldError();
+  await tx.auditLog.create({
+    data: {
+      actorUserId: actor?.id ?? null,
+      actorRole: actor?.role ?? "SYSTEM",
+      action: "partner.guest_phone_released",
+      entityType: "User",
+      entityId: holderId,
+      metadata: { phone },
+    },
+  });
+}
+
+class PhoneHeldError extends Error {
+  constructor() {
+    super("phone_held");
+  }
+}
+
 export type CreatePartnerInput = {
   ownerName: string;
   phone: string;
@@ -31,6 +73,7 @@ export type CreatePartnerInput = {
   district?: string | null;
   latitude: number;
   longitude: number;
+  actor?: OnboardingActor;
 };
 
 export type CreatePartnerResult =
@@ -53,14 +96,16 @@ class PartnerOnboardingService {
       transaction yine P2002 ile düşer; aşağıda yakalanıyor.
     */
     const [phoneOwner, emailOwner] = await Promise.all([
-      prisma.user.findUnique({ where: { phone }, select: { id: true } }),
+      prisma.user.findUnique({ where: { phone }, select: { id: true, role: true } }),
       email ? prisma.user.findUnique({ where: { email }, select: { id: true } }) : null,
     ]);
-    if (phoneOwner) return { ok: false, reason: "phone_already_registered" };
+    // Misafir numarayı tutuyorsa transaction içinde devralınır; esnaf/yönetici ise reddedilir.
+    if (phoneOwner && phoneOwner.role !== Role.GUEST) return { ok: false, reason: "phone_already_registered" };
     if (emailOwner) return { ok: false, reason: "email_already_registered" };
 
     try {
       const { userId, shopId } = await prisma.$transaction(async (tx) => {
+        if (phoneOwner) await releaseGuestPhone(tx, phoneOwner.id, phone, input.actor ?? null);
         const user = await tx.user.create({
           data: {
             role: Role.PARTNER,
@@ -92,7 +137,7 @@ class PartnerOnboardingService {
         e && typeof e === "object" && "code" in e
           ? (e as { code?: string }).code
           : undefined;
-      if (code === "P2002") return { ok: false, reason: "phone_already_registered" };
+      if (code === "P2002" || e instanceof PhoneHeldError) return { ok: false, reason: "phone_already_registered" };
       throw e;
     }
   }
@@ -114,13 +159,15 @@ class PartnerOnboardingService {
     if (!user) return { ok: false, reason: "not_found" };
     if (user.role !== Role.GUEST) return { ok: false, reason: "not_guest" };
 
-    const phoneOwner = await prisma.user.findUnique({ where: { phone }, select: { id: true } });
-    if (phoneOwner && phoneOwner.id !== user.id) {
+    const phoneOwner = await prisma.user.findUnique({ where: { phone }, select: { id: true, role: true } });
+    if (phoneOwner && phoneOwner.id !== user.id && phoneOwner.role !== Role.GUEST) {
       return { ok: false, reason: "phone_already_registered" };
     }
+    const heldByOtherGuest = phoneOwner && phoneOwner.id !== user.id ? phoneOwner : null;
 
     try {
       const shopId = await prisma.$transaction(async (tx) => {
+        if (heldByOtherGuest) await releaseGuestPhone(tx, heldByOtherGuest.id, phone, input.actor ?? null);
         // Rol koşulu yarışa karşı: iki admin aynı anda çevirirse ikincisi düşer.
         const updated = await tx.user.updateMany({
           where: { id: user.id, role: Role.GUEST },
@@ -144,6 +191,7 @@ class PartnerOnboardingService {
       });
       return { ok: true, shopId, phone, hasPassword: !!user.passwordHash };
     } catch (e: unknown) {
+      if (e instanceof PhoneHeldError) return { ok: false, reason: "phone_already_registered" };
       if (e instanceof Error && e.message === "not_guest") return { ok: false, reason: "not_guest" };
       const code =
         e && typeof e === "object" && "code" in e
@@ -164,6 +212,7 @@ export type ConvertGuestInput = {
   district?: string | null;
   latitude: number;
   longitude: number;
+  actor?: OnboardingActor;
 };
 
 export type ConvertGuestResult =
