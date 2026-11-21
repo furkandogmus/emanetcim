@@ -299,10 +299,13 @@ export type AdminApplication = {
 /** `toMobileGeocodeResult` (mobile-dto.ts) — `GET /geocode?q=`. */
 export type GeocodeResult = {
   label: string;
+  /** Satir basligi (otel/cadde adi) ve alt basligi (ilce, sehir). Eski sunucuda yok. */
+  title?: string;
+  subtitle?: string;
   latitude: number;
   longitude: number;
   /** En fazla bes sonuc (Turkiye). Eski sunucu gondermez: o zaman ust duzey tek sonuc. */
-  items?: { label: string; latitude: number; longitude: number }[];
+  items?: { label: string; title?: string; subtitle?: string; latitude: number; longitude: number }[];
 };
 
 /** `admin/messages` (sunucu `toMobileAdminMessage`). */
@@ -497,6 +500,8 @@ export type AdminUser = {
 /** `/cities`: dukkani olan sehirler (sunucu `toMobileCity`). */
 export type CityCoverage = {
   name: string;
+  /** Yazimdan bagimsiz anahtar ("istanbul"); eski sunucuda yok, istemci adindan turetir. */
+  slug?: string;
   shopCount: number;
   latitude: number;
   longitude: number;
