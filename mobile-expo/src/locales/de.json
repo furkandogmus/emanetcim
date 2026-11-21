@@ -302,13 +302,13 @@
     "detailTitle": "Buchung",
     "checkInTitle": "Gepäck annehmen",
     "checkInHint": "Gib die Nummer des Siegels an jedem Gepäckstück ein. Lass das Feld leer, wenn du das Gepäck ohne Siegel annimmst.",
-    "checkInHintNoSeals": "Nimm das Gepäck an, scanne den QR-Code des Gastes und bestätige.",
+    "checkInHintNoSeals": "Zähle das Gepäck, prüfe Namen und Buchung des Gastes und bestätige.",
     "bagN": "Gepäckstück {{n}} · {{size}}",
     "sealNumber": "Siegel-Nr.",
     "sealsPartial": "Gib ein Siegel für jedes Gepäckstück ein oder für keines.",
     "checkInCta": "Gepäck angenommen",
     "checkedInTitle": "Gepäck angenommen",
-    "checkedInBody": "Der Gast wurde benachrichtigt.",
+    "checkedInBody": "Als angenommen gespeichert.",
     "checkOutTitle": "Gepäck zurückgeben",
     "checkOutHint": "Sobald der Gast seinen QR-Code zeigt, gib das Gepäck zurück und bestätige.",
     "checkOutSealsHint": "Prüfe, ob jedes Siegel unversehrt ist, und hake es ab.",
@@ -317,7 +317,7 @@
     "checkedOutTitle": "Zurückgegeben",
     "checkedOutBody": "Die Buchung ist abgeschlossen.",
     "errors": {
-      "SHOP_CLOSED": "Der Laden scheint gerade geschlossen zu sein. Versuch es während der Öffnungszeiten erneut.",
+      "SHOP_CLOSED": "Du bist außerhalb der gespeicherten Öffnungszeiten deines Ladens. Wenn deine echten Zeiten anders sind, korrigiere sie und versuche es erneut.",
       "INVALID_STATUS": "Diese Buchung hat gerade nicht den passenden Status dafür.",
       "PAYMENT_REQUIRED": "Diese Buchung wurde nicht bezahlt.",
       "SEAL_REQUIRED": "Gib für jedes Gepäckstück eine Siegelnummer ein.",
@@ -376,7 +376,13 @@
     "sealBrokenHint": "Ein nicht intaktes Siegel wird erfasst; prüf das Gepäck mit dem Gast. Die Abholung kannst du trotzdem abschließen.",
     "lateFeeCollect": "Verspätungsgebühr {{amount}}: vom Gast kassieren.",
     "earlyRefundGive": "Frühe Abholung: dem Gast {{amount}} erstatten.",
-    "shopPending": "Wartet auf Freigabe"
+    "shopPending": "Wartet auf Freigabe",
+    "editHours": "Öffnungszeiten bearbeiten",
+    "searchPlaceholder": "Gastname oder Code suchen",
+    "searchNone": "Keine passende Buchung. Gib den 8-stelligen Code ein.",
+    "statusWaiting": "Erwartet",
+    "callGuest": "Gast anrufen",
+    "whatsappGuest": "Per WhatsApp schreiben"
   },
   "profile": {
     "title": "Profil",
@@ -661,7 +667,16 @@
       "forbidden": "Diese Buchung gehört nicht zu deinem Laden.",
       "not_found": "Buchung nicht gefunden."
     },
-    "openSettings": "In den Einstellungen erlauben"
+    "openSettings": "In den Einstellungen erlauben",
+    "manualOpen": "Code manuell eingeben",
+    "manualTitle": "Mit Code oder Name finden",
+    "manualPlaceholder": "8-stelliger Code oder Gastname",
+    "manualSearch": "Suchen",
+    "manualNone": "Keine passende Buchung gefunden.",
+    "manualMany": "Mehrere Treffer, wähle einen aus.",
+    "torchOn": "Taschenlampe an",
+    "torchOff": "Taschenlampe aus",
+    "manualClose": "Schließen"
   },
   "reset": {
     "forgotPassword": "Passwort vergessen",
@@ -705,6 +720,7 @@
       "invalid_name": "Dein Name muss 1–100 Zeichen lang sein.",
       "invalid_phone": "Gib eine gültige türkische Mobilnummer ein (5XX XXX XX XX).",
       "phone_taken": "Diese Nummer ist bereits für ein anderes Konto registriert.",
+      "phone_locked": "Mit dieser Nummer meldest du dich an. Ohne E-Mail oder andere Anmeldemethode lässt sie sich nicht ändern; wende dich an den Support.",
       "no_fields": "Es gibt nichts zu ändern.",
       "file_too_large": "Das Foto ist zu groß; versuch ein anderes.",
       "invalid_type": "Dieser Dateityp wird nicht unterstützt; wähle JPEG, PNG oder WebP.",
@@ -825,7 +841,7 @@
     "savedTitle": "Gepäckzahl aktualisiert",
     "savedBody": "Neuer Gesamtpreis: {{total}}",
     "approvalTitle": "Warten auf den Gast",
-    "approvalBody": "Diese Korrektur erhöht den Preis. Der Gast hat eine E-Mail zur Zustimmung erhalten; der neue Gesamtpreis gilt, sobald er zustimmt.",
+    "approvalBody": "Diese Korrektur erhöht den Preis. Der Gast wurde um Zustimmung gebeten; der neue Gesamtpreis gilt, sobald er zustimmt.",
     "errors": {
       "not_found": "Buchung nicht gefunden.",
       "forbidden": "Diese Buchung gehört nicht zu deinem Laden.",
@@ -838,7 +854,8 @@
       "no_pending_revision": "Diese Korrektur steht nicht mehr aus; aktualisiere die Seite.",
       "revision_changed": "Der Laden hat die Korrektur gerade geändert. Prüf den neuen Betrag und entscheide erneut."
     },
-    "pendingBody": "Der Gast wurde gebeten, {{count}} Gepäckstücke für insgesamt {{total}} zu bestätigen. Die Buchung ändert sich erst, wenn er zustimmt."
+    "pendingBody": "Der Gast wurde gebeten, {{count}} Gepäckstücke für insgesamt {{total}} zu bestätigen. Die Buchung ändert sich erst, wenn er zustimmt.",
+    "hintCheckedInNoSeals": "Das Gepäck ist angenommen. Eine Korrektur, die den Preis erhöht, braucht die Zustimmung des Gastes."
   },
   "seals": {
     "open": "Siegel",
@@ -913,10 +930,6 @@
     "district": "Bezirk",
     "city": "Stadt",
     "addressHint": "Gäste finden deinen Laden über diese Adresse. Den Pin auf der Karte verschiebst du im Web-Panel.",
-    "phoneSection": "Kontakt",
-    "phone": "Handynummer für SMS-Benachrichtigungen",
-    "phoneHint": "Wenn eine neue Buchung bezahlt wird, geht eine SMS an diese Nummer. Lass das Feld leer, um die Nummer zu entfernen.",
-    "phonePlaceholder": "05XX XXX XX XX",
     "save": "Speichern",
     "saved": "Einstellungen gespeichert.",
     "saveFailed": "Speichern nicht möglich",
@@ -926,11 +939,14 @@
     "errors": {
       "invalid_input": "Einer der Werte ist ungültig. Prüfe sie und versuch es erneut.",
       "shop_update_failed": "Die Ladendaten konnten nicht gespeichert werden. Prüfe die Werte und versuch es erneut.",
-      "invalid_tr_phone": "Die Telefonnummer ist keine gültige türkische Mobilnummer.",
-      "already_registered": "Diese Telefonnummer ist für ein anderes Konto registriert.",
-      "invalid_data": "Die Telefonnummer konnte nicht gelesen werden.",
-      "no_shop": "Wir konnten keinen aktiven Laden für dich finden."
-    }
+      "no_shop": "Wir konnten keinen aktiven Laden für dich finden.",
+      "price_out_of_range": "Der Tagespreis liegt außerhalb des erlaubten Bereichs. Der Bereich steht unter dem Preisfeld."
+    },
+    "priceRange": "Erlaubter Bereich: {{min}} – {{max}} ₺",
+    "priceOutOfRange": "Der Tagespreis liegt außerhalb des erlaubten Bereichs. Der Bereich steht unter dem Preisfeld.",
+    "impactTitle": "Gespeichert, aber Achtung",
+    "impactOutsideHours": "{{count}} aktive Buchung(en) liegen außerhalb der neuen Zeiten. Diese Gäste kannst du nicht annehmen; schau in deine Buchungsliste, um sie zu erreichen.",
+    "impactOverCapacity": "Im Regal liegen {{count}} Gepäckstücke über der neuen Kapazität. Du kannst keine neuen Buchungen annehmen."
   },
   "schedule": {
     "title": "Öffnungszeiten und freie Tage",
@@ -970,7 +986,8 @@
       "invalid_input": "Eine Zeit oder ein Datum ist ungültig. Freie Tage dürfen nicht in der Vergangenheit beginnen.",
       "schedule_save_failed": "Speichern nicht möglich, versuch es erneut.",
       "no_shop": "Wir konnten keinen aktiven Laden für dich finden."
-    }
+    },
+    "conflictNext": "Tippe auf eine Buchung, um den Gast zu erreichen, oder wende dich an den Support."
   },
   "referral": {
     "title": "Mein Einladungscode",

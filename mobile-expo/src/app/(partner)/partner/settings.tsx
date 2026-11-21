@@ -11,12 +11,15 @@ import { api } from "@/lib/api";
 import { usePartnerShopSelection, withShop } from "@/lib/partner-shop";
 import { errorMessage } from "@/lib/errors";
 import { keys, usePartnerShopSettings } from "@/lib/queries";
-import type { PartnerShopSettings } from "@/lib/types";
+import type { PartnerShopSettings, PartnerShopUpdateResult } from "@/lib/types";
 import { notify } from "@/lib/notify";
 import { colors, fonts, space } from "@/theme/tokens";
 
 /**
- * Dukkan temel bilgileri + esnafin telefonu. Calisma saatleri burada degil,
+ * Dukkan temel bilgileri.
+ * Telefon BURADA YOK: o alan hesabin giris numarasi; silinirse ya da yanlis yazilirsa
+ * esnaf kendi hesabindan kilitlenir. Numara profil ekranindan degisir.
+ * Calisma saatleri burada degil,
  * `schedule` ekraninda: web formu da ayni ayrimi yapiyor ve gun bazli saat
  * kaydedilince `Shop.openingTime/closingTime` oradan yaziliyor.
  */
@@ -52,28 +55,30 @@ function SettingsForm({ shop }: { shop: PartnerShopSettings }) {
   const [address, setAddress] = useState(shop.address ?? "");
   const [city, setCity] = useState(shop.city ?? "");
   const [district, setDistrict] = useState(shop.district ?? "");
-  const [phone, setPhone] = useState(shop.phone ?? "");
   const [formError, setFormError] = useState<string | null>(null);
 
   const save = useMutation({
     mutationFn: async (body: { name: string; capacity: number; pricePerDay: number }) => {
-      await api(withShop("/partner/shop", shopId), {
+      return await api<PartnerShopUpdateResult>(withShop("/partner/shop", shopId), {
         method: "PUT",
         body: { ...body, address: address.trim(), city: city.trim(), district: district.trim() },
       });
-      // Telefon yalnizca degistiyse: bos gondermek sunucuda numarayi SILER.
-      const nextPhone = phone.trim();
-      if (nextPhone !== (shop.phone ?? "")) {
-        await api("/partner/phone", { method: "PUT", body: { phone: nextPhone || null } });
-      }
     },
-    onSuccess: () => {
+    onSuccess: (res) => {
       void queryClient.invalidateQueries({ queryKey: keys.partnerShop });
-      notify(t("shopSettings.saved"));
+      // Degisiklik engellenmez, SONUCU soylenir: esnaf etkilenen misafirlere ulasabilsin.
+      const impact = res?.impact;
+      const warnings: string[] = [];
+      if (impact && impact.bookingsOutsideHours > 0) {
+        warnings.push(t("shopSettings.impactOutsideHours", { count: impact.bookingsOutsideHours }));
+      }
+      if (impact && impact.bagsOverCapacity > 0) {
+        warnings.push(t("shopSettings.impactOverCapacity", { count: impact.bagsOverCapacity }));
+      }
+      if (warnings.length > 0) notify(t("shopSettings.impactTitle"), warnings.join("\n\n"));
+      else notify(t("shopSettings.saved"));
     },
     onError: (e) => {
-      // Dukkan kaydi telefondan once yapilir; telefon hatasinda bilgiler yine kaydedilmis olabilir.
-      void queryClient.invalidateQueries({ queryKey: keys.partnerShop });
       notify(t("shopSettings.saveFailed"), errorMessage(e, "shopSettings"));
     },
   });
@@ -85,6 +90,11 @@ function SettingsForm({ shop }: { shop: PartnerShopSettings }) {
     if (name.trim().length < 2) return setFormError(t("shopSettings.nameInvalid"));
     if (!Number.isInteger(cap) || cap < 1) return setFormError(t("shopSettings.capacityInvalid"));
     if (!Number.isFinite(pricePerDay) || pricePerDay < 1) return setFormError(t("shopSettings.priceInvalid"));
+    // Bant sunucudan gelir (esnaf 250 yerine 2500 yazmasin); karar yine sunucuda.
+    const range = shop.priceRange;
+    if (range && (pricePerDay < range.min || pricePerDay > range.max)) {
+      return setFormError(t("shopSettings.priceOutOfRange"));
+    }
     setFormError(null);
     save.mutate({ name: name.trim(), capacity: cap, pricePerDay });
   }
@@ -115,6 +125,11 @@ function SettingsForm({ shop }: { shop: PartnerShopSettings }) {
           />
         </View>
         <AppText variant="caption">{t("shopSettings.priceHint")}</AppText>
+        {shop.priceRange ? (
+          <AppText variant="caption">
+            {t("shopSettings.priceRange", { min: shop.priceRange.min, max: shop.priceRange.max })}
+          </AppText>
+        ) : null}
 
         <AppText variant="label" style={styles.section}>
           {t("shopSettings.addressSection")}
@@ -125,20 +140,6 @@ function SettingsForm({ shop }: { shop: PartnerShopSettings }) {
           <Field style={{ flex: 1 }} label={t("shopSettings.city")} value={city} onChangeText={setCity} maxLength={100} />
         </View>
         <AppText variant="caption">{t("shopSettings.addressHint")}</AppText>
-
-        <AppText variant="label" style={styles.section}>
-          {t("shopSettings.phoneSection")}
-        </AppText>
-        <Field
-          label={t("shopSettings.phone")}
-          hint={t("shopSettings.phoneHint")}
-          value={phone}
-          onChangeText={setPhone}
-          keyboardType="phone-pad"
-          autoComplete="tel"
-          placeholder={t("shopSettings.phonePlaceholder")}
-          maxLength={20}
-        />
 
         {formError ? <Banner tone="danger" body={formError} /> : null}
       </ScrollView>
