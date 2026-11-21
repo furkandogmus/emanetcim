@@ -1,5 +1,6 @@
 import * as SecureStore from "expo-secure-store";
 
+import { isImpersonating } from "./api";
 import type { BookingDetail } from "./types";
 
 /**
@@ -27,6 +28,8 @@ async function readIndex(): Promise<string[]> {
 }
 
 export async function saveOfflineTicket(b: BookingDetail): Promise<void> {
+  // Goruntulemede hedefin QR'i admin cihazinda kalmasin (uygulama oldurulse bile).
+  if (isImpersonating()) return;
   const ids = (await readIndex()).filter((x) => x !== b.id);
   if (!ACTIVE.has(b.status) || !b.qrCodeToken) {
     await SecureStore.deleteItemAsync(key(b.id)).catch(() => undefined);
