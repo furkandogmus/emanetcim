@@ -8,10 +8,11 @@ import { BookingRow } from "@/components/BookingRow";
 import { LuggageTag } from "@/components/Illustrations";
 import { Segmented } from "@/components/Segmented";
 import { RowSkeleton } from "@/components/RowSkeleton";
-import { AppText, Button, CenterMessage } from "@/components/ui";
+import { AppText, Banner, Button, CenterMessage } from "@/components/ui";
 import { errorMessage } from "@/lib/errors";
 import { isActiveBooking, useMyBookings } from "@/lib/queries";
 import { useAuth } from "@/lib/auth";
+import { useOfflineTickets } from "@/lib/offline-tickets";
 import { SignInPrompt } from "@/components/SignInPrompt";
 import { colors, space } from "@/theme/tokens";
 
@@ -21,7 +22,10 @@ export default function MyBookingsScreen() {
   const [tab, setTab] = useState<"upcoming" | "past">("upcoming");
   const { state } = useAuth();
 
-  const all = query.data ?? [];
+  // Liste sunucudan gelmediyse (internet yok) cihazdaki biletler gosterilir.
+  const offlineTickets = useOfflineTickets(query.isError && !query.data);
+  const offlineMode = query.isError && !query.data && offlineTickets.length > 0;
+  const all = offlineMode ? offlineTickets : (query.data ?? []);
   const items = all
     .filter((b) => (tab === "upcoming" ? isActiveBooking(b) : !isActiveBooking(b)))
     .sort((a, b) =>
@@ -51,9 +55,16 @@ export default function MyBookingsScreen() {
         />
       </View>
 
+      {offlineMode ? (
+        <View style={{ paddingHorizontal: space.xl, paddingBottom: space.md, gap: space.sm }}>
+          <Banner tone="warning" title={t("bookings.offlineTitle")} body={t("bookings.offlineListBody")} />
+          <Button variant="secondary" title={t("common.retry")} onPress={() => query.refetch()} />
+        </View>
+      ) : null}
+
       {query.isLoading ? (
         <RowSkeleton />
-      ) : query.isError ? (
+      ) : query.isError && !offlineMode ? (
         <CenterMessage
           title={errorMessage(query.error)}
           action={<Button variant="secondary" title={t("common.retry")} onPress={() => query.refetch()} />}
@@ -70,12 +81,21 @@ export default function MyBookingsScreen() {
             <BookingRow booking={item} title={item.shopName} onPress={() => router.push(`/bookings/${item.id}`)} />
           )}
           ListEmptyComponent={
-            <CenterMessage
-              art={<LuggageTag size={80} />}
-              title={t("bookings.empty")}
-              body={t("bookings.emptyBody")}
-              action={<Button title={t("bookings.emptyCta")} onPress={() => router.push("/search")} />}
-            />
+            tab === "past" ? (
+              // Gecmis sekmesi: "henuz rezervasyonun yok" yalan, ve arama dugmesi buraya ait degil.
+              <CenterMessage
+                art={<LuggageTag size={80} />}
+                title={t("bookings.emptyPast")}
+                body={t("bookings.emptyPastBody")}
+              />
+            ) : (
+              <CenterMessage
+                art={<LuggageTag size={80} />}
+                title={t("bookings.empty")}
+                body={t("bookings.emptyBody")}
+                action={<Button title={t("bookings.emptyCta")} onPress={() => router.push("/search")} />}
+              />
+            )
           }
         />
       )}

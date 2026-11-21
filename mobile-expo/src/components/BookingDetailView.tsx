@@ -13,7 +13,7 @@ import { GuestDisputeCard } from "@/components/GuestDisputeCard";
 import { GuestReviewCard } from "@/components/GuestReviewCard";
 import { PartnerBookingActions } from "@/components/PartnerBookingActions";
 import { AppText, Banner, Button, CenterMessage, IconButton, Loading } from "@/components/ui";
-import { api } from "@/lib/api";
+import { api, ApiError } from "@/lib/api";
 import { errorMessage } from "@/lib/errors";
 import { formatMoney } from "@/lib/format";
 import { isActiveBooking, useBooking } from "@/lib/queries";
@@ -46,7 +46,7 @@ function openDirections(b: BookingDetail) {
 export function BookingDetailView({ id, mode }: { id: string; mode: "guest" | "partner" }) {
   const { t } = useTranslation();
   const queryClient = useQueryClient();
-  const query = useBooking(id);
+  const query = useBooking(id, { saveOffline: mode === "guest" });
   const scrollRef = useRef<ScrollView>(null);
 
   /**
@@ -69,7 +69,11 @@ export function BookingDetailView({ id, mode }: { id: string; mode: "guest" | "p
         res.fullRefund ? t("bookings.cancelledRefund") : t("bookings.cancelledNoCharge"),
       );
     },
-    onError: (e) => notify(t("bookings.cancelFailed"), errorMessage(e)),
+    onError: (e) => {
+      // Sunucu durumu degismis olabilir (zaten iptal / teslim edildi): ekran guncellensin.
+      void queryClient.invalidateQueries({ queryKey: ["bookings"] });
+      notify(t("bookings.cancelFailed"), errorMessage(e, "bookings"));
+    },
   });
 
   // Aktif rezervasyonun bileti cihaza yazilir; ag yoksa QR yine gosterilir.
@@ -77,10 +81,33 @@ export function BookingDetailView({ id, mode }: { id: string; mode: "guest" | "p
   useEffect(() => {
     if (mode === "guest" && query.data) void saveOfflineTicket(query.data);
   }, [mode, query.data]);
+  /*
+    Cihazdaki bilet ekran acilir acilmaz okunur (hata beklenmez): zayif sinyalde
+    istek 12 sn + 1 sn + 12 sn sonra hata verir; o sure boyunca donen yukleme
+    yerine kayitli bilet hemen gorunur.
+  */
   useEffect(() => {
-    if (mode === "guest" && query.isError) void loadOfflineTicket(id).then(setOffline);
-  }, [mode, query.isError, id]);
+    if (mode === "guest") void loadOfflineTicket(id).then(setOffline);
+  }, [mode, id]);
 
+  const cachedTicket = (banner: { tone: "warning" | "brand"; title?: string; body: string }, retry: boolean) => (
+    <SafeAreaView style={styles.safe} edges={["top"]}>
+      <View style={styles.header}>
+        <IconButton label={t("common.back")} onPress={() => router.back()}>
+          <ArrowLeft size={20} color={colors.ink} />
+        </IconButton>
+      </View>
+      <ScrollView contentContainerStyle={styles.content}>
+        <Banner tone={banner.tone} title={banner.title} body={banner.body} />
+        <BookingTicket booking={offline!} showQr />
+        {retry ? <Button variant="secondary" title={t("common.retry")} onPress={() => query.refetch()} /> : null}
+      </ScrollView>
+    </SafeAreaView>
+  );
+
+  if (query.isLoading && offline) {
+    return cachedTicket({ tone: "brand", body: t("bookings.refreshingBody") }, false);
+  }
   if (query.isLoading) {
     return (
       <SafeAreaView style={styles.safe} edges={["top"]}>
@@ -94,20 +121,18 @@ export function BookingDetailView({ id, mode }: { id: string; mode: "guest" | "p
     );
   }
   if (query.isError || !query.data) {
-    if (offline) {
+    // Cevrimdisi yalnizca baglanti hatasi (status 0): 404/403/5xx icin "internet yok" demek yaniltici.
+    const noConnection = query.error instanceof ApiError && query.error.status === 0;
+    const gone = query.error instanceof ApiError && (query.error.status === 404 || query.error.status === 403);
+    if (offline && noConnection) {
+      return cachedTicket({ tone: "warning", title: t("bookings.offlineTitle"), body: t("bookings.offlineBody") }, true);
+    }
+    if (gone) {
       return (
-        <SafeAreaView style={styles.safe} edges={["top"]}>
-          <View style={styles.header}>
-            <IconButton label={t("common.back")} onPress={() => router.back()}>
-              <ArrowLeft size={20} color={colors.ink} />
-            </IconButton>
-          </View>
-          <ScrollView contentContainerStyle={styles.content}>
-            <Banner tone="warning" title={t("bookings.offlineTitle")} body={t("bookings.offlineBody")} />
-            <BookingTicket booking={offline} showQr />
-            <Button variant="secondary" title={t("common.retry")} onPress={() => query.refetch()} />
-          </ScrollView>
-        </SafeAreaView>
+        <CenterMessage
+          title={t("bookings.notFound")}
+          action={<Button variant="secondary" title={t("common.back")} onPress={() => router.back()} />}
+        />
       );
     }
     return (
