@@ -164,10 +164,11 @@ export function Banner({
     success: { bg: colors.successSoft, border: "#BBF7D0" },
   }[tone];
   return (
+    // Hata ve uyari bandi ekran okuyucuya duyurulur: giris, odeme ve check-in hatalari
+    // aksi halde sessiz kaliyordu. Tehlike aninda keser, digerleri nazikce soyler.
     <View
-      // Hata/uyari ekran okuyucuya kendiliginden okunur (kaydirmadan gorunmeyen yerde cikabilir).
       accessibilityRole={tone === "danger" ? "alert" : undefined}
-      accessibilityLiveRegion={tone === "danger" ? "polite" : "none"}
+      accessibilityLiveRegion={tone === "danger" ? "assertive" : "polite"}
       style={[styles.banner, { backgroundColor: palette.bg, borderColor: palette.border }]}
     >
       {title ? <AppText variant="bodyMedium">{title}</AppText> : null}

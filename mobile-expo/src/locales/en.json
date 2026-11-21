@@ -15,7 +15,8 @@
     "ok": "OK",
     "clear": "Clear",
     "scrollBack": "Scroll back",
-    "scrollForward": "Scroll forward"
+    "scrollForward": "Scroll forward",
+    "goHome": "Go home"
   },
   "auth": {
     "title": "Sign in",
@@ -60,7 +61,7 @@
     "bookingsPromptTitle": "Your bookings live here",
     "bookingsPromptBody": "Sign in to see your bookings and QR code.",
     "profilePromptTitle": "Your account",
-    "profilePromptBody": "Sign in to book and share your invite code. You can change the language above without signing in.",
+    "profilePromptBody": "Sign in to book and share your invite code.",
     "modeLabel": "Sign-in method",
     "modeEmail": "Email",
     "modePhone": "Phone",
@@ -175,7 +176,8 @@
       "invalid_dates": "The selected dates can't be used. Change the dates.",
       "search_unavailable": "Search isn't available right now. Try again in a moment.",
       "too_many_requests": "Too many attempts. Wait a moment and try again."
-    }
+    },
+    "sheetHandle": "Shop list, drag to expand or collapse"
   },
   "shop": {
     "open247": "Open 24/7",
@@ -863,7 +865,7 @@
     "open": "Correct bag count",
     "title": "Correct bag count",
     "hint": "If the guest arrived with a different number of bags, enter the real count. The new total is calculated for you.",
-    "hintCheckedIn": "The bags are checked in. Sealed bags cannot be increased, and a correction that raises the price needs the guest's approval.",
+    "hintCheckedIn": "The bags are at the shop. A correction that raises the price needs the guest's approval.",
     "delta": "{{from}} bags → {{to}} bags",
     "atLeastOne": "There must be at least one bag.",
     "apply": "Apply",
@@ -1007,8 +1009,8 @@
     "remove": "Remove",
     "removeTitle": "Remove this time off?",
     "conflictTitle": "The bookings below fall on these dates:",
-    "conflictDropoff": "Drop-off",
-    "conflictPickup": "Pick-up",
+    "conflictDropoff": "Guest drop-off",
+    "conflictPickup": "Guest pick-up",
     "conflictBags": "Bags in the shop",
     "errors": {
       "schedule_conflict": "This change was not saved.",
@@ -1081,5 +1083,12 @@
     "exitLabel": "Exit user view and return to your admin account",
     "endedTitle": "User view ended",
     "endedBody": "Time ran out or access ended; you are back in your admin account."
+  },
+  "update": {
+    "requiredTitle": "Update required",
+    "requiredBody": "This version is no longer supported. Update BagajPark on Google Play to continue.",
+    "requiredCta": "Open Google Play",
+    "readyBody": "A new version is ready.",
+    "readyCta": "Refresh"
   }
 }
