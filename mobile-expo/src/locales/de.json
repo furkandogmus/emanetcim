@@ -296,6 +296,10 @@
     "cancelledTitle": "Buchung storniert",
     "cancelledRefund": "Der gesamte bezahlte Betrag wird erstattet.",
     "cancelledNoCharge": "Dir wurde nichts berechnet.",
+    "cancelledRefundOnsite": "Buchung storniert. Falls du schon im Laden bezahlt hast, frag dort nach einer Erstattung.",
+    "expiredTitle": "Abgelaufen",
+    "expiredBody": "Die Abholzeit ist vorbei und dein Gepäck wurde nicht abgegeben. Diese Buchung kann nicht mehr genutzt werden.",
+    "rebook": "Neu buchen",
     "cancelFailed": "Die Buchung konnte nicht storniert werden.",
     "code": "Buchungscode",
     "overdue": "Abholzeit überschritten",
@@ -321,7 +325,7 @@
     "CHECKED_IN": "Gepäck im Laden",
     "CHECKED_OUT": "Abgeschlossen",
     "CANCELLED": "Storniert",
-    "UNUSED": "Nicht genutzt"
+    "UNUSED": "Abgelaufen"
   },
   "partner": {
     "title": "Gepäck",
@@ -824,7 +828,7 @@
     "bagsTitle": "Wie viele Gepäckstücke?",
     "currentTotal": "Aktueller Gesamtpreis",
     "newTotal": "Neuer Gesamtpreis",
-    "paidNote": "Der Gesamtpreis einer bezahlten Buchung kann sich nicht ändern. Für eine Änderung, die den Preis beeinflusst, storniere und buche neu.",
+    "paidNote": "Der Gesamtpreis einer Buchung mit erfasster Zahlung kann sich nicht ändern. Für eine Änderung, die den Preis beeinflusst, storniere und buche neu.",
     "noBags": "Wähle mindestens ein Gepäckstück.",
     "save": "Änderungen speichern",
     "savedTitle": "Buchung aktualisiert",
@@ -832,7 +836,7 @@
     "errors": {
       "INVALID_DATES": "Die gewählte Zeit ist ungültig oder der Laden ist an dem Tag geschlossen. Die Abgabe darf nicht in der Vergangenheit liegen.",
       "INVALID_STATUS": "Diese Buchung kann nicht mehr geändert werden.",
-      "PRICE_INCREASE": "Der Gesamtpreis einer bezahlten Buchung kann sich nicht ändern. Du kannst stornieren und neu buchen.",
+      "PRICE_INCREASE": "Der Gesamtpreis einer Buchung mit erfasster Zahlung kann sich nicht ändern. Du kannst stornieren und neu buchen.",
       "CAPACITY": "Für die gewählte Zeit ist an diesem Ort nicht genug Platz.",
       "NOT_FOUND": "Buchung nicht gefunden.",
       "not_found": "Buchung nicht gefunden.",
