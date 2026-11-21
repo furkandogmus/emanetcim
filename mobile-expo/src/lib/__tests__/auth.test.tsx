@@ -17,6 +17,8 @@ jest.mock("expo-secure-store", () => {
 jest.mock("../google-auth", () => ({ forgetGoogleAccount: jest.fn(async () => undefined), pickGoogleIdToken: jest.fn() }));
 jest.mock("../apple-auth", () => ({ pickAppleCredential: jest.fn() }));
 jest.mock("../push", () => ({ forgetPushRegistration: jest.fn(), unregisterPush: jest.fn(async () => undefined) }));
+const mockReplace = jest.fn();
+jest.mock("expo-router", () => ({ router: { replace: (...a: unknown[]) => mockReplace(...a) } }));
 jest.mock("../notify", () => ({ notify: jest.fn() }));
 jest.mock("@tanstack/react-query", () => {
   // Uygulamadaki gibi sabit: her render'da yeni nesne acilis effect'ini yeniden calistirirdi.
@@ -53,20 +55,28 @@ type Env = {
   ctx: () => ReturnType<AuthModule["useAuth"]>;
   flush: () => Promise<void>;
   act: (fn: () => Promise<unknown>) => Promise<void>;
+  /** Uygulamanin on plana donusunu taklit eder. */
+  appState: (next: string) => void;
   /** Her render'daki durum ve o anki bearer turu: "loading" gecisini gormek icin. */
   renders: string[];
 };
 
 /** Her test taze modul kaydi: api.ts token'lari ve React ayni izolasyonda. */
 async function mount(seed: Record<string, string> = {}, opts: { unreadableSession?: boolean } = {}): Promise<Env> {
-  let env!: Omit<Env, "ctx" | "flush" | "act" | "renders">;
+  let env!: Omit<Env, "ctx" | "flush" | "act" | "renders" | "appState">;
   let React!: typeof import("react");
   let TR!: typeof import("react-test-renderer");
   let auth!: AuthModule;
+  const appStateListeners: ((s: string) => void)[] = [];
   jest.isolateModules(() => {
     React = jest.requireActual<typeof import("react")>("react");
     TR = jest.requireActual<typeof import("react-test-renderer")>("react-test-renderer");
     auth = jest.requireActual<AuthModule>("../auth");
+    const RN = jest.requireActual<typeof import("react-native")>("react-native");
+    jest.spyOn(RN.AppState, "addEventListener").mockImplementation(((_t: string, cb: (s: string) => void) => {
+      appStateListeners.push(cb);
+      return { remove: () => undefined };
+    }) as never);
     const ss = jest.requireMock<Env["SecureStore"] & { __store: Map<string, string> }>("expo-secure-store");
     env = {
       store: ss.__store,
@@ -103,12 +113,14 @@ async function mount(seed: Record<string, string> = {}, opts: { unreadableSessio
     });
     await flush();
   };
-  return { ...env, ctx: () => value!, flush, act, renders };
+  const appState = (next: string) => appStateListeners.forEach((cb) => cb(next));
+  return { ...env, ctx: () => value!, flush, act, renders, appState };
 }
 
 const session = JSON.stringify({ accessToken: "a-1", refreshToken: "r-1" });
 
 beforeEach(() => {
+  mockReplace.mockClear();
   fetchMock.mockReset();
   global.fetch = fetchMock as unknown as typeof fetch;
 });
@@ -164,6 +176,67 @@ describe("oturum sonu", () => {
     );
     expect(env.store.has("ticket_b1")).toBe(false);
     expect(env.store.has("bp.user")).toBe(false);
+  });
+});
+
+describe("oturum sonu yonlendirmesi", () => {
+  const expire = async (env: Env) => {
+    fetchMock.mockImplementation(async () => json(401, { error: "unauthorized" }) as never);
+    await env.act(() => env.api.api("/x").catch(() => undefined));
+  };
+
+  it("esnaf giris ekranina kimligi dolu gonderilir", async () => {
+    fetchMock.mockResolvedValue(json(200, partner) as never);
+    const env = await mount({ "bp.session": session });
+    await expire(env);
+    expect(env.ctx().state.status).toBe("signedOut");
+    expect(mockReplace).toHaveBeenCalledTimes(1);
+    expect(mockReplace).toHaveBeenCalledWith({ pathname: "/login", params: { identity: "p@example.test" } });
+  });
+
+  it("misafir haritada kalir, giris ekranina atilmaz", async () => {
+    fetchMock.mockResolvedValue(json(200, { ...partner, role: "GUEST" }) as never);
+    const env = await mount({ "bp.session": session });
+    await expire(env);
+    expect(env.ctx().state.status).toBe("signedOut");
+    expect(mockReplace).not.toHaveBeenCalled();
+  });
+
+  it("kullanicinin kendi cikisi giris ekranina yonlendirmez", async () => {
+    fetchMock.mockResolvedValue(json(200, partner) as never);
+    const env = await mount({ "bp.session": session });
+    await env.act(() => env.ctx().signOut());
+    expect(mockReplace).not.toHaveBeenCalled();
+  });
+});
+
+describe("on plana donuste rol tazeleme", () => {
+  const meCalls = () => fetchMock.mock.calls.filter(([u]) => String(u).endsWith("/auth/me")).length;
+
+  it("5 dakikadan once tazelemez, sonra /auth/me'yi okuyup rolu gunceller", async () => {
+    fetchMock.mockResolvedValue(json(200, { ...partner, role: "GUEST" }) as never);
+    const env = await mount({ "bp.session": session });
+    expect(env.ctx().state).toMatchObject({ user: { role: "GUEST" } });
+    const boot = meCalls();
+
+    fetchMock.mockResolvedValue(json(200, partner) as never);
+    await env.act(async () => env.appState("active"));
+    expect(meCalls()).toBe(boot);
+
+    const realNow = Date.now;
+    Date.now = () => realNow() + 6 * 60 * 1000;
+    try {
+      await env.act(async () => env.appState("background"));
+      expect(meCalls()).toBe(boot);
+      await env.act(async () => env.appState("active"));
+      expect(meCalls()).toBe(boot + 1);
+      expect(env.ctx().state).toMatchObject({ status: "signedIn", user: { role: "PARTNER" } });
+      // Hemen ardindan ikinci donus yeniden istek atmaz (throttle).
+      await env.act(async () => env.appState("active"));
+      expect(meCalls()).toBe(boot + 1);
+    } finally {
+      Date.now = realNow;
+    }
   });
 });
 
