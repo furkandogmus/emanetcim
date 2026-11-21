@@ -123,7 +123,7 @@ export default function PartnerBookingsScreen() {
               value={search}
               onChangeText={setSearch}
               placeholder={t("partner.searchPlaceholder")}
-              autoCapitalize="characters"
+              autoCapitalize="none"
               autoCorrect={false}
               returnKeyType="search"
               maxLength={60}
