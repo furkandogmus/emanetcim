@@ -22,19 +22,26 @@ vi.mock("@/services/auth/mobile-session", () => ({
   revokeAllUserSessions: vi.fn().mockResolvedValue(undefined),
 }));
 
-vi.mock("@/lib/mobile-auth", () => ({
-  verifyMobileToken: vi.fn(),
-  signAccessToken: vi.fn().mockResolvedValue("new-access"),
-  signRefreshToken: vi.fn().mockResolvedValue("new-refresh"),
-}));
+vi.mock("@/lib/mobile-auth", async (orig) => {
+  const real = await orig<typeof import("@/lib/mobile-auth")>();
+  return {
+    unauthorized: real.unauthorized,
+    serviceUnavailable: real.serviceUnavailable,
+    verifyMobileToken: vi.fn(),
+    signAccessToken: vi.fn().mockResolvedValue("new-access"),
+    signRefreshToken: vi.fn().mockResolvedValue("new-refresh"),
+  };
+});
 
 vi.mock("@/lib/refresh-token-store", () => ({
   claimRefreshJti: vi.fn(),
+  rememberIssuedPair: vi.fn().mockResolvedValue(undefined),
 }));
 
 import prisma from "@/lib/db";
 import { verifyMobileToken } from "@/lib/mobile-auth";
-import { claimRefreshJti } from "@/lib/refresh-token-store";
+import { claimRefreshJti, rememberIssuedPair } from "@/lib/refresh-token-store";
+import { rateLimit } from "@/lib/rate-limit";
 import { revokeAllUserSessions } from "@/services/auth/mobile-session";
 
 function makeRequest() {
@@ -64,15 +71,59 @@ describe("POST /api/mobile/auth/refresh — replay tespiti", () => {
   });
 
   it("ilk kullanımda yeni token çifti döner", async () => {
-    vi.mocked(claimRefreshJti).mockResolvedValue(true);
+    vi.mocked(claimRefreshJti).mockResolvedValue({ kind: "first" });
     const { POST } = await import("@/app/api/mobile/auth/refresh/route");
     const res = await POST(makeRequest());
     expect(res.status).toBe(200);
     expect(revokeAllUserSessions).not.toHaveBeenCalled();
+    expect(rememberIssuedPair).toHaveBeenCalledWith("jti-1", {
+      accessToken: "new-access",
+      refreshToken: "new-refresh",
+    });
   });
 
-  it("replay tespit edilirse 401 döner VE tüm aile (tokenVersion) iptal edilir", async () => {
-    vi.mocked(claimRefreshJti).mockResolvedValue(false);
+  it("tolerans penceresinde tekrar: aynı çift döner, aile iptal edilmez", async () => {
+    const pair = { accessToken: "a-1", refreshToken: "r-1" };
+    vi.mocked(claimRefreshJti).mockResolvedValue({ kind: "repeat", pair });
+    const { POST } = await import("@/app/api/mobile/auth/refresh/route");
+    const res = await POST(makeRequest());
+    expect(res.status).toBe(200);
+    expect(await res.json()).toEqual(pair);
+    expect(revokeAllUserSessions).not.toHaveBeenCalled();
+  });
+
+  it("ilk istek henüz bitmemişken tekrar: 503, aile iptal edilmez", async () => {
+    vi.mocked(claimRefreshJti).mockResolvedValue({ kind: "pending" });
+    const { POST } = await import("@/app/api/mobile/auth/refresh/route");
+    const res = await POST(makeRequest());
+    expect(res.status).toBe(503);
+    expect(revokeAllUserSessions).not.toHaveBeenCalled();
+  });
+
+  it("veritabanı hatası 401 değil 503 döner (istemci oturumu korur)", async () => {
+    vi.mocked(prisma.user.findUnique).mockRejectedValue(new Error("pool timeout"));
+    const { POST } = await import("@/app/api/mobile/auth/refresh/route");
+    const res = await POST(makeRequest());
+    expect(res.status).toBe(503);
+    expect((await res.json()).error).toBe("service_unavailable");
+  });
+
+  it("Redis hatası (jti deposu ya da hız sınırı) 503 döner", async () => {
+    vi.mocked(claimRefreshJti).mockRejectedValue(new Error("redis down"));
+    const { POST } = await import("@/app/api/mobile/auth/refresh/route");
+    expect((await POST(makeRequest())).status).toBe(503);
+    vi.mocked(rateLimit).mockRejectedValueOnce(new Error("redis down"));
+    expect((await POST(makeRequest())).status).toBe(503);
+  });
+
+  it("geçersiz token 401 kalır", async () => {
+    vi.mocked(verifyMobileToken).mockRejectedValue(new Error("bad signature"));
+    const { POST } = await import("@/app/api/mobile/auth/refresh/route");
+    expect((await POST(makeRequest())).status).toBe(401);
+  });
+
+  it("pencere dışında tekrar (replay) 401 döner VE tüm aile (tokenVersion) iptal edilir", async () => {
+    vi.mocked(claimRefreshJti).mockResolvedValue({ kind: "reused" });
     const { POST } = await import("@/app/api/mobile/auth/refresh/route");
     const res = await POST(makeRequest());
     expect(res.status).toBe(401);
