@@ -619,7 +619,9 @@
     "banShopsNote": "Bu kişinin {{count}} dükkanı var. Engellemek dükkanları kapatmaz; gerekirse dükkan sayfasından \"Misafire açık\" seçeneğini kapat.",
     "userBookingsOpen": "Rezervasyonlarını gör",
     "openShop": "Dükkan sayfasını aç",
-    "impersonateOwner": "Dükkan sahibi olarak gir"
+    "impersonateOwner": "Dükkan sahibi olarak gir",
+    "repliedAt": "Cevaplandı · {{date}}",
+    "approvedNotNotified": "Başvuru onaylandı ama esnafa bildirim gidemedi; kendisini ara."
   },
   "scan": {
     "open": "QR okut",

@@ -20,7 +20,11 @@ export async function applicationActionResponse(
         ? NextResponse.json({ error: "missing_coordinates" }, { status: 409 })
         : NextResponse.json({ error: "not_found" }, { status: 404 });
     }
-    return NextResponse.json({ success: true });
+    // `partnerNotified`: e-posta ya da push DENENDI mi. false ise admin esnafi kendisi aramali.
+    const n = result.notified;
+    return NextResponse.json(
+      n ? { success: true, partnerNotified: n.email || n.push } : { success: true },
+    );
   }
   if (action === "reject") {
     const result = await shopService.rejectApplication(shopId, actor);

@@ -24,13 +24,19 @@ export default function AdminApplicationsScreen() {
 
   const decide = useMutation({
     mutationFn: ({ id, action }: { id: string; action: "approve" | "reject" }) =>
-      api(`/admin/applications/${id}/${action}`, { method: "POST" }),
-    onSuccess: (_res, { action }) => {
+      api<{ success: boolean; partnerNotified?: boolean }>(`/admin/applications/${id}/${action}`, { method: "POST" }),
+    onSuccess: (res, { action }) => {
       // Yalnizca etkilenenler: basvuru listesi, ozet sayaci ve dukkan listesi.
       for (const k of ["applications", "overview", "shops"]) {
         void queryClient.invalidateQueries({ queryKey: [...keys.admin, k] });
       }
-      notify(action === "approve" ? t("admin.approvedTitle") : t("admin.rejectedTitle"));
+      notify(
+        action === "reject"
+          ? t("admin.rejectedTitle")
+          : res?.partnerNotified === false
+            ? t("admin.approvedNotNotified")
+            : t("admin.approvedTitle"),
+      );
     },
     onError: (e) => notify(t("admin.actionFailed"), errorMessage(e, "admin")),
   });

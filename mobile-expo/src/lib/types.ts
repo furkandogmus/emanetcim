@@ -284,14 +284,17 @@ export type GeocodeResult = {
   items?: { label: string; latitude: number; longitude: number }[];
 };
 
-/** `CONTACT_MESSAGE_LIST_SELECT` (src/lib/contact-message-list.ts); yalnizca kullanilan alanlar. */
+/** `admin/messages` (sunucu `toMobileAdminMessage`). */
 export type ContactMessage = {
   id: string;
   from: string;
   subject: string | null;
   text: string | null;
   isRead: boolean;
+  category?: string;
   createdAt: string;
+  /** Son cevabin zamani; cevaplanmamissa null. Eski sunucuda yok. */
+  repliedAt?: string | null;
 };
 
 /**

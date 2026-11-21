@@ -1,4 +1,5 @@
 import { moneyToNumber } from "@/lib/money";
+import { stripHtmlToText } from "@/lib/rich-text";
 import { toWhatsAppNumber } from "@/lib/whatsapp";
 import type { PricingRules } from "@/lib/pricing-rules";
 import { shopVisibilityIssues } from "@/lib/shop-visibility";
@@ -613,6 +614,39 @@ export function toMobileAdminUser(u: AdminUserSource) {
     bookingCount: u._count.bookings,
     shopCount: u._count.shops,
     createdAt: u.createdAt.toISOString(),
+  };
+}
+
+type AdminMessageSource = {
+  id: string;
+  from: string;
+  subject: string | null;
+  text: string | null;
+  html: string | null;
+  isRead: boolean;
+  category: string;
+  createdAt: Date;
+  replies: { createdAt: Date }[];
+};
+
+/** Mobil gelen kutusunda bir mesajin govdesi bu kadar karakterle sinirli. */
+const ADMIN_MESSAGE_BODY_MAX = 4000;
+
+/**
+ * `admin/messages` satiri. Ham Prisma satiri (200 mesajin tam HTML'i) yerine: govde yalnizca
+ * duz metin (yalniz-HTML posta icin etiketlerden arindirilmis), `repliedAt` en son cevap.
+ */
+export function toMobileAdminMessage(m: AdminMessageSource) {
+  const body = (m.text?.trim() || stripHtmlToText(m.html).trim()).slice(0, ADMIN_MESSAGE_BODY_MAX);
+  return {
+    id: m.id,
+    from: m.from,
+    subject: m.subject,
+    text: body || null,
+    isRead: m.isRead,
+    category: m.category,
+    createdAt: m.createdAt.toISOString(),
+    repliedAt: m.replies[0]?.createdAt.toISOString() ?? null,
   };
 }
 

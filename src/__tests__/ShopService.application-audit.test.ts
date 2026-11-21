@@ -97,3 +97,23 @@ describe("uç yanıtı: istemcinin çevirdiği kodlar", () => {
     expect(await res.json()).toEqual({ error: "invalid_action" });
   });
 });
+
+describe("onay yanıtı: esnaf bilgilendirildi mi", () => {
+  it("hiçbir kanal denenmediyse partnerNotified=false döner", async () => {
+    vi.spyOn(shopService, "approveApplication").mockResolvedValue({
+      ok: true,
+      notified: { email: false, push: false },
+    });
+    const res = await applicationActionResponse("s1", "approve", { userId: "a1", ip: null });
+    expect(await res.json()).toEqual({ success: true, partnerNotified: false });
+  });
+
+  it("push denendiyse partnerNotified=true", async () => {
+    vi.spyOn(shopService, "approveApplication").mockResolvedValue({
+      ok: true,
+      notified: { email: false, push: true },
+    });
+    const res = await applicationActionResponse("s1", "approve", { userId: "a1", ip: null });
+    expect(await res.json()).toEqual({ success: true, partnerNotified: true });
+  });
+});
