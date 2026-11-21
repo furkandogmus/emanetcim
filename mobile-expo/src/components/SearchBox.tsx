@@ -9,9 +9,17 @@ import { colors, fonts, radius, space } from "@/theme/tokens";
  * Yazilan metin burada tutulur: her tusta liste degil yalnizca kutu yeniden cizilir.
  * `onSearch` yazma durduktan 300 ms sonra cagrilir; `onSearch` kararli olmali (useCallback / setState).
  */
-export function SearchBox({ placeholder, onSearch }: { placeholder: string; onSearch: (q: string) => void }) {
+export function SearchBox({
+  placeholder,
+  onSearch,
+  initialValue = "",
+}: {
+  placeholder: string;
+  onSearch: (q: string) => void;
+  initialValue?: string;
+}) {
   const { t } = useTranslation();
-  const [text, setText] = useState("");
+  const [text, setText] = useState(initialValue);
   useEffect(() => {
     const id = setTimeout(() => onSearch(text), 300);
     return () => clearTimeout(id);

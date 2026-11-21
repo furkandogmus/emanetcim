@@ -407,7 +407,7 @@
     "deleteConfirm": "Evet, sil",
     "errors": {
       "not_found": "Kayıt bulunamadı; başka biri işlem yapmış olabilir.",
-      "missing_coordinates": "Dükkanın konumu yok; önce web panelinden konumu girin.",
+      "missing_coordinates": "Dükkanın konumu yok. Dükkan sayfasından konumu girince onaylayabilirsin.",
       "has_booking_history": "Dükkanın aktif rezervasyonu var; reddedilemez.",
       "invalid_action": "Geçersiz işlem.",
       "email_send_failed": "E-posta gönderilemedi; cevap kaydedilmedi. Biraz sonra tekrar dene.",
@@ -417,7 +417,8 @@
       "invalid_data": "Girilen değer geçersiz.",
       "cannot_impersonate_admin": "Bir yönetici olarak giremezsin.",
       "user_banned": "Engelli bir kullanıcı olarak girilemez.",
-      "not_allowed_while_impersonating": "Bu işlem kullanıcı olarak görüntülerken yapılamaz."
+      "not_allowed_while_impersonating": "Bu işlem kullanıcı olarak görüntülerken yapılamaz.",
+      "cannot_ban_admin": "Yönetici hesabı engellenemez; yetki değişikliği web panelinden iki admin onayıyla yapılır."
     },
     "deleteMessage": "Mesajı sil",
     "replyLabel": "E-postayla cevap",
@@ -609,7 +610,16 @@
     "impersonate": "Bu kullanıcı olarak gir",
     "impersonateTitle": "{{name}} olarak girilsin mi?",
     "impersonateBody": "Uygulama 30 dakika boyunca bu kullanıcının paneline geçer ve yaptığın her değişiklik kayda geçer. Hesap silinemez. Üstteki şeritten istediğin an çıkabilirsin.",
-    "impersonateConfirm": "Gir"
+    "impersonateConfirm": "Gir",
+    "location": "Konum",
+    "latitude": "Enlem",
+    "longitude": "Boylam",
+    "locationHint": "Haritada dükkanın yerine uzun basıp koordinatları kopyalayın. Örnek: 41.0082 ve 28.9784.",
+    "fixLocation": "Konumu gir",
+    "banShopsNote": "Bu kişinin {{count}} dükkanı var. Engellemek dükkanları kapatmaz; gerekirse dükkan sayfasından \"Misafire açık\" seçeneğini kapat.",
+    "userBookingsOpen": "Rezervasyonlarını gör",
+    "openShop": "Dükkan sayfasını aç",
+    "impersonateOwner": "Dükkan sahibi olarak gir"
   },
   "scan": {
     "open": "QR okut",

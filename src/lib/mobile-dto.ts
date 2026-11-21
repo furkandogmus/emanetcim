@@ -1,4 +1,5 @@
 import { moneyToNumber } from "@/lib/money";
+import { toWhatsAppNumber } from "@/lib/whatsapp";
 import type { PricingRules } from "@/lib/pricing-rules";
 import { shopVisibilityIssues } from "@/lib/shop-visibility";
 import { storageCitiesListingShop } from "@/lib/storage-cities";
@@ -369,7 +370,12 @@ export function toMobileAdminApplication(s: AdminApplicationSource) {
     pricePerDay: moneyToNumber(s.pricePerDay),
     capacity: s.capacity,
     createdAt: s.createdAt.toISOString(),
-    owner: { name: s.owner.name, phone: s.owner.phone, email: s.owner.email },
+    owner: {
+      name: s.owner.name,
+      phone: s.owner.phone,
+      email: s.owner.email,
+      whatsapp: toWhatsAppNumber(s.owner.phone),
+    },
   };
 }
 
@@ -505,14 +511,20 @@ export function toMobileAdminBookingDetail({ booking: b, events }: AdminBookingD
   return {
     ...toMobileAdminBookingRow(b),
     guest: {
+      // Kayitli kullanici degilse (misafir e-postasiyla alinmis) kimlik yok: "bu kullanici olarak gir" cizilmez.
+      id: b.guest?.id ?? null,
       name: b.guest?.name ?? "",
       email: b.guest?.email ?? b.guestEmail ?? "",
       phone: b.guest?.phone ?? b.guestPhone ?? "",
+      whatsapp: toWhatsAppNumber(b.guest?.phone ?? b.guestPhone),
     },
     shop: {
+      id: b.shopId,
+      ownerId: b.shop.owner.id,
       name: b.shop.name,
       address: place,
       phone: b.shop.owner.phone ?? "",
+      whatsapp: toWhatsAppNumber(b.shop.owner.phone),
       ownerName: b.shop.owner.name ?? "",
       latitude: b.shop.latitude,
       longitude: b.shop.longitude,
@@ -541,6 +553,7 @@ export function toMobileAdminShop(s: AdminShopSource) {
     isVerified: s.isVerified,
     issues: s.isPrelaunch || s.isTest ? [] : adminShopVisibility(s).issues,
     phone: s.owner.phone ?? "",
+    whatsapp: toWhatsAppNumber(s.owner.phone),
     bagsInStorage: s.bagsInStorage,
     arrivalsToday: s.arrivalsToday,
     pickupsToday: s.pickupsToday,
@@ -573,6 +586,7 @@ export function toMobileAdminShopDetail(d: AdminShopDetailSource) {
       name: s.owner.name ?? "",
       email: s.owner.email ?? "",
       phone: s.owner.phone ?? "",
+      whatsapp: toWhatsAppNumber(s.owner.phone),
     },
     bookingCount: s._count.bookings,
     reviewCount: s._count.reviews,
@@ -592,6 +606,7 @@ export function toMobileAdminUser(u: AdminUserSource) {
     name: u.name ?? "",
     email: u.email ?? "",
     phone: u.phone ?? "",
+    whatsapp: toWhatsAppNumber(u.phone),
     role: u.role,
     isBanned: u.isBanned,
     isTest: u.isTest,

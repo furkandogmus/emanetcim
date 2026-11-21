@@ -3,7 +3,7 @@ import type { ReactNode } from "react";
 import { Linking, Platform, ScrollView, StyleSheet, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { router, useLocalSearchParams } from "expo-router";
-import { ArrowLeft } from "lucide-react-native";
+import { ArrowLeft, MessageCircle } from "lucide-react-native";
 import { useTranslation } from "react-i18next";
 
 import { BookingTicket } from "@/components/BookingTicket";
@@ -11,6 +11,8 @@ import { AppText, Banner, Button, Card, CenterMessage, IconButton, Loading } fro
 import { errorMessage } from "@/lib/errors";
 import { formatDayTime } from "@/lib/format";
 import { SITE_ORIGIN } from "@/lib/images";
+import { telUrl, waUrl } from "@/lib/phone";
+import { useViewAs } from "@/lib/use-view-as";
 import { useAdminBooking } from "@/lib/queries";
 import type { AdminBookingDetail } from "@/lib/types";
 import { colors, radius, space } from "@/theme/tokens";
@@ -53,6 +55,7 @@ export default function AdminBookingScreen() {
 
 function Detail({ b, onWeb }: { b: AdminBookingDetail; onWeb: () => void }) {
   const { t } = useTranslation();
+  const viewAs = useViewAs();
   const [now] = useState(() => Date.now());
   const lateDays = b.status === "CHECKED_IN" ? Math.floor((now - new Date(b.checkOutTime).getTime()) / DAY) : 0;
   const disputeOpen = b.disputeStatus === "OPEN" || b.disputeStatus === "IN_REVIEW";
@@ -81,7 +84,12 @@ function Detail({ b, onWeb }: { b: AdminBookingDetail; onWeb: () => void }) {
           </View>
           <View style={styles.actions}>
             {b.guest.phone ? (
-              <Button variant="secondary" style={{ flex: 1 }} title={t("admin.call")} onPress={() => open(`tel:${b.guest.phone}`)} />
+              <Button variant="secondary" style={{ flex: 1 }} title={t("admin.call")} onPress={() => open(telUrl(b.guest.phone, b.guest.whatsapp))} />
+            ) : null}
+            {b.guest.whatsapp ? (
+              <IconButton label="WhatsApp" onPress={() => open(waUrl(b.guest.whatsapp ?? ""))}>
+                <MessageCircle size={18} color={colors.ink} />
+              </IconButton>
             ) : null}
             {b.guest.email ? (
               <Button
@@ -92,6 +100,15 @@ function Detail({ b, onWeb }: { b: AdminBookingDetail; onWeb: () => void }) {
               />
             ) : null}
           </View>
+          {b.guest.id ? (
+            <Button
+              variant="secondary"
+              title={t("admin.impersonate")}
+              loading={viewAs.pendingId === b.guest.id}
+              disabled={viewAs.pendingId !== undefined}
+              onPress={() => viewAs.confirmViewAs(b.guest.id ?? "", b.guest.name || b.guest.email || b.guest.phone)}
+            />
+          ) : null}
         </Card>
       </Block>
 
@@ -109,12 +126,29 @@ function Detail({ b, onWeb }: { b: AdminBookingDetail; onWeb: () => void }) {
           </View>
           <View style={styles.actions}>
             {b.shop.phone ? (
-              <Button variant="secondary" style={{ flex: 1 }} title={t("admin.callShop")} onPress={() => open(`tel:${b.shop.phone}`)} />
+              <Button variant="secondary" style={{ flex: 1 }} title={t("admin.callShop")} onPress={() => open(telUrl(b.shop.phone, b.shop.whatsapp))} />
+            ) : null}
+            {b.shop.whatsapp ? (
+              <IconButton label="WhatsApp" onPress={() => open(waUrl(b.shop.whatsapp ?? ""))}>
+                <MessageCircle size={18} color={colors.ink} />
+              </IconButton>
             ) : null}
             {directions ? (
               <Button variant="secondary" style={{ flex: 1 }} title={t("bookings.directions")} onPress={() => open(directions)} />
             ) : null}
           </View>
+          {b.shop.id ? (
+            <Button variant="secondary" title={t("admin.openShop")} onPress={() => router.push(`/admin/shop/${b.shop.id}`)} />
+          ) : null}
+          {b.shop.ownerId ? (
+            <Button
+              variant="secondary"
+              title={t("admin.impersonateOwner")}
+              loading={viewAs.pendingId === b.shop.ownerId}
+              disabled={viewAs.pendingId !== undefined}
+              onPress={() => viewAs.confirmViewAs(b.shop.ownerId ?? "", b.shop.ownerName || b.shop.name)}
+            />
+          ) : null}
         </Card>
       </Block>
 

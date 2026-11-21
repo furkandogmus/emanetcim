@@ -407,7 +407,7 @@
     "deleteConfirm": "Yes, delete",
     "errors": {
       "not_found": "Record not found; someone may have handled it already.",
-      "missing_coordinates": "The shop has no location; set it in the web panel first.",
+      "missing_coordinates": "The shop has no location. Enter it on the shop page, then you can approve.",
       "has_booking_history": "The shop has active bookings and cannot be rejected.",
       "invalid_action": "Invalid action.",
       "email_send_failed": "The email could not be sent; the reply was not saved. Try again shortly.",
@@ -417,7 +417,8 @@
       "invalid_data": "The value entered is invalid.",
       "cannot_impersonate_admin": "You cannot sign in as an administrator.",
       "user_banned": "You cannot sign in as a banned user.",
-      "not_allowed_while_impersonating": "This action is not available while viewing as a user."
+      "not_allowed_while_impersonating": "This action is not available while viewing as a user.",
+      "cannot_ban_admin": "An admin account can't be banned. Role changes are done on the web panel with two admin approvals."
     },
     "deleteMessage": "Delete message",
     "replyLabel": "Reply by email",
@@ -609,7 +610,16 @@
     "impersonate": "Sign in as this user",
     "impersonateTitle": "Sign in as {{name}}?",
     "impersonateBody": "For 30 minutes the app switches to this user's panel and every change you make is logged. The account cannot be deleted. You can exit any time from the bar at the top.",
-    "impersonateConfirm": "Sign in"
+    "impersonateConfirm": "Sign in",
+    "location": "Location",
+    "latitude": "Latitude",
+    "longitude": "Longitude",
+    "locationHint": "Long-press the shop on a map and copy the coordinates. Example: 41.0082 and 28.9784.",
+    "fixLocation": "Enter location",
+    "banShopsNote": "This person owns {{count}} shop(s). Banning does not close the shops; if needed, turn off \"Open to guests\" on the shop page.",
+    "userBookingsOpen": "See their bookings",
+    "openShop": "Open shop page",
+    "impersonateOwner": "View as the shop owner"
   },
   "scan": {
     "open": "Scan QR",
