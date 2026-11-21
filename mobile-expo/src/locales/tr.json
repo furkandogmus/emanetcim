@@ -119,6 +119,8 @@
     "useLocation": "Konumumu kullan",
     "locating": "Konum alınıyor…",
     "locationDenied": "Konum izni verilmedi. Listeden bir şehir seçebilirsin.",
+    "locationBlocked": "Konum izni kapalı. Ayarlardan izin verebilir ya da listeden şehir seçebilirsin.",
+    "openSettings": "Ayarlardan izin ver",
     "popular": "Popüler şehirler",
     "whenTitle": "Ne zaman lazım?",
     "whenHint": "Aynı gün için tarihe bir kez dokun. Birkaç gün için başlangıç ve bitiş gününü seç.",
