@@ -55,9 +55,8 @@ export default function ProfileEditScreen() {
   const [passwordBusy, setPasswordBusy] = useState(false);
   const [passwordError, setPasswordError] = useState<string | null>(null);
   const [passwordDone, setPasswordDone] = useState(false);
-  // Bu hesapta sifre var mi bilinmiyor (DTO tasimiyor): mevcut sifre alani istege bagli
-  // gosterilir, sunucu sifreliyse zorunlu kilar (`current_password_required`).
-  const [needsCurrent, setNeedsCurrent] = useState(false);
+  // Sifresi olan hesap mevcut sifreyi girmeden kaydedemez; baslangic DTO'daki `hasPassword`.
+  const [needsCurrent, setNeedsCurrent] = useState(user?.hasPassword ?? false);
   if (!user) return null;
 
   /** Fotograf formdan bagimsiz, secilir secilmez yuklenir: "Kaydet"i beklemez. */
