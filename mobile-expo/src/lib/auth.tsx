@@ -306,7 +306,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           if (now.status !== "signedIn" || isImpersonating()) return;
           if (now.user.id !== startedFor || user.id !== startedFor) return;
           void rememberUser(user);
-          const prev = stateRef.current.user;
+          const prev = now.user;
           if (JSON.stringify({ ...prev, avatarUrl: null }) !== JSON.stringify({ ...user, avatarUrl: null })) {
             update({ status: "signedIn", user });
           }
