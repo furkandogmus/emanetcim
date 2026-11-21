@@ -292,14 +292,15 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const signInWithGoogle = useCallback(async () => {
     const idToken = await pickGoogleIdToken();
     if (!idToken) return null;
-    return startSession({ idToken }, "/auth/google");
+    // Giris ekraninda Kullanim Sartlari + Gizlilik cumlesi gosteriliyor: yeni hesapta sunucu kabulu kaydeder.
+    return startSession({ idToken, acceptedLegal: true }, "/auth/google");
   }, [startSession]);
 
   // Ayni oturum govdesi (`auth/apple`); ad alanlari yalnizca ilk giriste dolu gelir.
   const signInWithApple = useCallback(async () => {
     const cred = await pickAppleCredential();
     if (!cred) return null;
-    const body: Record<string, string> = { identityToken: cred.identityToken };
+    const body: Record<string, string | boolean> = { identityToken: cred.identityToken, acceptedLegal: true };
     if (cred.givenName) body.givenName = cred.givenName;
     if (cred.familyName) body.familyName = cred.familyName;
     return startSession(body, "/auth/apple");
