@@ -1,13 +1,16 @@
 import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
 import { partnerProfileService } from "@/services/PartnerProfileService";
-import { requireMobileUser, requireRole } from "@/lib/mobile-auth";
+import { forbidWhileImpersonating, requireMobileUser, requireRole } from "@/lib/mobile-auth";
 
 export async function PUT(req: NextRequest) {
   const auth = await requireMobileUser(req);
   if ("error" in auth) return auth.error;
   const roleErr = requireRole(auth.user, ["PARTNER"]);
   if (roleErr) return roleErr;
+  // Telefon giris kimligi: yonetici goruntuleme oturumunda degistirilemez.
+  const blocked = forbidWhileImpersonating(auth.user);
+  if (blocked) return blocked;
 
   const body = await req.json().catch(() => null);
   const phone = body && typeof body === "object" ? (body as { phone?: unknown }).phone : undefined;

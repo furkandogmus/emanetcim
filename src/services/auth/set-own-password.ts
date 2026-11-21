@@ -1,4 +1,5 @@
 import prisma from "@/lib/db";
+import { writeAuditLog } from "@/lib/audit-log";
 import {
   hashPassword,
   verifyPassword,
@@ -30,9 +31,11 @@ export async function setOwnPassword(params: {
   userId: string;
   currentPassword?: string;
   newPassword: string;
-  impersonating?: boolean;
+  /** Goruntuleme oturumunu baslatan yoneticinin id'si; doluysa sifre islemi denetim kaydina yazilir. */
+  impersonatedBy?: string;
 }): Promise<SetOwnPasswordResult> {
-  const { userId, currentPassword, newPassword, impersonating = false } = params;
+  const { userId, currentPassword, newPassword, impersonatedBy } = params;
+  const impersonating = impersonatedBy !== undefined;
   if (
     typeof newPassword !== "string" ||
     newPassword.trim().length < MIN_PASSWORD_LENGTH ||
@@ -57,11 +60,23 @@ export async function setOwnPassword(params: {
   }
 
   const passwordHash = await hashPassword(newPassword);
-  const rotate = !impersonating && user.passwordHash !== null;
+  const hadPassword = user.passwordHash !== null;
+  const rotate = !impersonating && hadPassword;
   const updated = await prisma.user.update({
     where: { id: user.id },
     data: rotate ? { passwordHash, tokenVersion: { increment: 1 } } : { passwordHash },
     select: { tokenVersion: true },
   });
+  if (impersonatedBy) {
+    // Destek kullanim senaryosu icin izin var ama iz birakir: kimin, kimin sifresini, ne zaman.
+    writeAuditLog({
+      actorUserId: impersonatedBy,
+      actorRole: "ADMIN",
+      action: "admin.impersonate.password_set",
+      entityType: "User",
+      entityId: user.id,
+      metadata: { hadPassword },
+    });
+  }
   return { ok: true, tokenVersion: updated.tokenVersion, rotated: rotate };
 }
