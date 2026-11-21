@@ -1,10 +1,10 @@
-import { useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { AppState, Linking, Pressable, StyleSheet, View } from "react-native";
 import * as Haptics from "expo-haptics";
 import { Flashlight, FlashlightOff } from "lucide-react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { CameraView, useCameraPermissions } from "expo-camera";
-import { router, useIsFocused } from "expo-router";
+import { router, useFocusEffect, useIsFocused } from "expo-router";
 import { useTranslation } from "react-i18next";
 
 import { LuggageTag } from "@/components/Illustrations";
@@ -41,12 +41,15 @@ export default function PartnerScanScreen() {
   const [message, setMessage] = useState<{ tone: "danger" | "brand"; body: string } | null>(null);
   const [torch, setTorch] = useState(false);
   // Sekmeye her gelisde eski hata/mesaj ve fener sifirlansin: eski kirmizi banner hala gecerli sanilmasin.
-  useEffect(() => {
-    if (!focused) {
-      setMessage(null);
-      setTorch(false);
-    }
-  }, [focused]);
+  useFocusEffect(
+    useCallback(
+      () => () => {
+        setMessage(null);
+        setTorch(false);
+      },
+      [],
+    ),
+  );
   // Kamera ayni kodu saniyede onlarca kez okur; tek istek gitsin.
   const busy = useRef(false);
 
