@@ -16,7 +16,6 @@ import type { AdminBookingDetail } from "@/lib/types";
 import { colors, radius, space } from "@/theme/tokens";
 
 const DAY = 24 * 60 * 60 * 1000;
-const OPEN = ["PENDING", "WAITING_APPROVAL", "APPROVED", "PAID", "CHECKED_IN"];
 
 const open = (url: string) => void Linking.openURL(url).catch(() => undefined);
 
@@ -55,7 +54,7 @@ export default function AdminBookingScreen() {
 function Detail({ b, onWeb }: { b: AdminBookingDetail; onWeb: () => void }) {
   const { t } = useTranslation();
   const [now] = useState(() => Date.now());
-  const lateDays = OPEN.includes(b.status) ? Math.floor((now - new Date(b.checkOutTime).getTime()) / DAY) : 0;
+  const lateDays = b.status === "CHECKED_IN" ? Math.floor((now - new Date(b.checkOutTime).getTime()) / DAY) : 0;
   const disputeOpen = b.disputeStatus === "OPEN" || b.disputeStatus === "IN_REVIEW";
   const directions =
     b.shop.latitude != null && b.shop.longitude != null

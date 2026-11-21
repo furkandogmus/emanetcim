@@ -14,7 +14,7 @@ import { useAdminBookingCounts, useAdminBookings } from "@/lib/queries";
 import type { AdminBookingFilter, AdminBookingRow } from "@/lib/types";
 import { colors, fonts, radius, space } from "@/theme/tokens";
 
-const FILTERS: AdminBookingFilter[] = ["overdue", "inStorage", "arrivals", "pickups", "upcoming", "all"];
+const FILTERS: AdminBookingFilter[] = ["overdue", "inStorage", "arrivals", "pickups", "upcoming", "noShow", "all"];
 const DAY = 24 * 60 * 60 * 1000;
 
 /**
@@ -118,8 +118,8 @@ const Row = memo(function Row({
   last: boolean;
 }) {
   const { t } = useTranslation();
-  const open = ["PENDING", "WAITING_APPROVAL", "APPROVED", "PAID", "CHECKED_IN"].includes(b.status);
-  const lateMs = open ? now - new Date(b.checkOutTime).getTime() : 0;
+  // Kirmizi uyari yalnizca valizi dukkanda olanlara: gelmeyenler (gelmedi) sessiz.
+  const lateMs = b.status === "CHECKED_IN" ? now - new Date(b.checkOutTime).getTime() : 0;
   const lateDays = Math.floor(lateMs / DAY);
 
   return (
@@ -149,7 +149,7 @@ const Row = memo(function Row({
         <AppText variant="caption" style={{ fontSize: 13 }}>
           {formatDayTime(b.checkInTime)}
         </AppText>
-        {/* "Gecikmis" filtresi alis saati gecen her kaydi sayar; bir gunden kisa gecikme de etiketsiz kalmasin. */}
+        {/* Bir gunden kisa gecikme de etiketsiz kalmasin. */}
         {lateMs > 0 ? (
           <AppText variant="label" style={{ color: colors.danger, fontSize: 12 }}>
             {lateDays >= 1 ? t("admin.lateDays", { count: lateDays }) : t("admin.lateToday")}
