@@ -171,7 +171,7 @@ describe("ShopService", () => {
       expect(sonuc).toEqual({ ok: true });
       expect(mockPrisma.shop.update).toHaveBeenCalledWith({
         where: { id: "shop-1" },
-        data: { isActive: true },
+        data: { isActive: true, approvedAt: expect.any(Date) },
       });
       expect(mockPrisma.user.updateMany).toHaveBeenCalled();
     });

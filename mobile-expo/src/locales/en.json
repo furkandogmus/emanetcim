@@ -408,7 +408,7 @@
     "errors": {
       "not_found": "Record not found; someone may have handled it already.",
       "missing_coordinates": "The shop has no location; set it in the web panel first.",
-      "has_active_bookings": "The shop has active bookings and cannot be rejected.",
+      "has_booking_history": "The shop has active bookings and cannot be rejected.",
       "invalid_action": "Invalid action.",
       "email_send_failed": "The email could not be sent; the reply was not saved. Try again shortly.",
       "too_many_requests": "Too many replies sent; please wait a bit.",

@@ -1,5 +1,6 @@
 import { OPERATING_SHOP_FILTER } from "@/lib/public-shop-filter";
 import prisma from "@/lib/db";
+import { PENDING_APPLICATION_WHERE } from "@/lib/pending-application";
 import { moneyToNumber } from "@/lib/money";
 import { EARNING_BOOKING_STATUSES } from "@/lib/platform-split";
 import { dayRangeInTimeZone, startOfDayInTimeZone } from "@/lib/timezone";
@@ -110,7 +111,7 @@ export class AdminOverviewService {
         WHERE status IN ('PENDING','WAITING_APPROVAL','APPROVED','PAID','CHECKED_IN')
           OR "createdAt" >= ${today.start}
       `,
-      prisma.shop.count({ where: { isActive: false } }),
+      prisma.shop.count({ where: PENDING_APPLICATION_WHERE }),
       prisma.contactMessage.count({ where: { isRead: false } }),
       prisma.dispute.count({ where: { status: { in: OPEN_DISPUTE_STATUSES } } }),
       prisma.booking.findMany({

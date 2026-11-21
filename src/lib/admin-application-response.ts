@@ -27,7 +27,7 @@ export async function applicationActionResponse(
     if (!result.ok) {
       return result.reason === "not_found"
         ? NextResponse.json({ error: "not_found" }, { status: 404 })
-        : NextResponse.json({ error: "has_active_bookings" }, { status: 409 });
+        : NextResponse.json({ error: "has_booking_history" }, { status: 409 });
     }
     return NextResponse.json({ success: true });
   }
