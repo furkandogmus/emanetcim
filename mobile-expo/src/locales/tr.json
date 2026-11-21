@@ -879,6 +879,11 @@
       "duplicate_dispute": "Bu rezervasyon için zaten bir bildirimin var; ekibimiz inceliyor.",
       "not_found": "Rezervasyon bulunamadı.",
       "not_owner": "Bu rezervasyon için bildirim yapamazsın."
+    },
+    "statusText": {
+      "reviewing": "Bildirimin alındı; ekibimiz inceliyor.",
+      "resolved": "Bildirimin sonuçlandı ve çözüldü olarak kapatıldı.",
+      "closed": "Bildirimin kapatıldı. Sorun sürüyorsa destekle iletişime geç."
     }
   },
   "bagRevision": {

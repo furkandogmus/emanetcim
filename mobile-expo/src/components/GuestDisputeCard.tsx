@@ -8,7 +8,13 @@ import { AppText, Banner, Button, Card, Chip } from "@/components/ui";
 import { Input } from "@/components/Field";
 import { ApiError, api } from "@/lib/api";
 import { errorMessage } from "@/lib/errors";
-import type { BookingDetail, CreateDisputeRequest, CreateDisputeResponse, DisputeReason } from "@/lib/types";
+import type {
+  BookingDetail,
+  CreateDisputeRequest,
+  CreateDisputeResponse,
+  DisputeReason,
+} from "@/lib/types";
+import { disputeStatusView } from "@/lib/dispute-view";
 import { colors, space } from "@/theme/tokens";
 
 /** `DISPUTABLE_STATUSES` (DisputeService.ts): valiz dukkana teslim edilmis olmali. */
@@ -19,9 +25,8 @@ const MIN_DESC = 10;
 const MAX_DESC = 2000;
 
 /**
- * Hasar / kayip / diger sikayeti. Rezervasyon basina tek acik kayit
- * (`duplicate_dispute`); DTO bunu tasimadigi icin tekrar deneme sunucu
- * cevabiyla bilgi olarak kapanir.
+ * Hasar / kayip / diger sikayeti. Rezervasyon basina tek kayit
+ * (`duplicate_dispute`); durumu DTO'dan (`disputeStatus`) okunur.
  */
 export function GuestDisputeCard({ booking, onOpen }: { booking: BookingDetail; onOpen?: () => void }) {
   const { t } = useTranslation();
@@ -51,8 +56,10 @@ export function GuestDisputeCard({ booking, onOpen }: { booking: BookingDetail; 
 
   if (!DISPUTABLE.has(booking.status)) return null;
 
-  if (done || booking.hasDispute) {
-    return <Banner tone="success" body={t(done === "sent" ? "dispute.sent" : "dispute.errors.duplicate_dispute")} />;
+  if (done === "sent") return <Banner tone="success" body={t("dispute.sent")} />;
+  if (done === "duplicate" || booking.hasDispute) {
+    const view = disputeStatusView(booking.disputeStatus);
+    return <Banner tone={view.tone} body={t(view.key)} />;
   }
 
   if (!open) {

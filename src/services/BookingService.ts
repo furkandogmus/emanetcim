@@ -243,7 +243,7 @@ export class BookingService implements IBookingService {
         seals: { orderBy: { bagIndex: "asc" } },
         // Mobil detay "zaten degerlendirdi / bildirdi" bilgisini buradan alir.
         review: { select: { id: true } },
-        dispute: { select: { id: true } },
+        dispute: { select: { id: true, status: true } },
       },
     });
   }

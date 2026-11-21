@@ -879,6 +879,11 @@
       "duplicate_dispute": "Du hast für diese Buchung bereits ein Problem gemeldet; unser Team prüft es.",
       "not_found": "Buchung nicht gefunden.",
       "not_owner": "Du kannst für diese Buchung kein Problem melden."
+    },
+    "statusText": {
+      "reviewing": "Deine Meldung ist eingegangen; unser Team prüft sie.",
+      "resolved": "Deine Meldung wurde geprüft und als gelöst markiert.",
+      "closed": "Deine Meldung wurde geschlossen. Wenn das Problem weiter besteht, wende dich an den Support."
     }
   },
   "bagRevision": {
