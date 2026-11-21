@@ -16,7 +16,9 @@
     "clear": "Löschen",
     "scrollBack": "Zurückblättern",
     "scrollForward": "Weiterblättern",
-    "goHome": "Zur Startseite"
+    "goHome": "Zur Startseite",
+    "notFoundTitle": "Diese Seite lässt sich nicht öffnen",
+    "notFoundBody": "Der Link lässt sich mit diesem Konto nicht öffnen oder existiert nicht mehr. Du kannst zum Startbildschirm zurückkehren."
   },
   "auth": {
     "title": "Anmelden",

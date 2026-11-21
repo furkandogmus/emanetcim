@@ -16,7 +16,9 @@
     "clear": "Clear",
     "scrollBack": "Scroll back",
     "scrollForward": "Scroll forward",
-    "goHome": "Go home"
+    "goHome": "Go home",
+    "notFoundTitle": "This page can't be opened",
+    "notFoundBody": "The link doesn't open with this account, or it no longer exists. You can go back to the home screen."
   },
   "auth": {
     "title": "Sign in",
