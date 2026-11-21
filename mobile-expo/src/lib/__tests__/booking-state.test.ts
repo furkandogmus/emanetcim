@@ -18,6 +18,12 @@ describe("isBookingExpired", () => {
     expect(isBookingExpired({ status: "APPROVED", checkOutTime: FUTURE }, NOW)).toBe(false);
   });
 
+  it("bekleyen ve onay bekleyen kayit da alma saati gecince dolmustur", () => {
+    expect(isBookingExpired({ status: "PENDING", checkOutTime: PAST }, NOW)).toBe(true);
+    expect(isBookingExpired({ status: "WAITING_APPROVAL", checkOutTime: PAST }, NOW)).toBe(true);
+    expect(isBookingExpired({ status: "WAITING_APPROVAL", checkOutTime: FUTURE }, NOW)).toBe(false);
+  });
+
   it("valiz dukkandaysa, iptal ya da tamamlanmissa dolmus degildir", () => {
     for (const status of ["CHECKED_IN", "CANCELLED", "CHECKED_OUT"]) {
       expect(isBookingExpired({ status, checkOutTime: PAST }, NOW)).toBe(false);

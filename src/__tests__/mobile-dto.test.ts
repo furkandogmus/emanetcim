@@ -149,6 +149,12 @@ describe("suresi dolan rezervasyon (expired)", () => {
     expect(isBookingExpired({ status: "PAID", checkOutTime: past }, now)).toBe(true);
   });
 
+  it("bekleyen ve onay bekleyen kayit da alma saati gecince dolmustur", () => {
+    expect(isBookingExpired({ status: "PENDING", checkOutTime: past }, now)).toBe(true);
+    expect(isBookingExpired({ status: "WAITING_APPROVAL", checkOutTime: past }, now)).toBe(true);
+    expect(isBookingExpired({ status: "WAITING_APPROVAL", checkOutTime: future }, now)).toBe(false);
+  });
+
   it("alma saati gelmediyse dolmamistir", () => {
     expect(isBookingExpired({ status: "APPROVED", checkOutTime: future }, now)).toBe(false);
   });

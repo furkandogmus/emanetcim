@@ -1,10 +1,10 @@
 /**
  * Misafir rezervasyonunun "suresi doldu" durumu. Karar SUNUCUDA (`expired`,
- * `../src/lib/mobile-dto.ts` `isBookingExpired`): onayli/odenmis, valiz hic
+ * `../src/lib/mobile-dto.ts` `isBookingExpired`): bekleyen/onayli/odenmis, valiz hic
  * birakilmamis ve alma saati gecmis. Alan yoksa (eski sunucu, cihazdaki eski
  * bilet) ayni kural yerel saatle uygulanir.
  */
-const NEVER_DROPPED = new Set(["APPROVED", "PAID"]);
+const NEVER_DROPPED = new Set(["PENDING", "WAITING_APPROVAL", "APPROVED", "PAID"]);
 
 export function isBookingExpired(
   b: { status: string; checkOutTime: string; expired?: boolean },

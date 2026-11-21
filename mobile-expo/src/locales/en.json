@@ -296,7 +296,7 @@
     "cancelledTitle": "Booking cancelled",
     "cancelledRefund": "The full amount you paid will be refunded.",
     "cancelledNoCharge": "You haven't been charged anything.",
-    "cancelledRefundOnsite": "Booking cancelled. If you already paid at the shop, ask the shop about a refund.",
+    "cancelledRefundOnsite": "If you already paid at the shop, ask the shop about a refund.",
     "expiredTitle": "Expired",
     "expiredBody": "The pick-up time has passed and your bags were not dropped off. This booking can no longer be used.",
     "rebook": "Book again",

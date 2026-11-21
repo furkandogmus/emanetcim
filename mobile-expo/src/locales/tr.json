@@ -296,7 +296,7 @@
     "cancelledTitle": "Rezervasyon iptal edildi",
     "cancelledRefund": "Ödediğin tutarın tamamı iade edilecek.",
     "cancelledNoCharge": "Senden herhangi bir ücret alınmadı.",
-    "cancelledRefundOnsite": "Rezervasyon iptal edildi. Dükkanda ödeme yaptıysan iade için dükkanla görüş.",
+    "cancelledRefundOnsite": "Dükkanda ödeme yaptıysan iade için dükkanla görüş.",
     "expiredTitle": "Süresi doldu",
     "expiredBody": "Alma saati geçti ve valizin dükkana bırakılmadı. Bu rezervasyon artık kullanılamaz.",
     "rebook": "Yeniden rezervasyon yap",

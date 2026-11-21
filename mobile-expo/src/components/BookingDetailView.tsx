@@ -194,7 +194,7 @@ export function BookingDetailView({ id, mode }: { id: string; mode: "guest" | "p
   function rebook() {
     const w = defaultWindow();
     search.setBags({ s: b.bagCountS, m: b.bagCountM, xl: b.bagCountXl });
-    search.setWindow(w.checkIn, w.checkOut);
+    search.setWindow(w.checkIn, w.checkOut, w.rolled);
     router.push(`/shop/${b.shopId}`);
   }
 

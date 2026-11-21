@@ -57,10 +57,10 @@ type BookingSummarySource = {
 };
 
 /** Valiz hic birakilmamis durumlar: alma saati gecince rezervasyon bosa dusmustur. */
-const NEVER_DROPPED_STATUSES: readonly string[] = ["APPROVED", "PAID"];
+const NEVER_DROPPED_STATUSES: readonly string[] = ["PENDING", "WAITING_APPROVAL", "APPROVED", "PAID"];
 
 /**
- * Suresi dolmus (gelinmemis) rezervasyon: onayli/odenmis, valiz hic teslim
+ * Suresi dolmus (gelinmemis) rezervasyon: bekleyen/onayli/odenmis, valiz hic teslim
  * edilmemis ve alma saati gecmis. Kural SUNUCUDA: web ve mobil ayni cevabi gorur,
  * cihaz saati yanlis olan turist bos bir QR gostermez. Durum bilerek degismez
  * (sure asimi taramasi yalnizca isaretler), bu yuzden bu bir turetilmis alandir.
