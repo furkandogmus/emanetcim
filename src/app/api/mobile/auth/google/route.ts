@@ -12,10 +12,11 @@ import { analyticsService } from "@/services/AnalyticsService";
 import { resolveServerSessionId } from "@/lib/analytics-server";
 import logger from "@/lib/logger";
 import { toMobileUser } from "@/lib/mobile-dto";
+import { recordMobileLegalAcceptance } from "@/services/auth/legal-acceptance";
 
 const GOOGLE_JWKS = createRemoteJWKSet(new URL("https://www.googleapis.com/oauth2/v3/certs"));
 
-const schema = z.object({ idToken: z.string() });
+const schema = z.object({ idToken: z.string(), acceptedLegal: z.boolean().optional() });
 
 export async function POST(req: NextRequest) {
   const body = await req.json().catch(() => null);
@@ -62,6 +63,12 @@ export async function POST(req: NextRequest) {
         data: { email, name, image: picture, role: "GUEST", emailVerified: new Date() },
       });
       const newUserId = user.id;
+      if (parsed.data.acceptedLegal === true) {
+        // Giris ekraninda kabul cumlesi gosteriliyor (kodla girisle ayni): kayit yazilamazsa giris dusmez.
+        await recordMobileLegalAcceptance(newUserId, ip).catch((err) =>
+          logger.error({ err, userId: newUserId }, "mobile_legal_acceptance_failed"),
+        );
+      }
       void notificationService
         .notifyAdminsForNewUser({
           name: user.name,
