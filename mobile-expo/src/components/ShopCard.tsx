@@ -7,6 +7,7 @@ import type { TFunction } from "i18next";
 import { AppText } from "@/components/ui";
 import { formatDay, formatDistance, formatMoney, formatRating } from "@/lib/format";
 import { nextOpenInstant, openDayKind } from "@/lib/next-open";
+import { shopPriceA11y } from "@/lib/shop-label";
 import { RemoteImage } from "@/components/RemoteImage";
 import { resolveImage } from "@/lib/images";
 import type { NearbyShop } from "@/lib/types";
@@ -77,6 +78,7 @@ export const ShopCard = memo(function ShopCard({
     shop.isVerified && !shop.isPrelaunch ? t("map.verified") : null,
     shop.rating ? formatRating(shop.rating) : null,
     ...facts,
+    shopPriceA11y(shop, t),
     notice,
   ]
     .filter(Boolean)
