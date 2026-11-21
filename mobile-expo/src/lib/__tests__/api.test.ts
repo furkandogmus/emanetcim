@@ -100,7 +100,6 @@ describe("api token yenileme", () => {
     const { loadTokens } = freshApi();
     expect(await loadTokens()).toEqual({ accessToken: "eski-a", refreshToken: "eski-r" });
     expect(JSON.parse((await SecureStore.getItemAsync("bp.session"))!)).toEqual({ accessToken: "eski-a", refreshToken: "eski-r" });
-    expect(await SecureStore.getItemAsync("bp.accessToken")).toBeNull();
     const again = freshApi();
     expect(await again.loadTokens()).toEqual({ accessToken: "eski-a", refreshToken: "eski-r" });
   });
@@ -141,6 +140,18 @@ describe("api token yenileme", () => {
     await expect(api("/me")).rejects.toMatchObject({ code: "network" });
     expect(expired).not.toHaveBeenCalled();
     expect(await SecureStore.getItemAsync("bp.session")).not.toBeNull();
+  });
+
+  it("eski ayri kayitlar her yazimda guncellenir (OTA geri alinirsa eski paket onlari okur)", async () => {
+    const SecureStore = jest.requireMock<typeof import("expo-secure-store")>("expo-secure-store");
+    const { saveTokens, clearTokens } = freshApi();
+    await saveTokens("a-2", "r-2");
+    expect(await SecureStore.getItemAsync("bp.accessToken")).toBe("a-2");
+    expect(await SecureStore.getItemAsync("bp.refreshToken")).toBe("r-2");
+    await clearTokens();
+    expect(await SecureStore.getItemAsync("bp.accessToken")).toBeNull();
+    expect(await SecureStore.getItemAsync("bp.refreshToken")).toBeNull();
+    expect(await SecureStore.getItemAsync("bp.session")).toBeNull();
   });
 
   it("acik bearer: o token'la gider, 401'de yenileme ve oturum sonu calismaz", async () => {
