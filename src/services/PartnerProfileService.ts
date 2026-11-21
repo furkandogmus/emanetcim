@@ -52,7 +52,13 @@ class PartnerProfileService {
       where: { id: userId },
       select: { email: true, phone: true, _count: { select: { accounts: true } } },
     });
-    if (current && current.phone && normalized !== current.phone) {
+    /*
+      Eski satirlar "05..." ya da "+905..." biciminde durabilir: ham degerle
+      kiyaslanirsa ayni numarayi normal biciminde yeniden kaydetmek "degisiklik"
+      sayilir ve giris numarasi korumasina takilir; satir hic normallesemez.
+    */
+    const storedPhone = current?.phone ? (normalizeTrGsm10(current.phone) ?? current.phone) : null;
+    if (current && storedPhone && normalized !== storedPhone) {
       const hasOtherLogin = !!current.email || current._count.accounts > 0;
       if (!hasOtherLogin) return { ok: false, reason: "login_phone_locked" };
     }

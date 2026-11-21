@@ -18,6 +18,19 @@ beforeEach(() => {
  * ham değeri doğrudan yazıyordu ve kuralın hiçbirini uygulamıyordu.
  */
 describe("esnaf telefon güncelleme", () => {
+  it("telefon-only kullanicida eski \"+90...\" kaydi ayni numarayla normal bicimde yazilabilir", async () => {
+    mockPrisma.user.findUnique.mockResolvedValue({ email: null, phone: "+905321234567", _count: { accounts: 0 } });
+    const res = await partnerProfileService.updatePhone("u1", "0532 123 45 67");
+    expect(res).toEqual({ ok: true, phone: "5321234567" });
+    expect(mockPrisma.user.update).toHaveBeenCalledWith({ where: { id: "u1" }, data: { phone: "5321234567" } });
+  });
+
+  it("eski bicimli kayitta FARKLI numara hala kilitli", async () => {
+    mockPrisma.user.findUnique.mockResolvedValue({ email: null, phone: "05321234567", _count: { accounts: 0 } });
+    const res = await partnerProfileService.updatePhone("u1", "5559998877");
+    expect(res).toEqual({ ok: false, reason: "login_phone_locked" });
+  });
+
   it("TR yerel yazımlarını TEK BİÇİME indirir", async () => {
     /*
       Asil mesele bu. `User.phone` @unique ve `auth.config.ts` telefonla
