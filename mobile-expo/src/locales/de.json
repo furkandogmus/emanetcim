@@ -15,7 +15,8 @@
     "ok": "OK",
     "clear": "Löschen",
     "scrollBack": "Zurückblättern",
-    "scrollForward": "Weiterblättern"
+    "scrollForward": "Weiterblättern",
+    "goHome": "Zur Startseite"
   },
   "auth": {
     "title": "Anmelden",
@@ -60,7 +61,7 @@
     "bookingsPromptTitle": "Hier sind deine Buchungen",
     "bookingsPromptBody": "Melde dich an, um deine Buchungen und deinen QR-Code zu sehen.",
     "profilePromptTitle": "Dein Konto",
-    "profilePromptBody": "Melde dich an, um zu buchen und deinen Einladungscode zu teilen. Die Sprache kannst du oben auch ohne Anmeldung ändern.",
+    "profilePromptBody": "Melde dich an, um zu buchen und deinen Einladungscode zu teilen.",
     "modeLabel": "Anmeldeart",
     "modeEmail": "E-Mail",
     "modePhone": "Telefon",
@@ -178,7 +179,8 @@
       "invalid_dates": "Die gewählten Daten sind nicht verfügbar. Ändere die Daten.",
       "search_unavailable": "Die Suche ist gerade nicht verfügbar. Versuche es gleich noch einmal.",
       "too_many_requests": "Zu viele Versuche. Warte kurz und versuche es erneut."
-    }
+    },
+    "sheetHandle": "Shopliste, zum Öffnen oder Schließen ziehen"
   },
   "shop": {
     "open247": "24/7 geöffnet",
@@ -883,7 +885,7 @@
     "open": "Gepäckzahl korrigieren",
     "title": "Gepäckzahl korrigieren",
     "hint": "Wenn der Gast mit einer anderen Anzahl an Gepäckstücken gekommen ist, gib die tatsächliche Anzahl ein. Der neue Gesamtpreis wird für dich berechnet.",
-    "hintCheckedIn": "Das Gepäck ist angenommen. Bei versiegeltem Gepäck kann die Anzahl nicht erhöht werden, und eine Korrektur, die den Preis erhöht, braucht die Zustimmung des Gastes.",
+    "hintCheckedIn": "Das Gepäck ist im Laden. Eine Korrektur, die den Preis erhöht, braucht die Zustimmung des Gastes.",
     "delta": "{{from}} Gepäckstücke → {{to}} Gepäckstücke",
     "atLeastOne": "Es muss mindestens ein Gepäckstück geben.",
     "apply": "Anwenden",
@@ -1027,8 +1029,8 @@
     "remove": "Entfernen",
     "removeTitle": "Diesen freien Tag entfernen?",
     "conflictTitle": "Die folgenden Buchungen liegen an diesen Tagen:",
-    "conflictDropoff": "Abgabe",
-    "conflictPickup": "Abholung",
+    "conflictDropoff": "Gast gibt ab",
+    "conflictPickup": "Gast holt ab",
     "conflictBags": "Gepäck im Laden",
     "errors": {
       "schedule_conflict": "Diese Änderung wurde nicht gespeichert.",
@@ -1101,5 +1103,12 @@
     "exitLabel": "Nutzeransicht beenden und zum Admin-Konto zurückkehren",
     "endedTitle": "Nutzeransicht beendet",
     "endedBody": "Die Zeit ist abgelaufen oder der Zugriff wurde beendet; du bist wieder im Admin-Konto."
+  },
+  "update": {
+    "requiredTitle": "Update erforderlich",
+    "requiredBody": "Diese Version wird nicht mehr unterstützt. Aktualisiere BagajPark bei Google Play, um fortzufahren.",
+    "requiredCta": "Google Play öffnen",
+    "readyBody": "Eine neue Version ist bereit.",
+    "readyCta": "Neu laden"
   }
 }

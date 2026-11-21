@@ -3,7 +3,6 @@ import { loadScheduleParts } from "@/services/ShopScheduleService";
 import { toDatetimeLocalValueInTimeZone } from "@/lib/datetime-local";
 import { couponService } from "@/services/CouponService";
 import { rateLimit } from "@/lib/rate-limit";
-import { clientIp } from "@/lib/internal-api-guard";
 import { referralService } from "@/services/ReferralService";
 import { resolveRequestLocale } from "@/lib/request-locale";
 import { NextResponse } from "next/server";
@@ -115,13 +114,10 @@ export async function POST(req: NextRequest) {
     if (existing) return bookingResponse(existing);
   }
 
-  // Web `createBookingAction` ile ayni sinirlar: mobil uc sinirsizdi ve tek hesapla
-  // kapasite doldurulabiliyordu.
-  const ip = clientIp(req);
-  if (
-    !(await rateLimit(`booking_create:${ip}`, 10, 10 * 60 * 1000)) ||
-    !(await rateLimit(`booking_create_user:${auth.user.id}`, 5, 5 * 60 * 1000))
-  ) {
+  // Mobil uc sinirsizdi ve tek hesapla kapasite doldurulabiliyordu. Uc oturumlu: sinir
+  // HESAP basina. IP kovasi kaldirildi, otel/havalimani wifi'sindeki ve operator NAT'indaki
+  // turistler ayni IP'yi paylasip birbirinin rezervasyonunu engelliyordu.
+  if (!(await rateLimit(`booking_create_user:${auth.user.id}`, 5, 5 * 60 * 1000))) {
     return NextResponse.json({ error: "too_many_requests" }, { status: 429 });
   }
 
