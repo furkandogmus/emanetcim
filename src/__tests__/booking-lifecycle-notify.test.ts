@@ -1,0 +1,120 @@
+import { describe, it, expect, vi, beforeEach } from "vitest";
+
+/**
+ * MISAFIR IPTALI VE DEGISIKLIGI SESSIZ DEGIL; DEGISTIRME PLATFORM TATILINI DE KONTROL EDER.
+ *
+ * - Iptal/degisiklik yalnizca `bookingEvent` yaziyordu: esnaf iptali ancak liste
+ *   30 sn'de bir yenilenince goruyordu. Servis artik esnafa push, misafire iptal
+ *   onayi push'u gonderir (web ve mobil ayni yolu kullanir).
+ * - Esnafin "reddet"i `silent` gecer: misafir kendi bildirimini zaten aliyor.
+ * - Platform tatili kurali yalnizca web action'indaydi; mobil degistirme
+ *   rezervasyonu tatile tasiyabiliyordu.
+ */
+
+const m = vi.hoisted(() => ({
+  prisma: {
+    booking: { findUnique: vi.fn(), updateMany: vi.fn() },
+    paymentLog: { findFirst: vi.fn() },
+    reservationSlot: { deleteMany: vi.fn() },
+    $transaction: vi.fn(),
+  },
+  notifyPartner: vi.fn(),
+  pushGuestOnly: vi.fn(),
+  holiday: vi.fn(),
+}));
+
+vi.mock("@/lib/db", () => ({ default: m.prisma }));
+vi.mock("@/lib/logger", () => ({ default: { error: vi.fn(), warn: vi.fn(), info: vi.fn() } }));
+vi.mock("@/lib/tx-retry", () => ({ retryOnWriteConflict: (f: () => unknown) => f() }));
+vi.mock("@/services/SlotService", () => ({
+  reserveSlots: vi.fn(),
+  releaseSlots: vi.fn(),
+  SlotAvailabilityError: class extends Error {},
+}));
+vi.mock("@/lib/platform-settings", () => ({
+  getPricingRules: vi.fn().mockResolvedValue({ platformHolidayDates: ["2030-01-02"], maxStayDays: 30 }),
+}));
+vi.mock("@/services/ShopScheduleService", () => ({
+  findClosedStayDay: vi.fn().mockResolvedValue(null),
+  isClosedAtStayTimes: vi.fn().mockResolvedValue(false),
+}));
+vi.mock("@/lib/booking-server-price", () => ({
+  validateBookingStayWindow: () => true,
+  computeAuthoritativeCheckoutTotals: vi.fn(),
+  checkoutLineItems: vi.fn(),
+}));
+vi.mock("@/lib/booking-holidays", () => ({ bookingTouchesPlatformHoliday: m.holiday }));
+vi.mock("@/services/BookingEventService", () => ({
+  bookingEventService: { record: vi.fn().mockResolvedValue(undefined) },
+}));
+vi.mock("@/services/PaymentService", () => ({
+  paymentService: {
+    refund: vi.fn().mockResolvedValue({ ok: true }),
+    cancelIntent: vi.fn().mockResolvedValue(undefined),
+  },
+}));
+vi.mock("@/services/CouponService", () => ({ couponService: { releaseByCode: vi.fn() } }));
+vi.mock("@/services/NotificationService", () => ({
+  notificationService: { notifyPartnerBookingChange: m.notifyPartner, pushGuestOnly: m.pushGuestOnly },
+}));
+vi.mock("@/services/booking/create", () => ({ assertCapacityTx: vi.fn() }));
+
+import { cancelBooking, modifyBooking } from "@/services/booking/lifecycle";
+
+describe("cancelBooking bildirimleri", () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+    m.notifyPartner.mockResolvedValue(undefined);
+    m.prisma.booking.findUnique.mockResolvedValue({
+      id: "b1",
+      status: "APPROVED",
+      couponCode: null,
+      locale: "en",
+      reservationSlots: [],
+    });
+    m.prisma.paymentLog.findFirst.mockResolvedValue(null);
+    m.prisma.booking.updateMany.mockResolvedValue({ count: 1 });
+    m.prisma.$transaction.mockImplementation(async (f: (tx: unknown) => unknown) => f(m.prisma));
+  });
+
+  it("misafir iptali esnafa ve misafire bildirim gonderir", async () => {
+    const r = await cancelBooking("b1");
+    expect(r.ok).toBe(true);
+    expect(m.notifyPartner).toHaveBeenCalledWith({ bookingId: "b1", kind: "cancelled" });
+    expect(m.pushGuestOnly).toHaveBeenCalledWith("b1", "cancelled", "en");
+  });
+
+  it("silent iptal (esnafin reddi, toplu silme) bildirim gondermez", async () => {
+    const r = await cancelBooking("b1", { silent: true });
+    expect(r.ok).toBe(true);
+    expect(m.notifyPartner).not.toHaveBeenCalled();
+    expect(m.pushGuestOnly).not.toHaveBeenCalled();
+  });
+
+  it("basarisiz iptalde bildirim gitmez", async () => {
+    m.prisma.booking.updateMany.mockResolvedValue({ count: 0 });
+    await cancelBooking("b1");
+    expect(m.notifyPartner).not.toHaveBeenCalled();
+  });
+});
+
+describe("modifyBooking platform tatili", () => {
+  it("tatile denk gelen aralik PLATFORM_HOLIDAY ile reddedilir", async () => {
+    m.holiday.mockReturnValue(true);
+    m.prisma.booking.findUnique.mockResolvedValue({
+      id: "b1",
+      shopId: "s1",
+      guestId: "g1",
+      status: "APPROVED",
+      shop: {},
+    });
+    const r = await modifyBooking("b1", "g1", {
+      checkInTime: new Date("2030-01-01T10:00:00Z"),
+      checkOutTime: new Date("2030-01-03T10:00:00Z"),
+      bagCountS: 1,
+      bagCountM: 0,
+      bagCountXl: 0,
+    });
+    expect(r).toMatchObject({ ok: false, code: "PLATFORM_HOLIDAY" });
+  });
+});

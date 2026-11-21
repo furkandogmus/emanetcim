@@ -30,10 +30,10 @@ export async function PUT(req: NextRequest, { params }: { params: Promise<{ id: 
     return NextResponse.json({ error: "forbidden" }, { status: 403 });
   }
 
-  const body = await req.json();
+  const body = await req.json().catch(() => null);
   const parsed = modifySchema.safeParse(body);
   if (!parsed.success) {
-    return NextResponse.json({ error: "invalid_input", details: parsed.error.flatten() }, { status: 400 });
+    return NextResponse.json({ error: "invalid_input" }, { status: 400 });
   }
 
   const { checkInTime, checkOutTime, bagCountS, bagCountM, bagCountXl } = parsed.data;

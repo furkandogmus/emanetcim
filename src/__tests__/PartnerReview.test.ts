@@ -109,7 +109,7 @@ describe("rejectBooking", () => {
     const result = await rejectBooking("b1", OWNER, { locale: "tr" });
 
     expect(result).toEqual({ ok: true });
-    expect(mockCancelBooking).toHaveBeenCalledWith("b1");
+    expect(mockCancelBooking).toHaveBeenCalledWith("b1", { silent: true });
     expect(mockPrisma.booking.update).not.toHaveBeenCalled();
     expect(mockPrisma.booking.updateMany).not.toHaveBeenCalled();
   });
@@ -121,7 +121,7 @@ describe("rejectBooking", () => {
 
     mockPrisma.booking.findUnique.mockResolvedValue(booking("APPROVED"));
     expect(await rejectBooking("b1", ADMIN)).toEqual({ ok: true });
-    expect(mockCancelBooking).toHaveBeenCalledWith("b1");
+    expect(mockCancelBooking).toHaveBeenCalledWith("b1", { silent: true });
   });
 
   it("PAID / CHECKED_IN gibi durumlarda reddi engeller", async () => {
