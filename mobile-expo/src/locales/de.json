@@ -119,6 +119,8 @@
     "useLocation": "Meinen Standort verwenden",
     "locating": "Standort wird ermittelt…",
     "locationDenied": "Der Standortzugriff wurde abgelehnt. Wähle eine Stadt aus der Liste.",
+    "locationBlocked": "Der Standortzugriff ist ausgeschaltet. Erlaube ihn in den Einstellungen oder wähle eine Stadt aus der Liste.",
+    "openSettings": "In den Einstellungen erlauben",
     "popular": "Beliebte Städte",
     "whenTitle": "Wann brauchst du die Aufbewahrung?",
     "whenHint": "Tippe einmal auf ein Datum für denselben Tag. Für mehrere Tage wähle den ersten und den letzten Tag.",

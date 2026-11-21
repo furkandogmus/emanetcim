@@ -13,11 +13,12 @@ const MAX_AGE_MS = 10 * 60 * 1000;
  * (izin verildigi halde "izin reddedildi" yaziyordu, 2026-11-19 emulatorde goruldu).
  */
 export async function getDevicePosition(): Promise<
-  { ok: true; position: DevicePosition } | { ok: false; reason: LocationFailure }
+  | { ok: true; position: DevicePosition }
+  | { ok: false; reason: LocationFailure; /** false: izin kalici reddedildi, sistem penceresi bir daha acilmaz. */ canAskAgain: boolean }
 > {
   try {
     const perm = await Location.requestForegroundPermissionsAsync();
-    if (perm.status !== "granted") return { ok: false, reason: "denied" };
+    if (perm.status !== "granted") return { ok: false, reason: "denied", canAskAgain: perm.canAskAgain };
 
     const last = await Location.getLastKnownPositionAsync({ maxAge: MAX_AGE_MS });
     const pos =
@@ -26,9 +27,9 @@ export async function getDevicePosition(): Promise<
         Location.getCurrentPositionAsync({ accuracy: Location.Accuracy.Balanced }),
         new Promise<null>((resolve) => setTimeout(() => resolve(null), TIMEOUT_MS)),
       ]));
-    if (!pos) return { ok: false, reason: "unavailable" };
+    if (!pos) return { ok: false, reason: "unavailable", canAskAgain: true };
     return { ok: true, position: { latitude: pos.coords.latitude, longitude: pos.coords.longitude } };
   } catch {
-    return { ok: false, reason: "unavailable" };
+    return { ok: false, reason: "unavailable", canAskAgain: true };
   }
 }

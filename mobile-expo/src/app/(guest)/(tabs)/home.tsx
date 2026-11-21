@@ -14,7 +14,7 @@ import { LuggageTag, MapSnippet, SealedBag } from "@/components/Illustrations";
 import { InfoSheet } from "@/components/InfoSheet";
 import { RemoteImage } from "@/components/RemoteImage";
 import { ScrollArrows, useScrollArrows } from "@/components/ScrollArrows";
-import { CITY_IMAGES } from "@/lib/city-images";
+import { cityImage } from "@/lib/city-images";
 import { formatDayTime } from "@/lib/format";
 import { resolveImage } from "@/lib/images";
 import { useSearch } from "@/lib/search";
@@ -54,8 +54,12 @@ export default function HomeScreen() {
     try {
       const res = await getDevicePosition();
       // Konum yoksa arama sihirbazi acilir: orada sehir ya da adres secilebilir.
+      // Neden acildigi sihirbaza gider: izin kalici reddedildiyse orada "Ayarlari ac" cikar.
       if (!res.ok) {
-        router.push("/search");
+        router.push({
+          pathname: "/search",
+          params: { locationError: res.reason === "denied" && !res.canAskAgain ? "blocked" : res.reason },
+        });
         return;
       }
       search.setPlace({ label: t("map.nearYou"), ...res.position, isCurrent: true });
@@ -170,7 +174,7 @@ export default function HomeScreen() {
               {cities.isLoading
                 ? [0, 1, 2].map((i) => <View key={i} style={styles.cityCard} />)
                 : cities.data!.map((c) => {
-                    const local = CITY_IMAGES[c.name]?.source;
+                    const local = cityImage(c)?.source;
                     const photo = local ?? (resolveImage(c.coverImage) ? c.coverImage : null);
                     return (
                       <Pressable
