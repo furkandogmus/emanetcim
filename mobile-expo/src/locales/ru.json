@@ -1176,5 +1176,10 @@
     "requiredCta": "Открыть Google Play",
     "readyBody": "Новая версия готова.",
     "readyCta": "Обновить"
+  },
+  "intro": {
+    "sloganLine1": "Сдай багаж,",
+    "sloganLine2": "гуляй налегке.",
+    "skipHint": "Нажмите, чтобы пропустить"
   }
 }
