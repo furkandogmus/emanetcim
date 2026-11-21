@@ -297,10 +297,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       if (stateRef.current.status !== "signedIn" || isImpersonating() || pendingSwitch.current) return;
       if (Date.now() - lastCheckedAt.current < FOREGROUND_REVALIDATE_MS) return;
       lastCheckedAt.current = Date.now();
+      const startedFor = stateRef.current.user.id;
       void api<MobileUser>("/auth/me")
         .then((user) => {
-          // Bu arada cikis/goruntuleme olduysa eski yanit yeni kimligin ustune yazilmaz.
-          if (stateRef.current.status !== "signedIn" || isImpersonating()) return;
+          // Bu arada cikis, baska hesapla giris ya da goruntuleme olduysa eski yanit
+          // yeni kimligin ustune yazilmaz.
+          const now = stateRef.current;
+          if (now.status !== "signedIn" || isImpersonating()) return;
+          if (now.user.id !== startedFor || user.id !== startedFor) return;
           void rememberUser(user);
           const prev = stateRef.current.user;
           if (JSON.stringify({ ...prev, avatarUrl: null }) !== JSON.stringify({ ...user, avatarUrl: null })) {
