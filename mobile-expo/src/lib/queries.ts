@@ -5,7 +5,7 @@ import { deleteOfflineTicket, saveOfflineTicket } from "./offline-tickets";
 import { useAuth } from "./auth";
 import { usePartnerShopSelection, withShop } from "./partner-shop";
 import { nextCursorOf } from "./paging";
-import type { AdminApplication, AdminStats, BookingDetail, ContactMessage, PartnerEarnings, PartnerSealsResponse, PartnerShop, BookingSummary, NearbyShop, PartnerBookingsResponse, ShopDetail, ShopReview, PartnerShopSettings, PartnerSchedule, PartnerDashboard, AdminOverview, AdminBookingFilter, AdminBookingCounts, AdminBookingsResponse, AdminBookingDetail, AdminShop, AdminShopDetail, AdminUser, CityCoverage } from "./types";
+import type { AdminApplication, AdminStats, BookingDetail, ContactMessage, PartnerEarnings, PartnerSealsResponse, PartnerShop, BookingSummary, NearbyShop, PartnerBookingsResponse, ShopDetail, ShopReviewsPage, PartnerShopSettings, PartnerSchedule, PartnerDashboard, AdminOverview, AdminBookingFilter, AdminBookingCounts, AdminBookingsResponse, AdminBookingDetail, AdminShop, AdminShopDetail, AdminUser, CityCoverage } from "./types";
 
 export const keys = {
   myBookings: ["bookings", "me"] as const,
@@ -93,10 +93,25 @@ export function useShop(id: string) {
   return useQuery({ queryKey: keys.shop(id), queryFn: () => api<ShopDetail>(`/shops/${id}`, { auth: false }) });
 }
 
+/** Dukkan ekranindaki ozet: ilk 5 yorum ve gercek toplam (dizi ucu 50'de kesip toplam vermiyordu). */
 export function useShopReviews(id: string) {
   return useQuery({
-    queryKey: ["shops", id, "reviews"],
-    queryFn: () => api<ShopReview[]>(`/shops/${id}/reviews`, { auth: false }),
+    queryKey: ["shops", id, "reviews", "summary"],
+    queryFn: () => api<ShopReviewsPage>(`/shops/${id}/reviews?paged=1&limit=5`, { auth: false }),
+  });
+}
+
+/** "Tum yorumlar" ekrani. */
+export function useShopReviewsInfinite(id: string) {
+  return useInfiniteQuery({
+    queryKey: ["shops", id, "reviews", "all"],
+    initialPageParam: undefined as string | undefined,
+    queryFn: ({ pageParam }) =>
+      api<ShopReviewsPage>(
+        `/shops/${id}/reviews?paged=1&limit=20${pageParam ? `&cursor=${encodeURIComponent(pageParam)}` : ""}`,
+        { auth: false },
+      ),
+    getNextPageParam: nextCursorOf,
   });
 }
 
