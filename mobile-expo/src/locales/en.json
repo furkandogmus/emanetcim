@@ -1140,5 +1140,10 @@
     "requiredCta": "Open Google Play",
     "readyBody": "A new version is ready.",
     "readyCta": "Refresh"
+  },
+  "intro": {
+    "sloganLine1": "Drop the load,",
+    "sloganLine2": "hit the road.",
+    "skipHint": "Tap to skip"
   }
 }

@@ -1140,5 +1140,10 @@
     "requiredCta": "Google Play öffnen",
     "readyBody": "Eine neue Version ist bereit.",
     "readyCta": "Neu laden"
+  },
+  "intro": {
+    "sloganLine1": "Koffer weg,",
+    "sloganLine2": "Stadt entdeckt.",
+    "skipHint": "Zum Überspringen tippen"
   }
 }
