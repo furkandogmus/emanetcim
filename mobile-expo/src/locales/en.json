@@ -714,7 +714,11 @@
     "nameRequired": "Your name can't be empty.",
     "phoneLabel": "Mobile phone",
     "phonePlaceholder": "5XX XXX XX XX",
-    "phoneHint": "A Turkish mobile number. Leave it empty to remove your number.",
+    "phoneHint": "A Turkish mobile number. It is also the number you sign in with: if you change it, you will sign in with the new one. Leave it empty to remove your number.",
+    "phoneClearTitle": "Remove your number?",
+    "phoneClearBody": "This number may be what you sign in with. If you remove it, you can no longer sign in with it.",
+    "phoneChangeTitle": "Change your sign-in number?",
+    "phoneChangeBody": "From now on you will sign in with the new number.",
     "save": "Save",
     "errors": {
       "invalid_name": "Your name must be 1–100 characters.",
