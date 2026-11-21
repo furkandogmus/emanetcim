@@ -191,6 +191,8 @@ export type CheckoutRequest = {
   bagCountXl: number;
   couponCode?: string;
   referralCode?: string;
+  /** Ekranda gosterilen toplam: sunucu farkli hesaplarsa 409 `price_changed` doner. */
+  expectedTotal?: number;
 };
 
 /** `POST checkout/quote`: indirim kodu onizlemesi. Baglayici degil. */

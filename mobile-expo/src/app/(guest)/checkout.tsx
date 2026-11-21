@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { KeyboardAvoidingView, Pressable, ScrollView, StyleSheet, View } from "react-native";
 import { TicketPercent, X } from "lucide-react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
@@ -12,6 +12,7 @@ import { Input } from "@/components/Field";
 import { api, ApiError } from "@/lib/api";
 import { useAuth } from "@/lib/auth";
 import { errorMessage } from "@/lib/errors";
+import { newIdempotencyKey } from "@/lib/idempotency";
 import { formatMoney, formatStayWindow } from "@/lib/format";
 import { keys, useShop } from "@/lib/queries";
 import { totalBags, useSearch } from "@/lib/search";
@@ -59,14 +60,37 @@ export default function CheckoutScreen() {
   const shownIn = hoursQuote.data?.checkInTime ? new Date(hoursQuote.data.checkInTime) : search.checkIn;
   const shownOut = hoursQuote.data?.checkOutTime ? new Date(hoursQuote.data.checkOutTime) : search.checkOut;
 
+  /*
+    Onay denemesi anahtari: ayni sepet icin tekrar basmak AYNI anahtari yollar.
+    Istek 12 sn'de iptal olsa bile sunucu ilk istegi yazmis olabilir; anahtar
+    sayesinde ikinci basis ikinci rezervasyon degil, ayni rezervasyonu doner.
+    Sepet ya da tutar degisince (imza) yeni anahtar uretilir.
+  */
+  const attempt = useRef<{ sig: string; key: string } | null>(null);
+
   const mutation = useMutation({
-    mutationFn: (body: CheckoutRequest) =>
-      api<CheckoutResponse>("/checkout/intent", { method: "POST", body }),
+    mutationFn: ({ key, ...body }: CheckoutRequest & { key: string }) =>
+      api<CheckoutResponse>("/checkout/intent", { method: "POST", body, headers: { "Idempotency-Key": key } }),
     onSuccess: (res) => {
+      attempt.current = null;
       void queryClient.invalidateQueries({ queryKey: keys.myBookings });
       router.replace({ pathname: "/success", params: { bookingId: res.bookingId } });
     },
-    onError: (e) => setError(errorMessage(e, "checkout")),
+    onError: (e) => {
+      if (e instanceof ApiError && e.status === 0) {
+        // Yanit gelmedi: rezervasyon yazilmis olabilir. Liste yenilenir, tekrar basis guvenli.
+        void queryClient.invalidateQueries({ queryKey: keys.myBookings });
+        setError(t("checkout.errors.network_maybe"));
+        return;
+      }
+      if (e instanceof ApiError && e.code === "price_changed") {
+        // Gosterilen tutar eskidi (indirim dustu / fiyat degisti): kod kalkar, tutar yeniden sorulur.
+        attempt.current = null;
+        setQuote(null);
+        void hoursQuote.refetch();
+      }
+      setError(errorMessage(e, "checkout"));
+    },
   });
 
   const quoteMutation = useMutation({
@@ -138,11 +162,15 @@ export default function CheckoutScreen() {
 
   function confirm() {
     setError(null);
-    mutation.mutate({
+    const request: CheckoutRequest = {
       ...booking,
       ...(applied?.discount?.kind === "coupon" ? { couponCode: applied.discount.code } : {}),
       ...(applied?.discount?.kind === "referral" ? { referralCode: applied.discount.code } : {}),
-    });
+      ...(total != null ? { expectedTotal: total } : {}),
+    };
+    const sig = JSON.stringify(request);
+    if (attempt.current?.sig !== sig) attempt.current = { sig, key: newIdempotencyKey() };
+    mutation.mutate({ ...request, key: attempt.current.key });
   }
 
   return (
@@ -193,6 +221,12 @@ export default function CheckoutScreen() {
                 </AppText>
                 <Button variant="secondary" title={t("common.retry")} onPress={() => hoursQuote.refetch()} />
               </View>
+            ) : closedAtTime ? (
+              // Dukkan o saatte kapali: iskelet sonsuza dek doner, cikis yolu gosterilir.
+              <Button
+                title={t("checkout.pickOtherTime")}
+                onPress={() => router.push({ pathname: "/search", params: { step: "1", returnTo: "back" } })}
+              />
             ) : (
               [0, 1].map((i) => <View key={i} style={styles.lineSkeleton} />)
             )
@@ -315,12 +349,14 @@ export default function CheckoutScreen() {
           </AppText>
         </View>
 
-        {error ? <Banner tone="danger" body={error} /> : null}
       </ScrollView>
       </KeyboardAvoidingView>
 
       {/* Onay aninda tutar gozden kaybolmasin: dukkan ekranindaki alt cubukla ayni duzen. */}
       <View style={styles.footer}>
+        {/* Hata onay dugmesinin hemen ustunde: ScrollView'in sonunda kucuk ekranda gorunmuyordu. */}
+        {error ? <Banner tone="danger" body={error} /> : null}
+        <View style={styles.footerRow}>
         <View>
           <AppText variant="caption">{t("checkout.total")}</AppText>
           <AppText style={styles.footerTotal}>{total != null ? formatMoney(total) : "–"}</AppText>
@@ -332,6 +368,7 @@ export default function CheckoutScreen() {
           onPress={confirm}
           style={{ flex: 1 }}
         />
+        </View>
       </View>
     </SafeAreaView>
   );
@@ -386,14 +423,13 @@ const styles = StyleSheet.create({
     backgroundColor: colors.surfaceMuted,
   },
   footer: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: space.lg,
+    gap: space.md,
     padding: space.xl,
     paddingTop: space.md,
     borderTopWidth: 1,
     borderTopColor: colors.border,
     backgroundColor: colors.surface,
   },
+  footerRow: { flexDirection: "row", alignItems: "center", gap: space.lg },
   footerTotal: { fontFamily: fonts.display, fontSize: 22, lineHeight: 28, color: colors.ink, fontVariant: ["tabular-nums"] },
 });

@@ -165,6 +165,7 @@
     "perDayMediumLabel": "Medium bag, per day"
   },
   "checkout": {
+    "pickOtherTime": "Pick another time",
     "title": "Confirm",
     "when": "When",
     "bags": "Bags",
@@ -184,7 +185,9 @@
       "shop_not_found": "This spot is no longer taking bookings.",
       "no_bags": "Pick at least one bag.",
       "too_many_requests": "Too many requests. Try again shortly.",
-      "shop_closed_at_time": "The shop is closed at the time you picked. Choose another time or place."
+      "shop_closed_at_time": "The shop is closed at the time you picked. Choose another time or place.",
+      "price_changed": "The price changed. Check the updated total and confirm again.",
+      "network_maybe": "The connection dropped; your booking may have gone through. Confirming again will not create a second booking."
     },
     "code": {
       "prompt": "Have a discount or invite code?",
@@ -221,6 +224,8 @@
     "empty": "No bookings yet",
     "emptyBody": "Once you book a spot, it shows up here.",
     "emptyCta": "Find a spot",
+    "emptyPast": "No past bookings",
+    "emptyPastBody": "Completed or cancelled bookings will appear here.",
     "upcoming": "Upcoming",
     "past": "Past",
     "showQr": "Show this code at the shop",
@@ -244,6 +249,13 @@
     "overdueDays_other": "{{count}} days overdue",
     "offlineTitle": "No internet",
     "offlineBody": "This is the last ticket saved on your phone. You can show the QR code at the shop; it updates when you're back online.",
+    "offlineListBody": "Can't reach the server. Showing tickets saved on your phone; you can show the QR code at the shop.",
+    "refreshingBody": "Showing the ticket saved on your phone while it updates.",
+    "notFound": "This booking can no longer be found.",
+    "errors": {
+      "invalid_status": "Your bags were already handed to the shop or the booking is already cancelled, so it can't be cancelled.",
+      "not_found": "This booking was not found."
+    },
     "address": "Address",
     "addressHint": "Press and hold to copy; you can show it to a taxi driver."
   },
@@ -716,7 +728,10 @@
       "not_found": "Booking not found.",
       "UNAUTHORIZED": "You can't change this booking.",
       "forbidden": "You can't change this booking.",
-      "invalid_input": "Some details are invalid. Check the time and the number of bags."
+      "invalid_input": "Some details are invalid. Check the time and the number of bags.",
+      "PLATFORM_HOLIDAY": "The service is not available on the date you picked.",
+      "SHOP_CLOSED_DAY": "The shop is closed on one of the days you picked.",
+      "SHOP_CLOSED_HOURS": "The shop is closed at the time you picked."
     }
   },
   "review": {

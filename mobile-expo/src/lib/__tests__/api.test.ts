@@ -92,3 +92,19 @@ describe("api token yenileme", () => {
     await expect(api("/x", { auth: false })).rejects.toMatchObject({ code: "http_502" });
   });
 });
+
+describe("api ek basliklar", () => {
+  it("Idempotency-Key gibi ek baslik istege eklenir, Accept ezilmez", async () => {
+    const { api } = freshApi();
+    fetchMock.mockResolvedValue(json(200, { ok: true }));
+    await api("/checkout/intent", {
+      method: "POST",
+      body: { a: 1 },
+      auth: false,
+      headers: { "Idempotency-Key": "k-12345678", Accept: "text/plain" },
+    });
+    const headers = fetchMock.mock.calls[0][1]?.headers as Record<string, string>;
+    expect(headers["Idempotency-Key"]).toBe("k-12345678");
+    expect(headers.Accept).toBe("application/json");
+  });
+});

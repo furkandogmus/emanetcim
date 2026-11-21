@@ -165,6 +165,7 @@
     "perDayMediumLabel": "Mittleres Gepäck pro Tag"
   },
   "checkout": {
+    "pickOtherTime": "Andere Zeit wählen",
     "title": "Bestätigen",
     "when": "Wann",
     "bags": "Gepäck",
@@ -184,7 +185,9 @@
       "shop_not_found": "Dieser Ort nimmt keine Buchungen mehr an.",
       "no_bags": "Wähle mindestens ein Gepäckstück.",
       "too_many_requests": "Zu viele Anfragen. Versuch es gleich noch einmal.",
-      "shop_closed_at_time": "Der Laden ist zur gewählten Zeit geschlossen. Wähle eine andere Zeit oder einen anderen Ort."
+      "shop_closed_at_time": "Der Laden ist zur gewählten Zeit geschlossen. Wähle eine andere Zeit oder einen anderen Ort.",
+      "price_changed": "Der Preis hat sich geändert. Prüfe den aktuellen Gesamtbetrag und bestätige erneut.",
+      "network_maybe": "Die Verbindung wurde unterbrochen; deine Buchung ist möglicherweise schon angelegt. Erneutes Bestätigen erzeugt keine zweite Buchung."
     },
     "code": {
       "prompt": "Hast du einen Rabatt- oder Einladungscode?",
@@ -221,6 +224,8 @@
     "empty": "Noch keine Buchungen",
     "emptyBody": "Sobald du einen Ort gebucht hast, erscheint er hier.",
     "emptyCta": "Ort finden",
+    "emptyPast": "Keine vergangenen Buchungen",
+    "emptyPastBody": "Abgeschlossene oder stornierte Buchungen erscheinen hier.",
     "upcoming": "Bevorstehend",
     "past": "Vergangen",
     "showQr": "Zeig diesen Code im Laden",
@@ -244,6 +249,13 @@
     "overdueDays_other": "{{count}} Tage überfällig",
     "offlineTitle": "Kein Internet",
     "offlineBody": "Das ist das zuletzt gespeicherte Ticket. Du kannst den QR-Code im Laden zeigen; es aktualisiert sich, sobald du wieder online bist.",
+    "offlineListBody": "Server nicht erreichbar. Auf dem Telefon gespeicherte Tickets werden angezeigt; den QR-Code kannst du im Laden zeigen.",
+    "refreshingBody": "Das auf dem Telefon gespeicherte Ticket wird angezeigt und aktualisiert.",
+    "notFound": "Diese Buchung wurde nicht mehr gefunden.",
+    "errors": {
+      "invalid_status": "Dein Gepäck wurde dem Laden bereits übergeben oder die Buchung ist schon storniert; sie kann nicht storniert werden.",
+      "not_found": "Diese Buchung wurde nicht gefunden."
+    },
     "address": "Adresse",
     "addressHint": "Gedrückt halten zum Kopieren; du kannst sie einem Taxifahrer zeigen."
   },
@@ -716,7 +728,10 @@
       "not_found": "Buchung nicht gefunden.",
       "UNAUTHORIZED": "Du kannst diese Buchung nicht ändern.",
       "forbidden": "Du kannst diese Buchung nicht ändern.",
-      "invalid_input": "Einige Angaben sind ungültig. Prüfe die Zeit und die Anzahl der Gepäckstücke."
+      "invalid_input": "Einige Angaben sind ungültig. Prüfe die Zeit und die Anzahl der Gepäckstücke.",
+      "PLATFORM_HOLIDAY": "Am gewählten Datum ist der Service nicht verfügbar.",
+      "SHOP_CLOSED_DAY": "Der Laden ist an einem der gewählten Tage geschlossen.",
+      "SHOP_CLOSED_HOURS": "Der Laden ist zur gewählten Uhrzeit geschlossen."
     }
   },
   "review": {
