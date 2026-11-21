@@ -969,7 +969,8 @@
   "earnings": {
     "title": "Kazancım",
     "total": "Net hakediş",
-    "today": "Bugün",
+    "basis": "Teslim edilen emanetler: tutar, valizin misafire geri verildiği güne yazılır.",
+    "today": "Bugün teslim edilen",
     "commissionTitle": "Platform komisyonu %{{pct}}",
     "commissionBody": "Her ödemeden %{{pct}} platform payı düşülür, %{{share}} sana kalır. Tutarlar komisyon düşülmüş haliyle gösterilir.",
     "noCommissionTitle": "Komisyonsuz dönem",
@@ -977,6 +978,8 @@
     "recent": "Son {{count}} işlem",
     "empty": "Henüz kazanç yok.",
     "footnote": "Ödemeyi dükkanında misafirden alıyorsun; tutar zaten kasanda.",
+    "guestFallback": "Misafir",
+    "rowA11y": "{{guest}}, {{when}}, {{amount}}. Rezervasyonu aç.",
     "errors": {
       "no_shops": "Aktif bir dükkanın yok."
     }
@@ -1076,6 +1079,7 @@
     "pickups": "Bugün alınacak",
     "inStorage": "Dükkanda valiz",
     "thisMonth": "Bu ay kazancın",
+    "collectedBasis": "Teslim edilen emanetler",
     "failed": "Günlük özet yüklenemedi. Yeniden denemek için dokun.",
     "a11y": "{{shop}}, bugün: {{arrivals}} misafir gelecek, {{pickups}} valiz alınacak, dükkanda {{bags}} valiz var. Bu ay kazancın {{month}}.",
     "moreThanLastMonth": "Geçen aydan %{{pct}} fazla",

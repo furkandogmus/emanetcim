@@ -65,6 +65,7 @@ export function PartnerPulseCard() {
           <View style={{ flex: 1 }}>
             <AppText variant="caption">{t("pulse.thisMonth")}</AppText>
             <AppText style={styles.monthValue}>{formatMoney(d.monthNet)}</AppText>
+            <AppText variant="caption" style={{ fontSize: 12 }}>{t("pulse.collectedBasis")}</AppText>
           </View>
           {pct != null ? (
             <View style={[styles.badge, { backgroundColor: up ? colors.successSoft : colors.dangerSoft }]}>
