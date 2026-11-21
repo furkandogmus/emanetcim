@@ -114,12 +114,22 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     (ya da admin ekranlari hedef token'iyla) yeniden istek atiyordu.
   */
   const pendingSwitch = useRef<PendingSwitch | null>(null);
+  const pendingSwitchPromise = useRef<Promise<void> | null>(null);
   const switchIdentity = useCallback(
-    (run: () => Promise<void>) =>
-      new Promise<void>((resolve, reject) => {
+    (run: () => Promise<void>) => {
+      /*
+        Bekleyen gecis varken ikincisi kuyruga YAZILMAZ: ayni anda gelen zamanlayici ve
+        401 (ya da birkac 401) stopImpersonation'i iki kez kuruyordu; ilk promise hic
+        sonuclanmiyordu. Ikinci cagiran bekleyen gecisin sonucunu alir.
+      */
+      if (pendingSwitch.current && pendingSwitchPromise.current) return pendingSwitchPromise.current;
+      const promise = new Promise<void>((resolve, reject) => {
         pendingSwitch.current = { run, resolve, reject };
         update({ status: "loading" });
-      }),
+      });
+      pendingSwitchPromise.current = promise;
+      return promise;
+    },
     [update],
   );
   useEffect(() => {
@@ -180,7 +190,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   // 401 (sure doldu, admin yetkisi alindi) ve zamanlayici ayni yoldan cikar.
   const endImpersonation = useCallback(() => {
-    if (!isImpersonating()) return;
+    // Gecis zaten kuyruktaysa ikinci "goruntuleme bitti" bildirimi gitmez.
+    if (!isImpersonating() || pendingSwitch.current) return;
     void stopImpersonation().catch(() => undefined);
     notify(i18n.t("impersonation.endedTitle"), i18n.t("impersonation.endedBody"));
   }, [stopImpersonation]);

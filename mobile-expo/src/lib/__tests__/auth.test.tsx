@@ -255,4 +255,35 @@ describe("yonetici goruntulemesi", () => {
     // Cikistaki /auth/me admin token'iyla, goruntuleme kapandiktan sonra gider.
     expect(seen.filter((x) => x.startsWith("/auth/me")).every((x) => x.endsWith("|false"))).toBe(true);
   });
+
+  it("ayni anda gelen iki 401 goruntulemeyi bir kez bitirir; ikinci cikis cagrisi da sonuclanir", async () => {
+    fetchMock.mockResolvedValue(json(200, admin) as never);
+    const env = await mount({ "bp.session": session, "bp.user": JSON.stringify(admin) });
+    fetchMock.mockImplementation(async (url: string) =>
+      url.includes("/impersonate")
+        ? json(200, { accessToken: "imp-1", expiresInSeconds: 1800, user: { ...partner, avatarUrl: null } })
+        : json(200, admin),
+    );
+    let startDone!: Promise<void>;
+    await env.act(async () => {
+      startDone = env.ctx().startImpersonation("p1");
+    });
+    await env.act(() => startDone);
+    expect(env.api.isImpersonating()).toBe(true);
+
+    fetchMock.mockImplementation(async (url: string, init?: RequestInit) => {
+      const auth = (init?.headers as Record<string, string>).Authorization;
+      return auth === "Bearer imp-1" ? json(401, { error: "unauthorized" }) : json(200, admin);
+    });
+    let stops!: Promise<unknown>;
+    await env.act(async () => {
+      await Promise.all([env.api.api("/x").catch(() => undefined), env.api.api("/y").catch(() => undefined)]);
+      // Kuyruktaki gecisin uzerine ikinci bir cikis: ayni promise'i almali.
+      stops = Promise.all([env.ctx().stopImpersonation(), env.ctx().stopImpersonation()]);
+    });
+    await env.act(() => stops);
+    expect(env.notify).toHaveBeenCalledTimes(1);
+    expect(env.api.isImpersonating()).toBe(false);
+    expect(env.ctx().state).toMatchObject({ status: "signedIn", user: { id: "a1" } });
+  });
 });
