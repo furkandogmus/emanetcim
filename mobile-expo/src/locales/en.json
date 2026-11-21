@@ -119,6 +119,8 @@
     "useLocation": "Use my location",
     "locating": "Getting your location…",
     "locationDenied": "Location permission was denied. Pick a city from the list.",
+    "locationBlocked": "Location access is turned off. Allow it in Settings or pick a city from the list.",
+    "openSettings": "Allow in Settings",
     "popular": "Popular cities",
     "whenTitle": "When do you need storage?",
     "whenHint": "Tap a date once for the same day. For several days, pick the first and last day.",
