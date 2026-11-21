@@ -12,7 +12,7 @@ import path from "node:path";
  *
  * Yani ayni isi yapan iki yuzeyden biri digerinden yaklasik ON KAT gevsek bir
  * kovadaydi, ve gevsek olan parola/OTP denemelerinin ucuz oldugu taraftı:
- * `auth/session` (sifre + OTP dogrulama), `auth/register`, `auth/refresh`,
+ * `auth/session` (sifre + OTP dogrulama), `auth/refresh`,
  * `auth/password-reset/*`.
  *
  * Ayni bosluk misafir rezervasyon sorgulama zincirinde de vardi
@@ -82,7 +82,6 @@ function resolveLocation(locations: Location[], reqPath: string): Location | nul
 const MUST_BE_AUTH_ZONE: Array<{ path: string; why: string }> = [
   { path: "/api/auth/callback/credentials", why: "web sifre girisi" },
   { path: "/api/mobile/auth/session", why: "mobil sifre + OTP dogrulama" },
-  { path: "/api/mobile/auth/register", why: "mobil hesap acma" },
   { path: "/api/mobile/auth/refresh", why: "mobil token uretimi" },
   { path: "/api/mobile/auth/otp", why: "OTP gonderimi (SMS maliyeti)" },
   {
