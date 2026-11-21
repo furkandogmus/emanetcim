@@ -79,7 +79,7 @@ export async function PUT(req: NextRequest) {
     .catch(() => ({ name: undefined, phone: undefined, image: undefined }));
 
   const data: Record<string, unknown> = {};
-  let phoneWritten = false;
+  let phoneChange: string | null | undefined;
 
   if (name !== undefined) {
     if (typeof name !== "string" || !name.trim() || name.trim().length > 100) {
@@ -108,32 +108,36 @@ export async function PUT(req: NextRequest) {
     if (phone !== null && typeof phone !== "string") {
       return NextResponse.json({ error: "invalid_phone" }, { status: 400 });
     }
-    /*
-      Yazma ve giris-kilidi korumasi `PartnerProfileService`te (esnaf ucuyla
-      ayni govde). E-postasi/baska girisi olmayan hesabin telefonu silinemez
-      ya da degistirilemez.
-    */
-    const result = await partnerProfileService.updatePhone(auth.user.id, phone);
-    if (!result.ok) {
-      if (result.reason === "already_registered") {
-        return NextResponse.json({ error: "phone_taken" }, { status: 409 });
-      }
-      if (result.reason === "login_phone_locked") {
-        return NextResponse.json({ error: "phone_locked" }, { status: 409 });
-      }
-      return NextResponse.json({ error: "invalid_phone" }, { status: 400 });
-    }
-    phoneWritten = true;
+    phoneChange = phone;
   }
 
   // Yalnizca kaldirma: yeni fotograf multipart dalindan gelir.
   if (image === null) data.image = null;
 
-  if (Object.keys(data).length === 0 && !phoneWritten) {
+  if (Object.keys(data).length === 0 && phoneChange === undefined) {
     return NextResponse.json({ error: "no_fields" }, { status: 400 });
   }
 
   try {
+    /*
+      Yazma ve giris-kilidi korumasi `PartnerProfileService`te (esnaf ucuyla
+      ayni govde). E-postasi/baska girisi olmayan hesabin telefonu silinemez
+      ya da degistirilemez. Hata esleme ile log burada, tek try icinde; telefon
+      ONCE yazilir cunku is kurali redleri (kilit, cakisma) hicbir sey yazmadan
+      doner: ad/fotograf yarim kalmaz.
+    */
+    if (phoneChange !== undefined) {
+      const result = await partnerProfileService.updatePhone(auth.user.id, phoneChange);
+      if (!result.ok) {
+        if (result.reason === "already_registered") {
+          return NextResponse.json({ error: "phone_taken" }, { status: 409 });
+        }
+        if (result.reason === "login_phone_locked") {
+          return NextResponse.json({ error: "phone_locked" }, { status: 409 });
+        }
+        return NextResponse.json({ error: "invalid_phone" }, { status: 400 });
+      }
+    }
     if (Object.keys(data).length > 0) {
       await prisma.user.update({ where: { id: auth.user.id }, data });
     }
