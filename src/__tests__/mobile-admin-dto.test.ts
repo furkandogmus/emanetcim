@@ -74,3 +74,13 @@ describe("toMobileAdminMessage", () => {
     expect(dto.text?.length).toBe(4000);
   });
 });
+
+import { canViewAs } from "@/lib/mobile-dto";
+
+describe("canViewAs (kullanıcı olarak gör düğmesi)", () => {
+  it("ADMIN ve yasaklı hesapta false, diğerinde true", () => {
+    expect(canViewAs({ role: "PARTNER", isBanned: false })).toBe(true);
+    expect(canViewAs({ role: "ADMIN", isBanned: false })).toBe(false);
+    expect(canViewAs({ role: "GUEST", isBanned: true })).toBe(false);
+  });
+});

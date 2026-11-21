@@ -375,7 +375,7 @@ export type AdminBookingCounts = Record<AdminBookingFilter, number>;
 
 /** `admin/bookings/[id]` (`toMobileAdminBookingDetail`). QR token'i yok. */
 export type AdminBookingDetail = AdminBookingRow & {
-  guest: { id?: string | null; name: string; email: string; phone: string; whatsapp?: string | null };
+  guest: { id?: string | null; name: string; email: string; phone: string; whatsapp?: string | null; canViewAs?: boolean };
   shop: {
     id?: string;
     ownerId?: string;
@@ -384,6 +384,7 @@ export type AdminBookingDetail = AdminBookingRow & {
     phone: string;
     whatsapp?: string | null;
     ownerName: string;
+    canViewAsOwner?: boolean;
     latitude: number | null;
     longitude: number | null;
   };
@@ -437,7 +438,7 @@ export type AdminShopDetail = {
   /** null = 7/24 acik. */
   hours: { open: string; close: string } | null;
   createdAt: string;
-  owner: { id: string; name: string; email: string; phone: string; whatsapp?: string | null };
+  owner: { id: string; name: string; email: string; phone: string; whatsapp?: string | null; canViewAs?: boolean };
   bookingCount: number;
   reviewCount: number;
   bagsInStorage: number;

@@ -107,7 +107,7 @@ function Detail({ b, onWeb }: { b: AdminBookingDetail; onWeb: () => void }) {
               />
             ) : null}
           </View>
-          {b.guest.id ? (
+          {b.guest.id && b.guest.canViewAs !== false ? (
             <Button
               variant="secondary"
               title={t("admin.impersonate")}
@@ -147,7 +147,7 @@ function Detail({ b, onWeb }: { b: AdminBookingDetail; onWeb: () => void }) {
           {b.shop.id ? (
             <Button variant="secondary" title={t("admin.openShop")} onPress={() => router.push(`/admin/shop/${b.shop.id}`)} />
           ) : null}
-          {b.shop.ownerId ? (
+          {b.shop.ownerId && b.shop.canViewAsOwner !== false ? (
             <Button
               variant="secondary"
               title={t("admin.impersonateOwner")}

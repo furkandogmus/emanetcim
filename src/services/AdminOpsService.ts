@@ -150,7 +150,7 @@ export class AdminOpsService {
           checkedInAt: true,
           checkedOutAt: true,
           couponCode: true,
-          guest: { select: { id: true, name: true, email: true, phone: true } },
+          guest: { select: { id: true, name: true, email: true, phone: true, role: true, isBanned: true } },
           shop: {
             select: {
               name: true,
@@ -159,7 +159,7 @@ export class AdminOpsService {
               city: true,
               latitude: true,
               longitude: true,
-              owner: { select: { id: true, name: true, phone: true } },
+              owner: { select: { id: true, name: true, phone: true, role: true, isBanned: true } },
             },
           },
           seals: { select: { sealNumber: true, bagIndex: true, bagSize: true }, orderBy: { bagIndex: "asc" } },
@@ -266,7 +266,7 @@ export class AdminOpsService {
         openingTime: true,
         closingTime: true,
         createdAt: true,
-        owner: { select: { id: true, name: true, email: true, phone: true } },
+        owner: { select: { id: true, name: true, email: true, phone: true, role: true, isBanned: true } },
         _count: { select: { bookings: true, reviews: true } },
       },
     });
