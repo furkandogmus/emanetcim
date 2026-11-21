@@ -14,7 +14,6 @@ import {
   computeAuthoritativeCheckoutTotals,
   validateBookingStayWindow,
 } from "@/lib/booking-server-price";
-import { bookingTouchesPlatformHoliday } from "@/lib/booking-holidays";
 import { getPricingRules } from "@/lib/platform-settings";
 import { moneyToNumber } from "@/lib/money";
 import { BookingStatus } from "@prisma/client";
@@ -342,6 +341,9 @@ const MODIFY_ERROR_TO_KEY: Record<ModifyBookingErrorCode, string> = {
   UNAUTHORIZED: "Errors.unauthorized",
   INVALID_STATUS: "Errors.modificationNotAllowed",
   INVALID_DATES: "Errors.invalidBookingDates",
+  PLATFORM_HOLIDAY: "Errors.bookingIncludesPlatformHoliday",
+  SHOP_CLOSED_DAY: "Errors.invalidBookingDates",
+  SHOP_CLOSED_HOURS: "Errors.invalidBookingDates",
   CAPACITY: "Errors.insufficientCapacity",
   REFUND_FAILED: "Errors.modificationRefundFailed",
   PRICE_INCREASE: "Errors.modificationPriceIncrease",
@@ -358,12 +360,7 @@ export async function modifyBookingAction(data: ModifyBookingActionInput) {
   if (!validateBookingStayWindow(cin, cout, pricingRules)) {
     return { success: false as const, error: "Errors.invalidBookingDates" };
   }
-  if (bookingTouchesPlatformHoliday(cin, cout, pricingRules.platformHolidayDates)) {
-    return {
-      success: false as const,
-      error: "Errors.bookingIncludesPlatformHoliday",
-    };
-  }
+  // Platform tatili kurali `modifyBooking`te (mobil ile ortak); burada tekrar yazilmaz.
 
   const result = await bookingService.modifyBooking(
     data.bookingId,

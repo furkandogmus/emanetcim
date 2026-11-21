@@ -175,7 +175,7 @@ export async function rejectBooking(
       `ReservationSlot` satirlarini siler (kapasite geri gelir) ve sadakat
       puanini dusurur. Mobil uc bunlarin hicbirini yapmiyordu.
     */
-    const cancelled = await cancelBooking(bookingId);
+    const cancelled = await cancelBooking(bookingId, { silent: true });
     if (!cancelled.ok) return { ok: false, code: 'INVALID_STATUS' };
 
     void bookingEventService
@@ -237,7 +237,7 @@ export async function forceCancelOpenBookingsForUser(
   let cancelled = 0;
   let failed = 0;
   for (const { id } of open) {
-    const result = await cancelBooking(id);
+    const result = await cancelBooking(id, { silent: true });
     if (result.ok) cancelled++;
     else {
       failed++;

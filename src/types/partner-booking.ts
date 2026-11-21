@@ -61,6 +61,12 @@ export type ModifyBookingErrorCode =
   | "UNAUTHORIZED"
   | "INVALID_STATUS"
   | "INVALID_DATES"
+  /** Secilen aralik platform tatiline denk geliyor (web ile ayni kural). */
+  | "PLATFORM_HOLIDAY"
+  /** Birakis ya da alis gunu dukkan kapali. */
+  | "SHOP_CLOSED_DAY"
+  /** Dukkan secilen saatte kapali. */
+  | "SHOP_CLOSED_HOURS"
   | "CAPACITY"
   | "REFUND_FAILED"
   | "PRICE_INCREASE"

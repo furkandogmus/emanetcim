@@ -18,6 +18,9 @@ import { paymentService } from '@/services/PaymentService';
 import { couponService } from '@/services/CouponService';
 import { BookingCapacityExceededError } from '@/services/booking/errors';
 import { assertCapacityTx } from '@/services/booking/create';
+import { bookingTouchesPlatformHoliday } from '@/lib/booking-holidays';
+import { createQrToken } from '@/lib/qr-token';
+import { notificationService } from '@/services/NotificationService';
 import type { ModifyBookingInput } from '@/services/BookingService';
 
 export async function issueCancellationCreditCoupon(amountTry: number): Promise<string> {
@@ -64,7 +67,16 @@ export async function issueCancellationCreditCoupon(amountTry: number): Promise<
  * Not: iade `PaymentLog`'da işaretlenir; para gerçekten geri gönderilmez —
  * entegre bir sağlayıcı yok (P0-2, docs/PAYMENTS.md).
  */
-export async function cancelBooking(bookingId: string): Promise<CancelBookingResult> {
+export async function cancelBooking(
+  bookingId: string,
+  /*
+    `silent`: cagiran bildirimi kendisi yonetiyor. Esnafin "reddet"i misafire
+    kendi bildirimini gonderir ve esnafa "iptal edildi" demek anlamsiz; toplu
+    hesap silme de yuzlerce bildirim uretmemeli. Varsayilan (misafir iptali):
+    esnaf ve misafir haberdar edilir.
+  */
+  opts: { silent?: boolean } = {},
+): Promise<CancelBookingResult> {
   const booking = await prisma.booking.findUnique({
     where: { id: bookingId },
     include: { reservationSlots: true },
@@ -177,6 +189,13 @@ export async function cancelBooking(bookingId: string): Promise<CancelBookingRes
       metadata: { previousStatus: booking.status, hadPayment, fullRefund: true },
     }).catch((err) => logger.error({ err, bookingId }, "booking_event_cancelled_failed"));
 
+    if (!opts.silent) {
+      void notificationService
+        .notifyPartnerBookingChange({ bookingId, kind: 'cancelled' })
+        .catch((err) => logger.error({ err, bookingId }, 'notify_partner_booking_cancelled_failed'));
+      notificationService.pushGuestOnly(bookingId, 'cancelled', booking.locale ?? 'tr');
+    }
+
     return { ok: true, fullRefund: hadPayment };
   } catch (error) {
     logger.error({ err: error, bookingId }, 'BookingService::cancelBooking');
@@ -232,17 +251,36 @@ export async function modifyBooking(
     };
   }
 
+  /*
+    Platform tatili: olusturma yolu (create.ts) ve web action'i reddediyordu,
+    degistirme yolu hic bakmiyordu; mobil rezervasyonu tatile tasiyabiliyordu.
+    Kural artik servisin isi (iki tasiyici ayni cevabi alir).
+  */
+  if (
+    bookingTouchesPlatformHoliday(
+      input.checkInTime,
+      input.checkOutTime,
+      rules.platformHolidayDates,
+    )
+  ) {
+    return {
+      ok: false,
+      code: 'PLATFORM_HOLIDAY',
+      message: 'Rezervasyon bir platform tatiline denk geliyor.',
+    };
+  }
+  // Kapali gun ve kapali saat AYRI kod: misafir hangisini duzeltecegini bilsin.
   if (await findClosedStayDay(booking.shopId, input.checkInTime, input.checkOutTime)) {
     return {
       ok: false,
-      code: 'INVALID_DATES',
+      code: 'SHOP_CLOSED_DAY',
       message: 'Dükkan seçilen günde kapalı.',
     };
   }
   if (await isClosedAtStayTimes(booking.shopId, input.checkInTime, input.checkOutTime)) {
     return {
       ok: false,
-      code: 'INVALID_DATES',
+      code: 'SHOP_CLOSED_HOURS',
       message: 'Dükkan seçilen saatte kapalı.',
     };
   }
@@ -456,6 +494,17 @@ export async function modifyBooking(
             unitPrice: authTotals.unitPrice,
             insuranceFee: authTotals.insuranceFee,
             totalPrice: newTotal,
+            /*
+              QR token'in omru check-out + 24 saat; cikis degisince yeniden
+              uretilir (yoksa token eski cikisa gore bitebilir). Eski token
+              imzasi gecerli oldugu surece taranir (seals/scan).
+            */
+            qrCodeToken: await createQrToken({
+              bookingId,
+              guestId: booking.guestId ?? bookingId,
+              shopId: booking.shopId,
+              checkOutTime: kayitliCikis.toISOString(),
+            }),
           },
         });
       },
@@ -477,6 +526,11 @@ export async function modifyBooking(
         bagCountXl: input.bagCountXl,
       },
     }).catch((err) => logger.error({ err, bookingId }, "booking_event_modified_failed"));
+
+    // Esnaf degisikligi anlik gorsun (30 sn yoklamayi beklemesin).
+    void notificationService
+      .notifyPartnerBookingChange({ bookingId, kind: 'modified' })
+      .catch((err) => logger.error({ err, bookingId }, 'notify_partner_booking_modified_failed'));
 
     return { ok: true };
   } catch (error) {
