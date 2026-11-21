@@ -25,6 +25,21 @@ describe("CityCoverageService", () => {
     expect(list[0].coverImage).toBe("/a.jpg");
   });
 
+  it("noktali/noktasiz I ve aksanli yazimlar tek karttir, slug verir", async () => {
+    findMany.mockResolvedValue([
+      { city: "Istanbul", latitude: 41, longitude: 29, image: null },
+      { city: "İstanbul", latitude: 41.1, longitude: 29.1, image: null },
+      { city: "ISTANBUL", latitude: 41.2, longitude: 29.2, image: null },
+      { city: "Muğla", latitude: 37, longitude: 28, image: null },
+      { city: "Mugla", latitude: 37.1, longitude: 28.1, image: null },
+    ]);
+    const list = await new CityCoverageService().list();
+    expect(list.map((c) => [c.slug, c.shopCount])).toEqual([
+      ["istanbul", 3],
+      ["mugla", 2],
+    ]);
+  });
+
   it("aralik disi koordinat merkezi bozmaz ama dukkan sayilir", async () => {
     findMany.mockResolvedValue([
       { city: "Antalya", latitude: 36.9, longitude: 30.7, image: null },
