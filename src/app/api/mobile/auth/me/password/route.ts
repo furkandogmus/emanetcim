@@ -4,6 +4,9 @@ import { z } from "zod";
 import { requireMobileUser, signAccessToken, signRefreshToken } from "@/lib/mobile-auth";
 import { rateLimit } from "@/lib/rate-limit";
 import { setOwnPassword } from "@/services/auth/set-own-password";
+import { sendPasswordSetNotice } from "@/lib/mail";
+import { resolveRequestLocale } from "@/lib/request-locale";
+import logger from "@/lib/logger";
 
 const schema = z.object({
   currentPassword: z.string().max(128).optional(),
@@ -38,7 +41,19 @@ export async function POST(req: NextRequest) {
     const status = result.reason === "invalid_current_password" ? 403 : result.reason === "not_found" ? 404 : 400;
     return NextResponse.json({ error: result.reason }, { status });
   }
-  if (!result.rotated) return NextResponse.json({ ok: true });
+  if (!result.rotated) {
+    /*
+      Sifresiz hesapta ilk sifre: calinmis bir token ile sahibin haberi olmadan
+      kalici kimlik bilgisi koyulmasin diye hesap sahibine e-posta gider.
+      Goruntuleme oturumunda (destek) gitmez. Ateşle-unut: hata isteği dusurmez.
+    */
+    if (auth.user.impersonatedBy === undefined && auth.user.email) {
+      void sendPasswordSetNotice(auth.user.email, resolveRequestLocale(req.headers.get("accept-language"))).catch(
+        (err) => logger.error({ err, userId: auth.user.id }, "password_set_notice_failed"),
+      );
+    }
+    return NextResponse.json({ ok: true });
+  }
 
   return NextResponse.json({
     ok: true,
