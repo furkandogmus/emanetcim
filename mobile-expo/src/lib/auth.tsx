@@ -170,7 +170,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     await api("/auth/otp", { method: "POST", body: id, auth: false });
   }, []);
 
-  const startSession = useCallback(async (body: Record<string, string>, path = "/auth/session") => {
+  const startSession = useCallback(async (body: Record<string, string | boolean>, path = "/auth/session") => {
     const res = await api<SessionResponse>(path, { method: "POST", body, auth: false });
     await saveTokens(res.accessToken, res.refreshToken);
     void rememberUser(res.user);
@@ -179,7 +179,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }, []);
 
   const verifyCode = useCallback(
-    (id: Identity, code: string) => startSession({ ...id, code }),
+    // Giris ekraninda kabul cumlesi (Kullanim Sartlari + Gizlilik) gosteriliyor: sunucu yeni hesapta kabulu kaydeder.
+    (id: Identity, code: string) => startSession({ ...id, code, acceptedLegal: true }),
     [startSession],
   );
 
