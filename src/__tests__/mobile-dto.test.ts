@@ -8,6 +8,7 @@ import {
   toMobilePricing,
   toMobileBookingSummary,
   toMobileBookingDetail,
+  toMobilePartnerShop,
   toMobileSealRequest,
 } from "@/lib/mobile-dto";
 
@@ -213,5 +214,43 @@ describe("toMobileSealRequest", () => {
     expect(body.id).toBe("r1");
     expect(body.createdAt).toBe("2026-10-01T10:00:00.000Z");
     expect(body.requestedBy).toBeUndefined();
+  });
+});
+
+describe("misafir telefonu (detay gövdesi)", () => {
+  const withPhone = { ...BOOKING, guest: { name: "Ada", phone: "5551112233" } };
+  it("yalnız esnaf/yönetici için ve aktif kayıtta çıkar", () => {
+    expect(toMobileBookingDetail(withPhone, { operator: true }).guestPhone).toBe("5551112233");
+    expect(toMobileBookingDetail(withPhone).guestPhone).toBe("");
+    expect(toMobileBookingDetail({ ...withPhone, status: "CHECKED_OUT" }, { operator: true }).guestPhone).toBe("");
+    expect(toMobileBookingDetail({ ...withPhone, status: "CANCELLED" }, { operator: true }).guestPhone).toBe("");
+  });
+  it("hesapsız misafirde rezervasyondaki numaraya düşer", () => {
+    expect(toMobileBookingDetail({ ...BOOKING, guest: null, guestPhone: "5320000000" }, { operator: true }).guestPhone).toBe("5320000000");
+  });
+});
+
+describe("esnaf dükkan gövdesi", () => {
+  const FULL = {
+    ...SHOP,
+    ownerId: "u9",
+    isTest: false,
+    timezone: "Europe/Istanbul",
+    pricePerDay: { toNumber: () => 75 },
+    open247: false,
+  };
+  it("açık alan listesi: ownerId, isTest, timezone SIZMAZ", () => {
+    const body = toMobilePartnerShop(FULL) as Record<string, unknown>;
+    expect(Object.keys(body).sort()).toEqual(
+      ["address", "capacity", "city", "closingTime", "district", "id", "image", "name", "open247", "openingTime", "pricePerDay"].sort(),
+    );
+  });
+  it("Decimal fiyat sayı olur", () => {
+    expect(toMobilePartnerShop(FULL).pricePerDay).toBe(75);
+  });
+  it("rota `...shop` yayılımı kullanmaz", async () => {
+    const fs = await import("node:fs");
+    const src = fs.readFileSync("src/app/api/mobile/partner/shop/route.ts", "utf8");
+    expect(src).not.toMatch(/(^|[{,])\s*\.\.\.shop\s*[,}]?\s*$/m);
   });
 });
