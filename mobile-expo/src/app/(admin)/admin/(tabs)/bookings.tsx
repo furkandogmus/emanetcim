@@ -13,6 +13,8 @@ import { formatDayTime, formatMoney } from "@/lib/format";
 import { useAdminBookingCounts, useAdminBookings } from "@/lib/queries";
 import type { AdminBookingFilter, AdminBookingRow } from "@/lib/types";
 import { colors, fonts, radius, space } from "@/theme/tokens";
+import { isBlockingError } from "@/lib/query-view";
+import { StaleQueryBanner } from "@/components/StaleQueryBanner";
 
 const FILTERS: AdminBookingFilter[] = ["overdue", "inStorage", "arrivals", "pickups", "upcoming", "noShow", "all"];
 const DAY = 24 * 60 * 60 * 1000;
@@ -83,9 +85,11 @@ export default function AdminBookingsScreen() {
         </ScrollView>
       </View>
 
+      <StaleQueryBanner query={query} />
+
       {query.isLoading ? (
         <Loading />
-      ) : query.isError ? (
+      ) : isBlockingError(query) ? (
         <CenterMessage
           title={errorMessage(query.error)}
           action={<Button variant="secondary" title={t("common.retry")} onPress={() => query.refetch()} />}

@@ -14,6 +14,8 @@ import { keys, useAdminMessages } from "@/lib/queries";
 import type { ContactMessage } from "@/lib/types";
 import { notify } from "@/lib/notify";
 import { colors, fonts, radius, space } from "@/theme/tokens";
+import { isBlockingError } from "@/lib/query-view";
+import { StaleQueryBanner } from "@/components/StaleQueryBanner";
 
 export default function AdminMessagesScreen() {
   const { t } = useTranslation();
@@ -67,9 +69,11 @@ export default function AdminMessagesScreen() {
           <AppText variant="title">{t("admin.messages")}</AppText>
         </View>
 
+        <StaleQueryBanner query={query} />
+
         {query.isLoading ? (
           <Loading />
-        ) : query.isError ? (
+        ) : isBlockingError(query) ? (
           <CenterMessage
             title={errorMessage(query.error)}
             action={<Button variant="secondary" title={t("common.retry")} onPress={() => query.refetch()} />}

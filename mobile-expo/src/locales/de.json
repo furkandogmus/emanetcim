@@ -8,6 +8,7 @@
     "loading": "Lädt…",
     "genericError": "Etwas ist schiefgelaufen. Bitte versuch es noch einmal.",
     "networkError": "Der Server ist nicht erreichbar. Prüfe deine Verbindung.",
+    "staleData": "Keine Verbindung, die zuletzt geladenen Daten werden angezeigt.",
     "day_one": "{{count}} Tag",
     "day_other": "{{count}} Tage",
     "bag_one": "{{count}} Gepäckstück",

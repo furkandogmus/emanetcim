@@ -116,7 +116,7 @@ export default function CheckoutScreen() {
   if (authState.status === "signedOut") return <Redirect href="/login" />;
 
   if (shopQuery.isLoading) return <Loading />;
-  if (shopQuery.isError || !shopQuery.data) {
+  if (!shopQuery.data) {
     return (
       <CenterMessage
         title={errorMessage(shopQuery.error)}

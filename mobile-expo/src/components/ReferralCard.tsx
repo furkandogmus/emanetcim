@@ -58,7 +58,7 @@ export function ReferralCard({ audience }: { audience: "partner" | "guest" }) {
 
       {query.isLoading ? (
         <AppText variant="caption">{t("common.loading")}</AppText>
-      ) : query.isError || !data ? (
+      ) : !data ? (
         <View style={{ gap: space.sm }}>
           <AppText variant="caption" style={{ color: colors.danger }}>
             {errorMessage(query.error, "referral")}

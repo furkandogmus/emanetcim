@@ -19,6 +19,8 @@ import { notify } from "@/lib/notify";
 import { keys, useAdminUsers } from "@/lib/queries";
 import type { AdminUser } from "@/lib/types";
 import { colors, radius, space } from "@/theme/tokens";
+import { isBlockingError } from "@/lib/query-view";
+import { StaleQueryBanner } from "@/components/StaleQueryBanner";
 
 const open = (url: string) => void Linking.openURL(url).catch(() => undefined);
 
@@ -63,9 +65,10 @@ export default function AdminUsersScreen() {
       <View style={styles.search}>
         <SearchBox placeholder={t("admin.userSearchPlaceholder")} onSearch={setQ} />
       </View>
+      <StaleQueryBanner query={query} />
       {query.isLoading ? (
         <Loading />
-      ) : query.isError ? (
+      ) : isBlockingError(query) ? (
         <CenterMessage
           title={errorMessage(query.error)}
           action={<Button variant="secondary" title={t("common.retry")} onPress={() => query.refetch()} />}

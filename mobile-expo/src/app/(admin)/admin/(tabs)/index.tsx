@@ -18,6 +18,7 @@ import { languageInfo } from "@/lib/languages";
 import { useAdminOverview } from "@/lib/queries";
 import type { AdminBookingFilter, AdminOverview } from "@/lib/types";
 import { colors, fonts, radius, space } from "@/theme/tokens";
+import { StaleQueryBanner } from "@/components/StaleQueryBanner";
 
 /** Mobilde olmayan yonetim isleri web panelinde; yollar `src/app/[locale]/admin/*` ile ayni. */
 const WEB_SECTIONS = ["seals", "payments", "partners", "platform-settings"] as const;
@@ -48,9 +49,11 @@ export default function AdminDashboardScreen() {
         </IconButton>
       </View>
 
+      <StaleQueryBanner query={query} />
+
       {query.isLoading ? (
         <Loading />
-      ) : query.isError || !query.data ? (
+      ) : !query.data ? (
         <CenterMessage
           title={errorMessage(query.error)}
           action={<Button variant="secondary" title={t("common.retry")} onPress={() => query.refetch()} />}

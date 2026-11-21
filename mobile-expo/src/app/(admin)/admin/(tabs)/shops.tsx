@@ -14,6 +14,8 @@ import { useAdminOverview, useAdminShops } from "@/lib/queries";
 import type { AdminShop } from "@/lib/types";
 import { formatRating } from "@/lib/format";
 import { colors, radius, space } from "@/theme/tokens";
+import { isBlockingError } from "@/lib/query-view";
+import { StaleQueryBanner } from "@/components/StaleQueryBanner";
 
 /** Doluluk bu oranin ustundeyse cubuk turuncu: o dukkana yeni rezervasyon yonlendirmek riskli. */
 const BUSY = 0.8;
@@ -79,9 +81,11 @@ export default function AdminShopsScreen() {
         </ScrollView>
       ) : null}
 
+      <StaleQueryBanner query={query} />
+
       {query.isLoading ? (
         <Loading />
-      ) : query.isError ? (
+      ) : isBlockingError(query) ? (
         <CenterMessage
           title={errorMessage(query.error)}
           action={<Button variant="secondary" title={t("common.retry")} onPress={() => query.refetch()} />}
