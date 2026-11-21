@@ -1,17 +1,20 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
-const { mockPrisma } = vi.hoisted(() => ({
+const { mockPrisma, mockGenerate } = vi.hoisted(() => ({
+  mockGenerate: vi.fn(),
   mockPrisma: {
     booking: { findMany: vi.fn() },
     shop: { findUnique: vi.fn(), update: vi.fn() },
-    shopClosure: { findMany: vi.fn(), create: vi.fn() },
+    shopClosure: { findMany: vi.fn(), create: vi.fn(), deleteMany: vi.fn() },
     shopWeeklyHours: { findMany: vi.fn(), deleteMany: vi.fn(), createMany: vi.fn() },
     $transaction: vi.fn(),
   },
 }));
 vi.mock("@/lib/db", () => ({ default: mockPrisma }));
 
-import { addClosure, findScheduleConflicts } from "@/services/ShopScheduleService";
+vi.mock("@/services/SlotService", () => ({ generateSlotsForShop: mockGenerate }));
+
+import { addClosure, findScheduleConflicts, removeClosure, saveWeeklyHours } from "@/services/ShopScheduleService";
 
 const NOW = new Date("2026-10-05T08:00:00Z");
 const booking = (status: string, inIso: string, outIso: string) => ({
@@ -89,5 +92,24 @@ describe("addClosure", () => {
     mockPrisma.shopClosure.findMany.mockResolvedValue([]);
     expect(await addClosure("s1", { startDate: "2026-10-01", endDate: "2026-10-02" }, NOW)).toEqual({ ok: false, code: "INVALID" });
     expect(await addClosure("s1", { startDate: "2026-10-09", endDate: "2026-10-08" }, NOW)).toEqual({ ok: false, code: "INVALID" });
+  });
+});
+
+describe("takvim degisince slot uretimi", () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+    mockGenerate.mockResolvedValue(0);
+  });
+
+  it("removeClosure slotlari yeniden uretir; uretim hatasi yutulur", async () => {
+    mockPrisma.shopClosure.deleteMany.mockResolvedValue({ count: 1 });
+    mockGenerate.mockRejectedValue(new Error("db"));
+    await expect(removeClosure("s1", "c1")).resolves.toBeUndefined();
+    expect(mockGenerate).toHaveBeenCalledWith("s1");
+  });
+
+  it("gecersiz haftalik saat slot uretmez", async () => {
+    await saveWeeklyHours("s1", [], false);
+    expect(mockGenerate).not.toHaveBeenCalled();
   });
 });
