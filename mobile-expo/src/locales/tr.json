@@ -1140,5 +1140,10 @@
     "requiredCta": "Google Play'de aç",
     "readyBody": "Yeni sürüm hazır.",
     "readyCta": "Yenile"
+  },
+  "intro": {
+    "sloganLine1": "Valizini bırak,",
+    "sloganLine2": "yola bak.",
+    "skipHint": "Geçmek için dokunun"
   }
 }

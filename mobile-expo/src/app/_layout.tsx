@@ -26,6 +26,7 @@ import { AuthProvider, useAuth } from "@/lib/auth";
 import { openFromNotification, registerForPush } from "@/lib/push";
 import { ForcedUpdateScreen, OtaReadyBanner, useUpdateRequired } from "@/components/AppUpdate";
 import { ImpersonationFrame } from "@/components/ImpersonationBanner";
+import { BrandIntro } from "@/components/BrandIntro";
 import { SearchProvider } from "@/lib/search";
 import { colors } from "@/theme/tokens";
 
@@ -146,6 +147,8 @@ function RootNavigator() {
         </Stack.Protected>
       </Stack>
       <OtaReadyBanner />
+      {/* Yerel acilis ekrani kalkinca slogan; JS katmani oldugu icin OTA ile guncellenir. */}
+      <BrandIntro />
     </SearchProvider>
   );
 }
