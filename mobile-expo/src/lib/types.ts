@@ -104,6 +104,8 @@ export type BookingSummary = {
 export type BookingDetail = BookingSummary & {
   qrCodeToken: string | null;
   guestName: string;
+  /** Yalnizca esnaf/yonetici ve aktif rezervasyonda dolu; aksi halde bos. */
+  guestPhone?: string;
   latitude: number | null;
   longitude: number | null;
   shopPhone: string;
@@ -143,6 +145,8 @@ export type PartnerShop = {
   gallery?: { id: string; url: string }[];
   /** Kurulum ozeti: eksikse panoda "dukkanini tamamla". Eski sunucu gondermez. */
   setup?: { hasPhoto: boolean; hoursConfigured: boolean };
+  /** Yonetici ayari: check-in'de muhur numarasi zorunlu. Eski sunucu gondermez. */
+  requireSealsOnCheckIn?: boolean;
 };
 
 /** `toMobileSealRequest` (mobile-dto.ts). Durum sunucuda serbest metin; bilinen degerler bunlar. */
@@ -295,8 +299,8 @@ export type ContactMessage = {
 };
 
 /**
- * `partner/shop` GET'in ayarlar ekraninin okudugu alanlari. `phone` dukkanin
- * degil sahibinin (`User.phone`); yazmasi ayri uctan (`PUT partner/phone`).
+ * `partner/shop` GET'in ayarlar ekraninin okudugu alanlari (`toMobilePartnerShop`).
+ * `priceRange` sunucunun fiyat bandi: istemci hesaplamaz, yalnizca gosterir.
  */
 export type PartnerShopSettings = PartnerShop & {
   capacity: number;
@@ -304,8 +308,9 @@ export type PartnerShopSettings = PartnerShop & {
   address: string | null;
   city: string | null;
   district: string | null;
-  phone: string | null;
+  priceRange?: { min: number; max: number };
 };
+
 
 /** `partner/shop/schedule` GET. Gun ISO (1 = pazartesi), saatler "HH:mm", tarihler dukkan gunu "YYYY-MM-DD". */
 export type ScheduleDay = { weekday: number; isClosed: boolean; openingTime: string; closingTime: string };
@@ -462,4 +467,9 @@ export type CityCoverage = {
   /** Merkezden sehrin en uzak dukkanina (m). Eski sunucu gondermez. */
   radiusM?: number;
   coverImage: string | null;
+};
+
+/** `PUT partner/shop` yaniti: kaydin etkisi (acik rezervasyon / raf kapasitesi). */
+export type PartnerShopUpdateResult = {
+  impact?: { bookingsOutsideHours: number; bagsOverCapacity: number };
 };

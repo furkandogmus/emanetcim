@@ -270,13 +270,13 @@
     "detailTitle": "Rezervasyon",
     "checkInTitle": "Valizleri teslim al",
     "checkInHint": "Her valize taktığın mührün numarasını yaz. Mühürsüz teslim alıyorsan boş bırak.",
-    "checkInHintNoSeals": "Valizleri al, misafirin QR kodunu okut ve onayla.",
+    "checkInHintNoSeals": "Valizleri say, misafirin adını ve rezervasyonunu kontrol edip onayla.",
     "bagN": "{{n}}. valiz · {{size}}",
     "sealNumber": "Mühür no",
     "sealsPartial": "Ya bütün valizlerin mührünü gir ya da hiçbirini.",
     "checkInCta": "Teslim aldım",
     "checkedInTitle": "Teslim alındı",
-    "checkedInBody": "Misafire bildirim gönderildi.",
+    "checkedInBody": "Teslim alındı olarak kaydedildi.",
     "checkOutTitle": "Valizleri teslim et",
     "checkOutHint": "Misafir QR kodunu gösterdiyse valizleri ver ve onayla.",
     "checkOutSealsHint": "Her mührün sağlam olduğunu kontrol edip işaretle.",
@@ -285,7 +285,7 @@
     "checkedOutTitle": "Teslim edildi",
     "checkedOutBody": "Rezervasyon tamamlandı.",
     "errors": {
-      "SHOP_CLOSED": "Dükkan şu an kapalı görünüyor. Çalışma saatleri içinde tekrar dene.",
+      "SHOP_CLOSED": "Dükkanın kayıtlı çalışma saatlerinin dışındasın. Gerçek saatlerin farklıysa saatleri düzeltip tekrar dene.",
       "INVALID_STATUS": "Bu rezervasyonun durumu bu işleme uygun değil.",
       "PAYMENT_REQUIRED": "Bu rezervasyonun ödemesi alınmamış.",
       "SEAL_REQUIRED": "Her valiz için mühür numarası girmen gerekiyor.",
@@ -344,7 +344,13 @@
     "sealBrokenHint": "Sağlam olmayan mühür kayda geçer; misafirle valizi birlikte kontrol et. Teslimi yine tamamlayabilirsin.",
     "lateFeeCollect": "Gecikme ücreti {{amount}}: misafirden al.",
     "earlyRefundGive": "Erken teslim: misafire {{amount}} iade et.",
-    "shopPending": "Onay bekliyor"
+    "shopPending": "Onay bekliyor",
+    "editHours": "Çalışma saatlerini düzenle",
+    "searchPlaceholder": "Misafir adı veya kod ara",
+    "searchNone": "Eşleşen emanet yok. Kodu 8 haneli olarak yaz.",
+    "statusWaiting": "Bekleniyor",
+    "callGuest": "Misafiri ara",
+    "whatsappGuest": "WhatsApp ile yaz"
   },
   "profile": {
     "title": "Profil",
@@ -629,7 +635,16 @@
       "forbidden": "Bu rezervasyon senin dükkanına ait değil.",
       "not_found": "Rezervasyon bulunamadı."
     },
-    "openSettings": "Ayarlardan izin ver"
+    "openSettings": "Ayarlardan izin ver",
+    "manualOpen": "Kodu elle gir",
+    "manualTitle": "Kod veya isimle bul",
+    "manualPlaceholder": "8 haneli kod ya da misafir adı",
+    "manualSearch": "Ara",
+    "manualNone": "Eşleşen rezervasyon bulunamadı.",
+    "manualMany": "Birden fazla eşleşme var, birini seç.",
+    "torchOn": "Feneri aç",
+    "torchOff": "Feneri kapat",
+    "manualClose": "Kapat"
   },
   "reset": {
     "forgotPassword": "Şifremi unuttum",
@@ -670,6 +685,7 @@
       "invalid_name": "Ad 1–100 karakter olmalı.",
       "invalid_phone": "Geçerli bir Türkiye cep numarası gir (5XX XXX XX XX).",
       "phone_taken": "Bu numara başka bir hesapta kayıtlı.",
+      "phone_locked": "Bu numara girişinde kullanılıyor. E-posta veya başka bir giriş yöntemi olmadan değiştirilemez; destekle iletişime geç.",
       "no_fields": "Değiştirilecek bir bilgi yok.",
       "file_too_large": "Fotoğraf çok büyük; başka bir fotoğraf dene.",
       "invalid_type": "Bu dosya türü desteklenmiyor; JPEG, PNG ya da WebP seç.",
@@ -771,7 +787,7 @@
     "savedTitle": "Valiz sayısı güncellendi",
     "savedBody": "Yeni toplam: {{total}}",
     "approvalTitle": "Misafir onayı bekleniyor",
-    "approvalBody": "Bu düzeltme tutarı artırıyor. Misafire onay e-postası gönderildi; onaylarsa yeni tutar uygulanır.",
+    "approvalBody": "Bu düzeltme tutarı artırıyor. Misafirden onay istendi; onaylarsa yeni tutar uygulanır.",
     "errors": {
       "not_found": "Rezervasyon bulunamadı.",
       "forbidden": "Bu rezervasyon senin dükkanına ait değil.",
@@ -784,7 +800,8 @@
       "no_pending_revision": "Bu düzeltme artık geçerli değil; sayfayı yenile.",
       "revision_changed": "Dükkan düzeltmeyi az önce değiştirdi. Güncel tutara bakıp yeniden karar ver."
     },
-    "pendingBody": "Misafire {{count}} valiz, {{total}} toplam için onay isteği gitti. Onaylayana kadar rezervasyon değişmez."
+    "pendingBody": "Misafire {{count}} valiz, {{total}} toplam için onay isteği gitti. Onaylayana kadar rezervasyon değişmez.",
+    "hintCheckedInNoSeals": "Valizler teslim alındı. Tutarı artıran düzeltme için misafirin onayı istenir."
   },
   "seals": {
     "open": "Mühürler",
@@ -859,10 +876,6 @@
     "district": "İlçe",
     "city": "Şehir",
     "addressHint": "Misafirler dükkanını bu adresle bulur. Haritadaki konumu değiştirmek için web panelini kullan.",
-    "phoneSection": "İletişim",
-    "phone": "SMS bildirim telefonu (GSM)",
-    "phoneHint": "Yeni ödeme alındığında bu numaraya kısa mesaj gider. Boş bırakırsan numara silinir.",
-    "phonePlaceholder": "05XX XXX XX XX",
     "save": "Kaydet",
     "saved": "Ayarlar güncellendi.",
     "saveFailed": "Kaydedilemedi",
@@ -872,11 +885,14 @@
     "errors": {
       "invalid_input": "Bilgilerden biri geçersiz. Değerleri kontrol edip tekrar dene.",
       "shop_update_failed": "Dükkan bilgileri kaydedilemedi. Değerleri kontrol edip tekrar dene.",
-      "invalid_tr_phone": "Telefon numarası geçerli bir Türkiye cep numarası değil.",
-      "already_registered": "Bu telefon numarası başka bir hesapta kayıtlı.",
-      "invalid_data": "Telefon numarası okunamadı.",
-      "no_shop": "Aktif bir dükkanın bulunamadı."
-    }
+      "no_shop": "Aktif bir dükkanın bulunamadı.",
+      "price_out_of_range": "Günlük fiyat izin verilen aralığın dışında. Aralık fiyat alanının altında yazıyor."
+    },
+    "priceRange": "İzin verilen aralık: {{min}} – {{max}} ₺",
+    "priceOutOfRange": "Günlük fiyat izin verilen aralığın dışında. Aralık fiyat alanının altında yazıyor.",
+    "impactTitle": "Kaydedildi, ama dikkat",
+    "impactOutsideHours": "Yeni saatlerin dışında kalan {{count}} aktif rezervasyon var. Bu misafirler gelince teslim alamazsın; onlara ulaşmak için rezervasyon listesine bak.",
+    "impactOverCapacity": "Rafta şu an yeni kapasiteyi {{count}} valiz aşıyor. Yeni rezervasyon alamazsın."
   },
   "schedule": {
     "title": "Çalışma saatleri ve izin",
@@ -916,7 +932,8 @@
       "invalid_input": "Saat ya da tarih geçersiz. Geçmiş bir tarihe izin eklenemez.",
       "schedule_save_failed": "Kaydedilemedi, tekrar dene.",
       "no_shop": "Aktif bir dükkanın bulunamadı."
-    }
+    },
+    "conflictNext": "Bir rezervasyona dokunup misafirle konuş ya da destekle iletişime geç."
   },
   "referral": {
     "title": "Davet kodum",
