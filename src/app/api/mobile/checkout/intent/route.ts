@@ -14,7 +14,11 @@ import { bookingService } from "@/services/BookingService";
 import { computeAuthoritativeCheckoutTotals } from "@/lib/booking-server-price";
 import { getPricingRules } from "@/lib/platform-settings";
 import { moneyToNumber } from "@/lib/money";
-import { BookingRejectedError, type BookingRejectionCode } from "@/services/booking/errors";
+import {
+  BookingIdempotentReplayError,
+  BookingRejectedError,
+  type BookingRejectionCode,
+} from "@/services/booking/errors";
 import prisma from "@/lib/db";
 import logger from "@/lib/logger";
 import { BookingStatus } from "@prisma/client";
@@ -61,12 +65,55 @@ const schema = z.object({
   couponCode: z.string().trim().min(1).max(64).optional(),
   /** Davet kodu (2026-09-23). Kural `ReferralService`te; web ile ayni cagri. */
   referralCode: z.string().trim().min(1).max(32).optional(),
+  /*
+    Ekranda gosterilen toplam (`checkout/quote`). Sunucunun hesapladigi tutar
+    bundan farkliysa (kupon kotasi bitti, davet kodu gecmez, fiyat kurali
+    degisti) rezervasyon YAZILMAZ: misafir gordugunden farkli bir tutara
+    onay vermis olmasin. Eski istemci gondermez; o zaman kontrol atlanir.
+  */
+  expectedTotal: z.number().min(0).max(1_000_000).optional(),
 });
+
+/** `Idempotency-Key`: istemci UUID'si; baska bicim reddedilir (anahtar indekse girer). */
+const IDEMPOTENCY_KEY = /^[A-Za-z0-9_-]{8,80}$/;
+
+/** Basarili (ya da tekrar edilen) rezervasyonun yaniti: iki yol ayni govdeyi doner. */
+function bookingResponse(b: {
+  id: string;
+  status: BookingStatus;
+  totalPrice: unknown;
+  checkInTime: Date;
+  checkOutTime: Date;
+}) {
+  return NextResponse.json({
+    bookingId: b.id,
+    status: b.status,
+    totalPrice: moneyToNumber(b.totalPrice),
+    checkInTime: b.checkInTime.toISOString(),
+    checkOutTime: b.checkOutTime.toISOString(),
+  });
+}
 
 /** Mobil checkout: sağlayıcısız rezervasyon oluşturur ve doğrudan onaylar. */
 export async function POST(req: NextRequest) {
   const auth = await requireMobileUser(req);
   if ("error" in auth) return auth.error;
+
+  const rawKey = req.headers.get("idempotency-key")?.trim();
+  if (rawKey !== undefined && rawKey !== "" && !IDEMPOTENCY_KEY.test(rawKey)) {
+    return NextResponse.json({ error: "invalid_data" }, { status: 400 });
+  }
+  const idempotencyKey = rawKey || undefined;
+  /*
+    TEKRAR: ayni misafirin ayni anahtarla daha once yazilmis rezervasyonu varsa
+    AYNI yanit doner. Kupon hakki, hiz siniri ve kapasite ONCEDEN bakilir:
+    istemci 12 sn'de istegi iptal edip yeniden gonderdiginde ilk istek coktan
+    yazmis olabilir, ikinci kayit misafire cift rezervasyon olurdu.
+  */
+  if (idempotencyKey) {
+    const existing = await bookingService.findBookingByIdempotencyKey(auth.user.id, idempotencyKey);
+    if (existing) return bookingResponse(existing);
+  }
 
   // Web `createBookingAction` ile ayni sinirlar: mobil uc sinirsizdi ve tek hesapla
   // kapasite doldurulabiliyordu.
@@ -170,9 +217,22 @@ export async function POST(req: NextRequest) {
     }
   }
 
+  /*
+    Gosterilen tutar ile hesaplanan tutar ayrisirsa YAZMADAN reddedilir; alinan
+    kupon hakki geri verilir. Istemci yeni tutari 409 govdesinden gorur.
+  */
+  if (
+    parsed.data.expectedTotal !== undefined &&
+    Math.abs(parsed.data.expectedTotal - toplam) > 0.005
+  ) {
+    if (appliedCouponId) await couponService.release(appliedCouponId);
+    return NextResponse.json({ error: "price_changed", totalPrice: toplam }, { status: 409 });
+  }
+
   let booking;
   try {
     booking = await bookingService.createInitialBooking({
+      idempotencyKey,
       guestId: auth.user.id,
       shopId,
       /*
@@ -209,6 +269,8 @@ export async function POST(req: NextRequest) {
     if (appliedCouponId) {
       await couponService.release(appliedCouponId);
     }
+    // Es zamanli tekrar: kazananin kaydi doner, bu istek hicbir sey yazmadi.
+    if (e instanceof BookingIdempotentReplayError) return bookingResponse(e.existing);
     if (e instanceof BookingRejectedError) {
       const { status, error } = REJECTION_TO_HTTP[e.code];
       return NextResponse.json({ error }, { status });

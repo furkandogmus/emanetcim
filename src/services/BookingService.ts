@@ -4,7 +4,10 @@ import { type SealAssignmentInput } from '@/services/SealService';
 import { moneyToNumber } from '@/lib/money';
 import { PartnerCheckInResult, PartnerCheckOutResult, CancelBookingResult, ModifyBookingResult, BookingWithShopGuestDetails } from '@/types/partner-booking';
 import { paymentService, type PaymentActor } from '@/services/PaymentService';
-import { createInitialBooking as createInitialBookingImpl } from '@/services/booking/create';
+import {
+  createInitialBooking as createInitialBookingImpl,
+  findBookingByIdempotencyKey as findBookingByIdempotencyKeyImpl,
+} from '@/services/booking/create';
 import { checkIn as checkInImpl } from '@/services/booking/check-in';
 import { checkOut as checkOutImpl } from '@/services/booking/check-out';
 import { cancelBooking as cancelBookingImpl, modifyBooking as modifyBookingImpl } from '@/services/booking/lifecycle';
@@ -65,6 +68,12 @@ export type CreateInitialBookingInput = {
    * Misafir akislari `APPROVED` gecer — gerekce `src/services/booking/create.ts`.
    */
   initialStatus?: BookingStatus;
+  /**
+   * Istemci tekrar-deneme anahtari (mobil `Idempotency-Key` basligi). Verilirse
+   * ayni (misafir, anahtar) icin ikinci rezervasyon acilmaz: servis
+   * `BookingIdempotentReplayError` firlatir. Bkz. `Booking.idempotencyKey`.
+   */
+  idempotencyKey?: string;
 };
 
 export type ModifyBookingInput = {
@@ -159,6 +168,11 @@ export interface IBookingService {
 export class BookingService implements IBookingService {
   async createInitialBooking(data: CreateInitialBookingInput): Promise<Booking> {
     return createInitialBookingImpl(data);
+  }
+
+  /** Ayni (misafir, Idempotency-Key) icin onceden olusmus rezervasyon; yoksa `null`. */
+  async findBookingByIdempotencyKey(guestId: string, idempotencyKey: string): Promise<Booking | null> {
+    return findBookingByIdempotencyKeyImpl(guestId, idempotencyKey);
   }
 
   async checkIn(bookingId: string,
