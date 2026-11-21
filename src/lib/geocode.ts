@@ -1,6 +1,44 @@
 import { fetchWithTimeout } from "@/lib/async-timeout";
 
-export type GeocodedPlace = { lat: number; lng: number; label: string };
+export type GeocodedPlace = {
+  lat: number;
+  lng: number;
+  label: string;
+  /** Liste satirinin basligi (otel/cadde adi); kapi numarasi basliga cikmaz. */
+  title?: string;
+  /** Ilce ve sehir; yoksa display_name'in anlamli parcalari. */
+  subtitle?: string;
+};
+
+type NominatimHit = {
+  lat?: string;
+  lon?: string;
+  display_name?: string;
+  name?: string;
+  address?: Record<string, string | undefined>;
+};
+
+/**
+ * Nominatim sonucundan liste basligi ve alt basligi. `display_name` POI'lerde
+ * "Otel, 2, Cadde, Ilce, Sehir, ..." diye gelir: ilk iki parcayi almak kapi
+ * numarasini etiket yapiyordu. Once `name`/adres alanlari, yoksa sayisal olmayan
+ * parcalar kullanilir.
+ */
+export function placeTitleSubtitle(d: NominatimHit, fallback: string): { title: string; subtitle: string } {
+  const parts = (d.display_name ?? "")
+    .split(",")
+    .map((p) => p.trim())
+    .filter((p) => p && !/^\d+[A-Za-z]?$/.test(p));
+  const a = d.address ?? {};
+  const title = d.name?.trim() || a.road?.trim() || parts[0] || fallback;
+  const district = a.suburb || a.city_district || a.town || a.county || a.neighbourhood;
+  const city = a.city || a.province || a.state;
+  const fromAddress = [district, city]
+    .filter((p, i, all): p is string => !!p && p !== title && all.indexOf(p) === i)
+    .join(", ");
+  const subtitle = fromAddress || parts.filter((p) => p !== title).slice(0, 2).join(", ");
+  return { title, subtitle };
+}
 
 /** Sorgu bundan kısaysa ağa çıkılmaz (web debounce'u ile aynı eşik). */
 export const GEOCODE_MIN_QUERY_LENGTH = 3;
@@ -140,6 +178,7 @@ export async function geocodePlaces(
   const url = new URL("https://nominatim.openstreetmap.org/search");
   url.searchParams.set("q", q);
   url.searchParams.set("format", "jsonv2");
+  url.searchParams.set("addressdetails", "1");
   url.searchParams.set("limit", String(limit));
   url.searchParams.set("accept-language", locale);
   if (opts.countryCodes) url.searchParams.set("countrycodes", opts.countryCodes);
@@ -155,10 +194,15 @@ export async function geocodePlaces(
       "geocode_search_list",
     );
     if (!res.ok) return { ok: false, reason: "upstream" };
-    const data = (await res.json()) as Array<{ lat?: string; lon?: string; display_name?: string }>;
+    const data = (await res.json()) as NominatimHit[];
     if (!Array.isArray(data)) return { ok: false, reason: "upstream" };
     const places = data
-      .map((d) => ({ lat: Number(d.lat), lng: Number(d.lon), label: d.display_name ?? q }))
+      .map((d) => ({
+        lat: Number(d.lat),
+        lng: Number(d.lon),
+        label: d.display_name ?? q,
+        ...placeTitleSubtitle(d, q),
+      }))
       .filter((p) => Number.isFinite(p.lat) && Number.isFinite(p.lng));
     if (listCache.size >= CACHE_MAX) {
       const oldest = listCache.keys().next().value;

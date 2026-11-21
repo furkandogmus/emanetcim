@@ -41,11 +41,13 @@ describe("GET /api/mobile/geocode", () => {
     expect(res.status).toBe(200);
     expect(await res.json()).toEqual({
       label: "Kadıköy, İstanbul",
+      title: "Kadıköy, İstanbul",
+      subtitle: "",
       latitude: 40.99,
       longitude: 29.02,
       items: [
-        { label: "Kadıköy, İstanbul", latitude: 40.99, longitude: 29.02 },
-        { label: "Kadıköy İskelesi, İstanbul", latitude: 41.0, longitude: 29.0 },
+        { label: "Kadıköy, İstanbul", title: "Kadıköy, İstanbul", subtitle: "", latitude: 40.99, longitude: 29.02 },
+        { label: "Kadıköy İskelesi, İstanbul", title: "Kadıköy İskelesi, İstanbul", subtitle: "", latitude: 41.0, longitude: 29.0 },
       ],
     });
   });
