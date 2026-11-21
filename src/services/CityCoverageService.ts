@@ -1,10 +1,13 @@
 import prisma from "@/lib/db";
 import { OPERATING_SHOP_FILTER } from "@/lib/public-shop-filter";
 import { distanceKm } from "@/lib/geo";
+import { citySlug } from "@/lib/city-slug";
 
 export type CityCoverage = {
   /** En sik yazilan bicim ("İstanbul"); gruplama buyuk/kucuk harf ve bosluktan bagimsiz. */
   name: string;
+  /** Yazim bicimine bagli olmayan anahtar ("istanbul"); gruplama ve istemci gorsel eslemesi bunu kullanir. */
+  slug: string;
   shopCount: number;
   /**
    * Aramanin acildigi nokta: dukkanlarin ORTALAMASI degil, en yogun yerdeki dukkan
@@ -60,7 +63,8 @@ export class CityCoverageService {
     for (const s of shops) {
       const raw = s.city!.trim();
       if (!raw) continue;
-      const key = raw.toLocaleLowerCase("tr-TR");
+      const key = citySlug(raw);
+      if (!key) continue;
       const g = groups.get(key) ?? { spellings: new Map(), points: [] as Array<[number, number]>, n: 0, image: null };
       g.spellings.set(raw, (g.spellings.get(raw) ?? 0) + 1);
       g.n += 1;
@@ -76,12 +80,13 @@ export class CityCoverageService {
       groups.set(key, g);
     }
 
-    const value = [...groups.values()]
-      .filter((g) => g.points.length > 0)
-      .map((g) => {
+    const value = [...groups.entries()]
+      .filter(([, g]) => g.points.length > 0)
+      .map(([slug, g]) => {
         const [latitude, longitude] = medoid(g.points);
         const farthestKm = Math.max(...g.points.map(([la, lo]) => distanceKm(latitude, longitude, la, lo)));
         return {
+          slug,
           name: [...g.spellings.entries()].sort((a, b) => b[1] - a[1])[0][0],
           shopCount: g.n,
           latitude,
