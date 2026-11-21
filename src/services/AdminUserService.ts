@@ -2,6 +2,7 @@ import type { Prisma } from "@prisma/client";
 import prisma from "@/lib/db";
 import { writeAuditLog } from "@/lib/audit-log";
 import { phoneSearchDigits } from "@/lib/admin-phone-search";
+import { cursorArgs, toPage } from "@/lib/cursor-page";
 
 export type AdminActor = { userId: string | null; ip: string | null };
 
@@ -17,26 +18,41 @@ const LIST_SELECT = {
   _count: { select: { bookings: true, shops: true } },
 } as const satisfies Prisma.UserSelect;
 
+function userSearchWhere(q: string): Prisma.UserWhereInput | undefined {
+  const term = q.trim();
+  if (!term) return undefined;
+  // Telefon: bosluk/tire/+90/0 onekleri ne olursa olsun saklanan bicimle eslesir.
+  const digits = phoneSearchDigits(term, 4);
+  return {
+    OR: [
+      { name: { contains: term, mode: "insensitive" } },
+      { email: { contains: term, mode: "insensitive" } },
+      ...(digits ? [{ phone: { contains: digits } }] : []),
+    ],
+  };
+}
+
 export class AdminUserService {
   /** Ad, e-posta ya da telefonla arama; bos sorgu en yeni kullanicilari verir. */
   async search(q: string, take = 50) {
-    const term = q.trim();
-    // Telefon: bosluk/tire/+90/0 onekleri ne olursa olsun saklanan bicimle eslesir.
-    const digits = phoneSearchDigits(term, 4);
     return prisma.user.findMany({
-      where: term
-        ? {
-            OR: [
-              { name: { contains: term, mode: "insensitive" } },
-              { email: { contains: term, mode: "insensitive" } },
-              ...(digits ? [{ phone: { contains: digits } }] : []),
-            ],
-          }
-        : undefined,
+      where: userSearchWhere(q),
       orderBy: { createdAt: "desc" },
       take,
       select: LIST_SELECT,
     });
+  }
+
+  /** `search`'un sayfali hali: bos sorgu en yeni 50'de bitiyor, devamina ulasilamiyordu. */
+  async searchPage(q: string, opts: { cursor?: string | null; take?: number } = {}) {
+    const take = Math.min(Math.max(1, opts.take ?? 50), 100);
+    const rows = await prisma.user.findMany({
+      where: userSearchWhere(q),
+      orderBy: [{ createdAt: "desc" }, { id: "desc" }],
+      ...cursorArgs(opts.cursor ?? null, take),
+      select: LIST_SELECT,
+    });
+    return toPage(rows, take);
   }
 
   /*
