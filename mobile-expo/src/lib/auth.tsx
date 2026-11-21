@@ -9,7 +9,7 @@ import {
   ApiError,
   api,
   clearTokens,
-  currentAccessToken,
+  detachSession,
   forgetTokensInMemory,
   isImpersonating,
   loadTokens,
@@ -311,7 +311,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       await stopImpersonation();
       return;
     }
-    const bearer = currentAccessToken();
+    const session = detachSession();
     stateRef.current = { status: "signedOut" };
     await clearTokens();
     void rememberUser(null);
@@ -320,11 +320,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     await resetIdentityData();
     update({ status: "signedOut" });
     void forgetGoogleAccount().catch(() => undefined);
-    if (bearer) {
+    if (session) {
       // Push silme cikistan once: cikis tokenVersion'i artirir, sonraki istek 401 alirdi.
+      // Yakalanan access token'in suresi dolduysa cift bir kez yenilenir (DetachedSession).
       void (async () => {
-        await unregisterPush(bearer);
-        await api("/auth/logout", { method: "POST", bearer });
+        await unregisterPush(session);
+        await api("/auth/logout", { method: "POST", bearer: session });
       })().catch(() => undefined);
     } else forgetPushRegistration();
   }, [resetIdentityData, stopImpersonation, update]);
