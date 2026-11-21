@@ -1,5 +1,6 @@
 import { useState } from "react";
-import { Alert, KeyboardAvoidingView, ScrollView, StyleSheet, Switch, TextInput, View } from "react-native";
+import { Alert, KeyboardAvoidingView, Pressable, ScrollView, StyleSheet, Switch, TextInput, View } from "react-native";
+import { useRouter } from "expo-router";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { Trash2 } from "lucide-react-native";
@@ -94,8 +95,11 @@ function ScheduleForm({ schedule }: { schedule: PartnerSchedule }) {
   const [shopId] = usePartnerShopSelection();
   const [open247, setOpen247] = useState(schedule.open247);
   const [days, setDays] = useState<ScheduleDay[]>(schedule.days);
-  const [error, setError] = useState<string | null>(null);
-  const [conflicts, setConflicts] = useState<ScheduleConflict[]>([]);
+  const router = useRouter();
+  // Saat kaydi ve izin kaydi AYRI geri bildirim tasir: izin formu sayfanin dibinde,
+  // hata ise yukarida kalinca esnaf "hicbir sey olmadi" sanip tekrar tekrar basiyordu.
+  const [hoursFeedback, setHoursFeedback] = useState<Feedback | null>(null);
+  const [closureFeedback, setClosureFeedback] = useState<Feedback | null>(null);
   const [adding, setAdding] = useState(false);
   const [range, setRange] = useState(() => {
     const today = cellOf(new Date());
@@ -106,13 +110,11 @@ function ScheduleForm({ schedule }: { schedule: PartnerSchedule }) {
   const patch = (weekday: number, next: Partial<ScheduleDay>) =>
     setDays((cur) => cur.map((d) => (d.weekday === weekday ? { ...d, ...next } : d)));
 
-  const onFail = (e: unknown) => {
-    setError(errorMessage(e, "schedule"));
-    setConflicts(conflictsOf(e));
-  };
+  const failWith = (set: (f: Feedback | null) => void) => (e: unknown) =>
+    set({ error: errorMessage(e, "schedule"), conflicts: conflictsOf(e) });
   const onDone = () => {
-    setError(null);
-    setConflicts([]);
+    setHoursFeedback(null);
+    setClosureFeedback(null);
     void queryClient.invalidateQueries({ queryKey: partnerScheduleKey });
   };
 
@@ -123,7 +125,7 @@ function ScheduleForm({ schedule }: { schedule: PartnerSchedule }) {
       onDone();
       notify(t("schedule.saved"));
     },
-    onError: onFail,
+    onError: failWith(setHoursFeedback),
   });
 
   const addClosure = useMutation({
@@ -141,14 +143,14 @@ function ScheduleForm({ schedule }: { schedule: PartnerSchedule }) {
       setAdding(false);
       setReason("");
     },
-    onError: onFail,
+    onError: failWith(setClosureFeedback),
   });
 
   const removeClosure = useMutation({
     mutationFn: (id: string) =>
       api(withShop(`/partner/shop/schedule?closureId=${encodeURIComponent(id)}`, shopId), { method: "DELETE" }),
     onSuccess: onDone,
-    onError: onFail,
+    onError: failWith(setClosureFeedback),
   });
 
   function submitHours() {
@@ -161,10 +163,10 @@ function ScheduleForm({ schedule }: { schedule: PartnerSchedule }) {
     // Kapali gunun saati sunucuda yok sayilir; 7/24'te de gunluk saatler kullanilmaz.
     const bad = !open247 && normalized.some((d) => !d.isClosed && (!TIME_RE.test(d.openingTime) || !TIME_RE.test(d.closingTime)));
     if (bad) {
-      setError(t("schedule.timeInvalid"));
-      setConflicts([]);
+      setHoursFeedback({ error: t("schedule.timeInvalid"), conflicts: [] });
       return;
     }
+    setClosureFeedback(null);
     saveHours.mutate({ open247, days: normalized });
   }
 
@@ -202,14 +204,25 @@ function ScheduleForm({ schedule }: { schedule: PartnerSchedule }) {
             const name = t(`schedule.days.${d.weekday}`);
             return (
               <View key={d.weekday} style={[styles.dayRow, i > 0 && styles.dayDivider]}>
-                <AppText variant="bodyMedium" style={styles.dayName}>
-                  {name}
-                </AppText>
-                {d.isClosed ? (
-                  <AppText variant="caption" style={{ flex: 1 }}>
-                    {t("schedule.closed")}
+                {/* 360 dp'de tek satira sigmiyordu: gun adi + anahtar ustte, saatler altta. */}
+                <View style={styles.dayHead}>
+                  <AppText variant="bodyMedium" style={styles.dayName}>
+                    {name}
                   </AppText>
-                ) : (
+                  {d.isClosed ? (
+                    <AppText variant="caption" style={{ flexShrink: 1 }}>
+                      {t("schedule.closed")}
+                    </AppText>
+                  ) : null}
+                  <Switch
+                    accessibilityLabel={t("schedule.openOn", { day: name })}
+                    value={!d.isClosed}
+                    onValueChange={(open) => patch(d.weekday, { isClosed: !open })}
+                    trackColor={{ true: colors.accent, false: colors.borderStrong }}
+                    thumbColor={colors.white}
+                  />
+                </View>
+                {!d.isClosed ? (
                   <View style={styles.times}>
                     <TextInput
                       accessibilityLabel={t("schedule.openingFor", { day: name })}
@@ -231,14 +244,7 @@ function ScheduleForm({ schedule }: { schedule: PartnerSchedule }) {
                       style={styles.time}
                     />
                   </View>
-                )}
-                <Switch
-                  accessibilityLabel={t("schedule.openOn", { day: name })}
-                  value={!d.isClosed}
-                  onValueChange={(open) => patch(d.weekday, { isClosed: !open })}
-                  trackColor={{ true: colors.accent, false: colors.borderStrong }}
-                  thumbColor={colors.white}
-                />
+                ) : null}
               </View>
             );
           })}
@@ -247,16 +253,7 @@ function ScheduleForm({ schedule }: { schedule: PartnerSchedule }) {
 
         <Button title={t("schedule.save")} loading={saveHours.isPending} disabled={busy} onPress={submitHours} />
 
-        {error ? (
-          <View style={{ gap: space.sm }}>
-            <Banner tone="danger" title={error} body={conflicts.length > 0 ? t("schedule.conflictTitle") : ""} />
-            {conflicts.slice(0, 10).map((c) => (
-              <AppText key={`${c.bookingId}-${c.kind}`} variant="caption">
-                {`${formatShopDay(c.date)} · ${t(KIND_KEY[c.kind] ?? KIND_KEY.dropoff)} · ${c.guestName ?? "—"}`}
-              </AppText>
-            ))}
-          </View>
-        ) : null}
+        <FeedbackBlock feedback={hoursFeedback} onOpen={(id) => router.push(`/partner/${id}`)} />
 
         <View style={styles.sectionHead}>
           <AppText variant="heading">{t("schedule.closuresTitle")}</AppText>
@@ -293,19 +290,53 @@ function ScheduleForm({ schedule }: { schedule: PartnerSchedule }) {
                 : `${formatShopDay(cellToIso(range.start))} → ${formatShopDay(cellToIso(range.end))}`}
             </AppText>
             <Field label={t("schedule.reason")} value={reason} onChangeText={setReason} maxLength={200} />
+            <FeedbackBlock feedback={closureFeedback} onOpen={(id) => router.push(`/partner/${id}`)} />
             <Button
               title={t("schedule.add")}
               loading={addClosure.isPending}
               disabled={busy}
-              onPress={() => addClosure.mutate()}
+              onPress={() => {
+                setHoursFeedback(null);
+                setClosureFeedback(null);
+                addClosure.mutate();
+              }}
             />
             <Button variant="ghost" title={t("common.cancel")} onPress={() => setAdding(false)} />
           </Card>
         ) : (
           <Button variant="secondary" title={t("schedule.addOpen")} disabled={busy} onPress={() => setAdding(true)} />
         )}
+        {/* Izin SILME hatasi form kapaliyken de gorunsun. */}
+        {!adding ? <FeedbackBlock feedback={closureFeedback} onOpen={(id) => router.push(`/partner/${id}`)} /> : null}
       </ScrollView>
     </KeyboardAvoidingView>
+  );
+}
+
+type Feedback = { error: string; conflicts: ScheduleConflict[] };
+
+/** Hata + cakisan rezervasyonlar; her satir rezervasyon detayina gider. */
+function FeedbackBlock({ feedback, onOpen }: { feedback: Feedback | null; onOpen: (bookingId: string) => void }) {
+  const { t } = useTranslation();
+  if (!feedback) return null;
+  const { error, conflicts } = feedback;
+  return (
+    <View style={{ gap: space.sm }}>
+      <Banner tone="danger" title={error} body={conflicts.length > 0 ? t("schedule.conflictTitle") : ""} />
+      {conflicts.slice(0, 10).map((c) => (
+        <Pressable
+          key={`${c.bookingId}-${c.kind}`}
+          accessibilityRole="button"
+          onPress={() => onOpen(c.bookingId)}
+          style={{ minHeight: 44, justifyContent: "center" }}
+        >
+          <AppText variant="caption" style={{ color: colors.accent }}>
+            {`${formatShopDay(c.date)} · ${t(KIND_KEY[c.kind] ?? KIND_KEY.dropoff)} · ${c.guestName ?? "—"}`}
+          </AppText>
+        </Pressable>
+      ))}
+      {conflicts.length > 0 ? <AppText variant="caption">{t("schedule.conflictNext")}</AppText> : null}
+    </View>
   );
 }
 
@@ -335,12 +366,14 @@ const styles = StyleSheet.create({
     backgroundColor: colors.surface,
     paddingHorizontal: space.lg,
   },
-  dayRow: { flexDirection: "row", alignItems: "center", gap: space.sm, minHeight: 60 },
+  dayRow: { gap: space.sm, paddingVertical: space.sm, minHeight: 60 },
+  dayHead: { flexDirection: "row", alignItems: "center", gap: space.sm },
   dayDivider: { borderTopWidth: 1, borderTopColor: colors.border },
-  dayName: { width: 88 },
-  times: { flex: 1, flexDirection: "row", alignItems: "center", gap: space.xs },
+  dayName: { flex: 1, flexShrink: 1 },
+  times: { flexDirection: "row", alignItems: "center", gap: space.sm },
   time: {
-    minWidth: 72,
+    flex: 1,
+    minWidth: 0,
     minHeight: 44,
     borderRadius: radius.control,
     borderWidth: 1,
