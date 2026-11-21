@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
 import { clientIpFromRequest } from "@/lib/client-ip";
 import {
+  IMPERSONATION_TTL_SECONDS,
   forbidWhileImpersonating,
   requireMobileUser,
   requireRole,
@@ -43,6 +44,8 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ id:
   return NextResponse.json({
     accessToken: token,
     expiresAt: expiresAt.toISOString(),
+    // Istemci zamanlayiciyi buna kurar: cihaz saati kaymis olsa da oturum zamaninda biter.
+    expiresInSeconds: IMPERSONATION_TTL_SECONDS,
     user: toMobileUser(target),
   });
 }
