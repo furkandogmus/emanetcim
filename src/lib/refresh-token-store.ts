@@ -22,6 +22,11 @@ import { getRedis } from "./rate-limit";
  * oturumunu dusuruyordu. Artik ilk kullanimda basilan cift `REFRESH_GRACE_MS`
  * boyunca saklanir; pencere icindeki tekrar AYNI cifti alir (idempotent).
  * Aile yalnizca pencere DISINDAKI tekrar kullanimda iptal edilir.
+ *
+ * HALEF KONTROLU: cift, halef refresh token'in `jti`siyle (`nextJti`) saklanir.
+ * Pencere icindeki tekrarda halef ZATEN kullanildiysa bu kayip yanit olamaz (mesru
+ * istemci halefi aldi ve kullandi): replay sayilir, aile iptal edilir. Yaniti
+ * gercekten kaybolan istemci halefi hic kullanmamistir, ona maliyeti yok.
  */
 
 /** Ayni refresh token'in tekrarina ayni ciftin donuldugu sure. */
@@ -61,21 +66,34 @@ function memoryGet(key: string, now: number): string | null {
 const claimKey = (jti: string) => `rtjti:v1:${jti}`;
 const pairKey = (jti: string) => `rtpair:v1:${jti}`;
 
-function parsePair(raw: string | null): IssuedPair | null {
+type StoredPair = { pair: IssuedPair; nextJti: string | null };
+
+function parsePair(raw: string | null): StoredPair | null {
   if (!raw) return null;
   try {
-    const p = JSON.parse(raw) as Partial<IssuedPair>;
+    const p = JSON.parse(raw) as Partial<IssuedPair> & { nextJti?: unknown };
     return typeof p.accessToken === "string" && typeof p.refreshToken === "string"
-      ? { accessToken: p.accessToken, refreshToken: p.refreshToken }
+      ? {
+          pair: { accessToken: p.accessToken, refreshToken: p.refreshToken },
+          nextJti: typeof p.nextJti === "string" && p.nextJti ? p.nextJti : null,
+        }
       : null;
   } catch {
     return null;
   }
 }
 
-/** Ilk kullanim aninin degeri; eski "1" degerli kayit pencere disi sayilir. */
-function classifyRepeat(claimedAt: string | null, pair: IssuedPair | null, now: number): RefreshClaim {
-  if (pair) return { kind: "repeat", pair };
+/**
+ * Ilk kullanim aninin degeri; eski "1" degerli kayit pencere disi sayilir.
+ * `successorUsed`: saklanan ciftin halef jti'si zaten kullanilmis mi.
+ */
+function classifyRepeat(
+  claimedAt: string | null,
+  stored: StoredPair | null,
+  successorUsed: boolean,
+  now: number,
+): RefreshClaim {
+  if (stored) return successorUsed ? { kind: "reused" } : { kind: "repeat", pair: stored.pair };
   const at = Number(claimedAt);
   if (Number.isFinite(at) && now - at < REFRESH_GRACE_MS) return { kind: "pending" };
   return { kind: "reused" };
@@ -97,7 +115,9 @@ export async function claimRefreshJti(
     const res = await redis.set(claimKey(jti), String(now), "PX", ttlMs, "NX");
     if (res === "OK") return { kind: "first" };
     const [pairRaw, claimedAt] = await Promise.all([redis.get(pairKey(jti)), redis.get(claimKey(jti))]);
-    return classifyRepeat(claimedAt, parsePair(pairRaw), now);
+    const stored = parsePair(pairRaw);
+    const successorUsed = stored?.nextJti ? (await redis.exists(claimKey(stored.nextJti))) > 0 : false;
+    return classifyRepeat(claimedAt, stored, successorUsed, now);
   }
 
   sweepMemoryStore(now);
@@ -106,19 +126,40 @@ export async function claimRefreshJti(
     memoryStore.set(claimKey(jti), { value: String(now), expiresAt: now + ttlMs });
     return { kind: "first" };
   }
-  return classifyRepeat(existing, parsePair(memoryGet(pairKey(jti), now)), now);
+  const stored = parsePair(memoryGet(pairKey(jti), now));
+  const successorUsed = stored?.nextJti ? memoryGet(claimKey(stored.nextJti), now) !== null : false;
+  return classifyRepeat(existing, stored, successorUsed, now);
 }
 
-/** Ilk kullanimda basilan cifti pencere boyunca saklar. Hata FIRLATILIR. */
+/**
+ * Ilk kullanimda basilan cifti, halef refresh token'in jti'siyle birlikte pencere
+ * boyunca saklar. Hata FIRLATILIR: cagiran `releaseRefreshJti` ile isareti geri alir.
+ */
 export async function rememberIssuedPair(
   jti: string,
   pair: IssuedPair,
+  nextJti: string,
   now: number = Date.now(),
 ): Promise<void> {
+  const value = JSON.stringify({ ...pair, nextJti });
   const redis = getRedis();
   if (redis) {
-    await redis.set(pairKey(jti), JSON.stringify(pair), "PX", REFRESH_GRACE_MS);
+    await redis.set(pairKey(jti), value, "PX", REFRESH_GRACE_MS);
     return;
   }
-  memoryStore.set(pairKey(jti), { value: JSON.stringify(pair), expiresAt: now + REFRESH_GRACE_MS });
+  memoryStore.set(pairKey(jti), { value, expiresAt: now + REFRESH_GRACE_MS });
+}
+
+/**
+ * Cift saklanamadiysa ilk-kullanim isaretini geri alir: istemci ayni token'la tekrar
+ * geldiginde yine ilk kullanim sayilir. Yoksa 60 sn `pending` (503), ardindan
+ * `reused` ve butun cihazlarin oturumu duserdi. En iyi caba: hata yutulur.
+ */
+export async function releaseRefreshJti(jti: string): Promise<void> {
+  const redis = getRedis();
+  if (redis) {
+    await redis.del(claimKey(jti)).catch(() => undefined);
+    return;
+  }
+  memoryStore.delete(claimKey(jti));
 }

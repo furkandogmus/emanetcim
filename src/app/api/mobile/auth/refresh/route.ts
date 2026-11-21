@@ -12,7 +12,11 @@ import {
 } from "@/lib/mobile-auth";
 import { rateLimit } from "@/lib/rate-limit";
 import { clientIp } from "@/lib/internal-api-guard";
-import { claimRefreshJti, rememberIssuedPair, type RefreshClaim } from "@/lib/refresh-token-store";
+import {
+  claimRefreshJti,
+  rememberIssuedPair,
+  type RefreshClaim,
+} from "@/lib/refresh-token-store";
 import { revokeAllUserSessions } from "@/services/auth/mobile-session";
 import logger from "@/lib/logger";
 
@@ -90,13 +94,14 @@ export async function POST(req: NextRequest) {
     return unauthorized();
   }
 
+  const nextJti = crypto.randomUUID();
   const pair = {
     accessToken: await signAccessToken(user.id, user.role, user.tokenVersion),
-    refreshToken: await signRefreshToken(user.id, user.role, user.tokenVersion),
+    refreshToken: await signRefreshToken(user.id, user.role, user.tokenVersion, nextJti),
   };
   if (claims.jti) {
     // Yazilamazsa eski davranis: tekrar gelirse replay sayilir. Yanit yine doner.
-    await rememberIssuedPair(claims.jti, pair).catch((err: unknown) => {
+    await rememberIssuedPair(claims.jti, pair, nextJti).catch((err: unknown) => {
       logger.warn({ err }, "mobile_refresh_pair_store_failed");
     });
   }

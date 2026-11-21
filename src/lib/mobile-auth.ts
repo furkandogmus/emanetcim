@@ -96,10 +96,18 @@ export async function signAccessToken(userId: string, role: Role, tokenVersion?:
     .sign(secret());
 }
 
-export async function signRefreshToken(userId: string, role: Role, tokenVersion?: number) {
+/**
+ * `jti`: bkz. refresh-token-store.ts -- tekrar-kullanim (replay) tespiti bu alana dayanir.
+ * Yenileme ucu onu kendisi verir: halef token'in jti'si eski ciftin yanina yazilir.
+ */
+export async function signRefreshToken(
+  userId: string,
+  role: Role,
+  tokenVersion?: number,
+  jti: string = crypto.randomUUID(),
+) {
   const tv = await resolveTokenVersion(userId, tokenVersion);
-  // `jti`: bkz. refresh-token-store.ts -- tekrar-kullanim (replay) tespiti bu alana dayanir.
-  return new SignJWT({ role, type: "refresh", tv, jti: crypto.randomUUID() })
+  return new SignJWT({ role, type: "refresh", tv, jti })
     .setProtectedHeader({ alg: "HS256" })
     .setIssuer(JWT_ISSUER)
     .setAudience(JWT_AUDIENCE.mobile)

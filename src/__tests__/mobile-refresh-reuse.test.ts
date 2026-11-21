@@ -36,11 +36,12 @@ vi.mock("@/lib/mobile-auth", async (orig) => {
 vi.mock("@/lib/refresh-token-store", () => ({
   claimRefreshJti: vi.fn(),
   rememberIssuedPair: vi.fn().mockResolvedValue(undefined),
+  releaseRefreshJti: vi.fn().mockResolvedValue(undefined),
 }));
 
 import prisma from "@/lib/db";
-import { verifyMobileToken } from "@/lib/mobile-auth";
-import { claimRefreshJti, rememberIssuedPair } from "@/lib/refresh-token-store";
+import { signRefreshToken, verifyMobileToken } from "@/lib/mobile-auth";
+import { claimRefreshJti, rememberIssuedPair, releaseRefreshJti } from "@/lib/refresh-token-store";
 import { rateLimit } from "@/lib/rate-limit";
 import { revokeAllUserSessions } from "@/services/auth/mobile-session";
 
@@ -76,10 +77,14 @@ describe("POST /api/mobile/auth/refresh — replay tespiti", () => {
     const res = await POST(makeRequest());
     expect(res.status).toBe(200);
     expect(revokeAllUserSessions).not.toHaveBeenCalled();
-    expect(rememberIssuedPair).toHaveBeenCalledWith("jti-1", {
-      accessToken: "new-access",
-      refreshToken: "new-refresh",
-    });
+    // Halefin jti'si ciftin yanina yazilir: halef kullanildiktan sonraki tekrar replay sayilir.
+    const nextJti = vi.mocked(signRefreshToken).mock.calls[0][3];
+    expect(typeof nextJti).toBe("string");
+    expect(rememberIssuedPair).toHaveBeenCalledWith(
+      "jti-1",
+      { accessToken: "new-access", refreshToken: "new-refresh" },
+      nextJti,
+    );
   });
 
   it("tolerans penceresinde tekrar: aynı çift döner, aile iptal edilmez", async () => {
