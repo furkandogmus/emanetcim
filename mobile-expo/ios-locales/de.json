@@ -1,0 +1,4 @@
+{
+  "NSLocationWhenInUseUsageDescription": "Wir verwenden deinen Standort, um Gepäckaufbewahrungen in deiner Nähe anzuzeigen.",
+  "NSCameraUsageDescription": "Wir verwenden die Kamera, um den Buchungs-QR-Code des Gastes zu scannen."
+}

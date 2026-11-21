@@ -4,7 +4,7 @@ import { ChevronLeft, ChevronRight } from "lucide-react-native";
 import { useTranslation } from "react-i18next";
 
 import { IconButton } from "@/components/ui";
-import { formatMonth } from "@/lib/format";
+import { formatFullDate, formatMonth } from "@/lib/format";
 import { nextRange, type Picking } from "@/lib/date-range";
 import { cellOf } from "@/lib/time";
 import { colors, fonts, radius, space } from "@/theme/tokens";
@@ -109,6 +109,7 @@ export function RangeCalendar({
               disabled={past}
               onPress={() => pick(day)}
               accessibilityRole="button"
+              accessibilityLabel={formatFullDate(day)}
               accessibilityState={{ selected: isStart || isEnd, disabled: past }}
               style={styles.cell}
             >

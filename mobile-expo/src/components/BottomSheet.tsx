@@ -18,10 +18,15 @@ const SPRING = { damping: 22, stiffness: 220, mass: 0.9 };
  */
 export function BottomSheet({
   children,
+  header,
+  handleLabel,
   top,
   peek,
 }: {
   children: ReactNode;
+  /** Tutamacla birlikte surulebilir baslik: kapali konumda gorunen sert serit hep surukler. */
+  header?: ReactNode;
+  handleLabel?: string;
   top: number;
   peek: number;
 }) {
@@ -43,13 +48,32 @@ export function BottomSheet({
       y.value = withSpring(goingUp ? open : closed, SPRING);
     });
 
+  const tap = Gesture.Tap().onEnd(() => {
+    // Ince tutamac yerine dokunma da acar/kapatir.
+    y.value = withSpring(y.value > (open + closed) / 2 ? open : closed, SPRING);
+  });
+  const gesture = Gesture.Exclusive(pan, tap);
+
   const style = useAnimatedStyle(() => ({ transform: [{ translateY: y.value }] }));
 
   return (
     <Animated.View style={[styles.sheet, { height: height - open }, style]}>
-      <GestureDetector gesture={pan}>
-        <View style={styles.handleArea} accessibilityRole="adjustable">
-          <View style={styles.handle} />
+      <GestureDetector gesture={gesture}>
+        <View collapsable={false}>
+          <View
+            style={styles.handleArea}
+            accessible
+            accessibilityRole="adjustable"
+            accessibilityLabel={handleLabel}
+            accessibilityActions={[{ name: "increment" }, { name: "decrement" }]}
+            onAccessibilityAction={(e) => {
+              // Ekran okuyucuda surukleme yok: artir = paneli ac, azalt = kapat.
+              y.set(withSpring(e.nativeEvent.actionName === "increment" ? open : closed, SPRING));
+            }}
+          >
+            <View style={styles.handle} />
+          </View>
+          {header}
         </View>
       </GestureDetector>
       {children}
