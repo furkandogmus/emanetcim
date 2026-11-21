@@ -21,7 +21,7 @@ type SearchState = {
 
 type SearchContextValue = SearchState & {
   setPlace: (p: Place) => void;
-  setWindow: (checkIn: Date, checkOut: Date) => void;
+  setWindow: (checkIn: Date, checkOut: Date, rolled?: boolean) => void;
   setBags: (b: Bags) => void;
 };
 
@@ -94,7 +94,7 @@ export function SearchProvider({ children }: { children: ReactNode }) {
     () => ({
       ...state,
       setPlace: (place) => setState((s) => ({ ...s, place })),
-      setWindow: (checkIn, checkOut) => setState((s) => ({ ...s, checkIn, checkOut, rolled: false })),
+      setWindow: (checkIn, checkOut, rolled = false) => setState((s) => ({ ...s, checkIn, checkOut, rolled })),
       setBags: (bags) => setState((s) => ({ ...s, bags })),
     }),
     [state],

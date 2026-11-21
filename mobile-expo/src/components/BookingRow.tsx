@@ -74,7 +74,7 @@ export const BookingRow = memo(function BookingRow({
           </AppText>
         ) : null}
         <View style={styles.meta}>
-          <StatusBadge status={booking.status} checkOutTime={booking.checkOutTime} partnerView={partnerView} />
+          <StatusBadge status={booking.status} checkOutTime={booking.checkOutTime} expired={booking.expired} partnerView={partnerView} />
           {highlight ? (
             <View style={styles.highlight}>
               <AppText variant="label" style={{ color: colors.white, fontSize: 12 }}>

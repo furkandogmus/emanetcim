@@ -16,7 +16,9 @@ import { AppText, Banner, Button, CenterMessage, IconButton, Loading } from "@/c
 import { api, ApiError } from "@/lib/api";
 import { errorMessage } from "@/lib/errors";
 import { formatMoney } from "@/lib/format";
-import { isActiveBooking, useBooking } from "@/lib/queries";
+import { isBookingExpired } from "@/lib/booking-state";
+import { isActiveBooking, useBooking, useOnlinePayments } from "@/lib/queries";
+import { defaultWindow, useSearch } from "@/lib/search";
 import type { BookingDetail } from "@/lib/types";
 import { notify } from "@/lib/notify";
 import { whatsappNumber } from "@/lib/phone";
@@ -77,6 +79,8 @@ export function BookingDetailView({ id, mode }: { id: string; mode: "guest" | "p
   const queryClient = useQueryClient();
   const query = useBooking(id, { saveOffline: mode === "guest" });
   const scrollRef = useRef<ScrollView>(null);
+  const search = useSearch();
+  const onlinePayments = useOnlinePayments();
 
   /**
    * Degerlendirme / sorun formu sayfanin en altinda acilir; acildiginda ekranin
@@ -93,9 +97,14 @@ export function BookingDetailView({ id, mode }: { id: string; mode: "guest" | "p
       void queryClient.invalidateQueries({ queryKey: ["bookings"] });
       // Sunucuda `fullRefund = hadPayment` (lifecycle.ts): false "kismi ucret"
       // DEGIL, "hic odeme alinmamisti" demek -- dukkanda odeme modunda hep boyle.
+      // Kartli iade yalnizca online kipte dogru; dukkanda tahsilatta kart iadesi vaat edilmez.
       notify(
         t("bookings.cancelledTitle"),
-        res.fullRefund ? t("bookings.cancelledRefund") : t("bookings.cancelledNoCharge"),
+        !res.fullRefund
+          ? t("bookings.cancelledNoCharge")
+          : onlinePayments
+            ? t("bookings.cancelledRefund")
+            : t("bookings.cancelledRefundOnsite"),
       );
     },
     onError: (e) => {
@@ -128,7 +137,7 @@ export function BookingDetailView({ id, mode }: { id: string; mode: "guest" | "p
       </View>
       <ScrollView contentContainerStyle={styles.content}>
         <Banner tone={banner.tone} title={banner.title} body={banner.body} />
-        <BookingTicket booking={offline!} showQr />
+        <BookingTicket booking={offline!} showQr={!isBookingExpired(offline!)} />
         {retry ? <Button variant="secondary" title={t("common.retry")} onPress={() => query.refetch()} /> : null}
       </ScrollView>
     </SafeAreaView>
@@ -178,7 +187,17 @@ export function BookingDetailView({ id, mode }: { id: string; mode: "guest" | "p
   }
 
   const b = query.data;
-  const showQr = mode === "guest" && !["CANCELLED", "CHECKED_OUT"].includes(b.status);
+  // Gelinmemis, suresi dolmus rezervasyon: QR / degistir / iptal gizlenir, tek is "yeniden rezervasyon".
+  const expired = mode === "guest" && isBookingExpired(b);
+  const showQr = mode === "guest" && !expired && !["CANCELLED", "CHECKED_OUT"].includes(b.status);
+
+  /** Ayni dukkan, ayni valizler, yeni tarih (simdiden varsayilan pencere). */
+  function rebook() {
+    const w = defaultWindow();
+    search.setBags({ s: b.bagCountS, m: b.bagCountM, xl: b.bagCountXl });
+    search.setWindow(w.checkIn, w.checkOut, w.rolled);
+    router.push(`/shop/${b.shopId}`);
+  }
 
   function confirmCancel() {
     Alert.alert(t("bookings.cancelTitle"), t("bookings.cancelBody"), [
@@ -206,6 +225,12 @@ export function BookingDetailView({ id, mode }: { id: string; mode: "guest" | "p
           <RefreshControl refreshing={query.isRefetching} onRefresh={() => query.refetch()} tintColor={colors.accent} />
         }
       >
+        {expired ? (
+          <View style={{ gap: space.md }}>
+            <Banner tone="warning" title={t("bookings.expiredTitle")} body={t("bookings.expiredBody")} />
+            <Button title={t("bookings.rebook")} onPress={rebook} />
+          </View>
+        ) : null}
         {/* Onay bekleyen duzeltme bilet ve QR'in USTUNDE: misafirin yapmasi gereken tek is bu. */}
         {mode === "guest" ? <GuestBagRevisionCard booking={b} /> : null}
         <BookingTicket
@@ -269,7 +294,7 @@ export function BookingDetailView({ id, mode }: { id: string; mode: "guest" | "p
                 ) : null}
               </View>
             ) : null}
-            {MODIFIABLE.has(b.status) ? (
+            {!expired && MODIFIABLE.has(b.status) ? (
               <Button
                 variant="secondary"
                 title={t("modify.open")}
@@ -278,7 +303,7 @@ export function BookingDetailView({ id, mode }: { id: string; mode: "guest" | "p
             ) : null}
             <GuestReviewCard key={`review-${b.status}`} booking={b} onOpen={revealForm} />
             <GuestDisputeCard key={`dispute-${b.status}`} booking={b} onOpen={revealForm} />
-            {CANCELLABLE.has(b.status) ? (
+            {!expired && CANCELLABLE.has(b.status) ? (
               <Button
                 variant="ghost"
                 title={t("bookings.cancel")}

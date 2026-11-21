@@ -63,3 +63,10 @@ describe("cihazdaki biletler", () => {
     expect(await listOfflineTickets()).toEqual([]);
   });
 });
+
+describe("suresi dolan bilet", () => {
+  it("cihaza yazilmaz (gecersiz QR tezgahta gosterilmesin)", async () => {
+    await saveOfflineTicket(booking("exp1", { expired: true }));
+    expect(await listOfflineTickets()).toEqual([]);
+  });
+});

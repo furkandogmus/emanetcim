@@ -3,12 +3,12 @@ import * as Updates from "expo-updates";
 import Constants from "expo-constants";
 
 import { api } from "./api";
+import type { AppConfig } from "./types";
 
 /** Play Store sayfasi; `market://` Play yoksa (emulator, Huawei) https'e duser. */
 const PLAY_URL = "https://play.google.com/store/apps/details?id=com.bagajpark";
 const PLAY_MARKET_URL = "market://details?id=com.bagajpark";
 
-type AppConfig = { minAppVersion: string | null; latestAppVersion: string | null };
 
 /** "0.3.3" -> [0,3,3]; ayristirilamazsa null (kapi acik kalir, kullaniciyi kilitlemeyiz). */
 export function parseVersion(v: string | null | undefined): number[] | null {

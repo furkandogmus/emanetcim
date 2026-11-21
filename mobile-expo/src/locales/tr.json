@@ -301,6 +301,10 @@
     "cancelledTitle": "Rezervasyon iptal edildi",
     "cancelledRefund": "Ödediğin tutarın tamamı iade edilecek.",
     "cancelledNoCharge": "Senden herhangi bir ücret alınmadı.",
+    "cancelledRefundOnsite": "Dükkanda ödeme yaptıysan iade için dükkanla görüş.",
+    "expiredTitle": "Süresi doldu",
+    "expiredBody": "Alma saati geçti ve valizin dükkana bırakılmadı. Bu rezervasyon artık kullanılamaz.",
+    "rebook": "Yeniden rezervasyon yap",
     "cancelFailed": "Rezervasyon iptal edilemedi.",
     "code": "Rezervasyon kodu",
     "overdue": "Alma saati geçti",
@@ -326,7 +330,7 @@
     "CHECKED_IN": "Valiz dükkanda",
     "CHECKED_OUT": "Tamamlandı",
     "CANCELLED": "İptal edildi",
-    "UNUSED": "Kullanılmadı"
+    "UNUSED": "Süresi doldu"
   },
   "partner": {
     "title": "Emanetler",
@@ -834,7 +838,7 @@
     "bagsTitle": "Kaç valiz?",
     "currentTotal": "Şu anki tutar",
     "newTotal": "Yeni tutar",
-    "paidNote": "Ödemesi alınmış bir rezervasyonun tutarı değiştirilemez. Tutarı değiştiren bir değişiklik için iptal edip yeniden rezervasyon yap.",
+    "paidNote": "Ödemesi kaydedilmiş bir rezervasyonun tutarı değiştirilemez. Tutarı değiştiren bir değişiklik için iptal edip yeniden rezervasyon yap.",
     "noBags": "En az bir valiz seç.",
     "save": "Değişiklikleri kaydet",
     "savedTitle": "Rezervasyon güncellendi",
@@ -842,7 +846,7 @@
     "errors": {
       "INVALID_DATES": "Seçtiğin zaman geçersiz ya da dükkan o gün kapalı. Bırakma zamanı geçmişte olamaz.",
       "INVALID_STATUS": "Bu rezervasyon artık değiştirilemiyor.",
-      "PRICE_INCREASE": "Ödemesi alınmış bir rezervasyonun tutarı değiştirilemez. İptal edip yeniden rezervasyon yapabilirsin.",
+      "PRICE_INCREASE": "Ödemesi kaydedilmiş bir rezervasyonun tutarı değiştirilemez. İptal edip yeniden rezervasyon yapabilirsin.",
       "CAPACITY": "Bu noktada seçtiğin zaman için yeterli yer yok.",
       "NOT_FOUND": "Rezervasyon bulunamadı.",
       "not_found": "Rezervasyon bulunamadı.",
