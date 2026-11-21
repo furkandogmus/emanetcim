@@ -714,7 +714,11 @@
     "nameRequired": "Dein Name darf nicht leer sein.",
     "phoneLabel": "Mobiltelefon",
     "phonePlaceholder": "5XX XXX XX XX",
-    "phoneHint": "Eine türkische Mobilnummer. Lass das Feld leer, um deine Nummer zu entfernen.",
+    "phoneHint": "Eine türkische Mobilnummer. Es ist auch die Nummer, mit der du dich anmeldest: Wenn du sie änderst, meldest du dich mit der neuen an. Lass das Feld leer, um deine Nummer zu entfernen.",
+    "phoneClearTitle": "Nummer entfernen?",
+    "phoneClearBody": "Mit dieser Nummer meldest du dich eventuell an. Wenn du sie entfernst, kannst du dich damit nicht mehr anmelden.",
+    "phoneChangeTitle": "Anmeldenummer ändern?",
+    "phoneChangeBody": "Ab jetzt meldest du dich mit der neuen Nummer an.",
     "save": "Speichern",
     "errors": {
       "invalid_name": "Dein Name muss 1–100 Zeichen lang sein.",
