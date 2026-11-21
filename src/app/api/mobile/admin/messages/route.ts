@@ -2,7 +2,10 @@ import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
 import { requireMobileUser, requireRole } from "@/lib/mobile-auth";
 import prisma from "@/lib/db";
-import { CONTACT_MESSAGE_LIST_SELECT, CONTACT_MESSAGE_LIST_TAKE } from "@/lib/contact-message-list";
+import { toMobileAdminMessage } from "@/lib/mobile-dto";
+
+/** Mobil liste web'den kucuk: telefonda 200 mesajin govdesi okunmaz. */
+const MOBILE_MESSAGE_TAKE = 100;
 
 export const dynamic = 'force-dynamic';
 
@@ -14,9 +17,19 @@ export async function GET(req: NextRequest) {
 
   const messages = await prisma.contactMessage.findMany({
     orderBy: { createdAt: "desc" },
-    select: CONTACT_MESSAGE_LIST_SELECT,
-    take: CONTACT_MESSAGE_LIST_TAKE,
+    select: {
+      id: true,
+      from: true,
+      subject: true,
+      text: true,
+      html: true,
+      isRead: true,
+      category: true,
+      createdAt: true,
+      replies: { select: { createdAt: true }, orderBy: { createdAt: "desc" }, take: 1 },
+    },
+    take: MOBILE_MESSAGE_TAKE,
   });
 
-  return NextResponse.json(messages);
+  return NextResponse.json(messages.map(toMobileAdminMessage));
 }

@@ -314,7 +314,15 @@ export function extractKeyFromUrl(url: string, storage: { publicUrl: (k: string)
  * yok" demekti. `rejectShop` zaten yapilandirilmis sonuc donuyor; ayni kalip.
  */
 export type ApproveShopResult =
-  | { ok: true }
+  | {
+      ok: true;
+      /**
+       * Hangi kanaldan bildirim DENENDI (e-posta adresi var / mobil push token'i var).
+       * SMS sayilmaz: Netgsm kapali. Ikisi de false ise esnaf haberdar edilemedi:
+       * admin kendisi aramali. Gonderim arka planda; bu "iletildi" degil "denendi".
+       */
+      notified?: { email: boolean; push: boolean };
+    }
   | { ok: false; reason: "not_found" | "missing_coordinates" };
 
 export type RejectShopResult =
@@ -824,6 +832,23 @@ export class ShopService implements IShopService {
         );
       }
 
+      // Telefon + sifreyle kayit olan esnafin e-postasi yok; uygulamayi actiysa push ulasir.
+      let pushable = false;
+      try {
+        pushable = (await prisma.mobilePushToken.count({ where: { userId: shop.ownerId } })) > 0;
+      } catch (e) {
+        logger.warn({ err: e, shopId }, 'shop_approval_push_lookup_failed');
+      }
+      if (pushable) {
+        void notificationService
+          .sendMobilePush(
+            shop.ownerId,
+            'BagajPark: Başvurunuz onaylandı',
+            `${shop.name} mağazanız onaylandı, artık rezervasyon alabilirsiniz.`,
+          )
+          .catch((e) => logger.warn({ err: e, shopId }, 'shop_approval_push_failed'));
+      }
+
       if (partnerPhone) {
         void notificationService.sendSms(
           partnerPhone,
@@ -845,7 +870,7 @@ export class ShopService implements IShopService {
         );
       }
 
-      return { ok: true };
+      return { ok: true, notified: { email: Boolean(partnerEmail), push: pushable } };
     } catch (error) {
       logger.error({ err: error, shopId }, 'ShopService::approveShop error');
       // Beklenmeyen hata da "onaylanmadi" demek; cagiran ayni yolu izler.

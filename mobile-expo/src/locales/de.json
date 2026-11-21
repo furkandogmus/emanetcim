@@ -619,7 +619,9 @@
     "banShopsNote": "Diese Person hat {{count}} Laden/Läden. Eine Sperre schließt die Läden nicht; schalte sie bei Bedarf auf der Laden-Seite für Gäste ab.",
     "userBookingsOpen": "Buchungen ansehen",
     "openShop": "Laden-Seite öffnen",
-    "impersonateOwner": "Als Ladenbesitzer ansehen"
+    "impersonateOwner": "Als Ladenbesitzer ansehen",
+    "repliedAt": "Beantwortet · {{date}}",
+    "approvedNotNotified": "Antrag genehmigt, aber der Partner konnte nicht benachrichtigt werden. Bitte ruf ihn an."
   },
   "scan": {
     "open": "QR scannen",

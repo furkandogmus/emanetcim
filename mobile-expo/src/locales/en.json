@@ -619,7 +619,9 @@
     "banShopsNote": "This person owns {{count}} shop(s). Banning does not close the shops; if needed, turn off \"Open to guests\" on the shop page.",
     "userBookingsOpen": "See their bookings",
     "openShop": "Open shop page",
-    "impersonateOwner": "View as the shop owner"
+    "impersonateOwner": "View as the shop owner",
+    "repliedAt": "Replied · {{date}}",
+    "approvedNotNotified": "Application approved, but the partner could not be notified. Please call them."
   },
   "scan": {
     "open": "Scan QR",
