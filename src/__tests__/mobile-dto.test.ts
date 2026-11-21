@@ -245,6 +245,20 @@ describe("misafir telefonu (detay gövdesi)", () => {
   });
 });
 
+describe("bekleyen valiz önerisi (detay gövdesi)", () => {
+  const PENDING = { bagCountS: 1, bagCountM: 2, bagCountXl: 0, extraAmount: 50, newTotal: 300 };
+
+  // Bulgu 57: iptal edilmiş kayıtta kalan öneri onaylanamayacak bir kart çizdiriyordu.
+  it("öneriyi yalnızca düzeltilebilir durumda gösterir", () => {
+    for (const status of ["APPROVED", "PAID", "CHECKED_IN"]) {
+      expect(toMobileBookingDetail({ ...BOOKING, status, pendingBagRevision: PENDING }).pendingBagRevision).toEqual(PENDING);
+    }
+    for (const status of ["CANCELLED", "CHECKED_OUT"]) {
+      expect(toMobileBookingDetail({ ...BOOKING, status, pendingBagRevision: PENDING }).pendingBagRevision).toBeNull();
+    }
+  });
+});
+
 describe("esnaf dükkan gövdesi", () => {
   const FULL = {
     ...SHOP,

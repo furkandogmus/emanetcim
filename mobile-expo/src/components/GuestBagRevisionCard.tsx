@@ -33,7 +33,12 @@ export function GuestBagRevisionCard({ booking }: { booking: BookingDetail }) {
       setError(null);
       void queryClient.invalidateQueries({ queryKey: ["bookings"] });
       if (action === "approve") {
-        notify(t("guestRevision.approvedTitle"), t("guestRevision.approvedBody", { total: formatMoney(res.newTotal ?? 0) }));
+        // Sunucu tutari gondermezse kartta gorulen onaylanan tutar yazilir; asla "₺0" degil.
+        const total = res.newTotal ?? pending?.newTotal;
+        notify(
+          t("guestRevision.approvedTitle"),
+          total != null ? t("guestRevision.approvedBody", { total: formatMoney(total) }) : undefined,
+        );
       } else {
         notify(t("guestRevision.rejectedTitle"), t("guestRevision.rejectedBody"));
       }

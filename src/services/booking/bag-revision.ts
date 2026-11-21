@@ -25,6 +25,7 @@
  * `manual` oldugu surece tahsilat dukkanda yapilir; defterle baglanmasi ayri is
  * (P1-21). Bu yuzden `PaymentService` cagrilmaz — ama fark denetim izine yazilir.
  */
+import { isBagRevisableStatus } from '@/lib/bag-revision-status';
 import { Prisma } from '@prisma/client';
 import prisma from '@/lib/db';
 import logger from '@/lib/logger';
@@ -81,10 +82,9 @@ export type ProposeRevisionResult =
  * Revizyona IZIN VERILEN durumlar — web ve mobilin birlesimi.
  * Ayrintili gerekce dosya basinda.
  */
-const REVISABLE_STATUSES = ['APPROVED', 'PAID', 'CHECKED_IN'] as const;
-
+// Liste `lib/bag-revision-status.ts`te (`BAG_REVISABLE_STATUSES`); mobil DTO da onu okur.
 function isRevisable(status: string): boolean {
-  return (REVISABLE_STATUSES as readonly string[]).includes(status);
+  return isBagRevisableStatus(status);
 }
 
 type RevisableBooking = NonNullable<Awaited<ReturnType<typeof findBooking>>>;
