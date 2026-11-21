@@ -127,7 +127,8 @@
     "nextMonth": "Sonraki ay",
     "step": "Adım {{current}}/{{total}}",
     "dropOffInPast": "Bırakma saati geçmişte kaldı. Yeni bir saat seç.",
-    "locationUnavailable": "Konumun alınamadı. Bir adres ara ya da listeden şehir seç."
+    "locationUnavailable": "Konumun alınamadı. Bir adres ara ya da listeden şehir seç.",
+    "changePlace": "Değiştir"
   },
   "bags": {
     "s": "Küçük (S)",
@@ -156,7 +157,25 @@
     "hoursCloses": "Kapanış {{time}} · valizini o saatten önce al",
     "hoursOpens": "Açılış {{time}} · en erken bu saatte bırakabilirsin",
     "hoursPickupOpens": "Alış en erken {{time}}",
-    "perDayMedium": "orta boy / gün"
+    "perDayMedium": "orta boy / gün",
+    "closedToday": "Bugün {{time}}'te açılır",
+    "closedTomorrow": "Bugün kapalı · Yarın {{time}}'te açılır",
+    "closedDay": "Kapalı · {{day}} {{time}}'te açılır",
+    "closedNoDate": "Seçtiğin saatte kapalı",
+    "shiftTitle": "Aramayı kaydıralım mı?",
+    "shiftBody": "{{name}} {{when}} açılıyor. Aramayı o zamana göre güncelleyelim mi?",
+    "shiftAction": "Aramayı kaydır",
+    "emptyWindowTitle": "Seçtiğin saatte uygun nokta yok",
+    "emptyWindowBody": "Tarihi ya da saati değiştirip tekrar bakabilirsin.",
+    "changeDates": "Tarihi / saati değiştir",
+    "tomorrowMorning": "Yarın sabah için ara",
+    "toggleList": "Listeyi aç / kapat",
+    "rolledToTomorrow": "Akşam olduğu için yarın sabah gösteriliyor.",
+    "errors": {
+      "invalid_dates": "Seçilen tarihler kullanılamıyor. Tarihi değiştir.",
+      "search_unavailable": "Arama şu an yapılamıyor. Biraz sonra tekrar dene.",
+      "too_many_requests": "Çok fazla deneme yapıldı. Biraz bekleyip tekrar dene."
+    }
   },
   "shop": {
     "open247": "7/24 açık",
@@ -182,7 +201,13 @@
     "reviews": "Yorumlar ({{count}})",
     "noReviews": "Henüz yorum yok.",
     "photoN": "Fotoğraf {{n}}/{{total}}",
-    "perDayMediumLabel": "Orta boy valiz, günlük"
+    "perDayMediumLabel": "Orta boy valiz, günlük",
+    "errors": {
+      "not_found": "Bu nokta artık yok."
+    },
+    "nearbyAction": "Yakındaki noktalar",
+    "selection": "Seçimin: {{when}} · {{bags}}",
+    "change": "Değiştir"
   },
   "checkout": {
     "pickOtherTime": "Başka saat seç",

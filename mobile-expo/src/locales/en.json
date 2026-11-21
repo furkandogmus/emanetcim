@@ -127,7 +127,8 @@
     "nextMonth": "Next month",
     "step": "Step {{current}} of {{total}}",
     "dropOffInPast": "That drop-off time has passed. Pick a new time.",
-    "locationUnavailable": "We couldn't get your location. Search an address or pick a city from the list."
+    "locationUnavailable": "We couldn't get your location. Search an address or pick a city from the list.",
+    "changePlace": "Change"
   },
   "bags": {
     "s": "Small (S)",
@@ -156,7 +157,25 @@
     "hoursCloses": "Closes {{time}} · pick up your bags before then",
     "hoursOpens": "Opens {{time}} · drop off from then",
     "hoursPickupOpens": "Pick up from {{time}}",
-    "perDayMedium": "medium / day"
+    "perDayMedium": "medium / day",
+    "closedToday": "Opens today at {{time}}",
+    "closedTomorrow": "Closed today · Opens tomorrow at {{time}}",
+    "closedDay": "Closed · Opens {{day}} at {{time}}",
+    "closedNoDate": "Closed at your chosen time",
+    "shiftTitle": "Move your search?",
+    "shiftBody": "{{name}} opens {{when}}. Update your search to that time?",
+    "shiftAction": "Update search",
+    "emptyWindowTitle": "No spots available at your chosen time",
+    "emptyWindowBody": "Change the date or time and look again.",
+    "changeDates": "Change date / time",
+    "tomorrowMorning": "Search tomorrow morning",
+    "toggleList": "Open / close the list",
+    "rolledToTomorrow": "It's evening, so tomorrow morning is shown.",
+    "errors": {
+      "invalid_dates": "The selected dates can't be used. Change the dates.",
+      "search_unavailable": "Search isn't available right now. Try again in a moment.",
+      "too_many_requests": "Too many attempts. Wait a moment and try again."
+    }
   },
   "shop": {
     "open247": "Open 24/7",
@@ -182,7 +201,13 @@
     "reviews": "Reviews ({{count}})",
     "noReviews": "No reviews yet.",
     "photoN": "Photo {{n}} of {{total}}",
-    "perDayMediumLabel": "Medium bag, per day"
+    "perDayMediumLabel": "Medium bag, per day",
+    "errors": {
+      "not_found": "This spot is no longer available."
+    },
+    "nearbyAction": "Nearby spots",
+    "selection": "Your search: {{when}} · {{bags}}",
+    "change": "Change"
   },
   "checkout": {
     "pickOtherTime": "Pick another time",

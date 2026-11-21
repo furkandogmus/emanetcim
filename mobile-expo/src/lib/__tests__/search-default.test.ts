@@ -20,3 +20,12 @@ describe("defaultWindow", () => {
     expect(w.checkIn.toISOString()).toBe("2026-10-18T06:00:00.000Z");
   });
 });
+
+describe("defaultWindow.rolled", () => {
+  it("aksam acilista yarina kayan pencere rolled", () => {
+    expect(defaultWindow(new Date("2026-10-18T16:10:00Z")).rolled).toBe(true);
+  });
+  it("gun ici pencere rolled degil", () => {
+    expect(defaultWindow(new Date("2026-10-18T10:05:00Z")).rolled).toBe(false);
+  });
+});
