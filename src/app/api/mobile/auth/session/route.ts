@@ -135,7 +135,11 @@ export async function POST(req: NextRequest) {
       });
       const newUserId = user.id;
       if (data.acceptedLegal === true) {
-        await recordMobileLegalAcceptance(newUserId, ip);
+        // Kabul kaydi yazilamazsa giris dusmez: hesap ve kod zaten tuketildi, yeniden
+        // denemede kullanici "var" sayilir ve kayit hic yazilmazdi.
+        await recordMobileLegalAcceptance(newUserId, ip).catch((err) =>
+          logger.error({ err, userId: newUserId }, "mobile_legal_acceptance_failed"),
+        );
       }
       void notificationService
         .notifyAdminsForNewUser({
