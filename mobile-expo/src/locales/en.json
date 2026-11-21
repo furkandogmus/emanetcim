@@ -121,6 +121,7 @@
     "increase": "Increase {{size}}"
   },
   "map": {
+    "sheetHandle": "Shop list, drag to expand or collapse",
     "count_one": "{{count}} spot near {{place}}",
     "count_other": "{{count}} spots near {{place}}",
     "nearYou": "you",

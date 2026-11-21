@@ -121,6 +121,7 @@
     "increase": "{{size}} artır"
   },
   "map": {
+    "sheetHandle": "Dükkan listesi, açmak ya da kapatmak için sürükleyin",
     "count_one": "{{place}} çevresinde {{count}} nokta",
     "count_other": "{{place}} çevresinde {{count}} nokta",
     "nearYou": "Yakınında",
