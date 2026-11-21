@@ -794,6 +794,7 @@
     },
     "emailLabel": "Email",
     "emailLocked": "Your email address can't be changed in the app.",
+    "identityLockedViewing": "Login details can't be changed in view mode.",
     "photo": "Profile photo",
     "addPhoto": "Add photo",
     "changePhoto": "Change photo",
