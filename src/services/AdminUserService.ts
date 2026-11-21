@@ -82,6 +82,7 @@ export class AdminUserService {
         role: true,
         image: true,
         emailVerified: true,
+        passwordHash: true,
         isBanned: true,
         tokenVersion: true,
       },

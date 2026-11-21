@@ -17,13 +17,17 @@ import { useTranslation } from "react-i18next";
 import { Avatar } from "@/components/Avatar";
 import { AppText, Banner, Button, IconButton } from "@/components/ui";
 import { Input, inputBox } from "@/components/Field";
-import { api } from "@/lib/api";
+import { ApiError, api, saveTokens } from "@/lib/api";
+import { PasswordField } from "@/components/PasswordField";
 import { useAuth } from "@/lib/auth";
 import { errorMessage } from "@/lib/errors";
 import { prepareAvatar } from "@/lib/shop-photo";
 import { colors, space } from "@/theme/tokens";
 
 const MAX_NAME = 100;
+// Sunucu politikasi: src/lib/auth-password.ts (MIN/MAX_PASSWORD_LENGTH).
+const MIN_PASSWORD = 8;
+const MAX_PASSWORD = 128;
 
 /**
  * Sunucudaki `normalizeTrGsm10` (src/lib/netgsm.ts) ile ayni kural; yalnizca
@@ -45,6 +49,14 @@ export default function ProfileEditScreen() {
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [photoBusy, setPhotoBusy] = useState(false);
+  const [currentPassword, setCurrentPassword] = useState("");
+  const [newPassword, setNewPassword] = useState("");
+  const [repeatPassword, setRepeatPassword] = useState("");
+  const [passwordBusy, setPasswordBusy] = useState(false);
+  const [passwordError, setPasswordError] = useState<string | null>(null);
+  const [passwordDone, setPasswordDone] = useState(false);
+  // Sifresi olan hesap mevcut sifreyi girmeden kaydedemez; baslangic DTO'daki `hasPassword`.
+  const [needsCurrent, setNeedsCurrent] = useState(user?.hasPassword ?? false);
   if (!user) return null;
 
   /** Fotograf formdan bagimsiz, secilir secilmez yuklenir: "Kaydet"i beklemez. */
@@ -92,6 +104,38 @@ export default function ProfileEditScreen() {
       { text: t("profileEdit.removePhoto"), style: "destructive", onPress: () => void removePhoto() },
       { text: t("common.cancel"), style: "cancel" },
     ]);
+  }
+
+  async function savePassword() {
+    if (newPassword.trim().length < MIN_PASSWORD || newPassword.length > MAX_PASSWORD) {
+      setPasswordError(t("profileEdit.passwordRule", { min: MIN_PASSWORD }));
+      return;
+    }
+    if (newPassword !== repeatPassword) {
+      setPasswordError(t("profileEdit.passwordMismatch"));
+      return;
+    }
+    setPasswordBusy(true);
+    setPasswordError(null);
+    setPasswordDone(false);
+    try {
+      const res = await api<{ ok: true; accessToken?: string; refreshToken?: string }>("/auth/me/password", {
+        method: "POST",
+        body: { newPassword, ...(currentPassword ? { currentPassword } : {}) },
+      });
+      // Sifre degisince sunucu eski oturumlari dusurur ve bu cihaza yeni token cifti verir.
+      if (res.accessToken && res.refreshToken) await saveTokens(res.accessToken, res.refreshToken);
+      setCurrentPassword("");
+      setNewPassword("");
+      setRepeatPassword("");
+      setNeedsCurrent(true);
+      setPasswordDone(true);
+    } catch (e) {
+      if (e instanceof ApiError && e.code === "current_password_required") setNeedsCurrent(true);
+      setPasswordError(errorMessage(e, "profileEdit"));
+    } finally {
+      setPasswordBusy(false);
+    }
   }
 
   const close = () => (router.canGoBack() ? router.back() : router.replace("/profile"));
@@ -224,6 +268,66 @@ export default function ProfileEditScreen() {
 
           {error ? <Banner tone="danger" body={error} /> : null}
           <Button title={t("profileEdit.save")} onPress={save} loading={busy} />
+
+          <View style={styles.section}>
+            <AppText variant="heading">{t("profileEdit.passwordTitle")}</AppText>
+            <AppText variant="caption">
+              {needsCurrent ? t("profileEdit.passwordChangeHint") : t("profileEdit.passwordSetHint")}
+            </AppText>
+            {needsCurrent ? (
+              <View style={styles.field}>
+                <AppText variant="label" nativeID="currentPasswordLabel">
+                  {t("profileEdit.currentPasswordLabel")}
+                </AppText>
+                <PasswordField
+                  accessibilityLabelledBy="currentPasswordLabel"
+                  value={currentPassword}
+                  onChangeText={setCurrentPassword}
+                  autoComplete="current-password"
+                  textContentType="password"
+                  maxLength={MAX_PASSWORD}
+                />
+              </View>
+            ) : null}
+            <View style={styles.field}>
+              <AppText variant="label" nativeID="newPasswordLabel">
+                {t("profileEdit.newPasswordLabel")}
+              </AppText>
+              <PasswordField
+                accessibilityLabelledBy="newPasswordLabel"
+                value={newPassword}
+                onChangeText={setNewPassword}
+                autoComplete="new-password"
+                textContentType="newPassword"
+                maxLength={MAX_PASSWORD}
+              />
+              <AppText variant="caption">{t("profileEdit.passwordRule", { min: MIN_PASSWORD })}</AppText>
+            </View>
+            <View style={styles.field}>
+              <AppText variant="label" nativeID="repeatPasswordLabel">
+                {t("profileEdit.repeatPasswordLabel")}
+              </AppText>
+              <PasswordField
+                accessibilityLabelledBy="repeatPasswordLabel"
+                value={repeatPassword}
+                onChangeText={setRepeatPassword}
+                autoComplete="new-password"
+                textContentType="newPassword"
+                maxLength={MAX_PASSWORD}
+                returnKeyType="go"
+                onSubmitEditing={savePassword}
+              />
+            </View>
+            {passwordError ? <Banner tone="danger" body={passwordError} /> : null}
+            {passwordDone ? <Banner tone="success" body={t("profileEdit.passwordSaved")} /> : null}
+            <Button
+              variant="secondary"
+              title={needsCurrent ? t("profileEdit.changePassword") : t("profileEdit.setPassword")}
+              onPress={savePassword}
+              loading={passwordBusy}
+              disabled={!newPassword || !repeatPassword}
+            />
+          </View>
         </ScrollView>
       </KeyboardAvoidingView>
     </SafeAreaView>
@@ -249,5 +353,6 @@ const styles = StyleSheet.create({
   content: { padding: space.xl, gap: space.lg },
   header: { flexDirection: "row", alignItems: "center", gap: space.md },
   field: { gap: space.sm },
+  section: { gap: space.md, paddingTop: space.lg, borderTopWidth: StyleSheet.hairlineWidth, borderTopColor: colors.border },
   readOnly: { justifyContent: "center", backgroundColor: colors.surfaceMuted, borderColor: colors.surfaceMuted },
 });

@@ -36,6 +36,7 @@ const USER = {
   role: "GUEST",
   image: "https://x/y.png",
   emailVerified: new Date("2026-01-01"),
+  passwordHash: null as string | null,
 };
 
 const SHOP = {
@@ -84,10 +85,16 @@ describe("mobil kullanıcı gövdesi", () => {
   it("parola/hash gibi iç alanları SIZDIRMAZ", () => {
     // Govde ACIK bir alan listesi; `...user` yayilmasi olsaydi yeni bir sutun
     // (ornegin `passwordHash`) sessizce istemciye giderdi.
-    const body = toMobileUser({ ...USER, ...({ passwordHash: "gizli" } as object) });
+    const body = toMobileUser({ ...USER, passwordHash: "gizli" });
     expect(Object.keys(body).sort()).toEqual(
-      ["avatarUrl", "email", "emailVerified", "id", "name", "phone", "role"].sort(),
+      ["avatarUrl", "email", "emailVerified", "hasPassword", "id", "name", "phone", "role"].sort(),
     );
+    expect(JSON.stringify(body)).not.toContain("gizli");
+  });
+
+  it("`hasPassword` yalnızca var/yok bilgisidir", () => {
+    expect(toMobileUser(USER).hasPassword).toBe(false);
+    expect(toMobileUser({ ...USER, passwordHash: "x" }).hasPassword).toBe(true);
   });
 });
 

@@ -1,11 +1,13 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import {
   KeyboardAvoidingView,
+  Linking,
   ScrollView,
   StyleSheet,
   View,
   useWindowDimensions,
 } from "react-native";
+import type { TextInput } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { Image } from "expo-image";
 import { router } from "expo-router";
@@ -18,23 +20,45 @@ import { GoogleButton } from "@/components/GoogleButton";
 import { AppText, Banner, Button, IconButton } from "@/components/ui";
 import { X } from "lucide-react-native";
 import { Input } from "@/components/Field";
+import { PasswordField } from "@/components/PasswordField";
+import { Segmented } from "@/components/Segmented";
 import { useAuth } from "@/lib/auth";
+import { ApiError } from "@/lib/api";
 import { errorMessage } from "@/lib/errors";
 import { AppleSignInError, appleSignInAvailable } from "@/lib/apple-auth";
 import { GoogleSignInError, googleSignInAvailable } from "@/lib/google-auth";
-import { identityLabel, parseIdentity } from "@/lib/identity";
+import { SITE_ORIGIN } from "@/lib/images";
+import {
+  applyIdentityInput,
+  identityLabel,
+  parseIdentity,
+  parsePhone,
+  switchIdentityMode,
+} from "@/lib/identity";
+import { languageInfo } from "@/lib/languages";
 import { colors, fonts, radius, space } from "@/theme/tokens";
 
+type Mode = "email" | "phone";
+/** Yeni kod istendikten sonra tekrar istemeden beklenen sure (sunucu 2 dakikada 3 koda izin veriyor). */
+const RESEND_COOLDOWN_S = 40;
+
 export default function LoginScreen() {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const insets = useSafeAreaInsets();
   const { height } = useWindowDimensions();
   const { requestCode, verifyCode, signInWithPassword, signInWithGoogle, signInWithApple } = useAuth();
+  // E-posta modunda kod + sifre var; telefon modunda yalnizca sifre (SMS yok).
+  const [mode, setMode] = useState<Mode>("email");
   const [step, setStep] = useState<"email" | "code" | "password">("email");
   const [email, setEmail] = useState("");
+  const [phone, setPhone] = useState("");
   const [code, setCode] = useState("");
   const [password, setPassword] = useState("");
   const [busy, setBusy] = useState(false);
+  const [notice, setNotice] = useState<string | null>(null);
+  const [cooldown, setCooldown] = useState(0);
+  const passwordRef = useRef<TextInput>(null);
+  const modeLockedRef = useRef(false);
   // Google akisi ayri: o surerken kod dugmesi donmesin, yalnizca kilitlensin.
   const [googleBusy, setGoogleBusy] = useState(false);
   const [appleBusy, setAppleBusy] = useState(false);
@@ -47,17 +71,60 @@ export default function LoginScreen() {
       live = false;
     };
   }, []);
+  useEffect(() => {
+    if (cooldown <= 0) return;
+    const id = setTimeout(() => setCooldown((c) => c - 1), 1000);
+    return () => clearTimeout(id);
+  }, [cooldown]);
   const [error, setError] = useState<string | null>(null);
 
-  async function sendCode() {
-    const id = parseIdentity(email);
-    if (!id) {
-      setError(t("auth.invalidIdentity"));
+  const openSite = (path: string) =>
+    void Linking.openURL(`${SITE_ORIGIN}/${languageInfo(i18n.language).site}/${path}`).catch(() => undefined);
+
+  function authError(e: unknown) {
+    // Telefon girisinde "e-posta ya da sifre" demek yaniltir; hesap var/yok bilgisi yine sizmaz.
+    if (e instanceof ApiError && e.code === "invalid_credentials" && mode === "phone") {
+      return t("auth.errors.invalid_credentials_phone");
+    }
+    return errorMessage(e, "auth");
+  }
+
+  function changeMode(next: Mode) {
+    // Sekmeye dokunmak son sozdur: otomatik telefon gecisi bir daha devreye girmez.
+    modeLockedRef.current = true;
+    const s = switchIdentityMode({ mode, email, phone }, next);
+    setMode(s.mode);
+    setEmail(s.email);
+    setPhone(s.phone);
+    setStep("email");
+    setError(null);
+    setNotice(null);
+  }
+
+  /*
+    Tek metin kutusu iki modda da AYNI yerde durur (kutu yeniden kurulmaz, klavye
+    kapanmaz). Kullanici sekmeye dokunmadikca e-posta modunda telefon gibi bir sey
+    yazilirsa telefon moduna gecilir; telefon kutusuna harf/@ girilirse e-postaya
+    doner. Sekmeye dokunulduktan sonra otomatik gecis kapanir: "1907x@..." gibi
+    rakamla baslayan e-posta phone-pad klavyede yazilamaz (kural `applyIdentityInput`).
+  */
+  function onIdentityChange(v: string) {
+    setError(null);
+    if (mode === "email" && step === "code") {
+      setEmail(v);
       return;
     }
-    // SMS entegrasyonu yok: telefona kod gonderilmez, telefonla giris yalnizca sifreyle.
-    if ("phone" in id) {
-      switchTo("password");
+    const s = applyIdentityInput({ mode, email, phone }, v, modeLockedRef.current);
+    if (s.mode !== mode) setStep("email");
+    setMode(s.mode);
+    setEmail(s.email);
+    setPhone(s.phone);
+  }
+
+  async function sendCode(resend = false) {
+    const id = parseIdentity(email);
+    if (!id || !("email" in id)) {
+      setError(t("auth.invalidEmail"));
       return;
     }
     setBusy(true);
@@ -66,6 +133,8 @@ export default function LoginScreen() {
       await requestCode(id);
       setEmail(identityLabel(id));
       setCode("");
+      setNotice(resend ? t("auth.codeSentAgain") : null);
+      setCooldown(RESEND_COOLDOWN_S);
       setStep("code");
     } catch (e) {
       setError(errorMessage(e, "auth"));
@@ -74,12 +143,13 @@ export default function LoginScreen() {
     }
   }
 
-  async function verify() {
+  async function verify(value: string = code) {
+    if (busy) return;
     setBusy(true);
     setError(null);
     try {
       // Basarili olursa Stack.Protected kendiliginden dogru gruba gecirir.
-      await verifyCode(parseIdentity(email)!, code);
+      await verifyCode(parseIdentity(email)!, value);
     } catch (e) {
       setError(errorMessage(e, "auth"));
       setBusy(false);
@@ -87,9 +157,9 @@ export default function LoginScreen() {
   }
 
   async function passwordSignIn() {
-    const id = parseIdentity(email);
-    if (!id) {
-      setError(t("auth.invalidIdentity"));
+    const id = mode === "phone" ? parsePhone(phone) : parseIdentity(email);
+    if (!id || (mode === "email" && !("email" in id))) {
+      setError(mode === "phone" ? t("auth.invalidPhone") : t("auth.invalidEmail"));
       return;
     }
     setBusy(true);
@@ -97,7 +167,7 @@ export default function LoginScreen() {
     try {
       await signInWithPassword(id, password);
     } catch (e) {
-      setError(errorMessage(e, "auth"));
+      setError(authError(e));
       setBusy(false);
     }
   }
@@ -129,35 +199,83 @@ export default function LoginScreen() {
     }
   }
 
-  const emailField = (onSubmit: () => void) => (
+  const showPassword = mode === "phone" || step === "password";
+
+  const identityField = (
     <View style={styles.field}>
-      <AppText variant="label" nativeID="emailLabel">
-        {t("auth.identityLabel")}
+      <AppText variant="label" nativeID="identityLabel">
+        {mode === "phone" ? t("auth.phoneLabel") : t("auth.emailLabel")}
       </AppText>
       <Input
-        accessibilityLabelledBy="emailLabel"
-        value={email}
-        onChangeText={setEmail}
-        placeholder={t("auth.identityPlaceholder")}
+        accessibilityLabelledBy="identityLabel"
+        value={mode === "phone" ? phone : email}
+        onChangeText={onIdentityChange}
+        placeholder={mode === "phone" ? t("auth.phonePlaceholder") : t("auth.emailPlaceholder")}
         placeholderTextColor={colors.inkMuted}
-        // E-posta klavyesi: Android'de rakam satiri ve @ ikisi de var; esnaf telefonunu da yazar.
-        keyboardType="email-address"
+        // Telefon klavyesi yalnizca acik telefon modunda; harf/@ girilirse e-postaya doneriz.
+        keyboardType={mode === "phone" ? "phone-pad" : "email-address"}
         autoCapitalize="none"
-        autoComplete="username"
+        autoComplete={mode === "phone" ? "tel" : "username"}
         autoCorrect={false}
-        returnKeyType={step === "password" ? "next" : "send"}
-        onSubmitEditing={onSubmit}
+        returnKeyType={showPassword ? "next" : "send"}
+        onSubmitEditing={() => (showPassword ? passwordRef.current?.focus() : void sendCode())}
       />
     </View>
   );
 
-  const parsed = parseIdentity(email);
-  const isPhone = parsed !== null && "phone" in parsed;
-
-  const switchTo = (next: "email" | "password") => {
-    setStep(next);
-    setError(null);
-  };
+  const passwordBlock = (
+    <>
+      <View style={styles.field}>
+        <AppText variant="label" nativeID="passwordLabel">
+          {t("auth.passwordLabel")}
+        </AppText>
+        <PasswordField
+          ref={passwordRef}
+          accessibilityLabelledBy="passwordLabel"
+          value={password}
+          onChangeText={setPassword}
+          autoComplete="current-password"
+          textContentType="password"
+          returnKeyType="go"
+          onSubmitEditing={passwordSignIn}
+          autoFocus={mode === "email"}
+        />
+      </View>
+      {error ? <Banner tone="danger" body={error} /> : null}
+      <Button
+        title={t("auth.verify")}
+        onPress={passwordSignIn}
+        loading={busy}
+        disabled={password.length === 0 || oauthBusy}
+      />
+      {mode === "phone" ? (
+        <View style={styles.help}>
+          <AppText variant="caption">{t("auth.helpNoPassword")}</AppText>
+          <Button variant="secondary" title={t("auth.helpContact")} onPress={() => openSite("contact")} />
+          <Button
+            variant="ghost"
+            title={t("auth.haveResetLink")}
+            onPress={() => router.push({ pathname: "/reset-password", params: { mode: "link" } })}
+          />
+        </View>
+      ) : null}
+      <Button
+        variant="ghost"
+        title={t("reset.forgotPassword")}
+        onPress={() => {
+          setError(null);
+          // Sifre sifirlama e-postayla; telefon modunda e-posta alani bos gelir.
+          router.push({
+            pathname: "/reset-password",
+            params: { email: mode === "email" ? email.trim().toLowerCase() : "" },
+          });
+        }}
+      />
+      {mode === "email" ? (
+        <Button variant="ghost" title={t("auth.useCode")} onPress={() => setStep("email")} />
+      ) : null}
+    </>
+  );
 
   return (
     <View style={styles.safe}>
@@ -198,91 +316,7 @@ export default function LoginScreen() {
           </View>
 
           <View style={styles.content}>
-            {step === "email" ? (
-              <>
-                <AppText variant="title">{t("auth.title")}</AppText>
-                <AppText variant="caption">{t("auth.subtitle")}</AppText>
-                {emailField(sendCode)}
-                {error ? <Banner tone="danger" body={error} /> : null}
-                <Button title={t("auth.sendCode")} onPress={sendCode} loading={busy} disabled={oauthBusy} />
-                <Button
-                  variant="ghost"
-                  title={t("auth.usePassword")}
-                  onPress={() => switchTo("password")}
-                  disabled={oauthBusy}
-                />
-                {googleSignInAvailable || appleAvailable ? (
-                  <>
-                    <View
-                      style={styles.dividerRow}
-                      accessibilityElementsHidden
-                      importantForAccessibility="no-hide-descendants"
-                    >
-                      <View style={styles.dividerLine} />
-                      <AppText variant="caption">{t("auth.or")}</AppText>
-                      <View style={styles.dividerLine} />
-                    </View>
-                    {appleAvailable ? (
-                      <AppleButton onPress={appleSignIn} loading={appleBusy} disabled={busy || googleBusy} />
-                    ) : null}
-                    {googleSignInAvailable ? (
-                      <GoogleButton
-                        title={t("auth.continueWithGoogle")}
-                        onPress={googleSignIn}
-                        loading={googleBusy}
-                        disabled={busy || appleBusy}
-                      />
-                    ) : null}
-                  </>
-                ) : null}
-              </>
-            ) : step === "password" ? (
-              <>
-                <AppText variant="title">{t("auth.title")}</AppText>
-                <AppText variant="caption">
-                  {isPhone ? t("auth.phoneNeedsPassword") : t("auth.passwordSubtitle")}
-                </AppText>
-                {emailField(() => undefined)}
-                <View style={styles.field}>
-                  <AppText variant="label" nativeID="passwordLabel">
-                    {t("auth.passwordLabel")}
-                  </AppText>
-                  <Input
-                    accessibilityLabelledBy="passwordLabel"
-                    value={password}
-                    onChangeText={setPassword}
-                    secureTextEntry
-                    autoCapitalize="none"
-                    autoComplete="current-password"
-                    textContentType="password"
-                    returnKeyType="go"
-                    onSubmitEditing={passwordSignIn}
-                  />
-                </View>
-                {error ? <Banner tone="danger" body={error} /> : null}
-                <Button
-                  title={t("auth.verify")}
-                  onPress={passwordSignIn}
-                  loading={busy}
-                  disabled={password.length === 0}
-                />
-                <Button
-                  variant="ghost"
-                  title={t("reset.forgotPassword")}
-                  onPress={() => {
-                    setError(null);
-                    router.push({
-                      pathname: "/reset-password",
-                      // Sifre sifirlama e-postayla; telefon yazildiysa alan bos gelir.
-                      params: { email: email.includes("@") ? email.trim().toLowerCase() : "" },
-                    });
-                  }}
-                />
-                {isPhone ? null : (
-                  <Button variant="ghost" title={t("auth.useCode")} onPress={() => switchTo("email")} />
-                )}
-              </>
-            ) : (
+            {step === "code" ? (
               <>
                 <AppText variant="title">{t("auth.codeTitle")}</AppText>
                 <AppText variant="caption">{t("auth.codeSubtitle", { email })}</AppText>
@@ -293,7 +327,12 @@ export default function LoginScreen() {
                   <Input
                     accessibilityLabelledBy="codeLabel"
                     value={code}
-                    onChangeText={(v) => setCode(v.replace(/\D/g, "").slice(0, 6))}
+                    onChangeText={(v) => {
+                      const next = v.replace(/\D/g, "").slice(0, 6);
+                      setCode(next);
+                      // 6. hane girilince ayrica dokunmaya gerek yok.
+                      if (next.length === 6) void verify(next);
+                    }}
                     keyboardType="number-pad"
                     autoComplete="one-time-code"
                     textContentType="oneTimeCode"
@@ -302,19 +341,105 @@ export default function LoginScreen() {
                     style={styles.codeInput}
                   />
                 </View>
+                {notice ? <Banner tone="success" body={notice} /> : null}
                 {error ? <Banner tone="danger" body={error} /> : null}
-                <Button title={t("auth.verify")} onPress={verify} loading={busy} disabled={code.length !== 6} />
+                <Button title={t("auth.verify")} onPress={() => verify()} loading={busy} disabled={code.length !== 6} />
                 <View style={styles.row}>
-                  <Button variant="ghost" title={t("auth.resend")} onPress={sendCode} disabled={busy} />
+                  <Button
+                    variant="ghost"
+                    title={cooldown > 0 ? t("auth.resendIn", { seconds: cooldown }) : t("auth.resend")}
+                    onPress={() => sendCode(true)}
+                    disabled={busy || cooldown > 0}
+                  />
                   <Button
                     variant="ghost"
                     title={t("auth.changeEmail")}
                     onPress={() => {
                       setStep("email");
                       setError(null);
+                      setNotice(null);
                     }}
                   />
                 </View>
+              </>
+            ) : (
+              <>
+                <AppText variant="title">{t("auth.title")}</AppText>
+                <Segmented<Mode>
+                  options={[
+                    { value: "email", label: t("auth.modeEmail") },
+                    { value: "phone", label: t("auth.modePhone") },
+                  ]}
+                  value={mode}
+                  onChange={changeMode}
+                />
+                <AppText variant="caption">
+                  {mode === "phone" ? t("auth.phoneSubtitle") : step === "password" ? t("auth.passwordSubtitle") : t("auth.subtitle")}
+                </AppText>
+                {identityField}
+                {showPassword ? (
+                  passwordBlock
+                ) : (
+                  <>
+                    {error ? <Banner tone="danger" body={error} /> : null}
+                    <Button title={t("auth.sendCode")} onPress={() => sendCode()} loading={busy} disabled={oauthBusy} />
+                    <Button
+                      variant="ghost"
+                      title={t("auth.usePassword")}
+                      onPress={() => {
+                        setStep("password");
+                        setError(null);
+                      }}
+                      disabled={oauthBusy}
+                    />
+                    {googleSignInAvailable || appleAvailable ? (
+                      <>
+                        <View
+                          style={styles.dividerRow}
+                          accessibilityElementsHidden
+                          importantForAccessibility="no-hide-descendants"
+                        >
+                          <View style={styles.dividerLine} />
+                          <AppText variant="caption">{t("auth.or")}</AppText>
+                          <View style={styles.dividerLine} />
+                        </View>
+                        {appleAvailable ? (
+                          <AppleButton onPress={appleSignIn} loading={appleBusy} disabled={busy || googleBusy} />
+                        ) : null}
+                        {googleSignInAvailable ? (
+                          <GoogleButton
+                            title={t("auth.continueWithGoogle")}
+                            onPress={googleSignIn}
+                            loading={googleBusy}
+                            disabled={busy || appleBusy}
+                          />
+                        ) : null}
+                      </>
+                    ) : null}
+                    {/* Kodla ilk giris hesap acar: kabul cumlesi burada, baglantilariyla. */}
+                    <AppText variant="caption" style={styles.legal}>
+                      {t("auth.legalPrefix")}
+                      <AppText
+                        variant="caption"
+                        accessibilityRole="link"
+                        style={styles.legalLink}
+                        onPress={() => openSite("terms")}
+                      >
+                        {t("auth.legalTerms")}
+                      </AppText>
+                      {t("auth.legalAnd")}
+                      <AppText
+                        variant="caption"
+                        accessibilityRole="link"
+                        style={styles.legalLink}
+                        onPress={() => openSite("privacy")}
+                      >
+                        {t("auth.legalPrivacy")}
+                      </AppText>
+                      {t("auth.legalSuffix")}
+                    </AppText>
+                  </>
+                )}
               </>
             )}
           </View>
@@ -375,6 +500,9 @@ const styles = StyleSheet.create({
     textAlign: "center",
   },
   row: { flexDirection: "row", justifyContent: "space-between" },
+  help: { gap: space.sm },
+  legal: { textAlign: "center" },
+  legalLink: { textDecorationLine: "underline", color: colors.ink },
   dividerRow: { flexDirection: "row", alignItems: "center", gap: space.md },
   dividerLine: {
     flex: 1,

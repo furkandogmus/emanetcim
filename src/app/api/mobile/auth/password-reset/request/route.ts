@@ -6,10 +6,13 @@ import { rateLimit } from "@/lib/rate-limit";
 import { clientIpFromRequest } from "@/lib/client-ip";
 import { sendPasswordResetEmail } from "@/lib/mail";
 import { generatePasswordResetToken } from "@/lib/password-reset-token";
+import { APP_LOCALES } from "@/i18n/locales";
+import { resolveRequestLocale } from "@/lib/request-locale";
 
 const schema = z.object({
   email: z.string().trim().email().max(320),
-  locale: z.enum(["tr", "en"]).optional(),
+  // Tanimsiz dil istegi dusurmez (sessizce mail gitmezdi): Accept-Language'e duser.
+  locale: z.enum(APP_LOCALES).optional().catch(undefined),
 });
 
 /**
@@ -32,7 +35,8 @@ export async function POST(req: NextRequest) {
   }
 
   const email = parsed.data.email.toLowerCase();
-  const locale = parsed.data.locale ?? "tr";
+  // Istemci dil gondermediyse Accept-Language'den (eskiden hep Turkce).
+  const locale = parsed.data.locale ?? resolveRequestLocale(req.headers.get("accept-language"));
 
   if (!(await rateLimit(`forgot-password:email:${email}`, 5, 60 * 60 * 1000))) {
     return NextResponse.json({ ok: true });
