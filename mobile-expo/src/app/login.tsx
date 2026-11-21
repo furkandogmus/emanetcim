@@ -10,7 +10,7 @@ import {
 import type { TextInput } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { Image } from "expo-image";
-import { router } from "expo-router";
+import { router, useLocalSearchParams } from "expo-router";
 import { useTranslation } from "react-i18next";
 
 import { LanguageButton } from "@/components/LanguageButton";
@@ -48,10 +48,15 @@ export default function LoginScreen() {
   const { height } = useWindowDimensions();
   const { requestCode, verifyCode, signInWithPassword, signInWithGoogle, signInWithApple } = useAuth();
   // E-posta modunda kod + sifre var; telefon modunda yalnizca sifre (SMS yok).
-  const [mode, setMode] = useState<Mode>("email");
+  // Oturumu biten esnaf buraya kimligi dolu gelir (`identity`); kendi numarasini yeniden yazmaz.
+  const { identity: prefill } = useLocalSearchParams<{ identity?: string }>();
+  const [initial] = useState(() =>
+    applyIdentityInput({ mode: "email", email: "", phone: "" }, typeof prefill === "string" ? prefill : "", false),
+  );
+  const [mode, setMode] = useState<Mode>(initial.mode);
   const [step, setStep] = useState<"email" | "code" | "password">("email");
-  const [email, setEmail] = useState("");
-  const [phone, setPhone] = useState("");
+  const [email, setEmail] = useState(initial.email);
+  const [phone, setPhone] = useState(initial.phone);
   const [code, setCode] = useState("");
   const [password, setPassword] = useState("");
   const [busy, setBusy] = useState(false);

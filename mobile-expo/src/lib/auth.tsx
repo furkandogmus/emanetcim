@@ -1,5 +1,7 @@
 import { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState } from "react";
 import type { ReactNode } from "react";
+import { AppState } from "react-native";
+import { router } from "expo-router";
 import { useQueryClient } from "@tanstack/react-query";
 import type { Identity } from "./identity";
 
@@ -83,6 +85,9 @@ async function lastKnownUser(): Promise<MobileUser | null> {
   }
 }
 
+/** Uygulama on plana her donusunde /auth/me'yi tazelemek icin gereken en kisa ara (rol/yasak degisimi gecikmeli de olsa gorunsun, ag da yorulmasin). */
+const FOREGROUND_REVALIDATE_MS = 5 * 60 * 1000;
+
 function isRejected(e: unknown) {
   return e instanceof ApiError && (e.status === 401 || e.status === 403);
 }
@@ -100,6 +105,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     stateRef.current = next;
     setState(next);
   }, []);
+  // Oturumu biten esnaf/yonetici giris ekranina, kimligi dolu halde gonderilir (bos misafir haritasina degil).
+  const loginRedirect = useRef<string | null>(null);
+  const lastCheckedAt = useRef(0);
 
   // Kimlikler arasinda veri sizmasin: onbellek ve cevrimdisi biletler her geciste silinir.
   const resetIdentityData = useCallback(async () => {
@@ -217,6 +225,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       update({ status: "signedOut" });
       // Sessizce misafir haritasina dusmek yerine neden: esnaf/yonetici paneline giris gerektigini bilsin.
       const staff = prev.status === "signedIn" && prev.user.role !== "GUEST";
+      if (staff) loginRedirect.current = prev.user.email ?? prev.user.phone ?? "";
       notify(i18n.t("auth.sessionExpiredTitle"), i18n.t(staff ? "auth.sessionExpiredBodyStaff" : "auth.sessionExpiredBody"));
     });
     (async () => {
@@ -244,6 +253,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       if (cached) update({ status: "signedIn", user: cached });
       try {
         const user = await api<MobileUser>("/auth/me");
+        lastCheckedAt.current = Date.now();
         void rememberUser(user);
         update({ status: "signedIn", user });
       } catch (e) {
@@ -261,6 +271,46 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       }
     })().catch(() => update({ status: "signedOut" }));
   }, [queryClient, resetIdentityData, update]);
+
+  // `signedOut` render'i islendikten SONRA gider: giris ekrani ancak o zaman korumadan cikar.
+  const status = state.status;
+  useEffect(() => {
+    if (status !== "signedOut" || loginRedirect.current === null) return;
+    const identity = loginRedirect.current;
+    loginRedirect.current = null;
+    try {
+      router.replace({ pathname: "/login", params: identity ? { identity } : {} });
+    } catch {
+      // Yonlendirme olmazsa kullanici misafir haritasinda kalir; bildirim zaten gosterildi.
+    }
+  }, [status]);
+
+  /*
+    Rol/yasak degisikligi (yeni onaylanan esnaf, yasaklanan hesap) eskiden yalnizca
+    acilista ve profil duzenlemesinden sonra okunuyordu: uygulama gunlerce acik
+    kalirsa eski role ait ekran gorunuyordu. On plana donuste, son kontrolden
+    beri 5 dakika gectiyse /auth/me yeniden okunur; 401/403'u oturum-sonu isleyicisi karsilar.
+  */
+  useEffect(() => {
+    const sub = AppState.addEventListener("change", (next) => {
+      if (next !== "active") return;
+      if (stateRef.current.status !== "signedIn" || isImpersonating() || pendingSwitch.current) return;
+      if (Date.now() - lastCheckedAt.current < FOREGROUND_REVALIDATE_MS) return;
+      lastCheckedAt.current = Date.now();
+      void api<MobileUser>("/auth/me")
+        .then((user) => {
+          // Bu arada cikis/goruntuleme olduysa eski yanit yeni kimligin ustune yazilmaz.
+          if (stateRef.current.status !== "signedIn" || isImpersonating()) return;
+          void rememberUser(user);
+          const prev = stateRef.current.user;
+          if (JSON.stringify({ ...prev, avatarUrl: null }) !== JSON.stringify({ ...user, avatarUrl: null })) {
+            update({ status: "signedIn", user });
+          }
+        })
+        .catch(() => undefined);
+    });
+    return () => sub.remove();
+  }, [update]);
 
   // E-posta ya da telefon (esnaf); telefonda kod SMS ile gider.
   const requestCode = useCallback(async (id: Identity) => {
@@ -308,6 +358,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const refreshUser = useCallback(async () => {
     const user = await api<MobileUser>("/auth/me");
+    lastCheckedAt.current = Date.now();
     if (!isImpersonating()) void rememberUser(user);
     update({ status: "signedIn", user });
     return user;
