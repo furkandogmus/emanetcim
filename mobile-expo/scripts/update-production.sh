@@ -10,6 +10,29 @@
 set -euo pipefail
 cd "$(dirname "$0")/.."
 
+# Surum sabit: `@latest` her yayinda farkli bir arac calistirirdi.
+EAS_CLI_VERSION="27.11.0"
+
+# Yayin ELDEKI degil, main'deki kodu gonderir: kirli agac ya da geride kalmis dal
+# kullanicilara hic gozden gecirilmemis JS ulastirirdi.
+if [ -n "$(git status --porcelain)" ]; then
+  echo "calisma agaci temiz degil; once commit'le ya da stash'le" >&2
+  exit 1
+fi
+branch="$(git rev-parse --abbrev-ref HEAD)"
+if [ "$branch" != "main" ]; then
+  echo "yalnizca main'den yayinlanir (su an: $branch)" >&2
+  exit 1
+fi
+git fetch --quiet origin main
+if [ "$(git rev-parse HEAD)" != "$(git rev-parse origin/main)" ]; then
+  echo "main origin/main ile ayni degil; once git pull" >&2
+  exit 1
+fi
+
+# CI ile ayni kapi: tip, lint, locale paritesi, testler.
+npm run verify
+
 eval "$(node -e '
 const env = require("./eas.json").build.production.env || {};
 for (const k of ["EXPO_PUBLIC_API_BASE_URL", "EXPO_PUBLIC_GOOGLE_WEB_CLIENT_ID"]) {
@@ -23,4 +46,4 @@ case "$EXPO_PUBLIC_API_BASE_URL" in
 esac
 
 echo "API: $EXPO_PUBLIC_API_BASE_URL"
-npx -y eas-cli@latest update --channel production --environment production --non-interactive "$@"
+npx -y "eas-cli@${EAS_CLI_VERSION}" update --channel production --environment production --non-interactive "$@"
