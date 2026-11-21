@@ -56,10 +56,14 @@ export class AdminUserService {
     // Yonetici yetkisi iki admin onayli akistan gider; yasak bunun yan kapisi olmasin.
     if (isBanned && exists.role === "ADMIN") return { ok: false, error: "cannot_ban_admin" };
 
-    await prisma.user.update({
-      where: { id: userId },
-      data: { isBanned, tokenVersion: { increment: 1 } },
-    });
+    await prisma.$transaction([
+      prisma.user.update({
+        where: { id: userId },
+        data: { isBanned, tokenVersion: { increment: 1 } },
+      }),
+      // Oturumu dusen yasakli hesabin cihazlari bildirim de almasin (bkz. `revokeAllUserSessions`).
+      ...(isBanned ? [prisma.mobilePushToken.deleteMany({ where: { userId } })] : []),
+    ]);
     writeAuditLog({
       actorUserId: actor.userId,
       actorRole: "ADMIN",

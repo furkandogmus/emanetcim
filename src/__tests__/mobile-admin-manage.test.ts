@@ -3,6 +3,8 @@ import { describe, it, expect, vi, beforeEach } from "vitest";
 const db = vi.hoisted(() => ({
   shop: { findUnique: vi.fn(), update: vi.fn() },
   user: { findUnique: vi.fn(), update: vi.fn() },
+  mobilePushToken: { deleteMany: vi.fn() },
+  $transaction: vi.fn(async (ops: unknown[]) => Promise.all(ops)),
 }));
 vi.mock("@/lib/db", () => ({ default: db }));
 vi.mock("@/lib/audit-log", () => ({ writeAuditLog: vi.fn() }));
@@ -67,6 +69,7 @@ describe("AdminUserService.setBanned", () => {
   beforeEach(() => {
     db.user.findUnique.mockReset().mockResolvedValue({ id: "u1" });
     db.user.update.mockReset().mockResolvedValue({});
+    db.mobilePushToken.deleteMany.mockReset().mockResolvedValue({ count: 0 });
   });
 
   it("admin kendini yasaklayamaz", async () => {
@@ -89,6 +92,16 @@ describe("AdminUserService.setBanned", () => {
   it("yasaklama token surumunu artirir", async () => {
     await expect(adminUserService.setBanned("u1", true, actor)).resolves.toEqual({ ok: true });
     expect(db.user.update.mock.calls[0][0].data).toEqual({ isBanned: true, tokenVersion: { increment: 1 } });
+  });
+
+  // Bulgu 125: oturumu dusen cihaz bildirim de almasin.
+  it("yasaklama cihazlarin bildirim kayitlarini siler, yasak kaldirma silmez", async () => {
+    await adminUserService.setBanned("u1", true, actor);
+    expect(db.mobilePushToken.deleteMany).toHaveBeenCalledWith({ where: { userId: "u1" } });
+
+    db.mobilePushToken.deleteMany.mockClear();
+    await adminUserService.setBanned("u1", false, actor);
+    expect(db.mobilePushToken.deleteMany).not.toHaveBeenCalled();
   });
 });
 

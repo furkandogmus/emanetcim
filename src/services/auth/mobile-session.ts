@@ -17,6 +17,13 @@ import prisma from "@/lib/db";
  *
  * `Session` satirlari da silinir: ayni hesap web'de acilmis olabilir ve
  * "cikis yap" ikisini de kapatmali.
+ *
+ * `MobilePushToken` satirlari da silinir (bulgu 125). Oturumu dusen cihaz
+ * bildirim almaya devam ediyordu: istemci kaydi silmeyi bellekteki token'a
+ * bagliyor ve soguk acilistan sonra cevrimdisi cikista DELETE hic gitmiyordu.
+ * Ortak dukkan telefonunda onceki esnaf "yeni rezervasyon" bildirimlerini
+ * (misafir adiyla) almayi surduruyordu. Cihaz tekrar giris yapinca
+ * `push/register` satiri yeniden yazar.
  */
 export async function revokeAllUserSessions(userId: string): Promise<void> {
   await prisma.$transaction([
@@ -25,5 +32,6 @@ export async function revokeAllUserSessions(userId: string): Promise<void> {
       data: { tokenVersion: { increment: 1 } },
     }),
     prisma.session.deleteMany({ where: { userId } }),
+    prisma.mobilePushToken.deleteMany({ where: { userId } }),
   ]);
 }
