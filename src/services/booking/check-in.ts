@@ -66,7 +66,7 @@ export async function checkIn(
         ok: false,
         code: 'SHOP_CLOSED',
         message:
-          'Şu an dükkan kapalı görünüyor. Çalışma saatleri içinde tekrar deneyin.',
+          'Dükkanın kayıtlı çalışma saatlerinin dışındasınız. Gerçek saatleriniz farklıysa çalışma saatlerini düzeltip tekrar deneyin.',
       };
     }
 

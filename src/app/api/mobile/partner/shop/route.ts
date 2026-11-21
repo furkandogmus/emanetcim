@@ -93,6 +93,7 @@ export async function GET(req: NextRequest) {
       phone: owner?.phone ?? null,
       gallery: gallery.map(toMobileGalleryImage),
       setup: { hasPhoto: !!shop.image, hoursConfigured },
+      requireSealsOnCheckIn: rules.requireSealsOnCheckIn === true,
       priceRange: {
         min: Math.round(rules.defaultPricePerDay / 2),
         max: rules.defaultPricePerDay * 2,

@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useRouter } from "expo-router";
 import { Alert, Pressable, StyleSheet, View } from "react-native";
 import { Image } from "expo-image";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
@@ -11,6 +12,7 @@ import { ApiError, api } from "@/lib/api";
 import { errorMessage } from "@/lib/errors";
 import { SEALS_ENABLED } from "@/lib/config";
 import { formatMoney } from "@/lib/format";
+import { usePartnerShop } from "@/lib/queries";
 import type { BookingDetail } from "@/lib/types";
 import { notify } from "@/lib/notify";
 import { colors, fonts, radius, space } from "@/theme/tokens";
@@ -54,10 +56,21 @@ export function PartnerBookingActions({ booking }: { booking: BookingDetail }) {
     kalir; eskiden kart sayilara gore yeniden kuruluyor ve hepsi siliniyordu.
   */
   const [typed, setTyped] = useState<Record<number, string>>({});
-  const rows = (SEALS_ENABLED ? buildSealRows(booking) : []).map((r) => ({ ...r, sealNumber: typed[r.bagIndex] ?? "" }));
+  /*
+    Muhur adimi SUNUCUNUN ayarina bakar (`requireSealsOnCheckIn`), derleme sabitine
+    degil: yonetici ayari acarsa her check-in `SEAL_REQUIRED` ile reddedilir ve
+    esnafin yazacagi bir alan olmazdi. Sabit yalnizca ayar okunamazsa yedek.
+    Ayar eski bir degerle onbellekte kalmissa SEAL_REQUIRED yaniti da alanlari acar.
+  */
+  const router = useRouter();
+  const serverSeals = usePartnerShop().data?.requireSealsOnCheckIn === true;
+  const [sealsForced, setSealsForced] = useState(false);
+  const sealsOn = SEALS_ENABLED || serverSeals || sealsForced;
+  const rows = (sealsOn ? buildSealRows(booking) : []).map((r) => ({ ...r, sealNumber: typed[r.bagIndex] ?? "" }));
   // Muhur basina karar: saglam ya da saglam degil (FAULTY, teslim yine tamamlanir).
   const [sealState, setSealState] = useState<Record<number, "intact" | "broken">>({});
   const [error, setError] = useState<string | null>(null);
+  const [closed, setClosed] = useState(false);
 
   const refresh = () => {
     void queryClient.invalidateQueries({ queryKey: ["bookings"] });
@@ -97,6 +110,8 @@ export function PartnerBookingActions({ booking }: { booking: BookingDetail }) {
         notify(t("partner.checkedInTitle"), t("partner.checkedInBody"));
         return;
       }
+      if (e instanceof ApiError && e.code === "SEAL_REQUIRED") setSealsForced(true);
+      setClosed(e instanceof ApiError && e.code === "SHOP_CLOSED");
       setError(errorMessage(e, "partner"));
     },
   });
@@ -163,7 +178,7 @@ export function PartnerBookingActions({ booking }: { booking: BookingDetail }) {
     return (
       <Card style={styles.card}>
         <AppText variant="heading">{t("partner.checkInTitle")}</AppText>
-        <AppText variant="caption">{t(SEALS_ENABLED ? "partner.checkInHint" : "partner.checkInHintNoSeals")}</AppText>
+        <AppText variant="caption">{t(sealsOn ? "partner.checkInHint" : "partner.checkInHintNoSeals")}</AppText>
         {rows.map((r) => (
           <View key={r.bagIndex} style={styles.sealRow}>
             <View style={styles.bagThumb}>
@@ -198,6 +213,9 @@ export function PartnerBookingActions({ booking }: { booking: BookingDetail }) {
         ))}
         {partial ? <Banner tone="warning" body={t("partner.sealsPartial")} /> : null}
         {error ? <Banner tone="danger" body={error} /> : null}
+        {closed ? (
+          <Button variant="secondary" title={t("partner.editHours")} onPress={() => router.push("/partner/schedule")} />
+        ) : null}
         <Button
           title={collects ? t("partner.checkInCtaCash", { amount }) : t("partner.checkInCta")}
           loading={checkIn.isPending}

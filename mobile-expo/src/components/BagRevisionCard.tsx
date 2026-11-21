@@ -8,6 +8,7 @@ import { BagCounter } from "@/components/BagCounter";
 import { AppText, Banner, Button, Card } from "@/components/ui";
 import { api, ApiError } from "@/lib/api";
 import { errorMessage } from "@/lib/errors";
+import { SEALS_ENABLED } from "@/lib/config";
 import { formatMoney } from "@/lib/format";
 import type { BagRevisionRequest, BagRevisionResponse, BookingDetail } from "@/lib/types";
 import { notify } from "@/lib/notify";
@@ -88,7 +89,7 @@ export function BagRevisionCard({ booking }: { booking: BookingDetail }) {
     <Card style={styles.card}>
       <AppText variant="heading">{t("bagRevision.title")}</AppText>
       <AppText variant="caption">
-        {booking.status === "CHECKED_IN" ? t("bagRevision.hintCheckedIn") : t("bagRevision.hint")}
+        {booking.status === "CHECKED_IN" ? t(SEALS_ENABLED ? "bagRevision.hintCheckedIn" : "bagRevision.hintCheckedInNoSeals") : t("bagRevision.hint")}
       </AppText>
       <BagCounter compact size="s" value={counts.bagCountS} onChange={(n) => setCounts((c) => ({ ...c, bagCountS: n }))} />
       <BagCounter compact size="m" value={counts.bagCountM} onChange={(n) => setCounts((c) => ({ ...c, bagCountM: n }))} />
