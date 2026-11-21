@@ -1,5 +1,5 @@
 import { scryptSync } from "crypto";
-import { generatePasswordResetTokenByPhone } from "@/lib/password-reset-token";
+import { PARTNER_RESET_TTL_MS, generatePasswordResetTokenByPhone } from "@/lib/password-reset-token";
 import { getSiteBaseUrl } from "@/lib/site-urls";
 
 /**
@@ -40,7 +40,7 @@ export function tokenFingerprint(token: string): string {
 
 /** `phone` normalize edilmiş 10 haneli biçimde (`normalizeTrGsm10`) gelir. */
 export async function createPartnerResetLink(phone: string): Promise<PartnerResetLink> {
-  const row = await generatePasswordResetTokenByPhone(phone);
+  const row = await generatePasswordResetTokenByPhone(phone, PARTNER_RESET_TTL_MS);
   /*
     Taban adres ortak yardimciyla (`getSiteBaseUrl`) aliniyor. Onceden bu kod
     kendi yedegini yaziyordu ve YALNIZCA `NEXT_PUBLIC_APP_URL`e bakiyordu;
