@@ -44,7 +44,8 @@ export async function PUT(req: NextRequest) {
   const contentType = req.headers.get("content-type") || "";
 
   if (contentType.includes("multipart/form-data")) {
-    const formData = await req.formData();
+    const formData = await req.formData().catch(() => null);
+    if (!formData) return NextResponse.json({ error: "invalid_data" }, { status: 400 });
     const file = formData.get("avatar") as File | null;
     if (!file) {
       return NextResponse.json({ error: "no_file" }, { status: 400 });
