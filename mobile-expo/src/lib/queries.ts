@@ -4,6 +4,7 @@ import { api, ApiError, isImpersonating } from "./api";
 import { deleteOfflineTicket, saveOfflineTicket } from "./offline-tickets";
 import { useAuth } from "./auth";
 import { usePartnerShopSelection, withShop } from "./partner-shop";
+import { totalBags, type Bags } from "./search";
 import type { AdminApplication, AdminStats, BookingDetail, ContactMessage, PartnerEarnings, PartnerSealsResponse, PartnerShop, BookingSummary, NearbyShop, PartnerBookingsResponse, ShopDetail, ShopReview, PartnerShopSettings, PartnerSchedule, PartnerDashboard, AdminOverview, AdminBookingFilter, AdminBookingCounts, AdminBookingsResponse, AdminBookingDetail, AdminShop, AdminShopDetail, AdminUser, CityCoverage } from "./types";
 
 export const keys = {
@@ -105,7 +106,7 @@ export type NearbyParams = {
   radiusM: number;
   checkIn: Date;
   checkOut: Date;
-  bags: number;
+  bags: Bags;
 };
 
 export function useNearbyShops(p: NearbyParams | null) {
@@ -120,7 +121,11 @@ export function useNearbyShops(p: NearbyParams | null) {
         limit: "50",
         checkIn: p!.checkIn.toISOString(),
         checkOut: p!.checkOut.toISOString(),
-        bags: String(p!.bags),
+        // Eski sunucu icin toplam adet de gider; boy adetleriyle sunucu kalis toplamini ekler.
+        bags: String(totalBags(p!.bags)),
+        bagsS: String(p!.bags.s),
+        bagsM: String(p!.bags.m),
+        bagsXl: String(p!.bags.xl),
         // Saate oturmayan dukkanlar da gelsin (bookable:false); eski istemci bunu gondermez.
         includeClosed: "1",
       });
