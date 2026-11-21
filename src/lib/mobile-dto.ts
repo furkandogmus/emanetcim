@@ -56,6 +56,19 @@ type BookingSummarySource = {
   status: string;
 };
 
+/** Valiz hic birakilmamis durumlar: alma saati gecince rezervasyon bosa dusmustur. */
+const NEVER_DROPPED_STATUSES: readonly string[] = ["APPROVED", "PAID"];
+
+/**
+ * Suresi dolmus (gelinmemis) rezervasyon: onayli/odenmis, valiz hic teslim
+ * edilmemis ve alma saati gecmis. Kural SUNUCUDA: web ve mobil ayni cevabi gorur,
+ * cihaz saati yanlis olan turist bos bir QR gostermez. Durum bilerek degismez
+ * (sure asimi taramasi yalnizca isaretler), bu yuzden bu bir turetilmis alandir.
+ */
+export function isBookingExpired(b: { status: string; checkOutTime: Date }, now: Date = new Date()): boolean {
+  return NEVER_DROPPED_STATUSES.includes(b.status) && b.checkOutTime.getTime() < now.getTime();
+}
+
 export function toMobileBookingSummary(b: BookingSummarySource) {
   return {
     id: b.id,
@@ -68,6 +81,8 @@ export function toMobileBookingSummary(b: BookingSummarySource) {
     bagCountXl: b.bagCountXl,
     totalPrice: moneyToNumber(b.totalPrice),
     status: b.status,
+    // Eski uygulama bilinmeyen alani yok sayar; yeni istemci QR/iptal/degistir'i buna gore gizler.
+    expired: isBookingExpired(b),
   };
 }
 
@@ -341,6 +356,8 @@ type AppConfigSource = {
   latestAppVersion: string | null;
   /** Yonetici ayari: check-in'de muhur numarasi zorunlu mu. Gizli degil. */
   requireSealsOnCheckIn?: boolean;
+  /** Odeme metinlerinin kipi: "onsite" dukkanda tahsilat, "online" kartli. Bilinmiyorsa "onsite". */
+  paymentMode?: "online" | "onsite";
 };
 
 /**
@@ -360,6 +377,8 @@ export function toMobileAppConfig(c: AppConfigSource) {
     minAppVersion: c.minAppVersion,
     latestAppVersion: c.latestAppVersion,
     requireSealsOnCheckIn: c.requireSealsOnCheckIn === true,
+    // Gercek olan varsayilandir: bilinmeyen kip kartli odeme vaat etmez.
+    paymentMode: c.paymentMode === "online" ? ("online" as const) : ("onsite" as const),
   };
 }
 
