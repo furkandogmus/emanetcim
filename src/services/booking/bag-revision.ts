@@ -40,7 +40,12 @@ import { DEFAULT_NOTIFICATION_LOCALE } from '@/lib/request-locale';
 import { formatTryCurrency } from '@/lib/currency';
 import { bcp47ForUiLocale } from '@/lib/intl-locale';
 
-export type BagRevisionActor = { id: string; role: 'PARTNER' | 'ADMIN' | 'GUEST' };
+export type BagRevisionActor = {
+  id: string;
+  role: 'PARTNER' | 'ADMIN' | 'GUEST';
+  /** Yonetici goruntuleme oturumunda dugmeye basan yonetici (bkz. `BookingEventService.record`). */
+  impersonatedBy?: string | null;
+};
 
 export type BagCounts = { bagCountS: number; bagCountM: number; bagCountXl: number };
 
@@ -444,6 +449,7 @@ export async function applyBagRevision(
         event: 'BAGS_MODIFIED',
         actorId: actor.id,
         actorRole: actor.role,
+        impersonatedBy: actor.impersonatedBy ?? null,
         metadata: {
           from: {
             S: booking.bagCountS,

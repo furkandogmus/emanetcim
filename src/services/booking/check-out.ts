@@ -9,6 +9,7 @@ import { sealService } from '@/services/SealService';
 import { getPricingRules } from '@/lib/platform-settings';
 import { PartnerCheckOutResult } from '@/types/partner-booking';
 import { bookingEventService } from '@/services/BookingEventService';
+import type { PaymentActor } from '@/services/PaymentService';
 
 type CheckOutChargeSource = Parameters<
   (typeof import('@/services/PricingService'))['pricingService']['calculateEarlyRefund']
@@ -35,7 +36,7 @@ export async function previewCheckOutCharges(
 
 export async function checkOut(
   bookingId: string,
-  opts: { brokenSealNumbers?: number[] } = {},
+  opts: { brokenSealNumbers?: number[]; actor?: PaymentActor } = {},
 ): Promise<PartnerCheckOutResult> {
   const brokenSealNumbers = opts.brokenSealNumbers ?? [];
   const booking = await prisma.booking.findUnique({
@@ -134,6 +135,9 @@ export async function checkOut(
     void bookingEventService.record({
       bookingId,
       event: "CHECKED_OUT",
+      actorId: opts.actor?.id ?? null,
+      actorRole: opts.actor?.role ?? null,
+      impersonatedBy: opts.actor?.impersonatedBy ?? null,
       metadata: {
         lateFeeApplied: lateFeeTry,
         refundAmount: refundAmount > 0 ? refundAmount : undefined,

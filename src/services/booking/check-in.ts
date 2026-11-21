@@ -243,6 +243,9 @@ export async function checkIn(
     void bookingEventService.record({
       bookingId,
       event: "CHECKED_IN",
+      actorId: actor?.id ?? null,
+      actorRole: actor?.role ?? null,
+      impersonatedBy: actor?.impersonatedBy ?? null,
       metadata: { previousStatus: existing.status },
     }).catch((err) => logger.error({ err, bookingId }, "booking_event_checked_in_failed"));
 

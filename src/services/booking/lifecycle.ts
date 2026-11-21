@@ -14,7 +14,7 @@ import { CancelBookingResult, ModifyBookingResult } from '@/types/partner-bookin
 import { findClosedStayDay, isClosedAtStayTimes } from '@/services/ShopScheduleService';
 import { checkoutLineItems, computeAuthoritativeCheckoutTotals, validateBookingStayWindow } from '@/lib/booking-server-price';
 import { bookingEventService } from '@/services/BookingEventService';
-import { paymentService } from '@/services/PaymentService';
+import { paymentService, type PaymentActor } from '@/services/PaymentService';
 import { couponService } from '@/services/CouponService';
 import { BookingCapacityExceededError } from '@/services/booking/errors';
 import { assertCapacityTx } from '@/services/booking/create';
@@ -75,7 +75,7 @@ export async function cancelBooking(
     hesap silme de yuzlerce bildirim uretmemeli. Varsayilan (misafir iptali):
     esnaf ve misafir haberdar edilir.
   */
-  opts: { silent?: boolean } = {},
+  opts: { silent?: boolean; actor?: PaymentActor } = {},
 ): Promise<CancelBookingResult> {
   const booking = await prisma.booking.findUnique({
     where: { id: bookingId },
@@ -154,6 +154,7 @@ export async function cancelBooking(
       const refunded = await paymentService.refund({
         bookingId,
         reason: 'booking_cancelled',
+        actor: opts.actor,
       });
       if (!refunded.ok && refunded.code !== 'NOTHING_TO_REFUND') {
         logger.error(
@@ -165,7 +166,7 @@ export async function cancelBooking(
       // Tahsilat olmadan iptal: açık kalmış niyeti kapat, defterde PENDING
       // satır sürünmesin.
       await paymentService
-        .cancelIntent({ bookingId })
+        .cancelIntent({ bookingId, actor: opts.actor })
         .catch((err) => logger.error({ err, bookingId }, "payment_intent_cancel_failed"));
     }
 
@@ -186,6 +187,9 @@ export async function cancelBooking(
     void bookingEventService.record({
       bookingId,
       event: "CANCELLED",
+      actorId: opts.actor?.id ?? null,
+      actorRole: opts.actor?.role ?? null,
+      impersonatedBy: opts.actor?.impersonatedBy ?? null,
       metadata: { previousStatus: booking.status, hadPayment, fullRefund: true },
     }).catch((err) => logger.error({ err, bookingId }, "booking_event_cancelled_failed"));
 
