@@ -8,6 +8,7 @@ import { errorMessage } from "@/lib/errors";
 import { formatDayTime, formatMoney } from "@/lib/format";
 import { usePartnerEarnings } from "@/lib/queries";
 import { colors, fonts, radius, space } from "@/theme/tokens";
+import { StaleQueryBanner } from "@/components/StaleQueryBanner";
 
 /**
  * Esnaf kazanci. Tutarlar sunucuda komisyon dusulmus esnaf payidir; istemci
@@ -23,9 +24,11 @@ export default function PartnerEarningsScreen() {
     <SafeAreaView style={styles.safe} edges={["top"]}>
       <StackHeader title={t("earnings.title")} />
 
+      <StaleQueryBanner query={query} />
+
       {query.isLoading ? (
         <Loading />
-      ) : query.isError || !data ? (
+      ) : !data ? (
         <CenterMessage
           title={errorMessage(query.error, "earnings")}
           action={<Button variant="secondary" title={t("common.retry")} onPress={() => query.refetch()} />}

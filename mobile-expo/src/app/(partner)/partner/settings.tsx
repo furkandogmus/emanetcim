@@ -14,6 +14,7 @@ import { keys, usePartnerShopSettings } from "@/lib/queries";
 import type { PartnerShopSettings, PartnerShopUpdateResult } from "@/lib/types";
 import { notify } from "@/lib/notify";
 import { colors, fonts, space } from "@/theme/tokens";
+import { StaleQueryBanner } from "@/components/StaleQueryBanner";
 
 /**
  * Dukkan temel bilgileri.
@@ -30,9 +31,10 @@ export default function PartnerSettingsScreen() {
   return (
     <SafeAreaView style={styles.safe} edges={["top", "bottom"]}>
       <StackHeader title={t("shopSettings.title")} />
+      <StaleQueryBanner query={query} />
       {query.isLoading ? (
         <Loading />
-      ) : query.isError || !query.data ? (
+      ) : !query.data ? (
         <CenterMessage
           title={errorMessage(query.error, "shopSettings")}
           action={<Button variant="secondary" title={t("common.retry")} onPress={() => query.refetch()} />}

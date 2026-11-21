@@ -24,6 +24,8 @@ import { isActiveBooking, usePartnerBookings, usePartnerDashboard, usePartnerOld
 import { wallInstant, wallParts } from "@/lib/time";
 import type { PartnerBooking } from "@/lib/types";
 import { colors, space } from "@/theme/tokens";
+import { isBlockingError } from "@/lib/query-view";
+import { StaleQueryBanner } from "@/components/StaleQueryBanner";
 
 type Tab = "today" | "upcoming" | "past";
 
@@ -115,7 +117,7 @@ export default function PartnerBookingsScreen() {
       {/* Kartlar listenin basliginda: sabit dururken listeye ekranin %15'i kaliyordu
           (2026-11-19, Pixel 8 emulatorde iki kart + sekmeler). Artik sayfa tek parca kayar. */}
       <FlatList
-        data={query.isLoading || query.isError ? [] : items}
+        data={query.isLoading || isBlockingError(query) ? [] : items}
         keyExtractor={(b) => b.id}
         contentContainerStyle={styles.list}
         refreshControl={
@@ -123,6 +125,7 @@ export default function PartnerBookingsScreen() {
         }
         ListHeaderComponent={
           <View style={{ gap: space.md }}>
+            <StaleQueryBanner query={query} />
             <ShopSetupCard />
             <PartnerPulseCard />
             <Input
@@ -180,7 +183,7 @@ export default function PartnerBookingsScreen() {
         ListEmptyComponent={
           query.isLoading ? (
             <RowSkeleton />
-          ) : query.isError ? (
+          ) : isBlockingError(query) ? (
             <CenterMessage
               title={errorMessage(query.error)}
               action={<Button variant="secondary" title={t("common.retry")} onPress={() => query.refetch()} />}

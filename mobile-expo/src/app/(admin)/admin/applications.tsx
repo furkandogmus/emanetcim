@@ -16,6 +16,8 @@ import { keys, useAdminApplications } from "@/lib/queries";
 import type { AdminApplication } from "@/lib/types";
 import { notify } from "@/lib/notify";
 import { colors, fonts, radius, space } from "@/theme/tokens";
+import { isBlockingError } from "@/lib/query-view";
+import { StaleQueryBanner } from "@/components/StaleQueryBanner";
 
 export default function AdminApplicationsScreen() {
   const { t } = useTranslation();
@@ -57,9 +59,11 @@ export default function AdminApplicationsScreen() {
     <SafeAreaView style={styles.safe} edges={["top"]}>
       <StackHeader title={t("admin.applications")} />
 
+      <StaleQueryBanner query={query} />
+
       {query.isLoading ? (
         <Loading />
-      ) : query.isError ? (
+      ) : isBlockingError(query) ? (
         <CenterMessage
           title={errorMessage(query.error)}
           action={<Button variant="secondary" title={t("common.retry")} onPress={() => query.refetch()} />}

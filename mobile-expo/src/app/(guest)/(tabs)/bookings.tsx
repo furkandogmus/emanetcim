@@ -15,6 +15,8 @@ import { useAuth } from "@/lib/auth";
 import { useOfflineTickets } from "@/lib/offline-tickets";
 import { SignInPrompt } from "@/components/SignInPrompt";
 import { colors, space } from "@/theme/tokens";
+import { isBlockingError } from "@/lib/query-view";
+import { StaleQueryBanner } from "@/components/StaleQueryBanner";
 
 export default function MyBookingsScreen() {
   const { t } = useTranslation();
@@ -62,9 +64,11 @@ export default function MyBookingsScreen() {
         </View>
       ) : null}
 
+      <StaleQueryBanner query={query} />
+
       {query.isLoading ? (
         <RowSkeleton />
-      ) : query.isError && !offlineMode ? (
+      ) : isBlockingError(query) && !offlineMode ? (
         <CenterMessage
           title={errorMessage(query.error)}
           action={<Button variant="secondary" title={t("common.retry")} onPress={() => query.refetch()} />}

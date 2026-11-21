@@ -19,6 +19,7 @@ import { cellOf, wallInstant } from "@/lib/time";
 import type { PartnerSchedule, ScheduleConflict, ScheduleDay, ShopClosure } from "@/lib/types";
 import { notify } from "@/lib/notify";
 import { colors, fonts, radius, space } from "@/theme/tokens";
+import { StaleQueryBanner } from "@/components/StaleQueryBanner";
 
 /** Sunucudaki `ShopScheduleService.TIME_RE` ile ayni bicim. */
 const TIME_RE = /^([01]\d|2[0-3]):[0-5]\d$/;
@@ -75,9 +76,10 @@ export default function PartnerScheduleScreen() {
   return (
     <SafeAreaView style={styles.safe} edges={["top", "bottom"]}>
       <StackHeader title={t("schedule.title")} subtitle={shop.data ? shop.data.name : undefined} />
+      <StaleQueryBanner query={query} />
       {query.isLoading ? (
         <Loading />
-      ) : query.isError || !query.data ? (
+      ) : !query.data ? (
         <CenterMessage
           title={errorMessage(query.error, "schedule")}
           action={<Button variant="secondary" title={t("common.retry")} onPress={() => query.refetch()} />}

@@ -16,6 +16,7 @@ import { usePartnerSeals } from "@/lib/queries";
 import type { SealDeliveryResponse, SealRequest, SealRequestResponse } from "@/lib/types";
 import { notify } from "@/lib/notify";
 import { colors, fonts, radius, space } from "@/theme/tokens";
+import { StaleQueryBanner } from "@/components/StaleQueryBanner";
 
 /** `seals/request` ucunun mobil ust siniri (`MOBILE_MAX_COUNT`); fazlasi sunucuda sessizce kirpilir. */
 const MAX_REQUEST = 100;
@@ -95,9 +96,11 @@ export default function PartnerSealsScreen() {
     <SafeAreaView style={styles.safe} edges={["top"]}>
       <StackHeader title={t("seals.title")} subtitle={query.data?.shop ? query.data.shop.name : undefined} />
 
+      <StaleQueryBanner query={query} />
+
       {query.isLoading ? (
         <Loading />
-      ) : query.isError || !query.data ? (
+      ) : !query.data ? (
         <CenterMessage
           title={errorMessage(query.error, "seals")}
           action={<Button variant="secondary" title={t("common.retry")} onPress={() => query.refetch()} />}

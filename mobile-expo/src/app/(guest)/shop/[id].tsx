@@ -59,7 +59,7 @@ export default function ShopDetailScreen() {
       </View>
     );
   }
-  if (query.isError || !query.data) {
+  if (!query.data) {
     return (
       <CenterMessage
         title={errorMessage(query.error, "shop")}

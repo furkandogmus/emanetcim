@@ -17,6 +17,7 @@ import { useViewAs } from "@/lib/use-view-as";
 import { useAdminBooking } from "@/lib/queries";
 import type { AdminBookingDetail } from "@/lib/types";
 import { colors, radius, space } from "@/theme/tokens";
+import { StaleQueryBanner } from "@/components/StaleQueryBanner";
 
 const DAY = 24 * 60 * 60 * 1000;
 
@@ -40,9 +41,11 @@ export default function AdminBookingScreen() {
         </IconButton>
       </View>
 
+      <StaleQueryBanner query={query} />
+
       {query.isLoading ? (
         <Loading />
-      ) : query.isError || !query.data ? (
+      ) : !query.data ? (
         <CenterMessage
           title={errorMessage(query.error)}
           action={<Button variant="secondary" title={t("common.back")} onPress={() => router.back()} />}

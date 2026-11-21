@@ -22,6 +22,7 @@ import { notify } from "@/lib/notify";
 import { keys, useAdminShop } from "@/lib/queries";
 import type { AdminShopDetail, AdminShopPatch } from "@/lib/types";
 import { colors, radius, space } from "@/theme/tokens";
+import { StaleQueryBanner } from "@/components/StaleQueryBanner";
 
 const open = (url: string) => void Linking.openURL(url).catch(() => undefined);
 
@@ -52,9 +53,10 @@ export default function AdminShopScreen() {
           ) : undefined
         }
       />
+      <StaleQueryBanner query={query} />
       {query.isLoading ? (
         <Loading />
-      ) : query.isError || !query.data ? (
+      ) : !query.data ? (
         <CenterMessage
           title={errorMessage(query.error, "admin")}
           action={<Button variant="secondary" title={t("common.back")} onPress={() => router.back()} />}

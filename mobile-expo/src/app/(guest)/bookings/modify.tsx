@@ -24,7 +24,7 @@ export default function ModifyBookingScreen() {
   const query = useBooking(id);
 
   if (query.isLoading) return <Loading />;
-  if (query.isError || !query.data) {
+  if (!query.data) {
     return (
       <CenterMessage
         title={errorMessage(query.error)}

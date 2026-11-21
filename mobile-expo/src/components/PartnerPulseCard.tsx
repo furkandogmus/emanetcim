@@ -25,7 +25,7 @@ export function PartnerPulseCard() {
     );
   }
 
-  if (query.isError || !query.data) {
+  if (!query.data) {
     return (
       <Pressable accessibilityRole="button" onPress={() => query.refetch()} style={styles.errorRow}>
         <AppText variant="caption">{t("pulse.failed")}</AppText>
