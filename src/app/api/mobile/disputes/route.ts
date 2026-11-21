@@ -14,7 +14,7 @@ export async function POST(req: NextRequest) {
   const auth = await requireMobileUser(req);
   if ("error" in auth) return auth.error;
 
-  const body = await req.json();
+  const body = await req.json().catch(() => null);
   const parsed = disputeSchema.safeParse(body);
   if (!parsed.success) {
     return NextResponse.json({ error: "invalid_data", details: parsed.error.flatten() }, { status: 400 });
