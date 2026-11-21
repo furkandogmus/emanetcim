@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { getAppVersionGate } from "@/lib/app-version";
 import { toMobileAppConfig } from "@/lib/mobile-dto";
+import { getPaymentCopyMode } from "@/lib/payment-copy";
 import { getPricingRules } from "@/lib/platform-settings";
 
 /**
@@ -17,5 +18,15 @@ export async function GET() {
   const requireSealsOnCheckIn = await getPricingRules()
     .then((r) => r.requireSealsOnCheckIn === true)
     .catch(() => false);
-  return NextResponse.json(toMobileAppConfig({ ...gate, requireSealsOnCheckIn }));
+  /*
+    Odeme kipi: metinler saglayicinin yetenegine baglidir (`payment-copy.ts`).
+    Tanimsiz saglayici getPaymentProvider'i firlatir; o durumda "onsite" (gercek).
+  */
+  let paymentMode: "online" | "onsite" = "onsite";
+  try {
+    paymentMode = getPaymentCopyMode();
+  } catch {
+    paymentMode = "onsite";
+  }
+  return NextResponse.json(toMobileAppConfig({ ...gate, requireSealsOnCheckIn, paymentMode }));
 }
