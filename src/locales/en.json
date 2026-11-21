@@ -888,6 +888,7 @@
     "featureFlagsEmpty": "No feature flags yet.",
     "featureFlagsNav": "Feature flags",
     "shopDeleteBlockedByRelations": "This shop has linked bookings or other records and cannot be removed.",
+    "shopNotPending": "This application is no longer pending (already approved or active) and cannot be rejected. Refresh the list.",
     "roleApprovalsTitle": "Role change approvals",
     "roleApprovalsIntro": "Another administrator requested a change that affects admin access. Approve only if you trust it. You cannot approve your own request.",
     "roleApprovalsEmpty": "No pending role approvals.",

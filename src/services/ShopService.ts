@@ -327,7 +327,7 @@ export type ApproveShopResult =
 
 export type RejectShopResult =
   | { ok: true; releasedSeals: number }
-  | { ok: false; reason: "not_found" | "has_booking_history" };
+  | { ok: false; reason: "not_found" | "not_pending" | "has_booking_history" };
 
 /** Basvuru karari veren admin; IP tasiyicidan gelir (web action / mobil uc). */
 export type ApplicationActor = { userId: string | null; ip: string | null };
@@ -1132,21 +1132,33 @@ export class ShopService implements IShopService {
    * rezervasyon kalirdi. Kontrol acikca yapiliyor.
    */
   async rejectShop(shopId: string): Promise<RejectShopResult> {
-    const shop = await prisma.shop.findUnique({
+    const exists = await prisma.shop.findUnique({
       where: { id: shopId },
       select: { id: true },
     });
-    if (!shop) return { ok: false, reason: "not_found" };
+    if (!exists) return { ok: false, reason: "not_found" };
+
+    /*
+      Liste yalniz bekleyen basvuruyu gosterir ama bayat liste, eski uygulama
+      surumu ya da dogrudan POST canli dukkani da gonderebilir: ayni tanim burada
+      da uygulanir. Onayli/aktif/prelaunch dukkan SILINMEZ.
+    */
+    const pending = await prisma.shop.findFirst({
+      where: { id: shopId, ...PENDING_APPLICATION_WHERE },
+      select: { id: true },
+    });
 
     /*
       HERHANGI bir rezervasyon (iptal/teslim dahil) varsa silinmez: Booking ve
       PaymentLog `onDelete: Cascade`, silme gecmisi ve odeme defterini de goturur.
       Gercek bir basvurunun gecmisi yoktur; gecmisi olan dukkan yalnizca pasife alinir.
+      Sayim ayrica yaris korumasidir (liste ile islem arasinda rezervasyon dusebilir).
     */
     const bookingCount = await prisma.booking.count({ where: { shopId } });
     if (bookingCount > 0) {
       return { ok: false, reason: "has_booking_history" };
     }
+    if (!pending) return { ok: false, reason: "not_pending" };
 
     await prisma.shop.delete({ where: { id: shopId } });
 

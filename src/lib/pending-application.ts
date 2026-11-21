@@ -6,6 +6,8 @@
  */
 export const PENDING_APPLICATION_WHERE = {
   isActive: false,
+  // Talep testi noktalari (scripts/prelaunch-points.ts) rezervasyonsuzdur; basvuru degildir.
+  isPrelaunch: false,
   approvedAt: null,
   bookings: { none: {} },
 } as const;
