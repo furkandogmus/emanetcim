@@ -67,6 +67,50 @@ describe("findScheduleConflicts", () => {
   });
 });
 
+describe("findScheduleConflicts saat daraltma (bulgu 67)", () => {
+  beforeEach(() => vi.clearAllMocks());
+  const days = (close: string) =>
+    [1, 2, 3, 4, 5, 6, 7].map((weekday) => ({ weekday, isClosed: false, openingTime: "09:00", closingTime: close }));
+  const tz = "Europe/Istanbul";
+
+  it("kapanisi one ceken degisiklik o saatteki birakisi ve alisi cakisma sayar", async () => {
+    // 17:00Z = 20:00 Istanbul birakis, ertesi gun 18:00Z = 21:00 alis.
+    mockPrisma.booking.findMany.mockResolvedValue([
+      booking("APPROVED", "2026-10-07T17:00:00Z", "2026-10-08T18:00:00Z"),
+    ]);
+    const c = await findScheduleConflicts("s1", { timeZone: tz, weekly: days("18:00") }, NOW, {
+      current: { timeZone: tz, weekly: days("22:00") },
+    });
+    expect(c.map((x) => [x.kind, x.date])).toEqual([
+      ["dropoff", "2026-10-07"],
+      ["pickup", "2026-10-08"],
+    ]);
+  });
+
+  it("tolerans icindeki an cakisma sayilmaz", async () => {
+    // 15:10Z = 18:10 Istanbul; kapanis 18:00 + 15 dk tolerans.
+    mockPrisma.booking.findMany.mockResolvedValue([
+      booking("APPROVED", "2026-10-07T15:10:00Z", "2026-10-07T15:10:00Z"),
+    ]);
+    const c = await findScheduleConflicts("s1", { timeZone: tz, weekly: days("18:00") }, NOW, {
+      current: { timeZone: tz, weekly: days("22:00") },
+      graceMinutes: 15,
+    });
+    expect(c).toEqual([]);
+  });
+
+  it("bugunku takvimde de saat disinda kalan eski kayit ilgisiz duzenlemeyi kilitlemez", async () => {
+    // 20:30 Istanbul: hem eski (20:00) hem yeni (19:00) takvimde kapali.
+    mockPrisma.booking.findMany.mockResolvedValue([
+      booking("APPROVED", "2026-10-07T17:30:00Z", "2026-10-07T17:30:00Z"),
+    ]);
+    const c = await findScheduleConflicts("s1", { timeZone: tz, weekly: days("19:00") }, NOW, {
+      current: { timeZone: tz, weekly: days("20:00") },
+    });
+    expect(c).toEqual([]);
+  });
+});
+
 describe("addClosure", () => {
   beforeEach(() => vi.clearAllMocks());
 

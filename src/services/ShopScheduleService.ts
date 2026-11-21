@@ -2,7 +2,15 @@ import prisma from "@/lib/db";
 import logger from "@/lib/logger";
 import { generateSlotsForShop } from "@/services/SlotService";
 import { PLATFORM_TIMEZONE, toDatetimeLocalValueInTimeZone } from "@/lib/datetime-local";
-import { hoursForDate, isOpenAt, type ClosureRange, type ShopSchedule, type WeeklyDay } from "@/lib/shop-schedule";
+import { getPricingRules } from "@/lib/platform-settings";
+import {
+  hoursForDate,
+  isOpenAt,
+  isOpenForHandover,
+  type ClosureRange,
+  type ShopSchedule,
+  type WeeklyDay,
+} from "@/lib/shop-schedule";
 
 export type ShopScheduleParts = { weekly: WeeklyDay[]; closures: ClosureRange[] };
 
@@ -55,13 +63,26 @@ const ACTIVE_STATUSES = ["PAID", "APPROVED", "CHECKED_IN"] as const;
 const DATE_RE = /^\d{4}-\d{2}-\d{2}$/;
 
 /**
- * Yeni takvimin kapattığı güne denk gelen aktif rezervasyonlar. Boş liste = güvenli.
- * Rafta valizi (CHECKED_IN) olan dükkan, izin aralığı boyunca kapanamaz.
+ * Yeni takvimin kapattığı güne ya da SAATE denk gelen aktif rezervasyonlar.
+ * Boş liste = güvenli. Rafta valizi (CHECKED_IN) olan dükkan, izin aralığı
+ * boyunca kapanamaz.
+ *
+ * SAAT KONTROLU (bulgu 67): eskiden yalnizca "gun kapali mi" soruluyordu.
+ * Kapanisi 22:00'den 18:00'e ceken esnaf uyarilmiyordu; 20:00'de birakacak
+ * kabul edilmis misafir tezgahta `SHOP_CLOSED` ile geri donuyordu. Artik
+ * birakis/alis ANI, check-in kapisinin kullandigi `isOpenForHandover` (ayni
+ * tolerans) ile yeni takvime karsi sinanir. Web ve mobil ayni servisi cagirir.
+ *
+ * `current` verilirse yalnizca BU degisikligin kapattigi an sayilir: bugunku
+ * takvimde de saat disinda kalan eski bir kayit, ilgisiz bir duzenlemeyi
+ * sonsuza kadar kilitlemesin. Tur adlari (`dropoff`/`pickup`) bilerek ayni:
+ * eski uygulama surumleri yeni bir turu cevirmeden gosterirdi.
  */
 export async function findScheduleConflicts(
   shopId: string,
   next: ShopSchedule,
   now: Date = new Date(),
+  opts: { current?: ShopSchedule; graceMinutes?: number } = {},
 ): Promise<ScheduleConflict[]> {
   const tz = next.timeZone || PLATFORM_TIMEZONE;
   const bookings = await prisma.booking.findMany({
@@ -80,6 +101,9 @@ export async function findScheduleConflicts(
 
   const out: ScheduleConflict[] = [];
   const localDate = (d: Date) => toDatetimeLocalValueInTimeZone(d, tz).slice(0, 10);
+  const grace = opts.graceMinutes ?? 0;
+  const strandedAt = (at: Date) =>
+    !isOpenForHandover(next, at, grace) && (!opts.current || isOpenForHandover(opts.current, at, grace));
   for (const b of bookings) {
     const pickup = localDate(b.checkOutTime);
     const add = (date: string, kind: ScheduleConflict["kind"]) =>
@@ -90,9 +114,9 @@ export async function findScheduleConflicts(
       if (closed) add(closed.startDate > localDate(now) ? closed.startDate : localDate(now), "bags_on_shelf");
     } else if (b.checkInTime >= now) {
       const drop = localDate(b.checkInTime);
-      if (!hoursForDate(next, drop)) add(drop, "dropoff");
+      if (!hoursForDate(next, drop) || strandedAt(b.checkInTime)) add(drop, "dropoff");
     }
-    if (!hoursForDate(next, pickup)) add(pickup, "pickup");
+    if (!hoursForDate(next, pickup) || strandedAt(b.checkOutTime)) add(pickup, "pickup");
   }
   return out;
 }
@@ -120,6 +144,16 @@ async function currentSchedule(shopId: string) {
 
 const TIME_RE = /^([01]\d|2[0-3]):[0-5]\d$/;
 
+/** Check-in kapisinin kapanis toleransi; okunamazsa 0 (daha siki, hic gevsemez). */
+async function handoverGraceMinutes(): Promise<number> {
+  try {
+    return (await getPricingRules()).checkInGraceMin;
+  } catch (err) {
+    logger.warn({ err }, "schedule_conflict_grace_read_failed");
+    return 0;
+  }
+}
+
 export async function saveWeeklyHours(
   shopId: string,
   days: WeeklyDay[],
@@ -138,7 +172,10 @@ export async function saveWeeklyHours(
 
   const current = await currentSchedule(shopId);
   if (!current) return { ok: false, code: "INVALID" };
-  const conflicts = await findScheduleConflicts(shopId, { ...current, weekly: days, open247 });
+  const conflicts = await findScheduleConflicts(shopId, { ...current, weekly: days, open247 }, new Date(), {
+    current,
+    graceMinutes: await handoverGraceMinutes(),
+  });
   if (conflicts.length > 0) return { ok: false, code: "CONFLICT", conflicts };
 
   const firstOpen = days.find((d) => !d.isClosed);
@@ -190,6 +227,7 @@ export async function addClosure(
     shopId,
     { ...current, closures: [...current.closures, { startDate, endDate }] },
     now,
+    { current, graceMinutes: await handoverGraceMinutes() },
   );
   if (conflicts.length > 0) return { ok: false, code: "CONFLICT", conflicts };
 
