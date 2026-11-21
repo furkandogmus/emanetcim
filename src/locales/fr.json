@@ -1777,6 +1777,7 @@
     "notFound": "Enregistrement introuvable.",
     "paymentFailed": "Le paiement a échoué ou a été rejeté.",
     "phoneAlreadyRegistered": "Ce numéro de téléphone est déjà enregistré.",
+    "phoneLoginLocked": "Ce numéro sert à la connexion ; il ne peut pas être modifié sans e-mail ni autre méthode de connexion.",
     "referralCodeFailed": "Impossible de générer un code. Veuillez réessayer.",
     "reviewNotReady": "Les avis ne peuvent être effectués qu’une fois la livraison terminée.",
     "sealCountMismatch": "Le nombre de scellés saisis ne correspond pas au nombre de bagages.",

@@ -31,7 +31,7 @@ export async function PUT(req: NextRequest) {
   if (!result.ok) {
     return NextResponse.json(
       { error: result.reason },
-      { status: result.reason === "already_registered" ? 409 : 400 },
+      { status: result.reason === "invalid_tr_phone" ? 400 : 409 },
     );
   }
   return NextResponse.json({ success: true, phone: result.phone });

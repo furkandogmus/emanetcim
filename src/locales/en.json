@@ -1841,6 +1841,7 @@
     "notFound": "Record not found.",
     "paymentFailed": "Payment failed or rejected.",
     "phoneAlreadyRegistered": "This phone number is already registered.",
+    "phoneLoginLocked": "This number is used to sign in; it can't be changed without an email or another sign-in method.",
     "referralCodeFailed": "Could not generate a code. Please try again.",
     "reviewNotReady": "Reviews can only be made after the delivery is complete.",
     "sealCountMismatch": "The number of seals entered does not match the number of bags.",

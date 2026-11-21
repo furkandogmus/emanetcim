@@ -1777,6 +1777,7 @@
     "notFound": "Eintrag nicht gefunden.",
     "paymentFailed": "Die Zahlung ist fehlgeschlagen oder wurde abgelehnt.",
     "phoneAlreadyRegistered": "Diese Telefonnummer ist bereits registriert.",
+    "phoneLoginLocked": "Diese Nummer dient der Anmeldung; ohne E-Mail oder andere Anmeldemethode lässt sie sich nicht ändern.",
     "referralCodeFailed": "Code konnte nicht erstellt werden. Bitte versuchen Sie es erneut.",
     "reviewNotReady": "Bewertungen können erst nach Abschluss der Lieferung abgegeben werden.",
     "sealCountMismatch": "Die Anzahl der Siegel stimmt nicht mit der Anzahl der Gepäckstücke überein.",

@@ -1,7 +1,7 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
 
 const { mockPrisma } = vi.hoisted(() => ({
-  mockPrisma: { user: { update: vi.fn() } },
+  mockPrisma: { user: { update: vi.fn(), findUnique: vi.fn() } },
 }));
 vi.mock("@/lib/db", () => ({ default: mockPrisma }));
 
@@ -10,6 +10,7 @@ import { partnerProfileService } from "@/services/PartnerProfileService";
 beforeEach(() => {
   vi.clearAllMocks();
   mockPrisma.user.update.mockResolvedValue({ id: "u1" });
+  mockPrisma.user.findUnique.mockResolvedValue({ email: "a@b.co", phone: "5320000000", _count: { accounts: 0 } });
 });
 
 /**
@@ -76,3 +77,26 @@ describe("esnaf telefon güncelleme", () => {
     await expect(partnerProfileService.updatePhone("u1", "05321234567")).rejects.toThrow("baglanti koptu");
   });
 });
+
+describe("giris numarasi korumasi", () => {
+  it("e-postasi ve baska girisi olmayan hesabin numarasi SILINEMEZ ve DEGISTIRILEMEZ", async () => {
+    mockPrisma.user.findUnique.mockResolvedValue({ email: null, phone: "5320000000", _count: { accounts: 0 } });
+    for (const next of [null, "", "05321234567"]) {
+      const res = await partnerProfileService.updatePhone("u1", next);
+      expect(res, String(next)).toEqual({ ok: false, reason: "login_phone_locked" });
+    }
+    expect(mockPrisma.user.update).not.toHaveBeenCalled();
+  });
+
+  it("ayni numarayi tekrar kaydetmek engellenmez", async () => {
+    mockPrisma.user.findUnique.mockResolvedValue({ email: null, phone: "5321234567", _count: { accounts: 0 } });
+    const res = await partnerProfileService.updatePhone("u1", "0532 123 45 67");
+    expect(res).toEqual({ ok: true, phone: "5321234567" });
+  });
+
+  it("baska giris yontemi varsa (e-posta ya da Google/Apple) degisim serbest", async () => {
+    mockPrisma.user.findUnique.mockResolvedValue({ email: null, phone: "5320000000", _count: { accounts: 1 } });
+    expect(await partnerProfileService.updatePhone("u1", null)).toEqual({ ok: true, phone: null });
+  });
+});
+

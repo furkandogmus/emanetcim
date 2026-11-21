@@ -1777,6 +1777,7 @@
     "notFound": "レコードが見つかりません。",
     "paymentFailed": "支払いが失敗したか、拒否されました。",
     "phoneAlreadyRegistered": "この電話番号はすでに登録されています。",
+    "phoneLoginLocked": "この番号はログインに使われています。メールなど他のログイン方法がないと変更できません。",
     "referralCodeFailed": "コードを生成できませんでした。もう一度お試しください。",
     "reviewNotReady": "レビューは納品完了後にのみ可能です。",
     "sealCountMismatch": "入力された封印の数が荷物の数と一致しません。",
