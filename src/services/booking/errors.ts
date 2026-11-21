@@ -111,3 +111,18 @@ export class BookingShopClosedError extends BookingRejectedError {
     super(message, 'SHOP_CLOSED_ON_DATE');
   }
 }
+
+/**
+ * Ayni (misafir, Idempotency-Key) ikilisi icin rezervasyon ZATEN var.
+ *
+ * Hata degil, "bu istek daha once islendi" sinyali: mobil istemci 12 sn'de
+ * istegi iptal edip ayni onayi yeniden gonderdiginde ilk istek sunucuda
+ * tamamlanmis olabilir. Cagiran mevcut rezervasyonu ayni yanitla dondurur ve
+ * bu istek icin ayirdigi seyleri (kupon hakki) geri verir.
+ */
+export class BookingIdempotentReplayError extends Error {
+  constructor(readonly existing: import('@prisma/client').Booking) {
+    super('Idempotent replay');
+    this.name = 'BookingIdempotentReplayError';
+  }
+}

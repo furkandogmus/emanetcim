@@ -277,6 +277,14 @@ model Booking {
   /// Sigorta / güvence ücreti (iptal ve erken iade hesaplarında hariç tutulur)
   insuranceFee           Decimal           @default(0) @db.Decimal(12, 2)
   qrCodeToken            String?           @unique
+  /// Mobil checkout tekrar denemesini tek rezervasyona indiren istemci anahtari.
+  ///
+  /// Istemci 12 sn'de istegi iptal edip ayni onayi yeniden gonderdiginde sunucu
+  /// ilk istegi coktan yazmis olabiliyordu; anahtarsiz ikinci kayit olusuyordu.
+  /// `(guestId, idempotencyKey)` benzersiz: ayni misafir ayni anahtarla ikinci
+  /// rezervasyon acamaz. `null` = anahtarsiz (web, eski istemci); Postgres
+  /// benzersizlikte NULL'lari ayri sayar.
+  idempotencyKey         String?
   sealPhotoUrl           String?
   lateFeeApplied         Decimal           @default(0) @db.Decimal(12, 2)
   pendingBagRevision     Json?
@@ -362,6 +370,7 @@ model Booking {
   /// (guest checkout) rezervasyonların sorgulanması her seferinde tam tablo
   /// taraması yapıyordu. 2026-08-31'de ölçüldü.
   @@index([guestEmail])
+  @@unique([guestId, idempotencyKey])
 }
 
 /// Rezervasyon başına tek ödeme defteri satırı.

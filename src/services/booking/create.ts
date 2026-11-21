@@ -22,6 +22,7 @@ import { bookingTouchesPlatformHoliday } from '@/lib/booking-holidays';
 import { bookingEventService } from '@/services/BookingEventService';
 import {
   BookingCapacityExceededError,
+  BookingIdempotentReplayError,
   BookingWindowInvalidError,
   BookingHolidayError,
   BookingShopPrelaunchError,
@@ -66,8 +67,47 @@ function assertBookingInput(data: CreateInitialBookingInput): void {
   }
 }
 
+/**
+ * Ayni (misafir, Idempotency-Key) icin kayitli rezervasyon. Okuma: tasiyici
+ * yanitini yeniden kurmak icin cagirir (kupon hakki almadan ONCE).
+ */
+export async function findBookingByIdempotencyKey(
+  guestId: string,
+  idempotencyKey: string,
+): Promise<Booking | null> {
+  return prisma.booking.findUnique({
+    where: { guestId_idempotencyKey: { guestId, idempotencyKey } },
+  });
+}
+
 export async function createInitialBooking(data: CreateInitialBookingInput): Promise<Booking> {
+  try {
+    return await createInitialBookingOnce(data);
+  } catch (e) {
+    /*
+      Iki es zamanli ayni-anahtar istegi: ikisi de onceden-sorguyu gecti, biri
+      yazdi, digeri benzersiz indekse takildi. Kaybeden, kazananin kaydini alir.
+    */
+    if (
+      data.idempotencyKey &&
+      data.guestId &&
+      e instanceof Prisma.PrismaClientKnownRequestError &&
+      e.code === 'P2002' &&
+      JSON.stringify(e.meta?.target ?? '').includes('idempotencyKey')
+    ) {
+      const existing = await findBookingByIdempotencyKey(data.guestId, data.idempotencyKey);
+      if (existing) throw new BookingIdempotentReplayError(existing);
+    }
+    throw e;
+  }
+}
+
+async function createInitialBookingOnce(data: CreateInitialBookingInput): Promise<Booking> {
   assertBookingInput(data);
+  if (data.idempotencyKey && data.guestId) {
+    const existing = await findBookingByIdempotencyKey(data.guestId, data.idempotencyKey);
+    if (existing) throw new BookingIdempotentReplayError(existing);
+  }
   const rules = await getPricingRules();
   const initialStatus = data.initialStatus ?? DEFAULT_INITIAL_STATUS;
 
@@ -191,14 +231,21 @@ export async function createInitialBooking(data: CreateInitialBookingInput): Pro
           unitPrice,
           pricingSnapshot: toPricingSnapshot(rules),
           qrCodeToken: `temp_${crypto.randomUUID()}`,
+          idempotencyKey: data.idempotencyKey ?? null,
           status: initialStatus,
         },
       });
 
+      /*
+        Token omru = check-out + 24 saat. `checkOutTime` verilmeyince omur
+        olusturmadan 48 saat oluyordu: haftalar once alinan rezervasyonun
+        bileti teslim gunu "taninmayan kod" cikiyordu.
+      */
       const qrCodeToken = await createQrToken({
         bookingId: booking.id,
         guestId: data.guestId ?? booking.id,
         shopId: data.shopId,
+        checkOutTime: data.checkOutTime.toISOString(),
       });
 
       return tx.booking.update({
@@ -354,6 +401,7 @@ export async function createSlotBooking(
           unitPrice,
           pricingSnapshot: toPricingSnapshot(rules),
           qrCodeToken: `temp_${crypto.randomUUID()}`,
+          idempotencyKey: data.idempotencyKey ?? null,
           status: initialStatus,
           reservationSlots: {
             create: slots.map((s) => ({
@@ -364,10 +412,12 @@ export async function createSlotBooking(
         },
       });
 
+      // Slot sinirlarina yuvarlanmis, KAYDEDILEN cikis saati (yukaridaki not).
       const qrCodeToken = await createQrToken({
         bookingId: booking.id,
         guestId: data.guestId ?? booking.id,
         shopId: data.shopId,
+        checkOutTime: checkOutTime.toISOString(),
       });
 
       return tx.booking.update({
