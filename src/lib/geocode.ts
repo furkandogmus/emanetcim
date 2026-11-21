@@ -31,7 +31,7 @@ export function placeTitleSubtitle(d: NominatimHit, fallback: string): { title: 
     .filter((p) => p && !/^\d+[A-Za-z]?$/.test(p));
   const a = d.address ?? {};
   const title = d.name?.trim() || a.road?.trim() || parts[0] || fallback;
-  const district = a.suburb || a.city_district || a.town || a.county || a.neighbourhood;
+  const district = a.city_district || a.town || a.county || a.suburb || a.neighbourhood;
   const city = a.city || a.province || a.state;
   const fromAddress = [district, city]
     .filter((p, i, all): p is string => !!p && p !== title && all.indexOf(p) === i)
