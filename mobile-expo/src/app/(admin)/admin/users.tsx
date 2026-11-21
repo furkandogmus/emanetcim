@@ -6,6 +6,7 @@ import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { Mail, MessageCircle, Phone } from "lucide-react-native";
 import { useTranslation } from "react-i18next";
 
+import { LoadMoreFooter } from "@/components/LoadMoreFooter";
 import { SearchBox } from "@/components/SearchBox";
 import { StackHeader } from "@/components/StackHeader";
 import { AppText, Button, CenterMessage, IconButton, Loading } from "@/components/ui";
@@ -16,6 +17,7 @@ import { useViewAs } from "@/lib/use-view-as";
 import { errorMessage } from "@/lib/errors";
 import { formatDay } from "@/lib/format";
 import { notify } from "@/lib/notify";
+import { flattenPages } from "@/lib/paging";
 import { keys, useAdminUsers } from "@/lib/queries";
 import type { AdminUser } from "@/lib/types";
 import { colors, radius, space } from "@/theme/tokens";
@@ -33,6 +35,7 @@ export default function AdminUsersScreen() {
   const myId = state.status === "signedIn" ? state.user.id : null;
   const [q, setQ] = useState("");
   const query = useAdminUsers(q);
+  const users = flattenPages(query.data, (p) => p.users);
 
   const ban = useMutation({
     mutationFn: ({ id, isBanned }: { id: string; isBanned: boolean }) =>
@@ -72,20 +75,21 @@ export default function AdminUsersScreen() {
         />
       ) : (
         <FlatList
-          data={query.data ?? []}
+          data={users}
           keyExtractor={(u) => u.id}
           keyboardShouldPersistTaps="handled"
-          contentContainerStyle={[styles.list, !query.data?.length && { flex: 1 }]}
+          contentContainerStyle={[styles.list, users.length === 0 && { flex: 1 }]}
           refreshControl={
-            <RefreshControl refreshing={query.isRefetching} onRefresh={() => query.refetch()} tintColor={colors.accent} />
+            <RefreshControl refreshing={query.isRefetching && !query.isFetchingNextPage} onRefresh={() => query.refetch()} tintColor={colors.accent} />
           }
           ListEmptyComponent={<CenterMessage title={t("admin.noUsers")} />}
           ListFooterComponent={
-            (query.data?.length ?? 0) >= 50 ? (
-              <AppText variant="caption" style={{ textAlign: "center" }}>
-                {t("admin.listCapped", { count: query.data?.length ?? 0 })}
-              </AppText>
-            ) : null
+            <LoadMoreFooter
+              hasMore={!!query.hasNextPage}
+              loading={query.isFetchingNextPage}
+              failed={query.isFetchNextPageError}
+              onPress={() => void query.fetchNextPage()}
+            />
           }
           renderItem={({ item: u }) => {
             const self = u.id === myId;

@@ -2,6 +2,7 @@ import type { BookingStatus, Prisma } from "@prisma/client";
 
 import prisma from "@/lib/db";
 import { phoneSearchDigits } from "@/lib/admin-phone-search";
+import { cursorArgs, toPage } from "@/lib/cursor-page";
 import { dayRangeInTimeZone } from "@/lib/timezone";
 import { PLATFORM_TIMEZONE } from "@/services/AdminOverviewService";
 
@@ -94,6 +95,8 @@ export const ADMIN_BOOKING_LIST_SELECT = {
   guest: { select: { name: true, email: true } },
 } satisfies Prisma.BookingSelect;
 
+type AdminBookingListRow = Prisma.BookingGetPayload<{ select: typeof ADMIN_BOOKING_LIST_SELECT }>;
+
 export class AdminOpsService {
   /**
    * Bilet kodu aramasi asil kullanim ve tam bir eslesmesi var: once YALNIZCA kodla
@@ -124,6 +127,45 @@ export class AdminOpsService {
       take,
       select: ADMIN_BOOKING_LIST_SELECT,
     });
+  }
+
+  /**
+   * `listBookings`'in sayfali hali (mobil yonetim). Cip "Gecikmis 73" derken liste
+   * 50'de bitiyordu ve devami yoktu. Bilet kodu eslesmesi sayfalanmaz: birkac
+   * satirdir ve imlec iki ayri sorgu arasinda anlamsiz olurdu.
+   */
+  async listBookingsPage(opts: {
+    filter: AdminBookingFilter;
+    q?: string;
+    now?: Date;
+    take?: number;
+    cursor?: string | null;
+  }): Promise<{ items: AdminBookingListRow[]; nextCursor: string | null }> {
+    const now = opts.now ?? new Date();
+    const take = Math.min(opts.take ?? 50, 100);
+    const cursor = opts.cursor ?? null;
+    const base = filterWhere(opts.filter, now);
+    const term = (opts.q ?? "").trim();
+    const orderBy = [orderFor(opts.filter), { id: "asc" as const }];
+
+    if (!cursor && /^[0-9a-f]{4,8}$/i.test(term)) {
+      const byCode = await prisma.booking.findMany({
+        where: { AND: [base, { id: { startsWith: term.toLowerCase() } }] },
+        orderBy,
+        take: 100,
+        select: ADMIN_BOOKING_LIST_SELECT,
+      });
+      if (byCode.length > 0) return { items: byCode, nextCursor: null };
+    }
+
+    const search = searchWhere(term);
+    const rows = await prisma.booking.findMany({
+      where: search ? { AND: [base, search] } : base,
+      orderBy,
+      ...cursorArgs(cursor, take),
+      select: ADMIN_BOOKING_LIST_SELECT,
+    });
+    return toPage(rows, take);
   }
 
   /**
