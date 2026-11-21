@@ -66,16 +66,18 @@ function memoryGet(key: string, now: number): string | null {
 const claimKey = (jti: string) => `rtjti:v1:${jti}`;
 const pairKey = (jti: string) => `rtpair:v1:${jti}`;
 
-type StoredPair = { pair: IssuedPair; nextJti: string | null };
+/** `issuedAt`: pencere bu ana gore olculur; Redis TTL tek basina yetmez (testte sahte saat, saat kaymasi). */
+type StoredPair = { pair: IssuedPair; nextJti: string | null; issuedAt: number | null };
 
 function parsePair(raw: string | null): StoredPair | null {
   if (!raw) return null;
   try {
-    const p = JSON.parse(raw) as Partial<IssuedPair> & { nextJti?: unknown };
+    const p = JSON.parse(raw) as Partial<IssuedPair> & { nextJti?: unknown; issuedAt?: unknown };
     return typeof p.accessToken === "string" && typeof p.refreshToken === "string"
       ? {
           pair: { accessToken: p.accessToken, refreshToken: p.refreshToken },
           nextJti: typeof p.nextJti === "string" && p.nextJti ? p.nextJti : null,
+          issuedAt: typeof p.issuedAt === "number" ? p.issuedAt : null,
         }
       : null;
   } catch {
@@ -93,7 +95,8 @@ function classifyRepeat(
   successorUsed: boolean,
   now: number,
 ): RefreshClaim {
-  if (stored) return successorUsed ? { kind: "reused" } : { kind: "repeat", pair: stored.pair };
+  const inWindow = stored && (stored.issuedAt === null || now - stored.issuedAt < REFRESH_GRACE_MS);
+  if (stored && inWindow) return successorUsed ? { kind: "reused" } : { kind: "repeat", pair: stored.pair };
   const at = Number(claimedAt);
   if (Number.isFinite(at) && now - at < REFRESH_GRACE_MS) return { kind: "pending" };
   return { kind: "reused" };
@@ -141,7 +144,7 @@ export async function rememberIssuedPair(
   nextJti: string,
   now: number = Date.now(),
 ): Promise<void> {
-  const value = JSON.stringify({ ...pair, nextJti });
+  const value = JSON.stringify({ ...pair, nextJti, issuedAt: now });
   const redis = getRedis();
   if (redis) {
     await redis.set(pairKey(jti), value, "PX", REFRESH_GRACE_MS);
