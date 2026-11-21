@@ -154,6 +154,35 @@ describe("api token yenileme", () => {
     expect(await SecureStore.getItemAsync("bp.session")).toBeNull();
   });
 
+  it("cikista yakalanan cift: suresi dolmus access token 401 alirsa bir kez yenilenir, push ve logout yeni token'la gider", async () => {
+    const SecureStore = jest.requireMock<typeof import("expo-secure-store")>("expo-secure-store");
+    const { api, saveTokens, clearTokens, detachSession, setSessionExpiredHandler } = freshApi();
+    await saveTokens("suresi-dolmus", "refresh-1");
+    const expired = jest.fn();
+    setSessionExpiredHandler(expired);
+    const session = detachSession()!;
+    await clearTokens();
+    fetchMock.mockImplementation(async (url: string, init?: RequestInit) => {
+      if (url.endsWith("/auth/refresh")) {
+        expect(JSON.parse(String(init?.body)).refreshToken).toBe("refresh-1");
+        return json(200, { accessToken: "yenilenmis", refreshToken: "refresh-2" });
+      }
+      const auth = (init?.headers as Record<string, string>).Authorization;
+      return auth === "Bearer yenilenmis" ? json(200, { ok: true }) : json(401, { error: "unauthorized" });
+    });
+
+    await expect(api("/push/register", { method: "DELETE", body: { token: "t" }, bearer: session })).resolves.toEqual({ ok: true });
+    await expect(api("/auth/logout", { method: "POST", bearer: session })).resolves.toEqual({ ok: true });
+
+    const urls = fetchMock.mock.calls.map(([u]) => String(u).replace(/^.*\/api\/mobile/, ""));
+    expect(urls).toEqual(["/push/register", "/auth/refresh", "/push/register", "/auth/logout"]);
+    const logout = fetchMock.mock.calls.find(([u]) => String(u).endsWith("/auth/logout"));
+    expect((logout?.[1]?.headers as Record<string, string>).Authorization).toBe("Bearer yenilenmis");
+    // Yeni cift diske ve modul durumuna yazilmaz: kullanici cikis yapti.
+    expect(await SecureStore.getItemAsync("bp.session")).toBeNull();
+    expect(expired).not.toHaveBeenCalled();
+  });
+
   it("acik bearer: o token'la gider, 401'de yenileme ve oturum sonu calismaz", async () => {
     const { api, saveTokens, setSessionExpiredHandler } = freshApi();
     await saveTokens("guncel", "refresh-1");

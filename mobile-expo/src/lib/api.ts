@@ -117,9 +117,46 @@ export function forgetTokensInMemory() {
   refreshToken = null;
 }
 
-/** Cikista: yerel oturum silinmeden once, arka plandaki cikis istegine verilecek bearer. */
-export function currentAccessToken() {
-  return accessToken;
+/**
+ * Cikista yerel oturum silinmeden once yakalanan cift; arka plandaki push silme ve
+ * `/auth/logout` bununla gider. Access token 15 dk yasar: uzun bosta kalan
+ * kullanicida yakalanan token suresi dolmus olur. 401'de cift BIR KEZ yenilenir
+ * (modul durumuna ve diske dokunmadan), istekler yeni token'la tekrarlanir. Yoksa
+ * push kaydi kalir (cikis yapmis telefona bildirim gider) ve refresh token 30 gun
+ * gecerli kalirdi.
+ */
+export class DetachedSession {
+  private renewal: Promise<string | null> | null = null;
+
+  constructor(
+    public accessToken: string,
+    private readonly refreshToken: string | null,
+  ) {}
+
+  /** Yeni access token ya da `null` (yenilenemedi). Tek ucus: ikinci cagiran ayni sonucu alir. */
+  renew(): Promise<string | null> {
+    if (!this.renewal) {
+      this.renewal = (async () => {
+        if (!this.refreshToken) return null;
+        const res = await fetchWithTimeout(`${API_BASE_URL}/auth/refresh`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ refreshToken: this.refreshToken }),
+        }).catch(() => null);
+        if (!res?.ok) return null;
+        const body = parseSession(await res.text().catch(() => null));
+        if (!body) return null;
+        this.accessToken = body.accessToken;
+        return body.accessToken;
+      })();
+    }
+    return this.renewal;
+  }
+}
+
+/** Cikista: yerel oturum silinmeden once cagrilir; oturum yoksa `null`. */
+export function detachSession(): DetachedSession | null {
+  return accessToken ? new DetachedSession(accessToken, refreshToken) : null;
 }
 
 export function setSessionExpiredHandler(fn: () => void) {
@@ -236,10 +273,11 @@ type RequestOptions = {
   body?: unknown;
   auth?: boolean;
   /**
-   * Bu token'la gonder; 401'de yenileme ve oturum-sonu isleyicisi CALISMAZ. Cikista
-   * yerel oturum silindikten sonra arka planda giden istekler icin.
+   * Bu token'la gonder; modulun yenileme yolu ve oturum-sonu isleyicisi CALISMAZ.
+   * Cikista yerel oturum silindikten sonra arka planda giden istekler icin.
+   * `DetachedSession` verilirse 401'de o cift bir kez yenilenip istek tekrarlanir.
    */
-  bearer?: string;
+  bearer?: string | DetachedSession;
 };
 
 export async function api<T>(path: string, opts: RequestOptions = {}): Promise<T> {
@@ -254,7 +292,10 @@ export async function api<T>(path: string, opts: RequestOptions = {}): Promise<T
     // FormData (dosya yukleme) icin Content-Type'i fetch koyar: sinir (boundary) dahil.
     const isForm = body instanceof FormData;
     if (body !== undefined && !isForm) headers["Content-Type"] = "application/json";
-    const bearer = explicitBearer ?? (auth ? (impersonationToken ?? accessToken) : null);
+    const bearer =
+      typeof explicitBearer === "string"
+        ? explicitBearer
+        : (explicitBearer?.accessToken ?? (auth ? (impersonationToken ?? accessToken) : null));
     if (bearer) headers.Authorization = `Bearer ${bearer}`;
     if (isForm) return uploadWithXhr(`${API_BASE_URL}${path}`, { method, headers, body }, UPLOAD_TIMEOUT_MS);
     return fetchWithTimeout(
@@ -273,8 +314,16 @@ export async function api<T>(path: string, opts: RequestOptions = {}): Promise<T
     throw new ApiError(0, "network");
   }
 
-  // Goruntuleme token'i yenilenmez; 401 admin oturumunu degil goruntulemeyi bitirir.
-  if (res.status === 401 && sentWithImpersonation) {
+  if (res.status === 401 && explicitBearer instanceof DetachedSession) {
+    if (await explicitBearer.renew()) {
+      try {
+        res = await send();
+      } catch {
+        throw new ApiError(0, "network");
+      }
+    }
+  } else if (res.status === 401 && sentWithImpersonation) {
+    // Goruntuleme token'i yenilenmez; 401 admin oturumunu degil goruntulemeyi bitirir.
     onImpersonationEnded?.();
     throw new ApiError(401, "impersonation_ended");
   } else if (res.status === 401 && auth && refreshToken) {

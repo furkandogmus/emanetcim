@@ -4,7 +4,7 @@ import * as Notifications from "expo-notifications";
 import { getLocales } from "expo-localization";
 import { router } from "expo-router";
 
-import { api } from "./api";
+import { api, type DetachedSession } from "./api";
 import type { Role } from "./types";
 
 /*
@@ -74,7 +74,7 @@ export function forgetPushRegistration() {
  * Cikista: token silinmezse cikis yapmis esnafin telefonuna bildirim gitmeye devam eder.
  * `bearer`: yerel oturum silindikten sonra arka planda gonderilir (auth.tsx signOut).
  */
-export async function unregisterPush(bearer?: string): Promise<void> {
+export async function unregisterPush(bearer?: string | DetachedSession): Promise<void> {
   if (!registeredToken) return;
   const token = registeredToken;
   registeredToken = null;
