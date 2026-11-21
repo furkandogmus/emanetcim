@@ -6,6 +6,7 @@ const { mockPrisma, mockAuth } = vi.hoisted(() => {
     mockPrisma: {
       user: {
         update: vi.fn(),
+        findUnique: vi.fn(),
       },
       booking: {
         findUnique: vi.fn(),
@@ -234,6 +235,10 @@ describe("Partner Actions", () => {
   });
 
   describe("updatePartnerPhoneAction", () => {
+    beforeEach(() => {
+      mockPrisma.user.findUnique.mockResolvedValue({ email: "p@example.com", phone: null, _count: { accounts: 0 } });
+    });
+
     it("should normalize and update phone", async () => {
       const result = await updatePartnerPhoneAction("0555 123 45 67");
 
