@@ -32,7 +32,9 @@ const MAX_PASSWORD = 128;
 
 export default function ProfileEditScreen() {
   const { t } = useTranslation();
-  const { state, refreshUser } = useAuth();
+  const { state, refreshUser, impersonating } = useAuth();
+  // Yonetici goruntuleme oturumunda e-posta/telefon (giris kimligi) sunucuda da 403: alanlar salt okunur.
+  const identityLocked = impersonating !== null;
   const user = state.status === "signedIn" ? state.user : null;
   const [name, setName] = useState(user?.name ?? "");
   const [phone, setPhone] = useState(user?.phone ?? "");
@@ -144,7 +146,7 @@ export default function ProfileEditScreen() {
       body.name = trimmedName;
     }
     const trimmedPhone = phone.trim();
-    if (trimmedPhone !== (user.phone ?? "")) {
+    if (!identityLocked && trimmedPhone !== (user.phone ?? "")) {
       if (!trimmedPhone) {
         body.phone = null;
       } else {
@@ -235,7 +237,9 @@ export default function ProfileEditScreen() {
                   {user.email}
                 </AppText>
               </View>
-              <AppText variant="caption">{t("profileEdit.emailLocked")}</AppText>
+              <AppText variant="caption">
+                {identityLocked ? t("profileEdit.identityLockedViewing") : t("profileEdit.emailLocked")}
+              </AppText>
             </View>
           ) : null}
 
@@ -258,19 +262,29 @@ export default function ProfileEditScreen() {
             <AppText variant="label" nativeID="profilePhoneLabel">
               {t("profileEdit.phoneLabel")}
             </AppText>
-            <Input
-              accessibilityLabelledBy="profilePhoneLabel"
-              value={phone}
-              onChangeText={setPhone}
-              placeholder={t("profileEdit.phonePlaceholder")}
-              placeholderTextColor={colors.inkMuted}
-              keyboardType="phone-pad"
-              autoComplete="tel"
-              textContentType="telephoneNumber"
-              returnKeyType="done"
-              onSubmitEditing={save}
-            />
-            <AppText variant="caption">{t("profileEdit.phoneHint")}</AppText>
+            {identityLocked ? (
+              <View style={[inputBox, styles.readOnly]}>
+                <AppText variant="body" style={{ color: colors.inkSecondary }} numberOfLines={1}>
+                  {user.phone || "-"}
+                </AppText>
+              </View>
+            ) : (
+              <Input
+                accessibilityLabelledBy="profilePhoneLabel"
+                value={phone}
+                onChangeText={setPhone}
+                placeholder={t("profileEdit.phonePlaceholder")}
+                placeholderTextColor={colors.inkMuted}
+                keyboardType="phone-pad"
+                autoComplete="tel"
+                textContentType="telephoneNumber"
+                returnKeyType="done"
+                onSubmitEditing={save}
+              />
+            )}
+            <AppText variant="caption">
+              {identityLocked ? t("profileEdit.identityLockedViewing") : t("profileEdit.phoneHint")}
+            </AppText>
           </View>
 
           {error ? <Banner tone="danger" body={error} /> : null}
