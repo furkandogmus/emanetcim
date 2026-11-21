@@ -1,6 +1,6 @@
 import { describe, expect, it } from "@jest/globals";
 
-import { atWallMinutes, cellOf, fromCell, nextSlot, sameWallDay, wallInstant, wallMinutes, wallParts } from "@/lib/time";
+import { atWallMinutes, cellOf, fromCell, isoWeekdayIndex, nextSlot, sameWallDay, wallInstant, wallMinutes, wallParts } from "@/lib/time";
 
 /**
  * Duvar saati telefonun değil İstanbul'un (UTC+3). Kural kırılırsa Londra'daki
@@ -82,5 +82,12 @@ describe("nextSlot", () => {
 
   it("gece yarisini gecer (23:45 -> ertesi gun 00:00)", () => {
     expect(nextSlot(new Date("2026-10-18T20:45:00Z")).toISOString()).toBe("2026-10-18T21:00:00.000Z");
+  });
+});
+
+describe("isoWeekdayIndex", () => {
+  it("ISO 7 (pazar) dizinde 0, pazartesi-cumartesi ayni kalir", () => {
+    expect(isoWeekdayIndex(7)).toBe(0);
+    expect([1, 2, 3, 4, 5, 6].map(isoWeekdayIndex)).toEqual([1, 2, 3, 4, 5, 6]);
   });
 });

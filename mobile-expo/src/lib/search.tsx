@@ -15,6 +15,8 @@ type SearchState = {
   checkIn: Date;
   checkOut: Date;
   bags: Bags;
+  /** Pencere misafirce degil varsayilanca yarin sabaha kaydirildi (aksam acilis). */
+  rolled: boolean;
 };
 
 type SearchContextValue = SearchState & {
@@ -36,9 +38,10 @@ export function defaultWindow(now = new Date()) {
   if (p.hour < 8 || p.hour >= 19) {
     const day = p.hour >= 19 ? p.day + 1 : p.day;
     const morning = wallInstant(p.year, p.month, day, 9);
-    return { checkIn: morning, checkOut: new Date(morning.getTime() + 4 * 60 * 60 * 1000) };
+    // `rolled`: misafirin sectigi degil, varsayilanin ileri kaydirdigi pencere (ozette not dusulur).
+    return { checkIn: morning, checkOut: new Date(morning.getTime() + 4 * 60 * 60 * 1000), rolled: true };
   }
-  return { checkIn: start, checkOut: new Date(start.getTime() + 4 * 60 * 60 * 1000) };
+  return { checkIn: start, checkOut: new Date(start.getTime() + 4 * 60 * 60 * 1000), rolled: false };
 }
 
 const SearchContext = createContext<SearchContextValue | null>(null);
@@ -71,7 +74,12 @@ export function SearchProvider({ children }: { children: ReactNode }) {
         if (s.checkIn.getTime() >= Date.now()) return s;
         const next = defaultWindow();
         const keepPickup = s.checkOut.getTime() - next.checkIn.getTime() >= 60 * 60 * 1000;
-        return { ...s, checkIn: next.checkIn, checkOut: keepPickup ? s.checkOut : next.checkOut };
+        return {
+          ...s,
+          checkIn: next.checkIn,
+          checkOut: keepPickup ? s.checkOut : next.checkOut,
+          rolled: next.rolled && !keepPickup,
+        };
       });
     freshen();
     const timer = setInterval(freshen, 60_000);
@@ -86,7 +94,7 @@ export function SearchProvider({ children }: { children: ReactNode }) {
     () => ({
       ...state,
       setPlace: (place) => setState((s) => ({ ...s, place })),
-      setWindow: (checkIn, checkOut) => setState((s) => ({ ...s, checkIn, checkOut })),
+      setWindow: (checkIn, checkOut) => setState((s) => ({ ...s, checkIn, checkOut, rolled: false })),
       setBags: (bags) => setState((s) => ({ ...s, bags })),
     }),
     [state],
