@@ -1,8 +1,9 @@
 import { NextResponse } from "next/server";
 import { ShopService } from "@/services/ShopService";
-import { toMobilePricing, toMobilePublicGallery, toMobileShop } from "@/lib/mobile-dto";
+import { toMobilePriceBySize, toMobilePricing, toMobilePublicGallery, toMobileShop } from "@/lib/mobile-dto";
 import { shopGalleryService } from "@/services/ShopGalleryService";
 import { getPricingRules } from "@/lib/platform-settings";
+import { todayInZone } from "@/lib/stay-days";
 import { loadScheduleParts } from "@/services/ShopScheduleService";
 
 const shopService = new ShopService();
@@ -28,13 +29,15 @@ export async function GET(_req: Request, { params }: { params: Promise<{ id: str
   */
   const [rules, scheduleParts, images] = await Promise.all([
     getPricingRules(),
-    loadScheduleParts([s.id], new Date().toISOString().slice(0, 10)),
+    loadScheduleParts([s.id], todayInZone()),
     shopGalleryService.list(s.id),
   ]);
   const parts = scheduleParts.get(s.id);
   return NextResponse.json({
     ...toMobileShop(s, { weekly: parts?.weekly ?? [], closures: parts?.closures ?? [] }),
     pricing: toMobilePricing(rules),
+    // Boyut basina gunluk fiyat sunucudan, yuvarlanmis: istemci carpan uygulamaz.
+    priceBySize: toMobilePriceBySize(s.pricePerDay, rules),
     // Kapak `image`da; galeri onun ardindan kaydirilir.
     gallery: toMobilePublicGallery(images),
   });
