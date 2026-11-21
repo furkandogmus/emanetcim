@@ -14,6 +14,8 @@ import { ShopSetupCard } from "@/components/ShopSetupCard";
 import { Segmented } from "@/components/Segmented";
 import { RowSkeleton } from "@/components/RowSkeleton";
 import { AppText, Button, CenterMessage } from "@/components/ui";
+import { Input } from "@/components/Field";
+import { searchBookings } from "@/lib/booking-search";
 import { useAuth } from "@/lib/auth";
 import { errorMessage } from "@/lib/errors";
 import { isActiveBooking, usePartnerBookings, usePartnerDashboard } from "@/lib/queries";
@@ -38,6 +40,7 @@ export default function PartnerBookingsScreen() {
   const query = usePartnerBookings(useIsFocused());
   const queryClient = useQueryClient();
   const [tab, setTab] = useState<Tab>("today");
+  const [search, setSearch] = useState("");
   const { state } = useAuth();
   const user = state.status === "signedIn" ? state.user : null;
 
@@ -71,8 +74,10 @@ export default function PartnerBookingsScreen() {
   // derken liste baska dukkanin valizini gostermesin.
   const dash = usePartnerDashboard().data;
   const shopFilter = dash && dash.shops.length > 1 ? dash.shop.id : null;
-  const items = (query.data?.items ?? [])
-    .filter((b) => (!shopFilter || b.shopId === shopFilter) && bucket(b) === tab)
+  const inShop = (query.data?.items ?? []).filter((b) => !shopFilter || b.shopId === shopFilter);
+  // Arama tum sekmelerde arar: misafir kodunu soyluyor ya da adini hatirliyor, hangi sekmede oldugunu degil.
+  const searching = search.trim().length > 0;
+  const items = (searching ? searchBookings(inShop, search) : inShop.filter((b) => bucket(b) === tab))
     .sort((a, b) =>
       tab === "past"
         ? +new Date(b.checkInTime) - +new Date(a.checkInTime)
@@ -113,6 +118,16 @@ export default function PartnerBookingsScreen() {
           <View style={{ gap: space.md }}>
             <ShopSetupCard />
             <PartnerPulseCard />
+            <Input
+              accessibilityLabel={t("partner.searchPlaceholder")}
+              value={search}
+              onChangeText={setSearch}
+              placeholder={t("partner.searchPlaceholder")}
+              autoCapitalize="characters"
+              autoCorrect={false}
+              returnKeyType="search"
+              maxLength={60}
+            />
             <Segmented
               value={tab}
               onChange={setTab}
@@ -127,6 +142,7 @@ export default function PartnerBookingsScreen() {
         renderItem={({ item }) => (
           <BookingRow
             booking={item}
+            partnerView
             title={item.guestName || t("partner.guest")}
             highlight={fresh.has(item.id) ? t("partner.new") : undefined}
             onPress={() => {
@@ -149,7 +165,7 @@ export default function PartnerBookingsScreen() {
             />
           ) : (
             <View style={styles.empty}>
-              <CenterMessage art={<SealedBag size={64} />} title={t("partner.empty")} />
+              <CenterMessage art={<SealedBag size={64} />} title={searching ? t("partner.searchNone") : t("partner.empty")} />
             </View>
           )
         }

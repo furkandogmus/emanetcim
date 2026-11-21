@@ -43,6 +43,39 @@ function openDirections(b: BookingDetail) {
   void Linking.openURL(url).catch(() => undefined);
 }
 
+/** Esnaf, gelmeyen ya da gec kalan misafiri arar / yazar. Numara yoksa hicbir sey cizilmez. */
+function GuestContact({ phone }: { phone?: string }) {
+  const { t } = useTranslation();
+  const digits = (phone ?? "").replace(/[^\d+]/g, "");
+  if (!digits) return null;
+  // WhatsApp ulke kodlu, "+"siz numara ister; yerel TR biciminde (05..., 5...) 90 eklenir.
+  const intl = digits.startsWith("+")
+    ? digits.slice(1)
+    : digits.startsWith("00")
+      ? digits.slice(2)
+      : digits.startsWith("0")
+        ? `9${digits}`
+        : digits.length === 10
+          ? `90${digits}`
+          : digits;
+  return (
+    <View style={styles.actionRow}>
+      <Button
+        variant="secondary"
+        style={{ flex: 1 }}
+        title={t("partner.callGuest")}
+        onPress={() => void Linking.openURL(`tel:${digits}`).catch(() => undefined)}
+      />
+      <Button
+        variant="secondary"
+        style={{ flex: 1 }}
+        title={t("partner.whatsappGuest")}
+        onPress={() => void Linking.openURL(`https://wa.me/${intl}`).catch(() => undefined)}
+      />
+    </View>
+  );
+}
+
 export function BookingDetailView({ id, mode }: { id: string; mode: "guest" | "partner" }) {
   const { t } = useTranslation();
   const queryClient = useQueryClient();
@@ -199,10 +232,12 @@ export function BookingDetailView({ id, mode }: { id: string; mode: "guest" | "p
             })}
           />
         ) : null}
+        {/* Asil is (teslim al / et) duzeltme kartinin USTUNDE: kucuk telefonda ekran altinda kalmasin. */}
+        {mode === "partner" ? <PartnerBookingActions key={b.status} booking={b} /> : null}
+        {mode === "partner" ? <GuestContact phone={b.guestPhone} /> : null}
         {mode === "partner" ? (
           <BagRevisionCard key={`rev-${b.status}-${b.bagCountS}-${b.bagCountM}-${b.bagCountXl}`} booking={b} />
         ) : null}
-        {mode === "partner" ? <PartnerBookingActions key={b.status} booking={b} /> : null}
 
 
         {mode === "guest" ? (
