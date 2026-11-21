@@ -15,7 +15,8 @@
     "ok": "OK",
     "clear": "Clear",
     "scrollBack": "Scroll back",
-    "scrollForward": "Scroll forward"
+    "scrollForward": "Scroll forward",
+    "goHome": "Go home"
   },
   "auth": {
     "title": "Sign in",
@@ -40,7 +41,7 @@
       "too_many_requests": "Too many requests. Try again shortly.",
       "too_many_attempts": "Too many attempts. Try again shortly.",
       "account_banned": "This account has been disabled.",
-      "invalid_credentials": "Wrong email or password.",
+      "invalid_credentials": "Wrong email/phone or password.",
       "google_failed": "Couldn't sign in with Google. Try again later or use your email.",
       "play_services": "Google Play services is required. Update it and try again.",
       "invalid_token": "We couldn't verify your sign-in. Try again.",
@@ -59,7 +60,7 @@
     "bookingsPromptTitle": "Your bookings live here",
     "bookingsPromptBody": "Sign in to see your bookings and QR code.",
     "profilePromptTitle": "Your account",
-    "profilePromptBody": "Sign in to book and share your invite code. You can change the language above without signing in."
+    "profilePromptBody": "Sign in to book and share your invite code."
   },
   "home": {
     "heroTitle": "Drop your bags.\nEnjoy the city.",
@@ -764,7 +765,7 @@
     "open": "Correct bag count",
     "title": "Correct bag count",
     "hint": "If the guest arrived with a different number of bags, enter the real count. The new total is calculated for you.",
-    "hintCheckedIn": "The bags are checked in. Sealed bags cannot be increased, and a correction that raises the price needs the guest's approval.",
+    "hintCheckedIn": "The bags are at the shop. A correction that raises the price needs the guest's approval.",
     "delta": "{{from}} bags → {{to}} bags",
     "atLeastOne": "There must be at least one bag.",
     "apply": "Apply",
@@ -908,8 +909,8 @@
     "remove": "Remove",
     "removeTitle": "Remove this time off?",
     "conflictTitle": "The bookings below fall on these dates:",
-    "conflictDropoff": "Drop-off",
-    "conflictPickup": "Pick-up",
+    "conflictDropoff": "Guest drop-off",
+    "conflictPickup": "Guest pick-up",
     "conflictBags": "Bags in the shop",
     "errors": {
       "schedule_conflict": "This change was not saved.",
@@ -981,5 +982,12 @@
     "exitLabel": "Exit user view and return to your admin account",
     "endedTitle": "User view ended",
     "endedBody": "Time ran out or access ended; you are back in your admin account."
+  },
+  "update": {
+    "requiredTitle": "Update required",
+    "requiredBody": "This version is no longer supported. Update BagajPark on Google Play to continue.",
+    "requiredCta": "Open Google Play",
+    "readyBody": "A new version is ready.",
+    "readyCta": "Refresh"
   }
 }
