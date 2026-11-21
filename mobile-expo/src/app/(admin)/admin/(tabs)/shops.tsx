@@ -9,6 +9,7 @@ import { MapSnippet } from "@/components/Illustrations";
 import { SearchBox } from "@/components/SearchBox";
 import { AppText, Button, CenterMessage, Chip, IconButton, Loading } from "@/components/ui";
 import { errorMessage } from "@/lib/errors";
+import { telUrl } from "@/lib/phone";
 import { useAdminOverview, useAdminShops } from "@/lib/queries";
 import type { AdminShop } from "@/lib/types";
 import { formatRating } from "@/lib/format";
@@ -149,7 +150,7 @@ function PrelaunchRow({ shop: s }: { shop: AdminShop }) {
           </View>
         </View>
         {s.phone ? (
-          <IconButton label={t("admin.callShop")} onPress={() => void Linking.openURL(`tel:${s.phone}`).catch(() => undefined)}>
+          <IconButton label={t("admin.callShop")} onPress={() => void Linking.openURL(telUrl(s.phone, s.whatsapp)).catch(() => undefined)}>
             <Phone size={18} color={colors.ink} />
           </IconButton>
         ) : null}
@@ -162,11 +163,25 @@ function ShopRow({ shop: s }: { shop: AdminShop }) {
   const { t } = useTranslation();
   const ratio = s.capacity > 0 ? Math.min(1, s.bagsInStorage / s.capacity) : 0;
   const busy = ratio >= BUSY;
+  // Etiket satirin icerigini ezmesin: ad, durum, sorunlar ve doluluk birlikte okunur; arama eylem olarak sunulur.
+  const label = [
+    s.name,
+    !s.isActive ? t("admin.inactive") : null,
+    s.isTest ? t("admin.testRecord") : null,
+    ...s.issues.filter((i) => i !== "inactive").map((i) => t(`admin.shopIssue.${i}`)),
+    t("admin.bagsOfCapacity", { bags: s.bagsInStorage, capacity: s.capacity }),
+  ]
+    .filter(Boolean)
+    .join(", ");
 
   return (
     <Pressable
       accessibilityRole="button"
-      accessibilityLabel={s.name}
+      accessibilityLabel={label}
+      accessibilityActions={s.phone ? [{ name: "call", label: t("admin.callShop") }] : undefined}
+      onAccessibilityAction={(e) => {
+        if (e.nativeEvent.actionName === "call") void Linking.openURL(telUrl(s.phone, s.whatsapp)).catch(() => undefined);
+      }}
       onPress={() => router.push(`/admin/shop/${s.id}`)}
       style={({ pressed }) => [styles.card, !s.isActive && styles.inactiveCard, pressed && { backgroundColor: colors.surfaceMuted }]}
     >
@@ -198,7 +213,7 @@ function ShopRow({ shop: s }: { shop: AdminShop }) {
           </View>
         </View>
         {s.phone ? (
-          <IconButton label={t("admin.callShop")} onPress={() => void Linking.openURL(`tel:${s.phone}`).catch(() => undefined)}>
+          <IconButton label={t("admin.callShop")} onPress={() => void Linking.openURL(telUrl(s.phone, s.whatsapp)).catch(() => undefined)}>
             <Phone size={18} color={colors.ink} />
           </IconButton>
         ) : null}

@@ -882,6 +882,7 @@
     "featureFlagsEmpty": "Noch keine Feature-Flags.",
     "featureFlagsNav": "Feature-Flags",
     "shopDeleteBlockedByRelations": "Dieses Geschäft hat verknüpfte Buchungen oder andere Datensätze und kann nicht entfernt werden.",
+    "shopNotPending": "Dieser Antrag ist nicht mehr ausstehend (bereits genehmigt oder aktiv) und kann nicht abgelehnt werden. Liste aktualisieren.",
     "roleApprovalsTitle": "Freigaben für Rollenänderungen",
     "roleApprovalsIntro": "Ein anderer Administrator hat eine Änderung beantragt, die Administratorrechte betrifft. Geben Sie sie nur frei, wenn Sie ihr vertrauen. Ihre eigene Anfrage können Sie nicht freigeben.",
     "roleApprovalsEmpty": "Keine offenen Rollenfreigaben.",

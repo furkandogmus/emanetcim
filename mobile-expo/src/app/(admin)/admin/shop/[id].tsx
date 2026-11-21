@@ -15,6 +15,9 @@ import { api } from "@/lib/api";
 import { errorMessage } from "@/lib/errors";
 import { formatDay, formatDayTime } from "@/lib/format";
 import { SITE_ORIGIN } from "@/lib/images";
+import { telUrl, waUrl } from "@/lib/phone";
+import { useViewAs } from "@/lib/use-view-as";
+import { languageInfo } from "@/lib/languages";
 import { notify } from "@/lib/notify";
 import { keys, useAdminShop } from "@/lib/queries";
 import type { AdminShopDetail, AdminShopPatch } from "@/lib/types";
@@ -33,7 +36,7 @@ export default function AdminShopScreen() {
   const { t, i18n } = useTranslation();
   const { id } = useLocalSearchParams<{ id: string }>();
   const query = useAdminShop(id);
-  const lang = i18n.language === "tr" ? "tr" : "en";
+  const lang = languageInfo(i18n.language).site;
 
   return (
     <SafeAreaView style={styles.safe} edges={["top"]}>
@@ -66,8 +69,12 @@ export default function AdminShopScreen() {
 function Detail({ shop: s }: { shop: AdminShopDetail }) {
   const { t } = useTranslation();
   const queryClient = useQueryClient();
+  const viewAs = useViewAs();
   const [price, setPrice] = useState(String(s.pricePerDay));
   const [capacity, setCapacity] = useState(String(s.capacity));
+  const [lat, setLat] = useState(s.latitude == null ? "" : String(s.latitude));
+  const [lng, setLng] = useState(s.longitude == null ? "" : String(s.longitude));
+  const [locSaved, setLocSaved] = useState(false);
   // Basari penceresi yerine dugme "Kaydedildi" der: Android'de bos govdeli Alert kocaman kaliyordu.
   const [saved, setSaved] = useState(false);
 
@@ -76,8 +83,9 @@ function Detail({ shop: s }: { shop: AdminShopDetail }) {
       api<AdminShopDetail>(`/admin/shops/${encodeURIComponent(s.id)}`, { method: "PATCH", body: patch }),
     onSuccess: (next, patch) => {
       queryClient.setQueryData([...keys.admin, "shop", s.id], next);
-      for (const k of ["shops", "overview"]) void queryClient.invalidateQueries({ queryKey: [...keys.admin, k] });
+      for (const k of ["shops", "overview", "applications"]) void queryClient.invalidateQueries({ queryKey: [...keys.admin, k] });
       if (patch.pricePerDay !== undefined) setSaved(true);
+      if (patch.latitude !== undefined) setLocSaved(true);
     },
     onError: (e) => notify(t("admin.actionFailed"), errorMessage(e, "admin")),
   });
@@ -87,6 +95,11 @@ function Detail({ shop: s }: { shop: AdminShopDetail }) {
   const priceValid = Number.isFinite(priceNum) && priceNum >= 1;
   const capValid = Number.isInteger(capNum) && capNum >= 1;
   const dirty = priceNum !== s.pricePerDay || capNum !== s.capacity;
+  const latNum = Number(lat.trim().replace(",", "."));
+  const lngNum = Number(lng.trim().replace(",", "."));
+  const latValid = lat.trim() !== "" && Number.isFinite(latNum) && Math.abs(latNum) <= 90;
+  const lngValid = lng.trim() !== "" && Number.isFinite(lngNum) && Math.abs(lngNum) <= 180;
+  const locDirty = latNum !== s.latitude || lngNum !== s.longitude;
 
   // Misafirden saklayan iki degisiklik onay ister; geri almak mumkun ama o arada arama bos kalir.
   function toggle(field: "isActive" | "isTest" | "isVerified", value: boolean) {
@@ -104,10 +117,10 @@ function Detail({ shop: s }: { shop: AdminShopDetail }) {
         ? `http://maps.apple.com/?q=${s.latitude},${s.longitude}`
         : `https://www.google.com/maps/search/?api=1&query=${s.latitude},${s.longitude}`
       : null;
-  const wa = s.owner.phone.replace(/[^\d]/g, "");
+  const wa = s.owner.whatsapp ?? null;
 
   return (
-    <KeyboardAvoidingView style={{ flex: 1 }} behavior={Platform.OS === "ios" ? "padding" : undefined}>
+    <KeyboardAvoidingView style={{ flex: 1 }} behavior="padding">
       <ScrollView contentContainerStyle={styles.content} keyboardShouldPersistTaps="handled">
         <View style={{ gap: 4 }}>
           <AppText variant="title">{s.name}</AppText>
@@ -215,6 +228,42 @@ function Detail({ shop: s }: { shop: AdminShopDetail }) {
           )}
         </Block>
 
+        <Block title={t("admin.location")}>
+          <Card style={{ gap: space.lg }}>
+            <View style={styles.fieldRow}>
+              <Field
+                style={{ flex: 1 }}
+                label={t("admin.latitude")}
+                value={lat}
+                onChangeText={(v) => {
+                  setLat(v);
+                  setLocSaved(false);
+                }}
+                keyboardType="numbers-and-punctuation"
+                hint={lat.trim() === "" || latValid ? undefined : t("admin.invalidNumber")}
+              />
+              <Field
+                style={{ flex: 1 }}
+                label={t("admin.longitude")}
+                value={lng}
+                onChangeText={(v) => {
+                  setLng(v);
+                  setLocSaved(false);
+                }}
+                keyboardType="numbers-and-punctuation"
+                hint={lng.trim() === "" || lngValid ? undefined : t("admin.invalidNumber")}
+              />
+            </View>
+            <AppText variant="caption">{t("admin.locationHint")}</AppText>
+            <Button
+              title={locSaved && !locDirty ? t("admin.shopSaved") : t("admin.save")}
+              disabled={!locDirty || !latValid || !lngValid}
+              loading={update.isPending && update.variables?.latitude !== undefined}
+              onPress={() => update.mutate({ latitude: latNum, longitude: lngNum })}
+            />
+          </Card>
+        </Block>
+
         <Block title={t("admin.owner")}>
           <Card style={{ gap: space.md }}>
             <View style={{ gap: 2 }}>
@@ -224,10 +273,10 @@ function Detail({ shop: s }: { shop: AdminShopDetail }) {
             </View>
             <View style={styles.actions}>
               {s.owner.phone ? (
-                <Button variant="secondary" title={t("admin.call")} icon={<Phone size={16} color={colors.ink} />} onPress={() => open(`tel:${s.owner.phone}`)} style={{ flex: 1 }} />
+                <Button variant="secondary" title={t("admin.call")} icon={<Phone size={16} color={colors.ink} />} onPress={() => open(telUrl(s.owner.phone, s.owner.whatsapp))} style={{ flex: 1 }} />
               ) : null}
               {wa ? (
-                <IconButton label="WhatsApp" onPress={() => open(`https://wa.me/${wa}`)}>
+                <IconButton label="WhatsApp" onPress={() => open(waUrl(wa))}>
                   <MessageCircle size={18} color={colors.ink} />
                 </IconButton>
               ) : null}
@@ -242,6 +291,15 @@ function Detail({ shop: s }: { shop: AdminShopDetail }) {
                 </IconButton>
               ) : null}
             </View>
+            {s.owner.canViewAs !== false ? (
+              <Button
+                variant="secondary"
+                title={t("admin.impersonateOwner")}
+                loading={viewAs.pendingId === s.owner.id}
+                disabled={viewAs.pendingId !== undefined}
+                onPress={() => viewAs.confirmViewAs(s.owner.id, s.owner.name || s.name)}
+              />
+            ) : null}
           </Card>
         </Block>
 

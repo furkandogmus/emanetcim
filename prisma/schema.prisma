@@ -113,6 +113,9 @@ model Shop {
   longitude           Float?
   capacity            Int                 @default(10)
   isActive            Boolean             @default(false)
+  /// Admin onay zamani. NULL + isActive=false + rezervasyonsuz = bekleyen basvuru.
+  /// Pasife alinmis canli dukkan basvuru SAYILMAZ (reddet = silme, cascade).
+  approvedAt          DateTime?
   rating              Float?              @default(0.0)
   pricePerDay         Decimal             @default(250) @db.Decimal(12, 2)
   pricePerHour        Decimal             @default(10) @db.Decimal(12, 2)

@@ -473,8 +473,10 @@
     "deleteConfirm": "Evet, sil",
     "errors": {
       "not_found": "Kayıt bulunamadı; başka biri işlem yapmış olabilir.",
-      "missing_coordinates": "Dükkanın konumu yok; önce web panelinden konumu girin.",
+      "missing_coordinates": "Dükkanın konumu yok. Dükkan sayfasından konumu girince onaylayabilirsin.",
+      "has_booking_history": "Dükkanın aktif rezervasyonu var; reddedilemez.",
       "has_active_bookings": "Dükkanın aktif rezervasyonu var; reddedilemez.",
+      "not_pending": "Bu başvuru artık beklemede değil (onaylanmış ya da aktif); reddedilemez. Listeyi yenileyin.",
       "invalid_action": "Geçersiz işlem.",
       "email_send_failed": "E-posta gönderilemedi; cevap kaydedilmedi. Biraz sonra tekrar dene.",
       "too_many_requests": "Çok fazla cevap gönderildi; biraz bekle.",
@@ -483,7 +485,8 @@
       "invalid_data": "Girilen değer geçersiz.",
       "cannot_impersonate_admin": "Bir yönetici olarak giremezsin.",
       "user_banned": "Engelli bir kullanıcı olarak girilemez.",
-      "not_allowed_while_impersonating": "Bu işlem kullanıcı olarak görüntülerken yapılamaz."
+      "not_allowed_while_impersonating": "Bu işlem kullanıcı olarak görüntülerken yapılamaz.",
+      "cannot_ban_admin": "Yönetici hesabı engellenemez; yetki değişikliği web panelinden iki admin onayıyla yapılır."
     },
     "deleteMessage": "Mesajı sil",
     "replyLabel": "E-postayla cevap",
@@ -507,7 +510,7 @@
     "appUsersDay": "Son 24 saat",
     "appUsersWeek": "Son 7 gün",
     "appUsersMonth": "Son 30 gün",
-    "appUsersFoot": "Uygulamayı açan tekil cihaz. Toplam {{total}} cihaz; son 30 günde {{signedIn}} tanesinde giriş yapılmış.",
+    "appUsersFoot": "Uygulamayı açan tekil kişi (giriş yapanlar hesap başına, diğerleri cihaz başına). Toplam {{total}}; son 30 günde giriş yapılan hesap: {{signedIn}}.",
     "todayTitle": "Bugün",
     "todayArrivals": "Gelecek",
     "todayPickups": "Alınacak",
@@ -532,21 +535,22 @@
       "shops": "Dükkanlar",
       "inbox": "Gelen kutusu"
     },
-    "searchPlaceholder": "Kod, misafir ya da dükkan ara",
+    "searchPlaceholder": "Kod, misafir, dükkan ya da telefon ara",
     "filters": {
       "overdue": "Gecikmiş",
       "inStorage": "Dükkanda",
       "arrivals": "Bugün gelecek",
       "pickups": "Bugün alınacak",
       "upcoming": "Yaklaşan",
-      "all": "Tümü"
+      "all": "Tümü",
+      "noShow": "Gelmeyen"
     },
     "noSearchResult": "Bu aramayla rezervasyon bulunamadı",
     "noBookingsInFilter": "Bu listede rezervasyon yok",
     "lateDays_one": "{{count}} gün gecikti",
     "lateDays_other": "{{count}} gün gecikti",
     "lateToday": "Süresi geçti",
-    "lateBody": "Çıkış saati geçti ve valiz teslim edilmedi. Misafiri ya da dükkanı ara.",
+    "lateBody": "Alma saati geçti ve valiz hâlâ dükkanda. Misafiri ya da dükkanı ara.",
     "disputeOpen": "Bu rezervasyon için açık bir uyuşmazlık var.",
     "guest": "Misafir",
     "shop": "Dükkan",
@@ -674,7 +678,20 @@
     "impersonate": "Bu kullanıcı olarak gir",
     "impersonateTitle": "{{name}} olarak girilsin mi?",
     "impersonateBody": "Uygulama 30 dakika boyunca bu kullanıcının paneline geçer ve yaptığın her değişiklik kayda geçer. Hesap silinemez. Üstteki şeritten istediğin an çıkabilirsin.",
-    "impersonateConfirm": "Gir"
+    "impersonateConfirm": "Gir",
+    "location": "Konum",
+    "latitude": "Enlem",
+    "longitude": "Boylam",
+    "locationHint": "Haritada dükkanın yerine uzun basıp koordinatları kopyalayın. Örnek: 41.0082 ve 28.9784.",
+    "fixLocation": "Konumu gir",
+    "banShopsNote": "Bu kişinin {{count}} dükkanı var. Engellemek dükkanları kapatmaz; gerekirse dükkan sayfasından \"Misafire açık\" seçeneğini kapat.",
+    "userBookingsOpen": "Rezervasyonlarını gör",
+    "openShop": "Dükkan sayfasını aç",
+    "impersonateOwner": "Dükkan sahibi olarak gir",
+    "repliedAt": "Cevaplandı · {{date}}",
+    "approvedNotNotified": "Başvuru onaylandı ama esnafa bildirim gidemedi; kendisini ara.",
+    "openDisputeWeb": "Uyuşmazlığı webde aç",
+    "listCapped": "İlk {{count}} kayıt gösteriliyor; aramayı daralt."
   },
   "scan": {
     "open": "QR okut",

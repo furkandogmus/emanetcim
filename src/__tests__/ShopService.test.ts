@@ -168,10 +168,10 @@ describe("ShopService", () => {
 
       const sonuc = await service.approveShop("shop-1");
 
-      expect(sonuc).toEqual({ ok: true });
+      expect(sonuc).toEqual({ ok: true, notified: { email: true, push: false } });
       expect(mockPrisma.shop.update).toHaveBeenCalledWith({
         where: { id: "shop-1" },
-        data: { isActive: true },
+        data: { isActive: true, approvedAt: expect.any(Date) },
       });
       expect(mockPrisma.user.updateMany).toHaveBeenCalled();
     });

@@ -1,5 +1,6 @@
 import { Alert, FlatList, Linking, RefreshControl, StyleSheet, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
+import { router } from "expo-router";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { Phone } from "lucide-react-native";
 import { useTranslation } from "react-i18next";
@@ -9,6 +10,7 @@ import { StackHeader } from "@/components/StackHeader";
 import { AppText, Banner, Button, Card, CenterMessage, IconButton, Loading } from "@/components/ui";
 import { api } from "@/lib/api";
 import { errorMessage } from "@/lib/errors";
+import { telUrl } from "@/lib/phone";
 import { formatDay, formatMoney, initial } from "@/lib/format";
 import { keys, useAdminApplications } from "@/lib/queries";
 import type { AdminApplication } from "@/lib/types";
@@ -22,13 +24,19 @@ export default function AdminApplicationsScreen() {
 
   const decide = useMutation({
     mutationFn: ({ id, action }: { id: string; action: "approve" | "reject" }) =>
-      api(`/admin/applications/${id}/${action}`, { method: "POST" }),
-    onSuccess: (_res, { action }) => {
+      api<{ success: boolean; partnerNotified?: boolean }>(`/admin/applications/${id}/${action}`, { method: "POST" }),
+    onSuccess: (res, { action }) => {
       // Yalnizca etkilenenler: basvuru listesi, ozet sayaci ve dukkan listesi.
       for (const k of ["applications", "overview", "shops"]) {
         void queryClient.invalidateQueries({ queryKey: [...keys.admin, k] });
       }
-      notify(action === "approve" ? t("admin.approvedTitle") : t("admin.rejectedTitle"));
+      notify(
+        action === "reject"
+          ? t("admin.rejectedTitle")
+          : res?.partnerNotified === false
+            ? t("admin.approvedNotNotified")
+            : t("admin.approvedTitle"),
+      );
     },
     onError: (e) => notify(t("admin.actionFailed"), errorMessage(e, "admin")),
   });
@@ -101,7 +109,7 @@ export default function AdminApplicationsScreen() {
                   {item.owner.phone ? (
                     <IconButton
                       label={t("admin.call")}
-                      onPress={() => void Linking.openURL(`tel:${item.owner.phone}`).catch(() => undefined)}
+                      onPress={() => void Linking.openURL(telUrl(item.owner.phone ?? "", item.owner.whatsapp)).catch(() => undefined)}
                     >
                       <Phone size={18} color={colors.ink} />
                     </IconButton>
@@ -109,7 +117,14 @@ export default function AdminApplicationsScreen() {
                 </View>
 
                 {!item.hasCoordinates ? (
-                  <Banner tone="warning" body={t("admin.errors.missing_coordinates")} />
+                  <View style={{ gap: space.sm }}>
+                    <Banner tone="warning" body={t("admin.errors.missing_coordinates")} />
+                    <Button
+                      variant="secondary"
+                      title={t("admin.fixLocation")}
+                      onPress={() => router.push(`/admin/shop/${item.id}`)}
+                    />
+                  </View>
                 ) : null}
                 <View style={styles.actions}>
                   <Button
