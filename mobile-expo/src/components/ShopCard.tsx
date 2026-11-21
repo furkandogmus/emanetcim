@@ -7,7 +7,7 @@ import type { TFunction } from "i18next";
 import { AppText } from "@/components/ui";
 import { formatDay, formatDistance, formatMoney, formatRating } from "@/lib/format";
 import { nextOpenInstant, openDayKind } from "@/lib/next-open";
-import { shopPriceA11y } from "@/lib/shop-label";
+import { mediumDaily, shopPriceA11y, stayLabel } from "@/lib/shop-label";
 import { RemoteImage } from "@/components/RemoteImage";
 import { resolveImage } from "@/lib/images";
 import type { NearbyShop } from "@/lib/types";
@@ -172,9 +172,16 @@ export const ShopCard = memo(function ShopCard({
           <View style={styles.soon}>
             <Text style={styles.soonText}>{t("map.comingSoon")}</Text>
           </View>
+        ) : shop.stayQuote ? (
+          // Aranan kalisin toplami one cikar; gunluk fiyat karsilastirma icin ikincil.
+          <>
+            <Text style={styles.price}>{formatMoney(shop.stayQuote.total)}</Text>
+            <Text style={styles.perDay}>{stayLabel(shop.stayQuote, t)}</Text>
+            <Text style={styles.daily}>{t("map.perDayMediumPrice", { price: formatMoney(mediumDaily(shop)) })}</Text>
+          </>
         ) : (
           <>
-            <Text style={styles.price}>{formatMoney(shop.priceRange?.medium ?? shop.pricePerDay)}</Text>
+            <Text style={styles.price}>{formatMoney(mediumDaily(shop))}</Text>
             <Text style={styles.perDay}>{t("map.perDayMedium")}</Text>
           </>
         )}
@@ -209,9 +216,10 @@ const styles = StyleSheet.create({
   metaRow: { flexDirection: "row", alignItems: "center", gap: 4 },
   ratingText: { fontFamily: fonts.bodySemibold, fontSize: 13, color: colors.ink },
   dot: { fontFamily: fonts.body, fontSize: 13, color: colors.inkMuted },
-  right: { alignItems: "flex-end", alignSelf: "flex-start", paddingTop: 2, maxWidth: 96 },
+  right: { alignItems: "flex-end", alignSelf: "flex-start", paddingTop: 2, maxWidth: 112 },
   price: { fontFamily: fonts.display, fontSize: 18, lineHeight: 22, color: colors.ink, fontVariant: ["tabular-nums"] },
   perDay: { fontFamily: fonts.body, fontSize: 12, color: colors.inkMuted, textAlign: "right" },
+  daily: { fontFamily: fonts.body, fontSize: 11, color: colors.inkMuted, textAlign: "right", marginTop: 2 },
   soon: { backgroundColor: colors.surfaceMuted, borderRadius: radius.pill, paddingHorizontal: 8, paddingVertical: 3 },
   soonText: { fontFamily: fonts.bodyMedium, fontSize: 12, color: colors.inkSecondary },
 });
