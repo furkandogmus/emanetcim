@@ -543,7 +543,7 @@ export async function approveShopAction(shopId: string) {
 
 export type RejectShopActionResult =
   | { success: true }
-  | { success: false; error: "has_relations" };
+  | { success: false; error: "has_relations" | "not_pending" };
 
 /**
  * Esnaf (Shop) başvurusu reddet (sil). Bağlı rezervasyon vb. varsa FK hatası — digest yerine sonuç döner.
@@ -571,7 +571,10 @@ export async function rejectShopAction(
   });
   if (!result.ok) {
     logger.warn({ shopId, reason: result.reason }, "admin_reject_shop_blocked");
-    return { success: false, error: "has_relations" };
+    return {
+      success: false,
+      error: result.reason === "not_pending" ? "not_pending" : "has_relations",
+    };
   }
 
   revalidatePathAllLocales("/admin/applications");

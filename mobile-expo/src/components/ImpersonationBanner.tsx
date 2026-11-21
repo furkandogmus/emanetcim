@@ -1,7 +1,7 @@
 import type { ReactNode } from "react";
 import { Pressable, StyleSheet, View } from "react-native";
 import { StatusBar } from "expo-status-bar";
-import { SafeAreaInsetsContext, useSafeAreaInsets } from "react-native-safe-area-context";
+import { SafeAreaProvider, useSafeAreaFrame, useSafeAreaInsets } from "react-native-safe-area-context";
 import { useTranslation } from "react-i18next";
 
 import { AppText } from "@/components/ui";
@@ -11,12 +11,16 @@ import { colors, fonts, radius, space } from "@/theme/tokens";
 
 /**
  * Yonetici baska bir kullanici olarak goruntulerken her ekranin ustunde sabit serit.
- * Ust guvenli alani serit tuketir; alttaki ekranlara `top: 0` verilir ki
- * `useSafeAreaInsets` kullanan ekranlar boslugu iki kez eklemesin.
+ * Ust guvenli alani serit tuketir. Alttaki ekranlar IC ICE bir `SafeAreaProvider`
+ * icinde: saglayici kendi cercevesini yerel olarak olcer, bu yuzden hem
+ * `useSafeAreaInsets` hem yerel `<SafeAreaView edges={["top"]}>` (yaklasik 26 ekran)
+ * seridin altinda ikinci bir durum cubugu boslugu birakmaz. Eskiden yalnizca
+ * context degeri sifirlaniyordu; yerel `SafeAreaView` onu okumaz, bosluk kaliyordu.
  */
 export function ImpersonationFrame({ children }: { children: ReactNode }) {
   const { impersonating, stopImpersonation } = useAuth();
   const insets = useSafeAreaInsets();
+  const frame = useSafeAreaFrame();
   const { t } = useTranslation();
   if (!impersonating) return <>{children}</>;
 
@@ -40,9 +44,9 @@ export function ImpersonationFrame({ children }: { children: ReactNode }) {
           </AppText>
         </Pressable>
       </View>
-      <SafeAreaInsetsContext.Provider value={{ ...insets, top: 0 }}>
-        <View style={styles.root}>{children}</View>
-      </SafeAreaInsetsContext.Provider>
+      <SafeAreaProvider style={styles.root} initialMetrics={{ frame, insets: { ...insets, top: 0 } }}>
+        {children}
+      </SafeAreaProvider>
     </View>
   );
 }

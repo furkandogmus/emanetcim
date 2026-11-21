@@ -25,7 +25,7 @@ export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id
   if (!result.ok) {
     return result.error === "not_found"
       ? NextResponse.json({ error: "not_found" }, { status: 404 })
-      : NextResponse.json({ error: "cannot_ban_self" }, { status: 409 });
+      : NextResponse.json({ error: result.error }, { status: 409 });
   }
   return NextResponse.json({ ok: true });
 }

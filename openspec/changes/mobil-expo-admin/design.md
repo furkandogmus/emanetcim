@@ -16,7 +16,7 @@ mobil uçlar kazanmadı. Kural: aynı iş kuralı iki taşıyıcıda ayrı yazı
 - **Denetim kaydı servise mi, uca mı?** Web'de action'da (`writeAuditLog`). En küçük doğru
   adım: onay/red gövdesini (servis çağrısı + denetim kaydı) tek bir fonksiyona alıp web
   action'ı ve mobil uç ikisinden çağırmak; aktör ve IP taşıyıcıdan gelir.
-- **Hata kodları:** `not_found` 404, `missing_coordinates` 409, `has_active_bookings` 409,
+- **Hata kodları:** `not_found` 404, `missing_coordinates` 409, `has_booking_history` 409,
   `invalid_action` 400. İstemci `admin.errors.*` ile çevirir.
 - **Expo yönlendirme:** `_layout.tsx`'teki `Stack.Protected` kapısına `role === "ADMIN"` →
   `(admin)` grubu; şu an ADMIN `(guest)`a düşüyor.

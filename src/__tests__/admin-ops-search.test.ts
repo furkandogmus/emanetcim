@@ -42,12 +42,29 @@ describe("AdminOpsService.listBookings", () => {
     expect(findMany.mock.calls[1][0].where).toEqual({});
   });
 
-  it("gecikmis: cikis saati gecmis ve hala acik, en eski once", async () => {
+  it("gecikmis: yalnizca valizi dukkanda olan ve saati gecen, en eski once", async () => {
     const now = new Date("2026-11-17T09:00:00.000Z");
     await new AdminOpsService().listBookings({ filter: "overdue", now });
     const call = findMany.mock.calls[0][0];
-    expect(call.where.checkOutTime).toEqual({ lt: now });
-    expect(call.where.status.in).toEqual(expect.arrayContaining(["CHECKED_IN", "APPROVED", "PAID"]));
+    expect(call.where).toEqual({ status: "CHECKED_IN", checkOutTime: { lt: now } });
     expect(call.orderBy).toEqual({ checkOutTime: "asc" });
+  });
+
+  it("gelmeyen: hic birakilmamis ve saati gecmis rezervasyonlar ayri listede", async () => {
+    const now = new Date("2026-11-17T09:00:00.000Z");
+    await new AdminOpsService().listBookings({ filter: "noShow", now });
+    const where = findMany.mock.calls[0][0].where;
+    expect(where.checkOutTime).toEqual({ lt: now });
+    expect(where.status.in).toEqual(["PENDING", "WAITING_APPROVAL", "APPROVED", "PAID"]);
+  });
+
+  it("telefon: bosluk, 0 ve +90 farki yok; 7 haneden kisa terim telefon aramaz", async () => {
+    const svc = new AdminOpsService();
+    await svc.listBookings({ filter: "all", q: "0532 123 45 67" });
+    const where = JSON.stringify(findMany.mock.calls[0][0].where);
+    expect(where).toContain('"guestPhone":{"contains":"5321234567"}');
+    expect(where).toContain('"guest":{"phone":{"contains":"5321234567"}}');
+    await svc.listBookings({ filter: "all", q: "Elif12" });
+    expect(JSON.stringify(findMany.mock.calls[1][0].where)).not.toContain("guestPhone");
   });
 });

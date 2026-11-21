@@ -2,6 +2,7 @@ import { setRequestLocale } from "next-intl/server";
 import { auth } from "@/auth";
 import { redirect } from "next/navigation";
 import prisma from "@/lib/db";
+import { PENDING_APPLICATION_WHERE } from "@/lib/pending-application";
 import AdminApplicationsClient from "@/components/admin/AdminApplicationsClient";
 
 export default async function AdminApplicationsPage({
@@ -19,7 +20,7 @@ export default async function AdminApplicationsPage({
 
   // Onay bekleyen dükkanları ve sahiplerini çekiyoruz
   const applications = await prisma.shop.findMany({
-    where: { isActive: false },
+    where: PENDING_APPLICATION_WHERE,
     orderBy: { createdAt: "desc" },
     include: {
       owner: {

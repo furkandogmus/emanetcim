@@ -1,8 +1,9 @@
 import { useState } from "react";
 import { Alert, FlatList, Linking, RefreshControl, StyleSheet, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
+import { router } from "expo-router";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { Mail, Phone } from "lucide-react-native";
+import { Mail, MessageCircle, Phone } from "lucide-react-native";
 import { useTranslation } from "react-i18next";
 
 import { SearchBox } from "@/components/SearchBox";
@@ -10,6 +11,8 @@ import { StackHeader } from "@/components/StackHeader";
 import { AppText, Button, CenterMessage, IconButton, Loading } from "@/components/ui";
 import { api } from "@/lib/api";
 import { useAuth } from "@/lib/auth";
+import { telUrl, waUrl } from "@/lib/phone";
+import { useViewAs } from "@/lib/use-view-as";
 import { errorMessage } from "@/lib/errors";
 import { formatDay } from "@/lib/format";
 import { notify } from "@/lib/notify";
@@ -26,7 +29,7 @@ const open = (url: string) => void Linking.openURL(url).catch(() => undefined);
 export default function AdminUsersScreen() {
   const { t } = useTranslation();
   const queryClient = useQueryClient();
-  const { state, startImpersonation } = useAuth();
+  const { state } = useAuth();
   const myId = state.status === "signedIn" ? state.user.id : null;
   const [q, setQ] = useState("");
   const query = useAdminUsers(q);
@@ -41,24 +44,18 @@ export default function AdminUsersScreen() {
 
   function confirmBan(u: AdminUser) {
     if (u.isBanned) return ban.mutate({ id: u.id, isBanned: false });
-    Alert.alert(t("admin.banTitle", { name: u.name || u.email }), t("admin.banBody"), [
+    // Dukkan sahibini yasaklamak dukkanlarini kapatmaz: sayiyi soyle, admin karar versin.
+    const body =
+      u.shopCount > 0
+        ? `${t("admin.banBody")}\n\n${t("admin.banShopsNote", { count: u.shopCount })}`
+        : t("admin.banBody");
+    Alert.alert(t("admin.banTitle", { name: u.name || u.email }), body, [
       { text: t("common.cancel"), style: "cancel" },
       { text: t("admin.banConfirm"), style: "destructive", onPress: () => ban.mutate({ id: u.id, isBanned: true }) },
     ]);
   }
 
-  // Basarida rol degisir; Stack.Protected hedefin paneline gecirir, bu ekran kendiliginden kapanir.
-  const viewAs = useMutation({
-    mutationFn: (id: string) => startImpersonation(id),
-    onError: (e) => notify(t("admin.actionFailed"), errorMessage(e, "admin")),
-  });
-
-  function confirmViewAs(u: AdminUser) {
-    Alert.alert(t("admin.impersonateTitle", { name: u.name || u.email || u.phone }), t("admin.impersonateBody"), [
-      { text: t("common.cancel"), style: "cancel" },
-      { text: t("admin.impersonateConfirm"), onPress: () => viewAs.mutate(u.id) },
-    ]);
-  }
+  const viewAs = useViewAs();
 
   return (
     <SafeAreaView style={styles.safe} edges={["top"]}>
@@ -83,6 +80,13 @@ export default function AdminUsersScreen() {
             <RefreshControl refreshing={query.isRefetching} onRefresh={() => query.refetch()} tintColor={colors.accent} />
           }
           ListEmptyComponent={<CenterMessage title={t("admin.noUsers")} />}
+          ListFooterComponent={
+            (query.data?.length ?? 0) >= 50 ? (
+              <AppText variant="caption" style={{ textAlign: "center" }}>
+                {t("admin.listCapped", { count: query.data?.length ?? 0 })}
+              </AppText>
+            ) : null
+          }
           renderItem={({ item: u }) => {
             const self = u.id === myId;
             return (
@@ -112,8 +116,13 @@ export default function AdminUsersScreen() {
                 <View style={styles.bottom}>
                   <View style={styles.tags}>
                     {u.phone ? (
-                      <IconButton label={t("admin.call")} onPress={() => open(`tel:${u.phone}`)}>
+                      <IconButton label={t("admin.call")} onPress={() => open(telUrl(u.phone, u.whatsapp))}>
                         <Phone size={18} color={colors.ink} />
+                      </IconButton>
+                    ) : null}
+                    {u.whatsapp ? (
+                      <IconButton label="WhatsApp" onPress={() => open(waUrl(u.whatsapp ?? ""))}>
+                        <MessageCircle size={18} color={colors.ink} />
                       </IconButton>
                     ) : null}
                     {u.email ? (
@@ -124,7 +133,7 @@ export default function AdminUsersScreen() {
                     {u.isBanned ? <Tag label={t("admin.bannedTag")} warn /> : null}
                     {u.isTest ? <Tag label={t("admin.testRecord")} /> : null}
                   </View>
-                  {!self ? (
+                  {!self && u.role !== "ADMIN" ? (
                     <Button
                       variant="secondary"
                       title={u.isBanned ? t("admin.unban") : t("admin.ban")}
@@ -133,13 +142,25 @@ export default function AdminUsersScreen() {
                     />
                   ) : null}
                 </View>
+                {u.bookingCount > 0 ? (
+                  <Button
+                    variant="secondary"
+                    title={t("admin.userBookingsOpen")}
+                    onPress={() =>
+                      router.push({
+                        pathname: "/admin/bookings",
+                        params: { filter: "all", q: u.email || u.phone || u.name },
+                      })
+                    }
+                  />
+                ) : null}
                 {u.role !== "ADMIN" && !u.isBanned ? (
                   <Button
                     variant="secondary"
                     title={t("admin.impersonate")}
-                    loading={viewAs.isPending && viewAs.variables === u.id}
-                    disabled={viewAs.isPending}
-                    onPress={() => confirmViewAs(u)}
+                    loading={viewAs.pendingId === u.id}
+                    disabled={viewAs.pendingId !== undefined}
+                    onPress={() => viewAs.confirmViewAs(u.id, u.name || u.email || u.phone)}
                   />
                 ) : null}
               </View>

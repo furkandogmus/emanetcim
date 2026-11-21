@@ -1,5 +1,6 @@
 import { OPERATING_SHOP_FILTER } from "@/lib/public-shop-filter";
 import prisma from "@/lib/db";
+import { PENDING_APPLICATION_WHERE } from "@/lib/pending-application";
 import { moneyToNumber } from "@/lib/money";
 import { EARNING_BOOKING_STATUSES } from "@/lib/platform-split";
 import { dayRangeInTimeZone, startOfDayInTimeZone } from "@/lib/timezone";
@@ -93,7 +94,7 @@ export class AdminOverviewService {
       this.dailySeries(14, now),
       // Bugunun sayilari, dukkandaki valiz ve gecikmis TEK sorguda: havuz 10 baglanti,
       // bu uc eskiden 15+ paralel sorgu aciyordu (DEFECT_BACKLOG 2026-08-31 kurali).
-      // Gecikmis tanimi OverdueBookingService ile ayni (acik + cikis saati gecmis).
+      // Gecikmis (admin): valiz dukkanda ve alma saati gecmis; gelmeyenler ayri liste (noShow).
       prisma.$queryRaw<
         { arrivals: bigint; pickups: bigint; bags: bigint | null; new_today: bigint; overdue: bigint }[]
       >`
@@ -104,13 +105,13 @@ export class AdminOverviewService {
             AND "checkOutTime" >= ${today.start} AND "checkOutTime" < ${today.end}) AS pickups,
           sum("bagCountS" + "bagCountM" + "bagCountXl") FILTER (WHERE status = 'CHECKED_IN') AS bags,
           count(*) FILTER (WHERE "createdAt" >= ${today.start} AND "createdAt" < ${today.end}) AS new_today,
-          count(*) FILTER (WHERE status IN ('PENDING','WAITING_APPROVAL','APPROVED','PAID','CHECKED_IN')
+          count(*) FILTER (WHERE status = 'CHECKED_IN'
             AND "checkOutTime" < ${now}) AS overdue
         FROM "Booking"
         WHERE status IN ('PENDING','WAITING_APPROVAL','APPROVED','PAID','CHECKED_IN')
           OR "createdAt" >= ${today.start}
       `,
-      prisma.shop.count({ where: { isActive: false } }),
+      prisma.shop.count({ where: PENDING_APPLICATION_WHERE }),
       prisma.contactMessage.count({ where: { isRead: false } }),
       prisma.dispute.count({ where: { status: { in: OPEN_DISPUTE_STATUSES } } }),
       prisma.booking.findMany({

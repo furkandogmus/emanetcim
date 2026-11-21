@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Alert, FlatList, Pressable, RefreshControl, StyleSheet, View } from "react-native";
+import { Alert, FlatList, KeyboardAvoidingView, Pressable, RefreshControl, StyleSheet, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useTranslation } from "react-i18next";
@@ -28,9 +28,15 @@ export default function AdminMessagesScreen() {
     void queryClient.invalidateQueries({ queryKey: [...keys.admin, "overview"] });
   };
 
+  // Okundu isareti listeyi bastan indirmez: satir yerelde okundu yapilir, yalnizca sayac yenilenir.
   const markRead = useMutation({
     mutationFn: (id: string) => api(`/admin/messages/${id}`, { method: "PATCH" }),
-    onSuccess: refresh,
+    onSuccess: (_res, id) => {
+      queryClient.setQueryData<ContactMessage[]>([...keys.admin, "messages"], (cur) =>
+        cur?.map((m) => (m.id === id ? { ...m, isRead: true } : m)),
+      );
+      void queryClient.invalidateQueries({ queryKey: [...keys.admin, "overview"] });
+    },
     // Okundu isareti arka plan isi; basarisizsa mesaj yine acilir, sayac yenilemede duzelir.
     onError: refresh,
   });
@@ -55,82 +61,90 @@ export default function AdminMessagesScreen() {
 
   return (
     <SafeAreaView style={styles.safe} edges={["top"]}>
-      {/* Sekme ekrani: geri dugmesi yok, baslik diger sekmelerle ayni hizada. */}
-      <View style={styles.header}>
-        <AppText variant="title">{t("admin.messages")}</AppText>
-      </View>
+      <KeyboardAvoidingView style={{ flex: 1 }} behavior="padding">
+        {/* Sekme ekrani: geri dugmesi yok, baslik diger sekmelerle ayni hizada. */}
+        <View style={styles.header}>
+          <AppText variant="title">{t("admin.messages")}</AppText>
+        </View>
 
-      {query.isLoading ? (
-        <Loading />
-      ) : query.isError ? (
-        <CenterMessage
-          title={errorMessage(query.error)}
-          action={<Button variant="secondary" title={t("common.retry")} onPress={() => query.refetch()} />}
-        />
-      ) : (
-        <FlatList
-          data={query.data ?? []}
-          keyExtractor={(m) => m.id}
-          contentContainerStyle={[styles.list, !query.data?.length && { flex: 1 }]}
-          refreshControl={
-            <RefreshControl refreshing={query.isRefetching} onRefresh={() => query.refetch()} tintColor={colors.accent} />
-          }
-          ListEmptyComponent={<CenterMessage art={<LuggageTag size={64} />} title={t("admin.noMessages")} />}
-          renderItem={({ item }) => {
-            const expanded = open === item.id;
-            return (
-              <View style={styles.item}>
-                <Pressable
-                  accessibilityRole="button"
-                  accessibilityState={{ expanded }}
-                  accessibilityLabel={!item.isRead ? `${t("admin.unread")}: ${item.subject || t("admin.noSubject")}` : undefined}
-                  onPress={() => toggle(item)}
-                  style={styles.head}
-                >
-                  <View style={styles.avatar}>
-                    <AppText style={styles.avatarText}>{initial(item.from)}</AppText>
-                    {!item.isRead ? <View style={styles.dot} /> : null}
-                  </View>
-                  <View style={{ flex: 1, gap: 2 }}>
-                    <View style={styles.row}>
-                      <AppText variant="caption" numberOfLines={1} style={{ flex: 1 }}>
-                        {item.from}
-                      </AppText>
-                      <AppText variant="caption" style={{ fontSize: 12, fontVariant: ["tabular-nums"] }}>
-                        {formatDayTime(item.createdAt)}
-                      </AppText>
+        {query.isLoading ? (
+          <Loading />
+        ) : query.isError ? (
+          <CenterMessage
+            title={errorMessage(query.error)}
+            action={<Button variant="secondary" title={t("common.retry")} onPress={() => query.refetch()} />}
+          />
+        ) : (
+          <FlatList
+            data={query.data ?? []}
+            keyExtractor={(m) => m.id}
+            keyboardShouldPersistTaps="handled"
+            contentContainerStyle={[styles.list, !query.data?.length && { flex: 1 }]}
+            refreshControl={
+              <RefreshControl refreshing={query.isRefetching} onRefresh={() => query.refetch()} tintColor={colors.accent} />
+            }
+            ListEmptyComponent={<CenterMessage art={<LuggageTag size={64} />} title={t("admin.noMessages")} />}
+            renderItem={({ item }) => {
+              const expanded = open === item.id;
+              return (
+                <View style={styles.item}>
+                  <Pressable
+                    accessibilityRole="button"
+                    accessibilityState={{ expanded }}
+                    accessibilityLabel={`${!item.isRead ? `${t("admin.unread")}: ` : ""}${item.from}, ${item.subject || t("admin.noSubject")}`}
+                    onPress={() => toggle(item)}
+                    style={styles.head}
+                  >
+                    <View style={styles.avatar}>
+                      <AppText style={styles.avatarText}>{initial(item.from)}</AppText>
+                      {!item.isRead ? <View style={styles.dot} /> : null}
                     </View>
-                    <AppText
-                      variant="bodyMedium"
-                      numberOfLines={expanded ? undefined : 1}
-                      style={!item.isRead ? { fontFamily: fonts.bodySemibold } : undefined}
-                    >
-                      {item.subject || t("admin.noSubject")}
-                    </AppText>
-                    {item.text ? (
-                      <AppText variant="caption" numberOfLines={expanded ? undefined : 2} style={expanded ? { color: colors.ink, fontSize: 15, lineHeight: 22 } : undefined}>
-                        {item.text}
+                    <View style={{ flex: 1, gap: 2 }}>
+                      <View style={styles.row}>
+                        <AppText variant="caption" numberOfLines={1} style={{ flex: 1 }}>
+                          {item.from}
+                        </AppText>
+                        <AppText variant="caption" style={{ fontSize: 12, fontVariant: ["tabular-nums"] }}>
+                          {formatDayTime(item.createdAt)}
+                        </AppText>
+                      </View>
+                      {item.repliedAt ? (
+                        <AppText variant="caption" style={{ color: colors.accent, fontSize: 12 }}>
+                          {t("admin.repliedAt", { date: formatDayTime(item.repliedAt) })}
+                        </AppText>
+                      ) : null}
+                      <AppText
+                        variant="bodyMedium"
+                        numberOfLines={expanded ? undefined : 1}
+                        style={!item.isRead ? { fontFamily: fonts.bodySemibold } : undefined}
+                      >
+                        {item.subject || t("admin.noSubject")}
                       </AppText>
-                    ) : null}
-                  </View>
-                </Pressable>
-                {expanded ? (
-                  <View style={{ gap: space.sm }}>
-                    <AdminMessageReply messageId={item.id} to={item.from} onSent={refresh} />
-                    {/* Her satirda kirmizi cop ikonu listeyi agirlastiriyordu: silme yalnizca acik mesajda. */}
-                    <Button
-                      variant="ghost"
-                      textColor={colors.danger}
-                      title={t("admin.deleteMessage")}
-                      onPress={() => confirmDelete(item)}
-                    />
-                  </View>
-                ) : null}
-              </View>
-            );
-          }}
-        />
-      )}
+                      {item.text ? (
+                        <AppText variant="caption" numberOfLines={expanded ? undefined : 2} style={expanded ? { color: colors.ink, fontSize: 15, lineHeight: 22 } : undefined}>
+                          {item.text}
+                        </AppText>
+                      ) : null}
+                    </View>
+                  </Pressable>
+                  {expanded ? (
+                    <View style={{ gap: space.sm }}>
+                      <AdminMessageReply messageId={item.id} to={item.from} onSent={refresh} />
+                      {/* Her satirda kirmizi cop ikonu listeyi agirlastiriyordu: silme yalnizca acik mesajda. */}
+                      <Button
+                        variant="ghost"
+                        textColor={colors.danger}
+                        title={t("admin.deleteMessage")}
+                        onPress={() => confirmDelete(item)}
+                      />
+                    </View>
+                  ) : null}
+                </View>
+              );
+            }}
+          />
+        )}
+      </KeyboardAvoidingView>
     </SafeAreaView>
   );
 }

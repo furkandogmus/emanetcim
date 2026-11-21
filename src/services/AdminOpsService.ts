@@ -1,6 +1,7 @@
 import type { BookingStatus, Prisma } from "@prisma/client";
 
 import prisma from "@/lib/db";
+import { phoneSearchDigits } from "@/lib/admin-phone-search";
 import { dayRangeInTimeZone } from "@/lib/timezone";
 import { PLATFORM_TIMEZONE } from "@/services/AdminOverviewService";
 
@@ -12,16 +13,11 @@ import { PLATFORM_TIMEZONE } from "@/services/AdminOverviewService";
  * onekiyle aranir; ad, e-posta ve dukkan adiyla da bulunur.
  */
 
-export const ADMIN_BOOKING_FILTERS = ["arrivals", "pickups", "inStorage", "overdue", "upcoming", "all"] as const;
+export const ADMIN_BOOKING_FILTERS = ["arrivals", "pickups", "inStorage", "overdue", "noShow", "upcoming", "all"] as const;
 export type AdminBookingFilter = (typeof ADMIN_BOOKING_FILTERS)[number];
 
 /** Valizi henuz dukkana gelmemis durumlar. */
 const PRE_CHECK_IN: BookingStatus[] = ["PENDING", "WAITING_APPROVAL", "APPROVED", "PAID"];
-/**
- * Cikis saati gectiginde hala acik sayilanlar: `OverdueBookingService.OPEN_STATUSES`
- * ile AYNI liste (orada disa acik degil). Ortak bir sabite tasininca ikisi de onu okumali.
- */
-const OPEN: BookingStatus[] = [...PRE_CHECK_IN, "CHECKED_IN"];
 /** Gelecegi kesin olanlar; PENDING/WAITING_APPROVAL odeme ya da onay bekliyor. */
 const CONFIRMED_PRE: BookingStatus[] = ["APPROVED", "PAID"];
 
@@ -34,9 +30,15 @@ function filterWhere(filter: AdminBookingFilter, now: Date): Prisma.BookingWhere
       return { status: "CHECKED_IN", checkOutTime: { gte: today.start, lt: today.end } };
     case "inStorage":
       return { status: "CHECKED_IN" };
-    // OverdueBookingService ile ayni tanim: cikis saati gecmis ve hala acik.
+    /*
+      GECIKMIS (acil): valiz dukkanda ve alma saati gecti. Dukkana hic gelmemis
+      rezervasyonlar (gelmedi) bunu gurultuye cevirmesin diye ayri: "noShow".
+    */
     case "overdue":
-      return { status: { in: OPEN }, checkOutTime: { lt: now } };
+      return { status: "CHECKED_IN", checkOutTime: { lt: now } };
+    // Sessiz liste: valiz hic birakilmadi, saati gecti. Kirmizi uyari yok.
+    case "noShow":
+      return { status: { in: PRE_CHECK_IN }, checkOutTime: { lt: now } };
     case "upcoming":
       return { status: { in: PRE_CHECK_IN }, checkInTime: { gte: now } };
     default:
@@ -52,6 +54,7 @@ function orderFor(filter: AdminBookingFilter): Prisma.BookingOrderByWithRelation
     case "pickups":
     case "inStorage":
     case "overdue":
+    case "noShow":
       return { checkOutTime: "asc" };
     default:
       return { createdAt: "desc" };
@@ -67,6 +70,9 @@ function searchWhere(q: string): Prisma.BookingWhereInput | null {
     { guest: { email: { contains: term, mode: "insensitive" } } },
     { shop: { name: { contains: term, mode: "insensitive" } } },
   ];
+  // Telefon: en az 7 hane; kisa kodlar rastgele telefonlarla eslesmesin.
+  const digits = phoneSearchDigits(term);
+  if (digits) or.push({ guestPhone: { contains: digits } }, { guest: { phone: { contains: digits } } });
   // Bilet kodu: id'nin ilk 8 karakteri buyuk harfle gosteriliyor; id kucuk harf.
   if (/^[0-9a-f-]{4,36}$/i.test(term)) or.push({ id: { startsWith: term.toLowerCase() } });
   return { OR: or };
@@ -144,7 +150,7 @@ export class AdminOpsService {
           checkedInAt: true,
           checkedOutAt: true,
           couponCode: true,
-          guest: { select: { name: true, email: true, phone: true } },
+          guest: { select: { id: true, name: true, email: true, phone: true, role: true, isBanned: true } },
           shop: {
             select: {
               name: true,
@@ -153,7 +159,7 @@ export class AdminOpsService {
               city: true,
               latitude: true,
               longitude: true,
-              owner: { select: { name: true, phone: true } },
+              owner: { select: { id: true, name: true, phone: true, role: true, isBanned: true } },
             },
           },
           seals: { select: { sealNumber: true, bagIndex: true, bagSize: true }, orderBy: { bagIndex: "asc" } },
@@ -260,7 +266,7 @@ export class AdminOpsService {
         openingTime: true,
         closingTime: true,
         createdAt: true,
-        owner: { select: { id: true, name: true, email: true, phone: true } },
+        owner: { select: { id: true, name: true, email: true, phone: true, role: true, isBanned: true } },
         _count: { select: { bookings: true, reviews: true } },
       },
     });

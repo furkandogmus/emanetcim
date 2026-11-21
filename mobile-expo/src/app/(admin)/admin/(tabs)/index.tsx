@@ -14,6 +14,7 @@ import { AppText, Button, Card, CenterMessage, IconButton, Loading } from "@/com
 import { errorMessage } from "@/lib/errors";
 import { formatDay, formatDayTime, formatMoney } from "@/lib/format";
 import { SITE_ORIGIN } from "@/lib/images";
+import { languageInfo } from "@/lib/languages";
 import { useAdminOverview } from "@/lib/queries";
 import type { AdminBookingFilter, AdminOverview } from "@/lib/types";
 import { colors, fonts, radius, space } from "@/theme/tokens";
@@ -31,7 +32,7 @@ function weekChange(series: AdminOverview["series"]) {
 export default function AdminDashboardScreen() {
   const { t, i18n } = useTranslation();
   const query = useAdminOverview();
-  const lang = i18n.language === "tr" ? "tr" : "en";
+  const lang = languageInfo(i18n.language).site;
   const openWeb = (section: string) =>
     void Linking.openURL(`${SITE_ORIGIN}/${lang}/admin/${section}`).catch(() => undefined);
 
@@ -147,7 +148,7 @@ function Dashboard({
           />
         </View>
         <LinkGroup>
-          <AttentionRow label={t("admin.openDisputes")} value={a.openDisputes} onPress={() => openWeb("disputes")} />
+          <AttentionRow external label={t("admin.openDisputes")} value={a.openDisputes} onPress={() => openWeb("disputes")} />
           <AttentionRow label={t("admin.overdueBookings")} value={a.overdueBookings} onPress={() => openBookings("overdue")} />
         </LinkGroup>
         <LinkGroup>
@@ -317,7 +318,18 @@ function QueueTile({ label, value, href, art }: { label: string; value: number; 
 }
 
 /** Webde cozulen dikkat isleri: sayi varsa turuncu rozet, yoksa sessiz gri. */
-function AttentionRow({ label, value, onPress }: { label: string; value: number; onPress: () => void }) {
+function AttentionRow({
+  label,
+  value,
+  onPress,
+  external,
+}: {
+  label: string;
+  value: number;
+  onPress: () => void;
+  /** Satir uygulama ici bir ekran degil tarayiciyi acar: ok yerine dis baglanti simgesi. */
+  external?: boolean;
+}) {
   return (
     <Pressable
       accessibilityRole="link"
@@ -333,7 +345,7 @@ function AttentionRow({ label, value, onPress }: { label: string; value: number;
           {value}
         </AppText>
       </View>
-      <ChevronRight size={18} color={colors.inkMuted} />
+      {external ? <ExternalLink size={16} color={colors.inkMuted} /> : <ChevronRight size={18} color={colors.inkMuted} />}
     </Pressable>
   );
 }

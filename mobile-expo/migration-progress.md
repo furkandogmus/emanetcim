@@ -89,7 +89,7 @@ sunucuda düzeltilir:
   denetim kaydı yazıyor (`shop.approve_application`, `shop.reject_application`),
   mobil uç yazmıyor. Reddetmek dükkanı SİLER; izsiz olmamalı.
 - [x] Aynı uç ham İngilizce cümle dönüyor ("Shop not found."); istemci çeviremez.
-  Kod olmalı: `not_found`, `missing_coordinates`, `has_active_bookings`.
+  Kod olmalı: `not_found`, `missing_coordinates`, `has_booking_history`.
 - [x] `admin/applications` GET ham Prisma `Shop` dönüyor (bütün kolonlar, `Decimal`
   string). `mobile-dto.ts`'e DTO.
 - [x] `admin/messages/[id]` PATCH/DELETE olmayan id'de Prisma P2025 → 500; 404 olmalı.
