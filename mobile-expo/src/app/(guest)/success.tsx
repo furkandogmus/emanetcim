@@ -17,7 +17,7 @@ export default function SuccessScreen() {
   const { bookingId } = useLocalSearchParams<{ bookingId: string }>();
   const { t } = useTranslation();
   // Ozet karti: "rezervasyonun hazir" tek basina neyin, nerede, ne zaman oldugunu soylemiyordu.
-  const booking = useBooking(bookingId ?? "").data;
+  const booking = useBooking(bookingId ?? "", { saveOffline: true }).data;
 
   // Bildirim izni burada istenir: misafir az once rezervasyon yapti, check-in ve
   // hatirlatma bildiriminin neden geldigi belli. Ekran oturduktan sonra sorulur.

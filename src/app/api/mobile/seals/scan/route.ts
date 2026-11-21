@@ -49,15 +49,29 @@ export async function POST(req: NextRequest) {
     }
   }
 
-  // 2. Booking QR token (imzalı)
+  // 2. Booking QR token: once imzali yol, sonra kayitli token ile ESLESME.
   try {
+    /*
+      Imza suresi dolmus (ya da eski surumde 48 saatle sinirli uretilmis) ama
+      veritabaninda KAYITLI olan token da gecerlidir: misafirin elindeki bilet
+      rezervasyona ait tek kimlik bilgisidir ve tam eslesme onu kanitlar.
+      Eskiden yalnizca imzaya bakiliyordu; 2 gunden once alinan rezervasyonun
+      bileti teslim gununde "BagajPark QR'i degil" cikiyordu.
+      `temp_` onekli degerler olusturma sirasindaki gecici yer tutucudur.
+    */
     const payload = await verifyQrToken(code);
-    if (payload?.bookingId) {
-      const booking = await prisma.booking.findUnique({
-        where: { id: payload.bookingId },
-        include: { shop: true, guest: { select: { name: true } } },
-      });
-      if (!booking) return NextResponse.json({ error: "not_found" }, { status: 404 });
+    const lookup = payload?.bookingId
+      ? { id: payload.bookingId }
+      : code.startsWith("temp_")
+        ? null
+        : { qrCodeToken: code };
+    const booking = lookup
+      ? await prisma.booking.findUnique({
+          where: lookup,
+          include: { shop: true, guest: { select: { name: true } } },
+        })
+      : null;
+    if (booking) {
       // Dukkan operasyonu: kural `booking/access.ts`te, uc yerde degil.
       if (!canOperateBookingAtShop(booking, auth.user)) {
         return NextResponse.json({ error: "forbidden" }, { status: 403 });
@@ -72,6 +86,7 @@ export async function POST(req: NextRequest) {
         checkOutTime: booking.checkOutTime,
       });
     }
+    if (payload?.bookingId) return NextResponse.json({ error: "not_found" }, { status: 404 });
   } catch {
     // ignore
   }

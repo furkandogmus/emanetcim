@@ -15,7 +15,8 @@ export async function POST(req: NextRequest) {
   const { activeShop: shop } = await resolvePartnerShops(auth.user.id, req.nextUrl.searchParams.get("shop"));
   if (!shop) return NextResponse.json({ error: "no_shop" }, { status: 404 });
 
-  const { serialNumber } = await req.json();
+  const json = (await req.json().catch(() => null)) as { serialNumber?: unknown } | null;
+  const serialNumber = json?.serialNumber;
   const serial = Number(serialNumber);
   if (!serialNumber || !Number.isInteger(serial)) {
     return NextResponse.json({ error: "invalid_data" }, { status: 400 });

@@ -165,6 +165,7 @@
     "perDayMediumLabel": "Orta boy valiz, günlük"
   },
   "checkout": {
+    "pickOtherTime": "Başka saat seç",
     "title": "Onayla",
     "when": "Zaman",
     "bags": "Valizler",
@@ -184,7 +185,9 @@
       "shop_not_found": "Bu nokta artık rezervasyon almıyor.",
       "no_bags": "En az bir valiz seç.",
       "too_many_requests": "Çok fazla istek. Biraz sonra tekrar dene.",
-      "shop_closed_at_time": "Dükkan seçtiğin saatte kapalı. Başka bir saat ya da nokta seç."
+      "shop_closed_at_time": "Dükkan seçtiğin saatte kapalı. Başka bir saat ya da nokta seç.",
+      "price_changed": "Tutar değişti. Güncel tutarı kontrol edip yeniden onayla.",
+      "network_maybe": "Bağlantı koptu; rezervasyonun oluşmuş olabilir. Tekrar onaylarsan ikinci bir rezervasyon açılmaz."
     },
     "code": {
       "prompt": "İndirim ya da davet kodun var mı?",
@@ -221,6 +224,8 @@
     "empty": "Henüz rezervasyonun yok",
     "emptyBody": "Bir nokta seçip valizini bıraktığında burada görünecek.",
     "emptyCta": "Nokta ara",
+    "emptyPast": "Geçmiş rezervasyonun yok",
+    "emptyPastBody": "Tamamlanan ya da iptal edilen rezervasyonların burada görünür.",
     "upcoming": "Yaklaşan",
     "past": "Geçmiş",
     "showQr": "Dükkanda bu kodu göster",
@@ -244,6 +249,13 @@
     "overdueDays_other": "{{count}} gün gecikti",
     "offlineTitle": "İnternet yok",
     "offlineBody": "Bu, cihazına kaydedilmiş son bilet. QR kodu dükkanda gösterebilirsin; bağlantı gelince güncellenir.",
+    "offlineListBody": "Sunucuya ulaşılamadı. Cihazına kaydedilmiş biletler gösteriliyor; QR kodu dükkanda gösterebilirsin.",
+    "refreshingBody": "Cihazına kaydedilmiş bilet gösteriliyor, güncelleniyor.",
+    "notFound": "Bu rezervasyon artık bulunamıyor.",
+    "errors": {
+      "invalid_status": "Valizin dükkana teslim edildi ya da rezervasyon zaten iptal edilmiş; iptal edilemez.",
+      "not_found": "Bu rezervasyon bulunamadı."
+    },
     "address": "Adres",
     "addressHint": "Basılı tut, kopyala; taksiciye gösterebilirsin."
   },
@@ -716,7 +728,10 @@
       "not_found": "Rezervasyon bulunamadı.",
       "UNAUTHORIZED": "Bu rezervasyonu değiştiremezsin.",
       "forbidden": "Bu rezervasyonu değiştiremezsin.",
-      "invalid_input": "Gönderilen bilgiler geçersiz. Zamanı ve valiz sayısını kontrol et."
+      "invalid_input": "Gönderilen bilgiler geçersiz. Zamanı ve valiz sayısını kontrol et.",
+      "PLATFORM_HOLIDAY": "Seçtiğin tarihte hizmet verilmiyor.",
+      "SHOP_CLOSED_DAY": "Dükkan seçtiğin günlerden birinde kapalı.",
+      "SHOP_CLOSED_HOURS": "Dükkan seçtiğin saatte kapalı."
     }
   },
   "review": {

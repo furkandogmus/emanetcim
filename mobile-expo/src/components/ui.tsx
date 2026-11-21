@@ -164,7 +164,12 @@ export function Banner({
     success: { bg: colors.successSoft, border: "#BBF7D0" },
   }[tone];
   return (
-    <View style={[styles.banner, { backgroundColor: palette.bg, borderColor: palette.border }]}>
+    <View
+      // Hata/uyari ekran okuyucuya kendiliginden okunur (kaydirmadan gorunmeyen yerde cikabilir).
+      accessibilityRole={tone === "danger" ? "alert" : undefined}
+      accessibilityLiveRegion={tone === "danger" ? "polite" : "none"}
+      style={[styles.banner, { backgroundColor: palette.bg, borderColor: palette.border }]}
+    >
       {title ? <AppText variant="bodyMedium">{title}</AppText> : null}
       <AppText variant="caption" style={{ color: colors.inkSecondary }}>
         {body}

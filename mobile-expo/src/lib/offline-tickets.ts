@@ -1,5 +1,7 @@
+import { useEffect, useState } from "react";
 import * as SecureStore from "expo-secure-store";
 
+import { isImpersonating } from "./api";
 import type { BookingDetail } from "./types";
 
 /**
@@ -51,6 +53,43 @@ export async function saveOfflineTicket(b: BookingDetail): Promise<void> {
   const next = [b.id, ...ids];
   for (const old of next.slice(5)) await SecureStore.deleteItemAsync(key(old)).catch(() => undefined);
   await SecureStore.setItemAsync(INDEX_KEY, JSON.stringify(next.slice(0, 5))).catch(() => undefined);
+}
+
+/** Tek bir biletin silinmesi: sunucu rezervasyonu artik vermiyorsa (404/403) eski QR kalmasin. */
+export async function deleteOfflineTicket(id: string): Promise<void> {
+  const ids = (await readIndex()).filter((x) => x !== id);
+  await SecureStore.deleteItemAsync(key(id)).catch(() => undefined);
+  await SecureStore.setItemAsync(INDEX_KEY, JSON.stringify(ids)).catch(() => undefined);
+}
+
+/**
+ * Cihazdaki biletler, en yeni kaydedilen once. Liste ekranlari sunucuya
+ * ulasamayinca bunlari gosterir: bilet yalnizca tek bir detay ekraninin icinden
+ * erisilebilirse, internetsiz acilista o ekrana giden satir hic gelmiyordu.
+ * Goruntuleme (impersonation) sirasinda bos doner: baska kullanicinin bileti.
+ */
+export async function listOfflineTickets(): Promise<OfflineTicket[]> {
+  if (isImpersonating()) return [];
+  const out: OfflineTicket[] = [];
+  for (const id of await readIndex()) {
+    const t = await loadOfflineTicket(id);
+    if (t) out.push(t);
+  }
+  return out;
+}
+
+/** `enabled` iken (liste sorgusu hata verdiginde) cihazdaki biletleri okur. */
+export function useOfflineTickets(enabled: boolean): OfflineTicket[] {
+  const [tickets, setTickets] = useState<OfflineTicket[]>([]);
+  useEffect(() => {
+    if (!enabled) return;
+    let alive = true;
+    void listOfflineTickets().then((t) => alive && setTickets(t));
+    return () => {
+      alive = false;
+    };
+  }, [enabled]);
+  return enabled ? tickets : [];
 }
 
 export async function loadOfflineTicket(id: string): Promise<OfflineTicket | null> {

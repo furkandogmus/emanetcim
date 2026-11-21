@@ -21,6 +21,7 @@ import { useSearch } from "@/lib/search";
 import { AppText } from "@/components/ui";
 import { prefetchMapStyle } from "@/lib/map-style";
 import { isActiveBooking, useCities, useMyBookings } from "@/lib/queries";
+import { useOfflineTickets } from "@/lib/offline-tickets";
 import type { BookingSummary } from "@/lib/types";
 import { colors, fonts, radius, shadow, space } from "@/theme/tokens";
 
@@ -35,7 +36,9 @@ export default function HomeScreen() {
   const cityStrip = useRef<ScrollView>(null);
   const cityArrows = useScrollArrows(cityStrip);
   const cities = useCities();
-  const active = (bookings.data ?? [])
+  // Liste sunucudan gelmediyse (internet yok) "Siradaki" karti cihazdaki biletten kurulur.
+  const offlineTickets = useOfflineTickets(bookings.isError && !bookings.data);
+  const active = (bookings.data ?? offlineTickets)
     .filter((b) => isActiveBooking(b))
     .sort((a, b) => +new Date(a.checkInTime) - +new Date(b.checkInTime));
   // "Nasil calisir" adimlari bu iki kayda gore canli: QR'i hazir olan teslim, dukkandaki valiz.
