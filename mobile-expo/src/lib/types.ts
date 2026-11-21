@@ -13,6 +13,8 @@ export type MobileUser = {
   role: Role;
   avatarUrl: string | null;
   emailVerified: boolean;
+  /** Hesapta sifre var mi (hash degil). Profilde "sifre belirle" / "degistir" ayrimi. */
+  hasPassword: boolean;
 };
 
 export type SessionResponse = {
