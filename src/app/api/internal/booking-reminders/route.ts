@@ -18,6 +18,8 @@ import {
 } from "@/lib/reminder-notice";
 import { formatDateTimeInZone, bookingTimeZone } from "@/lib/format-datetime";
 import { DEFAULT_NOTIFICATION_LOCALE } from "@/lib/request-locale";
+import { GUEST_PUSH_COPY } from "@/lib/guest-push-copy";
+import { bcp47ForUiLocale } from "@/lib/intl-locale";
 
 /**
  * Bu rezervasyonlardan HANGILERINE bu hatirlatma daha once gonderildi.
@@ -40,6 +42,34 @@ async function alreadyNotified(
       bookingId: { in: bookingIds },
       type: "EMAIL",
       subject: { startsWith: subjectPrefix },
+    },
+    select: { bookingId: true },
+    distinct: ["bookingId"],
+  });
+  return new Set(rows.map((r) => r.bookingId).filter((id): id is string => id != null));
+}
+
+/**
+ * E-postasi olmayan (telefonla kayitli) misafire bu hatirlatmanin PUSH'u daha once
+ * gonderilmeye calisildi mi.
+ *
+ * E-posta kaydi bu misafirde hic olusmaz, yani `alreadyNotified` onlar icin hep
+ * "yok" der ve is 15 dakikada bir calistigindan 120 dakikalik pencerede ayni
+ * push ~8 kez giderdi. `sendMobilePush` her denemeyi (SENT/FAILED/SKIPPED)
+ * `MOBILE_PUSH` olarak kaydediyor ve konu push basligi: o basliklar (her dilde)
+ * tekrar kontrolunun anahtari. Yeni kolon gerekmez.
+ */
+async function alreadyPushed(
+  bookingIds: string[],
+  event: "reminderCheckIn" | "reminderCheckOut",
+): Promise<Set<string>> {
+  if (bookingIds.length === 0) return new Set();
+  const titles = Object.values(GUEST_PUSH_COPY).map((c) => c[event]({ shop: "" }).title);
+  const rows = await prisma.notificationLog.findMany({
+    where: {
+      bookingId: { in: bookingIds },
+      type: "MOBILE_PUSH",
+      subject: { in: titles },
     },
     select: { bookingId: true },
     distinct: ["bookingId"],
@@ -132,10 +162,17 @@ export async function GET(req: NextRequest) {
   // Yoksa /api/health/jobs bu isi hic gormez ve enforced=true yapildiginda
   // sonsuza dek "gecikmis" gorunur (2026-08-29: sekiz isten dordu boyleydi).
   const outcome = await withJobRun("booking-reminders", async () => {
-    // 1. Pencere icinde check-in yapacak PAID booking'ler
+    /*
+      1. Pencere icinde birakis yapacak booking'ler.
+
+      `PAID` yetmez: misafir akislari rezervasyonu `APPROVED` olusturur ve tahsilat
+      dukkanda, check-in'de yapilir (`PaymentService.markCaptured`). Eskiden
+      yalnizca `PAID` seciliyordu, yani "birakmana 2 saat kaldi" hatirlatmasi
+      HICBIR rezervasyona gitmiyordu.
+    */
     const checkInSoon = await prisma.booking.findMany({
       where: {
-        status: "PAID",
+        status: { in: ["APPROVED", "PAID"] },
         checkInTime: {
           gte: now,
           lte: new Date(now.getTime() + CHECK_IN_REMINDER_WINDOW_MINUTES * 60_000),
@@ -163,8 +200,14 @@ export async function GET(req: NextRequest) {
       CHECK_IN_REMINDER_SUBJECT_PREFIX,
     );
 
+    const checkInPushed = await alreadyPushed(
+      checkInSoon.map((b) => b.id),
+      "reminderCheckIn",
+    );
+
     for (const booking of checkInSoon) {
       if (checkInNotified.has(booking.id)) continue;
+      if (checkInPushed.has(booking.id)) continue;
       if (booking.guest?.email) {
         void notificationService.sendStayReminder(
           booking.guest.email,
@@ -177,6 +220,18 @@ export async function GET(req: NextRequest) {
           },
           booking.locale ?? DEFAULT_NOTIFICATION_LOCALE,
         ).catch((e) => logger.warn({ err: e, bookingId: booking.id }, "reminder_checkin_email_failed"));
+        results.checkInReminders++;
+      } else if (booking.guestId) {
+        // E-postasiz (telefonla kayitli) misafir: yalnizca push; e-postaya bagli degil.
+        const locale = booking.locale ?? DEFAULT_NOTIFICATION_LOCALE;
+        notificationService.pushGuestOnly(booking.id, "reminderCheckIn", locale, {
+          time: formatDateTimeInZone(booking.checkInTime, {
+            locale: bcp47ForUiLocale(locale),
+            timeZone: bookingTimeZone(booking.shop),
+            dateStyle: "medium",
+            timeStyle: "short",
+          }),
+        });
         results.checkInReminders++;
       }
     }
@@ -210,8 +265,14 @@ export async function GET(req: NextRequest) {
       CHECK_OUT_REMINDER_SUBJECT_PREFIX,
     );
 
+    const checkOutPushed = await alreadyPushed(
+      checkOutSoon.map((b) => b.id),
+      "reminderCheckOut",
+    );
+
     for (const booking of checkOutSoon) {
       if (checkOutNotified.has(booking.id)) continue;
+      if (checkOutPushed.has(booking.id)) continue;
       if (booking.guest?.email) {
         void notificationService.sendStayReminder(
           booking.guest.email,
@@ -224,6 +285,17 @@ export async function GET(req: NextRequest) {
           },
           booking.locale ?? DEFAULT_NOTIFICATION_LOCALE,
         ).catch((e) => logger.warn({ err: e, bookingId: booking.id }, "reminder_checkout_email_failed"));
+        results.checkOutReminders++;
+      } else if (booking.guestId) {
+        const locale = booking.locale ?? DEFAULT_NOTIFICATION_LOCALE;
+        notificationService.pushGuestOnly(booking.id, "reminderCheckOut", locale, {
+          time: formatDateTimeInZone(booking.checkOutTime, {
+            locale: bcp47ForUiLocale(locale),
+            timeZone: bookingTimeZone(booking.shop),
+            dateStyle: "medium",
+            timeStyle: "short",
+          }),
+        });
         results.checkOutReminders++;
       }
     }
