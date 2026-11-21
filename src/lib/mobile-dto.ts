@@ -253,6 +253,24 @@ export function toMobilePriceRange(pricePerDay: unknown, r: PricingRules) {
 }
 
 /**
+ * Tarihli aramada aranan kalis ve valiz karisiminin toplami. Girdi
+ * `computeAuthoritativeCheckoutTotals` ciktisi: `checkout/quote`un kodsuz `total`i ile ayni sayi.
+ */
+export function toMobileStayQuote(totals: {
+  subtotalBeforeCoupon: number;
+  stayDays: number;
+  bagCountS: number;
+  bagCountM: number;
+  bagCountXl: number;
+}) {
+  return {
+    total: totals.subtotalBeforeCoupon,
+    days: totals.stayDays,
+    bags: totals.bagCountS + totals.bagCountM + totals.bagCountXl,
+  };
+}
+
+/**
  * Dukkan detayinda boyut basina gunluk fiyat, sunucunun yuvarlamasiyla. Istemci
  * `pricePerDay * carpan` hesaplamaz (mobile-expo/CLAUDE.md "Fiyat istemcide hesaplanmaz").
  */
