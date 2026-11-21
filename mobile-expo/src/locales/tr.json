@@ -16,7 +16,9 @@
     "clear": "Temizle",
     "scrollBack": "Geri kaydır",
     "scrollForward": "İleri kaydır",
-    "goHome": "Ana sayfaya git"
+    "goHome": "Ana sayfaya git",
+    "notFoundTitle": "Bu sayfa açılamadı",
+    "notFoundBody": "Bağlantı bu hesapta açılmıyor ya da artık yok. Ana ekrana dönebilirsin."
   },
   "auth": {
     "title": "Giriş yap",
