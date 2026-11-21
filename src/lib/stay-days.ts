@@ -188,3 +188,26 @@ export function snapStayToShopHours(
   if (out.checkOut.getTime() - out.checkIn.getTime() < MIN_BOOKING_STAY_MS) return null;
   return out;
 }
+
+/**
+ * Dukkanin `after` anindan SONRA acilacagi ilk gunun acilisi (haftalik takvim ve
+ * kapanislar). Mobil arama, saate oturtulamayan dukkani "Yarin 09:00'da acilir"
+ * diye gosterir; kaynak `hoursForDate` (resolveStayWindow ile ayni), eski
+ * `openingTime` degil. 7/24 dukkan her an aciktir: bir sonraki 5 dk. Yok ise null.
+ */
+export function nextOpening(
+  shop: ShopSchedule,
+  after: Date,
+  maxDays = 14,
+): { date: string; at: string } | null {
+  const tz = shop.timeZone || PLATFORM_TIMEZONE;
+  const today = todayInZone(tz, after);
+  for (let i = 0; i <= maxDays; i++) {
+    const date = addDays(today, i);
+    const h = hoursForDate(shop, date);
+    if (!h) continue;
+    const opensAt = parseDatetimeLocalInTimeZone(`${date}T${h.open}`, tz);
+    if (opensAt && opensAt.getTime() > after.getTime()) return { date, at: h.open };
+  }
+  return null;
+}

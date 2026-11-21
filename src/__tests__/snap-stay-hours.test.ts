@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { snapStayToShopHours } from "@/lib/stay-days";
+import { nextOpening, snapStayToShopHours } from "@/lib/stay-days";
 
 // Istanbul UTC+3. 2026-11-20 Cuma.
 const at = (local: string) => new Date(`${local}:00+03:00`);
@@ -58,5 +58,30 @@ describe("snapStayToShopHours", () => {
   it("7/24 dukkana dokunmaz", () => {
     const r = snapStayToShopHours({ open247: true }, at("2026-11-20T03:00"), at("2026-11-20T23:00"));
     expect(r?.checkIn).toEqual(at("2026-11-20T03:00"));
+  });
+});
+
+describe("nextOpening", () => {
+  it("kapanistan sonra aranirsa ertesi gunun acilisi", () => {
+    expect(nextOpening(shop, at("2026-11-20T21:00"))).toEqual({ date: "2026-11-21", at: "09:00" });
+  });
+
+  it("acilistan once aranirsa ayni gunun acilisi", () => {
+    expect(nextOpening(shop, at("2026-11-20T07:00"))).toEqual({ date: "2026-11-20", at: "09:00" });
+  });
+
+  it("kapali gunleri (pazar) atlar, eski openingTime degil haftalik satiri kullanir", () => {
+    const weekly = [
+      { weekday: 6, isClosed: false, openingTime: "10:00", closingTime: "18:00" },
+      { weekday: 7, isClosed: true, openingTime: "09:00", closingTime: "20:00" },
+      { weekday: 1, isClosed: false, openingTime: "08:30", closingTime: "20:00" },
+    ];
+    // 2026-11-21 Cumartesi 19:00 -> pazar kapali -> pazartesi 08:30
+    expect(nextOpening({ ...shop, weekly }, at("2026-11-21T19:00"))).toEqual({ date: "2026-11-23", at: "08:30" });
+  });
+
+  it("izin gunlerini atlar", () => {
+    const closures = [{ startDate: "2026-11-21", endDate: "2026-11-22" }];
+    expect(nextOpening({ ...shop, closures }, at("2026-11-20T21:00"))).toEqual({ date: "2026-11-23", at: "09:00" });
   });
 });
