@@ -69,7 +69,7 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ id:
 
   const result = await bookingService.applyBagRevision(
     id,
-    { id: auth.user.id, role: "PARTNER" },
+    { id: auth.user.id, role: "PARTNER", impersonatedBy: auth.user.impersonatedBy ?? null },
     {
       counts: {
         bagCountS: s ?? current.bagCountS,

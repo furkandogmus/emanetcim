@@ -56,7 +56,7 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ id:
     }
   }
 
-  const actor = { id: auth.user.id, role: "GUEST" as const };
+  const actor = { id: auth.user.id, role: "GUEST" as const, impersonatedBy: auth.user.impersonatedBy ?? null };
   const result =
     parsed.data.action === "approve"
       ? await bookingService.applyBagRevision(id, actor, { source: "mobile" })

@@ -30,6 +30,11 @@ import { getPaymentProvider, type PaymentProvider } from "@/lib/payments";
 export type PaymentActor = {
   id?: string | null;
   role?: Role | null;
+  /**
+   * Yonetici goruntuleme oturumu: dugmeye basan yonetici. `id` goruntulenen
+   * kullanici olarak kalir; denetim satiri ikisini birlikte yazar.
+   */
+  impersonatedBy?: string | null;
 };
 
 export type LedgerResult<T = void> =
@@ -522,6 +527,7 @@ export class PaymentService {
         event,
         actorId: actor?.id ?? null,
         actorRole: actor?.role ?? null,
+        impersonatedBy: actor?.impersonatedBy ?? null,
         metadata,
       })
       .catch((err) =>

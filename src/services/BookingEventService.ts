@@ -27,15 +27,26 @@ export class BookingEventService {
     event: BookingEventType;
     actorId?: string | null;
     actorRole?: Role | null;
+    /**
+     * Yazma bir yonetici "kullanici olarak goruntule" oturumunda yapildiysa o
+     * yoneticinin id'si. `actorId` goruntulenen kullanicidir (yetki onun);
+     * bu alan olmadan defter "esnaf tahsil etti" der, oysa dugmeye yonetici
+     * basmistir. Nakit anlasmazliginda ilk bakilan satir bu.
+     */
+    impersonatedBy?: string | null;
     metadata?: Record<string, unknown>;
   }): Promise<void> {
+    const metadata = {
+      ...(params.metadata ?? {}),
+      ...(params.impersonatedBy ? { impersonatedBy: params.impersonatedBy } : {}),
+    };
     await prisma.bookingEvent.create({
       data: {
         bookingId: params.bookingId,
         event: params.event,
         actorId: params.actorId ?? null,
         actorRole: params.actorRole ?? null,
-        metadata: (params.metadata ?? {}) as Prisma.InputJsonValue,
+        metadata: metadata as Prisma.InputJsonValue,
       },
     });
   }

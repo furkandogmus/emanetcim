@@ -39,7 +39,10 @@ export async function POST(
   const brokenSealNumbers = Array.isArray(body?.brokenSealNumbers)
     ? body.brokenSealNumbers.filter((n): n is number => Number.isInteger(n) && n > 0).slice(0, 50)
     : [];
-  const result = await bookingService.checkOut(id, { brokenSealNumbers });
+  const result = await bookingService.checkOut(id, {
+    brokenSealNumbers,
+    actor: { id: auth.user.id, role: auth.user.role, impersonatedBy: auth.user.impersonatedBy ?? null },
+  });
 
   if (!result.ok) {
     /* Ham servis METNI gonderilmez; istemci kodu kendi dilinde eslesir. */
