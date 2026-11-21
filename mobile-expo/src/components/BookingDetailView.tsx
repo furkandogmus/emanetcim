@@ -19,6 +19,7 @@ import { formatMoney } from "@/lib/format";
 import { isActiveBooking, useBooking } from "@/lib/queries";
 import type { BookingDetail } from "@/lib/types";
 import { notify } from "@/lib/notify";
+import { whatsappNumber } from "@/lib/phone";
 import { loadOfflineTicket, saveOfflineTicket, type OfflineTicket } from "@/lib/offline-tickets";
 import { colors, radius, space } from "@/theme/tokens";
 
@@ -48,16 +49,8 @@ function GuestContact({ phone }: { phone?: string }) {
   const { t } = useTranslation();
   const digits = (phone ?? "").replace(/[^\d+]/g, "");
   if (!digits) return null;
-  // WhatsApp ulke kodlu, "+"siz numara ister; yerel TR biciminde (05..., 5...) 90 eklenir.
-  const intl = digits.startsWith("+")
-    ? digits.slice(1)
-    : digits.startsWith("00")
-      ? digits.slice(2)
-      : digits.startsWith("0")
-        ? `9${digits}`
-        : digits.length === 10
-          ? `90${digits}`
-          : digits;
+  // Ulke kodu belli degilse WhatsApp gosterilmez (yanlis kisiye gitmesin); Ara her zaman var.
+  const intl = whatsappNumber(phone);
   return (
     <View style={styles.actionRow}>
       <Button
@@ -66,12 +59,14 @@ function GuestContact({ phone }: { phone?: string }) {
         title={t("partner.callGuest")}
         onPress={() => void Linking.openURL(`tel:${digits}`).catch(() => undefined)}
       />
-      <Button
-        variant="secondary"
-        style={{ flex: 1 }}
-        title={t("partner.whatsappGuest")}
-        onPress={() => void Linking.openURL(`https://wa.me/${intl}`).catch(() => undefined)}
-      />
+      {intl ? (
+        <Button
+          variant="secondary"
+          style={{ flex: 1 }}
+          title={t("partner.whatsappGuest")}
+          onPress={() => void Linking.openURL(`https://wa.me/${intl}`).catch(() => undefined)}
+        />
+      ) : null}
     </View>
   );
 }
