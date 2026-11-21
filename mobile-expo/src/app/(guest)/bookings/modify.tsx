@@ -137,11 +137,23 @@ function ModifyForm({ booking: b }: { booking: BookingDetail }) {
         </Card>
 
         {paidPriceChange ? <Banner tone="warning" body={t("modify.paidNote")} /> : null}
-        {previewError ? <Banner tone="danger" body={previewError} /> : null}
-        {error ? <Banner tone="danger" body={error} /> : null}
       </ScrollView>
 
       <View style={styles.footer}>
+        {/*
+          Hata ve yeni tutar Kaydet dugmesinin hemen ustunde: ScrollView'in sonunda
+          kaldiklarinda dugme neden kapali, goremiyordu (takvim + 3 sayac asagida).
+        */}
+        {previewError ? <Banner tone="danger" body={previewError} /> : null}
+        {error ? <Banner tone="danger" body={error} /> : null}
+        {newTotal !== null ? (
+          <View style={styles.row}>
+            <AppText variant="bodyMedium">{t("modify.newTotal")}</AppText>
+            <AppText variant="heading" style={{ fontFamily: fonts.display, fontSize: 22 }}>
+              {formatMoney(newTotal)}
+            </AppText>
+          </View>
+        ) : null}
         <Button
           title={t("modify.save")}
           loading={mutation.isPending}
@@ -164,5 +176,5 @@ const styles = StyleSheet.create({
   },
   content: { padding: space.xl, gap: space.lg },
   row: { flexDirection: "row", alignItems: "center", justifyContent: "space-between", gap: space.md },
-  footer: { padding: space.xl, paddingTop: space.md, borderTopWidth: 1, borderTopColor: colors.border },
+  footer: { gap: space.sm, padding: space.xl, paddingTop: space.md, borderTopWidth: 1, borderTopColor: colors.border },
 });
