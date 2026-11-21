@@ -20,6 +20,7 @@ import { goBackOr } from "@/lib/navigation";
 import { nextOpenInstant, shiftWindowTo } from "@/lib/next-open";
 import { MAP_ATTRIBUTION, useMapStyle } from "@/lib/map-style";
 import { useNearbyShops } from "@/lib/queries";
+import { shopPriceA11y } from "@/lib/shop-label";
 import { totalBags, useSearch } from "@/lib/search";
 import { wallInstant, wallParts } from "@/lib/time";
 import type { NearbyShop } from "@/lib/types";
@@ -131,7 +132,7 @@ export default function MapScreen() {
       ...center,
       checkIn: search.checkIn,
       checkOut: search.checkOut,
-      bags: totalBags(search.bags),
+      bags: search.bags,
     },
   );
 
@@ -338,8 +339,10 @@ const ShopMarkers = memo(function ShopMarkers({
         if (s.latitude == null || s.longitude == null) return null;
         // Web haritasiyla ayni: pinde gunluk fiyat. Talep testi noktasindaki fiyat
         // sema varsayilani, gercek degil; orada "Yakinda" yazar.
-        // Kartla ayni tek fiyat: orta boy valizin gunlugu.
-        const label = s.isPrelaunch ? t("map.comingSoon") : formatMoney(s.priceRange?.medium ?? s.pricePerDay);
+        // Kartla ayni ana fiyat: sunucunun kalis toplami, yoksa (eski sunucu) orta boy gunlugu.
+        const label = s.isPrelaunch
+          ? t("map.comingSoon")
+          : formatMoney(s.stayQuote?.total ?? s.priceRange?.medium ?? s.pricePerDay);
         const selected = s.id === selectedId;
         return (
           <Marker
@@ -349,7 +352,7 @@ const ShopMarkers = memo(function ShopMarkers({
             anchor="center"
             onPress={() => onSelect(s.id)}
             accessibilityLabel={
-              s.isPrelaunch ? `${s.name}, ${label}` : `${s.name}, ${t("shop.perDay", { price: label })}`
+              s.isPrelaunch ? `${s.name}, ${label}` : `${s.name}, ${shopPriceA11y(s, t)}`
             }
           >
             {/* Seffaf kusak: gorunen pin 30 dp kalir, dokunma alani 44 dp olur. */}
