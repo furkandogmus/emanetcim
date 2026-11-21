@@ -879,6 +879,11 @@
       "duplicate_dispute": "You've already reported a problem for this booking; our team is reviewing it.",
       "not_found": "Booking not found.",
       "not_owner": "You can't report a problem for this booking."
+    },
+    "statusText": {
+      "reviewing": "Your report is in; our team is reviewing it.",
+      "resolved": "Your report has been reviewed and marked as resolved.",
+      "closed": "Your report has been closed. If the problem continues, contact support."
     }
   },
   "bagRevision": {

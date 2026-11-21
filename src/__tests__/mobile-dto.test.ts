@@ -245,8 +245,17 @@ describe("misafir telefonu (detay gövdesi)", () => {
   });
 });
 
-describe("bekleyen valiz önerisi (detay gövdesi)", () => {
+describe("itiraz durumu ve bekleyen valiz önerisi (detay gövdesi)", () => {
   const PENDING = { bagCountS: 1, bagCountM: 2, bagCountXl: 0, extraAmount: 50, newTotal: 300 };
+
+  // Bulgu 52: kart "inceliyoruz"da takılı kalıyordu; sonuç misafire görünmeli.
+  it("itiraz durumunu taşır; bilinmeyen değer OPEN, itiraz yoksa null", () => {
+    expect(toMobileBookingDetail(BOOKING).disputeStatus).toBeNull();
+    expect(toMobileBookingDetail({ ...BOOKING, dispute: { id: "d1", status: "RESOLVED" } }).disputeStatus).toBe("RESOLVED");
+    expect(toMobileBookingDetail({ ...BOOKING, dispute: { id: "d1", status: "CLOSED" } }).disputeStatus).toBe("CLOSED");
+    expect(toMobileBookingDetail({ ...BOOKING, dispute: { id: "d1", status: "WEIRD" } }).disputeStatus).toBe("OPEN");
+    expect(toMobileBookingDetail({ ...BOOKING, dispute: { id: "d1" } }).disputeStatus).toBe("OPEN");
+  });
 
   // Bulgu 57: iptal edilmiş kayıtta kalan öneri onaylanamayacak bir kart çizdiriyordu.
   it("öneriyi yalnızca düzeltilebilir durumda gösterir", () => {
