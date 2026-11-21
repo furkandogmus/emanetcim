@@ -28,7 +28,13 @@ import { errorMessage } from "@/lib/errors";
 import { AppleSignInError, appleSignInAvailable } from "@/lib/apple-auth";
 import { GoogleSignInError, googleSignInAvailable } from "@/lib/google-auth";
 import { SITE_ORIGIN } from "@/lib/images";
-import { identityLabel, looksLikePhone, parseIdentity, parsePhone } from "@/lib/identity";
+import {
+  applyIdentityInput,
+  identityLabel,
+  parseIdentity,
+  parsePhone,
+  switchIdentityMode,
+} from "@/lib/identity";
 import { languageInfo } from "@/lib/languages";
 import { colors, fonts, radius, space } from "@/theme/tokens";
 
@@ -52,6 +58,7 @@ export default function LoginScreen() {
   const [notice, setNotice] = useState<string | null>(null);
   const [cooldown, setCooldown] = useState(0);
   const passwordRef = useRef<TextInput>(null);
+  const modeLockedRef = useRef(false);
   // Google akisi ayri: o surerken kod dugmesi donmesin, yalnizca kilitlensin.
   const [googleBusy, setGoogleBusy] = useState(false);
   const [appleBusy, setAppleBusy] = useState(false);
@@ -83,7 +90,12 @@ export default function LoginScreen() {
   }
 
   function changeMode(next: Mode) {
-    setMode(next);
+    // Sekmeye dokunmak son sozdur: otomatik telefon gecisi bir daha devreye girmez.
+    modeLockedRef.current = true;
+    const s = switchIdentityMode({ mode, email, phone }, next);
+    setMode(s.mode);
+    setEmail(s.email);
+    setPhone(s.phone);
     setStep("email");
     setError(null);
     setNotice(null);
@@ -91,31 +103,22 @@ export default function LoginScreen() {
 
   /*
     Tek metin kutusu iki modda da AYNI yerde durur (kutu yeniden kurulmaz, klavye
-    kapanmaz). E-posta modunda telefon gibi bir sey yazilirsa telefon moduna
-    gecilir; telefon kutusuna harf/@ girilirse e-postaya geri doner. Esik
-    (`looksLikePhone`) "34ahmet@..." gibi rakamla baslayan e-postayi bozmasin diye
-    en az 3 rakam ister; yine de dusen "E-posta" sekmesiyle geri doner.
+    kapanmaz). Kullanici sekmeye dokunmadikca e-posta modunda telefon gibi bir sey
+    yazilirsa telefon moduna gecilir; telefon kutusuna harf/@ girilirse e-postaya
+    doner. Sekmeye dokunulduktan sonra otomatik gecis kapanir: "1907x@..." gibi
+    rakamla baslayan e-posta phone-pad klavyede yazilamaz (kural `applyIdentityInput`).
   */
   function onIdentityChange(v: string) {
     setError(null);
-    if (mode === "email") {
-      if (step !== "code" && looksLikePhone(v)) {
-        setPhone(v);
-        setEmail("");
-        setStep("email");
-        setMode("phone");
-        return;
-      }
+    if (mode === "email" && step === "code") {
       setEmail(v);
       return;
     }
-    if (/[a-z@]/i.test(v)) {
-      setEmail(v);
-      setPhone("");
-      setMode("email");
-      return;
-    }
-    setPhone(v);
+    const s = applyIdentityInput({ mode, email, phone }, v, modeLockedRef.current);
+    if (s.mode !== mode) setStep("email");
+    setMode(s.mode);
+    setEmail(s.email);
+    setPhone(s.phone);
   }
 
   async function sendCode(resend = false) {
