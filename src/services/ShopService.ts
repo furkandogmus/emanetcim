@@ -79,6 +79,12 @@ export type ShopWithDistance = {
 export type ShopSearchHit = ShopWithDistance & {
   bagsAvailable: number;
   _score?: number;
+  /**
+   * Slot satiri olmayan ama calisan dukkan: pencere tamamen calisma saatinin
+   * disinda (ornegin 18:30'da 19:00-23:00). Yalnizca `includeOutsideHours`
+   * istenirse doner; mobil uc bunu `bookable:false` + `nextOpen` yapar.
+   */
+  outsideHours?: boolean;
 };
 
 /**
@@ -240,6 +246,13 @@ export type FindShopsForSearchOptions = {
    * aramasi eski davranisi (hatada bos liste) korur.
    */
   strict?: boolean;
+  /**
+   * Slotlar yalnizca calisma saati icinde uretilir; pencere tamamen kapanistan
+   * sonraysa dukkanin hic slotu olmaz ve eskiden sessizce dusuyordu. true ise
+   * (`ignoreOpenHours` ile) bu dukkanlar `outsideHours` bayragiyla, gercek
+   * sonuclardan SONRA doner. Yalnizca mobil uc ister.
+   */
+  includeOutsideHours?: boolean;
 };
 
 export interface IShopService {
@@ -413,6 +426,7 @@ export class ShopService implements IShopService {
       requestedBags,
       ignoreOpenHours = false,
       strict = false,
+      includeOutsideHours = false,
     } = options;
     const bags = Math.max(1, Math.floor(requestedBags));
 
@@ -520,10 +534,21 @@ export class ShopService implements IShopService {
           }
 
           const hits: ShopSearchHit[] = [];
+          const outsideHits: ShopSearchHit[] = [];
           for (const shop of operating) {
             try {
               const slots = availabilityByShop.get(shop.id) ?? [];
-              if (slots.length === 0) continue;
+              if (slots.length === 0) {
+                if (includeOutsideHours && ignoreOpenHours && availabilityByShop.size > 0) {
+                  outsideHits.push({
+                    ...shop,
+                    bagsAvailable: Math.max(0, shop.capacity),
+                    _score: 0,
+                    outsideHours: true,
+                  });
+                }
+                continue;
+              }
               const availableCounts = slots.map((s) => s.available);
               if (availableCounts.length === 0) continue;
               const minAvailable = Math.min(...availableCounts);
@@ -551,7 +576,8 @@ export class ShopService implements IShopService {
           }
           if (hits.length > 0) {
             hits.sort((a, b) => (b._score ?? 0) - (a._score ?? 0));
-            return [...hits, ...prelaunchHits];
+            outsideHits.sort((a, b) => a.distanceKm - b.distanceKm);
+            return [...hits, ...outsideHits, ...prelaunchHits];
           }
         }
 
@@ -922,8 +948,9 @@ export class ShopService implements IShopService {
       where: { id: shopId },
       data,
     });
-    // Saat ya da kapasite degisince yeni gunlerin slotlari beklemeden uretilir (cron 04:17).
-    if ('open247' in data || 'openingTime' in data || 'closingTime' in data || 'capacity' in data) {
+    // Saat degisince yeni gunlerin slotlari beklemeden uretilir (cron 04:17).
+    // Kapasite tetikleyici degil: slotlar `update: {}` ile upsert edilir, mevcut slot kapasitesi degismez.
+    if ('open247' in data || 'openingTime' in data || 'closingTime' in data) {
       generateSlotsForShop(shopId).catch((err: unknown) =>
         logger.warn({ err, shopId }, 'update_shop_slot_generation_failed'),
       );
