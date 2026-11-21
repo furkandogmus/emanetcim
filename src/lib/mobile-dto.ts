@@ -1,4 +1,7 @@
+import type { Prisma } from "@prisma/client";
 import { moneyToNumber } from "@/lib/money";
+import { computeSplit } from "@/lib/platform-split";
+import { collectedAt } from "@/lib/earning-collection";
 import { stripHtmlToText } from "@/lib/rich-text";
 import { toWhatsAppNumber } from "@/lib/whatsapp";
 import type { PricingRules } from "@/lib/pricing-rules";
@@ -493,6 +496,34 @@ export function toMobilePartnerDashboard(s: PartnerDashboardSource, shop: ShopRe
     monthNet: s.monthNet,
     prevMonthNet: s.prevMonthNet,
     monthChangePct: s.monthChangePct,
+  };
+}
+
+type PartnerEarningRowSource = {
+  id: string;
+  shopId: string;
+  totalPrice: Prisma.Decimal | number;
+  checkedOutAt: Date | null;
+  checkOutTime: Date;
+  guest: { name: string | null } | null;
+};
+
+/**
+ * `partner/earnings/stats` gecmis satiri. Tutar esnaf payidir; an TESLIM anidir
+ * (`earning-collection.ts`). `createdAt` adi 0.3.x istemcileri icin korunur:
+ * onlar satir saatini bu alandan okur, deger artik teslim anidir.
+ */
+export function toMobilePartnerEarningRow(b: PartnerEarningRowSource, commissionRate: number) {
+  const at = collectedAt(b);
+  return {
+    bookingId: b.id,
+    guestName: b.guest?.name ?? "",
+    collectedAt: at.toISOString(),
+    createdAt: at.toISOString(),
+    date: at.toISOString().slice(5, 10).replace("-", " "),
+    amount: computeSplit(moneyToNumber(b.totalPrice), commissionRate).merchantAmount,
+    shopId: b.shopId,
+    status: "PAID" as const,
   };
 }
 

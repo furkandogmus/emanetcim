@@ -1,6 +1,7 @@
 # Learn more https://docs.github.com/en/get-started/getting-started-with-git/ignoring-files
 
 # dependencies
+# Sonda egik cizgi YOK: worktree kurulumundaki symlink de yok sayilsin.
 node_modules
 
 # Expo

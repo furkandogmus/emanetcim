@@ -417,6 +417,9 @@
     "earlyRefundGive": "Frühe Abholung: dem Gast {{amount}} erstatten.",
     "shopPending": "Wartet auf Freigabe",
     "editHours": "Öffnungszeiten bearbeiten",
+    "outsideHoursTitle": "Der Laden scheint gerade geschlossen. Trotzdem annehmen?",
+    "outsideHoursBody": "Du bist außerhalb deiner gespeicherten Öffnungszeiten. Wenn der Laden jetzt geöffnet ist, kannst du das Gepäck trotzdem annehmen; es wird als Annahme außerhalb der Öffnungszeiten vermerkt. Stimmen deine Zeiten nicht, korrigiere sie bitte.",
+    "outsideHoursConfirm": "Trotzdem annehmen",
     "searchPlaceholder": "Gastname oder Code suchen",
     "searchNone": "Keine passende Buchung. Gib den 8-stelligen Code ein.",
     "statusWaiting": "Erwartet",
@@ -973,7 +976,8 @@
   "earnings": {
     "title": "Meine Einnahmen",
     "total": "Nettoeinnahmen",
-    "today": "Heute",
+    "basis": "Abgeschlossene Aufbewahrungen: Der Betrag zählt am Tag der Gepäckrückgabe.",
+    "today": "Heute zurückgegeben",
     "commissionTitle": "Plattformprovision {{pct}}%",
     "commissionBody": "Von jeder Zahlung wird eine Plattformgebühr von {{pct}}% abgezogen und {{share}}% gehören dir. Die Beträge werden nach Abzug der Provision angezeigt.",
     "noCommissionTitle": "Provisionsfreie Zeit",
@@ -981,6 +985,8 @@
     "recent": "Letzte {{count}} Transaktionen",
     "empty": "Noch keine Einnahmen.",
     "footnote": "Du kassierst die Zahlung des Gastes in deinem Laden, das Geld ist also schon in deiner Kasse.",
+    "guestFallback": "Gast",
+    "rowA11y": "{{guest}}, {{when}}, {{amount}}. Buchung öffnen.",
     "errors": {
       "no_shops": "Du hast keinen aktiven Laden."
     }
@@ -1080,6 +1086,7 @@
     "pickups": "Abholungen",
     "inStorage": "Gepäck im Laden",
     "thisMonth": "Diesen Monat verdient",
+    "collectedBasis": "Abgeschlossene Aufbewahrungen",
     "failed": "Die Übersicht für heute konnte nicht geladen werden. Tippen zum Wiederholen.",
     "a11y": "{{shop}}, heute: {{arrivals}} ankommende Gäste, {{pickups}} Abholungen, {{bags}} Gepäckstücke im Laden. Diesen Monat verdient: {{month}}.",
     "moreThanLastMonth": "{{pct}}% mehr als im Vormonat",

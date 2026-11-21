@@ -32,11 +32,14 @@ export async function POST(
    * tarafıyla aynı şema kullanılır ki iki uç farklı şeyi kabul etmesin.
    */
   let rawSeals: unknown;
+  // Saat disi onay yalnizca kesin `true`; kimin kullanabilecegine servis karar verir.
+  let outsideHours = false;
   try {
     const body = await req.json();
     if (body && typeof body === "object" && "sealAssignments" in body) {
       rawSeals = body;
     }
+    outsideHours = Boolean(body && typeof body === "object" && body.outsideHours === true);
   } catch {
     // Gövde yok veya JSON değil — mühürsüz check-in denemesi.
   }
@@ -68,11 +71,16 @@ export async function POST(
     Yonetici "esnaf olarak goruntule" oturumunda da yazabilir (urun karari), ama
     defter dugmeye kimin bastigini bilmeli: `impersonatedBy` olay satirina gider.
   */
-  const result = await bookingService.checkIn(id, sealPayload, {
-    id: auth.user.id,
-    role: auth.user.role,
-    impersonatedBy: auth.user.impersonatedBy ?? null,
-  });
+  const result = await bookingService.checkIn(
+    id,
+    sealPayload,
+    {
+      id: auth.user.id,
+      role: auth.user.role,
+      impersonatedBy: auth.user.impersonatedBy ?? null,
+    },
+    { outsideHours },
+  );
 
   if (!result.ok) {
     /* Ham servis METNI gonderilmez; istemci kodu kendi dilinde eslesir. */

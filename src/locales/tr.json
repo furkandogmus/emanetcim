@@ -341,7 +341,13 @@
       "conflictDropoff": "Bırakış",
       "conflictPickup": "Teslim alış",
       "conflictBags": "Dükkanda valiz var"
-    }
+    },
+    "outsideHoursTitle": "Dükkan şu an kapalı görünüyor. Yine de teslim alınsın mı?",
+    "outsideHoursBody": "Kayıtlı çalışma saatlerinizin dışındasınız. Dükkan şu an açıksa valizi teslim alabilirsiniz; kayda saat dışı teslim olarak geçer. Saatleriniz yanlışsa ayarlardan düzeltin.",
+    "outsideHoursConfirm": "Yine de teslim al",
+    "outsideHoursEditHours": "Çalışma saatlerini düzenle",
+    "earningsBasisNote": "Teslim edilen emanetler, teslim tarihine göre",
+    "pulseCollectedBasis": "Teslim edilen emanetler"
   },
   "Guest": {
     "heroTitle": "Valizini Güvenle Bırak, Özgürce Gez",
