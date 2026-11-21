@@ -5,6 +5,7 @@ import { useTranslation } from "react-i18next";
 
 import { StatusBadge } from "@/components/StatusBadge";
 import { AppText } from "@/components/ui";
+import { bookingCode } from "@/lib/booking-search";
 import { prefetchBooking } from "@/lib/queries";
 import { formatMoney, formatMonthShort, formatStayRange } from "@/lib/format";
 import { shiftedForFormat } from "@/lib/time";
@@ -20,11 +21,14 @@ export const BookingRow = memo(function BookingRow({
   title,
   onPress,
   highlight,
+  partnerView,
 }: {
   booking: BookingSummary;
   title: string;
   onPress: () => void;
   highlight?: string;
+  /** Esnaf listesi: rezervasyon kodu gorunur, durum esnaf diliyle yazilir. */
+  partnerView?: boolean;
 }) {
   const queryClient = useQueryClient();
   const { t } = useTranslation();
@@ -59,13 +63,18 @@ export const BookingRow = memo(function BookingRow({
         <AppText variant="caption" numberOfLines={1}>
           {formatStayRange(booking.checkInTime, booking.checkOutTime)}
         </AppText>
+        {partnerView ? (
+          <AppText variant="caption" style={{ fontVariant: ["tabular-nums"] }}>
+            {`#${bookingCode(booking.id)}`}
+          </AppText>
+        ) : null}
         {overdueMs > 0 ? (
           <AppText variant="label" style={{ color: colors.danger, fontSize: 13 }}>
             {overdueDays >= 1 ? t("bookings.overdueDays", { count: overdueDays }) : t("bookings.overdue")}
           </AppText>
         ) : null}
         <View style={styles.meta}>
-          <StatusBadge status={booking.status} checkOutTime={booking.checkOutTime} />
+          <StatusBadge status={booking.status} checkOutTime={booking.checkOutTime} partnerView={partnerView} />
           {highlight ? (
             <View style={styles.highlight}>
               <AppText variant="label" style={{ color: colors.white, fontSize: 12 }}>
