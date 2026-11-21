@@ -3,7 +3,7 @@ import { describe, it, expect, vi, beforeEach } from "vitest";
 const { mockPrisma, mockReleaseShopSeals } = vi.hoisted(() => ({
   mockReleaseShopSeals: vi.fn(),
   mockPrisma: {
-    shop: { findUnique: vi.fn(), delete: vi.fn() },
+    shop: { findUnique: vi.fn(), findFirst: vi.fn(), delete: vi.fn() },
     booking: { count: vi.fn() },
   },
 }));
@@ -17,6 +17,7 @@ import { shopService } from "@/services/ShopService";
 beforeEach(() => {
   vi.clearAllMocks();
   mockPrisma.shop.findUnique.mockResolvedValue({ id: "s1" });
+  mockPrisma.shop.findFirst.mockResolvedValue({ id: "s1" });
   mockPrisma.booking.count.mockResolvedValue(0);
   mockPrisma.shop.delete.mockResolvedValue({ id: "s1" });
   mockReleaseShopSeals.mockResolvedValue(3);
@@ -40,11 +41,11 @@ describe("dükkan başvurusu reddi", () => {
     expect(mockReleaseShopSeals).toHaveBeenCalledWith("s1");
   });
 
-  it("AKTİF REZERVASYONU olan dükkanı silmez", async () => {
+  it("HERHANGİ BİR REZERVASYONU olan dükkanı silmez", async () => {
     // Silinirse misafirin elinde karsiligi olmayan bir rezervasyon kalir.
     mockPrisma.booking.count.mockResolvedValue(2);
     const res = await shopService.rejectShop("s1");
-    expect(res).toEqual({ ok: false, reason: "has_active_bookings" });
+    expect(res).toEqual({ ok: false, reason: "has_booking_history" });
     expect(mockPrisma.shop.delete).not.toHaveBeenCalled();
     expect(mockReleaseShopSeals).not.toHaveBeenCalled();
   });
@@ -56,16 +57,38 @@ describe("dükkan başvurusu reddi", () => {
       uygulanmamis olurdu. Sorgu bu yuzden acikca yapiliyor.
     */
     await shopService.rejectShop("s1");
-    expect(mockPrisma.booking.count).toHaveBeenCalledWith({
-      where: { shopId: "s1", status: { in: ["APPROVED", "PAID", "CHECKED_IN"] } },
-    });
+    expect(mockPrisma.booking.count).toHaveBeenCalledWith({ where: { shopId: "s1" } });
   });
 
   it("olmayan dükkanı ayrı bir sebeple reddeder", async () => {
-    // `not_found` ile `has_active_bookings` ayri: ilki 404, ikincisi 409.
+    // `not_found` ile `has_booking_history` ayri: ilki 404, ikincisi 409.
     mockPrisma.shop.findUnique.mockResolvedValue(null);
     const res = await shopService.rejectShop("yok");
     expect(res).toEqual({ ok: false, reason: "not_found" });
     expect(mockPrisma.shop.delete).not.toHaveBeenCalled();
+  });
+
+  it("ONAYLI / AKTİF dükkanı (0 rezervasyon olsa bile) silmez: not_pending", async () => {
+    // Bayat liste, eski uygulama ya da dogrudan POST canli dukkani gonderebilir.
+    mockPrisma.shop.findFirst.mockResolvedValue(null);
+    const res = await shopService.rejectShop("s1");
+    expect(res).toEqual({ ok: false, reason: "not_pending" });
+    expect(mockPrisma.shop.delete).not.toHaveBeenCalled();
+    expect(mockReleaseShopSeals).not.toHaveBeenCalled();
+  });
+
+  it("bekleyen-başvuru tanımı (liste ile aynı) sorguya eklenir", async () => {
+    await shopService.rejectShop("s1");
+    expect(mockPrisma.shop.findFirst).toHaveBeenCalledWith(
+      expect.objectContaining({
+        where: expect.objectContaining({
+          id: "s1",
+          isActive: false,
+          approvedAt: null,
+          isPrelaunch: false,
+          bookings: { none: {} },
+        }),
+      }),
+    );
   });
 });

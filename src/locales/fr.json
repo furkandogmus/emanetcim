@@ -882,6 +882,7 @@
     "featureFlagsEmpty": "Aucun indicateur de fonctionnalité.",
     "featureFlagsNav": "Indicateurs de fonctionnalité",
     "shopDeleteBlockedByRelations": "Ce commerce a des réservations ou d'autres enregistrements liés et ne peut pas être supprimé.",
+    "shopNotPending": "Cette demande n'est plus en attente (déjà approuvée ou active) et ne peut pas être refusée. Actualisez la liste.",
     "roleApprovalsTitle": "Approbations de changement de rôle",
     "roleApprovalsIntro": "Un autre administrateur a demandé une modification touchant aux droits d'administration. N'approuvez que si vous lui faites confiance. Vous ne pouvez pas approuver votre propre demande.",
     "roleApprovalsEmpty": "Aucune approbation de rôle en attente.",

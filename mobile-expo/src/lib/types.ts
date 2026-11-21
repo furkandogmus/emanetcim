@@ -289,7 +289,7 @@ export type AdminApplication = {
   pricePerDay: number;
   capacity: number;
   createdAt: string;
-  owner: { name: string | null; phone: string | null; email: string | null };
+  owner: { name: string | null; phone: string | null; email: string | null; whatsapp?: string | null };
 };
 
 /** `toMobileGeocodeResult` (mobile-dto.ts) — `GET /geocode?q=`. */
@@ -301,14 +301,17 @@ export type GeocodeResult = {
   items?: { label: string; latitude: number; longitude: number }[];
 };
 
-/** `CONTACT_MESSAGE_LIST_SELECT` (src/lib/contact-message-list.ts); yalnizca kullanilan alanlar. */
+/** `admin/messages` (sunucu `toMobileAdminMessage`). */
 export type ContactMessage = {
   id: string;
   from: string;
   subject: string | null;
   text: string | null;
   isRead: boolean;
+  category?: string;
   createdAt: string;
+  /** Son cevabin zamani; cevaplanmamissa null. Eski sunucuda yok. */
+  repliedAt?: string | null;
 };
 
 /**
@@ -379,7 +382,7 @@ export type AdminOverview = {
   recent: (BookingSummary & { guestName: string; createdAt: string })[];
 };
 
-export type AdminBookingFilter = "arrivals" | "pickups" | "inStorage" | "overdue" | "upcoming" | "all";
+export type AdminBookingFilter = "arrivals" | "pickups" | "inStorage" | "overdue" | "noShow" | "upcoming" | "all";
 
 /** `admin/bookings` (`toMobileAdminBookingRow`). */
 export type AdminBookingRow = BookingSummary & { guestName: string; createdAt: string };
@@ -390,8 +393,19 @@ export type AdminBookingCounts = Record<AdminBookingFilter, number>;
 
 /** `admin/bookings/[id]` (`toMobileAdminBookingDetail`). QR token'i yok. */
 export type AdminBookingDetail = AdminBookingRow & {
-  guest: { name: string; email: string; phone: string };
-  shop: { name: string; address: string; phone: string; ownerName: string; latitude: number | null; longitude: number | null };
+  guest: { id?: string | null; name: string; email: string; phone: string; whatsapp?: string | null; canViewAs?: boolean };
+  shop: {
+    id?: string;
+    ownerId?: string;
+    name: string;
+    address: string;
+    phone: string;
+    whatsapp?: string | null;
+    ownerName: string;
+    canViewAsOwner?: boolean;
+    latitude: number | null;
+    longitude: number | null;
+  };
   seals: { sealNumber: number; bagIndex: number; bagSize: string }[];
   checkedInAt: string | null;
   checkedOutAt: string | null;
@@ -415,6 +429,7 @@ export type AdminShop = {
   /** Misafirden saklayan durumlar (sunucu `shopVisibilityIssues`); talep testi ve test kaydinda bos. */
   issues: ShopVisibilityIssue[];
   phone: string;
+  whatsapp?: string | null;
   bagsInStorage: number;
   arrivalsToday: number;
   pickupsToday: number;
@@ -441,7 +456,7 @@ export type AdminShopDetail = {
   /** null = 7/24 acik. */
   hours: { open: string; close: string } | null;
   createdAt: string;
-  owner: { id: string; name: string; email: string; phone: string };
+  owner: { id: string; name: string; email: string; phone: string; whatsapp?: string | null; canViewAs?: boolean };
   bookingCount: number;
   reviewCount: number;
   bagsInStorage: number;
@@ -454,7 +469,10 @@ export type AdminShopDetail = {
 };
 
 export type AdminShopPatch = Partial<
-  Pick<AdminShopDetail, "name" | "address" | "capacity" | "pricePerDay" | "isActive" | "isTest" | "isVerified">
+  Pick<
+    AdminShopDetail,
+    "name" | "address" | "capacity" | "pricePerDay" | "isActive" | "isTest" | "isVerified" | "latitude" | "longitude"
+  >
 >;
 
 /** `/admin/users` satiri (sunucu `toMobileAdminUser`). */
@@ -463,6 +481,7 @@ export type AdminUser = {
   name: string;
   email: string;
   phone: string;
+  whatsapp?: string | null;
   role: Role;
   isBanned: boolean;
   isTest: boolean;

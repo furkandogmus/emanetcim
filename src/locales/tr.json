@@ -888,6 +888,7 @@
     "featureFlagsEmpty": "Henüz bayrak yok.",
     "featureFlagsNav": "Özellik bayrakları",
     "shopDeleteBlockedByRelations": "Bu dükkânın bağlı rezervasyon veya başka kayıtları var; kaldırılamaz.",
+    "shopNotPending": "Bu başvuru artık beklemede değil (onaylanmış ya da aktif); reddedilemez. Listeyi yenileyin.",
     "roleApprovalsTitle": "Rol değişikliği onayları",
     "roleApprovalsIntro": "Başka bir yönetici admin yetkisini etkileyen bir değişiklik talep etti. Güveniyorsanız onaylayın. Kendi talebinizi onaylayamazsınız.",
     "roleApprovalsEmpty": "Bekleyen rol onayı yok.",

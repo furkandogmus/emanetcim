@@ -20,14 +20,18 @@ export async function applicationActionResponse(
         ? NextResponse.json({ error: "missing_coordinates" }, { status: 409 })
         : NextResponse.json({ error: "not_found" }, { status: 404 });
     }
-    return NextResponse.json({ success: true });
+    // `partnerNotified`: e-posta ya da push DENENDI mi. false ise admin esnafi kendisi aramali.
+    const n = result.notified;
+    return NextResponse.json(
+      n ? { success: true, partnerNotified: n.email || n.push } : { success: true },
+    );
   }
   if (action === "reject") {
     const result = await shopService.rejectApplication(shopId, actor);
     if (!result.ok) {
-      return result.reason === "not_found"
-        ? NextResponse.json({ error: "not_found" }, { status: 404 })
-        : NextResponse.json({ error: "has_active_bookings" }, { status: 409 });
+      if (result.reason === "not_found") return NextResponse.json({ error: "not_found" }, { status: 404 });
+      if (result.reason === "not_pending") return NextResponse.json({ error: "not_pending" }, { status: 409 });
+      return NextResponse.json({ error: "has_booking_history" }, { status: 409 });
     }
     return NextResponse.json({ success: true });
   }
