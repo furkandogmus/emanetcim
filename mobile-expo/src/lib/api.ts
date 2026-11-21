@@ -15,6 +15,9 @@ function requestLanguage() {
   return `${lang.intl}, ${lang.value}, en;q=0.5`;
 }
 
+/** Iki token TEK kayitta: ayri iki yazim arasinda surec olurse cift birbirinden kopuyordu. */
+const SESSION_KEY = "bp.session";
+// Eski surumlerin ayri kayitlari: bir kez okunur, yeni kayda tasinir.
 const ACCESS_KEY = "bp.accessToken";
 const REFRESH_KEY = "bp.refreshToken";
 
@@ -55,24 +58,62 @@ export function setImpersonationEndedHandler(fn: () => void) {
   onImpersonationEnded = fn;
 }
 
+function parseSession(raw: string | null): { accessToken: string; refreshToken: string } | null {
+  if (!raw) return null;
+  try {
+    const v = JSON.parse(raw) as { accessToken?: unknown; refreshToken?: unknown };
+    return typeof v.accessToken === "string" && typeof v.refreshToken === "string"
+      ? { accessToken: v.accessToken, refreshToken: v.refreshToken }
+      : null;
+  } catch {
+    return null;
+  }
+}
+
+/** SecureStore okuma hatasi FIRLATILIR; cagiran (auth.tsx acilisi) yakalar. */
 export async function loadTokens() {
-  accessToken = await SecureStore.getItemAsync(ACCESS_KEY);
-  refreshToken = await SecureStore.getItemAsync(REFRESH_KEY);
+  const stored = parseSession(await SecureStore.getItemAsync(SESSION_KEY));
+  if (stored) {
+    accessToken = stored.accessToken;
+    refreshToken = stored.refreshToken;
+  } else {
+    const legacyAccess = await SecureStore.getItemAsync(ACCESS_KEY);
+    const legacyRefresh = await SecureStore.getItemAsync(REFRESH_KEY);
+    accessToken = legacyAccess;
+    refreshToken = legacyRefresh;
+    if (legacyAccess && legacyRefresh) await saveTokens(legacyAccess, legacyRefresh).catch(() => undefined);
+  }
   return { accessToken, refreshToken };
 }
 
+/**
+ * Once diske, sonra bellege: yazim basarisiz olursa bellekteki (sunucunun hala
+ * tanidigi) cift degismez. Eski ayri kayitlar silinir.
+ */
 export async function saveTokens(access: string, refresh: string) {
+  await SecureStore.setItemAsync(SESSION_KEY, JSON.stringify({ accessToken: access, refreshToken: refresh }));
   accessToken = access;
   refreshToken = refresh;
-  await SecureStore.setItemAsync(ACCESS_KEY, access);
-  await SecureStore.setItemAsync(REFRESH_KEY, refresh);
+  await SecureStore.deleteItemAsync(ACCESS_KEY).catch(() => undefined);
+  await SecureStore.deleteItemAsync(REFRESH_KEY).catch(() => undefined);
 }
 
+/** Reddetmez: cikis ve oturum sonu yollari bunu beklerken takilmasin. */
 export async function clearTokens() {
   accessToken = null;
   refreshToken = null;
-  await SecureStore.deleteItemAsync(ACCESS_KEY);
-  await SecureStore.deleteItemAsync(REFRESH_KEY);
+  for (const k of [SESSION_KEY, ACCESS_KEY, REFRESH_KEY]) await SecureStore.deleteItemAsync(k).catch(() => undefined);
+}
+
+/** Disk kaydina dokunmadan bu surecte oturumsuz devam: acilista sunucuya ulasilamadiysa sonraki acilis dener. */
+export function forgetTokensInMemory() {
+  accessToken = null;
+  refreshToken = null;
+}
+
+/** Cikista: yerel oturum silinmeden once, arka plandaki cikis istegine verilecek bearer. */
+export function currentAccessToken() {
+  return accessToken;
 }
 
 export function setSessionExpiredHandler(fn: () => void) {
@@ -85,6 +126,8 @@ export function setSessionExpiredHandler(fn: () => void) {
  * onbellekteki kullaniciyla devam eder (auth.tsx).
  */
 const REQUEST_TIMEOUT_MS = 12_000;
+/** Zaman asimina ugrayan yenilemenin tek tekrari: sunucu 60 sn icinde ayni cifti geri verir. */
+const REFRESH_RETRY_TIMEOUT_MS = 30_000;
 const UPLOAD_TIMEOUT_MS = 60_000;
 
 /** `fetch` ve XHR yanitlarinin ortak, kullandigimiz kadarlik yuzu. */
@@ -141,23 +184,34 @@ let refreshing: Promise<RefreshOutcome> | null = null;
   Eskiden ikisi de `false`ti: refresh anindaki kisa bir ag kopuklugu kullaniciyi
   cikis yaptiriyordu, oysa acilista ayni durum onbellekteki kullaniciyla tolere ediliyor.
 */
-type RefreshOutcome = "ok" | "rejected" | "network";
+export type RefreshOutcome = "ok" | "rejected" | "network";
 
 function refreshOnce(): Promise<RefreshOutcome> {
   if (!refreshing) {
     refreshing = (async (): Promise<RefreshOutcome> => {
       if (!refreshToken) return "rejected";
-      const res = await fetchWithTimeout(`${API_BASE_URL}/auth/refresh`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ refreshToken }),
-      }).catch(() => null);
+      const sent = refreshToken;
+      const post = (ms: number) =>
+        fetchWithTimeout(
+          `${API_BASE_URL}/auth/refresh`,
+          { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ refreshToken: sent }) },
+          ms,
+        ).catch(() => null);
+      // Yanit kaybolduysa sunucu jti'yi yakmis olabilir; tolerans penceresi icindeki tekrar ayni cifti alir.
+      const res = (await post(REQUEST_TIMEOUT_MS)) ?? (await post(REFRESH_RETRY_TIMEOUT_MS));
       // 429 (operator NAT'inda paylasilan IP'ye hiz siniri) ve 408 gecicidir: bunlarda
       // token silinip kullanici disari atilmasin.
       if (!res || res.status >= 500 || res.status === 429 || res.status === 408) return "network";
       if (!res.ok) return "rejected";
-      const body = (await res.json()) as { accessToken: string; refreshToken: string };
-      await saveTokens(body.accessToken, body.refreshToken);
+      const body = parseSession(await res.text().catch(() => null));
+      if (!body) return "network";
+      try {
+        await saveTokens(body.accessToken, body.refreshToken);
+      } catch {
+        // Diske yazilamadi: cift yine de bu surecte kullanilir, sonraki acilis eski token'la pencereye duser.
+        accessToken = body.accessToken;
+        refreshToken = body.refreshToken;
+      }
       return "ok";
     })().finally(() => {
       refreshing = null;
@@ -166,14 +220,25 @@ function refreshOnce(): Promise<RefreshOutcome> {
   return refreshing;
 }
 
+/** Uygulama on plana gelince sayac gibi 401 donmeyen uclar icin: suresi dolmus token'i yeniler. */
+export function refreshSession(): Promise<RefreshOutcome> {
+  return refreshOnce();
+}
+
 type RequestOptions = {
   method?: "GET" | "POST" | "PUT" | "PATCH" | "DELETE";
   body?: unknown;
   auth?: boolean;
+  /**
+   * Bu token'la gonder; 401'de yenileme ve oturum-sonu isleyicisi CALISMAZ. Cikista
+   * yerel oturum silindikten sonra arka planda giden istekler icin.
+   */
+  bearer?: string;
 };
 
 export async function api<T>(path: string, opts: RequestOptions = {}): Promise<T> {
-  const { method = "GET", body, auth = true } = opts;
+  const { method = "GET", body, bearer: explicitBearer } = opts;
+  const auth = explicitBearer ? false : (opts.auth ?? true);
 
   const send = () => {
     const headers: Record<string, string> = {
@@ -183,8 +248,8 @@ export async function api<T>(path: string, opts: RequestOptions = {}): Promise<T
     // FormData (dosya yukleme) icin Content-Type'i fetch koyar: sinir (boundary) dahil.
     const isForm = body instanceof FormData;
     if (body !== undefined && !isForm) headers["Content-Type"] = "application/json";
-    const bearer = impersonationToken ?? accessToken;
-    if (auth && bearer) headers.Authorization = `Bearer ${bearer}`;
+    const bearer = explicitBearer ?? (auth ? (impersonationToken ?? accessToken) : null);
+    if (bearer) headers.Authorization = `Bearer ${bearer}`;
     if (isForm) return uploadWithXhr(`${API_BASE_URL}${path}`, { method, headers, body }, UPLOAD_TIMEOUT_MS);
     return fetchWithTimeout(
       `${API_BASE_URL}${path}`,
