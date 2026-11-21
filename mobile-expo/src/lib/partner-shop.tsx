@@ -1,6 +1,8 @@
 import { createContext, useCallback, useContext, useEffect, useState, type ReactNode } from "react";
 import * as SecureStore from "expo-secure-store";
 
+import { isImpersonating } from "./api";
+
 /** Son secilen dukkan: uygulama yeniden acilinca esnaf kaldigi dukkandan devam eder. */
 const KEY = "partner_shop";
 
@@ -26,10 +28,17 @@ export function PartnerShopProvider({ children }: { children: ReactNode }) {
 
   const select = useCallback((id: string | null) => {
     setShopId(id);
+    // Yonetici goruntulemesinde hedef esnafin secimi admin cihazina yazilmaz.
+    if (isImpersonating()) return;
     void (id ? SecureStore.setItemAsync(KEY, id) : SecureStore.deleteItemAsync(KEY)).catch(() => undefined);
   }, []);
 
   return <PartnerShopContext.Provider value={[shopId, select]}>{children}</PartnerShopContext.Provider>;
+}
+
+/** Yarim kalmis goruntulemeden (uygulama oldu) kalan secimi temizler. */
+export async function clearSavedPartnerShop(): Promise<void> {
+  await SecureStore.deleteItemAsync(KEY).catch(() => undefined);
 }
 
 export function usePartnerShopSelection() {

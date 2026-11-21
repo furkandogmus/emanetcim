@@ -10,6 +10,7 @@ import {
   hasForeignClaims,
 } from "./jwt-audience";
 import { writeAuditLog } from "./audit-log";
+import logger from "./logger";
 
 const secret = () => {
   const s = process.env.MOBILE_JWT_SECRET ?? process.env.AUTH_SECRET;
@@ -31,6 +32,8 @@ export type MobileJwtClaims = {
   jti?: string;
   /** Yalniz yonetici goruntuleme token'larinda: oturumu baslatan ADMIN'in id'si. */
   imp?: string;
+  /** Goruntuleme token'inda ADMIN'in `tokenVersion`i: admin "her yerden cikis" yapinca goruntuleme de biter. */
+  impTv?: number;
 };
 
 /**
@@ -42,10 +45,12 @@ export async function signImpersonationToken(
   role: Role,
   adminId: string,
   tokenVersion?: number,
+  adminTokenVersion?: number,
 ) {
   const tv = await resolveTokenVersion(targetUserId, tokenVersion);
+  const impTv = await resolveTokenVersion(adminId, adminTokenVersion);
   const expiresAt = new Date(Date.now() + IMPERSONATION_TTL_SECONDS * 1000);
-  const token = await new SignJWT({ role, type: "access", tv, imp: adminId })
+  const token = await new SignJWT({ role, type: "access", tv, imp: adminId, impTv })
     .setProtectedHeader({ alg: "HS256" })
     .setIssuer(JWT_ISSUER)
     .setAudience(JWT_AUDIENCE.mobile)
@@ -91,10 +96,18 @@ export async function signAccessToken(userId: string, role: Role, tokenVersion?:
     .sign(secret());
 }
 
-export async function signRefreshToken(userId: string, role: Role, tokenVersion?: number) {
+/**
+ * `jti`: bkz. refresh-token-store.ts -- tekrar-kullanim (replay) tespiti bu alana dayanir.
+ * Yenileme ucu onu kendisi verir: halef token'in jti'si eski ciftin yanina yazilir.
+ */
+export async function signRefreshToken(
+  userId: string,
+  role: Role,
+  tokenVersion?: number,
+  jti: string = crypto.randomUUID(),
+) {
   const tv = await resolveTokenVersion(userId, tokenVersion);
-  // `jti`: bkz. refresh-token-store.ts -- tekrar-kullanim (replay) tespiti bu alana dayanir.
-  return new SignJWT({ role, type: "refresh", tv, jti: crypto.randomUUID() })
+  return new SignJWT({ role, type: "refresh", tv, jti })
     .setProtectedHeader({ alg: "HS256" })
     .setIssuer(JWT_ISSUER)
     .setAudience(JWT_AUDIENCE.mobile)
@@ -163,55 +176,76 @@ export function forbidWhileImpersonating(user: MobileActor) {
   return NextResponse.json({ error: "not_allowed_while_impersonating" }, { status: 403 });
 }
 
+export function unauthorized() {
+  return NextResponse.json({ error: "unauthorized" }, { status: 401 });
+}
+
+/**
+ * Veritabani/Redis hatasi. 401 DEGIL: istemci 401'de token'lari silip
+ * kullaniciyi cikisa atar, 5xx'i ise gecici ag hatasi sayar ve oturumu korur.
+ */
+export function serviceUnavailable() {
+  return NextResponse.json({ error: "service_unavailable" }, { status: 503 });
+}
+
+type ActorRow = { id: string; role: Role; email: string | null; isBanned: boolean; tokenVersion: number };
+
 export async function requireMobileUser(req: NextRequest) {
   const header = req.headers.get("authorization");
-  if (!header?.startsWith("Bearer ")) {
-    return { error: NextResponse.json({ error: "unauthorized" }, { status: 401 }) } as const;
-  }
+  if (!header?.startsWith("Bearer ")) return { error: unauthorized() } as const;
   const token = header.slice(7);
+
+  let claims: Awaited<ReturnType<typeof verifyMobileToken>>;
   try {
-    const claims = await verifyMobileToken(token);
-    if (claims.type !== "access") throw new Error("bad token type");
-    const user = await prisma.user.findUnique({
-      where: { id: claims.sub },
-      select: {
-        id: true,
-        role: true,
-        email: true,
-        isBanned: true,
-        tokenVersion: true,
-      },
-    });
-    if (!user) throw new Error("user not found");
-    if (user.isBanned) throw new Error("user banned");
-    if (user.tokenVersion !== (claims.tv ?? 0)) throw new Error("token version mismatch");
-    const actor: MobileActor = { id: user.id, role: user.role, email: user.email };
-    if (claims.imp !== undefined) {
-      // Yetkisi alinan ya da yasaklanan yonetici acik goruntuleme oturumunu da aninda kaybeder.
-      if (typeof claims.imp !== "string" || !claims.imp) throw new Error("bad imp claim");
-      // Oturum suresince ADMIN'e yukseltilen hedef de goruntulenemez.
-      if (user.role === "ADMIN") throw new Error("impersonating admin");
-      const admin = await prisma.user.findUnique({
-        where: { id: claims.imp },
-        select: { role: true, isBanned: true },
-      });
-      if (!admin || admin.role !== "ADMIN" || admin.isBanned) throw new Error("impersonator invalid");
-      actor.impersonatedBy = claims.imp;
-      if (req.method !== "GET" && req.method !== "HEAD") {
-        writeAuditLog({
-          actorUserId: claims.imp,
-          actorRole: "ADMIN",
-          action: "admin.impersonate.request",
-          entityType: "User",
-          entityId: user.id,
-          metadata: { method: req.method, path: new URL(req.url).pathname },
-        });
-      }
-    }
-    return { user: actor } as const;
+    claims = await verifyMobileToken(token);
   } catch {
-    return { error: NextResponse.json({ error: "unauthorized" }, { status: 401 }) } as const;
+    return { error: unauthorized() } as const;
   }
+  if (claims.type !== "access") return { error: unauthorized() } as const;
+  // Yetkisi alinan ya da yasaklanan yonetici acik goruntuleme oturumunu da aninda kaybeder.
+  if (claims.imp !== undefined && (typeof claims.imp !== "string" || !claims.imp)) {
+    return { error: unauthorized() } as const;
+  }
+
+  let user: ActorRow | null;
+  let admin: { role: Role; isBanned: boolean; tokenVersion: number } | null = null;
+  try {
+    user = await prisma.user.findUnique({
+      where: { id: claims.sub },
+      select: { id: true, role: true, email: true, isBanned: true, tokenVersion: true },
+    });
+    if (user && claims.imp) {
+      admin = await prisma.user.findUnique({
+        where: { id: claims.imp },
+        select: { role: true, isBanned: true, tokenVersion: true },
+      });
+    }
+  } catch (err) {
+    logger.warn({ err }, "mobile_auth_db_unavailable");
+    return { error: serviceUnavailable() } as const;
+  }
+
+  if (!user || user.isBanned || user.tokenVersion !== (claims.tv ?? 0)) return { error: unauthorized() } as const;
+  const actor: MobileActor = { id: user.id, role: user.role, email: user.email };
+  if (claims.imp) {
+    // Oturum suresince ADMIN'e yukseltilen hedef de goruntulenemez.
+    if (user.role === "ADMIN") return { error: unauthorized() } as const;
+    if (!admin || admin.role !== "ADMIN" || admin.isBanned) return { error: unauthorized() } as const;
+    // `impTv` tasimayan (bu degisiklikten once basilmis) token da reddedilir: en fazla 30 dk'lik oturum.
+    if (admin.tokenVersion !== claims.impTv) return { error: unauthorized() } as const;
+    actor.impersonatedBy = claims.imp;
+    if (req.method !== "GET" && req.method !== "HEAD") {
+      writeAuditLog({
+        actorUserId: claims.imp,
+        actorRole: "ADMIN",
+        action: "admin.impersonate.request",
+        entityType: "User",
+        entityId: user.id,
+        metadata: { method: req.method, path: new URL(req.url).pathname },
+      });
+    }
+  }
+  return { user: actor } as const;
 }
 
 export function requireRole(user: { role: Role }, roles: Role[]) {

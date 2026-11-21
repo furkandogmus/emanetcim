@@ -12,6 +12,12 @@ describe("errorMessage", () => {
     expect(errorMessage(new ApiError(0, "network"))).toBe(i18n.t("common.networkError"));
   });
 
+  it("503 service_unavailable ag mesajina, session_expired her ekranda oturum mesajina doner", () => {
+    expect(errorMessage(new ApiError(503, "service_unavailable"), "testNs")).toBe(i18n.t("common.networkError"));
+    expect(errorMessage(new ApiError(401, "session_expired"), "testNs")).toBe(i18n.t("auth.sessionExpiredTitle"));
+    expect(i18n.t("auth.sessionExpiredTitle")).not.toBe(i18n.t("common.genericError"));
+  });
+
   it("ad alaninda cevirisi olan kodu cevirir", () => {
     i18n.addResource("tr", "translation", "testNs.errors.insufficient_capacity", "Yer kalmadi");
     expect(errorMessage(new ApiError(409, "insufficient_capacity"), "testNs")).toBe("Yer kalmadi");
