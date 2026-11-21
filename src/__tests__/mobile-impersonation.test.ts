@@ -123,6 +123,13 @@ describe("signImpersonationToken", () => {
     expect("error" in r && r.error?.status).toBe(401);
   });
 
+  it("veritabani hatasi 401 degil 503 (istemci oturumu dusurmez)", async () => {
+    const token = await signAccessToken("guest-1", "GUEST", 0);
+    db.user.findUnique.mockRejectedValueOnce(new Error("pool timeout"));
+    const r = await requireMobileUser(req("GET", "/api/mobile/bookings", token));
+    expect("error" in r && r.error?.status).toBe(503);
+  });
+
   it("refresh ucu goruntuleme token'ini reddeder", async () => {
     const { token } = await signImpersonationToken("guest-1", "GUEST", "admin-1", 0);
     const res = (await refresh(req("POST", "/api/mobile/auth/refresh", undefined, { refreshToken: token })))!;
