@@ -43,6 +43,17 @@ describe("ShopService.adminUpdateShop (web + mobil admin)", () => {
     expect(Number(data.pricePerDay)).toBe(300);
   });
 
+  it("aktif ederken approvedAt'i bir kez yazar, var olani ezmez", async () => {
+    db.shop.findUnique.mockResolvedValue({ id: "s1", approvedAt: null });
+    await shopService.adminUpdateShop("s1", { isActive: true }, actor);
+    expect(db.shop.update.mock.calls[0][0].data.approvedAt).toBeInstanceOf(Date);
+
+    db.shop.update.mockClear();
+    db.shop.findUnique.mockResolvedValue({ id: "s1", approvedAt: new Date("2026-01-01") });
+    await shopService.adminUpdateShop("s1", { isActive: true }, actor);
+    expect(db.shop.update.mock.calls[0][0].data).not.toHaveProperty("approvedAt");
+  });
+
   it("olmayan dukkan not_found doner", async () => {
     db.shop.findUnique.mockResolvedValue(null);
     await expect(shopService.adminUpdateShop("yok", { isActive: true }, actor)).resolves.toEqual({
@@ -62,6 +73,15 @@ describe("AdminUserService.setBanned", () => {
     await expect(adminUserService.setBanned("admin-1", true, actor)).resolves.toEqual({
       ok: false,
       error: "cannot_ban_self",
+    });
+    expect(db.user.update).not.toHaveBeenCalled();
+  });
+
+  it("ADMIN hesabi yasaklanamaz", async () => {
+    db.user.findUnique.mockResolvedValue({ id: "a2", role: "ADMIN" });
+    await expect(adminUserService.setBanned("a2", true, actor)).resolves.toEqual({
+      ok: false,
+      error: "cannot_ban_admin",
     });
     expect(db.user.update).not.toHaveBeenCalled();
   });
