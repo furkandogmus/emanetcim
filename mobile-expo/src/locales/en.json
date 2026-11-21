@@ -59,7 +59,10 @@
     "bookingsPromptTitle": "Your bookings live here",
     "bookingsPromptBody": "Sign in to see your bookings and QR code.",
     "profilePromptTitle": "Your account",
-    "profilePromptBody": "Sign in to book and share your invite code. You can change the language above without signing in."
+    "profilePromptBody": "Sign in to book and share your invite code. You can change the language above without signing in.",
+    "sessionExpiredTitle": "Your session has ended. Please sign in again.",
+    "sessionExpiredBody": "Sign in again to see your bookings.",
+    "sessionExpiredBodyStaff": "Sign in again to get back to your shop panel. The action you were doing was not saved; please try it again after signing in."
   },
   "home": {
     "heroTitle": "Drop your bags.\nEnjoy the city.",

@@ -3,7 +3,7 @@ import * as SecureStore from "expo-secure-store";
 import * as Updates from "expo-updates";
 import Constants from "expo-constants";
 
-import { api } from "./api";
+import { api, refreshSession } from "./api";
 
 const INSTALL_KEY = "bp.installId";
 /** Son gonderilen "gun|kullanici"; ayni gun ayni kullaniciyla ikinci istek atilmaz. */
@@ -48,14 +48,22 @@ export async function pingAppOpen(userId: string | null) {
   inflight = key;
   try {
     // appVersion: runtimeVersion = yuklu ikilinin surumu; OTA sonrasi expoConfig yeni surumu gosterir.
-    await api("/ping", {
-      method: "POST",
-      body: {
-        installId: await getInstallId(),
-        platform: Platform.OS === "ios" ? "ios" : "android",
-        appVersion: Updates.runtimeVersion ?? Constants.expoConfig?.version,
-      },
-    });
+    const body = {
+      installId: await getInstallId(),
+      platform: Platform.OS === "ios" ? "ios" : "android",
+      appVersion: Updates.runtimeVersion ?? Constants.expoConfig?.version,
+    };
+    const send = () => api<{ linked?: boolean }>("/ping", { method: "POST", body });
+    let res = await send();
+    /*
+      /ping 401 donmez, yani api() suresi dolmus access token'i (15 dk) kendiliginden
+      yenilemez: on plana donuste kullanici baglanmadan gunun isareti yaziliyordu.
+    */
+    if (userId && res?.linked === false) {
+      if ((await refreshSession()) !== "ok") return;
+      res = await send();
+      if (res?.linked === false) return;
+    }
     await SecureStore.setItemAsync(LAST_KEY, key).catch(() => undefined);
   } catch {
     // Sayac kaybi kabul edilebilir; kullaniciya yansimaz. Isaret yazilmaz, sonraki acilis dener.

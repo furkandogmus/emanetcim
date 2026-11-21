@@ -59,7 +59,10 @@
     "bookingsPromptTitle": "Rezervasyonların burada",
     "bookingsPromptBody": "Rezervasyonlarını ve QR kodunu görmek için giriş yap.",
     "profilePromptTitle": "Hesabın",
-    "profilePromptBody": "Giriş yaparak rezervasyon yapabilir, davet kodunu paylaşabilirsin. Dil seçimi giriş yapmadan da yukarıda."
+    "profilePromptBody": "Giriş yaparak rezervasyon yapabilir, davet kodunu paylaşabilirsin. Dil seçimi giriş yapmadan da yukarıda.",
+    "sessionExpiredTitle": "Oturumun sona erdi. Tekrar giriş yap.",
+    "sessionExpiredBody": "Rezervasyonlarını görmek için tekrar giriş yapabilirsin.",
+    "sessionExpiredBodyStaff": "Dükkan paneline dönmek için tekrar giriş yap. Bekleyen işlemin kaydedilmedi; girişten sonra yeniden dene."
   },
   "home": {
     "heroTitle": "Valizini bırak.\nŞehrin tadını çıkar.",
