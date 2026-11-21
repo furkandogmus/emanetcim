@@ -296,7 +296,7 @@
     "cancelledTitle": "Buchung storniert",
     "cancelledRefund": "Der gesamte bezahlte Betrag wird erstattet.",
     "cancelledNoCharge": "Dir wurde nichts berechnet.",
-    "cancelledRefundOnsite": "Buchung storniert. Falls du schon im Laden bezahlt hast, frag dort nach einer Erstattung.",
+    "cancelledRefundOnsite": "Falls du schon im Laden bezahlt hast, frag dort nach einer Erstattung.",
     "expiredTitle": "Abgelaufen",
     "expiredBody": "Die Abholzeit ist vorbei und dein Gepäck wurde nicht abgegeben. Diese Buchung kann nicht mehr genutzt werden.",
     "rebook": "Neu buchen",
