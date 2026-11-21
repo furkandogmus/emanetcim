@@ -22,7 +22,7 @@ import { referralService } from "@/services/ReferralService";
  *    girdi 400 olmali, sunucu hatasi degil.
  *
  * Yanittaki `referrerName` BILINCLI: davet ekrani "X sizi davet etti" yaziyor.
- * Kodu bilen zaten daveti alan kisidir.
+ * Kodu bilen zaten daveti alan kisidir; yine de yalnizca ILK AD doner (yorum kuraliyla ayni).
  */
 const schema = z.object({ code: z.string().trim().min(1).max(32) });
 
@@ -57,6 +57,8 @@ export async function POST(req: NextRequest) {
   return NextResponse.json({
     valid: true,
     discountPct: check.discountPct,
-    referrerName: referrer?.name ?? null,
+    // Yalnizca ilk ad: yorumlardaki `authorLabel` kuraliyla ayni; kodu bilen kisiye
+    // davet edenin soyadi gerekmez.
+    referrerName: referrer?.name?.trim().split(/\s+/)[0] ?? null,
   });
 }
