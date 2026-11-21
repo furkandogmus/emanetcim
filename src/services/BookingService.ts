@@ -8,7 +8,7 @@ import {
   createInitialBooking as createInitialBookingImpl,
   findBookingByIdempotencyKey as findBookingByIdempotencyKeyImpl,
 } from '@/services/booking/create';
-import { checkIn as checkInImpl } from '@/services/booking/check-in';
+import { checkIn as checkInImpl, type CheckInOptions } from '@/services/booking/check-in';
 import { checkOut as checkOutImpl } from '@/services/booking/check-out';
 import { cancelBooking as cancelBookingImpl, modifyBooking as modifyBookingImpl } from '@/services/booking/lifecycle';
 import {
@@ -134,6 +134,7 @@ export interface IBookingService {
     bookingId: string,
     seals?: CheckInSealPayload,
     actor?: PaymentActor,
+    opts?: CheckInOptions,
   ): Promise<PartnerCheckInResult>;
   checkOut(bookingId: string, opts?: { brokenSealNumbers?: number[]; actor?: PaymentActor }): Promise<PartnerCheckOutResult>;
   getBookingByToken(token: string): Promise<BookingWithGuestShop | null>;
@@ -177,8 +178,9 @@ export class BookingService implements IBookingService {
 
   async checkIn(bookingId: string,
     seals?: CheckInSealPayload,
-    actor?: PaymentActor,): Promise<PartnerCheckInResult> {
-    return checkInImpl(bookingId, seals, actor);
+    actor?: PaymentActor,
+    opts?: CheckInOptions,): Promise<PartnerCheckInResult> {
+    return checkInImpl(bookingId, seals, actor, opts);
   }
 
   async checkOut(bookingId: string, opts?: { brokenSealNumbers?: number[]; actor?: PaymentActor }): Promise<PartnerCheckOutResult> {

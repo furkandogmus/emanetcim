@@ -15,10 +15,30 @@ import { bookingEventService } from '@/services/BookingEventService';
 import { paymentService, type PaymentActor } from '@/services/PaymentService';
 import type { CheckInSealPayload } from '@/services/BookingService';
 
+export type CheckInOptions = {
+  /**
+   * Esnaf "dukkan kapali gorunuyor, yine de teslim al" onayini verdi. Kayitli
+   * saatler cogu dukkanda sema varsayilaninda kaldigi icin gercekte acik dukkan
+   * misafiri geri ceviriyordu. Yalnizca sahip/yonetici icin gecerli; olaya
+   * `outside_hours: true` yazilir.
+   */
+  outsideHours?: boolean;
+};
+
+/** Saat disi onayi bu aktor icin gecerli mi? Web ve mobil ayni kurali buradan alir. */
+export function canOverrideClosedHours(
+  shop: { ownerId: string },
+  actor?: Pick<PaymentActor, 'id' | 'role'>,
+): boolean {
+  if (!actor) return false;
+  return actor.role === 'ADMIN' || shop.ownerId === actor.id;
+}
+
 export async function checkIn(
   bookingId: string,
   seals?: CheckInSealPayload,
   actor?: PaymentActor,
+  opts: CheckInOptions = {},
 ): Promise<PartnerCheckInResult> {
   try {
     const existing = await prisma.booking.findUnique({
@@ -48,19 +68,23 @@ export async function checkIn(
     }
     const now = new Date();
     const scheduleParts = (await loadScheduleParts([existing.shopId])).get(existing.shopId);
-    if (
-      !isOpenForHandover(
-        {
-          open247: existing.shop.open247,
-          openingTime: existing.shop.openingTime,
-          closingTime: existing.shop.closingTime,
-          timeZone: existing.shop.timezone,
-          ...scheduleParts,
-        },
-        now,
-        rules.checkInGraceMin,
-      )
-    ) {
+    const openNow = isOpenForHandover(
+      {
+        open247: existing.shop.open247,
+        openingTime: existing.shop.openingTime,
+        closingTime: existing.shop.closingTime,
+        timeZone: existing.shop.timezone,
+        ...scheduleParts,
+      },
+      now,
+      rules.checkInGraceMin,
+    );
+    const overrideHours =
+      !openNow && opts.outsideHours === true && canOverrideClosedHours(existing.shop, actor);
+    if (overrideHours) {
+      logger.info({ bookingId, actorId: actor?.id }, 'checkin_outside_hours_confirmed');
+    }
+    if (!openNow && !overrideHours) {
       logger.warn('BookingService::checkIn: dükkan kapalı saat aralığında');
       return {
         ok: false,
@@ -246,7 +270,10 @@ export async function checkIn(
       actorId: actor?.id ?? null,
       actorRole: actor?.role ?? null,
       impersonatedBy: actor?.impersonatedBy ?? null,
-      metadata: { previousStatus: existing.status },
+      // Saat disi onay denetim izine girer; normal teslimde alan hic yazilmaz.
+      metadata: overrideHours
+        ? { previousStatus: existing.status, outside_hours: true }
+        : { previousStatus: existing.status },
     }).catch((err) => logger.error({ err, bookingId }, "booking_event_checked_in_failed"));
 
     return { ok: true };
