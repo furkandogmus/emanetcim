@@ -83,7 +83,7 @@ function Detail({ shop: s }: { shop: AdminShopDetail }) {
       api<AdminShopDetail>(`/admin/shops/${encodeURIComponent(s.id)}`, { method: "PATCH", body: patch }),
     onSuccess: (next, patch) => {
       queryClient.setQueryData([...keys.admin, "shop", s.id], next);
-      for (const k of ["shops", "overview"]) void queryClient.invalidateQueries({ queryKey: [...keys.admin, k] });
+      for (const k of ["shops", "overview", "applications"]) void queryClient.invalidateQueries({ queryKey: [...keys.admin, k] });
       if (patch.pricePerDay !== undefined) setSaved(true);
       if (patch.latitude !== undefined) setLocSaved(true);
     },
@@ -291,13 +291,15 @@ function Detail({ shop: s }: { shop: AdminShopDetail }) {
                 </IconButton>
               ) : null}
             </View>
-            <Button
-              variant="secondary"
-              title={t("admin.impersonateOwner")}
-              loading={viewAs.pendingId === s.owner.id}
-              disabled={viewAs.pendingId !== undefined}
-              onPress={() => viewAs.confirmViewAs(s.owner.id, s.owner.name || s.name)}
-            />
+            {s.owner.canViewAs !== false ? (
+              <Button
+                variant="secondary"
+                title={t("admin.impersonateOwner")}
+                loading={viewAs.pendingId === s.owner.id}
+                disabled={viewAs.pendingId !== undefined}
+                onPress={() => viewAs.confirmViewAs(s.owner.id, s.owner.name || s.name)}
+              />
+            ) : null}
           </Card>
         </Block>
 
