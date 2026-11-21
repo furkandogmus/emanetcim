@@ -302,13 +302,13 @@
     "detailTitle": "Booking",
     "checkInTitle": "Receive the bags",
     "checkInHint": "Enter the number of the seal on each bag. Leave empty if you take them without seals.",
-    "checkInHintNoSeals": "Take the bags, scan the guest's QR code and confirm.",
+    "checkInHintNoSeals": "Count the bags, check the guest's name and booking, then confirm.",
     "bagN": "Bag {{n}} · {{size}}",
     "sealNumber": "Seal no.",
     "sealsPartial": "Enter a seal for every bag, or for none.",
     "checkInCta": "Bags received",
     "checkedInTitle": "Bags received",
-    "checkedInBody": "The guest has been notified.",
+    "checkedInBody": "Recorded as received.",
     "checkOutTitle": "Hand the bags back",
     "checkOutHint": "Once the guest shows their QR code, hand the bags back and confirm.",
     "checkOutSealsHint": "Check that every seal is intact and tick it.",
@@ -317,7 +317,7 @@
     "checkedOutTitle": "Handed back",
     "checkedOutBody": "The booking is complete.",
     "errors": {
-      "SHOP_CLOSED": "The shop looks closed right now. Try again during opening hours.",
+      "SHOP_CLOSED": "You are outside the shop's saved opening hours. If your real hours are different, fix them and try again.",
       "INVALID_STATUS": "This booking is not in a state that allows this.",
       "PAYMENT_REQUIRED": "This booking has not been paid.",
       "SEAL_REQUIRED": "Enter a seal number for every bag.",
@@ -376,7 +376,13 @@
     "sealBrokenHint": "A seal that isn't intact is recorded; check the bag with the guest. You can still complete the pickup.",
     "lateFeeCollect": "Late fee {{amount}}: collect it from the guest.",
     "earlyRefundGive": "Early pickup: refund the guest {{amount}}.",
-    "shopPending": "Awaiting approval"
+    "shopPending": "Awaiting approval",
+    "editHours": "Edit opening hours",
+    "searchPlaceholder": "Search guest name or code",
+    "searchNone": "No matching booking. Type the 8-character code.",
+    "statusWaiting": "Expected",
+    "callGuest": "Call guest",
+    "whatsappGuest": "Message on WhatsApp"
   },
   "profile": {
     "title": "Profile",
@@ -661,7 +667,16 @@
       "forbidden": "This booking does not belong to your shop.",
       "not_found": "Booking not found."
     },
-    "openSettings": "Allow in Settings"
+    "openSettings": "Allow in Settings",
+    "manualOpen": "Enter code manually",
+    "manualTitle": "Find by code or name",
+    "manualPlaceholder": "8-character code or guest name",
+    "manualSearch": "Search",
+    "manualNone": "No matching booking found.",
+    "manualMany": "Several matches, pick one.",
+    "torchOn": "Turn torch on",
+    "torchOff": "Turn torch off",
+    "manualClose": "Close"
   },
   "reset": {
     "forgotPassword": "Forgot password",
@@ -705,6 +720,7 @@
       "invalid_name": "Your name must be 1–100 characters.",
       "invalid_phone": "Enter a valid Turkish mobile number (5XX XXX XX XX).",
       "phone_taken": "This number is already registered to another account.",
+      "phone_locked": "This number is how you sign in. It can't be changed without an email or another sign-in method; contact support.",
       "no_fields": "There's nothing to change.",
       "file_too_large": "That photo is too large; try another one.",
       "invalid_type": "That file type isn't supported; choose a JPEG, PNG or WebP.",
@@ -825,7 +841,7 @@
     "savedTitle": "Bag count updated",
     "savedBody": "New total: {{total}}",
     "approvalTitle": "Waiting for the guest",
-    "approvalBody": "This correction raises the price. The guest has been emailed to approve it; the new total applies once they do.",
+    "approvalBody": "This correction raises the price. The guest has been asked to approve it; the new total applies once they do.",
     "errors": {
       "not_found": "Booking not found.",
       "forbidden": "This booking does not belong to your shop.",
@@ -838,7 +854,8 @@
       "no_pending_revision": "This correction is no longer pending; refresh the page.",
       "revision_changed": "The shop just changed the correction. Check the new amount and decide again."
     },
-    "pendingBody": "The guest was asked to approve {{count}} bags for {{total}} in total. The booking won't change until they approve."
+    "pendingBody": "The guest was asked to approve {{count}} bags for {{total}} in total. The booking won't change until they approve.",
+    "hintCheckedInNoSeals": "The bags are checked in. A correction that raises the price needs the guest's approval."
   },
   "seals": {
     "open": "Seals",
@@ -913,10 +930,6 @@
     "district": "District",
     "city": "City",
     "addressHint": "Guests find your shop by this address. Use the web panel to move the pin on the map.",
-    "phoneSection": "Contact",
-    "phone": "SMS notification phone (GSM)",
-    "phoneHint": "When a new booking is paid, a text message goes to this number. Leave it empty to remove the number.",
-    "phonePlaceholder": "05XX XXX XX XX",
     "save": "Save",
     "saved": "Settings saved.",
     "saveFailed": "Could not save",
@@ -926,11 +939,14 @@
     "errors": {
       "invalid_input": "One of the values is invalid. Check them and try again.",
       "shop_update_failed": "The shop details could not be saved. Check the values and try again.",
-      "invalid_tr_phone": "The phone number is not a valid Turkish mobile number.",
-      "already_registered": "This phone number is registered to another account.",
-      "invalid_data": "The phone number could not be read.",
-      "no_shop": "We couldn't find an active shop for you."
-    }
+      "no_shop": "We couldn't find an active shop for you.",
+      "price_out_of_range": "The daily price is outside the allowed range. The range is shown under the price field."
+    },
+    "priceRange": "Allowed range: {{min}} – {{max}} ₺",
+    "priceOutOfRange": "The daily price is outside the allowed range. The range is shown under the price field.",
+    "impactTitle": "Saved, but heads up",
+    "impactOutsideHours": "{{count}} active booking(s) fall outside the new hours. You won't be able to accept those guests; check your bookings list to reach them.",
+    "impactOverCapacity": "There are {{count}} bags on the shelf over the new capacity. You won't be able to take new bookings."
   },
   "schedule": {
     "title": "Opening hours and time off",
@@ -970,7 +986,8 @@
       "invalid_input": "A time or date is invalid. Time off cannot start in the past.",
       "schedule_save_failed": "Could not save, try again.",
       "no_shop": "We couldn't find an active shop for you."
-    }
+    },
+    "conflictNext": "Tap a booking to reach the guest, or contact support."
   },
   "referral": {
     "title": "My invite code",
