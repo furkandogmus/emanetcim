@@ -10,6 +10,7 @@ import { AppText, Banner, Button, Card } from "@/components/ui";
 import { Input } from "@/components/Field";
 import { ApiError, api } from "@/lib/api";
 import { errorMessage } from "@/lib/errors";
+import { buildCheckInBody, shouldOfferOutsideHours } from "@/lib/check-in-request";
 import { SEALS_ENABLED } from "@/lib/config";
 import { formatMoney } from "@/lib/format";
 import { usePartnerShop } from "@/lib/queries";
@@ -89,21 +90,15 @@ export function PartnerBookingActions({ booking }: { booking: BookingDetail }) {
   }
 
   const checkIn = useMutation({
-    mutationFn: () => {
-      const sealAssignments = rows
-        .filter((r) => r.sealNumber !== "")
-        .map((r) => ({ sealNumber: Number(r.sealNumber), bagIndex: r.bagIndex, bagSize: r.bagSize }));
-      return api(`/bookings/${booking.id}/check-in`, {
-        method: "POST",
-        body: sealAssignments.length ? { sealAssignments, faultySealNumbers: [] } : {},
-      });
-    },
+    mutationFn: (vars: { outsideHours?: boolean }) =>
+      api(`/bookings/${booking.id}/check-in`, { method: "POST", body: buildCheckInBody(rows, vars) }),
     onSuccess: () => {
       setError(null);
+      setClosed(false);
       refresh();
       notify(t("partner.checkedInTitle"), t("partner.checkedInBody"));
     },
-    onError: async (e) => {
+    onError: async (e, vars) => {
       if (await settledAs(e, "CHECKED_IN")) {
         setError(null);
         refresh();
@@ -113,8 +108,21 @@ export function PartnerBookingActions({ booking }: { booking: BookingDetail }) {
       if (e instanceof ApiError && e.code === "SEAL_REQUIRED") setSealsForced(true);
       setClosed(e instanceof ApiError && e.code === "SHOP_CLOSED");
       setError(errorMessage(e, "partner"));
+      /*
+        Kayitli saatler cogu dukkanda varsayilanda kaldi; tezgahtaki esnaf dukkanin
+        acik oldugunu bilir. Onaylarsa sunucu teslimi saat disi diye kaydeder.
+      */
+      if (shouldOfferOutsideHours(e, vars.outsideHours === true)) confirmOutsideHours();
     },
   });
+
+  function confirmOutsideHours() {
+    Alert.alert(t("partner.outsideHoursTitle"), t("partner.outsideHoursBody"), [
+      { text: t("common.cancel"), style: "cancel" },
+      { text: t("partner.editHours"), onPress: () => router.push("/partner/schedule") },
+      { text: t("partner.outsideHoursConfirm"), onPress: () => checkIn.mutate({ outsideHours: true }) },
+    ]);
+  }
 
   const checkOut = useMutation({
     mutationFn: () => {
@@ -161,7 +169,7 @@ export function PartnerBookingActions({ booking }: { booking: BookingDetail }) {
         : t("partner.confirmCheckInPaid", { count: bagCount }),
       [
         { text: t("common.cancel"), style: "cancel" },
-        { text: t("partner.confirmYes"), onPress: () => checkIn.mutate() },
+        { text: t("partner.confirmYes"), onPress: () => checkIn.mutate({}) },
       ],
     );
   }
@@ -214,7 +222,10 @@ export function PartnerBookingActions({ booking }: { booking: BookingDetail }) {
         {partial ? <Banner tone="warning" body={t("partner.sealsPartial")} /> : null}
         {error ? <Banner tone="danger" body={error} /> : null}
         {closed ? (
-          <Button variant="secondary" title={t("partner.editHours")} onPress={() => router.push("/partner/schedule")} />
+          <>
+            <Button variant="secondary" title={t("partner.outsideHoursConfirm")} onPress={confirmOutsideHours} />
+            <Button variant="ghost" title={t("partner.editHours")} onPress={() => router.push("/partner/schedule")} />
+          </>
         ) : null}
         <Button
           title={collects ? t("partner.checkInCtaCash", { amount }) : t("partner.checkInCta")}
