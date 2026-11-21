@@ -345,7 +345,9 @@
     "outsideHoursTitle": "La boutique semble fermée en ce moment. Enregistrer quand même ?",
     "outsideHoursBody": "Vous êtes en dehors de vos horaires enregistrés. Si la boutique est ouverte, vous pouvez quand même prendre les bagages ; le dépôt sera noté hors horaires. Si vos horaires sont faux, corrigez-les dans les paramètres.",
     "outsideHoursConfirm": "Enregistrer quand même",
-    "outsideHoursEditHours": "Modifier les horaires"
+    "outsideHoursEditHours": "Modifier les horaires",
+    "earningsBasisNote": "Dépôts terminés, selon la date de restitution",
+    "pulseCollectedBasis": "Dépôts terminés"
   },
   "Guest": {
     "heroTitle": "Déposez vos bagages, explorez librement",

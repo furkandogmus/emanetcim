@@ -1,6 +1,7 @@
 import prisma from "@/lib/db";
 import { computeSplit, EARNING_BOOKING_STATUSES } from "@/lib/platform-split";
 import { Prisma } from "@prisma/client";
+import { COLLECTED_AT_SQL, COLLECTED_BOOKING_STATUS, collectedEarningsWhere } from "@/lib/earning-collection";
 
 /**
  * Esnaf kazanç özeti — TOPLAMA VERİTABANINDA YAPILIR.
@@ -74,7 +75,7 @@ export type PartnerEarningsSummary = {
   totalGross: number;
   totalNet: number;
   totalCommission: number;
-  /** Hakedişe sayılan rezervasyon adedi. */
+  /** Teslim edilmiş (kazanca sayılan) rezervasyon adedi. */
   earningBookingCount: number;
   /** Dükkana düşen TÜM rezervasyonlar (dönüşüm oranının paydası). */
   allBookingCount: number;
@@ -99,6 +100,10 @@ class PartnerEarningsService {
   /**
    * Dükkanın kazanç özeti. Tek gidiş-dönüşte dört toplama.
    *
+   * Para (aylar ve toplamlar) TESLİM anına göre (`earning-collection.ts`):
+   * mobil kazanç ekranı ve panel aynı tabanı kullanır. Yoğun saat ve ortalama
+   * süre para değil, iş hacmi; onlar hâlâ hakediş durumlarının tamamına bakar.
+   *
    * TOPLAMLAR AYLARDAN TÜRETİLİR, ayrı hesaplanmaz. Brüt toplamı bir kez, her ayı
    * bir kez bölmek iki farklı sonuç verebilir (yuvarlama). Esnafın ekranında aylık
    * satırların toplamı üstteki toplama TUTMAK ZORUNDA — aksi hâlde hangisinin
@@ -114,12 +119,12 @@ class PartnerEarningsService {
 
     const [monthRows, hourRows, stayRows, allBookingCount] = await Promise.all([
       prisma.$queryRaw<MonthRow[]>`
-        SELECT to_char(date_trunc('month', "createdAt" AT TIME ZONE 'UTC' AT TIME ZONE ${tz}), 'YYYY-MM') AS month,
+        SELECT to_char(date_trunc('month', ${COLLECTED_AT_SQL} AT TIME ZONE 'UTC' AT TIME ZONE ${tz}), 'YYYY-MM') AS month,
                SUM("totalPrice") AS gross,
                COUNT(*) AS count
         FROM "Booking"
         WHERE "shopId" = ${shopId}
-          AND "status"::text IN (${EARNING_STATUS_SQL})
+          AND "status"::text = ${COLLECTED_BOOKING_STATUS}
         GROUP BY 1
         ORDER BY 1 DESC
       `,
@@ -178,7 +183,7 @@ class PartnerEarningsService {
   /**
    * Ana panelin "toplam kazanç" kartı için TEK sayı.
    *
-   * Ayrı bir yol değil: aynı `EARNING_BOOKING_STATUSES` kümesi, aynı `computeSplit`.
+   * Ayrı bir yol değil: kazanç sayfasıyla aynı teslim tabanı, aynı `computeSplit`.
    * Ana panel bunu rezervasyon LİSTESİNDEN hesapladığı için 100'de kesiliyordu.
    */
   async getTotals(
@@ -186,7 +191,7 @@ class PartnerEarningsService {
     commissionRate: number,
   ): Promise<{ gross: number; net: number; commission: number }> {
     const agg = await prisma.booking.aggregate({
-      where: { shopId, status: { in: [...EARNING_BOOKING_STATUSES] } },
+      where: { shopId, ...collectedEarningsWhere() },
       _sum: { totalPrice: true },
     });
     const split = computeSplit(Number(agg._sum.totalPrice ?? 0), commissionRate);

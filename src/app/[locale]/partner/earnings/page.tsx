@@ -2,7 +2,7 @@ import { setRequestLocale } from "next-intl/server";
 import { redirect } from "next/navigation";
 import prisma from "@/lib/db";
 import { moneyToNumber } from "@/lib/money";
-import { EARNING_BOOKING_STATUSES } from "@/lib/platform-split";
+import { COLLECTED_ORDER_BY, collectedAt, collectedEarningsWhere } from "@/lib/earning-collection";
 import { getEffectiveCommission } from "@/lib/commission";
 import { requirePartnerPage } from "@/lib/page-auth";
 import { resolvePartnerShops } from "@/lib/partner-shop";
@@ -52,17 +52,16 @@ export default async function PartnerEarningsPage({
       commission.rate,
     ),
     prisma.booking.findMany({
-      where: {
-        shopId: activeShop.id,
-        status: { in: [...EARNING_BOOKING_STATUSES] },
-      },
+      // Aylik ozetle ayni taban: teslim edilenler, en son teslim edilen once.
+      where: { shopId: activeShop.id, ...collectedEarningsWhere() },
       select: {
         id: true,
         totalPrice: true,
-        createdAt: true,
+        checkedOutAt: true,
+        checkOutTime: true,
         guest: { select: { name: true } },
       },
-      orderBy: { createdAt: "desc" },
+      orderBy: COLLECTED_ORDER_BY,
       take: RECENT_LIMIT,
     }),
   ]);
@@ -90,7 +89,7 @@ export default async function PartnerEarningsPage({
       recent={recent.map((b) => ({
         id: b.id,
         totalPrice: moneyToNumber(b.totalPrice),
-        createdAt: b.createdAt.toISOString(),
+        collectedAt: collectedAt(b).toISOString(),
         guestName: b.guest?.name ?? null,
       }))}
       recentLimit={RECENT_LIMIT}

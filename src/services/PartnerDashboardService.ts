@@ -1,5 +1,6 @@
 import prisma from "@/lib/db";
-import { computeSplit, EARNING_BOOKING_STATUSES } from "@/lib/platform-split";
+import { computeSplit } from "@/lib/platform-split";
+import { collectedEarningsWhere } from "@/lib/earning-collection";
 import { moneyToNumber } from "@/lib/money";
 import { dayRangeInTimeZone, monthRangeInTimeZone } from "@/lib/timezone";
 import { safeTimezone } from "@/services/PartnerEarningsService";
@@ -28,9 +29,9 @@ export type PartnerDashboardSnapshot = {
   todayPickups: number;
   /** ŞU AN dükkanda duran valiz adedi — rezervasyon değil, valiz. */
   bagsInStorage: number;
-  /** Bu ayın esnaf payı. */
+  /** Bu ay TESLIM EDILEN emanetlerin esnaf payı (`earning-collection.ts`). */
   monthNet: number;
-  /** Geçen ayın esnaf payı — karşılaştırma için. */
+  /** Geçen ay teslim edilenlerin esnaf payı — karşılaştırma için. */
   prevMonthNet: number;
   /**
    * Geçen aya göre yüzde değişim. Geçen ay 0 ise `null` —
@@ -55,8 +56,6 @@ class PartnerDashboardService {
     const today = dayRangeInTimeZone(tz, now);
     const thisMonth = monthRangeInTimeZone(tz, now, 0);
     const lastMonth = monthRangeInTimeZone(tz, now, 1);
-
-    const earning = { in: [...EARNING_BOOKING_STATUSES] };
 
     const [arrivals, pickups, inStorage, monthAgg, prevAgg, handled] =
       await Promise.all([
@@ -87,20 +86,13 @@ class PartnerDashboardService {
           where: { shopId, status: "CHECKED_IN" },
           _sum: BAG_SUM,
         }),
+        // Kazanc teslim anina gore: kasadaki para ile ayni gune duser.
         prisma.booking.aggregate({
-          where: {
-            shopId,
-            status: earning,
-            createdAt: { gte: thisMonth.start, lt: thisMonth.end },
-          },
+          where: { shopId, ...collectedEarningsWhere(thisMonth) },
           _sum: { totalPrice: true },
         }),
         prisma.booking.aggregate({
-          where: {
-            shopId,
-            status: earning,
-            createdAt: { gte: lastMonth.start, lt: lastMonth.end },
-          },
+          where: { shopId, ...collectedEarningsWhere(lastMonth) },
           _sum: { totalPrice: true },
         }),
         prisma.booking.aggregate({
