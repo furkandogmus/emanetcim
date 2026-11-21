@@ -17,6 +17,7 @@ import { formatDay, formatDayTime } from "@/lib/format";
 import { SITE_ORIGIN } from "@/lib/images";
 import { telUrl, waUrl } from "@/lib/phone";
 import { useViewAs } from "@/lib/use-view-as";
+import { languageInfo } from "@/lib/languages";
 import { notify } from "@/lib/notify";
 import { keys, useAdminShop } from "@/lib/queries";
 import type { AdminShopDetail, AdminShopPatch } from "@/lib/types";
@@ -35,7 +36,7 @@ export default function AdminShopScreen() {
   const { t, i18n } = useTranslation();
   const { id } = useLocalSearchParams<{ id: string }>();
   const query = useAdminShop(id);
-  const lang = i18n.language === "tr" ? "tr" : "en";
+  const lang = languageInfo(i18n.language).site;
 
   return (
     <SafeAreaView style={styles.safe} edges={["top"]}>

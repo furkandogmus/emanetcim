@@ -80,6 +80,13 @@ export default function AdminUsersScreen() {
             <RefreshControl refreshing={query.isRefetching} onRefresh={() => query.refetch()} tintColor={colors.accent} />
           }
           ListEmptyComponent={<CenterMessage title={t("admin.noUsers")} />}
+          ListFooterComponent={
+            (query.data?.length ?? 0) >= 50 ? (
+              <AppText variant="caption" style={{ textAlign: "center" }}>
+                {t("admin.listCapped", { count: query.data?.length ?? 0 })}
+              </AppText>
+            ) : null
+          }
           renderItem={({ item: u }) => {
             const self = u.id === myId;
             return (
