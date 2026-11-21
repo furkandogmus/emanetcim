@@ -1,0 +1,4 @@
+{
+  "NSLocationWhenInUseUsageDescription": "We use your location to show luggage storage points near you.",
+  "NSCameraUsageDescription": "We use the camera to scan the guest's booking QR code."
+}
