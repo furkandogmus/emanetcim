@@ -82,7 +82,7 @@ describe("slotlar cron'u beklemez", () => {
     expect(onay.indexOf("generateSlotsForShop")).toBeGreaterThan(onay.indexOf("$transaction"));
   });
 
-  it("updateShop saat/kapasite degisince slot uretir", () => {
+  it("updateShop saat degisince slot uretir", () => {
     const guncelle = servis.slice(servis.indexOf("async updateShop"), servis.indexOf("async updateShop") + 900);
     expect(guncelle).toContain("generateSlotsForShop(shopId)");
   });

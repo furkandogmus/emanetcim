@@ -1,4 +1,6 @@
 import prisma from "@/lib/db";
+import logger from "@/lib/logger";
+import { generateSlotsForShop } from "@/services/SlotService";
 import { PLATFORM_TIMEZONE, toDatetimeLocalValueInTimeZone } from "@/lib/datetime-local";
 import { hoursForDate, isOpenAt, type ClosureRange, type ShopSchedule, type WeeklyDay } from "@/lib/shop-schedule";
 
@@ -162,6 +164,10 @@ export async function saveWeeklyHours(
       },
     }),
   ]);
+  // Yeni acilan gunlerin slotu cron'u (04:17) beklemesin; hata cron'a kalir.
+  generateSlotsForShop(shopId).catch((err: unknown) =>
+    logger.warn({ err, shopId }, "save_weekly_hours_slot_generation_failed"),
+  );
   return { ok: true };
 }
 
@@ -195,6 +201,10 @@ export async function addClosure(
 
 export async function removeClosure(shopId: string, closureId: string): Promise<void> {
   await prisma.shopClosure.deleteMany({ where: { id: closureId, shopId } });
+  // Kapanis kalkinca o gunlerin slotu cron'u beklemeden uretilir.
+  generateSlotsForShop(shopId).catch((err: unknown) =>
+    logger.warn({ err, shopId }, "remove_closure_slot_generation_failed"),
+  );
 }
 
 /**
