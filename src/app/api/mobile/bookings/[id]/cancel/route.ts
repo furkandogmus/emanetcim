@@ -26,7 +26,10 @@ export async function DELETE(req: NextRequest, { params }: { params: Promise<{ i
     if (result.ok) {
       return NextResponse.json({ success: true, fullRefund: result.fullRefund });
     }
-    return NextResponse.json({ error: "cancel_failed" }, { status: 400 });
+    // Kod tasinir ki ekran "zaten iptal / teslim edildi" ile "bulunamadi"yi ayirabilsin.
+    const error =
+      result.code === "INVALID_STATUS" ? "invalid_status" : result.code === "NOT_FOUND" ? "not_found" : "cancel_failed";
+    return NextResponse.json({ error }, { status: 400 });
   } catch {
     return NextResponse.json({ error: "server_error" }, { status: 500 });
   }
