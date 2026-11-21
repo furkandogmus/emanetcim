@@ -44,7 +44,7 @@ export function installedBinaryVersion(): string | null {
  */
 export async function isUpdateRequired(): Promise<boolean> {
   try {
-    const cfg = await api<AppConfig>("/config");
+    const cfg = await api<AppConfig>("/config", { auth: false });
     return isBelowMinVersion(installedBinaryVersion(), cfg.minAppVersion);
   } catch {
     return false;
@@ -57,4 +57,12 @@ export async function openPlayStore(): Promise<void> {
   } catch {
     await Linking.openURL(PLAY_URL).catch(() => undefined);
   }
+}
+
+/**
+ * "Yeni surum hazir" seridi odeme ve QR okutma ekraninda gosterilmez: alttaki
+ * ana dugmeyi kapatir, tek cikisi da uygulamayi yeniden baslatip ekrani yitirmek olurdu.
+ */
+export function isOtaBannerBlocked(pathname: string): boolean {
+  return /(^|\/)(checkout|scan)(\/|$)/.test(pathname);
 }

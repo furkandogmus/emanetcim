@@ -1,11 +1,13 @@
 import { useEffect, useRef, useState } from "react";
 import { AppState, StyleSheet, View } from "react-native";
 import * as Updates from "expo-updates";
+import { usePathname } from "expo-router";
+import { X } from "lucide-react-native";
 import { useTranslation } from "react-i18next";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
-import { isUpdateRequired, openPlayStore } from "@/lib/app-update";
-import { AppText, Button } from "@/components/ui";
+import { isOtaBannerBlocked, isUpdateRequired, openPlayStore } from "@/lib/app-update";
+import { AppText, Button, IconButton } from "@/components/ui";
 import { colors, radius, space } from "@/theme/tokens";
 
 /** Arka plandan donuste OTA'yi en fazla bu sikliktan bir kontrol et. */
@@ -20,11 +22,24 @@ export function useUpdateRequired(): boolean {
   const [required, setRequired] = useState(false);
   useEffect(() => {
     let alive = true;
-    void isUpdateRequired().then((r) => {
-      if (alive) setRequired(r);
+    let last = 0;
+    // Uygulama gunlerce arka planda kalabilir: min surum sonradan yukselirse
+    // one gelince yeniden sor (OTA kontroluyle ayni 5 dakikalik sinir).
+    const check = () => {
+      const now = Date.now();
+      if (now - last < OTA_CHECK_MIN_GAP_MS) return;
+      last = now;
+      void isUpdateRequired().then((r) => {
+        if (alive && r) setRequired(true);
+      });
+    };
+    check();
+    const sub = AppState.addEventListener("change", (st) => {
+      if (st === "active") check();
     });
     return () => {
       alive = false;
+      sub.remove();
     };
   }, []);
   return required;
@@ -48,13 +63,15 @@ export function ForcedUpdateScreen() {
 /**
  * Uygulama on plana her dondugunde yeni JS paketi var mi diye bakar ve indirir;
  * hazir olunca "Yeni surum hazir, yenile" seridi cikar. Yeniden baslatma yalnizca
- * kullanici dokununca olur: odeme ya da QR okutma sirasinda ekran kapanmaz.
+ * kullanici dokununca olur; serit ustte durur, kapatilabilir ve odeme/QR ekraninda hic cikmaz.
  */
 export function OtaReadyBanner() {
   const { t } = useTranslation();
   const { isUpdatePending } = Updates.useUpdates();
   const insets = useSafeAreaInsets();
   const lastCheck = useRef(0);
+  const pathname = usePathname();
+  const [dismissed, setDismissed] = useState(false);
 
   useEffect(() => {
     if (!Updates.isEnabled) return;
@@ -73,9 +90,9 @@ export function OtaReadyBanner() {
     return () => sub.remove();
   }, []);
 
-  if (!isUpdatePending) return null;
+  if (!isUpdatePending || dismissed || isOtaBannerBlocked(pathname)) return null;
   return (
-    <View style={[styles.ota, { bottom: insets.bottom + space.lg }]} accessibilityRole="alert" accessibilityLiveRegion="polite">
+    <View style={[styles.ota, { top: insets.top + space.sm }]} accessibilityRole="alert" accessibilityLiveRegion="polite">
       <AppText variant="bodyMedium" style={{ flex: 1 }}>
         {t("update.readyBody")}
       </AppText>
@@ -84,6 +101,9 @@ export function OtaReadyBanner() {
         style={styles.otaButton}
         onPress={() => void Updates.reloadAsync().catch(() => undefined)}
       />
+      <IconButton label={t("common.close")} onPress={() => setDismissed(true)}>
+        <X size={20} color={colors.inkSecondary} />
+      </IconButton>
     </View>
   );
 }

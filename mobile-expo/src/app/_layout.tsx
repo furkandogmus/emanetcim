@@ -3,7 +3,8 @@ import i18n from "@/lib/i18n";
 
 import { useEffect, useState } from "react";
 import { AppState, Pressable, StyleSheet, Text, View } from "react-native";
-import { Stack, router } from "expo-router";
+import { Stack } from "expo-router";
+import * as Updates from "expo-updates";
 import type { ErrorBoundaryProps } from "expo-router";
 import * as SplashScreen from "expo-splash-screen";
 import { StatusBar } from "expo-status-bar";
@@ -199,8 +200,9 @@ export function ErrorBoundary({ error, retry }: ErrorBoundaryProps) {
       <Pressable
         accessibilityRole="button"
         onPress={() => {
-          void retry();
-          router.replace("/");
+          // Kok sinir ekraniyken yonlendirici hazir degil (router.replace firlatir) ve
+          // retry() cokmus rotayi yeniden acar: soguk yeniden baslatma ilk rotaya iner.
+          Updates.reloadAsync().catch(() => void retry());
         }}
         style={[boundaryStyles.button, { borderColor: colors.border, borderWidth: 1 }]}
       >

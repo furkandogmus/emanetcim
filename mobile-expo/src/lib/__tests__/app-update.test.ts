@@ -1,6 +1,6 @@
 import { describe, expect, it } from "@jest/globals";
 
-import { isBelowMinVersion, parseVersion } from "@/lib/app-update";
+import { isBelowMinVersion, isOtaBannerBlocked, parseVersion } from "@/lib/app-update";
 
 /**
  * Zorunlu guncelleme kapisi: yanlis karsilastirma ya eski surumu iceri alir ya da
@@ -35,5 +35,18 @@ describe("isBelowMinVersion", () => {
     expect(isBelowMinVersion("0.3.3", null)).toBe(false);
     expect(isBelowMinVersion(null, "1.0.0")).toBe(false);
     expect(isBelowMinVersion("0.3.3", "bozuk")).toBe(false);
+  });
+});
+
+describe("isOtaBannerBlocked", () => {
+  it("odeme ve QR okutma yollarinda seridi gizler", () => {
+    expect(isOtaBannerBlocked("/checkout")).toBe(true);
+    expect(isOtaBannerBlocked("/partner/scan")).toBe(true);
+  });
+  it("diger ekranlarda gosterir", () => {
+    expect(isOtaBannerBlocked("/")).toBe(false);
+    expect(isOtaBannerBlocked("/map")).toBe(false);
+    expect(isOtaBannerBlocked("/partner/schedule")).toBe(false);
+    expect(isOtaBannerBlocked("/bookings/checkout-help")).toBe(false);
   });
 });
