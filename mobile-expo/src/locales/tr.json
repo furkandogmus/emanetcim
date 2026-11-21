@@ -709,6 +709,7 @@
       "file_too_large": "Fotoğraf çok büyük; başka bir fotoğraf dene.",
       "invalid_type": "Bu dosya türü desteklenmiyor; JPEG, PNG ya da WebP seç.",
       "no_file": "Fotoğraf seçilmedi.",
+      "invalid_input": "Girdiğin bilgileri kontrol edip tekrar dene.",
       "invalid_password": "Şifre en az 8 karakter olmalı.",
       "current_password_required": "Mevcut şifreni gir.",
       "invalid_current_password": "Mevcut şifre hatalı.",

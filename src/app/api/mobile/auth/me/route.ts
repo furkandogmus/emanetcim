@@ -30,6 +30,7 @@ export async function GET(req: NextRequest) {
       role: true,
       image: true,
       emailVerified: true,
+      passwordHash: true,
     },
   });
   if (!profile) return NextResponse.json({ error: "unauthorized" }, { status: 401 });

@@ -709,6 +709,7 @@
       "file_too_large": "That photo is too large; try another one.",
       "invalid_type": "That file type isn't supported; choose a JPEG, PNG or WebP.",
       "no_file": "No photo selected.",
+      "invalid_input": "Please check what you entered and try again.",
       "invalid_password": "The password must be at least 8 characters.",
       "current_password_required": "Enter your current password.",
       "invalid_current_password": "The current password is wrong.",

@@ -238,6 +238,8 @@ type MobileUserSource = {
   role: string;
   image: string | null;
   emailVerified: Date | null;
+  /** Yalnızca "var mı" bilgisi dışarı çıkar; hash asla. Select'te `passwordHash: true` şart. */
+  passwordHash: string | null;
 };
 
 /**
@@ -262,6 +264,7 @@ export function toMobileUser(u: MobileUserSource) {
     role: u.role,
     avatarUrl: u.image,
     emailVerified: u.emailVerified !== null,
+    hasPassword: u.passwordHash !== null,
   };
 }
 
