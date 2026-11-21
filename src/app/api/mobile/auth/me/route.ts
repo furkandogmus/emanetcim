@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
 import prisma from "@/lib/db";
-import { requireMobileUser } from "@/lib/mobile-auth";
+import { forbidWhileImpersonating, requireMobileUser } from "@/lib/mobile-auth";
 import { toMobileUser } from "@/lib/mobile-dto";
 import { partnerProfileService } from "@/services/PartnerProfileService";
 import { isPrismaUniqueViolation } from "@/lib/prisma-errors";
@@ -76,9 +76,15 @@ export async function PUT(req: NextRequest) {
     });
   }
 
-  const { name, phone, image } = await req
+  const { name, phone, image, email } = await req
     .json()
-    .catch(() => ({ name: undefined, phone: undefined, image: undefined }));
+    .catch(() => ({ name: undefined, phone: undefined, image: undefined, email: undefined }));
+
+  // E-posta bu uctan hic yazilmaz; yine de goruntuleme oturumunda girisim acik 403 alir.
+  if (email !== undefined) {
+    const blocked = forbidWhileImpersonating(auth.user);
+    if (blocked) return blocked;
+  }
 
   const data: Record<string, unknown> = {};
   let phoneChange: string | null | undefined;
@@ -91,6 +97,9 @@ export async function PUT(req: NextRequest) {
   }
 
   if (phone !== undefined) {
+    // Telefon giris kimligi: yonetici goruntuleme oturumunda degistirilemez (ad/fotograf serbest).
+    const blocked = forbidWhileImpersonating(auth.user);
+    if (blocked) return blocked;
     /*
       TELEFON NORMALIZE EDILMEDEN YAZILIYORDU (2026-08-31'de bulundu).
 
