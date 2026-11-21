@@ -31,7 +31,6 @@ describe("bot kayit kalibi", () => {
 describe("her yeni hesap yolu kalibi uygular", () => {
   it.each([
     "src/app/api/mobile/auth/session/route.ts",
-    "src/app/api/mobile/auth/register/route.ts",
     "src/app/api/mobile/auth/google/route.ts",
     "src/app/api/mobile/auth/apple/route.ts",
     "src/actions/register.ts",

@@ -36,10 +36,6 @@ function read(rel: string): string {
 /** Hiz siniri TASIMASI ZORUNLU uclar ve neden. */
 const MUST_RATE_LIMIT: Array<{ file: string; why: string }> = [
   {
-    file: "src/app/api/mobile/auth/register/route.ts",
-    why: "hesap acar ve token uretir",
-  },
-  {
     file: "src/app/api/mobile/auth/session/route.ts",
     why: "sifre ve OTP dogrular",
   },
@@ -106,21 +102,13 @@ describe("kimlik dogrulama uclarinin kapilari", () => {
     ).toEqual([]);
   });
 
-  it("register: parolasiz mevcut hesaba token BASMAZ", () => {
-    const src = read("src/app/api/mobile/auth/register/route.ts");
+  it("register: mobil uc SILINDI, geri gelmemeli", () => {
     /*
-      Onceki hali: `if (existing.passwordHash) { ...dogrula... }` — yani
-      `passwordHash` NULL ise dogrulama BLOGU HIC calismiyor ve alt satirda
-      token uretiliyordu. Dogrusu erken cikis: parolasiz hesapta bu uc token
-      uretmez, cunku kimligi kanitlayan hicbir sey yok.
+      E-postayi kanitsiz dogrulanmis sayip hesap aciyordu (on-hesap devralma)
+      ve Expo istemcisi hic cagirmiyordu. Sifreli kayit geri gelirse e-posta
+      OTP ile dogrulanmadan `emailVerified` yazilmamali.
     */
-    expect(src).toMatch(/if\s*\(\s*!existing\.passwordHash\s*\)/);
-    expect(src).toMatch(/account_exists_social/);
-    expect(
-      src,
-      "Sifre dogrulamasi `passwordHash` VARSA calisan bir blogun icinde " +
-        "olmamali: null oldugunda blok atlanip token uretiliyordu.",
-    ).not.toMatch(/if\s*\(\s*existing\.passwordHash\s*\)\s*\{/);
+    expect(fs.existsSync(path.join(ROOT, "src/app/api/mobile/auth/register/route.ts"))).toBe(false);
   });
 
   it("apple: dogrulanmamis e-postayi kimlik olarak kullanmaz", () => {
@@ -305,7 +293,6 @@ describe("kimlik dogrulama uclarinin kapilari", () => {
     const files = [
       "src/actions/register.ts",
       "src/actions/password-reset.ts",
-      "src/app/api/mobile/auth/register/route.ts",
       "src/services/auth/password-reset.ts",
     ];
     const offenders: string[] = [];
