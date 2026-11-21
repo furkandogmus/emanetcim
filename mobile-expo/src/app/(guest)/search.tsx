@@ -167,7 +167,7 @@ export default function SearchWizard() {
             <AppText variant="title">{t("search.whenTitle")}</AppText>
             {editing ? (
               <View style={styles.summaryRows}>
-                {search.place ? (
+                {params.returnTo === "map" && search.place ? (
                   <Pressable accessibilityRole="button" onPress={() => setStep(0)} style={styles.summaryRow}>
                     <AppText variant="bodyMedium" numberOfLines={1} style={{ flex: 1 }}>
                       {search.place.label}
