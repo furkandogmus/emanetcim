@@ -14,9 +14,15 @@ import { resolveServerSessionId } from "@/lib/analytics-server";
 import logger from "@/lib/logger";
 import { toMobileUser } from "@/lib/mobile-dto";
 import { markEmailVerifiedByCode } from "@/services/auth/verify-email";
+import { recordMobileLegalAcceptance } from "@/services/auth/legal-acceptance";
+import { smsLoginEnabled } from "@/lib/sms-login";
 
 const schema = z.union([
-  z.object({ email: z.string().email(), code: z.string().length(6) }),
+  z.object({
+    email: z.string().email(),
+    code: z.string().length(6),
+    acceptedLegal: z.boolean().optional(),
+  }),
   z.object({ phone: z.string().min(10), code: z.string().length(6) }),
   z.object({ email: z.string().email(), password: z.string().min(1) }),
   z.object({ phone: z.string().min(10), password: z.string().min(1) }),
@@ -27,6 +33,7 @@ type AuthRequestBody = {
   phone?: string;
   code?: string;
   password?: string;
+  acceptedLegal?: boolean;
 };
 
 export async function POST(req: NextRequest) {
@@ -63,6 +70,10 @@ export async function POST(req: NextRequest) {
   }
 
   const { code, password } = data;
+  // SMS yok: telefonla kod dogrulamasi kapali (bkz. `lib/sms-login.ts`).
+  if (code && !isEmail && !smsLoginEnabled()) {
+    return NextResponse.json({ error: "sms_unavailable" }, { status: 400 });
+  }
   const identifier = `mobile:${normalizedIdentity}`;
 
   let user: User | null = null;
@@ -70,6 +81,20 @@ export async function POST(req: NextRequest) {
   if (code) {
     if (!(await rateLimit(`mobile_otp_verify:${normalizedIdentity}`, 5, 15 * 60_000))) {
       return NextResponse.json({ error: "too_many_attempts" }, { status: 429 });
+    }
+
+    /*
+      Bot kalibi / gecici domain: yeni hesap acilmayacaksa kodu TUKETMEDEN
+      reddet (eskiden once kod siliniyor, sonra 403 donuyordu).
+    */
+    if (isEmail && isBlockedSignupEmail(normalizedIdentity)) {
+      const existing = await prisma.user.findUnique({
+        where: { email: normalizedIdentity },
+        select: { id: true },
+      });
+      if (!existing) {
+        return NextResponse.json({ error: "invalid_email" }, { status: 403 });
+      }
     }
 
     const token = await prisma.verificationToken.delete({
@@ -104,10 +129,14 @@ export async function POST(req: NextRequest) {
           emailVerified: isEmail ? new Date() : null,
           phone: !isEmail ? normalizedIdentity : null,
           role: "GUEST",
-          name: isEmail ? normalizedIdentity.split("@")[0] : `User ${normalizedIdentity.slice(-4)}`,
+          // E-posta yerel kismi ad degildir: esnaf listesinde "Misafir" yazilir.
+          name: isEmail ? null : `User ${normalizedIdentity.slice(-4)}`,
         },
       });
       const newUserId = user.id;
+      if (data.acceptedLegal === true) {
+        await recordMobileLegalAcceptance(newUserId, ip);
+      }
       void notificationService
         .notifyAdminsForNewUser({
           name: user.name,
@@ -126,7 +155,14 @@ export async function POST(req: NextRequest) {
     }
     if (isEmail && !user.emailVerified) await markEmailVerifiedByCode(user.id);
   } else if (password) {
-    if (!(await rateLimit(`mobile_pwd:${normalizedIdentity}`, 5, 15 * 60_000))) {
+    /*
+      Kimlik + IP: kimligin telefonu/e-postasini bilen biri baska IP'den hesabi
+      kilitleyemez. Yalniz-kimlik kovasi (yuksek) dagitik denemeye karsi yedek.
+    */
+    if (
+      !(await rateLimit(`mobile_pwd:${normalizedIdentity}:${ip}`, 5, 15 * 60_000)) ||
+      !(await rateLimit(`mobile_pwd:${normalizedIdentity}`, 40, 15 * 60_000))
+    ) {
       return NextResponse.json({ error: "too_many_attempts" }, { status: 429 });
     }
 

@@ -58,7 +58,6 @@ vi.mock("@/services/ReviewService", () => {
 });
 
 import prisma from "@/lib/db";
-import { isNetgsmConfigured } from "@/lib/netgsm";
 import { sendMobileOtp } from "@/lib/mail";
 
 describe("Mobile API - Auth OTP", () => {
@@ -131,17 +130,41 @@ describe("Mobile API - Auth OTP", () => {
     expect(sendMobileOtp).toHaveBeenCalled();
   });
 
-  it("should skip SMS when netgsm not configured for phone identity", async () => {
-    vi.mocked(isNetgsmConfigured).mockReturnValue(false);
+  it("telefon kimligine kod gondermez: sms_unavailable, kod saklanmaz", async () => {
     const { POST } = await import("@/app/api/mobile/auth/otp/route");
     const req = new Request("http://localhost/api/mobile/auth/otp", {
       method: "POST",
       body: JSON.stringify({ phone: "5051234567" }),
     });
     const res = await POST(req);
-    expect(res.status).toBe(200);
-    const body = await res.json();
-    expect(body.ok).toBe(true);
+    expect(res.status).toBe(400);
+    expect((await res.json()).error).toBe("sms_unavailable");
+    expect(prisma.verificationToken.upsert).not.toHaveBeenCalled();
+  });
+
+  it("giris kodu e-postasi Accept-Language dilinde gider", async () => {
+    const { POST } = await import("@/app/api/mobile/auth/otp/route");
+    const req = new Request("http://localhost/api/mobile/auth/otp", {
+      method: "POST",
+      headers: { "accept-language": "de-DE,de;q=0.9" },
+      body: JSON.stringify({ email: "gast@bagajpark.com" }),
+    });
+    await POST(req);
+    expect(sendMobileOtp).toHaveBeenCalledWith("gast@bagajpark.com", expect.any(String), "de");
+  });
+
+  it("bot kalibi yeni e-postayi mail gitmeden 403 invalid_email ile reddeder", async () => {
+    vi.mocked(prisma.user.findUnique).mockResolvedValueOnce(null);
+    const { POST } = await import("@/app/api/mobile/auth/otp/route");
+    const req = new Request("http://localhost/api/mobile/auth/otp", {
+      method: "POST",
+      body: JSON.stringify({ email: "x@mailinator.com" }),
+    });
+    const res = await POST(req);
+    expect(res.status).toBe(403);
+    expect((await res.json()).error).toBe("invalid_email");
+    expect(sendMobileOtp).not.toHaveBeenCalled();
+    expect(prisma.verificationToken.upsert).not.toHaveBeenCalled();
   });
 });
 
