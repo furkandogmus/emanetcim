@@ -63,6 +63,13 @@ export type NearbyShop = Shop & {
   priceRange?: { min: number; max: number; medium?: number };
   /** Secilen saat dukkanin saatine oturtulduysa (ornegin alis kapanisa cekildi). */
   hoursNotice?: HoursNotice | null;
+  /**
+   * `false`: secilen saatte rezervasyon acilamaz (kapali gun, kapanistan sonra). Alan
+   * yoksa (eski sunucu) rezervasyon alinabilir demektir. Yalnizca `includeClosed=1` ile gelir.
+   */
+  bookable?: boolean;
+  /** Kapali dukkanin sonraki gercek acilisi (Istanbul gunu `YYYY-MM-DD` + `HH:mm`); bulunamazsa null. */
+  nextOpen?: { date: string; at: string } | null;
 };
 
 export type HoursAdjustment = { at: string; reason: "opens" | "closes" };
@@ -73,6 +80,8 @@ export type ShopDetail = Shop & {
   gallery?: string[];
   weeklyHours?: { weekday: number; isClosed: boolean; openingTime: string; closingTime: string }[];
   closures?: { startDate: string; endDate: string }[];
+  /** Boyut basina gunluk fiyat, sunucu yuvarlamasiyla. Eski sunucuda yok. */
+  priceBySize?: { s: number; m: number; xl: number };
   pricing: {
     bagMultiplierS: number;
     bagMultiplierM: number;

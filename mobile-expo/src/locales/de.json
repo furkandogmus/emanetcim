@@ -127,7 +127,8 @@
     "nextMonth": "Nächster Monat",
     "step": "Schritt {{current}} von {{total}}",
     "dropOffInPast": "Diese Abgabezeit ist vorbei. Wähle eine neue Zeit.",
-    "locationUnavailable": "Dein Standort konnte nicht ermittelt werden. Suche eine Adresse oder wähle eine Stadt aus der Liste."
+    "locationUnavailable": "Dein Standort konnte nicht ermittelt werden. Suche eine Adresse oder wähle eine Stadt aus der Liste.",
+    "changePlace": "Ändern"
   },
   "bags": {
     "s": "Klein (S)",
@@ -156,7 +157,25 @@
     "hoursCloses": "Schließt {{time}} · Gepäck vorher abholen",
     "hoursOpens": "Öffnet {{time}} · Abgabe ab dann",
     "hoursPickupOpens": "Abholung ab {{time}}",
-    "perDayMedium": "mittel / Tag"
+    "perDayMedium": "mittel / Tag",
+    "closedToday": "Öffnet heute um {{time}}",
+    "closedTomorrow": "Heute geschlossen · Öffnet morgen um {{time}}",
+    "closedDay": "Geschlossen · Öffnet {{day}} um {{time}}",
+    "closedNoDate": "Zur gewählten Zeit geschlossen",
+    "shiftTitle": "Suche verschieben?",
+    "shiftBody": "{{name}} öffnet {{when}}. Suche auf diese Zeit aktualisieren?",
+    "shiftAction": "Suche anpassen",
+    "emptyWindowTitle": "Zur gewählten Zeit keine freien Orte",
+    "emptyWindowBody": "Ändere Datum oder Uhrzeit und versuche es erneut.",
+    "changeDates": "Datum / Uhrzeit ändern",
+    "tomorrowMorning": "Morgen früh suchen",
+    "toggleList": "Liste öffnen / schließen",
+    "rolledToTomorrow": "Es ist Abend, daher wird morgen früh angezeigt.",
+    "errors": {
+      "invalid_dates": "Die gewählten Daten sind nicht verfügbar. Ändere die Daten.",
+      "search_unavailable": "Die Suche ist gerade nicht verfügbar. Versuche es gleich noch einmal.",
+      "too_many_requests": "Zu viele Versuche. Warte kurz und versuche es erneut."
+    }
   },
   "shop": {
     "open247": "24/7 geöffnet",
@@ -182,7 +201,13 @@
     "reviews": "Bewertungen ({{count}})",
     "noReviews": "Noch keine Bewertungen.",
     "photoN": "Foto {{n}} von {{total}}",
-    "perDayMediumLabel": "Mittleres Gepäck pro Tag"
+    "perDayMediumLabel": "Mittleres Gepäck pro Tag",
+    "errors": {
+      "not_found": "Dieser Ort ist nicht mehr verfügbar."
+    },
+    "nearbyAction": "Orte in der Nähe",
+    "selection": "Deine Suche: {{when}} · {{bags}}",
+    "change": "Ändern"
   },
   "checkout": {
     "pickOtherTime": "Andere Zeit wählen",
