@@ -7,6 +7,9 @@ import { sendMobileOtp } from "@/lib/mail";
 import { isNetgsmConfigured, normalizeTrGsm10, sendNetgsmRestSms } from "@/lib/netgsm";
 import { rateLimit } from "@/lib/rate-limit";
 import { clientIpFromHeaders } from "@/lib/client-ip";
+import { resolveRequestLocale } from "@/lib/request-locale";
+import { isBlockedSignupEmail } from "@/lib/disposable-emails";
+import { smsLoginEnabled } from "@/lib/sms-login";
 
 const schema = z.union([
   z.object({ email: z.string().email() }),
@@ -30,6 +33,15 @@ export async function POST(req: Request) {
 
   const data = parsed.data;
   const isEmail = "email" in data;
+
+  /*
+    SMS YOK: eski surumler telefon gonderebilir (parse hatasi yerine acik kod
+    donsun diye sema telefonu hala kabul ediyor) ama hicbir kod saklanmaz.
+  */
+  if (!isEmail && !smsLoginEnabled()) {
+    logger.warn("mobile_otp_phone_rejected_sms_disabled");
+    return NextResponse.json({ error: "sms_unavailable" }, { status: 400 });
+  }
   const rawIdentity = isEmail ? data.email : data.phone;
   const normalizedIdentity = isEmail ? rawIdentity.toLowerCase() : normalizeTrGsm10(rawIdentity);
 
@@ -43,6 +55,21 @@ export async function POST(req: Request) {
   }
   if (!(await rateLimit(`mobile_otp_ip:${ip}`, 10, 5 * 60_000))) {
     return NextResponse.json({ error: "too_many_requests" }, { status: 429 });
+  }
+
+  /*
+    Bot kalibi / gecici domain yeni hesap acamaz (session ucu da reddeder). Kod
+    yazildiktan SONRA degil, mail gitmeden once soyle: kullanici bos yere
+    bekletilmez. Yalnizca engelli kalipta olan ve hesabi bulunmayan adres icin.
+  */
+  if (isEmail && isBlockedSignupEmail(normalizedIdentity)) {
+    const existing = await prisma.user.findUnique({
+      where: { email: normalizedIdentity },
+      select: { id: true },
+    });
+    if (!existing) {
+      return NextResponse.json({ error: "invalid_email" }, { status: 403 });
+    }
   }
 
   const review = playReviewLogin(normalizedIdentity);
@@ -62,7 +89,11 @@ export async function POST(req: Request) {
   if (review) {
     logger.info("mobile_otp_play_review_login");
   } else if (isEmail) {
-    await sendMobileOtp(normalizedIdentity, code);
+    await sendMobileOtp(
+      normalizedIdentity,
+      code,
+      resolveRequestLocale(req.headers.get("accept-language")),
+    );
   } else {
     if (isNetgsmConfigured()) {
       const smsResult = await sendNetgsmRestSms({
