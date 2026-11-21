@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from "react";
-import { AppState, Linking, Pressable, StyleSheet, View } from "react-native";
+import { AppState, KeyboardAvoidingView, Linking, Platform, Pressable, ScrollView, StyleSheet, View } from "react-native";
 import * as Haptics from "expo-haptics";
 import { Flashlight, FlashlightOff } from "lucide-react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
@@ -83,6 +83,8 @@ export default function PartnerScanScreen() {
   if (!permission.granted) {
     return (
       <SafeAreaView style={styles.safe}>
+        <KeyboardAvoidingView style={{ flex: 1 }} behavior={Platform.OS === "ios" ? "padding" : undefined}>
+        <ScrollView contentContainerStyle={{ flexGrow: 1, justifyContent: "center" }} keyboardShouldPersistTaps="handled">
         <CenterMessage
           art={<LuggageTag size={72} />}
           title={t("scan.permissionTitle")}
@@ -101,6 +103,8 @@ export default function PartnerScanScreen() {
             </View>
           }
         />
+        </ScrollView>
+        </KeyboardAvoidingView>
       </SafeAreaView>
     );
   }
@@ -117,7 +121,10 @@ export default function PartnerScanScreen() {
         onBarcodeScanned={({ data }) => void onScanned(data)}
       />
       ) : null}
-      <SafeAreaView style={styles.overlay} edges={["top", "bottom"]}>
+      <SafeAreaView style={styles.overlaySafe} edges={["top", "bottom"]}>
+      <KeyboardAvoidingView style={{ flex: 1 }} behavior={Platform.OS === "ios" ? "padding" : undefined}>
+      {/* Klavye acilinca icerik kayabilsin: arama kutusu, buton ve eslesme listesi gorunur kalsin. */}
+      <ScrollView contentContainerStyle={styles.overlay} keyboardShouldPersistTaps="handled" bounces={false}>
         <View style={styles.top}>
           <AppText variant="title" style={{ color: colors.white, flex: 1 }}>
             {t("scan.open")}
@@ -143,6 +150,8 @@ export default function PartnerScanScreen() {
             <ManualLookup />
           </View>
         </View>
+      </ScrollView>
+      </KeyboardAvoidingView>
       </SafeAreaView>
     </View>
   );
@@ -151,7 +160,8 @@ export default function PartnerScanScreen() {
 const styles = StyleSheet.create({
   safe: { flex: 1, backgroundColor: colors.bg },
   root: { flex: 1, backgroundColor: "#000" },
-  overlay: { flex: 1, justifyContent: "space-between", padding: space.xl },
+  overlaySafe: { flex: 1 },
+  overlay: { flexGrow: 1, justifyContent: "space-between", gap: space.lg, padding: space.xl },
   top: { flexDirection: "row", justifyContent: "flex-start", alignItems: "center" },
   torch: { width: 48, height: 48, borderRadius: 24, alignItems: "center", justifyContent: "center", backgroundColor: "rgba(0,0,0,0.55)" },
   manual: { backgroundColor: colors.bg, borderRadius: radius.control, padding: space.md },
@@ -201,7 +211,7 @@ function ManualLookup() {
           setMatches(null);
         }}
         placeholder={t("scan.manualPlaceholder")}
-        autoCapitalize="characters"
+        autoCapitalize="none"
         autoCorrect={false}
         returnKeyType="search"
         onSubmitEditing={search}
