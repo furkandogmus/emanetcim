@@ -21,7 +21,8 @@ import { bcp47ForUiLocale } from "@/lib/intl-locale";
 interface RecentBooking {
   id: string;
   totalPrice: number;
-  createdAt: string;
+  /** Teslim (check-out) anı; kazanç bu tarihe yazılır. */
+  collectedAt: string;
   guestName: string | null;
 }
 
@@ -155,6 +156,7 @@ export default function PartnerEarningsClient({
           <div>
             <h1 className="text-xl font-black text-gray-900">{t("earnings")}</h1>
             <p className="text-sm text-gray-500">{shopName}</p>
+            <p className="text-xs text-gray-400">{t("earningsBasisNote")}</p>
           </div>
         </div>
       </div>
@@ -367,7 +369,7 @@ export default function PartnerEarningsClient({
               <div className="divide-y divide-gray-50">
                 {recent.map((b) => {
                   const net = Math.round(b.totalPrice * merchantRatio * 100) / 100;
-                  const date = new Date(b.createdAt).toLocaleDateString(bcp47);
+                  const date = new Date(b.collectedAt).toLocaleDateString(bcp47);
                   return (
                     <div key={b.id} className="px-4 py-3 flex items-center justify-between">
                       <div>

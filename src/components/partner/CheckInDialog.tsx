@@ -114,6 +114,8 @@ export default function CheckInDialog({
    * `SEAL_INVALID` ile reddediliyor: numara stokta KAYITLI olmak zorunda.
    */
   const [stockEmpty, setStockEmpty] = useState(false);
+  // Sunucu SHOP_CLOSED dedi: esnaf "yine de teslim al" onayini verebilir (mobil ile ayni kural).
+  const [askOutsideHours, setAskOutsideHours] = useState(false);
 
   /**
    * Mühür numaralarını dükkan stoğundan ÖN DOLDUR.
@@ -172,7 +174,7 @@ export default function CheckInDialog({
   const sealsIncomplete =
     requireSeals && sealRows.length > 0 && filledSealCount !== sealRows.length;
 
-  const handleCheckIn = async () => {
+  const handleCheckIn = async (outsideHours = false) => {
     /**
      * Ayar açıkken eksik mühürle sunucuya GİTMEYİZ. Sunucu zaten reddediyor
      * ama esnafın hatayı butona bastıktan sonra öğrenmesi için sebep yok.
@@ -211,10 +213,14 @@ export default function CheckInDialog({
         preview.id,
         hasSealInput ? { sealAssignments, faultySealNumbers: faultySeals } : undefined,
         photoBuffer,
+        outsideHours ? { outsideHours: true } : undefined,
       );
       if (result.success) {
         onSuccess();
+      } else if (result.code === "SHOP_CLOSED" && !outsideHours) {
+        setAskOutsideHours(true);
       } else {
+        setAskOutsideHours(false);
         toast.error(errorText(result.error, t("checkInFailed")));
       }
     } catch (e) {
@@ -395,6 +401,35 @@ export default function CheckInDialog({
                     {t("sealNumbersRequired")}
                   </p>
                 )}
+              </div>
+            )}
+
+            {askOutsideHours && (
+              <div
+                role="alert"
+                className="flex flex-col gap-3 rounded-2xl border border-amber-200 bg-amber-50 p-4 text-amber-900"
+              >
+                <p className="flex items-center gap-2 text-sm font-bold">
+                  <AlertTriangle size={16} />
+                  {t("outsideHoursTitle")}
+                </p>
+                <p className="text-xs font-medium">{t("outsideHoursBody")}</p>
+                <div className="flex flex-wrap gap-2">
+                  <button
+                    type="button"
+                    onClick={() => void handleCheckIn(true)}
+                    disabled={isProcessing}
+                    className="rounded-2xl bg-amber-600 px-4 py-2 text-xs font-bold text-white hover:bg-amber-700 disabled:opacity-50"
+                  >
+                    {t("outsideHoursConfirm")}
+                  </button>
+                  <Link
+                    href="/partner/settings"
+                    className="rounded-2xl border border-amber-300 px-4 py-2 text-xs font-bold text-amber-900 hover:bg-amber-100"
+                  >
+                    {t("outsideHoursEditHours")}
+                  </Link>
+                </div>
               </div>
             )}
 

@@ -249,6 +249,11 @@ export async function checkInAction(
    * onun seçtiği bir dosya olurdu. Doğrulama ve yükleme sunucuda.
    */
   sealPhoto?: ArrayBuffer | null,
+  /**
+   * Esnaf "dukkan su an kapali gorunuyor, yine de teslim al" onayini verdi.
+   * Kural (kim gecersiz kilabilir, ne kaydedilir) serviste; mobil uc ile ayni.
+   */
+  options?: { outsideHours?: boolean },
 ) {
   const actor = await assertPartner();
 
@@ -316,10 +321,12 @@ export async function checkInAction(
 
   // Aktör kim: dükkanda tahsilat modunda check-in aynı zamanda "parayı aldım"
   // beyanıdır ve bu denetim izine yazılır (P1-9).
-  const result = await bookingService.checkIn(bookingId, sealPayload, {
-    id: actor.id,
-    role: actor.role,
-  });
+  const result = await bookingService.checkIn(
+    bookingId,
+    sealPayload,
+    { id: actor.id, role: actor.role },
+    { outsideHours: options?.outsideHours === true },
+  );
 
   if (result.ok) {
     /*
