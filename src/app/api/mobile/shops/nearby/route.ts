@@ -2,11 +2,12 @@ import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
 import { z } from "zod";
 import { shopService } from "@/services/ShopService";
-import { validateBookingStayWindow } from "@/lib/booking-server-price";
+import { computeAuthoritativeCheckoutTotals, validateBookingStayWindow } from "@/lib/booking-server-price";
+import { moneyToNumber } from "@/lib/money";
 import { getPricingRules } from "@/lib/platform-settings";
 import { rateLimit } from "@/lib/rate-limit";
 import { getClientIp } from "@/lib/get-ip";
-import { toMobilePriceRange, toMobileShop } from "@/lib/mobile-dto";
+import { toMobilePriceRange, toMobileShop, toMobileStayQuote } from "@/lib/mobile-dto";
 import { toDatetimeLocalValueInTimeZone } from "@/lib/datetime-local";
 import { nextOpening, snapStayToShopHours } from "@/lib/stay-days";
 import logger from "@/lib/logger";
@@ -26,6 +27,13 @@ const schema = z.object({
   checkOut: z.string().optional(),
   bags: z.coerce.number().int().min(1).max(200).optional(),
   /**
+   * Boy basina adet (yeni istemci). Gelirse her sonuca `stayQuote` eklenir; sinir
+   * `checkout/quote` ile ayni. Eski istemci yalnizca `bags` gonderir, yanit degismez.
+   */
+  bagsS: z.coerce.number().int().min(0).max(20).optional(),
+  bagsM: z.coerce.number().int().min(0).max(20).optional(),
+  bagsXl: z.coerce.number().int().min(0).max(20).optional(),
+  /**
    * Yeni istemci "saate oturmayan dukkanlari da gonder" der (`bookable:false`).
    * Eski surumler bu alani gondermez ve bilmedikleri alani yok sayar; onlara
    * kapali dukkan normal kart gibi gorunup odemede patlardi, bu yuzden onlar icin
@@ -42,7 +50,12 @@ export async function GET(req: NextRequest) {
 
   const parsed = schema.safeParse(Object.fromEntries(req.nextUrl.searchParams));
   if (!parsed.success) return NextResponse.json({ error: "invalid" }, { status: 400 });
-  const { lat, lng, r, page, limit, checkIn, checkOut, bags, includeClosed } = parsed.data;
+  const { lat, lng, r, page, limit, checkIn, checkOut, bags, bagsS, bagsM, bagsXl, includeClosed } = parsed.data;
+  const mix =
+    bagsS !== undefined || bagsM !== undefined || bagsXl !== undefined
+      ? { s: bagsS ?? 0, m: bagsM ?? 0, xl: bagsXl ?? 0 }
+      : null;
+  const mixTotal = mix ? mix.s + mix.m + mix.xl : 0;
 
   const radiusKm = r / 1000;
 
@@ -53,7 +66,7 @@ export async function GET(req: NextRequest) {
     if (!validateBookingStayWindow(ci, co, rules)) {
       return NextResponse.json({ error: "invalid_dates" }, { status: 400 });
     }
-    const requestedBags = Math.max(1, Math.floor(bags ?? 1));
+    const requestedBags = mixTotal > 0 ? mixTotal : Math.max(1, Math.floor(bags ?? 1));
     let results;
     try {
       results = await shopService.findShopsForSearch({
@@ -124,6 +137,25 @@ export async function GET(req: NextRequest) {
       open.push({
         ...base,
         bookable: true,
+        /*
+          Odeme ekraniyla AYNI hesap ve AYNI oturtulmus pencere (`checkout/quote`):
+          listede gorulen toplam, kod girilmemis odeme toplamidir.
+        */
+        ...(mix && mixTotal > 0
+          ? {
+              stayQuote: toMobileStayQuote(
+                computeAuthoritativeCheckoutTotals(
+                  moneyToNumber(s.pricePerDay),
+                  mix.s,
+                  mix.m,
+                  mix.xl,
+                  snapped.checkIn,
+                  snapped.checkOut,
+                  rules,
+                ),
+              ),
+            }
+          : {}),
         hoursNotice: snapped.drop || snapped.pickup ? { drop: snapped.drop ?? null, pickup: snapped.pickup ?? null } : null,
       });
     }
