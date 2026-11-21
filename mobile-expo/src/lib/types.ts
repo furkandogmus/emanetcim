@@ -126,6 +126,8 @@ export type BookingDetail = BookingSummary & {
   /** Eski sunucu gondermez; o zaman tekrar gonderim 409 ile yakalanir. */
   hasReview?: boolean;
   hasDispute?: boolean;
+  /** Bildirimin durumu (`toMobileDisputeStatus`); bildirim yoksa ya da eski sunucuda yok. */
+  disputeStatus?: DisputeStatus | null;
   /** Esnafin onerdigi, misafir onayi bekleyen valiz duzeltmesi. */
   pendingBagRevision?: PendingBagRevision | null;
   /** Yalnizca esnaf/admin ve CHECKED_IN: su an teslim edilirse gecikme ucreti ve erken iade. */
@@ -263,6 +265,8 @@ export type CreateReviewRequest = { bookingId: string; rating: number; comment?:
 export type CreateReviewResponse = { success: true; review: { id: string; rating: number } };
 
 export type DisputeReason = "DAMAGE" | "THEFT" | "OTHER";
+/** `../src/lib/dispute-status.ts` ile ayni liste. */
+export type DisputeStatus = "OPEN" | "IN_REVIEW" | "RESOLVED" | "CLOSED";
 
 /** `POST disputes`. Aciklama 10-2000 karakter (uc semasi). */
 export type CreateDisputeRequest = { bookingId: string; reason: DisputeReason; description: string };

@@ -5,6 +5,7 @@ import type { PricingRules } from "@/lib/pricing-rules";
 import { shopVisibilityIssues } from "@/lib/shop-visibility";
 import { storageCitiesListingShop } from "@/lib/storage-cities";
 import { isBagRevisableStatus } from "@/lib/bag-revision-status";
+import { DISPUTE_STATUSES, type DisputeStatus } from "@/lib/dispute-status";
 import type { PartnerDashboardSnapshot } from "@/services/PartnerDashboardService";
 
 /**
@@ -86,9 +87,19 @@ type BookingDetailSource = BookingSummarySource & {
   };
   seals: Array<{ sealNumber: number; bagIndex: number; bagSize: string }>;
   review?: { id: string } | null;
-  dispute?: { id: string } | null;
+  dispute?: { id: string; status?: string | null } | null;
   pendingBagRevision?: unknown;
 };
+
+/**
+ * Misafirin gordugu bildirim durumu. Sema `String`: listede olmayan bir deger
+ * "OPEN" sayilir (web misafir sayfasindaki `disputeStatusView` ile ayni kural).
+ */
+function toMobileDisputeStatus(dispute: { status?: string | null } | null | undefined): DisputeStatus | null {
+  if (!dispute) return null;
+  const s = dispute.status ?? "OPEN";
+  return (DISPUTE_STATUSES as readonly string[]).includes(s) ? (s as DisputeStatus) : "OPEN";
+}
 
 /**
  * Esnafin onerdigi, misafir onayi bekleyen valiz duzeltmesi. Kayit JSON
@@ -130,6 +141,8 @@ export function toMobileBookingDetail(b: BookingDetailSource, opts: { operator?:
     // yalnizca sunucunun 409'uyla ogreniyordu.
     hasReview: !!b.review,
     hasDispute: !!b.dispute,
+    // Kart "inceliyoruz"da takili kalmasin: sonuclanan bildirim kendi metnini gosterir (bulgu 52).
+    disputeStatus: toMobileDisputeStatus(b.dispute),
     /*
       Yalnizca duzeltilebilir durumda: iptal edilmis/teslim edilmis rezervasyonda
       kalmis bir oneri misafire onaylayamayacagi bir kart cizdiriyordu (bulgu 57).
