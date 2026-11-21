@@ -91,4 +91,67 @@ describe("api token yenileme", () => {
     fetchMock.mockResolvedValueOnce({ ok: false, status: 502, text: async () => "<html>" });
     await expect(api("/x", { auth: false })).rejects.toMatchObject({ code: "http_502" });
   });
+
+  it("iki token tek kayitta saklanir; eski ayri kayitlar okunup tasinir", async () => {
+    const SecureStore = jest.requireMock<typeof import("expo-secure-store")>("expo-secure-store");
+    await SecureStore.deleteItemAsync("bp.session");
+    await SecureStore.setItemAsync("bp.accessToken", "eski-a");
+    await SecureStore.setItemAsync("bp.refreshToken", "eski-r");
+    const { loadTokens } = freshApi();
+    expect(await loadTokens()).toEqual({ accessToken: "eski-a", refreshToken: "eski-r" });
+    expect(JSON.parse((await SecureStore.getItemAsync("bp.session"))!)).toEqual({ accessToken: "eski-a", refreshToken: "eski-r" });
+    expect(await SecureStore.getItemAsync("bp.accessToken")).toBeNull();
+    const again = freshApi();
+    expect(await again.loadTokens()).toEqual({ accessToken: "eski-a", refreshToken: "eski-r" });
+  });
+
+  it("yanit kaybolan refresh ayni token'la bir kez daha denenir (sunucu tolerans penceresi)", async () => {
+    const { api, saveTokens } = freshApi();
+    await saveTokens("eski-access", "refresh-1");
+    let refreshCalls = 0;
+    fetchMock.mockImplementation(async (url: string, init?: RequestInit) => {
+      if (url.endsWith("/auth/refresh")) {
+        refreshCalls += 1;
+        expect(JSON.parse(String(init?.body)).refreshToken).toBe("refresh-1");
+        if (refreshCalls === 1) throw new Error("aborted");
+        return json(200, { accessToken: "yeni-access", refreshToken: "refresh-2" });
+      }
+      const auth = (init?.headers as Record<string, string>).Authorization;
+      return auth === "Bearer yeni-access" ? json(200, { ok: true }) : json(401, { error: "unauthorized" });
+    });
+    await expect(api("/me")).resolves.toEqual({ ok: true });
+    expect(refreshCalls).toBe(2);
+  });
+
+  it("refresh 503 ya da bozuk govde: oturum dusmez, network atar", async () => {
+    const SecureStore = jest.requireMock<typeof import("expo-secure-store")>("expo-secure-store");
+    const { api, saveTokens, setSessionExpiredHandler } = freshApi();
+    await saveTokens("eski-access", "refresh-1");
+    const expired = jest.fn();
+    setSessionExpiredHandler(expired);
+    fetchMock.mockImplementation(async (url: string) =>
+      url.endsWith("/auth/refresh") ? json(503, { error: "service_unavailable" }) : json(401, { error: "unauthorized" }),
+    );
+    await expect(api("/me")).rejects.toMatchObject({ code: "network" });
+    fetchMock.mockImplementation(async (url: string) =>
+      url.endsWith("/auth/refresh")
+        ? { ok: true, status: 200, text: async () => "{trunc", json: async () => JSON.parse("{trunc") }
+        : json(401, { error: "unauthorized" }),
+    );
+    await expect(api("/me")).rejects.toMatchObject({ code: "network" });
+    expect(expired).not.toHaveBeenCalled();
+    expect(await SecureStore.getItemAsync("bp.session")).not.toBeNull();
+  });
+
+  it("acik bearer: o token'la gider, 401'de yenileme ve oturum sonu calismaz", async () => {
+    const { api, saveTokens, setSessionExpiredHandler } = freshApi();
+    await saveTokens("guncel", "refresh-1");
+    const expired = jest.fn();
+    setSessionExpiredHandler(expired);
+    fetchMock.mockResolvedValue(json(401, { error: "unauthorized" }) as never);
+    await expect(api("/auth/logout", { method: "POST", bearer: "yakalanan" })).rejects.toMatchObject({ status: 401 });
+    expect(fetchMock).toHaveBeenCalledTimes(1);
+    expect((fetchMock.mock.calls[0][1]?.headers as Record<string, string>).Authorization).toBe("Bearer yakalanan");
+    expect(expired).not.toHaveBeenCalled();
+  });
 });
