@@ -23,7 +23,16 @@ const NEVER_DROPPED = new Set<BookingStatus>(["APPROVED", "PAID", "PENDING", "WA
  * yalnizca isaretler), ama gecmis sekmesinde yesil "Onaylandi" hala gecerli bir
  * rezervasyon gibi okunuyordu.
  */
-export function StatusBadge({ status, checkOutTime }: { status: BookingStatus; checkOutTime?: string }) {
+export function StatusBadge({
+  status,
+  checkOutTime,
+  partnerView,
+}: {
+  status: BookingStatus;
+  checkOutTime?: string;
+  /** Esnafa "Onaylandi" degil "Bekleniyor": o onay esnafin isi degil, misafir henuz gelmedi. */
+  partnerView?: boolean;
+}) {
   const { t } = useTranslation();
   // BookingRow ile ayni desen: an bir kez okunur, cizim saf kalir.
   const [now] = useState(() => Date.now());
@@ -31,7 +40,7 @@ export function StatusBadge({ status, checkOutTime }: { status: BookingStatus; c
   const tone = unused ? TONES.CHECKED_OUT : (TONES[status] ?? TONES.PENDING);
   return (
     <View style={[styles.badge, { backgroundColor: tone.bg }]}>
-      <Text style={[styles.text, { color: tone.fg }]}>{unused ? t("status.UNUSED") : t(`status.${status}`)}</Text>
+      <Text style={[styles.text, { color: tone.fg }]}>{unused ? t("status.UNUSED") : partnerView && (status === "APPROVED" || status === "PAID") ? t("partner.statusWaiting") : t(`status.${status}`)}</Text>
     </View>
   );
 }

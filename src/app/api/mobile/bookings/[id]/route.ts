@@ -25,5 +25,12 @@ export async function GET(req: NextRequest, { params }: { params: Promise<{ id: 
   const operator = !requireRole(auth.user, ["PARTNER", "ADMIN"]);
   const checkoutPreview =
     operator && b.status === "CHECKED_IN" ? await previewCheckOutCharges(b, new Date()) : null;
-  return NextResponse.json({ ...toMobileBookingDetail(b), checkoutPreview });
+  /*
+    Misafirin telefonu YALNIZCA islemi yapan esnaf/yonetici icin ve YALNIZCA
+    aktif rezervasyonda: gelmeyen ya da gec kalan misafiri aramak icin. Bitmis
+    kayitta kisisel veri telefona gitmez.
+  */
+  const active = !["CHECKED_OUT", "CANCELLED"].includes(b.status);
+  const guestPhone = operator && active ? (b.guest?.phone ?? b.guestPhone ?? "") : "";
+  return NextResponse.json({ ...toMobileBookingDetail(b), guestPhone, checkoutPreview });
 }
