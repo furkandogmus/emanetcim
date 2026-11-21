@@ -15,6 +15,7 @@ import { clientIp } from "@/lib/internal-api-guard";
 import {
   claimRefreshJti,
   rememberIssuedPair,
+  releaseRefreshJti,
   type RefreshClaim,
 } from "@/lib/refresh-token-store";
 import { revokeAllUserSessions } from "@/services/auth/mobile-session";
@@ -100,10 +101,19 @@ export async function POST(req: NextRequest) {
     refreshToken: await signRefreshToken(user.id, user.role, user.tokenVersion, nextJti),
   };
   if (claims.jti) {
-    // Yazilamazsa eski davranis: tekrar gelirse replay sayilir. Yanit yine doner.
-    await rememberIssuedPair(claims.jti, pair, nextJti).catch((err: unknown) => {
+    /*
+      Cift saklanamazsa yanit DONMEZ: isaret geri alinir, 503 doner. Istemci 503'u
+      "network" sayar, ayni token'la tekrar gelir ve bu yine ilk kullanim olur. Cift
+      donup saklanmasaydi her tekrar 60 sn 503 (pending), sonra replay sayilip TUM
+      cihazlarin oturumu iptal edilirdi.
+    */
+    try {
+      await rememberIssuedPair(claims.jti, pair, nextJti);
+    } catch (err) {
       logger.warn({ err }, "mobile_refresh_pair_store_failed");
-    });
+      await releaseRefreshJti(claims.jti).catch(() => undefined);
+      return serviceUnavailable();
+    }
   }
   return NextResponse.json(pair);
 }
