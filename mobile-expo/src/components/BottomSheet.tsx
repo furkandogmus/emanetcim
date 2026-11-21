@@ -43,12 +43,27 @@ export function BottomSheet({
       y.value = withSpring(goingUp ? open : closed, SPRING);
     });
 
+  const tap = Gesture.Tap().onEnd(() => {
+    // Ince tutamac yerine dokunma da acar/kapatir.
+    y.value = withSpring(y.value > (open + closed) / 2 ? open : closed, SPRING);
+  });
+  const gesture = Gesture.Exclusive(pan, tap);
+
   const style = useAnimatedStyle(() => ({ transform: [{ translateY: y.value }] }));
 
   return (
     <Animated.View style={[styles.sheet, { height: height - open }, style]}>
-      <GestureDetector gesture={pan}>
-        <View style={styles.handleArea} accessibilityRole="adjustable">
+      <GestureDetector gesture={gesture}>
+        <View
+          style={styles.handleArea}
+          accessible
+          accessibilityRole="adjustable"
+          accessibilityActions={[{ name: "increment" }, { name: "decrement" }]}
+          onAccessibilityAction={(e) => {
+            // Ekran okuyucuda surukleme yok: artir = paneli ac, azalt = kapat.
+            y.set(withSpring(e.nativeEvent.actionName === "increment" ? open : closed, SPRING));
+          }}
+        >
           <View style={styles.handle} />
         </View>
       </GestureDetector>

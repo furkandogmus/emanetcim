@@ -283,12 +283,13 @@ const ShopMarkers = memo(function ShopMarkers({
               s.isPrelaunch ? `${s.name}, ${label}` : `${s.name}, ${t("shop.perDay", { price: label })}`
             }
           >
-            <View
-              style={[styles.pin, s.isPrelaunch && styles.pinMuted, selected && styles.pinSelected]}
-            >
-              <Text style={styles.pinText} numberOfLines={1}>
-                {label}
-              </Text>
+            {/* Seffaf kusak: gorunen pin 30 dp kalir, dokunma alani 44 dp olur. */}
+            <View style={styles.pinTouch}>
+              <View style={[styles.pin, s.isPrelaunch && styles.pinMuted, selected && styles.pinSelected]}>
+                <Text style={styles.pinText} numberOfLines={1}>
+                  {label}
+                </Text>
+              </View>
             </View>
           </Marker>
         );
@@ -322,6 +323,7 @@ const styles = StyleSheet.create({
   },
   searchHere: { position: "absolute", alignSelf: "center" },
   // Fiyat hapi: dar ekranda komsu pinleri ortmesin diye kucuk tutuldu (web `h-8`).
+  pinTouch: { paddingVertical: 7 },
   pin: {
     minWidth: 44,
     height: 30,
