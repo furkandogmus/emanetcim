@@ -18,10 +18,10 @@ const MAX_LIMIT = 50;
 const schema = z.object({
   lat: z.coerce.number().min(-90).max(90),
   lng: z.coerce.number().min(-180).max(180),
-  /** Metre. Kimliksiz uc: ust sinir 50 km (CR-nearby-clamp). */
-  r: z.coerce.number().min(100).max(MAX_RADIUS_M).default(5000),
-  page: z.coerce.number().int().min(1).max(1000).default(1),
-  limit: z.coerce.number().int().min(1).max(MAX_LIMIT).default(20),
+  /** Metre. Kimliksiz uc: 50 km'ye kirpilir (CR-nearby-clamp); sehir karti yaricapi sinirsiz olabilir, reddedilmez. */
+  r: z.coerce.number().default(5000).transform((v) => Math.min(Math.max(v, 100), MAX_RADIUS_M)),
+  page: z.coerce.number().int().default(1).transform((v) => Math.min(Math.max(v, 1), 1000)),
+  limit: z.coerce.number().int().default(20).transform((v) => Math.min(Math.max(v, 1), MAX_LIMIT)),
   checkIn: z.string().optional(),
   checkOut: z.string().optional(),
   bags: z.coerce.number().int().min(1).max(200).optional(),
@@ -71,6 +71,7 @@ export async function GET(req: NextRequest) {
         */
         ignoreOpenHours: true,
         strict: true,
+        includeOutsideHours: !!includeClosed,
         /*
           Web aramasiyla (`actions/search-shops.ts`) ayni gun kapisi: haftalik
           takvim ve kapanislar. Yoksa pazar gunu kapali ya da o tarihte izinli

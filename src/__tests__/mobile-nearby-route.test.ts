@@ -88,9 +88,12 @@ describe("GET /api/mobile/shops/nearby", () => {
     expect(res.status).toBe(503);
   });
 
-  it("sınırsız r / limit / page reddedilir", async () => {
-    for (const q of [{ r: "9999999" }, { limit: "5000" }, { page: "0" }, { page: "-3" }, { lat: "999" }] as Record<string, string>[]) {
-      expect((await GET(url(q))).status).toBe(400);
-    }
+  it("sınırsız r / limit / page reddedilmez, kırpılır; geçersiz enlem 400", async () => {
+    mockSearch.mockResolvedValue([]);
+    expect((await GET(url({ r: "9999999" }))).status).toBe(200);
+    expect(mockSearch.mock.calls.at(-1)?.[0].radiusKm).toBe(50);
+    expect((await GET(url({ limit: "5000", page: "-3" }))).status).toBe(200);
+    expect((await GET(url({ lat: "999" }))).status).toBe(400);
+    expect((await GET(url({ r: "abc" }))).status).toBe(400);
   });
 });
