@@ -91,6 +91,18 @@ describe("cancelBooking bildirimleri", () => {
     expect(m.pushGuestOnly).not.toHaveBeenCalled();
   });
 
+  // Bulgu 65: yonetici goruntulemede yapilan iptal olay satirinda yoneticiyi tasir.
+  it("aktor ve goruntuleyen yonetici olay kaydina ve deftere gecer", async () => {
+    const { bookingEventService } = await import("@/services/BookingEventService");
+    const { paymentService } = await import("@/services/PaymentService");
+    const actor = { id: "g1", role: "GUEST" as const, impersonatedBy: "admin-1" };
+    await cancelBooking("b1", { actor });
+    expect(bookingEventService.record).toHaveBeenCalledWith(
+      expect.objectContaining({ event: "CANCELLED", actorId: "g1", impersonatedBy: "admin-1" }),
+    );
+    expect(paymentService.cancelIntent).toHaveBeenCalledWith({ bookingId: "b1", actor });
+  });
+
   it("basarisiz iptalde bildirim gitmez", async () => {
     m.prisma.booking.updateMany.mockResolvedValue({ count: 0 });
     await cancelBooking("b1");

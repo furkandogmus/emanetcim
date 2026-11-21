@@ -22,7 +22,9 @@ export async function DELETE(req: NextRequest, { params }: { params: Promise<{ i
   }
 
   try {
-    const result = await bookingService.cancelBooking(id);
+    const result = await bookingService.cancelBooking(id, {
+      actor: { id: auth.user.id, role: auth.user.role, impersonatedBy: auth.user.impersonatedBy ?? null },
+    });
     if (result.ok) {
       return NextResponse.json({ success: true, fullRefund: result.fullRefund });
     }

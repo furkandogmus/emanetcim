@@ -64,9 +64,14 @@ export async function POST(
   }
 
   // Aktör: dükkanda tahsilat modunda check-in "parayı aldım" beyanıdır (P1-9).
+  /*
+    Yonetici "esnaf olarak goruntule" oturumunda da yazabilir (urun karari), ama
+    defter dugmeye kimin bastigini bilmeli: `impersonatedBy` olay satirina gider.
+  */
   const result = await bookingService.checkIn(id, sealPayload, {
     id: auth.user.id,
     role: auth.user.role,
+    impersonatedBy: auth.user.impersonatedBy ?? null,
   });
 
   if (!result.ok) {

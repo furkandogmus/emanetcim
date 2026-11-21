@@ -135,13 +135,13 @@ export interface IBookingService {
     seals?: CheckInSealPayload,
     actor?: PaymentActor,
   ): Promise<PartnerCheckInResult>;
-  checkOut(bookingId: string, opts?: { brokenSealNumbers?: number[] }): Promise<PartnerCheckOutResult>;
+  checkOut(bookingId: string, opts?: { brokenSealNumbers?: number[]; actor?: PaymentActor }): Promise<PartnerCheckOutResult>;
   getBookingByToken(token: string): Promise<BookingWithGuestShop | null>;
   createInitialBooking(data: CreateInitialBookingInput): Promise<Booking>;
   getUserBookings(userId: string, opts?: { page?: number; limit?: number }): Promise<{ items: GuestBookingListItem[]; total: number }>;
   getPartnerBookings(shopId: string, opts?: { page?: number; limit?: number }): Promise<{ items: PartnerBookingListItem[]; total: number }>;
   getBookingDetails(id: string): Promise<BookingWithShopGuestDetails | null>;
-  cancelBooking(bookingId: string): Promise<CancelBookingResult>;
+  cancelBooking(bookingId: string, opts?: { actor?: PaymentActor }): Promise<CancelBookingResult>;
   approveBooking(bookingId: string, actor: PartnerReviewActor, opts?: { locale?: string }): Promise<PartnerReviewResult>;
   rejectBooking(bookingId: string, actor: PartnerReviewActor, opts?: { locale?: string }): Promise<PartnerReviewResult>;
   markAsPaid(bookingId: string): Promise<void>;
@@ -181,7 +181,7 @@ export class BookingService implements IBookingService {
     return checkInImpl(bookingId, seals, actor);
   }
 
-  async checkOut(bookingId: string, opts?: { brokenSealNumbers?: number[] }): Promise<PartnerCheckOutResult> {
+  async checkOut(bookingId: string, opts?: { brokenSealNumbers?: number[]; actor?: PaymentActor }): Promise<PartnerCheckOutResult> {
     return checkOutImpl(bookingId, opts);
   }
 
@@ -299,8 +299,8 @@ export class BookingService implements IBookingService {
    * Tek kullanımlı indirim kuponu = “platform kredisi” (check-in’e &lt;1 saat kala nakit iade yok).
    */
 
-  async cancelBooking(bookingId: string): Promise<CancelBookingResult> {
-    return cancelBookingImpl(bookingId);
+  async cancelBooking(bookingId: string, opts?: { actor?: PaymentActor }): Promise<CancelBookingResult> {
+    return cancelBookingImpl(bookingId, { actor: opts?.actor });
   }
 
   /**
