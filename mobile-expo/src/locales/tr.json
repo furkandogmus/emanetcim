@@ -16,7 +16,9 @@
     "clear": "Temizle",
     "scrollBack": "Geri kaydır",
     "scrollForward": "İleri kaydır",
-    "goHome": "Ana sayfaya git"
+    "goHome": "Ana sayfaya git",
+    "notFoundTitle": "Bu sayfa açılamadı",
+    "notFoundBody": "Bağlantı bu hesapta açılmıyor ya da artık yok. Ana ekrana dönebilirsin."
   },
   "auth": {
     "title": "Giriş yap",
@@ -119,6 +121,8 @@
     "useLocation": "Konumumu kullan",
     "locating": "Konum alınıyor…",
     "locationDenied": "Konum izni verilmedi. Listeden bir şehir seçebilirsin.",
+    "locationBlocked": "Konum izni kapalı. Ayarlardan izin verebilir ya da listeden şehir seçebilirsin.",
+    "openSettings": "Ayarlardan izin ver",
     "popular": "Popüler şehirler",
     "whenTitle": "Ne zaman lazım?",
     "whenHint": "Aynı gün için tarihe bir kez dokun. Birkaç gün için başlangıç ve bitiş gününü seç.",
@@ -819,7 +823,7 @@
     "whenTitle": "Ne zaman?",
     "bagsTitle": "Kaç valiz?",
     "currentTotal": "Şu anki tutar",
-    "newTotal": "Tahmini yeni tutar",
+    "newTotal": "Yeni tutar",
     "paidNote": "Ödemesi alınmış bir rezervasyonun tutarı değiştirilemez. Tutarı değiştiren bir değişiklik için iptal edip yeniden rezervasyon yap.",
     "noBags": "En az bir valiz seç.",
     "save": "Değişiklikleri kaydet",

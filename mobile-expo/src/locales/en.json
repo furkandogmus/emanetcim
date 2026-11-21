@@ -16,7 +16,9 @@
     "clear": "Clear",
     "scrollBack": "Scroll back",
     "scrollForward": "Scroll forward",
-    "goHome": "Go home"
+    "goHome": "Go home",
+    "notFoundTitle": "This page can't be opened",
+    "notFoundBody": "The link doesn't open with this account, or it no longer exists. You can go back to the home screen."
   },
   "auth": {
     "title": "Sign in",
@@ -119,6 +121,8 @@
     "useLocation": "Use my location",
     "locating": "Getting your location…",
     "locationDenied": "Location permission was denied. Pick a city from the list.",
+    "locationBlocked": "Location access is turned off. Allow it in Settings or pick a city from the list.",
+    "openSettings": "Allow in Settings",
     "popular": "Popular cities",
     "whenTitle": "When do you need storage?",
     "whenHint": "Tap a date once for the same day. For several days, pick the first and last day.",
@@ -819,7 +823,7 @@
     "whenTitle": "When?",
     "bagsTitle": "How many bags?",
     "currentTotal": "Current total",
-    "newTotal": "Estimated new total",
+    "newTotal": "New total",
     "paidNote": "The total of a paid booking can't change. To make a change that alters the price, cancel and book again.",
     "noBags": "Select at least one bag.",
     "save": "Save changes",

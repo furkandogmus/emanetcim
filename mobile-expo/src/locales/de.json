@@ -16,7 +16,9 @@
     "clear": "Löschen",
     "scrollBack": "Zurückblättern",
     "scrollForward": "Weiterblättern",
-    "goHome": "Zur Startseite"
+    "goHome": "Zur Startseite",
+    "notFoundTitle": "Diese Seite lässt sich nicht öffnen",
+    "notFoundBody": "Der Link lässt sich mit diesem Konto nicht öffnen oder existiert nicht mehr. Du kannst zum Startbildschirm zurückkehren."
   },
   "auth": {
     "title": "Anmelden",
@@ -119,6 +121,8 @@
     "useLocation": "Meinen Standort verwenden",
     "locating": "Standort wird ermittelt…",
     "locationDenied": "Der Standortzugriff wurde abgelehnt. Wähle eine Stadt aus der Liste.",
+    "locationBlocked": "Der Standortzugriff ist ausgeschaltet. Erlaube ihn in den Einstellungen oder wähle eine Stadt aus der Liste.",
+    "openSettings": "In den Einstellungen erlauben",
     "popular": "Beliebte Städte",
     "whenTitle": "Wann brauchst du die Aufbewahrung?",
     "whenHint": "Tippe einmal auf ein Datum für denselben Tag. Für mehrere Tage wähle den ersten und den letzten Tag.",
@@ -819,7 +823,7 @@
     "whenTitle": "Wann?",
     "bagsTitle": "Wie viele Gepäckstücke?",
     "currentTotal": "Aktueller Gesamtpreis",
-    "newTotal": "Geschätzter neuer Gesamtpreis",
+    "newTotal": "Neuer Gesamtpreis",
     "paidNote": "Der Gesamtpreis einer bezahlten Buchung kann sich nicht ändern. Für eine Änderung, die den Preis beeinflusst, storniere und buche neu.",
     "noBags": "Wähle mindestens ein Gepäckstück.",
     "save": "Änderungen speichern",
