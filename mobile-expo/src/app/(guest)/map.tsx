@@ -263,25 +263,28 @@ export default function MapScreen() {
         top={insets.top + 90}
         peek={SHEET_PEEK}
         initialOpen={query.isError || emptyWindow}
-      >
-        <View style={styles.sheetHeader}>
-          <AppText variant="title" style={{ fontSize: 20, lineHeight: 26 }}>
-            {query.isLoading
-              ? t("common.loading")
-              : query.isError
-                ? search.place.label
-                : bookableCount === 0
-                  ? t("map.emptyWindowTitle")
-                  : search.place.isCurrent
-                    ? t("map.countNear", { count: bookableCount })
-                    : t("map.count", { count: bookableCount, place: search.place.label })}
-          </AppText>
-          {search.rolled ? (
-            <AppText variant="caption" style={{ fontSize: 13 }}>
-              {t("map.rolledToTomorrow")}
+        handleLabel={t("map.sheetHandle")}
+        header={
+          <View style={styles.sheetHeader}>
+            <AppText variant="title" style={{ fontSize: 20, lineHeight: 26 }}>
+              {query.isLoading
+                ? t("common.loading")
+                : query.isError
+                  ? search.place.label
+                  : bookableCount === 0
+                    ? t("map.emptyWindowTitle")
+                    : search.place.isCurrent
+                      ? t("map.countNear", { count: bookableCount })
+                      : t("map.count", { count: bookableCount, place: search.place.label })}
             </AppText>
-          ) : null}
-        </View>
+            {search.rolled ? (
+              <AppText variant="caption" style={{ fontSize: 13 }}>
+                {t("map.rolledToTomorrow")}
+              </AppText>
+            ) : null}
+          </View>
+        }
+      >
         {query.isLoading ? (
           <Loading />
         ) : query.isError ? (
@@ -348,17 +351,20 @@ const ShopMarkers = memo(function ShopMarkers({
               s.isPrelaunch ? `${s.name}, ${label}` : `${s.name}, ${t("shop.perDay", { price: label })}`
             }
           >
-            <View
-              style={[
-                styles.pin,
-                (s.isPrelaunch || s.bookable === false) && styles.pinMuted,
-                s.bookable === false && styles.pinClosed,
-                selected && styles.pinSelected,
-              ]}
-            >
-              <Text style={styles.pinText} numberOfLines={1}>
-                {label}
-              </Text>
+            {/* Seffaf kusak: gorunen pin 30 dp kalir, dokunma alani 44 dp olur. */}
+            <View style={styles.pinTouch}>
+              <View
+                style={[
+                  styles.pin,
+                  (s.isPrelaunch || s.bookable === false) && styles.pinMuted,
+                  s.bookable === false && styles.pinClosed,
+                  selected && styles.pinSelected,
+                ]}
+              >
+                <Text style={styles.pinText} numberOfLines={1}>
+                  {label}
+                </Text>
+              </View>
             </View>
           </Marker>
         );
@@ -392,6 +398,8 @@ const styles = StyleSheet.create({
   },
   searchHere: { position: "absolute", alignSelf: "center" },
   // Fiyat hapi: dar ekranda komsu pinleri ortmesin diye kucuk tutuldu (web `h-8`).
+  // Pin alt-orta noktadan baglanir; ek dokunma alani yalnizca ustte olmali ki etiket konumundan kaymasin.
+  pinTouch: { paddingTop: 14 },
   pin: {
     minWidth: 44,
     height: 30,
