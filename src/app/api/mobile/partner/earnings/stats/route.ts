@@ -2,7 +2,9 @@ import { NextResponse } from "next/server";
 import { NextRequest } from "next/server";
 import prisma from "@/lib/db";
 import { requireMobileUser, requireRole } from "@/lib/mobile-auth";
-import { EARNING_BOOKING_STATUSES, computeSplit } from "@/lib/platform-split";
+import { computeSplit } from "@/lib/platform-split";
+import { COLLECTED_ORDER_BY, collectedEarningsWhere } from "@/lib/earning-collection";
+import { toMobilePartnerEarningRow } from "@/lib/mobile-dto";
 import { getEffectiveCommission } from "@/lib/commission";
 import { startOfDayInTimeZone } from "@/lib/timezone";
 
@@ -41,36 +43,33 @@ export async function GET(req: NextRequest) {
   */
   const today = startOfDayInTimeZone(shops[0].timezone ?? "Europe/Istanbul");
 
-  // Partner ana paneli ve web kazanç sayfasıyla AYNI tanım — tek doğru kaynak
-  // platform-split.ts'te. Eskiden burada ayrıca `paymentLog: SUCCESS` şartı vardı;
-  // bu, kısmi iade sonrası (PaymentLog SUCCESS'ten PARTIALLY_REFUNDED'a düşünce)
-  // mobilin bir rezervasyonu web'in saydığı yerde saymamasına yol açıyordu — P0-7
-  // (partner panelinde iki farklı NET HAKEDİŞ) ile aynı desen, bu kez web/mobil
-  // arasında. Bkz. docs/KOD_TARAMA_2026-08-23.md, BULGU 16.
-  const baseWhere = {
-    shopId: { in: shopIds },
-    status: { in: [...EARNING_BOOKING_STATUSES] },
-  };
+  /*
+    Toplam, "bugun" ve gecmis AYNI tabandan: teslim edilmis emanetler, teslim
+    anina gore (`earning-collection.ts`). Eskiden toplam olusturmaya, "bugun"
+    check-in'e, liste yine olusturmaya bakiyordu ve kasa hicbiriyle tutmuyordu.
+  */
+  const shopFilter = { shopId: { in: shopIds } };
 
   const [aggregateResult, todayResult, history] = await Promise.all([
     prisma.booking.aggregate({
-      where: baseWhere,
+      where: { ...shopFilter, ...collectedEarningsWhere() },
       _sum: { totalPrice: true },
     }),
-    /*
-      "Bugun" = bugun TESLIM ALINAN valizler (2026-11-18). Rezervasyonun
-      olusturuldugu gune bakiyordu; dukkanda tahsilatta para check-in aninda
-      alinir, yani dun yapilip bugun teslim alinan rezervasyon hicbir gunun
-      "bugun"unde gorunmuyordu ve yogun bir gunde sayi sifira yakin kaliyordu.
-    */
     prisma.booking.aggregate({
-      where: { ...baseWhere, checkedInAt: { gte: today } },
+      where: { ...shopFilter, ...collectedEarningsWhere({ start: today }) },
       _sum: { totalPrice: true },
     }),
     prisma.booking.findMany({
-      where: baseWhere,
-      select: { totalPrice: true, createdAt: true, shopId: true },
-      orderBy: { createdAt: "desc" },
+      where: { ...shopFilter, ...collectedEarningsWhere() },
+      select: {
+        id: true,
+        totalPrice: true,
+        shopId: true,
+        checkedOutAt: true,
+        checkOutTime: true,
+        guest: { select: { name: true } },
+      },
+      orderBy: COLLECTED_ORDER_BY,
       take: 10,
     }),
   ]);
@@ -94,16 +93,7 @@ export async function GET(req: NextRequest) {
     commissionRate,
   ).merchantAmount;
 
-  const formattedHistory = history.map((b) => ({
-    date: b.createdAt.toISOString().slice(5, 10).replace("-", " "),
-    // `date` UTC'den kesilmis "MM DD": yilsiz, bicimlenemez, 00-03 TRT bir gun
-    // geri kayar. Expo ani buradan okur; `date` Flutter icin kalir.
-    createdAt: b.createdAt.toISOString(),
-    // Liste de esnaf payini gosterir; ustteki toplamla ayni birim olmasi sart.
-    amount: computeSplit(Number(b.totalPrice), commissionRate).merchantAmount,
-    shopId: b.shopId,
-    status: "PAID" as const,
-  }));
+  const formattedHistory = history.map((b) => toMobilePartnerEarningRow(b, commissionRate));
 
   return NextResponse.json({
     totalBalance: totalEarnings,

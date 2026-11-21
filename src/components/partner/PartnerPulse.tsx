@@ -131,6 +131,7 @@ export default function PartnerPulse({
           <p className="id-display text-3xl text-gray-900">
             {formatTryCurrency(monthNet, bcp47)}
           </p>
+          <p className="text-xs text-gray-400">{t("pulseCollectedBasis")}</p>
           {/*
             Yuzde degisim GECEN AY 0 ISE gosterilmez: sifira bolmek "%sonsuz
             artis" gibi anlamsiz bir rakam uretir. Yeni acilan dukkan da her ay

@@ -345,7 +345,9 @@
     "outsideHoursTitle": "Der Laden scheint gerade geschlossen. Trotzdem annehmen?",
     "outsideHoursBody": "Sie sind außerhalb Ihrer gespeicherten Öffnungszeiten. Wenn der Laden jetzt geöffnet ist, können Sie das Gepäck trotzdem annehmen; es wird als Annahme außerhalb der Öffnungszeiten vermerkt. Stimmen Ihre Zeiten nicht, korrigieren Sie sie in den Einstellungen.",
     "outsideHoursConfirm": "Trotzdem annehmen",
-    "outsideHoursEditHours": "Öffnungszeiten bearbeiten"
+    "outsideHoursEditHours": "Öffnungszeiten bearbeiten",
+    "earningsBasisNote": "Abgeschlossene Aufbewahrungen, nach Rückgabedatum",
+    "pulseCollectedBasis": "Abgeschlossene Aufbewahrungen"
   },
   "Guest": {
     "heroTitle": "Gepäck abgeben, die Stadt frei erkunden",
