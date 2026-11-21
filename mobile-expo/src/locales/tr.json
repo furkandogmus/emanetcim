@@ -442,7 +442,7 @@
     "appUsersDay": "Son 24 saat",
     "appUsersWeek": "Son 7 gün",
     "appUsersMonth": "Son 30 gün",
-    "appUsersFoot": "Uygulamayı açan tekil cihaz. Toplam {{total}} cihaz; son 30 günde {{signedIn}} tanesinde giriş yapılmış.",
+    "appUsersFoot": "Uygulamayı açan tekil kişi (giriş yapanlar hesap başına, diğerleri cihaz başına). Toplam {{total}}; son 30 günde giriş yapılan hesap: {{signedIn}}.",
     "todayTitle": "Bugün",
     "todayArrivals": "Gelecek",
     "todayPickups": "Alınacak",
@@ -621,7 +621,9 @@
     "openShop": "Dükkan sayfasını aç",
     "impersonateOwner": "Dükkan sahibi olarak gir",
     "repliedAt": "Cevaplandı · {{date}}",
-    "approvedNotNotified": "Başvuru onaylandı ama esnafa bildirim gidemedi; kendisini ara."
+    "approvedNotNotified": "Başvuru onaylandı ama esnafa bildirim gidemedi; kendisini ara.",
+    "openDisputeWeb": "Uyuşmazlığı webde aç",
+    "listCapped": "İlk {{count}} kayıt gösteriliyor; aramayı daralt."
   },
   "scan": {
     "open": "QR okut",

@@ -105,6 +105,13 @@ export default function AdminBookingsScreen() {
               title={q.trim().length >= 2 ? t("admin.noSearchResult") : t("admin.noBookingsInFilter")}
             />
           }
+          ListFooterComponent={
+            rows.length >= 50 ? (
+              <AppText variant="caption" style={{ textAlign: "center", paddingTop: space.md }}>
+                {t("admin.listCapped", { count: rows.length })}
+              </AppText>
+            ) : null
+          }
           renderItem={renderRow}
         />
       )}

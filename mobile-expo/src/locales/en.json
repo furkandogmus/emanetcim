@@ -442,7 +442,7 @@
     "appUsersDay": "Last 24 hours",
     "appUsersWeek": "Last 7 days",
     "appUsersMonth": "Last 30 days",
-    "appUsersFoot": "Unique devices that opened the app. {{total}} devices in total; {{signedIn}} signed in during the last 30 days.",
+    "appUsersFoot": "Unique people who opened the app (signed-in users counted per account, others per device). {{total}} in total; accounts signed in during the last 30 days: {{signedIn}}.",
     "todayTitle": "Today",
     "todayArrivals": "Arriving",
     "todayPickups": "Picking up",
@@ -621,7 +621,9 @@
     "openShop": "Open shop page",
     "impersonateOwner": "View as the shop owner",
     "repliedAt": "Replied · {{date}}",
-    "approvedNotNotified": "Application approved, but the partner could not be notified. Please call them."
+    "approvedNotNotified": "Application approved, but the partner could not be notified. Please call them.",
+    "openDisputeWeb": "Open the dispute on the web",
+    "listCapped": "Showing the first {{count}}; narrow your search."
   },
   "scan": {
     "open": "Scan QR",

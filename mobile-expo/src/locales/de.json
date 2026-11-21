@@ -442,7 +442,7 @@
     "appUsersDay": "Letzte 24 Stunden",
     "appUsersWeek": "Letzte 7 Tage",
     "appUsersMonth": "Letzte 30 Tage",
-    "appUsersFoot": "Eindeutige Geräte, die die App geöffnet haben. Insgesamt {{total}} Geräte; {{signedIn}} davon in den letzten 30 Tagen angemeldet.",
+    "appUsersFoot": "Eindeutige Personen, die die App geöffnet haben (Angemeldete pro Konto, andere pro Gerät). Insgesamt {{total}}; in den letzten 30 Tagen angemeldete Konten: {{signedIn}}.",
     "todayTitle": "Heute",
     "todayArrivals": "Ankünfte",
     "todayPickups": "Abholungen",
@@ -621,7 +621,9 @@
     "openShop": "Laden-Seite öffnen",
     "impersonateOwner": "Als Ladenbesitzer ansehen",
     "repliedAt": "Beantwortet · {{date}}",
-    "approvedNotNotified": "Antrag genehmigt, aber der Partner konnte nicht benachrichtigt werden. Bitte ruf ihn an."
+    "approvedNotNotified": "Antrag genehmigt, aber der Partner konnte nicht benachrichtigt werden. Bitte ruf ihn an.",
+    "openDisputeWeb": "Streitfall im Web öffnen",
+    "listCapped": "Die ersten {{count}} werden angezeigt; Suche eingrenzen."
   },
   "scan": {
     "open": "QR scannen",

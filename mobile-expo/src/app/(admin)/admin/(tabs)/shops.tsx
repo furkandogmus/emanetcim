@@ -163,11 +163,25 @@ function ShopRow({ shop: s }: { shop: AdminShop }) {
   const { t } = useTranslation();
   const ratio = s.capacity > 0 ? Math.min(1, s.bagsInStorage / s.capacity) : 0;
   const busy = ratio >= BUSY;
+  // Etiket satirin icerigini ezmesin: ad, durum, sorunlar ve doluluk birlikte okunur; arama eylem olarak sunulur.
+  const label = [
+    s.name,
+    !s.isActive ? t("admin.inactive") : null,
+    s.isTest ? t("admin.testRecord") : null,
+    ...s.issues.filter((i) => i !== "inactive").map((i) => t(`admin.shopIssue.${i}`)),
+    t("admin.bagsOfCapacity", { bags: s.bagsInStorage, capacity: s.capacity }),
+  ]
+    .filter(Boolean)
+    .join(", ");
 
   return (
     <Pressable
       accessibilityRole="button"
-      accessibilityLabel={s.name}
+      accessibilityLabel={label}
+      accessibilityActions={s.phone ? [{ name: "call", label: t("admin.callShop") }] : undefined}
+      onAccessibilityAction={(e) => {
+        if (e.nativeEvent.actionName === "call") void Linking.openURL(telUrl(s.phone, s.whatsapp)).catch(() => undefined);
+      }}
       onPress={() => router.push(`/admin/shop/${s.id}`)}
       style={({ pressed }) => [styles.card, !s.isActive && styles.inactiveCard, pressed && { backgroundColor: colors.surfaceMuted }]}
     >

@@ -11,6 +11,7 @@ import { AppText, Banner, Button, Card, CenterMessage, IconButton, Loading } fro
 import { errorMessage } from "@/lib/errors";
 import { formatDayTime } from "@/lib/format";
 import { SITE_ORIGIN } from "@/lib/images";
+import { languageInfo } from "@/lib/languages";
 import { telUrl, waUrl } from "@/lib/phone";
 import { useViewAs } from "@/lib/use-view-as";
 import { useAdminBooking } from "@/lib/queries";
@@ -29,7 +30,7 @@ export default function AdminBookingScreen() {
   const { t, i18n } = useTranslation();
   const { id } = useLocalSearchParams<{ id: string }>();
   const query = useAdminBooking(id);
-  const lang = i18n.language === "tr" ? "tr" : "en";
+  const lang = languageInfo(i18n.language).site;
 
   return (
     <SafeAreaView style={styles.safe} edges={["top"]}>
@@ -54,7 +55,8 @@ export default function AdminBookingScreen() {
 }
 
 function Detail({ b, onWeb }: { b: AdminBookingDetail; onWeb: () => void }) {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
+  const lang = languageInfo(i18n.language).site;
   const viewAs = useViewAs();
   const [now] = useState(() => Date.now());
   const lateDays = b.status === "CHECKED_IN" ? Math.floor((now - new Date(b.checkOutTime).getTime()) / DAY) : 0;
@@ -71,7 +73,12 @@ function Detail({ b, onWeb }: { b: AdminBookingDetail; onWeb: () => void }) {
       {lateDays >= 1 ? (
         <Banner tone="danger" title={t("admin.lateDays", { count: lateDays })} body={t("admin.lateBody")} />
       ) : null}
-      {disputeOpen ? <Banner tone="warning" body={t("admin.disputeOpen")} /> : null}
+      {disputeOpen ? (
+        <View style={{ gap: space.sm }}>
+          <Banner tone="warning" body={t("admin.disputeOpen")} />
+          <Button variant="secondary" title={t("admin.openDisputeWeb")} onPress={() => open(`${SITE_ORIGIN}/${lang}/admin/disputes`)} />
+        </View>
+      ) : null}
 
       <BookingTicket booking={b} showQr={false} title={b.guestName || t("partner.guest")} subtitle={b.shopName} />
 
