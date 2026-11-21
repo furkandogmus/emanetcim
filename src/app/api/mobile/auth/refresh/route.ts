@@ -1,67 +1,119 @@
 import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
 import { z } from "zod";
+import type { Role } from "@prisma/client";
 import prisma from "@/lib/db";
-import { signAccessToken, signRefreshToken, verifyMobileToken } from "@/lib/mobile-auth";
+import {
+  serviceUnavailable,
+  signAccessToken,
+  signRefreshToken,
+  unauthorized,
+  verifyMobileToken,
+} from "@/lib/mobile-auth";
 import { rateLimit } from "@/lib/rate-limit";
 import { clientIp } from "@/lib/internal-api-guard";
-import { claimRefreshJti } from "@/lib/refresh-token-store";
+import {
+  claimRefreshJti,
+  rememberIssuedPair,
+  releaseRefreshJti,
+  type RefreshClaim,
+} from "@/lib/refresh-token-store";
 import { revokeAllUserSessions } from "@/services/auth/mobile-session";
 import logger from "@/lib/logger";
 
 const schema = z.object({ refreshToken: z.string() });
 
+/*
+  401 YALNIZCA token sorununda (2026-11-21). Eskiden Prisma/Redis hatasi da ayni
+  `catch`e dusup 401 donuyordu; istemci 401'de token'lari silip kullaniciyi
+  cikisa atiyordu. Altyapi hatasi 503: istemci onu "network" sayar, oturum kalir.
+*/
 export async function POST(req: NextRequest) {
-  /*
-    HIZ SINIRI (2026-08-31): bu uc hicbir sinir tasimiyordu ve her cagrida bir
-    JWT dogrulamasi + bir `user` sorgusu yapiyor. Sinirsiz olmasi hem imza
-    dogrulama denemelerini bedava kiliyor hem de tek bir istemcinin veritabani
-    havuzunu doldurmasina izin veriyordu.
-  */
   const ip = clientIp(req);
-  if (!(await rateLimit(`mobile_refresh:ip:${ip}`, 60, 60_000))) {
-    return NextResponse.json({ error: "too_many_attempts" }, { status: 429 });
+  let allowed: boolean;
+  try {
+    allowed = await rateLimit(`mobile_refresh:ip:${ip}`, 60, 60_000);
+  } catch (err) {
+    logger.warn({ err }, "mobile_refresh_rate_limit_unavailable");
+    return serviceUnavailable();
   }
+  if (!allowed) return NextResponse.json({ error: "too_many_attempts" }, { status: 429 });
 
   const body = await req.json().catch(() => null);
   const parsed = schema.safeParse(body);
   if (!parsed.success) return NextResponse.json({ error: "invalid" }, { status: 400 });
 
+  let claims: Awaited<ReturnType<typeof verifyMobileToken>>;
   try {
-    const claims = await verifyMobileToken(parsed.data.refreshToken);
-    if (claims.type !== "refresh") throw new Error("bad type");
-    // Yonetici goruntuleme oturumu asla yenilenmez (imp tasiyan refresh hic basilmaz).
-    if (claims.imp !== undefined) throw new Error("impersonation token");
-    const user = await prisma.user.findUnique({ where: { id: claims.sub } });
-    if (!user) throw new Error("user gone");
-    if (user.isBanned) throw new Error("user banned");
-    if (user.tokenVersion !== (claims.tv ?? 0)) throw new Error("token version mismatch");
-
-    /*
-      TEKRAR KULLANIM (REPLAY) TESPITI (2026-09-10'da bulundu). `jti`
-      YOKSA (bu degisiklikten ONCE basilmis eski bir refresh token) kontrol
-      atlanir -- "aud tasimayan eski token hala gecer" ile ayni gecis donemi
-      deseni (bkz. jwt-family-boundary.test.ts). `jti` VARSA: ayni jti ikinci
-      kez sunulursa bu, token'in calinip HEM mesru cihaz HEM saldirgan
-      tarafindan kullanildigi anlamina gelebilir -- TUM aile (`tokenVersion`
-      artirilarak) iptal edilir, boylece calinmis token da mesru cihazin
-      elindeki HENUZ KULLANILMAMIS diger token'lar da ayni anda dusurulur.
-    */
-    if (claims.jti) {
-      const exp = typeof claims.exp === "number" ? claims.exp * 1000 : 0;
-      const ttlMs = Math.max(0, exp - Date.now());
-      const firstUse = await claimRefreshJti(claims.jti, ttlMs);
-      if (!firstUse) {
-        logger.warn({ userId: user.id }, "mobile_refresh_token_reuse_detected");
-        await revokeAllUserSessions(user.id);
-        return NextResponse.json({ error: "unauthorized" }, { status: 401 });
-      }
-    }
-
-    const access = await signAccessToken(user.id, user.role, user.tokenVersion);
-    const refresh = await signRefreshToken(user.id, user.role, user.tokenVersion);
-    return NextResponse.json({ accessToken: access, refreshToken: refresh });
+    claims = await verifyMobileToken(parsed.data.refreshToken);
   } catch {
-    return NextResponse.json({ error: "unauthorized" }, { status: 401 });
+    return unauthorized();
   }
+  if (claims.type !== "refresh") return unauthorized();
+  // Yonetici goruntuleme oturumu asla yenilenmez (imp tasiyan refresh hic basilmaz).
+  if (claims.imp !== undefined) return unauthorized();
+
+  let user: { id: string; role: Role; isBanned: boolean; tokenVersion: number } | null;
+  try {
+    user = await prisma.user.findUnique({
+      where: { id: claims.sub },
+      select: { id: true, role: true, isBanned: true, tokenVersion: true },
+    });
+  } catch (err) {
+    logger.warn({ err }, "mobile_refresh_db_unavailable");
+    return serviceUnavailable();
+  }
+  if (!user || user.isBanned || user.tokenVersion !== (claims.tv ?? 0)) return unauthorized();
+
+  /*
+    TEKRAR KULLANIM: `jti` YOKSA (eski token) kontrol atlanir. Pencere icindeki
+    tekrar ayni cifti alir; pencere disindaki tekrar tum aileyi iptal eder
+    (bkz. refresh-token-store.ts).
+  */
+  let claim: RefreshClaim = { kind: "first" };
+  if (claims.jti) {
+    const exp = typeof claims.exp === "number" ? claims.exp * 1000 : 0;
+    try {
+      claim = await claimRefreshJti(claims.jti, Math.max(0, exp - Date.now()));
+    } catch (err) {
+      logger.warn({ err }, "mobile_refresh_store_unavailable");
+      return serviceUnavailable();
+    }
+  }
+
+  if (claim.kind === "repeat") return NextResponse.json(claim.pair);
+  // Ilk istegin cifti henuz yazilmadi: istemci "network" sayar, birazdan tekrar dener.
+  if (claim.kind === "pending") return serviceUnavailable();
+  if (claim.kind === "reused") {
+    logger.warn({ userId: user.id }, "mobile_refresh_token_reuse_detected");
+    try {
+      await revokeAllUserSessions(user.id);
+    } catch (err) {
+      logger.warn({ err }, "mobile_refresh_revoke_failed");
+      return serviceUnavailable();
+    }
+    return unauthorized();
+  }
+
+  const nextJti = crypto.randomUUID();
+  const pair = {
+    accessToken: await signAccessToken(user.id, user.role, user.tokenVersion),
+    refreshToken: await signRefreshToken(user.id, user.role, user.tokenVersion, nextJti),
+  };
+  if (claims.jti) {
+    /*
+      Cift saklanamazsa yanit DONMEZ: isaret geri alinir, 503 doner. Istemci 503'u
+      "network" sayar, ayni token'la tekrar gelir ve bu yine ilk kullanim olur. Cift
+      donup saklanmasaydi her tekrar 60 sn 503 (pending), sonra replay sayilip TUM
+      cihazlarin oturumu iptal edilirdi.
+    */
+    try {
+      await rememberIssuedPair(claims.jti, pair, nextJti);
+    } catch (err) {
+      logger.warn({ err }, "mobile_refresh_pair_store_failed");
+      await releaseRefreshJti(claims.jti).catch(() => undefined);
+      return serviceUnavailable();
+    }
+  }
+  return NextResponse.json(pair);
 }

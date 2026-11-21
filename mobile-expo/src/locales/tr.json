@@ -79,7 +79,10 @@
     "legalPrivacy": "Gizlilik Politikası",
     "legalSuffix": "'nı kabul etmiş olursun.",
     "codeSentAgain": "Kod tekrar gönderildi.",
-    "resendIn": "Tekrar gönder ({{seconds}} sn)"
+    "resendIn": "Tekrar gönder ({{seconds}} sn)",
+    "sessionExpiredTitle": "Oturumun sona erdi. Tekrar giriş yap.",
+    "sessionExpiredBody": "Rezervasyonlarını görmek için tekrar giriş yapabilirsin.",
+    "sessionExpiredBodyStaff": "Dükkan paneline dönmek için tekrar giriş yap. Bekleyen işlemin kaydedilmedi; girişten sonra yeniden dene."
   },
   "home": {
     "heroTitle": "Valizini bırak.\nŞehrin tadını çıkar.",

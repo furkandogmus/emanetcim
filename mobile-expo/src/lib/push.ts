@@ -4,7 +4,7 @@ import * as Notifications from "expo-notifications";
 import { getLocales } from "expo-localization";
 import { router } from "expo-router";
 
-import { api } from "./api";
+import { api, type DetachedSession } from "./api";
 import type { Role } from "./types";
 
 /*
@@ -70,12 +70,15 @@ export function forgetPushRegistration() {
   registeredToken = null;
 }
 
-/** Cikista: token silinmezse cikis yapmis esnafin telefonuna bildirim gitmeye devam eder. */
-export async function unregisterPush(): Promise<void> {
+/**
+ * Cikista: token silinmezse cikis yapmis esnafin telefonuna bildirim gitmeye devam eder.
+ * `bearer`: yerel oturum silindikten sonra arka planda gonderilir (auth.tsx signOut).
+ */
+export async function unregisterPush(bearer?: string | DetachedSession): Promise<void> {
   if (!registeredToken) return;
   const token = registeredToken;
   registeredToken = null;
-  await api("/push/register", { method: "DELETE", body: { token } }).catch(() => undefined);
+  await api("/push/register", { method: "DELETE", body: { token }, bearer }).catch(() => undefined);
 }
 
 /** Bildirime dokununca ilgili rezervasyon acilir; role gore misafir ya da esnaf ekrani. */

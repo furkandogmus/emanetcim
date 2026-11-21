@@ -123,6 +123,21 @@ describe("signImpersonationToken", () => {
     expect("error" in r && r.error?.status).toBe(401);
   });
 
+  it("admin 'her yerden cikis' yapinca (tokenVersion artti) goruntuleme token'i 401", async () => {
+    const { token } = await signImpersonationToken("guest-1", "GUEST", "admin-1", 0);
+    expect((await verifyMobileToken(token)).impTv).toBe(0);
+    users["admin-1"].tokenVersion = 1;
+    const r = await requireMobileUser(req("GET", "/api/mobile/bookings", token));
+    expect("error" in r && r.error?.status).toBe(401);
+  });
+
+  it("veritabani hatasi 401 degil 503 (istemci oturumu dusurmez)", async () => {
+    const token = await signAccessToken("guest-1", "GUEST", 0);
+    db.user.findUnique.mockRejectedValueOnce(new Error("pool timeout"));
+    const r = await requireMobileUser(req("GET", "/api/mobile/bookings", token));
+    expect("error" in r && r.error?.status).toBe(503);
+  });
+
   it("refresh ucu goruntuleme token'ini reddeder", async () => {
     const { token } = await signImpersonationToken("guest-1", "GUEST", "admin-1", 0);
     const res = (await refresh(req("POST", "/api/mobile/auth/refresh", undefined, { refreshToken: token })))!;
@@ -138,6 +153,7 @@ describe("POST /api/mobile/admin/users/[id]/impersonate", () => {
     const body = await res.json();
     expect(body.user).toMatchObject({ id: "guest-1", role: "GUEST" });
     expect(typeof body.expiresAt).toBe("string");
+    expect(body.expiresInSeconds).toBe(30 * 60);
     expect(body.refreshToken).toBeUndefined();
     expect((await verifyMobileToken(body.accessToken)).imp).toBe("admin-1");
     expect(audit.writeAuditLog).toHaveBeenCalledWith(

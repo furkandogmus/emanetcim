@@ -79,7 +79,10 @@
     "legalPrivacy": "Privacy Policy",
     "legalSuffix": ".",
     "codeSentAgain": "Code sent again.",
-    "resendIn": "Resend in {{seconds}}s"
+    "resendIn": "Resend in {{seconds}}s",
+    "sessionExpiredTitle": "Your session has ended. Please sign in again.",
+    "sessionExpiredBody": "Sign in again to see your bookings.",
+    "sessionExpiredBodyStaff": "Sign in again to get back to your shop panel. The action you were doing was not saved; please try it again after signing in."
   },
   "home": {
     "heroTitle": "Drop your bags.\nEnjoy the city.",
