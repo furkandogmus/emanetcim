@@ -114,7 +114,8 @@
         "expo-notifications",
         {
           "icon": "./assets/notification-icon.png",
-          "color": "#EA580C"
+          "color": "#EA580C",
+          "defaultChannel": "default"
         }
       ],
       "@react-native-google-signin/google-signin",

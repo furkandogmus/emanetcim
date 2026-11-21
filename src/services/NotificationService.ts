@@ -371,6 +371,12 @@ export class NotificationService implements INotificationService {
             tokens: fcmTokens,
             notification: { title, body: message },
             data: bookingId ? { bookingId } : undefined,
+            /*
+              Uygulamanin olusturdugu YUKSEK onemli "default" kanali (push.ts).
+              kanal verilmezse sistem FCM'in "Miscellaneous" kanalina dusuyor:
+              baslik bandi yok, esnaf yeni rezervasyonu kacirabiliyor.
+            */
+            android: { priority: "high", notification: { channelId: "default" } },
           });
           successCount += resp.successCount;
 
