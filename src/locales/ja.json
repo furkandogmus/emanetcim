@@ -341,7 +341,13 @@
       "conflictDropoff": "預け入れ",
       "conflictPickup": "受け取り",
       "conflictBags": "荷物を預かり中"
-    }
+    },
+    "outsideHoursTitle": "現在、店舗は営業時間外のようです。それでも受け取りますか？",
+    "outsideHoursBody": "登録された営業時間外です。店舗が営業中であれば、荷物を受け取れます。この受け取りは営業時間外として記録されます。営業時間が違う場合は設定で修正してください。",
+    "outsideHoursConfirm": "それでも受け取る",
+    "outsideHoursEditHours": "営業時間を編集",
+    "earningsBasisNote": "返却済みの預かり（返却日基準）",
+    "pulseCollectedBasis": "返却済みの預かり"
   },
   "Guest": {
     "heroTitle": "荷物を預けて、身軽に街へ",

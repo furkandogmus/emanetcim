@@ -341,7 +341,13 @@
       "conflictDropoff": "Drop-off",
       "conflictPickup": "Pick-up",
       "conflictBags": "Bags in the shop"
-    }
+    },
+    "outsideHoursTitle": "The shop looks closed right now. Check in anyway?",
+    "outsideHoursBody": "You are outside your saved opening hours. If the shop is open now, you can still take the bags; it will be recorded as an out-of-hours check-in. If your hours are wrong, fix them in settings.",
+    "outsideHoursConfirm": "Check in anyway",
+    "outsideHoursEditHours": "Edit opening hours",
+    "earningsBasisNote": "Completed bookings, by hand-back date",
+    "pulseCollectedBasis": "Completed bookings"
   },
   "Guest": {
     "heroTitle": "Drop Your Bags, Explore Freely",
