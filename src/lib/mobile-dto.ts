@@ -622,3 +622,43 @@ export function toMobileGalleryImage(i: { id: string; url: string }) {
 export function toMobilePublicGallery(images: Array<{ url: string }>) {
   return images.map((i) => i.url);
 }
+
+type PartnerShopSource = {
+  id: string;
+  name: string;
+  image: string | null;
+  capacity: number;
+  pricePerDay: unknown;
+  address: string | null;
+  city: string | null;
+  district: string | null;
+  openingTime: string | null;
+  closingTime: string | null;
+  open247: boolean;
+};
+
+/**
+ * Esnaf `partner/shop` GET/PUT govdesi. ONCEDEN `...shop` yayilimiydi: sahip
+ * kimligi, test bayragi, saat dilimi gibi ic kolonlar telefona gidiyor, yeni
+ * eklenen her kolon da kendiliginden sizip cikiyordu; PUT yanitinda
+ * `pricePerDay` Decimal oldugu icin string geliyordu. Alan listesi acik.
+ */
+export function toMobilePartnerShop(
+  shop: PartnerShopSource,
+  extras: Record<string, unknown> = {},
+) {
+  return {
+    id: shop.id,
+    name: shop.name,
+    image: shop.image,
+    capacity: shop.capacity,
+    pricePerDay: moneyToNumber(shop.pricePerDay),
+    address: shop.address,
+    city: shop.city,
+    district: shop.district,
+    openingTime: shop.openingTime,
+    closingTime: shop.closingTime,
+    open247: shop.open247,
+    ...extras,
+  };
+}

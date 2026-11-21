@@ -2,11 +2,9 @@
 
 import prisma from "@/lib/db";
 import { revalidatePathAllLocales } from "@/lib/revalidate-locales";
-import { getPricingRules } from "@/lib/platform-settings";
 import { z } from "zod";
 import { requireUser, requirePartner } from "@/lib/action-auth";
 import { shopService } from "@/services/ShopService";
-import { shopSettingsImpactService } from "@/services/ShopSettingsImpact";
 
 const hm = /^\d{1,2}:\d{2}$/;
 
@@ -55,37 +53,14 @@ export async function updateShopSettingsAction(
     return { success: false, error: "Errors.invalidData" };
   }
 
-  if (parsed.data.pricePerDay !== undefined) {
-    const rules = await getPricingRules();
-    const minPrice = Math.round(rules.defaultPricePerDay / 2);
-    const maxPrice = rules.defaultPricePerDay * 2;
-    if (parsed.data.pricePerDay < minPrice || parsed.data.pricePerDay > maxPrice) {
-      return { success: false, error: "Errors.invalidData" };
-    }
-  }
-
   /*
-    ETKI, YAZMADAN ONCE olculuyor: yazdiktan sonra "eski saatlere gore kac
-    rezervasyon disarida kaliyordu" sorusu artik sorulamaz.
-
-    Degisiklik ENGELLENMIYOR -- esnafin saatini degistirme hakki var ve
-    dukkanini kapatmasi gerekebilir. Dogru olan sonucu SOYLEMEK, boylece esnaf
-    etkilenen misafirlere ulasabilir. Bkz. `ShopSettingsImpact`.
+    Bant + etki olcumu + yazma `ShopService.updateSettings`te: mobil uc da ayni
+    govdeyi cagiriyor. Degisiklik ENGELLENMIYOR (esnafin saatini degistirme
+    hakki var), sonuc SOYLENIYOR. Bkz. `ShopSettingsImpact`.
   */
-  const impact = await shopSettingsImpactService.assess({
-    shopId,
-    openingTime: parsed.data.openingTime,
-    closingTime: parsed.data.closingTime,
-    capacity: parsed.data.capacity,
-  });
-
-  await prisma.shop.update({
-    where: { id: shopId },
-    data: {
-      ...parsed.data,
-      updatedAt: new Date(),
-    },
-  });
+  const result = await shopService.updateSettings(shopId, parsed.data);
+  if (!result.ok) return { success: false, error: "Errors.invalidData" };
+  const impact = result.impact;
 
   revalidatePathAllLocales("/partner");
   revalidatePathAllLocales("/partner/settings");
