@@ -170,13 +170,16 @@ type RequestOptions = {
   method?: "GET" | "POST" | "PUT" | "PATCH" | "DELETE";
   body?: unknown;
   auth?: boolean;
+  /** Ek basliklar (ornegin `Idempotency-Key`); Authorization/Accept bunlari ezmez. */
+  headers?: Record<string, string>;
 };
 
 export async function api<T>(path: string, opts: RequestOptions = {}): Promise<T> {
-  const { method = "GET", body, auth = true } = opts;
+  const { method = "GET", body, auth = true, headers: extraHeaders } = opts;
 
   const send = () => {
     const headers: Record<string, string> = {
+      ...extraHeaders,
       Accept: "application/json",
       "Accept-Language": requestLanguage(),
     };
