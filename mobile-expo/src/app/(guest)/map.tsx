@@ -1,5 +1,5 @@
 import { memo, useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { FlatList, PixelRatio, Pressable, StyleSheet, Text, View, useWindowDimensions } from "react-native";
+import { Alert, FlatList, PixelRatio, Pressable, StyleSheet, Text, View, useWindowDimensions } from "react-native";
 import { Image } from "expo-image";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { Camera, Map, Marker, UserLocation } from "@maplibre/maplibre-react-native";
@@ -12,12 +12,16 @@ import { BottomSheet } from "@/components/BottomSheet";
 import { MapSnippet } from "@/components/Illustrations";
 import { ShopCard } from "@/components/ShopCard";
 import { AppText, Button, CenterMessage, IconButton, Loading } from "@/components/ui";
+import { ApiError } from "@/lib/api";
 import { errorMessage } from "@/lib/errors";
 import { thumbUrl } from "@/lib/images";
-import { formatDay, formatMoney } from "@/lib/format";
+import { formatDay, formatDayTime, formatMoney, formatStayRange } from "@/lib/format";
+import { goBackOr } from "@/lib/navigation";
+import { nextOpenInstant, shiftWindowTo } from "@/lib/next-open";
 import { MAP_ATTRIBUTION, useMapStyle } from "@/lib/map-style";
 import { useNearbyShops } from "@/lib/queries";
 import { totalBags, useSearch } from "@/lib/search";
+import { wallInstant, wallParts } from "@/lib/time";
 import type { NearbyShop } from "@/lib/types";
 import { colors, fonts, radius, shadow, space } from "@/theme/tokens";
 
@@ -90,7 +94,27 @@ export default function MapScreen() {
     setSelectedId(null);
   }, [placeKey, search.place]);
 
-  const openShop = useCallback((s: NearbyShop) => router.push(`/shop/${s.id}`), []);
+  const { checkIn, checkOut, setWindow } = search;
+  /*
+    Saate oturmayan (kapali) nokta: odemeye gitmek yerine aramayi onun acilisina
+    kaydirmayi onerir. Kabul edilirse harita ayni yerde yeni saatle tekrar aranir.
+  */
+  const openShop = useCallback(
+    (s: NearbyShop) => {
+      if (s.bookable !== false) return router.push(`/shop/${s.id}`);
+      const to = s.nextOpen ? shiftWindowTo(s.nextOpen, checkIn, checkOut) : null;
+      if (!to) return Alert.alert(t("map.closedNoDate"), t("map.emptyWindowBody"));
+      Alert.alert(
+        t("map.shiftTitle"),
+        t("map.shiftBody", { name: s.name, when: formatDayTime(nextOpenInstant(s.nextOpen!)!) }),
+        [
+          { text: t("common.cancel"), style: "cancel" },
+          { text: t("map.shiftAction"), onPress: () => setWindow(to.checkIn, to.checkOut) },
+        ],
+      );
+    },
+    [t, checkIn, checkOut, setWindow],
+  );
   // Secili pin ya da harita hareketi listeyi yeniden cizmesin: kart memo, renderItem sabit.
   const renderShop = useCallback(
     ({ item }: { item: NearbyShop }) => <ShopCard shop={item} onPress={openShop} />,
@@ -114,9 +138,14 @@ export default function MapScreen() {
     // Talep testi noktalari mobilde gosterilmez (urun karari 2026-10-18): prod'daki
     // ~500 noktanin yalnizca ~10'u rezervasyon aliyor, gerisi harita ve listeyi
     // "Yakinda" kartlariyla dolduruyordu. Olcum web'de surer.
-    () => (query.data ?? []).filter((s) => !s.isPrelaunch).sort((a, b) => a.distanceKm - b.distanceKm),
+    // Rezervasyon alabilenler once (kapalilar soluk, sonda); grup icinde yakindan uzaga.
+    () =>
+      (query.data ?? [])
+        .filter((s) => !s.isPrelaunch)
+        .sort((a, b) => Number(b.bookable !== false) - Number(a.bookable !== false) || a.distanceKm - b.distanceKm),
     [query.data],
   );
+  const bookableCount = useMemo(() => shops.filter((s) => s.bookable !== false).length, [shops]);
   const selected = shops.find((s) => s.id === selectedId) ?? null;
 
   // Sonuclar gelince kart kucuk resimleri arka planda diske iner: liste kaydirilirken
@@ -132,7 +161,20 @@ export default function MapScreen() {
   if (!search.place || !center) return <Redirect href="/search" />;
 
   const bags = totalBags(search.bags);
-  const summary = `${search.place.label} · ${formatDay(search.checkIn)} · ${t("common.bag", { count: bags })}`;
+  const summary = `${search.place.label} · ${formatDay(search.checkIn)}, ${formatStayRange(search.checkIn, search.checkOut)} · ${t("common.bag", { count: bags })}`;
+  const emptyWindow = !query.isLoading && !query.isError && bookableCount === 0;
+  const changeDates = () => router.push({ pathname: "/search", params: { returnTo: "map", step: "1" } });
+  const tomorrowMorning = () => {
+    const p = wallParts(new Date());
+    const morning = wallInstant(p.year, p.month, p.day + 1, 9);
+    setWindow(morning, new Date(morning.getTime() + 4 * 60 * 60 * 1000));
+  };
+  const emptyActions = (
+    <View style={{ gap: space.sm, alignSelf: "stretch" }}>
+      <Button title={t("map.changeDates")} onPress={changeDates} />
+      <Button variant="secondary" title={t("map.tomorrowMorning")} onPress={tomorrowMorning} />
+    </View>
+  );
 
   return (
     <View style={styles.root}>
@@ -177,13 +219,13 @@ export default function MapScreen() {
       <Text style={[styles.attribution, { top: insets.top + 66 }]}>{MAP_ATTRIBUTION}</Text>
 
       <View style={[styles.top, { paddingTop: insets.top + space.sm }]}>
-        <IconButton label={t("common.back")} onPress={() => router.back()} style={shadow.card}>
+        <IconButton label={t("common.back")} onPress={goBackOr} style={shadow.card}>
           <ArrowLeft size={20} color={colors.ink} />
         </IconButton>
         <Pressable
           accessibilityRole="button"
           accessibilityLabel={t("map.editSearch")}
-          onPress={() => router.push({ pathname: "/search", params: { returnTo: "map" } })}
+          onPress={changeDates}
           style={styles.summary}
         >
           <Search size={18} color={colors.brand} />
@@ -216,32 +258,55 @@ export default function MapScreen() {
         </View>
       ) : null}
 
-      <BottomSheet top={insets.top + 90} peek={SHEET_PEEK}>
+      <BottomSheet
+        key={query.isError || emptyWindow ? "open" : "peek"}
+        top={insets.top + 90}
+        peek={SHEET_PEEK}
+        initialOpen={query.isError || emptyWindow}
+      >
         <View style={styles.sheetHeader}>
           <AppText variant="title" style={{ fontSize: 20, lineHeight: 26 }}>
             {query.isLoading
               ? t("common.loading")
-              : shops.length === 0
-                ? search.place.isCurrent
-                  ? t("map.emptyTitleNear")
-                  : t("map.emptyTitle", { place: search.place.label })
-                : search.place.isCurrent
-                  ? t("map.countNear", { count: shops.length })
-                  : t("map.count", { count: shops.length, place: search.place.label })}
+              : query.isError
+                ? search.place.label
+                : bookableCount === 0
+                  ? t("map.emptyWindowTitle")
+                  : search.place.isCurrent
+                    ? t("map.countNear", { count: bookableCount })
+                    : t("map.count", { count: bookableCount, place: search.place.label })}
           </AppText>
+          {search.rolled ? (
+            <AppText variant="caption" style={{ fontSize: 13 }}>
+              {t("map.rolledToTomorrow")}
+            </AppText>
+          ) : null}
         </View>
         {query.isLoading ? (
           <Loading />
         ) : query.isError ? (
           <CenterMessage
-            title={errorMessage(query.error, "checkout")}
-            action={<Button variant="secondary" title={t("common.retry")} onPress={() => query.refetch()} />}
+            title={errorMessage(query.error, "map")}
+            action={
+              query.error instanceof ApiError && query.error.code === "invalid_dates" ? (
+                // Ayni istegi tekrarlamak ayni hatayi dondurur: tarih adimina git.
+                <Button variant="secondary" title={t("map.changeDates")} onPress={changeDates} />
+              ) : (
+                <Button variant="secondary" title={t("common.retry")} onPress={() => query.refetch()} />
+              )
+            }
           />
         ) : shops.length === 0 ? (
-          <CenterMessage art={<MapSnippet width={120} price="?" />} title={t("map.empty")} />
+          <CenterMessage
+            art={<MapSnippet width={120} price="?" />}
+            title={t("map.emptyWindowTitle")}
+            body={t("map.emptyWindowBody")}
+            action={emptyActions}
+          />
         ) : (
           <FlatList
             data={shops}
+            ListHeaderComponent={bookableCount === 0 ? emptyActions : null}
             keyExtractor={(s) => s.id}
             contentContainerStyle={{ padding: space.lg, gap: space.md, paddingBottom: height * 0.2 }}
             renderItem={renderShop}
@@ -284,7 +349,12 @@ const ShopMarkers = memo(function ShopMarkers({
             }
           >
             <View
-              style={[styles.pin, s.isPrelaunch && styles.pinMuted, selected && styles.pinSelected]}
+              style={[
+                styles.pin,
+                (s.isPrelaunch || s.bookable === false) && styles.pinMuted,
+                s.bookable === false && styles.pinClosed,
+                selected && styles.pinSelected,
+              ]}
             >
               <Text style={styles.pinText} numberOfLines={1}>
                 {label}
@@ -335,6 +405,7 @@ const styles = StyleSheet.create({
     ...shadow.card,
   },
   pinMuted: { backgroundColor: colors.inkSecondary },
+  pinClosed: { opacity: 0.55 },
   pinSelected: { backgroundColor: colors.ink, transform: [{ scale: 1.1 }] },
   pinText: { fontFamily: fonts.bodySemibold, fontSize: 13, color: colors.white },
   selectedCard: { position: "absolute", left: space.lg, right: space.lg, ...shadow.floating },

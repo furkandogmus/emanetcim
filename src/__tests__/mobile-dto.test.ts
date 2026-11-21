@@ -5,6 +5,7 @@ import { DEFAULT_PRICING_RULES } from "@/lib/pricing-rules";
 import {
   toMobileUser,
   toMobileShop,
+  toMobilePriceBySize,
   toMobilePricing,
   toMobileBookingSummary,
   toMobileBookingDetail,
@@ -173,6 +174,13 @@ describe("toMobilePricing", () => {
       bagMultiplierXl: 1,
       insuranceFeeTry: 0,
     });
+  });
+});
+
+describe("toMobilePriceBySize", () => {
+  it("boyut basina fiyati sunucu yuvarlamasiyla verir (float gurultusu yok)", () => {
+    const rules = { ...DEFAULT_PRICING_RULES, bagMultipliers: { S: 0.7, M: 1, XL: 1.1 } };
+    expect(toMobilePriceBySize(110, rules)).toEqual({ s: 77, m: 110, xl: 121 });
   });
 });
 

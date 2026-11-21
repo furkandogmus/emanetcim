@@ -2,6 +2,12 @@ import { Stack } from "expo-router";
 
 import { colors } from "@/theme/tokens";
 
+/**
+ * Uygulama baglantisindan (`/shop/<id>`) soguk acilista yigin tek ekran kalirdi ve
+ * geri oku hicbir sey yapmazdi. Altta ana sayfa durur.
+ */
+export const unstable_settings = { initialRouteName: "(tabs)" };
+
 export default function GuestLayout() {
   return (
     <Stack screenOptions={{ headerShown: false, contentStyle: { backgroundColor: colors.bg } }}>

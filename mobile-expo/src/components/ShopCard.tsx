@@ -5,7 +5,8 @@ import { useTranslation } from "react-i18next";
 import type { TFunction } from "i18next";
 
 import { AppText } from "@/components/ui";
-import { formatDistance, formatMoney, formatRating } from "@/lib/format";
+import { formatDay, formatDistance, formatMoney, formatRating } from "@/lib/format";
+import { nextOpenInstant, openDayKind } from "@/lib/next-open";
 import { RemoteImage } from "@/components/RemoteImage";
 import { resolveImage } from "@/lib/images";
 import type { NearbyShop } from "@/lib/types";
@@ -17,6 +18,17 @@ export function hoursLabel(shop: Pick<NearbyShop, "open247" | "openingTime" | "c
     return t("shop.hours", { open: shop.openingTime, close: shop.closingTime });
   }
   return null;
+}
+
+/** "Bugun kapali · Yarin 09:00'da acilir"; sonraki acilis bilinmiyorsa kisa uyari. */
+export function closedLabel(shop: Pick<NearbyShop, "nextOpen">, t: TFunction) {
+  const n = shop.nextOpen;
+  if (!n) return t("map.closedNoDate");
+  const kind = openDayKind(n);
+  if (kind === "today") return t("map.closedToday", { time: n.at });
+  if (kind === "tomorrow") return t("map.closedTomorrow", { time: n.at });
+  const at = nextOpenInstant(n);
+  return t("map.closedDay", { day: at ? formatDay(at) : n.date, time: n.at });
 }
 
 /**
@@ -35,6 +47,7 @@ export const ShopCard = memo(function ShopCard({
   const { t } = useTranslation();
   const image = resolveImage(shop.image);
   const hours = hoursLabel(shop, t);
+  const closed = shop.bookable === false;
   const facts = [
     shop.district || shop.city || null,
     formatDistance(shop.distanceKm),
@@ -51,7 +64,7 @@ export const ShopCard = memo(function ShopCard({
       style={({ pressed }) => [
         styles.card,
         selected && styles.selected,
-        shop.isPrelaunch && { opacity: 0.7 },
+        (shop.isPrelaunch || closed) && { opacity: closed ? 0.6 : 0.7 },
         pressed && { backgroundColor: colors.surfaceMuted },
       ]}
     >
@@ -86,20 +99,38 @@ export const ShopCard = memo(function ShopCard({
           </AppText>
         </View>
 
-        {shop.hoursNotice?.pickup || shop.hoursNotice?.drop ? (
+        {closed ? (
           <View style={styles.metaRow}>
-            <Clock size={13} color={colors.warning} />
-            <AppText variant="caption" numberOfLines={2} style={{ fontSize: 13, color: colors.warning, flexShrink: 1 }}>
-              {shop.hoursNotice.pickup
-                ? t(shop.hoursNotice.pickup.reason === "closes" ? "map.hoursCloses" : "map.hoursPickupOpens", {
-                    time: shop.hoursNotice.pickup.at,
-                  })
-                : t("map.hoursOpens", { time: shop.hoursNotice.drop!.at })}
+            <Clock size={13} color={colors.inkSecondary} />
+            <AppText variant="caption" numberOfLines={2} style={{ fontSize: 13, flexShrink: 1 }}>
+              {closedLabel(shop, t)}
             </AppText>
           </View>
+        ) : shop.hoursNotice?.pickup || shop.hoursNotice?.drop ? (
+          // Ikisi de oturtulduysa ikisi de yazilir: biri gizlenince misafir digerini bilmeden gelirdi.
+          <View style={{ gap: 2 }}>
+            {shop.hoursNotice.drop ? (
+              <View style={styles.metaRow}>
+                <Clock size={13} color={colors.warning} />
+                <AppText variant="caption" numberOfLines={2} style={{ fontSize: 13, color: colors.warning, flexShrink: 1 }}>
+                  {t("map.hoursOpens", { time: shop.hoursNotice.drop.at })}
+                </AppText>
+              </View>
+            ) : null}
+            {shop.hoursNotice.pickup ? (
+              <View style={styles.metaRow}>
+                <Clock size={13} color={colors.warning} />
+                <AppText variant="caption" numberOfLines={2} style={{ fontSize: 13, color: colors.warning, flexShrink: 1 }}>
+                  {t(shop.hoursNotice.pickup.reason === "closes" ? "map.hoursCloses" : "map.hoursPickupOpens", {
+                    time: shop.hoursNotice.pickup.at,
+                  })}
+                </AppText>
+              </View>
+            ) : null}
+          </View>
         ) : hours ? (
+          // Yesil "acik" noktasi kaldirildi: secilen ani degil sabit saati gosteriyordu.
           <View style={styles.metaRow}>
-            <View style={styles.openDot} />
             <AppText variant="caption" style={{ fontSize: 13, color: colors.inkSecondary }}>
               {hours}
             </AppText>
@@ -149,7 +180,6 @@ const styles = StyleSheet.create({
   metaRow: { flexDirection: "row", alignItems: "center", gap: 4 },
   ratingText: { fontFamily: fonts.bodySemibold, fontSize: 13, color: colors.ink },
   dot: { fontFamily: fonts.body, fontSize: 13, color: colors.inkMuted },
-  openDot: { width: 6, height: 6, borderRadius: 3, backgroundColor: colors.success, marginRight: 2 },
   right: { alignItems: "flex-end", alignSelf: "flex-start", paddingTop: 2, maxWidth: 96 },
   price: { fontFamily: fonts.display, fontSize: 18, lineHeight: 22, color: colors.ink, fontVariant: ["tabular-nums"] },
   perDay: { fontFamily: fonts.body, fontSize: 12, color: colors.inkMuted, textAlign: "right" },

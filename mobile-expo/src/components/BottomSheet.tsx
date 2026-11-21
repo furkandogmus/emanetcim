@@ -1,4 +1,5 @@
 import { StyleSheet, View, useWindowDimensions } from "react-native";
+import { useTranslation } from "react-i18next";
 import type { ReactNode } from "react";
 import { Gesture, GestureDetector } from "react-native-gesture-handler";
 import Animated, { useAnimatedStyle, useSharedValue, withSpring } from "react-native-reanimated";
@@ -20,16 +21,25 @@ export function BottomSheet({
   children,
   top,
   peek,
+  initialOpen,
 }: {
   children: ReactNode;
   top: number;
   peek: number;
+  /** true: panel acik baslar (bos durum mesaji kapali konumda gorunmesin diye). Degisince `key` ile yeniden kurulur. */
+  initialOpen?: boolean;
 }) {
+  const { t } = useTranslation();
   const { height } = useWindowDimensions();
   const open = top;
   const closed = height - peek;
-  const y = useSharedValue(closed);
-  const start = useSharedValue(closed);
+  const y = useSharedValue(initialOpen ? open : closed);
+  const start = useSharedValue(initialOpen ? open : closed);
+
+  // Surukleme kesfedilmese de tutamaca dokunmak paneli acar/kapatir.
+  const tap = Gesture.Tap().onEnd((_e, ok) => {
+    if (ok) y.value = withSpring(y.value > (open + closed) / 2 ? open : closed, SPRING);
+  });
 
   const pan = Gesture.Pan()
     .onBegin(() => {
@@ -47,8 +57,19 @@ export function BottomSheet({
 
   return (
     <Animated.View style={[styles.sheet, { height: height - open }, style]}>
-      <GestureDetector gesture={pan}>
-        <View style={styles.handleArea} accessibilityRole="adjustable">
+      <GestureDetector gesture={Gesture.Race(pan, tap)}>
+        <View
+          style={styles.handleArea}
+          accessible
+          accessibilityRole="button"
+          accessibilityLabel={t("map.toggleList")}
+          accessibilityActions={[{ name: "activate" }]}
+          onAccessibilityAction={() => {
+            // Paylasilan deger JS tarafindan yazilabilir; derleyici kurali bunu bilmiyor.
+            // eslint-disable-next-line react-hooks/immutability
+            y.value = withSpring(y.value > (open + closed) / 2 ? open : closed, SPRING);
+          }}
+        >
           <View style={styles.handle} />
         </View>
       </GestureDetector>

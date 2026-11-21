@@ -26,14 +26,19 @@ export default function SearchWizard() {
   const search = useSearch();
   /*
     `step` ile belirli bir adimdan acilir; `returnTo=back` ise bitince haritaya
-    degil geldigi ekrana (checkout'taki "Duzenle") doner. Yer zaten secilmis
-    olmali; secili degilse ilk adimdan baslanir.
+    degil geldigi ekrana (checkout'taki "Duzenle") doner. Checkout yeri hic
+    okumaz, bu yuzden uygulama baglantisindan gelen (yer secilmemis) misafirde de
+    duzenleme modudur: yer adimi gosterilmez, bitince geri doner. `returnTo=map`
+    "Aramayi duzenle": yer secili, tarih adiminda acilir; yer ve valiz satirlarindan
+    ilgili adima gidilir.
   */
   const params = useLocalSearchParams<{ step?: string; returnTo?: string; from?: string }>();
-  const editing = params.returnTo === "back" && !!search.place;
+  const editing = params.returnTo === "back" || (params.returnTo === "map" && !!search.place);
   // Ana sayfadaki sehir kartindan gelince yer secili: dogrudan "ne zaman" adimi.
   const [step, setStep] = useState(() =>
-    editing ? Math.min(2, Math.max(0, Number(params.step) || 0)) : params.from === "city" && search.place ? 1 : 0,
+    editing
+      ? Math.min(2, Math.max(0, params.step === undefined ? 1 : Number(params.step) || 0))
+      : params.from === "city" && search.place ? 1 : 0,
   );
 
   const [checkIn, setCheckIn] = useState(search.checkIn);
@@ -70,8 +75,8 @@ export default function SearchWizard() {
   return (
     <SafeAreaView style={styles.safe} edges={["top", "bottom"]}>
       <View style={styles.topBar}>
-        {step > 0 && !editing ? (
-          <IconButton label={t("common.back")} onPress={() => setStep(step - 1)}>
+        {(editing ? step === 2 || (step === 0 && !!search.place) : step > 0) ? (
+          <IconButton label={t("common.back")} onPress={() => setStep(editing ? 1 : step - 1)}>
             <ArrowLeft size={20} color={colors.ink} />
           </IconButton>
         ) : (
@@ -160,6 +165,28 @@ export default function SearchWizard() {
         <>
           <ScrollView contentContainerStyle={styles.content}>
             <AppText variant="title">{t("search.whenTitle")}</AppText>
+            {editing ? (
+              <View style={styles.summaryRows}>
+                {params.returnTo === "map" && search.place ? (
+                  <Pressable accessibilityRole="button" onPress={() => setStep(0)} style={styles.summaryRow}>
+                    <AppText variant="bodyMedium" numberOfLines={1} style={{ flex: 1 }}>
+                      {search.place.label}
+                    </AppText>
+                    <AppText variant="caption" style={{ color: colors.accent }}>
+                      {t("search.changePlace")}
+                    </AppText>
+                  </Pressable>
+                ) : null}
+                <Pressable accessibilityRole="button" onPress={() => setStep(2)} style={styles.summaryRow}>
+                  <AppText variant="bodyMedium" numberOfLines={1} style={{ flex: 1 }}>
+                    {t("common.bag", { count: totalBags(bags) })}
+                  </AppText>
+                  <AppText variant="caption" style={{ color: colors.accent }}>
+                    {t("search.changePlace")}
+                  </AppText>
+                </Pressable>
+              </View>
+            ) : null}
             <AppText variant="caption">{t("search.whenHint")}</AppText>
             <StayWindowPicker
               checkIn={checkIn}
@@ -226,6 +253,20 @@ const styles = StyleSheet.create({
   cityRow: { flexDirection: "row", alignItems: "center", gap: space.md, minHeight: 60, paddingHorizontal: space.md },
   cityThumb: { width: 40, height: 40, borderRadius: radius.inner, backgroundColor: colors.surfaceMuted },
   cityDivider: { borderTopWidth: 1, borderTopColor: colors.border },
+  summaryRows: {
+    borderRadius: radius.card,
+    borderWidth: 1,
+    borderColor: colors.border,
+    backgroundColor: colors.surface,
+    overflow: "hidden",
+  },
+  summaryRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: space.md,
+    minHeight: 48,
+    paddingHorizontal: space.md,
+  },
   placeIcon: {
     width: 40,
     height: 40,

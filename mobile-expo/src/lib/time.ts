@@ -80,3 +80,8 @@ export function fromCell(cell: Date, minutes = 0): Date {
 export function shiftedForFormat(d: Date | string): Date {
   return new Date(new Date(d).getTime() + OFFSET_MS);
 }
+
+/** Sunucunun ISO hafta gunu (1 = pazartesi ... 7 = pazar) -> `wallParts().weekday` / `shop.weekdays` dizini (pazar = 0). */
+export function isoWeekdayIndex(isoWeekday: number): number {
+  return isoWeekday % 7;
+}

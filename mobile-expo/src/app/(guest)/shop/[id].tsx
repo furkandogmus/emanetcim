@@ -1,5 +1,5 @@
 import { useEffect } from "react";
-import { ScrollView, StyleSheet, View } from "react-native";
+import { Pressable, ScrollView, StyleSheet, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { router, useLocalSearchParams } from "expo-router";
 import { ArrowLeft, BadgeCheck, Star, Store } from "lucide-react-native";
@@ -9,12 +9,15 @@ import { PhotoPager } from "@/components/PhotoPager";
 import { hoursLabel } from "@/components/ShopCard";
 import { AppText, Banner, Button, Card, CenterMessage, IconButton, Loading } from "@/components/ui";
 import { rememberCheckoutIntent, takeCheckoutIntent } from "@/lib/after-login";
+import { ApiError } from "@/lib/api";
 import { useAuth } from "@/lib/auth";
 import { errorMessage } from "@/lib/errors";
-import { formatDay, formatMoney, formatRating } from "@/lib/format";
+import { formatDay, formatMoney, formatRating, formatStayRange } from "@/lib/format";
 import { resolveImage } from "@/lib/images";
+import { goBackOr } from "@/lib/navigation";
 import { useShop, useShopReviews } from "@/lib/queries";
-import { wallParts } from "@/lib/time";
+import { totalBags, useSearch } from "@/lib/search";
+import { isoWeekdayIndex, wallParts } from "@/lib/time";
 import { colors, fonts, radius, shadow, space } from "@/theme/tokens";
 
 export default function ShopDetailScreen() {
@@ -22,6 +25,7 @@ export default function ShopDetailScreen() {
   const { t } = useTranslation();
   const insets = useSafeAreaInsets();
   const query = useShop(id);
+  const search = useSearch();
   const { state } = useAuth();
   const signedIn = state.status === "signedIn";
 
@@ -46,7 +50,7 @@ export default function ShopDetailScreen() {
     return (
       <View style={{ flex: 1, backgroundColor: colors.bg }}>
         <View style={{ position: "absolute", top: insets.top + space.sm, left: space.lg, zIndex: 1 }}>
-          <IconButton label={t("common.back")} onPress={() => router.back()}>
+          <IconButton label={t("common.back")} onPress={goBackOr}>
             <ArrowLeft size={20} color={colors.ink} />
           </IconButton>
         </View>
@@ -57,8 +61,15 @@ export default function ShopDetailScreen() {
   if (query.isError || !query.data) {
     return (
       <CenterMessage
-        title={errorMessage(query.error)}
-        action={<Button variant="secondary" title={t("common.back")} onPress={() => router.back()} />}
+        title={errorMessage(query.error, "shop")}
+        action={
+          query.error instanceof ApiError && query.error.code === "not_found" ? (
+            // Silinmis / kapanmis nokta: geri donulecek yer olmayabilir (uygulama baglantisi).
+            <Button variant="secondary" title={t("shop.nearbyAction")} onPress={() => router.replace(search.place ? "/map" : "/")} />
+          ) : (
+            <Button variant="secondary" title={t("common.back")} onPress={goBackOr} />
+          )
+        }
       />
     );
   }
@@ -68,9 +79,10 @@ export default function ShopDetailScreen() {
   const photos = [shop.image, ...(shop.gallery ?? [])].filter((u): u is string => !!resolveImage(u));
   const hours = hoursLabel(shop, t);
   const weekdays = t("shop.weekdays", { returnObjects: true }) as string[];
-  // Haftalik liste pazartesiden baslasin (API 0 = pazar).
+  // API ISO hafta gunu verir (1 = pazartesi ... 7 = pazar); `weekdays` ve `wallParts` ise
+  // pazar = 0. Liste pazartesiden baslar.
   const weekly = [...(shop.weeklyHours ?? [])].sort((a, b) => ((a.weekday + 6) % 7) - ((b.weekday + 6) % 7));
-  const todayIdx = wallParts(new Date()).weekday;
+  const todayIdx = wallParts(new Date()).weekday; // 0 = pazar
 
   return (
     <View style={styles.root}>
@@ -84,7 +96,7 @@ export default function ShopDetailScreen() {
           )}
           <IconButton
             label={t("common.back")}
-            onPress={() => router.back()}
+            onPress={goBackOr}
             style={[styles.back, { top: insets.top + space.sm }, shadow.card]}
           >
             <ArrowLeft size={20} color={colors.ink} />
@@ -97,7 +109,6 @@ export default function ShopDetailScreen() {
           <View style={styles.metaRow}>
             {hours ? (
               <View style={styles.meta}>
-                <View style={styles.openDot} />
                 <AppText variant="bodyMedium">{hours}</AppText>
               </View>
             ) : null}
@@ -141,22 +152,42 @@ export default function ShopDetailScreen() {
           )}
 
           {!shop.isPrelaunch ? (
+            // Secilen tarih ve valiz burada da gorunur; checkout bunlari sessizce okuyordu.
+            <Pressable
+              accessibilityRole="button"
+              onPress={() => router.push({ pathname: "/search", params: { returnTo: "back", step: "1" } })}
+              style={styles.selection}
+            >
+              <AppText variant="bodyMedium" numberOfLines={2} style={{ flex: 1 }}>
+                {t("shop.selection", {
+                  when: `${formatDay(search.checkIn)}, ${formatStayRange(search.checkIn, search.checkOut)}`,
+                  bags: t("common.bag", { count: totalBags(search.bags) }),
+                })}
+              </AppText>
+              <AppText variant="caption" style={{ color: colors.accent }}>
+                {t("shop.change")}
+              </AppText>
+            </Pressable>
+          ) : null}
+
+          {/* Boyut basina fiyat sunucudan (yuvarlanmis); istemci carpan uygulamaz. */}
+          {!shop.isPrelaunch && shop.priceBySize ? (
             <Card style={{ gap: space.sm }}>
               <AppText variant="heading">{t("shop.prices")}</AppText>
               {(
                 [
-                  ["s", shop.pricing.bagMultiplierS],
-                  ["m", shop.pricing.bagMultiplierM],
-                  ["xl", shop.pricing.bagMultiplierXl],
+                  ["s", shop.priceBySize.s],
+                  ["m", shop.priceBySize.m],
+                  ["xl", shop.priceBySize.xl],
                 ] as const
-              ).map(([size, mult]) => (
+              ).map(([size, price]) => (
                 <View key={size} style={styles.hourRow}>
                   <View style={{ flex: 1 }}>
                     <AppText variant="bodyMedium">{t(`bags.${size}`)}</AppText>
                     <AppText variant="caption">{t(`bags.${size}Desc`)}</AppText>
                   </View>
                   <AppText variant="bodyMedium" style={{ fontVariant: ["tabular-nums"] }}>
-                    {t("shop.perDay", { price: formatMoney(shop.pricePerDay * mult) })}
+                    {t("shop.perDay", { price: formatMoney(price) })}
                   </AppText>
                 </View>
               ))}
@@ -171,12 +202,12 @@ export default function ShopDetailScreen() {
               {weekly.map((w) => (
                 <View key={w.weekday} style={styles.hourRow}>
                   <AppText
-                    variant={w.weekday === todayIdx ? "bodyMedium" : "body"}
-                    style={w.weekday === todayIdx && { color: colors.accent }}
+                    variant={isoWeekdayIndex(w.weekday) === todayIdx ? "bodyMedium" : "body"}
+                    style={isoWeekdayIndex(w.weekday) === todayIdx && { color: colors.accent }}
                   >
-                    {weekdays[w.weekday]}
+                    {weekdays[isoWeekdayIndex(w.weekday)]}
                   </AppText>
-                  <AppText variant={w.weekday === todayIdx ? "bodyMedium" : "body"}>
+                  <AppText variant={isoWeekdayIndex(w.weekday) === todayIdx ? "bodyMedium" : "body"}>
                     {w.isClosed ? t("shop.closed") : `${w.openingTime} – ${w.closingTime}`}
                   </AppText>
                 </View>
@@ -188,12 +219,14 @@ export default function ShopDetailScreen() {
 
       {!shop.isPrelaunch ? (
         <View style={[styles.cta, { paddingBottom: insets.bottom + space.md }]}>
-          <View>
-            <AppText variant="caption">{t("shop.perDayMediumLabel")}</AppText>
-            <AppText variant="heading" style={{ fontFamily: fonts.display, fontSize: 22 }}>
-              {formatMoney(Math.round(shop.pricePerDay * shop.pricing.bagMultiplierM * 100) / 100)}
-            </AppText>
-          </View>
+          {shop.priceBySize ? (
+            <View>
+              <AppText variant="caption">{t("shop.perDayMediumLabel")}</AppText>
+              <AppText variant="heading" style={{ fontFamily: fonts.display, fontSize: 22 }}>
+                {formatMoney(shop.priceBySize.m)}
+              </AppText>
+            </View>
+          ) : null}
           <Button
             title={t("shop.book")}
             style={{ flex: 1 }}
@@ -245,7 +278,18 @@ const styles = StyleSheet.create({
   },
   metaRow: { flexDirection: "row", flexWrap: "wrap", gap: space.lg },
   meta: { flexDirection: "row", alignItems: "center", gap: 6 },
-  openDot: { width: 8, height: 8, borderRadius: 4, backgroundColor: colors.success },
+  selection: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: space.md,
+    minHeight: 48,
+    paddingHorizontal: space.md,
+    paddingVertical: space.sm,
+    borderRadius: radius.card,
+    borderWidth: 1,
+    borderColor: colors.border,
+    backgroundColor: colors.surface,
+  },
   rule: {
     flexDirection: "row",
     gap: space.md,

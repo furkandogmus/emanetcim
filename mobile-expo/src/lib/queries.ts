@@ -83,6 +83,8 @@ export function useNearbyShops(p: NearbyParams | null) {
         checkIn: p!.checkIn.toISOString(),
         checkOut: p!.checkOut.toISOString(),
         bags: String(p!.bags),
+        // Saate oturmayan dukkanlar da gelsin (bookable:false); eski istemci bunu gondermez.
+        includeClosed: "1",
       });
       return api<NearbyShop[]>(`/shops/nearby?${q}`, { auth: false });
     },
