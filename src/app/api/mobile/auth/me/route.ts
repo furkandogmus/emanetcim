@@ -3,7 +3,7 @@ import type { NextRequest } from "next/server";
 import prisma from "@/lib/db";
 import { requireMobileUser } from "@/lib/mobile-auth";
 import { toMobileUser } from "@/lib/mobile-dto";
-import { normalizeTrGsm10 } from "@/lib/netgsm";
+import { partnerProfileService } from "@/services/PartnerProfileService";
 import { isPrismaUniqueViolation } from "@/lib/prisma-errors";
 import logger from "@/lib/logger";
 
@@ -79,6 +79,7 @@ export async function PUT(req: NextRequest) {
     .catch(() => ({ name: undefined, phone: undefined, image: undefined }));
 
   const data: Record<string, unknown> = {};
+  let phoneChange: string | null | undefined;
 
   if (name !== undefined) {
     if (typeof name !== "string" || !name.trim() || name.trim().length > 100) {
@@ -104,26 +105,42 @@ export async function PUT(req: NextRequest) {
       Kural: telefon yalnizca `normalizeTrGsm10` biciminde saklanir. Bosaltma
       (`""` / `null`) de acikca desteklenir.
     */
-    if (phone === null || (typeof phone === "string" && !phone.trim())) {
-      data.phone = null;
-    } else {
-      const normalized = typeof phone === "string" ? normalizeTrGsm10(phone) : null;
-      if (!normalized) {
-        return NextResponse.json({ error: "invalid_phone" }, { status: 400 });
-      }
-      data.phone = normalized;
+    if (phone !== null && typeof phone !== "string") {
+      return NextResponse.json({ error: "invalid_phone" }, { status: 400 });
     }
+    phoneChange = phone;
   }
 
   // Yalnizca kaldirma: yeni fotograf multipart dalindan gelir.
   if (image === null) data.image = null;
 
-  if (Object.keys(data).length === 0) {
+  if (Object.keys(data).length === 0 && phoneChange === undefined) {
     return NextResponse.json({ error: "no_fields" }, { status: 400 });
   }
 
   try {
-    await prisma.user.update({ where: { id: auth.user.id }, data });
+    /*
+      Yazma ve giris-kilidi korumasi `PartnerProfileService`te (esnaf ucuyla
+      ayni govde). E-postasi/baska girisi olmayan hesabin telefonu silinemez
+      ya da degistirilemez. Hata esleme ile log burada, tek try icinde; telefon
+      ONCE yazilir cunku is kurali redleri (kilit, cakisma) hicbir sey yazmadan
+      doner: ad/fotograf yarim kalmaz.
+    */
+    if (phoneChange !== undefined) {
+      const result = await partnerProfileService.updatePhone(auth.user.id, phoneChange);
+      if (!result.ok) {
+        if (result.reason === "already_registered") {
+          return NextResponse.json({ error: "phone_taken" }, { status: 409 });
+        }
+        if (result.reason === "login_phone_locked") {
+          return NextResponse.json({ error: "phone_locked" }, { status: 409 });
+        }
+        return NextResponse.json({ error: "invalid_phone" }, { status: 400 });
+      }
+    }
+    if (Object.keys(data).length > 0) {
+      await prisma.user.update({ where: { id: auth.user.id }, data });
+    }
     return NextResponse.json({ success: true });
   } catch (err) {
     /*

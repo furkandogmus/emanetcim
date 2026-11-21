@@ -25,5 +25,6 @@ export async function GET(req: NextRequest, { params }: { params: Promise<{ id: 
   const operator = !requireRole(auth.user, ["PARTNER", "ADMIN"]);
   const checkoutPreview =
     operator && b.status === "CHECKED_IN" ? await previewCheckOutCharges(b, new Date()) : null;
-  return NextResponse.json({ ...toMobileBookingDetail(b), checkoutPreview });
+  // Misafir telefonu kurali (yalniz esnaf/yonetici + aktif kayit) DTO'da.
+  return NextResponse.json({ ...toMobileBookingDetail(b, { operator }), checkoutPreview });
 }

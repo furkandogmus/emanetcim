@@ -429,7 +429,9 @@ export async function updatePartnerPhoneAction(phone: string) {
       error:
         result.reason === "invalid_tr_phone"
           ? "Errors.invalidTrPhone"
-          : "Errors.phoneAlreadyRegistered",
+          : result.reason === "login_phone_locked"
+            ? "Errors.phoneLoginLocked"
+            : "Errors.phoneAlreadyRegistered",
     };
   }
 

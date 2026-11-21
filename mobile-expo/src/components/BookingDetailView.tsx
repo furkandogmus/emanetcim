@@ -19,6 +19,7 @@ import { formatMoney } from "@/lib/format";
 import { isActiveBooking, useBooking } from "@/lib/queries";
 import type { BookingDetail } from "@/lib/types";
 import { notify } from "@/lib/notify";
+import { whatsappNumber } from "@/lib/phone";
 import { loadOfflineTicket, saveOfflineTicket, type OfflineTicket } from "@/lib/offline-tickets";
 import { colors, radius, space } from "@/theme/tokens";
 
@@ -41,6 +42,33 @@ function openDirections(b: BookingDetail) {
       ? `http://maps.apple.com/?daddr=${q}`
       : `https://www.google.com/maps/dir/?api=1&destination=${q}`;
   void Linking.openURL(url).catch(() => undefined);
+}
+
+/** Esnaf, gelmeyen ya da gec kalan misafiri arar / yazar. Numara yoksa hicbir sey cizilmez. */
+function GuestContact({ phone }: { phone?: string }) {
+  const { t } = useTranslation();
+  const digits = (phone ?? "").replace(/[^\d+]/g, "");
+  if (!digits) return null;
+  // Ulke kodu belli degilse WhatsApp gosterilmez (yanlis kisiye gitmesin); Ara her zaman var.
+  const intl = whatsappNumber(phone);
+  return (
+    <View style={styles.actionRow}>
+      <Button
+        variant="secondary"
+        style={{ flex: 1 }}
+        title={t("partner.callGuest")}
+        onPress={() => void Linking.openURL(`tel:${digits}`).catch(() => undefined)}
+      />
+      {intl ? (
+        <Button
+          variant="secondary"
+          style={{ flex: 1 }}
+          title={t("partner.whatsappGuest")}
+          onPress={() => void Linking.openURL(`https://wa.me/${intl}`).catch(() => undefined)}
+        />
+      ) : null}
+    </View>
+  );
 }
 
 export function BookingDetailView({ id, mode }: { id: string; mode: "guest" | "partner" }) {
@@ -174,10 +202,12 @@ export function BookingDetailView({ id, mode }: { id: string; mode: "guest" | "p
             })}
           />
         ) : null}
+        {/* Asil is (teslim al / et) duzeltme kartinin USTUNDE: kucuk telefonda ekran altinda kalmasin. */}
+        {mode === "partner" ? <PartnerBookingActions key={b.status} booking={b} /> : null}
+        {mode === "partner" ? <GuestContact phone={b.guestPhone} /> : null}
         {mode === "partner" ? (
           <BagRevisionCard key={`rev-${b.status}-${b.bagCountS}-${b.bagCountM}-${b.bagCountXl}`} booking={b} />
         ) : null}
-        {mode === "partner" ? <PartnerBookingActions key={b.status} booking={b} /> : null}
 
 
         {mode === "guest" ? (

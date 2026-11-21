@@ -69,7 +69,8 @@ export function toMobileBookingSummary(b: BookingSummarySource) {
 
 type BookingDetailSource = BookingSummarySource & {
   qrCodeToken: string | null;
-  guest: { name: string | null } | null;
+  guest: { name: string | null; phone?: string | null } | null;
+  guestPhone?: string | null;
   shop: {
     name: string;
     /* Sema `Float?`: koordinatsiz dukkan (henuz haritaya islenmemis) mumkun. */
@@ -100,7 +101,14 @@ function toMobilePendingBagRevision(raw: unknown) {
   return { bagCountS: s, bagCountM: m, bagCountXl: xl, extraAmount: extra, newTotal: next };
 }
 
-export function toMobileBookingDetail(b: BookingDetailSource) {
+export function toMobileBookingDetail(b: BookingDetailSource, opts: { operator?: boolean } = {}) {
+  /*
+    Misafirin telefonu YALNIZCA islemi yapan esnaf/yonetici icin ve YALNIZCA
+    aktif rezervasyonda (gelmeyen/gec kalan misafiri aramak icin). Kural burada,
+    DTO'da: rota ayri bir kopya tutarsa ayrisir. Bitmis kayitta bos doner.
+  */
+  const active = !["CHECKED_OUT", "CANCELLED"].includes(b.status);
+  const guestPhone = opts.operator && active ? (b.guest?.phone ?? b.guestPhone ?? "") : "";
   return {
     ...toMobileBookingSummary(b),
     qrCodeToken: b.qrCodeToken,
@@ -120,6 +128,7 @@ export function toMobileBookingDetail(b: BookingDetailSource) {
     hasReview: !!b.review,
     hasDispute: !!b.dispute,
     pendingBagRevision: toMobilePendingBagRevision(b.pendingBagRevision),
+    guestPhone,
   };
 }
 
@@ -291,6 +300,8 @@ export function toMobileReview(r: ReviewSource) {
 type AppConfigSource = {
   minAppVersion: string | null;
   latestAppVersion: string | null;
+  /** Yonetici ayari: check-in'de muhur numarasi zorunlu mu. Gizli degil. */
+  requireSealsOnCheckIn?: boolean;
 };
 
 /**
@@ -309,6 +320,7 @@ export function toMobileAppConfig(c: AppConfigSource) {
   return {
     minAppVersion: c.minAppVersion,
     latestAppVersion: c.latestAppVersion,
+    requireSealsOnCheckIn: c.requireSealsOnCheckIn === true,
   };
 }
 
@@ -621,4 +633,44 @@ export function toMobileGalleryImage(i: { id: string; url: string }) {
 /** Misafirin dukkan detayindaki galeri: yalnizca adresler, sirali. */
 export function toMobilePublicGallery(images: Array<{ url: string }>) {
   return images.map((i) => i.url);
+}
+
+type PartnerShopSource = {
+  id: string;
+  name: string;
+  image: string | null;
+  capacity: number;
+  pricePerDay: unknown;
+  address: string | null;
+  city: string | null;
+  district: string | null;
+  openingTime: string | null;
+  closingTime: string | null;
+  open247: boolean;
+};
+
+/**
+ * Esnaf `partner/shop` GET/PUT govdesi. ONCEDEN `...shop` yayilimiydi: sahip
+ * kimligi, test bayragi, saat dilimi gibi ic kolonlar telefona gidiyor, yeni
+ * eklenen her kolon da kendiliginden sizip cikiyordu; PUT yanitinda
+ * `pricePerDay` Decimal oldugu icin string geliyordu. Alan listesi acik.
+ */
+export function toMobilePartnerShop(
+  shop: PartnerShopSource,
+  extras: Record<string, unknown> = {},
+) {
+  return {
+    id: shop.id,
+    name: shop.name,
+    image: shop.image,
+    capacity: shop.capacity,
+    pricePerDay: moneyToNumber(shop.pricePerDay),
+    address: shop.address,
+    city: shop.city,
+    district: shop.district,
+    openingTime: shop.openingTime,
+    closingTime: shop.closingTime,
+    open247: shop.open247,
+    ...extras,
+  };
 }

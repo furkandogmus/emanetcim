@@ -1841,6 +1841,7 @@
     "notFound": "Kayıt bulunamadı.",
     "paymentFailed": "Ödeme başarısız veya reddedildi.",
     "phoneAlreadyRegistered": "Bu telefon numarası zaten kayıtlı.",
+    "phoneLoginLocked": "Bu numara girişte kullanılıyor; e-posta veya başka bir giriş yöntemi olmadan değiştirilemez.",
     "referralCodeFailed": "Kod oluşturulamadı, lütfen tekrar deneyin.",
     "reviewNotReady": "Yorum yalnızca teslim tamamlandıktan sonra yapılabilir.",
     "sealCountMismatch": "Girilen mühür sayısı valiz sayısıyla eşleşmiyor.",

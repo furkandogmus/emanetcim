@@ -24,7 +24,7 @@ import { normalizeTrGsm10 } from "@/lib/netgsm";
 
 export type UpdatePhoneResult =
   | { ok: true; phone: string | null }
-  | { ok: false; reason: "invalid_tr_phone" | "already_registered" };
+  | { ok: false; reason: "invalid_tr_phone" | "already_registered" | "login_phone_locked" };
 
 class PartnerProfileService {
   /**
@@ -39,6 +39,28 @@ class PartnerProfileService {
     const normalized = trimmed ? normalizeTrGsm10(trimmed) : null;
     if (trimmed && !normalized) {
       return { ok: false, reason: "invalid_tr_phone" };
+    }
+
+    /*
+      GIRIS NUMARASI KORUMASI (2026-11-21). Telefon ayni zamanda girisin
+      kendisi: e-postasi ve baska giris yontemi (Google/Apple) olmayan bir
+      hesapta numarayi silmek ya da degistirmek esnafi kendi hesabindan
+      kilitler, ve geri almak icin giremeyecegi icin yol da kalmaz. Bu kural
+      iki tasiyici (esnaf ucu ve /auth/me) icin burada, tek yerde.
+    */
+    const current = await prisma.user.findUnique({
+      where: { id: userId },
+      select: { email: true, phone: true, _count: { select: { accounts: true } } },
+    });
+    /*
+      Eski satirlar "05..." ya da "+905..." biciminde durabilir: ham degerle
+      kiyaslanirsa ayni numarayi normal biciminde yeniden kaydetmek "degisiklik"
+      sayilir ve giris numarasi korumasina takilir; satir hic normallesemez.
+    */
+    const storedPhone = current?.phone ? (normalizeTrGsm10(current.phone) ?? current.phone) : null;
+    if (current && storedPhone && normalized !== storedPhone) {
+      const hasOtherLogin = !!current.email || current._count.accounts > 0;
+      if (!hasOtherLogin) return { ok: false, reason: "login_phone_locked" };
     }
 
     try {
