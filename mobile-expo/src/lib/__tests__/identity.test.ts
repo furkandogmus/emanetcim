@@ -1,6 +1,13 @@
 import { describe, expect, it } from "@jest/globals";
 
-import { looksLikePhone, normalizeTrGsm10, parseIdentity, parsePhone } from "@/lib/identity";
+import {
+  applyIdentityInput,
+  looksLikePhone,
+  normalizeTrGsm10,
+  parseIdentity,
+  parsePhone,
+  switchIdentityMode,
+} from "@/lib/identity";
 
 describe("parseIdentity", () => {
   it("e-postayi kucuk harfe cevirir", () => {
@@ -51,5 +58,45 @@ describe("looksLikePhone", () => {
     expect(looksLikePhone("34ahmet")).toBe(false);
     expect(looksLikePhone("05")).toBe(false);
     expect(looksLikePhone("")).toBe(false);
+  });
+});
+
+describe("applyIdentityInput / switchIdentityMode", () => {
+  const empty = { mode: "email" as const, email: "", phone: "" };
+
+  it("kilitsizken 3 rakamda telefona gecer", () => {
+    expect(applyIdentityInput(empty, "190", false)).toEqual({ mode: "phone", email: "", phone: "190" });
+  });
+
+  it("sekmeyle e-postaya donen kullanici '190ahmet@x.com' yazabilir (tuzak yok)", () => {
+    let s = applyIdentityInput(empty, "190", false);
+    s = switchIdentityMode(s, "email");
+    expect(s).toEqual({ mode: "email", email: "190", phone: "" });
+    s = applyIdentityInput(s, "190", true);
+    expect(s.mode).toBe("email");
+    s = applyIdentityInput(s, "190ahmet@x.com", true);
+    expect(s).toEqual({ mode: "email", email: "190ahmet@x.com", phone: "" });
+  });
+
+  it("kilitliyken e-posta kutusuna yalniz rakam yazmak modu degistirmez", () => {
+    expect(applyIdentityInput(empty, "05321234567", true).mode).toBe("email");
+  });
+
+  it("telefon kutusuna harf/@ gelirse kilitli de olsa e-postaya doner", () => {
+    const phone = { mode: "phone" as const, email: "", phone: "532" };
+    expect(applyIdentityInput(phone, "ahmet@x.com", true)).toEqual({ mode: "email", email: "ahmet@x.com", phone: "" });
+  });
+
+  it("e-posta -> telefon sekmesi telefon gibi metni tasir, e-postayi telefona dokmez", () => {
+    expect(switchIdentityMode({ mode: "email", email: "0532", phone: "" }, "phone")).toEqual({
+      mode: "phone",
+      email: "",
+      phone: "0532",
+    });
+    expect(switchIdentityMode({ mode: "email", email: "a@b.co", phone: "" }, "phone")).toEqual({
+      mode: "phone",
+      email: "a@b.co",
+      phone: "",
+    });
   });
 });
