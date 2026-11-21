@@ -13,6 +13,8 @@ import {
   p90Minutes,
 } from '@/lib/shop-response-time';
 import { moneyToNumber } from '@/lib/money';
+import { getPricingRules } from '@/lib/platform-settings';
+import { shopSettingsImpactService, type SettingsImpact } from '@/services/ShopSettingsImpact';
 import { getActiveShopsOrderedByDistanceKm } from '@/lib/shop-distance-postgis';
 
 import { isShopOpenForStay } from '@/lib/shop-hours';
@@ -235,6 +237,24 @@ export type FindShopsForSearchOptions = {
   stayDays?: { drop: string; pickup: string };
 };
 
+/** Esnafin ayarlar formundan gelen alanlar (web action + mobil uc ORTAK). */
+export type ShopSettingsInput = {
+  name?: string;
+  capacity?: number;
+  pricePerDay?: number;
+  openingTime?: string;
+  closingTime?: string;
+  address?: string;
+  city?: string;
+  district?: string;
+  latitude?: number | null;
+  longitude?: number | null;
+};
+
+export type UpdateShopSettingsResult =
+  | { ok: true; shop: Shop; impact: SettingsImpact }
+  | { ok: false; reason: 'price_out_of_range'; min: number; max: number };
+
 export interface IShopService {
   findNearby(
     latitude: number,
@@ -258,6 +278,7 @@ export interface IShopService {
   getShopsByOwner(ownerId: string): Promise<Shop[]>;
   getShopByOwner(ownerId: string, requestedShopId?: string | null): Promise<Shop | null>;
   updateShop(shopId: string, data: Partial<Shop>): Promise<Shop>;
+  updateSettings(shopId: string, input: ShopSettingsInput): Promise<UpdateShopSettingsResult>;
   recomputeResponseTimes(now?: Date): Promise<RecomputeResponseTimesResult>;
 }
 
@@ -895,6 +916,40 @@ export class ShopService implements IShopService {
   async getShopByOwner(ownerId: string, requestedShopId?: string | null): Promise<Shop | null> {
     const { activeShop } = await resolvePartnerShops(ownerId, requestedShopId);
     return activeShop ? await prisma.shop.findUnique({ where: { id: activeShop.id } }) : null;
+  }
+
+  /**
+   * Esnaf ayarlari: fiyat bandi + etki olcumu + yazma TEK YERDE.
+   *
+   * NEDEN (2026-11-21): bant ve etki kontrolu yalnizca web action'indaydi;
+   * mobil uc ayni degeri dogrudan yaziyordu. Esnaf 250 yerine 2500 yazinca
+   * dukkan aninda o fiyatla yayina giriyor, kapasite/saat daraltmasi da
+   * "kaydedildi" diyerek kabul edilmis rezervasyonlari tezgahta reddedilir
+   * birakiyordu. Band: platform gunluk fiyatinin yarisi ile iki kati.
+   * Etki YAZMADAN ONCE olculur (sonra "eski saatlere gore" sorusu sorulamaz).
+   */
+  async updateSettings(shopId: string, input: ShopSettingsInput): Promise<UpdateShopSettingsResult> {
+    if (input.pricePerDay !== undefined) {
+      const rules = await getPricingRules();
+      const min = Math.round(rules.defaultPricePerDay / 2);
+      const max = rules.defaultPricePerDay * 2;
+      if (input.pricePerDay < min || input.pricePerDay > max) {
+        return { ok: false, reason: 'price_out_of_range', min, max };
+      }
+    }
+
+    const impact = await shopSettingsImpactService.assess({
+      shopId,
+      openingTime: input.openingTime,
+      closingTime: input.closingTime,
+      capacity: input.capacity,
+    });
+
+    const { pricePerDay, ...rest } = input;
+    const data: Partial<Shop> = { ...rest, updatedAt: new Date() };
+    if (pricePerDay !== undefined) data.pricePerDay = new Prisma.Decimal(pricePerDay);
+    const shop = await this.updateShop(shopId, data);
+    return { ok: true, shop, impact };
   }
 
   async updateShop(shopId: string, data: Partial<Shop>): Promise<Shop> {

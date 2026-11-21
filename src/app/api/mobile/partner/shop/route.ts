@@ -1,12 +1,12 @@
 import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
 import { z } from "zod";
-import { Prisma } from "@prisma/client";
 import { requireMobileUser, requireRole } from "@/lib/mobile-auth";
-import { shopService } from "@/services/ShopService";
+import { shopService, type ShopSettingsInput } from "@/services/ShopService";
 import { shopGalleryService } from "@/services/ShopGalleryService";
-import { toMobileGalleryImage } from "@/lib/mobile-dto";
+import { toMobileGalleryImage, toMobilePartnerShop } from "@/lib/mobile-dto";
 import prisma from "@/lib/db";
+import { getPricingRules } from "@/lib/platform-settings";
 import logger from "@/lib/logger";
 
 const shopUpdateSchema = z.object({
@@ -84,14 +84,21 @@ export async function GET(req: NextRequest) {
   const hoursConfigured =
     shop.open247 || weeklyRows > 0 || shop.openingTime !== "09:00" || shop.closingTime !== "20:00";
 
-  return NextResponse.json({
-    ...shop,
-    pricePerDay: Number(shop.pricePerDay),
-    sealCount,
-    phone: owner?.phone ?? null,
-    gallery: gallery.map(toMobileGalleryImage),
-    setup: { hasPhoto: !!shop.image, hoursConfigured },
-  });
+  /* Fiyat bandi istemciye SUNUCUDAN gider: fiyat istemcide hesaplanmaz, bant da. */
+  const rules = await getPricingRules();
+
+  return NextResponse.json(
+    toMobilePartnerShop(shop, {
+      sealCount,
+      phone: owner?.phone ?? null,
+      gallery: gallery.map(toMobileGalleryImage),
+      setup: { hasPhoto: !!shop.image, hoursConfigured },
+      priceRange: {
+        min: Math.round(rules.defaultPricePerDay / 2),
+        max: rules.defaultPricePerDay * 2,
+      },
+    }),
+  );
 }
 
 export async function PUT(req: NextRequest) {
@@ -113,19 +120,32 @@ export async function PUT(req: NextRequest) {
       return NextResponse.json({ error: "invalid_input", details: parsed.error.flatten() }, { status: 400 });
     }
 
-    const data: Record<string, unknown> = {};
+    const data: ShopSettingsInput = {};
     if (parsed.data.name !== undefined) data.name = parsed.data.name;
     if (parsed.data.capacity !== undefined) data.capacity = parsed.data.capacity;
-    if (parsed.data.pricePerDay !== undefined) data.pricePerDay = new Prisma.Decimal(parsed.data.pricePerDay);
+    if (parsed.data.pricePerDay !== undefined) data.pricePerDay = parsed.data.pricePerDay;
     if (parsed.data.openingTime !== undefined) data.openingTime = parsed.data.openingTime;
     if (parsed.data.closingTime !== undefined) data.closingTime = parsed.data.closingTime;
     if (parsed.data.address !== undefined) data.address = parsed.data.address;
     if (parsed.data.city !== undefined) data.city = parsed.data.city;
     if (parsed.data.district !== undefined) data.district = parsed.data.district;
 
-    const updated = await shopService.updateShop(shop.id, data);
+    /* Bant + etki + yazma serviste (web action'iyla ayni govde). */
+    const result = await shopService.updateSettings(shop.id, data);
+    if (!result.ok) {
+      return NextResponse.json(
+        { error: result.reason, min: result.min, max: result.max },
+        { status: 400 },
+      );
+    }
 
-    return NextResponse.json(updated);
+    return NextResponse.json({
+      ...toMobilePartnerShop(result.shop),
+      impact: {
+        bookingsOutsideHours: result.impact.bookingsOutsideHours,
+        bagsOverCapacity: result.impact.bagsOverCapacity,
+      },
+    });
   } catch (error) {
     /*
       Ham hata metni İSTEMCİYE GİTMEZ (2026-08-25). `String(e)` bir Prisma
