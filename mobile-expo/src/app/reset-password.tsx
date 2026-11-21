@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { KeyboardAvoidingView, ScrollView, StyleSheet, View } from "react-native";
+import { KeyboardAvoidingView, Linking, ScrollView, StyleSheet, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { router, useLocalSearchParams } from "expo-router";
 import { X } from "lucide-react-native";
@@ -9,6 +9,7 @@ import { AppText, Banner, Button, IconButton } from "@/components/ui";
 import { Input } from "@/components/Field";
 import { api } from "@/lib/api";
 import { errorMessage } from "@/lib/errors";
+import { languageInfo } from "@/lib/languages";
 import { colors, space } from "@/theme/tokens";
 
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -30,8 +31,12 @@ function extractResetToken(input: string): string {
 
 export default function ResetPasswordScreen() {
   const { t, i18n } = useTranslation();
-  const params = useLocalSearchParams<{ email?: string }>();
-  const [step, setStep] = useState<"request" | "confirm" | "done">("request");
+  const params = useLocalSearchParams<{ email?: string; mode?: string }>();
+  // mode=link: kullanicida zaten bir sifre yenileme baglantisi var (yonetici/destek ilettiyse);
+  // e-posta adimi atlanir ve dogrudan baglanti + yeni sifre formu acilir.
+  const hasLink = params.mode === "link";
+  const [step, setStep] = useState<"request" | "confirm" | "done">(hasLink ? "confirm" : "request");
+  const [pasteOpen, setPasteOpen] = useState(hasLink);
   const [email, setEmail] = useState(typeof params.email === "string" ? params.email : "");
   const [link, setLink] = useState("");
   const [password, setPassword] = useState("");
@@ -53,7 +58,8 @@ export default function ResetPasswordScreen() {
       // Sunucu hesap var/yok ayrimini gizlemek icin her zaman { ok: true } doner.
       await api("/auth/password-reset/request", {
         method: "POST",
-        body: { email: value, locale: i18n.language === "tr" ? "tr" : "en" },
+        // Sunucu tr/en/de bilir; ru baglantisi Ingilizce gider (languageInfo.site).
+        body: { email: value, locale: languageInfo(i18n.language).site },
         auth: false,
       });
       setEmail(value);
@@ -136,61 +142,80 @@ export default function ResetPasswordScreen() {
             </>
           ) : step === "confirm" ? (
             <>
-              <Banner tone="brand" title={t("reset.sentTitle")} body={t("reset.sentBody", { email })} />
-              <View style={styles.field}>
-                <AppText variant="label" nativeID="resetLinkLabel">
-                  {t("reset.linkLabel")}
-                </AppText>
-                <Input
-                  accessibilityLabelledBy="resetLinkLabel"
-                  value={link}
-                  onChangeText={setLink}
-                  placeholder={t("reset.linkPlaceholder")}
-                  placeholderTextColor={colors.inkMuted}
-                  autoCapitalize="none"
-                  autoCorrect={false}
+              {hasLink ? (
+                <Banner tone="brand" body={t("reset.linkModeBody")} />
+              ) : (
+                <>
+                  <Banner tone="brand" title={t("reset.sentTitle")} body={t("reset.sentBody", { email })} />
+                  <Button title={t("reset.backToSignIn")} onPress={close} />
+                  <Button
+                    variant="secondary"
+                    title={t("reset.openMail")}
+                    onPress={() => void Linking.openURL("mailto:").catch(() => undefined)}
+                  />
+                  {pasteOpen ? null : (
+                    <Button variant="ghost" title={t("reset.pasteLink")} onPress={() => setPasteOpen(true)} />
+                  )}
+                </>
+              )}
+              {pasteOpen ? (
+                <>
+                <View style={styles.field}>
+                  <AppText variant="label" nativeID="resetLinkLabel">
+                    {t("reset.linkLabel")}
+                  </AppText>
+                  <Input
+                    accessibilityLabelledBy="resetLinkLabel"
+                    value={link}
+                    onChangeText={setLink}
+                    placeholder={t("reset.linkPlaceholder")}
+                    placeholderTextColor={colors.inkMuted}
+                    autoCapitalize="none"
+                    autoCorrect={false}
+                  />
+                </View>
+                <View style={styles.field}>
+                  <AppText variant="label" nativeID="resetPasswordLabel">
+                    {t("reset.newPasswordLabel")}
+                  </AppText>
+                  <Input
+                    accessibilityLabelledBy="resetPasswordLabel"
+                    value={password}
+                    onChangeText={setPassword}
+                    secureTextEntry
+                    autoCapitalize="none"
+                    autoComplete="new-password"
+                    textContentType="newPassword"
+                    maxLength={MAX_PASSWORD}
+                  />
+                  <AppText variant="caption">{t("reset.passwordRule", { min: MIN_PASSWORD })}</AppText>
+                </View>
+                <View style={styles.field}>
+                  <AppText variant="label" nativeID="resetRepeatLabel">
+                    {t("reset.repeatPasswordLabel")}
+                  </AppText>
+                  <Input
+                    accessibilityLabelledBy="resetRepeatLabel"
+                    value={repeat}
+                    onChangeText={setRepeat}
+                    secureTextEntry
+                    autoCapitalize="none"
+                    autoComplete="new-password"
+                    textContentType="newPassword"
+                    maxLength={MAX_PASSWORD}
+                    returnKeyType="go"
+                    onSubmitEditing={confirm}
+                  />
+                </View>
+                {error ? <Banner tone="danger" body={error} /> : null}
+                <Button
+                  title={t("reset.save")}
+                  onPress={confirm}
+                  loading={busy}
+                  disabled={!link.trim() || !password || !repeat}
                 />
-              </View>
-              <View style={styles.field}>
-                <AppText variant="label" nativeID="resetPasswordLabel">
-                  {t("reset.newPasswordLabel")}
-                </AppText>
-                <Input
-                  accessibilityLabelledBy="resetPasswordLabel"
-                  value={password}
-                  onChangeText={setPassword}
-                  secureTextEntry
-                  autoCapitalize="none"
-                  autoComplete="new-password"
-                  textContentType="newPassword"
-                  maxLength={MAX_PASSWORD}
-                />
-                <AppText variant="caption">{t("reset.passwordRule", { min: MIN_PASSWORD })}</AppText>
-              </View>
-              <View style={styles.field}>
-                <AppText variant="label" nativeID="resetRepeatLabel">
-                  {t("reset.repeatPasswordLabel")}
-                </AppText>
-                <Input
-                  accessibilityLabelledBy="resetRepeatLabel"
-                  value={repeat}
-                  onChangeText={setRepeat}
-                  secureTextEntry
-                  autoCapitalize="none"
-                  autoComplete="new-password"
-                  textContentType="newPassword"
-                  maxLength={MAX_PASSWORD}
-                  returnKeyType="go"
-                  onSubmitEditing={confirm}
-                />
-              </View>
-              {error ? <Banner tone="danger" body={error} /> : null}
-              <Button
-                title={t("reset.save")}
-                onPress={confirm}
-                loading={busy}
-                disabled={!link.trim() || !password || !repeat}
-              />
+                </>
+              ) : null}
               <Button
                 variant="ghost"
                 title={t("reset.resendLink")}
