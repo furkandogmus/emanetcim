@@ -2,6 +2,7 @@ import { Resend } from "resend";
 import logger from "@/lib/logger";
 import { getSiteBaseUrl } from "@/lib/site-base-url";
 import { withTimeout } from "@/lib/async-timeout";
+import { renderEmailHtml } from "@/lib/email-template";
 
 /**
  * NEDEN (2026-08-25): bu üç fonksiyon kayıt/şifre-sıfırlama/mobil-giriş
@@ -385,5 +386,75 @@ export const sendSupportReplyEmail = async (params: {
     */
     logger.error({ error }, "mail_support_reply_exception");
     return null;
+  }
+};
+
+/*
+  Sifresiz hesapta (kod / Google ile acilmis) sifre belirlenince hesap sahibine
+  haber. NEDEN: calinmis bir erisim token'i ile sifre koyulabiliyor ve bu,
+  sahibinin hic fark etmedigi kalici bir kimlik bilgisi olurdu.
+*/
+const PASSWORD_SET_COPY: Record<string, { subject: string; heading: string; text: string; footer: string }> = {
+  tr: {
+    subject: "Hesabınıza şifre belirlendi",
+    heading: "Şifre belirlendi",
+    text: "BagajPark hesabınız için bir şifre belirlendi. Artık e-posta ve şifrenizle de giriş yapabilirsiniz.",
+    footer: "Bu işlemi siz yapmadıysanız uygulamada \"Şifremi unuttum\" ile şifrenizi hemen yenileyin ve bize yazın.",
+  },
+  en: {
+    subject: "A password was set on your account",
+    heading: "Password set",
+    text: "A password was set for your BagajPark account. You can now also sign in with your e-mail and password.",
+    footer: "If this was not you, reset your password with \"Forgot password\" in the app right away and contact us.",
+  },
+  de: {
+    subject: "Für Ihr Konto wurde ein Passwort festgelegt",
+    heading: "Passwort festgelegt",
+    text: "Für Ihr BagajPark-Konto wurde ein Passwort festgelegt. Sie können sich jetzt auch mit E-Mail und Passwort anmelden.",
+    footer: "Wenn Sie das nicht waren, setzen Sie Ihr Passwort in der App über \"Passwort vergessen\" sofort zurück und schreiben Sie uns.",
+  },
+  fr: {
+    subject: "Un mot de passe a été défini sur votre compte",
+    heading: "Mot de passe défini",
+    text: "Un mot de passe a été défini pour votre compte BagajPark. Vous pouvez désormais aussi vous connecter avec votre e-mail et votre mot de passe.",
+    footer: "Si ce n'était pas vous, réinitialisez immédiatement votre mot de passe via \"Mot de passe oublié\" dans l'application et contactez-nous.",
+  },
+  ja: {
+    subject: "アカウントにパスワードが設定されました",
+    heading: "パスワードが設定されました",
+    text: "BagajParkアカウントにパスワードが設定されました。今後はメールアドレスとパスワードでもログインできます。",
+    footer: "心当たりがない場合は、アプリの「パスワードを忘れた場合」からすぐにパスワードを再設定し、ご連絡ください。",
+  },
+  fa: {
+    subject: "برای حساب شما رمز عبور تعیین شد",
+    heading: "رمز عبور تعیین شد",
+    text: "برای حساب BagajPark شما رمز عبور تعیین شد. اکنون می‌توانید با ایمیل و رمز عبور نیز وارد شوید.",
+    footer: "اگر این کار را شما انجام نداده‌اید، فوراً از «فراموشی رمز عبور» در برنامه رمز خود را بازنشانی کنید و با ما تماس بگیرید.",
+  },
+};
+
+export const sendPasswordSetNotice = async (email: string, locale: string = "tr") => {
+  const resend = getResendClient();
+  if (!resend) {
+    logger.warn({}, "mail_password_set_skipped_no_resend_key");
+    return;
+  }
+  const lang = locale in PASSWORD_SET_COPY ? locale : "tr";
+  const c = PASSWORD_SET_COPY[lang];
+  try {
+    const { error } = await withTimeout(
+      resend.emails.send({
+        from: process.env.RESEND_FROM || "BagajPark <info@bagajpark.com>",
+        to: email,
+        subject: c.subject,
+        text: `${c.heading}\n\n${c.text}\n\n${c.footer}`,
+        html: renderEmailHtml({ locale: lang, heading: c.heading, paragraphs: [c.text], footer: c.footer }),
+      }),
+      MAIL_SEND_TIMEOUT_MS,
+      "password_set_notice_send",
+    );
+    if (error) logger.error({ error }, "password_set_notice_error");
+  } catch (error) {
+    logger.error({ error }, "password_set_notice_exception");
   }
 };
