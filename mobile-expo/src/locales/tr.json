@@ -788,6 +788,7 @@
     },
     "emailLabel": "E-posta",
     "emailLocked": "E-posta adresi uygulamadan değiştirilemez.",
+    "identityLockedViewing": "Görüntüleme modunda giriş bilgileri değiştirilemez.",
     "photo": "Profil fotoğrafı",
     "addPhoto": "Fotoğraf ekle",
     "changePhoto": "Fotoğrafı değiştir",

@@ -788,6 +788,7 @@
     },
     "emailLabel": "E-Mail",
     "emailLocked": "Deine E-Mail-Adresse kann in der App nicht geändert werden.",
+    "identityLockedViewing": "Im Ansichtsmodus lassen sich die Anmeldedaten nicht ändern.",
     "photo": "Profilfoto",
     "addPhoto": "Foto hinzufügen",
     "changePhoto": "Foto ändern",
