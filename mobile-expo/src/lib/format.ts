@@ -66,6 +66,11 @@ export function formatMonth(d: Date) {
   return dateFmt({ month: "long", year: "numeric" }).format(d);
 }
 
+/** Ekran okuyucu icin tam tarih ("17 Kasim Pazartesi"); takvim hucresi (yerel `Date`). */
+export function formatFullDate(d: Date) {
+  return dateFmt({ weekday: "long", day: "numeric", month: "long" }).format(d);
+}
+
 /** Mesafe birimiyle: 1 km altinda metre ("0.0 km" yerine "40 m"), 10 m'ye yuvarlanir. */
 export function formatDistance(km: number) {
   if (km < 1) return `${Math.max(10, Math.round((km * 1000) / 10) * 10)} m`;

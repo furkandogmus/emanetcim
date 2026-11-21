@@ -15,7 +15,8 @@
     "ok": "Tamam",
     "clear": "Temizle",
     "scrollBack": "Geri kaydır",
-    "scrollForward": "İleri kaydır"
+    "scrollForward": "İleri kaydır",
+    "goHome": "Ana sayfaya git"
   },
   "auth": {
     "title": "Giriş yap",
@@ -60,7 +61,7 @@
     "bookingsPromptTitle": "Rezervasyonların burada",
     "bookingsPromptBody": "Rezervasyonlarını ve QR kodunu görmek için giriş yap.",
     "profilePromptTitle": "Hesabın",
-    "profilePromptBody": "Giriş yaparak rezervasyon yapabilir, davet kodunu paylaşabilirsin. Dil seçimi giriş yapmadan da yukarıda.",
+    "profilePromptBody": "Giriş yaparak rezervasyon yapabilir, davet kodunu paylaşabilirsin.",
     "modeLabel": "Giriş yöntemi",
     "modeEmail": "E-posta",
     "modePhone": "Telefon",
@@ -132,11 +133,11 @@
   },
   "bags": {
     "s": "Küçük (S)",
-    "sDesc": "Sırt çantası, el çantası (max 10kg)",
+    "sDesc": "Sırt çantası, el çantası (en fazla 10 kg)",
     "m": "Orta (M/L)",
-    "mDesc": "Kabin boy valiz, spor çantası (max 20kg)",
+    "mDesc": "Kabin boy valiz, spor çantası (en fazla 20 kg)",
     "xl": "Büyük (XL)",
-    "xlDesc": "Kargo boy valiz (max 30kg, 100cm)",
+    "xlDesc": "Kargo boy valiz (en fazla 30 kg, 100cm)",
     "decrease": "{{size}} azalt",
     "increase": "{{size}} artır"
   },
@@ -175,7 +176,8 @@
       "invalid_dates": "Seçilen tarihler kullanılamıyor. Tarihi değiştir.",
       "search_unavailable": "Arama şu an yapılamıyor. Biraz sonra tekrar dene.",
       "too_many_requests": "Çok fazla deneme yapıldı. Biraz bekleyip tekrar dene."
-    }
+    },
+    "sheetHandle": "Dükkan listesi, açmak ya da kapatmak için sürükleyin"
   },
   "shop": {
     "open247": "7/24 açık",
@@ -470,7 +472,7 @@
     "deleteConfirm": "Evet, sil",
     "errors": {
       "not_found": "Kayıt bulunamadı; başka biri işlem yapmış olabilir.",
-      "missing_coordinates": "Dükkanın konumu yok; önce web panelinden konumu girin.",
+      "missing_coordinates": "Dükkanın konumu yok; önce web panelinden konumu gir.",
       "has_active_bookings": "Dükkanın aktif rezervasyonu var; reddedilemez.",
       "invalid_action": "Geçersiz işlem.",
       "email_send_failed": "E-posta gönderilemedi; cevap kaydedilmedi. Biraz sonra tekrar dene.",
@@ -506,8 +508,8 @@
     "appUsersMonth": "Son 30 gün",
     "appUsersFoot": "Uygulamayı açan tekil cihaz. Toplam {{total}} cihaz; son 30 günde {{signedIn}} tanesinde giriş yapılmış.",
     "todayTitle": "Bugün",
-    "todayArrivals": "Gelecek",
-    "todayPickups": "Alınacak",
+    "todayArrivals": "Bugün gelecek",
+    "todayPickups": "Bugün alınacak",
     "todayInStorage": "Dükkanda valiz",
     "todayNew": "Yeni rezervasyon",
     "revenueTitle": "Ciro",
@@ -638,10 +640,10 @@
     },
     "listedOn": "Şehir sayfaları: {{cities}}",
     "today": "Bugün",
-    "arrivals": "Gelecek",
-    "pickups": "Teslim",
+    "arrivals": "Bugün gelecek",
+    "pickups": "Bugün alınacak",
     "pricing": "Fiyat ve kapasite",
-    "invalidNumber": "Geçerli bir sayı girin",
+    "invalidNumber": "Geçerli bir sayı gir",
     "save": "Kaydet",
     "hoursLine": "Çalışma saati {{open}}–{{close}} · değişiklik esnaf panelinden",
     "open247": "7/24 açık",
@@ -863,7 +865,7 @@
     "open": "Valiz sayısını düzelt",
     "title": "Valiz sayısını düzelt",
     "hint": "Misafir farklı sayıda valizle geldiyse gerçek sayıyı gir. Yeni tutarı sistem hesaplar.",
-    "hintCheckedIn": "Valizler teslim alındı. Mühürlü valiz sayısı artırılamaz; tutarı artıran düzeltme için misafirin onayı istenir.",
+    "hintCheckedIn": "Valizler dükkanda. Tutarı artıran düzeltme için misafirin onayı istenir.",
     "delta": "{{from}} valiz → {{to}} valiz",
     "atLeastOne": "En az bir valiz olmalı.",
     "apply": "Uygula",
@@ -1007,8 +1009,8 @@
     "remove": "Kaldır",
     "removeTitle": "Bu izin kaldırılsın mı?",
     "conflictTitle": "Aşağıdaki rezervasyonlar bu güne denk geliyor:",
-    "conflictDropoff": "Bırakış",
-    "conflictPickup": "Teslim alış",
+    "conflictDropoff": "Misafir bırakacak",
+    "conflictPickup": "Misafir alacak",
     "conflictBags": "Dükkanda valiz var",
     "errors": {
       "schedule_conflict": "Bu değişiklik kaydedilemedi.",
@@ -1038,8 +1040,8 @@
     }
   },
   "pulse": {
-    "arrivals": "Gelecek",
-    "pickups": "Alınacak",
+    "arrivals": "Bugün gelecek",
+    "pickups": "Bugün alınacak",
     "inStorage": "Dükkanda valiz",
     "thisMonth": "Bu ay kazancın",
     "failed": "Günlük özet yüklenemedi. Yeniden denemek için dokun.",
@@ -1081,5 +1083,12 @@
     "exitLabel": "Kullanıcı görünümünden çık, yönetici hesabına dön",
     "endedTitle": "Kullanıcı görünümü bitti",
     "endedBody": "Süre doldu ya da erişim sona erdi; yönetici hesabına döndün."
+  },
+  "update": {
+    "requiredTitle": "Güncelleme gerekli",
+    "requiredBody": "Bu sürüm artık desteklenmiyor. Devam etmek için BagajPark'ı Google Play'den güncelle.",
+    "requiredCta": "Google Play'de aç",
+    "readyBody": "Yeni sürüm hazır.",
+    "readyCta": "Yenile"
   }
 }

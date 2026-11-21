@@ -71,9 +71,10 @@ describe("iptal ve mobil rezervasyon ucu", () => {
   it("check-in oncesi iptal kupon hakkini geri verir", () => {
     expect(read("src/services/booking/lifecycle.ts")).toContain("couponService.releaseByCode(booking.couponCode)");
   });
-  it("mobil rezervasyon ucu web ile ayni hiz sinirini uygular", () => {
+  it("mobil rezervasyon ucu hesap basina hiz siniri uygular, IP kovasi yok", () => {
+    // Uc oturumlu; paylasilan otel/havalimani wifi'si ve operator NAT'i IP kovasini tuketirdi.
     const uc = read("src/app/api/mobile/checkout/intent/route.ts");
-    expect(uc).toContain("booking_create:${ip}");
+    expect(uc).not.toContain("booking_create:${ip}");
     expect(uc).toContain("booking_create_user:${auth.user.id}");
   });
 });
