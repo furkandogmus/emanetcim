@@ -61,6 +61,11 @@ export type NearbyShop = Shop & {
   /** Kucuk-buyuk valiz gunluk fiyati. Eski sunucu gondermez: o zaman `pricePerDay`. */
   /** `medium`: orta boy valizin gunlugu; liste ve pinde gosterilen tek fiyat (eski sunucuda yok). */
   priceRange?: { min: number; max: number; medium?: number };
+  /**
+   * Aranan kalis ve valiz karisiminin sunucu toplami (`checkout/quote`un kodsuz toplamiyla ayni).
+   * Yalnizca boy adetleriyle aranan, rezervasyon alabilen dukkanda gelir; eski sunucuda yok.
+   */
+  stayQuote?: { total: number; days: number; bags: number };
   /** Secilen saat dukkanin saatine oturtulduysa (ornegin alis kapanisa cekildi). */
   hoursNotice?: HoursNotice | null;
   /**
