@@ -291,6 +291,8 @@ export function toMobileReview(r: ReviewSource) {
 type AppConfigSource = {
   minAppVersion: string | null;
   latestAppVersion: string | null;
+  /** Yonetici ayari: check-in'de muhur numarasi zorunlu mu. Gizli degil. */
+  requireSealsOnCheckIn?: boolean;
 };
 
 /**
@@ -309,6 +311,7 @@ export function toMobileAppConfig(c: AppConfigSource) {
   return {
     minAppVersion: c.minAppVersion,
     latestAppVersion: c.latestAppVersion,
+    requireSealsOnCheckIn: c.requireSealsOnCheckIn === true,
   };
 }
 
