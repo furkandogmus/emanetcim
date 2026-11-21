@@ -20,21 +20,11 @@ import { Input, inputBox } from "@/components/Field";
 import { api } from "@/lib/api";
 import { useAuth } from "@/lib/auth";
 import { errorMessage } from "@/lib/errors";
+import { normalizeTrGsm10 } from "@/lib/phone";
 import { prepareAvatar } from "@/lib/shop-photo";
 import { colors, space } from "@/theme/tokens";
 
 const MAX_NAME = 100;
-
-/**
- * Sunucudaki `normalizeTrGsm10` (src/lib/netgsm.ts) ile ayni kural; yalnizca
- * istegi bosuna atmamak icin. Son karar sunucunun (`invalid_phone`).
- */
-function normalizeTrGsm10(input: string): string | null {
-  let d = input.replace(/\D/g, "");
-  if (d.startsWith("90") && d.length >= 12) d = d.slice(2);
-  if (d.startsWith("0") && d.length === 11) d = d.slice(1);
-  return d.length === 10 && d.startsWith("5") ? d : null;
-}
 
 export default function ProfileEditScreen() {
   const { t } = useTranslation();
@@ -96,7 +86,7 @@ export default function ProfileEditScreen() {
 
   const close = () => (router.canGoBack() ? router.back() : router.replace("/profile"));
 
-  async function save() {
+  function save() {
     if (!user) return;
     // Yalnizca degisen alan gider: bos `name` sunucuda `invalid_name`, adi hic
     // olmayan bir kullanicinin yalniz telefonu degistirmesini engellerdi.
@@ -127,6 +117,23 @@ export default function ProfileEditScreen() {
       return;
     }
 
+    // Telefon ayni zamanda giris numarasi: kayitli numarayi silmek ya da degistirmek onayla.
+    if (body.phone !== undefined && user.phone) {
+      const clearing = body.phone === null;
+      Alert.alert(
+        t(clearing ? "profileEdit.phoneClearTitle" : "profileEdit.phoneChangeTitle"),
+        t(clearing ? "profileEdit.phoneClearBody" : "profileEdit.phoneChangeBody"),
+        [
+          { text: t("common.cancel"), style: "cancel" },
+          { text: t("common.continue"), style: clearing ? "destructive" : "default", onPress: () => void send(body) },
+        ],
+      );
+      return;
+    }
+    void send(body);
+  }
+
+  async function send(body: { name?: string; phone?: string | null }) {
     setBusy(true);
     setError(null);
     try {

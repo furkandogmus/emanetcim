@@ -679,7 +679,11 @@
     "nameRequired": "Adını boş bırakamazsın.",
     "phoneLabel": "Cep telefonu",
     "phonePlaceholder": "5XX XXX XX XX",
-    "phoneHint": "Türkiye cep numarası. Boş bırakırsan numaran silinir.",
+    "phoneHint": "Türkiye cep numarası. Bu numara aynı zamanda giriş numaran: değiştirirsen yeni numarayla giriş yaparsın. Boş bırakırsan numaran silinir.",
+    "phoneClearTitle": "Numaranı silinsin mi?",
+    "phoneClearBody": "Bu numara girişinde kullanılıyor olabilir. Silersen bu numarayla giriş yapamazsın.",
+    "phoneChangeTitle": "Giriş numaran değişsin mi?",
+    "phoneChangeBody": "Bundan sonra yeni numarayla giriş yapacaksın.",
     "save": "Kaydet",
     "errors": {
       "invalid_name": "Ad 1–100 karakter olmalı.",
