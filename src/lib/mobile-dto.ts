@@ -230,6 +230,20 @@ export function toMobilePriceRange(pricePerDay: unknown, r: PricingRules) {
   };
 }
 
+/**
+ * Dukkan detayinda boyut basina gunluk fiyat, sunucunun yuvarlamasiyla. Istemci
+ * `pricePerDay * carpan` hesaplamaz (mobile-expo/CLAUDE.md "Fiyat istemcide hesaplanmaz").
+ */
+export function toMobilePriceBySize(pricePerDay: unknown, r: PricingRules) {
+  const base = moneyToNumber(pricePerDay);
+  const round = (n: number) => Math.round(n * 100) / 100;
+  return {
+    s: round(base * r.bagMultipliers.S),
+    m: round(base * r.bagMultipliers.M),
+    xl: round(base * r.bagMultipliers.XL),
+  };
+}
+
 export function toMobilePricing(r: PricingRules) {
   return {
     bagMultiplierS: r.bagMultipliers.S,
