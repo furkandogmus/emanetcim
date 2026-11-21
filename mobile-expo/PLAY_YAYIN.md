@@ -102,6 +102,8 @@ EAS bulut kuyruğu ve `eas submit` kuyruğu ücretsiz planda saatlerce bekleyebi
   `ROLLOUT=10`; sonra `eas update:edit` ile yüzde artırılır). Aynı `version`'a sahip
   derlemeler bir sonraki açılışta alır (`runtimeVersion: appVersion`). İlk OTA,
   `expo-updates` içeren ilk derlemeden sonra çalışır.
+  Eski bir ikiliye (Play'de hâlâ kurulu önceki sürüm) aynı JS'i göndermek için başına
+  `OTA_RUNTIME=0.3.0` eklenir; yalnızca ikililer arasında yerel değişiklik yoksa güvenlidir.
   **Doğrudan `eas update` çalıştırma:** `eas.json`'daki derleme `env`ini okumaz ve EAS'ta
   ortam değişkeni yok; 2026-11-18'de yayınlanan güncelleme API adresi olarak `10.0.2.2`
   taşıdı. Script değerleri `eas.json` production profilinden alır, eksikse durur.

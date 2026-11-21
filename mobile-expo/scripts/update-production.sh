@@ -60,5 +60,22 @@ if [ -n "${ROLLOUT:-}" ]; then
   esac
 fi
 
+# Eski ikiliye yayin: OTA_RUNTIME=0.3.0 npm run update:production -- --message "...".
+# runtimeVersion = app.json surumu (appVersion politikasi); main'deki JS o ikiliyle
+# uyumlu olmali (yeni yerel modul yoksa uyumludur). Surum yalnizca kapilardan SONRA ve
+# gecici yazilir; cikista (hata dahil) geri alinir, agac temiz kalir.
+if [ -n "${OTA_RUNTIME:-}" ]; then
+  [[ "$OTA_RUNTIME" =~ ^[0-9]+\.[0-9]+\.[0-9]+$ ]] || { echo "OTA_RUNTIME x.y.z olmali: $OTA_RUNTIME" >&2; exit 1; }
+  cp app.json app.json.ota-bak
+  trap 'mv app.json.ota-bak app.json' EXIT
+  node -e '
+    const fs = require("fs");
+    const j = JSON.parse(fs.readFileSync("app.json", "utf8"));
+    j.expo.version = process.argv[1];
+    fs.writeFileSync("app.json", JSON.stringify(j, null, 2) + "\n");
+  ' "$OTA_RUNTIME"
+  echo "runtime: $OTA_RUNTIME (gecici)"
+fi
+
 echo "API: $EXPO_PUBLIC_API_BASE_URL"
 npx -y "eas-cli@${EAS_CLI_VERSION}" update --channel production --environment production --non-interactive ${rollout_args[@]+"${rollout_args[@]}"} "$@"
