@@ -98,7 +98,8 @@ EAS bulut kuyruğu ve `eas submit` kuyruğu ücretsiz planda saatlerce bekleyebi
   Developer API ile kapalı teste (alpha) tamamlanmış sürüm olarak gönderir. İç test için
   `TRACK=internal npm run release:android`.
 - **Yalnızca JS/görsel/metin** → derleme ve Play incelemesi yok:
-  `npm run update:production -- --message "kısa açıklama"`. Aynı `version`'a sahip
+  `npm run update:production -- --message "kısa açıklama"` (kademeli yayın için başına
+  `ROLLOUT=10`; sonra `eas update:edit` ile yüzde artırılır). Aynı `version`'a sahip
   derlemeler bir sonraki açılışta alır (`runtimeVersion: appVersion`). İlk OTA,
   `expo-updates` içeren ilk derlemeden sonra çalışır.
   **Doğrudan `eas update` çalıştırma:** `eas.json`'daki derleme `env`ini okumaz ve EAS'ta

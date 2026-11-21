@@ -15,8 +15,14 @@ EAS_CLI_VERSION="27.11.0"
 
 # Yayin ELDEKI degil, main'deki kodu gonderir: kirli agac ya da geride kalmis dal
 # kullanicilara hic gozden gecirilmemis JS ulastirirdi.
-if [ -n "$(git status --porcelain)" ]; then
+# Izlenmeyen dosyalar (AGENTS.md, __pycache__ vb.) yayina girmez; yalnizca izlenen
+# degisiklikler ve paketlenen klasorlerdeki (src, assets) izlenmeyen dosyalar engeller.
+if [ -n "$(git status --porcelain --untracked-files=no)" ]; then
   echo "calisma agaci temiz degil; once commit'le ya da stash'le" >&2
+  exit 1
+fi
+if [ -n "$(git ls-files --others --exclude-standard -- src assets)" ]; then
+  echo "src/ ya da assets/ altinda izlenmeyen dosya var; commit'le ya da sil" >&2
   exit 1
 fi
 branch="$(git rev-parse --abbrev-ref HEAD)"
@@ -45,5 +51,14 @@ case "$EXPO_PUBLIC_API_BASE_URL" in
   *) echo "uretim API adresi https degil: $EXPO_PUBLIC_API_BASE_URL" >&2; exit 1 ;;
 esac
 
+# Kademeli yayin: ROLLOUT=10 npm run update:production -- --message "..." (yuzde 1-99).
+rollout_args=()
+if [ -n "${ROLLOUT:-}" ]; then
+  case "$ROLLOUT" in
+    [1-9]|[1-9][0-9]) rollout_args=(--rollout-percentage "$ROLLOUT") ;;
+    *) echo "ROLLOUT 1-99 arasi tam sayi olmali: $ROLLOUT" >&2; exit 1 ;;
+  esac
+fi
+
 echo "API: $EXPO_PUBLIC_API_BASE_URL"
-npx -y "eas-cli@${EAS_CLI_VERSION}" update --channel production --environment production --non-interactive "$@"
+npx -y "eas-cli@${EAS_CLI_VERSION}" update --channel production --environment production --non-interactive ${rollout_args[@]+"${rollout_args[@]}"} "$@"
