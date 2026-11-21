@@ -1,7 +1,8 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
 /**
- * Mobil denetim (2026-11) sunucu takipleri: yonetici goruntuleme izi (65).
+ * Mobil denetim (2026-11) sunucu takipleri: yonetici goruntuleme izi (65),
+ * cikista bildirim kaydi temizligi (125), iptalde bekleyen oneri (57).
  */
 const { db } = vi.hoisted(() => ({
   db: {
@@ -16,6 +17,7 @@ const { db } = vi.hoisted(() => ({
 vi.mock("@/lib/db", () => ({ default: db }));
 
 import { bookingEventService } from "@/services/BookingEventService";
+import { revokeAllUserSessions } from "@/services/auth/mobile-session";
 import { PaymentService } from "@/services/PaymentService";
 import { ManualPaymentProvider } from "@/lib/payments";
 
@@ -55,5 +57,17 @@ describe("yonetici goruntuleme izi (bulgu 65)", () => {
     const { data } = db.bookingEvent.create.mock.calls[0][0];
     expect(data.actorId).toBe("guest-1");
     expect(data.metadata).toMatchObject({ payment: "intent_cancelled", impersonatedBy: "admin-1" });
+  });
+});
+
+describe("revokeAllUserSessions (bulgu 125)", () => {
+  it("oturumlarla birlikte cihaz bildirim kayitlarini da siler", async () => {
+    await revokeAllUserSessions("u1");
+    expect(db.user.update).toHaveBeenCalledWith({
+      where: { id: "u1" },
+      data: { tokenVersion: { increment: 1 } },
+    });
+    expect(db.session.deleteMany).toHaveBeenCalledWith({ where: { userId: "u1" } });
+    expect(db.mobilePushToken.deleteMany).toHaveBeenCalledWith({ where: { userId: "u1" } });
   });
 });

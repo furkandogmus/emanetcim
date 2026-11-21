@@ -16,6 +16,7 @@ const { mockPrisma, mockRateLimit, mockMail } = vi.hoisted(() => {
         delete: vi.fn(),
         deleteMany: vi.fn(),
       },
+      mobilePushToken: { deleteMany: vi.fn() },
       $transaction: vi.fn((fn) => {
         if (typeof fn === 'function') return fn(mockPrisma);
         return Promise.all(fn);
@@ -140,6 +141,8 @@ describe("Password Reset Actions", () => {
       expect(mockPrisma.verificationToken.deleteMany).toHaveBeenCalledWith({
         where: { identifier: `${PASSWORD_RESET_IDENTIFIER_PREFIX}user@test.com` },
       });
+      // Bulgu 125: oturumu dusen cihazlar bildirim de almasin.
+      expect(mockPrisma.mobilePushToken.deleteMany).toHaveBeenCalledWith({ where: { userId: "user123" } });
     });
 
     it("should return error for expired token", async () => {

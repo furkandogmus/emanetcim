@@ -121,6 +121,8 @@ export async function consumePasswordResetToken(
         data: { passwordHash, tokenVersion: { increment: 1 } },
       }),
       prisma.verificationToken.deleteMany({ where: { identifier: row.identifier } }),
+      // Oturumu dusen cihazlar bildirim de almasin (bkz. `revokeAllUserSessions`).
+      prisma.mobilePushToken.deleteMany({ where: { userId: user.id } }),
     ]);
 
     return { ok: true, userId: user.id };
