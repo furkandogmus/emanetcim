@@ -1,9 +1,11 @@
 import "@/lib/intl-polyfills";
-import "@/lib/i18n";
+import i18n from "@/lib/i18n";
 
 import { useEffect, useState } from "react";
-import { AppState } from "react-native";
+import { AppState, Pressable, StyleSheet, Text, View } from "react-native";
 import { Stack } from "expo-router";
+import * as Updates from "expo-updates";
+import type { ErrorBoundaryProps } from "expo-router";
 import * as SplashScreen from "expo-splash-screen";
 import { StatusBar } from "expo-status-bar";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
@@ -22,6 +24,7 @@ import { ApiError } from "@/lib/api";
 import { pingAppOpen } from "@/lib/app-ping";
 import { AuthProvider, useAuth } from "@/lib/auth";
 import { openFromNotification, registerForPush } from "@/lib/push";
+import { ForcedUpdateScreen, OtaReadyBanner, useUpdateRequired } from "@/components/AppUpdate";
 import { ImpersonationFrame } from "@/components/ImpersonationBanner";
 import { SearchProvider } from "@/lib/search";
 import { colors } from "@/theme/tokens";
@@ -60,6 +63,8 @@ function RootNavigator() {
   const role = state.status === "signedIn" ? state.user.role : null;
   // Goruntulemede cihaz hedef kullaniciya baglanmaz ve onun bildirimlerine kaydolmaz.
   const viewingAs = impersonating !== null;
+  // Zorunlu guncelleme kapisi giristen ONCE: `/config` min surumun altindaysa Play'e yonlendirir.
+  const updateRequired = useUpdateRequired();
 
   useEffect(() => {
     if (state.status !== "loading") void SplashScreen.hideAsync().catch(() => undefined);
@@ -113,6 +118,7 @@ function RootNavigator() {
   */
   const searchKey = useSearchKey(state.status === "signedIn" ? state.user.id : null);
 
+  if (updateRequired) return <ForcedUpdateScreen />;
   if (state.status === "loading") return null;
 
   // Arama durumu kullaniciya ait: anahtar degisince sifirlanir, sonraki hesap oncekinin
@@ -139,6 +145,7 @@ function RootNavigator() {
           <Stack.Screen name="profile-edit" options={{ presentation: "modal" }} />
         </Stack.Protected>
       </Stack>
+      <OtaReadyBanner />
     </SearchProvider>
   );
 }
@@ -170,3 +177,44 @@ export default function RootLayout() {
     </GestureHandlerRootView>
   );
 }
+
+/**
+ * Render hatasinda uygulama kapanmasin: sade, cevrilmis bir ekran. Kok sinir saglayicilarin
+ * (auth, React Query) yerini alir; bu yuzden yalnizca i18n ve duz RN kullanir, ham hata
+ * metni gosterilmez.
+ */
+export function ErrorBoundary({ error, retry }: ErrorBoundaryProps) {
+  useEffect(() => {
+    console.error(error);
+  }, [error]);
+  return (
+    <View style={boundaryStyles.wrap}>
+      <Text style={boundaryStyles.title}>{i18n.t("common.genericError")}</Text>
+      <Pressable
+        accessibilityRole="button"
+        onPress={() => void retry()}
+        style={[boundaryStyles.button, { backgroundColor: colors.accent }]}
+      >
+        <Text style={[boundaryStyles.buttonText, { color: colors.white }]}>{i18n.t("common.retry")}</Text>
+      </Pressable>
+      <Pressable
+        accessibilityRole="button"
+        onPress={() => {
+          // Kok sinir ekraniyken yonlendirici hazir degil (router.replace firlatir) ve
+          // retry() cokmus rotayi yeniden acar: soguk yeniden baslatma ilk rotaya iner.
+          Updates.reloadAsync().catch(() => void retry());
+        }}
+        style={[boundaryStyles.button, { borderColor: colors.border, borderWidth: 1 }]}
+      >
+        <Text style={[boundaryStyles.buttonText, { color: colors.ink }]}>{i18n.t("common.goHome")}</Text>
+      </Pressable>
+    </View>
+  );
+}
+
+const boundaryStyles = StyleSheet.create({
+  wrap: { flex: 1, justifyContent: "center", gap: 12, padding: 24, backgroundColor: colors.bg },
+  title: { fontSize: 20, fontWeight: "600", textAlign: "center", color: colors.ink, marginBottom: 8 },
+  button: { minHeight: 52, borderRadius: 14, alignItems: "center", justifyContent: "center" },
+  buttonText: { fontSize: 16, fontWeight: "600" },
+});
