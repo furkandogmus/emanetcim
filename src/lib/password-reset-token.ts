@@ -18,12 +18,20 @@ export function isPhoneResetIdentifier(identifier: string): boolean {
   return identifier.startsWith(PASSWORD_RESET_PHONE_PREFIX);
 }
 
+/** E-posta ile istenen sıfırlama bağı: 1 saat. */
+export const PASSWORD_RESET_TTL_MS = 60 * 60 * 1000;
 /**
- * 1 saat geçerli token oluşturur. Aynı identifier için önceki token varsa silinir.
+ * Yalnızca ADMİN'in esnafa elden (WhatsApp) ilettiği bağ: 72 saat. Esnaf teknik değil ve
+ * mesajı vardiya sonunda açabiliyor; 1 saatlik bağ okunmadan ölüyor, admin yeniden üretiyordu.
  */
-async function createToken(identifier: string) {
+export const PARTNER_RESET_TTL_MS = 72 * 60 * 60 * 1000;
+
+/**
+ * Token oluşturur (varsayılan 1 saat). Aynı identifier için önceki token varsa silinir.
+ */
+async function createToken(identifier: string, ttlMs: number = PASSWORD_RESET_TTL_MS) {
   const token = crypto.randomUUID();
-  const expires = new Date(Date.now() + 60 * 60 * 1000);
+  const expires = new Date(Date.now() + ttlMs);
 
   const existing = await prisma.verificationToken.findFirst({
     where: { identifier },
@@ -49,6 +57,6 @@ export async function generatePasswordResetToken(email: string) {
 /**
  * Telefon ile şifre sıfırlama tokenı (admin-initiated).
  */
-export async function generatePasswordResetTokenByPhone(phone: string) {
-  return createToken(passwordResetPhoneIdentifier(phone));
+export async function generatePasswordResetTokenByPhone(phone: string, ttlMs: number = PASSWORD_RESET_TTL_MS) {
+  return createToken(passwordResetPhoneIdentifier(phone), ttlMs);
 }
