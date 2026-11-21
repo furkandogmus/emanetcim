@@ -68,3 +68,22 @@ describe("cagiranlar sonucu DOGRU okuyor", () => {
     expect(web).toContain("Errors.shopMissingCoordinates");
   });
 });
+
+/**
+ * Yeni onaylanan dukkan, slot cron'u (04:17) calisana kadar aramada cikmiyordu:
+ * arama slot satirlarina bakar. Onay ve saat degisimi slotlari hemen uretir.
+ */
+describe("slotlar cron'u beklemez", () => {
+  const servis = oku("src/services/ShopService.ts");
+
+  it("approveShop onaydan sonra slot uretir ve hatayi yutmaz (.catch)", () => {
+    expect(servis).toMatch(/generateSlotsForShop\(shopId\)\.catch\(/);
+    const onay = servis.slice(servis.indexOf("async approveShop"));
+    expect(onay.indexOf("generateSlotsForShop")).toBeGreaterThan(onay.indexOf("$transaction"));
+  });
+
+  it("updateShop saat/kapasite degisince slot uretir", () => {
+    const guncelle = servis.slice(servis.indexOf("async updateShop"), servis.indexOf("async updateShop") + 900);
+    expect(guncelle).toContain("generateSlotsForShop(shopId)");
+  });
+});
