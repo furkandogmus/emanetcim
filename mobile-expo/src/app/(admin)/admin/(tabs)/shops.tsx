@@ -9,6 +9,7 @@ import { MapSnippet } from "@/components/Illustrations";
 import { SearchBox } from "@/components/SearchBox";
 import { AppText, Button, CenterMessage, Chip, IconButton, Loading } from "@/components/ui";
 import { errorMessage } from "@/lib/errors";
+import { telUrl } from "@/lib/phone";
 import { useAdminOverview, useAdminShops } from "@/lib/queries";
 import type { AdminShop } from "@/lib/types";
 import { formatRating } from "@/lib/format";
@@ -149,7 +150,7 @@ function PrelaunchRow({ shop: s }: { shop: AdminShop }) {
           </View>
         </View>
         {s.phone ? (
-          <IconButton label={t("admin.callShop")} onPress={() => void Linking.openURL(`tel:${s.phone}`).catch(() => undefined)}>
+          <IconButton label={t("admin.callShop")} onPress={() => void Linking.openURL(telUrl(s.phone, s.whatsapp)).catch(() => undefined)}>
             <Phone size={18} color={colors.ink} />
           </IconButton>
         ) : null}
@@ -198,7 +199,7 @@ function ShopRow({ shop: s }: { shop: AdminShop }) {
           </View>
         </View>
         {s.phone ? (
-          <IconButton label={t("admin.callShop")} onPress={() => void Linking.openURL(`tel:${s.phone}`).catch(() => undefined)}>
+          <IconButton label={t("admin.callShop")} onPress={() => void Linking.openURL(telUrl(s.phone, s.whatsapp)).catch(() => undefined)}>
             <Phone size={18} color={colors.ink} />
           </IconButton>
         ) : null}

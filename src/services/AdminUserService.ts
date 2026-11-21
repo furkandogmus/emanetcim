@@ -47,12 +47,14 @@ export class AdminUserService {
     userId: string,
     isBanned: boolean,
     actor: AdminActor,
-  ): Promise<{ ok: true } | { ok: false; error: "not_found" | "cannot_ban_self" }> {
+  ): Promise<{ ok: true } | { ok: false; error: "not_found" | "cannot_ban_self" | "cannot_ban_admin" }> {
     if (actor.userId != null && actor.userId === userId && isBanned) {
       return { ok: false, error: "cannot_ban_self" };
     }
-    const exists = await prisma.user.findUnique({ where: { id: userId }, select: { id: true } });
+    const exists = await prisma.user.findUnique({ where: { id: userId }, select: { id: true, role: true } });
     if (!exists) return { ok: false, error: "not_found" };
+    // Yonetici yetkisi iki admin onayli akistan gider; yasak bunun yan kapisi olmasin.
+    if (isBanned && exists.role === "ADMIN") return { ok: false, error: "cannot_ban_admin" };
 
     await prisma.user.update({
       where: { id: userId },

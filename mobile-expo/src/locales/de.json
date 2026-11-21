@@ -407,7 +407,7 @@
     "deleteConfirm": "Ja, löschen",
     "errors": {
       "not_found": "Eintrag nicht gefunden; vielleicht hat sich schon jemand darum gekümmert.",
-      "missing_coordinates": "Der Laden hat keinen Standort; lege ihn zuerst im Web-Panel fest.",
+      "missing_coordinates": "Der Laden hat keinen Standort. Gib ihn auf der Laden-Seite ein, dann kannst du freigeben.",
       "has_booking_history": "Der Laden hat aktive Buchungen und kann nicht abgelehnt werden.",
       "invalid_action": "Ungültige Aktion.",
       "email_send_failed": "Die E-Mail konnte nicht gesendet werden; die Antwort wurde nicht gespeichert. Versuch es gleich noch einmal.",
@@ -417,7 +417,8 @@
       "invalid_data": "Der eingegebene Wert ist ungültig.",
       "cannot_impersonate_admin": "Du kannst dich nicht als Administrator anmelden.",
       "user_banned": "Als gesperrter Nutzer ist keine Anmeldung möglich.",
-      "not_allowed_while_impersonating": "Diese Aktion ist in der Nutzeransicht nicht möglich."
+      "not_allowed_while_impersonating": "Diese Aktion ist in der Nutzeransicht nicht möglich.",
+      "cannot_ban_admin": "Ein Admin-Konto kann nicht gesperrt werden. Rollenänderungen laufen im Web-Panel mit zwei Admin-Freigaben."
     },
     "deleteMessage": "Nachricht löschen",
     "replyLabel": "Per E-Mail antworten",
@@ -609,7 +610,16 @@
     "impersonate": "Als dieser Nutzer anmelden",
     "impersonateTitle": "Als {{name}} anmelden?",
     "impersonateBody": "Die App wechselt 30 Minuten lang in das Konto dieses Nutzers, und jede Änderung wird protokolliert. Das Konto kann nicht gelöscht werden. Über die Leiste oben kannst du jederzeit zurück.",
-    "impersonateConfirm": "Anmelden"
+    "impersonateConfirm": "Anmelden",
+    "location": "Standort",
+    "latitude": "Breitengrad",
+    "longitude": "Längengrad",
+    "locationHint": "Halte den Laden auf einer Karte gedrückt und kopiere die Koordinaten. Beispiel: 41.0082 und 28.9784.",
+    "fixLocation": "Standort eingeben",
+    "banShopsNote": "Diese Person hat {{count}} Laden/Läden. Eine Sperre schließt die Läden nicht; schalte sie bei Bedarf auf der Laden-Seite für Gäste ab.",
+    "userBookingsOpen": "Buchungen ansehen",
+    "openShop": "Laden-Seite öffnen",
+    "impersonateOwner": "Als Ladenbesitzer ansehen"
   },
   "scan": {
     "open": "QR scannen",

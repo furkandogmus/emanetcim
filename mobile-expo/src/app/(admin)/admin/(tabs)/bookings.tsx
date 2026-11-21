@@ -24,11 +24,11 @@ const DAY = 24 * 60 * 60 * 1000;
  */
 export default function AdminBookingsScreen() {
   const { t } = useTranslation();
-  const params = useLocalSearchParams<{ filter?: string }>();
+  const params = useLocalSearchParams<{ filter?: string; q?: string }>();
   const [filter, setFilter] = useState<AdminBookingFilter>(
     FILTERS.includes(params.filter as AdminBookingFilter) ? (params.filter as AdminBookingFilter) : "all",
   );
-  const [q, setQ] = useState("");
+  const [q, setQ] = useState(params.q ?? "");
 
   // Genel bakistan farkli bir filtreyle tekrar gelinirse sekme ekrani yeniden kurulmaz;
   // parametre degistiginde (efekt yerine render sirasinda) secimi guncelle.
@@ -36,6 +36,12 @@ export default function AdminBookingsScreen() {
   if (params.filter !== seenParam) {
     setSeenParam(params.filter);
     if (FILTERS.includes(params.filter as AdminBookingFilter)) setFilter(params.filter as AdminBookingFilter);
+  }
+  // Kullanici kartindan gelen arama metni: kutu `key` ile yeniden kurulur, metin dolu acilir.
+  const [seenQ, setSeenQ] = useState(params.q);
+  if (params.q !== seenQ) {
+    setSeenQ(params.q);
+    setQ(params.q ?? "");
   }
 
 
@@ -55,7 +61,7 @@ export default function AdminBookingsScreen() {
     <SafeAreaView style={styles.safe} edges={["top"]}>
       <View style={styles.header}>
         <AppText variant="title">{t("admin.tabs.bookings")}</AppText>
-        <SearchBox placeholder={t("admin.searchPlaceholder")} onSearch={setQ} />
+        <SearchBox key={params.q ?? ""} initialValue={params.q ?? ""} placeholder={t("admin.searchPlaceholder")} onSearch={setQ} />
       </View>
 
       <View>

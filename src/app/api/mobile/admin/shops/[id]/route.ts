@@ -33,6 +33,9 @@ const PatchSchema = z
     address: z.string().max(300).optional(),
     capacity: z.number().int().optional(),
     pricePerDay: z.number().optional(),
+    // Aralik kontrolu servisin (adminUpdateShop); burada yalnizca sayi olmasi sart.
+    latitude: z.number().finite().optional(),
+    longitude: z.number().finite().optional(),
     isActive: z.boolean().optional(),
     isTest: z.boolean().optional(),
     isVerified: z.boolean().optional(),
