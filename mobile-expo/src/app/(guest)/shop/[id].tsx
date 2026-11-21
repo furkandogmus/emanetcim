@@ -65,7 +65,7 @@ export default function ShopDetailScreen() {
         action={
           query.error instanceof ApiError && query.error.code === "not_found" ? (
             // Silinmis / kapanmis nokta: geri donulecek yer olmayabilir (uygulama baglantisi).
-            <Button variant="secondary" title={t("shop.nearbyAction")} onPress={() => router.replace("/")} />
+            <Button variant="secondary" title={t("shop.nearbyAction")} onPress={() => router.replace(search.place ? "/map" : "/")} />
           ) : (
             <Button variant="secondary" title={t("common.back")} onPress={goBackOr} />
           )
