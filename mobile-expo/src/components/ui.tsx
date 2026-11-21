@@ -164,7 +164,13 @@ export function Banner({
     success: { bg: colors.successSoft, border: "#BBF7D0" },
   }[tone];
   return (
-    <View style={[styles.banner, { backgroundColor: palette.bg, borderColor: palette.border }]}>
+    // Hata ve uyari bandi ekran okuyucuya duyurulur: giris, odeme ve check-in hatalari
+    // aksi halde sessiz kaliyordu. Tehlike aninda keser, digerleri nazikce soyler.
+    <View
+      accessibilityRole={tone === "danger" ? "alert" : undefined}
+      accessibilityLiveRegion={tone === "danger" ? "assertive" : "polite"}
+      style={[styles.banner, { backgroundColor: palette.bg, borderColor: palette.border }]}
+    >
       {title ? <AppText variant="bodyMedium">{title}</AppText> : null}
       <AppText variant="caption" style={{ color: colors.inkSecondary }}>
         {body}
