@@ -39,7 +39,7 @@ export function BookingTicket({
   return (
     <View style={styles.ticket}>
       <View style={styles.top}>
-        <StatusBadge status={b.status} checkOutTime={b.checkOutTime} />
+        <StatusBadge status={b.status} checkOutTime={b.checkOutTime} expired={b.expired} />
         <View style={{ gap: 2 }}>
           <AppText variant="title" numberOfLines={2}>
             {title ?? b.shopName}

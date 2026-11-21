@@ -26,17 +26,23 @@ const NEVER_DROPPED = new Set<BookingStatus>(["APPROVED", "PAID", "PENDING", "WA
 export function StatusBadge({
   status,
   checkOutTime,
+  expired,
   partnerView,
 }: {
   status: BookingStatus;
   checkOutTime?: string;
+  /** Sunucunun karari (`expired`); verilirse yerel saat okunmaz. */
+  expired?: boolean;
   /** Esnafa "Onaylandi" degil "Bekleniyor": o onay esnafin isi degil, misafir henuz gelmedi. */
   partnerView?: boolean;
 }) {
   const { t } = useTranslation();
   // BookingRow ile ayni desen: an bir kez okunur, cizim saf kalir.
   const [now] = useState(() => Date.now());
-  const unused = !!checkOutTime && NEVER_DROPPED.has(status) && new Date(checkOutTime).getTime() < now;
+  const unused =
+    typeof expired === "boolean"
+      ? expired
+      : !!checkOutTime && NEVER_DROPPED.has(status) && new Date(checkOutTime).getTime() < now;
   const tone = unused ? TONES.CHECKED_OUT : (TONES[status] ?? TONES.PENDING);
   return (
     <View style={[styles.badge, { backgroundColor: tone.bg }]}>

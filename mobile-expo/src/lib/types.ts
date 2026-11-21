@@ -113,6 +113,8 @@ export type BookingSummary = {
   bagCountXl: number;
   totalPrice: number;
   status: BookingStatus;
+  /** Suresi dolmus (gelinmemis) rezervasyon; sunucu karar verir. Eski sunucu gondermez. */
+  expired?: boolean;
 };
 
 export type BookingDetail = BookingSummary & {
@@ -530,4 +532,12 @@ export type CityCoverage = {
 /** `PUT partner/shop` yaniti: kaydin etkisi (acik rezervasyon / raf kapasitesi). */
 export type PartnerShopUpdateResult = {
   impact?: { bookingsOutsideHours: number; bagsOverCapacity: number };
+};
+
+/** `GET /config` (kimliksiz). `paymentMode`: eski sunucu gondermez, o zaman "onsite" varsayilir. */
+export type AppConfig = {
+  minAppVersion: string | null;
+  latestAppVersion: string | null;
+  requireSealsOnCheckIn?: boolean;
+  paymentMode?: "online" | "onsite";
 };
