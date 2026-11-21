@@ -15,6 +15,7 @@ import { errorMessage } from "@/lib/errors";
 import { usePartnerShopSelection } from "@/lib/partner-shop";
 import { usePartnerShop } from "@/lib/queries";
 import { colors, radius, space } from "@/theme/tokens";
+import { StaleQueryBanner } from "@/components/StaleQueryBanner";
 
 /**
  * Dukkanim: secili dukkanin fotograflari ve ayarlari, altinda esnafin kendi hesabi.
@@ -39,6 +40,8 @@ export default function PartnerShopScreen() {
           <ShopSwitcher />
         </View>
 
+        <StaleQueryBanner query={query} />
+
         {query.isLoading ? (
           // Dukkan degisirken ekran ziplamasin: fotograf izgarasi ve satirlar yerinde bekler.
           <View style={styles.skeleton}>
@@ -46,7 +49,7 @@ export default function PartnerShopScreen() {
               <View key={i} style={styles.skeletonTile} />
             ))}
           </View>
-        ) : query.isError || !query.data ? (
+        ) : !query.data ? (
           <CenterMessage
             title={errorMessage(query.error, "partner")}
             action={<Button variant="secondary" title={t("common.retry")} onPress={() => query.refetch()} />}

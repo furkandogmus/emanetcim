@@ -24,6 +24,7 @@ import { totalBags, useSearch } from "@/lib/search";
 import { wallInstant, wallParts } from "@/lib/time";
 import type { NearbyShop } from "@/lib/types";
 import { colors, fonts, radius, shadow, space } from "@/theme/tokens";
+import { isBlockingError } from "@/lib/query-view";
 
 const DEFAULT_RADIUS_M = 15_000;
 const SHEET_PEEK = 150;
@@ -162,7 +163,7 @@ export default function MapScreen() {
 
   const bags = totalBags(search.bags);
   const summary = `${search.place.label} · ${formatDay(search.checkIn)}, ${formatStayRange(search.checkIn, search.checkOut)} · ${t("common.bag", { count: bags })}`;
-  const emptyWindow = !query.isLoading && !query.isError && bookableCount === 0;
+  const emptyWindow = !query.isLoading && !isBlockingError(query) && bookableCount === 0;
   const changeDates = () => router.push({ pathname: "/search", params: { returnTo: "map", step: "1" } });
   const tomorrowMorning = () => {
     const p = wallParts(new Date());
@@ -259,17 +260,17 @@ export default function MapScreen() {
       ) : null}
 
       <BottomSheet
-        key={query.isError || emptyWindow ? "open" : "peek"}
+        key={isBlockingError(query) || emptyWindow ? "open" : "peek"}
         top={insets.top + 90}
         peek={SHEET_PEEK}
-        initialOpen={query.isError || emptyWindow}
+        initialOpen={isBlockingError(query) || emptyWindow}
         handleLabel={t("map.sheetHandle")}
         header={
           <View style={styles.sheetHeader}>
             <AppText variant="title" style={{ fontSize: 20, lineHeight: 26 }}>
               {query.isLoading
                 ? t("common.loading")
-                : query.isError
+                : isBlockingError(query)
                   ? search.place.label
                   : bookableCount === 0
                     ? t("map.emptyWindowTitle")
@@ -287,7 +288,7 @@ export default function MapScreen() {
       >
         {query.isLoading ? (
           <Loading />
-        ) : query.isError ? (
+        ) : isBlockingError(query) ? (
           <CenterMessage
             title={errorMessage(query.error, "map")}
             action={

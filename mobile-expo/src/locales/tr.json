@@ -8,6 +8,7 @@
     "loading": "Yükleniyor…",
     "genericError": "Bir şeyler ters gitti. Lütfen tekrar dene.",
     "networkError": "Sunucuya ulaşılamadı. İnternet bağlantını kontrol et.",
+    "staleData": "Bağlantı yok, son veriler gösteriliyor.",
     "day_one": "{{count}} gün",
     "day_other": "{{count}} gün",
     "bag_one": "{{count}} valiz",

@@ -22,6 +22,7 @@ import { notify } from "@/lib/notify";
 import { whatsappNumber } from "@/lib/phone";
 import { loadOfflineTicket, saveOfflineTicket, type OfflineTicket } from "@/lib/offline-tickets";
 import { colors, radius, space } from "@/theme/tokens";
+import { StaleQueryBanner } from "@/components/StaleQueryBanner";
 
 /** Misafirin iptal edebildigi durumlar: valiz henuz dukkana teslim edilmemis. */
 const CANCELLABLE = new Set(["PENDING", "WAITING_APPROVAL", "APPROVED", "PAID"]);
@@ -148,7 +149,7 @@ export function BookingDetailView({ id, mode }: { id: string; mode: "guest" | "p
       </SafeAreaView>
     );
   }
-  if (query.isError || !query.data) {
+  if (!query.data) {
     // Cevrimdisi yalnizca baglanti hatasi (status 0): 404/403/5xx icin "internet yok" demek yaniltici.
     const noConnection = query.error instanceof ApiError && query.error.status === 0;
     const gone = query.error instanceof ApiError && (query.error.status === 404 || query.error.status === 403);
@@ -193,6 +194,8 @@ export function BookingDetailView({ id, mode }: { id: string; mode: "guest" | "p
           <ArrowLeft size={20} color={colors.ink} />
         </IconButton>
       </View>
+
+      <StaleQueryBanner query={query} />
 
       <KeyboardAvoidingView style={{ flex: 1 }} behavior="padding">
       <ScrollView

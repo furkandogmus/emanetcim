@@ -8,6 +8,7 @@
     "loading": "Loading…",
     "genericError": "Something went wrong. Please try again.",
     "networkError": "Couldn't reach the server. Check your connection.",
+    "staleData": "No connection, showing the last loaded data.",
     "day_one": "{{count}} day",
     "day_other": "{{count}} days",
     "bag_one": "{{count}} bag",
