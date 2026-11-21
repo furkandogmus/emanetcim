@@ -87,6 +87,16 @@ describe("POST /api/mobile/auth/refresh — replay tespiti", () => {
     );
   });
 
+  it("çift saklanamazsa 503 döner ve işaret geri alınır (tekrar yine ilk kullanım olur)", async () => {
+    vi.mocked(claimRefreshJti).mockResolvedValue({ kind: "first" });
+    vi.mocked(rememberIssuedPair).mockRejectedValueOnce(new Error("redis down"));
+    const { POST } = await import("@/app/api/mobile/auth/refresh/route");
+    const res = await POST(makeRequest());
+    expect(res.status).toBe(503);
+    expect(releaseRefreshJti).toHaveBeenCalledWith("jti-1");
+    expect(revokeAllUserSessions).not.toHaveBeenCalled();
+  });
+
   it("tolerans penceresinde tekrar: aynı çift döner, aile iptal edilmez", async () => {
     const pair = { accessToken: "a-1", refreshToken: "r-1" };
     vi.mocked(claimRefreshJti).mockResolvedValue({ kind: "repeat", pair });
