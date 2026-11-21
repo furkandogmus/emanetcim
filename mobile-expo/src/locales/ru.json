@@ -20,7 +20,9 @@
     "clear": "Очистить",
     "scrollBack": "Прокрутить назад",
     "scrollForward": "Прокрутить вперёд",
-    "goHome": "На главную"
+    "goHome": "На главную",
+    "loadMore": "Показать ещё",
+    "loadMoreFailed": "Не удалось загрузить ещё."
   },
   "auth": {
     "title": "Вход",
@@ -432,7 +434,8 @@
     "searchNone": "Подходящих бронирований нет. Введи 8-значный код.",
     "statusWaiting": "Ожидается",
     "callGuest": "Позвонить гостю",
-    "whatsappGuest": "Написать в WhatsApp"
+    "whatsappGuest": "Написать в WhatsApp",
+    "olderBookings": "Более ранние бронирования"
   },
   "profile": {
     "title": "Профиль",

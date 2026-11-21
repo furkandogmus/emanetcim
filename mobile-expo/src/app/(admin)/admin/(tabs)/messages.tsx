@@ -1,16 +1,18 @@
 import { useState } from "react";
 import { Alert, FlatList, KeyboardAvoidingView, Pressable, RefreshControl, StyleSheet, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { useMutation, useQueryClient, type InfiniteData } from "@tanstack/react-query";
 import { useTranslation } from "react-i18next";
 
 import { LuggageTag } from "@/components/Illustrations";
 import { AdminMessageReply } from "@/components/AdminMessageReply";
+import { LoadMoreFooter } from "@/components/LoadMoreFooter";
 import { AppText, Button, CenterMessage, Loading } from "@/components/ui";
 import { api } from "@/lib/api";
 import { errorMessage } from "@/lib/errors";
 import { formatDayTime, initial } from "@/lib/format";
-import { keys, useAdminMessages } from "@/lib/queries";
+import { flattenPages } from "@/lib/paging";
+import { adminMessagesKey, keys, useAdminMessages, type AdminMessagesPage } from "@/lib/queries";
 import type { ContactMessage } from "@/lib/types";
 import { notify } from "@/lib/notify";
 import { colors, fonts, radius, space } from "@/theme/tokens";
@@ -19,6 +21,7 @@ export default function AdminMessagesScreen() {
   const { t } = useTranslation();
   const queryClient = useQueryClient();
   const query = useAdminMessages();
+  const messages = flattenPages(query.data, (p) => p.messages);
   const [open, setOpen] = useState<string | null>(null);
 
   // Tum "admin" onbellegi degil: sekmeler acik kaldigi icin bu, her okundu isaretinde
@@ -32,8 +35,14 @@ export default function AdminMessagesScreen() {
   const markRead = useMutation({
     mutationFn: (id: string) => api(`/admin/messages/${id}`, { method: "PATCH" }),
     onSuccess: (_res, id) => {
-      queryClient.setQueryData<ContactMessage[]>([...keys.admin, "messages"], (cur) =>
-        cur?.map((m) => (m.id === id ? { ...m, isRead: true } : m)),
+      queryClient.setQueryData<InfiniteData<AdminMessagesPage>>(adminMessagesKey, (cur) =>
+        cur && {
+          ...cur,
+          pages: cur.pages.map((p) => ({
+            ...p,
+            messages: p.messages.map((m) => (m.id === id ? { ...m, isRead: true } : m)),
+          })),
+        },
       );
       void queryClient.invalidateQueries({ queryKey: [...keys.admin, "overview"] });
     },
@@ -76,12 +85,24 @@ export default function AdminMessagesScreen() {
           />
         ) : (
           <FlatList
-            data={query.data ?? []}
+            data={messages}
             keyExtractor={(m) => m.id}
             keyboardShouldPersistTaps="handled"
-            contentContainerStyle={[styles.list, !query.data?.length && { flex: 1 }]}
+            contentContainerStyle={[styles.list, messages.length === 0 && { flex: 1 }]}
             refreshControl={
-              <RefreshControl refreshing={query.isRefetching} onRefresh={() => query.refetch()} tintColor={colors.accent} />
+              <RefreshControl
+                refreshing={query.isRefetching && !query.isFetchingNextPage}
+                onRefresh={() => query.refetch()}
+                tintColor={colors.accent}
+              />
+            }
+            ListFooterComponent={
+              <LoadMoreFooter
+                hasMore={!!query.hasNextPage}
+                loading={query.isFetchingNextPage}
+                failed={query.isFetchNextPageError}
+                onPress={() => void query.fetchNextPage()}
+              />
             }
             ListEmptyComponent={<CenterMessage art={<LuggageTag size={64} />} title={t("admin.noMessages")} />}
             renderItem={({ item }) => {

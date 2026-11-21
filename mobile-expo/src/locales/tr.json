@@ -16,7 +16,9 @@
     "clear": "Temizle",
     "scrollBack": "Geri kaydır",
     "scrollForward": "İleri kaydır",
-    "goHome": "Ana sayfaya git"
+    "goHome": "Ana sayfaya git",
+    "loadMore": "Daha fazla göster",
+    "loadMoreFailed": "Devamı yüklenemedi."
   },
   "auth": {
     "title": "Giriş yap",
@@ -412,7 +414,8 @@
     "searchNone": "Eşleşen emanet yok. Kodu 8 haneli olarak yaz.",
     "statusWaiting": "Bekleniyor",
     "callGuest": "Misafiri ara",
-    "whatsappGuest": "WhatsApp ile yaz"
+    "whatsappGuest": "WhatsApp ile yaz",
+    "olderBookings": "Daha eski kayıtlar"
   },
   "profile": {
     "title": "Profil",
