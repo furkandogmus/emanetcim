@@ -419,7 +419,11 @@ describe("NotificationService", () => {
 
       expect(result).toBe(true);
       expect(mockSendEachForMulticast).toHaveBeenCalledWith(
-        expect.objectContaining({ tokens: ["t1", "t2"] }),
+        expect.objectContaining({
+          tokens: ["t1", "t2"],
+          // Uygulamanin YUKSEK onemli kanali: yoksa Android "Miscellaneous"a dusurur, baslik bandi cikmaz.
+          android: { priority: "high", notification: { channelId: "default" } },
+        }),
       );
       // Gecersiz token SILINIR -- aksi halde her gonderimde ayni olu token'a bosuna istek atilir.
       expect(mockPrisma.mobilePushToken.deleteMany).toHaveBeenCalledWith({
