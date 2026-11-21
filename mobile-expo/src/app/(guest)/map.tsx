@@ -216,20 +216,26 @@ export default function MapScreen() {
         </View>
       ) : null}
 
-      <BottomSheet top={insets.top + 90} peek={SHEET_PEEK}>
-        <View style={styles.sheetHeader}>
-          <AppText variant="title" style={{ fontSize: 20, lineHeight: 26 }}>
-            {query.isLoading
-              ? t("common.loading")
-              : shops.length === 0
-                ? search.place.isCurrent
-                  ? t("map.emptyTitleNear")
-                  : t("map.emptyTitle", { place: search.place.label })
-                : search.place.isCurrent
-                  ? t("map.countNear", { count: shops.length })
-                  : t("map.count", { count: shops.length, place: search.place.label })}
-          </AppText>
-        </View>
+      <BottomSheet
+        top={insets.top + 90}
+        peek={SHEET_PEEK}
+        handleLabel={t("map.sheetHandle")}
+        header={
+          <View style={styles.sheetHeader}>
+            <AppText variant="title" style={{ fontSize: 20, lineHeight: 26 }}>
+              {query.isLoading
+                ? t("common.loading")
+                : shops.length === 0
+                  ? search.place.isCurrent
+                    ? t("map.emptyTitleNear")
+                    : t("map.emptyTitle", { place: search.place.label })
+                  : search.place.isCurrent
+                    ? t("map.countNear", { count: shops.length })
+                    : t("map.count", { count: shops.length, place: search.place.label })}
+            </AppText>
+          </View>
+        }
+      >
         {query.isLoading ? (
           <Loading />
         ) : query.isError ? (
@@ -323,7 +329,8 @@ const styles = StyleSheet.create({
   },
   searchHere: { position: "absolute", alignSelf: "center" },
   // Fiyat hapi: dar ekranda komsu pinleri ortmesin diye kucuk tutuldu (web `h-8`).
-  pinTouch: { paddingVertical: 7 },
+  // Pin alt-orta noktadan baglanir; ek dokunma alani yalnizca ustte olmali ki etiket konumundan kaymasin.
+  pinTouch: { paddingTop: 14 },
   pin: {
     minWidth: 44,
     height: 30,

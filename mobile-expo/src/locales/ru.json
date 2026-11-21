@@ -127,6 +127,7 @@
     "increase": "Увеличить: {{size}}"
   },
   "map": {
+    "sheetHandle": "Список мест, потяните, чтобы раскрыть или свернуть",
     "count_one": "{{count}} точка рядом: {{place}}",
     "count_few": "{{count}} точки рядом: {{place}}",
     "count_many": "{{count}} точек рядом: {{place}}",

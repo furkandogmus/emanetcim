@@ -121,6 +121,7 @@
     "increase": "{{size}} erhöhen"
   },
   "map": {
+    "sheetHandle": "Shopliste, zum Öffnen oder Schließen ziehen",
     "count_one": "{{count}} Ort in der Nähe von {{place}}",
     "count_other": "{{count}} Orte in der Nähe von {{place}}",
     "nearYou": "dir",
