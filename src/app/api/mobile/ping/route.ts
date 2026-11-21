@@ -39,5 +39,6 @@ export async function POST(req: NextRequest) {
 
   await mobileInstallService.recordOpen({ installId, platform, appVersion, userId });
 
-  return NextResponse.json({ ok: true });
+  // `linked`: istemci suresi dolmus token'la geldiyse yenileyip tekrar dener (app-ping.ts).
+  return NextResponse.json({ ok: true, linked: userId !== undefined });
 }

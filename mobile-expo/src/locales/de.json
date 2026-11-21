@@ -79,7 +79,10 @@
     "legalPrivacy": "Datenschutzerklärung",
     "legalSuffix": ".",
     "codeSentAgain": "Code erneut gesendet.",
-    "resendIn": "Erneut senden in {{seconds}} s"
+    "resendIn": "Erneut senden in {{seconds}} s",
+    "sessionExpiredTitle": "Deine Sitzung ist abgelaufen. Bitte melde dich erneut an.",
+    "sessionExpiredBody": "Melde dich erneut an, um deine Buchungen zu sehen.",
+    "sessionExpiredBodyStaff": "Melde dich erneut an, um zu deinem Shop-Bereich zurückzukehren. Die letzte Aktion wurde nicht gespeichert; versuch sie nach der Anmeldung noch einmal."
   },
   "home": {
     "heroTitle": "Gepäck abgeben.\nStadt genießen.",
