@@ -1,10 +1,11 @@
 import { useQuery, useQueryClient, type QueryClient } from "@tanstack/react-query";
 
 import { api, ApiError, isImpersonating } from "./api";
+import { isBookingExpired } from "./booking-state";
 import { deleteOfflineTicket, saveOfflineTicket } from "./offline-tickets";
 import { useAuth } from "./auth";
 import { usePartnerShopSelection, withShop } from "./partner-shop";
-import type { AdminApplication, AdminStats, BookingDetail, ContactMessage, PartnerEarnings, PartnerSealsResponse, PartnerShop, BookingSummary, NearbyShop, PartnerBookingsResponse, ShopDetail, ShopReview, PartnerShopSettings, PartnerSchedule, PartnerDashboard, AdminOverview, AdminBookingFilter, AdminBookingCounts, AdminBookingsResponse, AdminBookingDetail, AdminShop, AdminShopDetail, AdminUser, CityCoverage } from "./types";
+import type { AdminApplication, AdminStats, BookingDetail, ContactMessage, PartnerEarnings, PartnerSealsResponse, PartnerShop, BookingSummary, NearbyShop, PartnerBookingsResponse, ShopDetail, ShopReview, PartnerShopSettings, PartnerSchedule, PartnerDashboard, AdminOverview, AdminBookingFilter, AdminBookingCounts, AdminBookingsResponse, AdminBookingDetail, AdminShop, AdminShopDetail, AdminUser, CityCoverage, AppConfig } from "./types";
 
 export const keys = {
   myBookings: ["bookings", "me"] as const,
@@ -15,6 +16,23 @@ export const keys = {
   partnerSeals: ["partner", "seals"] as const,
   admin: ["admin"] as const,
 };
+
+/**
+ * Sunucu yapilandirmasi (kimliksiz). Odeme metinleri `paymentMode`a baglanir:
+ * kip bilinmiyorsa dukkanda tahsilat (bugun gercek olan) varsayilir, boylece
+ * hicbir ekran kartla odeme ya da karta iade vaat etmez.
+ */
+export function useAppConfig() {
+  return useQuery({
+    queryKey: ["config"],
+    queryFn: () => api<AppConfig>("/config", { auth: false }),
+    staleTime: 10 * 60_000,
+  });
+}
+
+export function useOnlinePayments(): boolean {
+  return useAppConfig().data?.paymentMode === "online";
+}
 
 /** Dukkani olan sehirler; yeni sehirde esnaf acilinca kendiliginden gelir. */
 export function useCities() {
@@ -147,9 +165,13 @@ export function usePartnerBookings(polling = true) {
  * gecince aktif degildir: gelmeyen misafirin APPROVED/PAID kaydi sonsuza dek oyle
  * kalir ve "Siradaki" kartini, sekme rozetini ve Yaklasan listesini dolduruyordu.
  */
-export function isActiveBooking(b: { status: string; checkOutTime: string }, now: number = Date.now()) {
+export function isActiveBooking(
+  b: { status: string; checkOutTime: string; expired?: boolean },
+  now: number = Date.now(),
+) {
   if (b.status === "CHECKED_IN") return true;
   if (b.status === "CANCELLED" || b.status === "CHECKED_OUT") return false;
+  if (isBookingExpired(b, now)) return false;
   return new Date(b.checkOutTime).getTime() > now;
 }
 
