@@ -98,7 +98,7 @@
         "expo-image-picker",
         {
           "photosPermission": false,
-          "cameraPermission": "Misafirin rezervasyon QR kodunu okutmak için kamerayı kullanıyoruz.",
+          "cameraPermission": false,
           "microphonePermission": false
         }
       ],
@@ -148,6 +148,12 @@
     "updates": {
       "url": "https://u.expo.dev/e977b077-e469-4d63-a705-99b7ddd86346",
       "fallbackToCacheTimeout": 0
+    },
+    "locales": {
+      "tr": "./ios-locales/tr.json",
+      "en": "./ios-locales/en.json",
+      "de": "./ios-locales/de.json",
+      "ru": "./ios-locales/ru.json"
     }
   }
 }
