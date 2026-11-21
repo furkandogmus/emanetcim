@@ -16,20 +16,16 @@ vi.mock("@/services/ShopService", () => ({
 vi.mock("@/lib/rate-limit", () => ({ rateLimit: mockRateLimit }));
 vi.mock("@/lib/get-ip", () => ({ getClientIp: async () => "1.1.1.1" }));
 vi.mock("@/services/ShopScheduleService", () => ({ loadScheduleParts: mockSchedules }));
-vi.mock("@/lib/platform-settings", () => ({
-  getPricingRules: async () => ({
-    maxStayDays: 30,
-    bagMultiplierS: 0.7,
-    bagMultiplierM: 1,
-    bagMultiplierXl: 1.5,
-    insuranceFeeTry: 0,
-  }),
-}));
-vi.mock("@/lib/booking-server-price", () => ({
+vi.mock("@/lib/platform-settings", async () => {
+  const { DEFAULT_PRICING_RULES } = await import("@/lib/pricing-rules");
+  return { getPricingRules: async () => ({ ...DEFAULT_PRICING_RULES, maxStayDays: 30 }) };
+});
+vi.mock("@/lib/booking-server-price", async (orig) => ({
+  ...(await orig<typeof import("@/lib/booking-server-price")>()),
   validateBookingStayWindow: () => true,
-  MIN_BOOKING_STAY_MS: 3_600_000,
 }));
-vi.mock("@/lib/mobile-dto", () => ({
+vi.mock("@/lib/mobile-dto", async (orig) => ({
+  ...(await orig<typeof import("@/lib/mobile-dto")>()),
   toMobileShop: (s: { id: string }) => ({ id: s.id }),
   toMobilePriceRange: () => ({ min: 1, max: 2, medium: 1 }),
 }));
@@ -95,5 +91,26 @@ describe("GET /api/mobile/shops/nearby", () => {
     expect((await GET(url({ limit: "5000", page: "-3" }))).status).toBe(200);
     expect((await GET(url({ lat: "999" }))).status).toBe(400);
     expect((await GET(url({ r: "abc" }))).status).toBe(400);
+  });
+
+  it("boy karışımı gelirse her açık dükkana stayQuote eklenir ve arama toplam adetle yapılır", async () => {
+    mockSearch.mockResolvedValue([shopRow("always", { open247: true }), shopRow("closed")]);
+    const body = await (await GET(url({ includeClosed: "1", bags: "1", bagsS: "1", bagsM: "0", bagsXl: "2" }))).json();
+    expect(mockSearch.mock.calls[0][0].requestedBags).toBe(3);
+    expect(body[0].stayQuote).toMatchObject({ days: 1, bags: 3 });
+    expect(body[0].stayQuote.total).toBeGreaterThan(0);
+    expect(body[1].stayQuote).toBeUndefined();
+  });
+
+  it("eski istemci (yalnızca bags) eski yanıt biçimini alır: stayQuote yok", async () => {
+    mockSearch.mockResolvedValue([shopRow("always", { open247: true })]);
+    const body = await (await GET(url({ bags: "4" }))).json();
+    expect(mockSearch.mock.calls[0][0].requestedBags).toBe(4);
+    expect(body[0]).not.toHaveProperty("stayQuote");
+  });
+
+  it("boy adedi sınırı checkout/quote ile aynı: 21 reddedilir", async () => {
+    mockSearch.mockResolvedValue([]);
+    expect((await GET(url({ bagsXl: "21" }))).status).toBe(400);
   });
 });
