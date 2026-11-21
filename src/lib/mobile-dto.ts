@@ -497,6 +497,11 @@ function adminShopVisibility(s: {
   return { cityPages, issues: shopVisibilityIssues({ ...s, cityPages }) };
 }
 
+/** "Bu kullanici olarak gor" yalniz ADMIN olmayan, yasaksiz hesap icin mumkun (sunucu kurali). */
+export function canViewAs(u: { role: string; isBanned: boolean }): boolean {
+  return u.role !== "ADMIN" && !u.isBanned;
+}
+
 /** `admin/bookings` satiri: ozet + misafir adi (yoksa e-posta) ve olusturulma ani. */
 export function toMobileAdminBookingRow(b: AdminBookingRowSource) {
   return {
@@ -518,6 +523,8 @@ export function toMobileAdminBookingDetail({ booking: b, events }: AdminBookingD
       email: b.guest?.email ?? b.guestEmail ?? "",
       phone: b.guest?.phone ?? b.guestPhone ?? "",
       whatsapp: toWhatsAppNumber(b.guest?.phone ?? b.guestPhone),
+      // Sunucu ADMIN ve yasakli hesaba girisi reddeder; dugme hic cizilmesin.
+      canViewAs: b.guest ? canViewAs(b.guest) : false,
     },
     shop: {
       id: b.shopId,
@@ -527,6 +534,7 @@ export function toMobileAdminBookingDetail({ booking: b, events }: AdminBookingD
       phone: b.shop.owner.phone ?? "",
       whatsapp: toWhatsAppNumber(b.shop.owner.phone),
       ownerName: b.shop.owner.name ?? "",
+      canViewAsOwner: canViewAs(b.shop.owner),
       latitude: b.shop.latitude,
       longitude: b.shop.longitude,
     },
@@ -588,6 +596,7 @@ export function toMobileAdminShopDetail(d: AdminShopDetailSource) {
       email: s.owner.email ?? "",
       phone: s.owner.phone ?? "",
       whatsapp: toWhatsAppNumber(s.owner.phone),
+      canViewAs: canViewAs(s.owner),
     },
     bookingCount: s._count.bookings,
     reviewCount: s._count.reviews,

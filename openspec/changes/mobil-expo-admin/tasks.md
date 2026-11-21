@@ -1,7 +1,7 @@
 ## 1. Sunucu
 
 - [x] 1.1 Onay/red gövdesini (servis + `writeAuditLog`) tek fonksiyona al; web action ve mobil uç ondan çağırsın
-- [x] 1.2 `admin/applications/[id]/[action]`: hata kodları (`not_found`, `missing_coordinates`, `has_active_bookings`, `invalid_action`)
+- [x] 1.2 `admin/applications/[id]/[action]`: hata kodları (`not_found`, `missing_coordinates`, `has_booking_history`, `invalid_action`)
 - [x] 1.3 `admin/applications` GET: `toMobileAdminApplication` DTO (`mobile-dto.ts`)
 - [x] 1.4 `admin/messages/[id]` PATCH/DELETE: olmayan kayıtta 404
 - [x] 1.5 Testler: denetim kaydı yazılıyor, kodlar, 404, 403 (misafir/esnaf)

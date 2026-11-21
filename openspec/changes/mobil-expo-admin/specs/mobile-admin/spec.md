@@ -35,7 +35,7 @@ Reddetme dükkanı siler; yıkıcı onay penceresinden sonra yapılmalı (SHALL)
 
 #### Scenario: Aktif rezervasyonlu dükkan
 - **WHEN** dükkanın APPROVED, PAID ya da CHECKED_IN rezervasyonu vardır
-- **THEN** sunucu 409 `has_active_bookings` döner, dükkan silinmez
+- **THEN** sunucu 409 `has_booking_history` döner, dükkan silinmez
 
 ### Requirement: İletişim mesajları
 Admin mesajları listeleyip okundu işaretleyebilmeli ve silebilmelidir (SHALL). Silme yıkıcı
