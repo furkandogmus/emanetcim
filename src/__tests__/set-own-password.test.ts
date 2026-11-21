@@ -4,7 +4,9 @@ const { mockPrisma } = vi.hoisted(() => ({
   mockPrisma: { user: { findUnique: vi.fn(), update: vi.fn() } },
 }));
 
+const { mockAudit } = vi.hoisted(() => ({ mockAudit: vi.fn() }));
 vi.mock("@/lib/db", () => ({ default: mockPrisma }));
+vi.mock("@/lib/audit-log", () => ({ writeAuditLog: mockAudit }));
 vi.mock("@/lib/auth-password", async (orig) => ({
   ...(await orig<typeof import("@/lib/auth-password")>()),
   hashPassword: vi.fn(async (p: string) => `hashed:${p}`),
@@ -52,10 +54,24 @@ describe("setOwnPassword", () => {
       userId: "u1",
       currentPassword: "eski-sifre1",
       newPassword: "Yeni-sifre9",
-      impersonating: true,
+      impersonatedBy: "adm-1",
     });
     expect(res).toMatchObject({ ok: true, rotated: false });
     expect(mockPrisma.user.update.mock.calls[0][0].data).not.toHaveProperty("tokenVersion");
+    expect(mockAudit).toHaveBeenCalledWith(
+      expect.objectContaining({
+        actorUserId: "adm-1",
+        actorRole: "ADMIN",
+        action: "admin.impersonate.password_set",
+        entityId: "u1",
+      }),
+    );
+  });
+
+  it("normal kullanicinin sifre degisimi admin denetim satiri yazmaz", async () => {
+    mockPrisma.user.findUnique.mockResolvedValue({ id: "u1", passwordHash: null, tokenVersion: 3 });
+    await setOwnPassword({ userId: "u1", newPassword: "Yeni-sifre9" });
+    expect(mockAudit).not.toHaveBeenCalled();
   });
 
   it("kisa sifreyi reddeder", async () => {

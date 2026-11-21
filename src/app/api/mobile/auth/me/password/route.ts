@@ -35,7 +35,7 @@ export async function POST(req: NextRequest) {
     userId: auth.user.id,
     currentPassword: parsed.data.currentPassword,
     newPassword: parsed.data.newPassword,
-    impersonating: auth.user.impersonatedBy !== undefined,
+    impersonatedBy: auth.user.impersonatedBy,
   });
   if (!result.ok) {
     const status = result.reason === "invalid_current_password" ? 403 : result.reason === "not_found" ? 404 : 400;
