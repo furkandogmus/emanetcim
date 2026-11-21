@@ -409,6 +409,8 @@
       "not_found": "Eintrag nicht gefunden; vielleicht hat sich schon jemand darum gekümmert.",
       "missing_coordinates": "Der Laden hat keinen Standort. Gib ihn auf der Laden-Seite ein, dann kannst du freigeben.",
       "has_booking_history": "Der Laden hat aktive Buchungen und kann nicht abgelehnt werden.",
+      "has_active_bookings": "Der Laden hat aktive Buchungen und kann nicht abgelehnt werden.",
+      "not_pending": "Dieser Antrag ist nicht mehr ausstehend (bereits genehmigt oder aktiv) und kann nicht abgelehnt werden. Zum Aktualisieren nach unten ziehen.",
       "invalid_action": "Ungültige Aktion.",
       "email_send_failed": "Die E-Mail konnte nicht gesendet werden; die Antwort wurde nicht gespeichert. Versuch es gleich noch einmal.",
       "too_many_requests": "Zu viele Antworten gesendet; bitte warte einen Moment.",

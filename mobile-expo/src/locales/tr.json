@@ -409,6 +409,8 @@
       "not_found": "Kayıt bulunamadı; başka biri işlem yapmış olabilir.",
       "missing_coordinates": "Dükkanın konumu yok. Dükkan sayfasından konumu girince onaylayabilirsin.",
       "has_booking_history": "Dükkanın aktif rezervasyonu var; reddedilemez.",
+      "has_active_bookings": "Dükkanın aktif rezervasyonu var; reddedilemez.",
+      "not_pending": "Bu başvuru artık beklemede değil (onaylanmış ya da aktif); reddedilemez. Listeyi yenileyin.",
       "invalid_action": "Geçersiz işlem.",
       "email_send_failed": "E-posta gönderilemedi; cevap kaydedilmedi. Biraz sonra tekrar dene.",
       "too_many_requests": "Çok fazla cevap gönderildi; biraz bekle.",

@@ -90,7 +90,7 @@ export default function AdminApplicationsClient({ applications: initialApps }: A
         try {
           const res = await rejectShopAction(id);
           if (!res.success) {
-            toast.error(t("shopDeleteBlockedByRelations"));
+            toast.error(t(res.error === "not_pending" ? "shopNotPending" : "shopDeleteBlockedByRelations"));
             return;
           }
           setApps((prev) => prev.filter((a) => a.id !== id));

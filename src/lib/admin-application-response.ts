@@ -29,9 +29,9 @@ export async function applicationActionResponse(
   if (action === "reject") {
     const result = await shopService.rejectApplication(shopId, actor);
     if (!result.ok) {
-      return result.reason === "not_found"
-        ? NextResponse.json({ error: "not_found" }, { status: 404 })
-        : NextResponse.json({ error: "has_booking_history" }, { status: 409 });
+      if (result.reason === "not_found") return NextResponse.json({ error: "not_found" }, { status: 404 });
+      if (result.reason === "not_pending") return NextResponse.json({ error: "not_pending" }, { status: 409 });
+      return NextResponse.json({ error: "has_booking_history" }, { status: 409 });
     }
     return NextResponse.json({ success: true });
   }

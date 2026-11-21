@@ -9,7 +9,7 @@ const { mockPrisma, mockReleaseShopSeals, mockAuditLog } = vi.hoisted(() => ({
   mockReleaseShopSeals: vi.fn(),
   mockAuditLog: vi.fn(),
   mockPrisma: {
-    shop: { findUnique: vi.fn(), delete: vi.fn() },
+    shop: { findUnique: vi.fn(), findFirst: vi.fn(), delete: vi.fn() },
     booking: { count: vi.fn() },
   },
 }));
@@ -28,6 +28,7 @@ beforeEach(() => {
   vi.restoreAllMocks();
   vi.clearAllMocks();
   mockPrisma.shop.findUnique.mockResolvedValue({ id: "s1" });
+  mockPrisma.shop.findFirst.mockResolvedValue({ id: "s1" });
   mockPrisma.booking.count.mockResolvedValue(0);
   mockPrisma.shop.delete.mockResolvedValue({ id: "s1" });
   mockReleaseShopSeals.mockResolvedValue(2);

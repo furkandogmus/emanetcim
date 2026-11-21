@@ -6,6 +6,7 @@ describe("bekleyen başvuru tanımı", () => {
     // Pasife alinmis canli dukkan listeye dusup "Reddet" ile silinmesin.
     expect(PENDING_APPLICATION_WHERE).toEqual({
       isActive: false,
+      isPrelaunch: false,
       approvedAt: null,
       bookings: { none: {} },
     });
@@ -24,5 +25,26 @@ describe("admin telefon araması", () => {
     expect(phoneSearchDigits("0532 123 4")).toBe("5321234");
     expect(phoneSearchDigits("0532 123")).toBeNull();
     expect(phoneSearchDigits("158D19")).toBeNull();
+  });
+});
+
+import { readdirSync, readFileSync, statSync } from "node:fs";
+import { join } from "node:path";
+
+function walk(dir: string, out: string[] = []): string[] {
+  for (const name of readdirSync(dir)) {
+    const p = join(dir, name);
+    if (statSync(p).isDirectory()) {
+      if (name !== "__tests__") walk(p, out);
+    } else if (/\.tsx?$/.test(name)) out.push(p);
+  }
+  return out;
+}
+
+describe("bekleyen başvuru tek tanım (mandal)", () => {
+  it("`shop.findMany/count({ where: { isActive: false } })` yalnız pending-application.ts üzerinden", () => {
+    const re = /shop\.(findMany|count)\(\s*\{\s*where:\s*\{\s*isActive:\s*false/;
+    const offenders = walk(join(process.cwd(), "src")).filter((f) => re.test(readFileSync(f, "utf-8")));
+    expect(offenders).toEqual([]);
   });
 });

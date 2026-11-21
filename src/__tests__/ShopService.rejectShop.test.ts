@@ -3,7 +3,7 @@ import { describe, it, expect, vi, beforeEach } from "vitest";
 const { mockPrisma, mockReleaseShopSeals } = vi.hoisted(() => ({
   mockReleaseShopSeals: vi.fn(),
   mockPrisma: {
-    shop: { findUnique: vi.fn(), delete: vi.fn() },
+    shop: { findUnique: vi.fn(), findFirst: vi.fn(), delete: vi.fn() },
     booking: { count: vi.fn() },
   },
 }));
@@ -17,6 +17,7 @@ import { shopService } from "@/services/ShopService";
 beforeEach(() => {
   vi.clearAllMocks();
   mockPrisma.shop.findUnique.mockResolvedValue({ id: "s1" });
+  mockPrisma.shop.findFirst.mockResolvedValue({ id: "s1" });
   mockPrisma.booking.count.mockResolvedValue(0);
   mockPrisma.shop.delete.mockResolvedValue({ id: "s1" });
   mockReleaseShopSeals.mockResolvedValue(3);
@@ -65,5 +66,29 @@ describe("dükkan başvurusu reddi", () => {
     const res = await shopService.rejectShop("yok");
     expect(res).toEqual({ ok: false, reason: "not_found" });
     expect(mockPrisma.shop.delete).not.toHaveBeenCalled();
+  });
+
+  it("ONAYLI / AKTİF dükkanı (0 rezervasyon olsa bile) silmez: not_pending", async () => {
+    // Bayat liste, eski uygulama ya da dogrudan POST canli dukkani gonderebilir.
+    mockPrisma.shop.findFirst.mockResolvedValue(null);
+    const res = await shopService.rejectShop("s1");
+    expect(res).toEqual({ ok: false, reason: "not_pending" });
+    expect(mockPrisma.shop.delete).not.toHaveBeenCalled();
+    expect(mockReleaseShopSeals).not.toHaveBeenCalled();
+  });
+
+  it("bekleyen-başvuru tanımı (liste ile aynı) sorguya eklenir", async () => {
+    await shopService.rejectShop("s1");
+    expect(mockPrisma.shop.findFirst).toHaveBeenCalledWith(
+      expect.objectContaining({
+        where: expect.objectContaining({
+          id: "s1",
+          isActive: false,
+          approvedAt: null,
+          isPrelaunch: false,
+          bookings: { none: {} },
+        }),
+      }),
+    );
   });
 });
