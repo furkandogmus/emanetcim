@@ -19,4 +19,16 @@ describe("placeTitleSubtitle", () => {
     expect(r.title).toBe("Ornek Sokak");
     expect(r.subtitle).toBe("Kadikoy, Istanbul");
   });
+
+  it("mahalle (suburb) ilcenin onune gecmez", () => {
+    const r = placeTitleSubtitle(
+      {
+        name: "Example Cafe",
+        display_name: "Example Cafe, Ornek Mahallesi, Kadikoy, Istanbul",
+        address: { suburb: "Ornek Mahallesi", town: "Kadikoy", province: "Istanbul" },
+      },
+      "q",
+    );
+    expect(r.subtitle).toBe("Kadikoy, Istanbul");
+  });
 });
