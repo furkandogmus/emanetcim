@@ -5,6 +5,7 @@ import { requireMobileUser, requireRole } from "@/lib/mobile-auth";
 import { shopService } from "@/services/ShopService";
 import prisma from "@/lib/db";
 import logger from "@/lib/logger";
+import { todayInZone } from "@/lib/stay-days";
 import {
   addClosure,
   removeClosure,
@@ -60,7 +61,11 @@ export async function GET(req: NextRequest) {
   const [rows, closures] = await Promise.all([
     prisma.shopWeeklyHours.findMany({ where: { shopId: shop.id } }),
     prisma.shopClosure.findMany({
-      where: { shopId: shop.id, endDate: { gte: new Date().toISOString().slice(0, 10) } },
+      /*
+        "Bugun" dukkanin gunu (Europe/Istanbul), UTC degil (bulgu 146): 00:00-03:00
+        arasinda dun biten izin hala "yaklasan" diye listeleniyordu.
+      */
+      where: { shopId: shop.id, endDate: { gte: todayInZone(shop.timezone || undefined) } },
       orderBy: { startDate: "asc" },
     }),
   ]);
