@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from "react";
-import { AppState, KeyboardAvoidingView, Linking, Platform, Pressable, ScrollView, StyleSheet, View } from "react-native";
+import { AppState, KeyboardAvoidingView, Linking, Pressable, ScrollView, StyleSheet, View } from "react-native";
 import * as Haptics from "expo-haptics";
 import { Flashlight, FlashlightOff } from "lucide-react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
@@ -83,7 +83,7 @@ export default function PartnerScanScreen() {
   if (!permission.granted) {
     return (
       <SafeAreaView style={styles.safe}>
-        <KeyboardAvoidingView style={{ flex: 1 }} behavior={Platform.OS === "ios" ? "padding" : undefined}>
+        <KeyboardAvoidingView style={{ flex: 1 }} behavior="padding">
         <ScrollView contentContainerStyle={{ flexGrow: 1, justifyContent: "center" }} keyboardShouldPersistTaps="handled">
         <CenterMessage
           art={<LuggageTag size={72} />}
@@ -122,7 +122,7 @@ export default function PartnerScanScreen() {
       />
       ) : null}
       <SafeAreaView style={styles.overlaySafe} edges={["top", "bottom"]}>
-      <KeyboardAvoidingView style={{ flex: 1 }} behavior={Platform.OS === "ios" ? "padding" : undefined}>
+      <KeyboardAvoidingView style={{ flex: 1 }} behavior="padding">
       {/* Klavye acilinca icerik kayabilsin: arama kutusu, buton ve eslesme listesi gorunur kalsin. */}
       <ScrollView contentContainerStyle={styles.overlay} keyboardShouldPersistTaps="handled" bounces={false}>
         <View style={styles.top}>
