@@ -12,6 +12,7 @@ import { analyticsService } from "@/services/AnalyticsService";
 import { resolveServerSessionId } from "@/lib/analytics-server";
 import logger from "@/lib/logger";
 import { toMobileUser } from "@/lib/mobile-dto";
+import { recordMobileLegalAcceptance } from "@/services/auth/legal-acceptance";
 
 const APPLE_JWKS = createRemoteJWKSet(new URL("https://appleid.apple.com/auth/keys"));
 
@@ -19,6 +20,7 @@ const schema = z.object({
   identityToken: z.string(),
   givenName: z.string().optional(),
   familyName: z.string().optional(),
+  acceptedLegal: z.boolean().optional(),
 });
 
 export async function POST(req: NextRequest) {
@@ -101,6 +103,12 @@ export async function POST(req: NextRequest) {
       }
       if (!existedBefore) {
         const newUserId = user.id;
+        if (parsed.data.acceptedLegal === true) {
+          // Yalnizca gercekten yeni hesapta; kayit yazilamazsa giris dusmez.
+          await recordMobileLegalAcceptance(newUserId, ip).catch((err) =>
+            logger.error({ err, userId: newUserId }, "mobile_legal_acceptance_failed"),
+          );
+        }
         void notificationService
           .notifyAdminsForNewUser({
             name: user.name,
