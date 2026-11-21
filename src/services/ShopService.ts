@@ -251,6 +251,14 @@ export type ShopSettingsInput = {
   longitude?: number | null;
 };
 
+/**
+ * Esnafin girebilecegi gunluk fiyat bandi: platform fiyatinin yarisi ile iki kati.
+ * Hem yazma kontrolu hem ekrandaki aralik bunu kullanir; ikisi ayrismasin.
+ */
+export function priceBand(rules: { defaultPricePerDay: number }): { min: number; max: number } {
+  return { min: Math.round(rules.defaultPricePerDay / 2), max: rules.defaultPricePerDay * 2 };
+}
+
 export type UpdateShopSettingsResult =
   | { ok: true; shop: Shop; impact: SettingsImpact }
   | { ok: false; reason: 'price_out_of_range'; min: number; max: number };
@@ -931,8 +939,7 @@ export class ShopService implements IShopService {
   async updateSettings(shopId: string, input: ShopSettingsInput): Promise<UpdateShopSettingsResult> {
     if (input.pricePerDay !== undefined) {
       const rules = await getPricingRules();
-      const min = Math.round(rules.defaultPricePerDay / 2);
-      const max = rules.defaultPricePerDay * 2;
+      const { min, max } = priceBand(rules);
       if (input.pricePerDay < min || input.pricePerDay > max) {
         return { ok: false, reason: 'price_out_of_range', min, max };
       }

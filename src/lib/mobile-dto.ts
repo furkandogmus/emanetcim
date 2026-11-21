@@ -69,7 +69,8 @@ export function toMobileBookingSummary(b: BookingSummarySource) {
 
 type BookingDetailSource = BookingSummarySource & {
   qrCodeToken: string | null;
-  guest: { name: string | null } | null;
+  guest: { name: string | null; phone?: string | null } | null;
+  guestPhone?: string | null;
   shop: {
     name: string;
     /* Sema `Float?`: koordinatsiz dukkan (henuz haritaya islenmemis) mumkun. */
@@ -100,7 +101,14 @@ function toMobilePendingBagRevision(raw: unknown) {
   return { bagCountS: s, bagCountM: m, bagCountXl: xl, extraAmount: extra, newTotal: next };
 }
 
-export function toMobileBookingDetail(b: BookingDetailSource) {
+export function toMobileBookingDetail(b: BookingDetailSource, opts: { operator?: boolean } = {}) {
+  /*
+    Misafirin telefonu YALNIZCA islemi yapan esnaf/yonetici icin ve YALNIZCA
+    aktif rezervasyonda (gelmeyen/gec kalan misafiri aramak icin). Kural burada,
+    DTO'da: rota ayri bir kopya tutarsa ayrisir. Bitmis kayitta bos doner.
+  */
+  const active = !["CHECKED_OUT", "CANCELLED"].includes(b.status);
+  const guestPhone = opts.operator && active ? (b.guest?.phone ?? b.guestPhone ?? "") : "";
   return {
     ...toMobileBookingSummary(b),
     qrCodeToken: b.qrCodeToken,
@@ -120,6 +128,7 @@ export function toMobileBookingDetail(b: BookingDetailSource) {
     hasReview: !!b.review,
     hasDispute: !!b.dispute,
     pendingBagRevision: toMobilePendingBagRevision(b.pendingBagRevision),
+    guestPhone,
   };
 }
 
