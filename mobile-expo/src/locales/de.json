@@ -16,7 +16,9 @@
     "clear": "Löschen",
     "scrollBack": "Zurückblättern",
     "scrollForward": "Weiterblättern",
-    "goHome": "Zur Startseite"
+    "goHome": "Zur Startseite",
+    "loadMore": "Mehr anzeigen",
+    "loadMoreFailed": "Weitere Einträge konnten nicht geladen werden."
   },
   "auth": {
     "title": "Anmelden",
@@ -412,7 +414,8 @@
     "searchNone": "Keine passende Buchung. Gib den 8-stelligen Code ein.",
     "statusWaiting": "Erwartet",
     "callGuest": "Gast anrufen",
-    "whatsappGuest": "Per WhatsApp schreiben"
+    "whatsappGuest": "Per WhatsApp schreiben",
+    "olderBookings": "Ältere Buchungen"
   },
   "profile": {
     "title": "Profil",

@@ -16,7 +16,9 @@
     "clear": "Clear",
     "scrollBack": "Scroll back",
     "scrollForward": "Scroll forward",
-    "goHome": "Go home"
+    "goHome": "Go home",
+    "loadMore": "Show more",
+    "loadMoreFailed": "Could not load more."
   },
   "auth": {
     "title": "Sign in",
@@ -412,7 +414,8 @@
     "searchNone": "No matching booking. Type the 8-character code.",
     "statusWaiting": "Expected",
     "callGuest": "Call guest",
-    "whatsappGuest": "Message on WhatsApp"
+    "whatsappGuest": "Message on WhatsApp",
+    "olderBookings": "Older bookings"
   },
   "profile": {
     "title": "Profile",
