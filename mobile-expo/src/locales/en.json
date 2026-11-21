@@ -407,8 +407,10 @@
     "deleteConfirm": "Yes, delete",
     "errors": {
       "not_found": "Record not found; someone may have handled it already.",
-      "missing_coordinates": "The shop has no location; set it in the web panel first.",
+      "missing_coordinates": "The shop has no location. Enter it on the shop page, then you can approve.",
+      "has_booking_history": "The shop has active bookings and cannot be rejected.",
       "has_active_bookings": "The shop has active bookings and cannot be rejected.",
+      "not_pending": "This application is no longer pending (already approved or active) and cannot be rejected. Pull to refresh.",
       "invalid_action": "Invalid action.",
       "email_send_failed": "The email could not be sent; the reply was not saved. Try again shortly.",
       "too_many_requests": "Too many replies sent; please wait a bit.",
@@ -417,7 +419,8 @@
       "invalid_data": "The value entered is invalid.",
       "cannot_impersonate_admin": "You cannot sign in as an administrator.",
       "user_banned": "You cannot sign in as a banned user.",
-      "not_allowed_while_impersonating": "This action is not available while viewing as a user."
+      "not_allowed_while_impersonating": "This action is not available while viewing as a user.",
+      "cannot_ban_admin": "An admin account can't be banned. Role changes are done on the web panel with two admin approvals."
     },
     "deleteMessage": "Delete message",
     "replyLabel": "Reply by email",
@@ -441,7 +444,7 @@
     "appUsersDay": "Last 24 hours",
     "appUsersWeek": "Last 7 days",
     "appUsersMonth": "Last 30 days",
-    "appUsersFoot": "Unique devices that opened the app. {{total}} devices in total; {{signedIn}} signed in during the last 30 days.",
+    "appUsersFoot": "Unique people who opened the app (signed-in users counted per account, others per device). {{total}} in total; accounts signed in during the last 30 days: {{signedIn}}.",
     "todayTitle": "Today",
     "todayArrivals": "Arriving",
     "todayPickups": "Picking up",
@@ -466,21 +469,22 @@
       "shops": "Shops",
       "inbox": "Inbox"
     },
-    "searchPlaceholder": "Search code, guest or shop",
+    "searchPlaceholder": "Search code, guest, shop or phone",
     "filters": {
       "overdue": "Overdue",
       "inStorage": "In shop",
       "arrivals": "Arriving today",
       "pickups": "Picking up today",
       "upcoming": "Upcoming",
-      "all": "All"
+      "all": "All",
+      "noShow": "No-shows"
     },
     "noSearchResult": "No bookings match this search",
     "noBookingsInFilter": "No bookings in this list",
     "lateDays_one": "{{count}} day late",
     "lateDays_other": "{{count}} days late",
     "lateToday": "Overdue",
-    "lateBody": "The pickup time has passed and the bag was not collected. Call the guest or the shop.",
+    "lateBody": "The pickup time has passed and the bag is still in the shop. Call the guest or the shop.",
     "disputeOpen": "There is an open dispute for this booking.",
     "guest": "Guest",
     "shop": "Shop",
@@ -608,7 +612,20 @@
     "impersonate": "Sign in as this user",
     "impersonateTitle": "Sign in as {{name}}?",
     "impersonateBody": "For 30 minutes the app switches to this user's panel and every change you make is logged. The account cannot be deleted. You can exit any time from the bar at the top.",
-    "impersonateConfirm": "Sign in"
+    "impersonateConfirm": "Sign in",
+    "location": "Location",
+    "latitude": "Latitude",
+    "longitude": "Longitude",
+    "locationHint": "Long-press the shop on a map and copy the coordinates. Example: 41.0082 and 28.9784.",
+    "fixLocation": "Enter location",
+    "banShopsNote": "This person owns {{count}} shop(s). Banning does not close the shops; if needed, turn off \"Open to guests\" on the shop page.",
+    "userBookingsOpen": "See their bookings",
+    "openShop": "Open shop page",
+    "impersonateOwner": "View as the shop owner",
+    "repliedAt": "Replied · {{date}}",
+    "approvedNotNotified": "Application approved, but the partner could not be notified. Please call them.",
+    "openDisputeWeb": "Open the dispute on the web",
+    "listCapped": "Showing the first {{count}}; narrow your search."
   },
   "scan": {
     "open": "Scan QR",

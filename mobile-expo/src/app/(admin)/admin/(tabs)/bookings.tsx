@@ -14,7 +14,7 @@ import { useAdminBookingCounts, useAdminBookings } from "@/lib/queries";
 import type { AdminBookingFilter, AdminBookingRow } from "@/lib/types";
 import { colors, fonts, radius, space } from "@/theme/tokens";
 
-const FILTERS: AdminBookingFilter[] = ["overdue", "inStorage", "arrivals", "pickups", "upcoming", "all"];
+const FILTERS: AdminBookingFilter[] = ["overdue", "inStorage", "arrivals", "pickups", "upcoming", "noShow", "all"];
 const DAY = 24 * 60 * 60 * 1000;
 
 /**
@@ -24,11 +24,11 @@ const DAY = 24 * 60 * 60 * 1000;
  */
 export default function AdminBookingsScreen() {
   const { t } = useTranslation();
-  const params = useLocalSearchParams<{ filter?: string }>();
+  const params = useLocalSearchParams<{ filter?: string; q?: string }>();
   const [filter, setFilter] = useState<AdminBookingFilter>(
     FILTERS.includes(params.filter as AdminBookingFilter) ? (params.filter as AdminBookingFilter) : "all",
   );
-  const [q, setQ] = useState("");
+  const [q, setQ] = useState(params.q ?? "");
 
   // Genel bakistan farkli bir filtreyle tekrar gelinirse sekme ekrani yeniden kurulmaz;
   // parametre degistiginde (efekt yerine render sirasinda) secimi guncelle.
@@ -36,6 +36,12 @@ export default function AdminBookingsScreen() {
   if (params.filter !== seenParam) {
     setSeenParam(params.filter);
     if (FILTERS.includes(params.filter as AdminBookingFilter)) setFilter(params.filter as AdminBookingFilter);
+  }
+  // Kullanici kartindan gelen arama metni: kutu `key` ile yeniden kurulur, metin dolu acilir.
+  const [seenQ, setSeenQ] = useState(params.q);
+  if (params.q !== seenQ) {
+    setSeenQ(params.q);
+    setQ(params.q ?? "");
   }
 
 
@@ -55,7 +61,7 @@ export default function AdminBookingsScreen() {
     <SafeAreaView style={styles.safe} edges={["top"]}>
       <View style={styles.header}>
         <AppText variant="title">{t("admin.tabs.bookings")}</AppText>
-        <SearchBox placeholder={t("admin.searchPlaceholder")} onSearch={setQ} />
+        <SearchBox key={params.q ?? ""} initialValue={params.q ?? ""} placeholder={t("admin.searchPlaceholder")} onSearch={setQ} />
       </View>
 
       <View>
@@ -99,6 +105,13 @@ export default function AdminBookingsScreen() {
               title={q.trim().length >= 2 ? t("admin.noSearchResult") : t("admin.noBookingsInFilter")}
             />
           }
+          ListFooterComponent={
+            rows.length >= 50 ? (
+              <AppText variant="caption" style={{ textAlign: "center", paddingTop: space.md }}>
+                {t("admin.listCapped", { count: rows.length })}
+              </AppText>
+            ) : null
+          }
           renderItem={renderRow}
         />
       )}
@@ -118,8 +131,8 @@ const Row = memo(function Row({
   last: boolean;
 }) {
   const { t } = useTranslation();
-  const open = ["PENDING", "WAITING_APPROVAL", "APPROVED", "PAID", "CHECKED_IN"].includes(b.status);
-  const lateMs = open ? now - new Date(b.checkOutTime).getTime() : 0;
+  // Kirmizi uyari yalnizca valizi dukkanda olanlara: gelmeyenler (gelmedi) sessiz.
+  const lateMs = b.status === "CHECKED_IN" ? now - new Date(b.checkOutTime).getTime() : 0;
   const lateDays = Math.floor(lateMs / DAY);
 
   return (
@@ -149,7 +162,7 @@ const Row = memo(function Row({
         <AppText variant="caption" style={{ fontSize: 13 }}>
           {formatDayTime(b.checkInTime)}
         </AppText>
-        {/* "Gecikmis" filtresi alis saati gecen her kaydi sayar; bir gunden kisa gecikme de etiketsiz kalmasin. */}
+        {/* Bir gunden kisa gecikme de etiketsiz kalmasin. */}
         {lateMs > 0 ? (
           <AppText variant="label" style={{ color: colors.danger, fontSize: 12 }}>
             {lateDays >= 1 ? t("admin.lateDays", { count: lateDays }) : t("admin.lateToday")}

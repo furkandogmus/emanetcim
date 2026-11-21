@@ -882,6 +882,7 @@
     "featureFlagsEmpty": "フィーチャーフラグはまだありません。",
     "featureFlagsNav": "フィーチャーフラグ",
     "shopDeleteBlockedByRelations": "この店舗には予約などの関連レコードがあるため削除できません。",
+    "shopNotPending": "この申請は保留中ではなく（承認済みまたは有効）、拒否できません。一覧を更新してください。",
     "roleApprovalsTitle": "権限変更の承認",
     "roleApprovalsIntro": "別の管理者が管理者権限に影響する変更を申請しました。信頼できる場合のみ承認してください。自分のリクエストは承認できません。",
     "roleApprovalsEmpty": "保留中の権限承認はありません。",

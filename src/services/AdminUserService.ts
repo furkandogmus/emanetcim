@@ -1,6 +1,7 @@
 import type { Prisma } from "@prisma/client";
 import prisma from "@/lib/db";
 import { writeAuditLog } from "@/lib/audit-log";
+import { phoneSearchDigits } from "@/lib/admin-phone-search";
 
 export type AdminActor = { userId: string | null; ip: string | null };
 
@@ -20,13 +21,15 @@ export class AdminUserService {
   /** Ad, e-posta ya da telefonla arama; bos sorgu en yeni kullanicilari verir. */
   async search(q: string, take = 50) {
     const term = q.trim();
+    // Telefon: bosluk/tire/+90/0 onekleri ne olursa olsun saklanan bicimle eslesir.
+    const digits = phoneSearchDigits(term, 4);
     return prisma.user.findMany({
       where: term
         ? {
             OR: [
               { name: { contains: term, mode: "insensitive" } },
               { email: { contains: term, mode: "insensitive" } },
-              { phone: { contains: term.replace(/\s+/g, "") } },
+              ...(digits ? [{ phone: { contains: digits } }] : []),
             ],
           }
         : undefined,
@@ -44,12 +47,14 @@ export class AdminUserService {
     userId: string,
     isBanned: boolean,
     actor: AdminActor,
-  ): Promise<{ ok: true } | { ok: false; error: "not_found" | "cannot_ban_self" }> {
+  ): Promise<{ ok: true } | { ok: false; error: "not_found" | "cannot_ban_self" | "cannot_ban_admin" }> {
     if (actor.userId != null && actor.userId === userId && isBanned) {
       return { ok: false, error: "cannot_ban_self" };
     }
-    const exists = await prisma.user.findUnique({ where: { id: userId }, select: { id: true } });
+    const exists = await prisma.user.findUnique({ where: { id: userId }, select: { id: true, role: true } });
     if (!exists) return { ok: false, error: "not_found" };
+    // Yonetici yetkisi iki admin onayli akistan gider; yasak bunun yan kapisi olmasin.
+    if (isBanned && exists.role === "ADMIN") return { ok: false, error: "cannot_ban_admin" };
 
     await prisma.user.update({
       where: { id: userId },

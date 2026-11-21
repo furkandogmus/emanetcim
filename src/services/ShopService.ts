@@ -1,4 +1,5 @@
 import { Prisma, type Shop } from '@prisma/client';
+import { PENDING_APPLICATION_WHERE } from "@/lib/pending-application";
 import { writeAuditLog } from "@/lib/audit-log";
 import { Role } from '@prisma/client';
 import prisma from '@/lib/db';
@@ -313,12 +314,20 @@ export function extractKeyFromUrl(url: string, storage: { publicUrl: (k: string)
  * yok" demekti. `rejectShop` zaten yapilandirilmis sonuc donuyor; ayni kalip.
  */
 export type ApproveShopResult =
-  | { ok: true }
+  | {
+      ok: true;
+      /**
+       * Hangi kanaldan bildirim DENENDI (e-posta adresi var / mobil push token'i var).
+       * SMS sayilmaz: Netgsm kapali. Ikisi de false ise esnaf haberdar edilemedi:
+       * admin kendisi aramali. Gonderim arka planda; bu "iletildi" degil "denendi".
+       */
+      notified?: { email: boolean; push: boolean };
+    }
   | { ok: false; reason: "not_found" | "missing_coordinates" };
 
 export type RejectShopResult =
   | { ok: true; releasedSeals: number }
-  | { ok: false; reason: "not_found" | "has_active_bookings" };
+  | { ok: false; reason: "not_found" | "not_pending" | "has_booking_history" };
 
 /** Basvuru karari veren admin; IP tasiyicidan gelir (web action / mobil uc). */
 export type ApplicationActor = { userId: string | null; ip: string | null };
@@ -711,7 +720,7 @@ export class ShopService implements IShopService {
 
   async getPendingShops(): Promise<ShopWithOwner[]> {
     return await prisma.shop.findMany({
-      where: { isActive: false },
+      where: PENDING_APPLICATION_WHERE,
       include: { owner: true }
     });
   }
@@ -751,7 +760,7 @@ export class ShopService implements IShopService {
       await prisma.$transaction(async (tx) => {
         await tx.shop.update({
           where: { id: shopId },
-          data: { isActive: true },
+          data: { isActive: true, approvedAt: shop.approvedAt ?? new Date() },
         });
         // Eski kayıtlar: esnaf e-postası doğrulanmamış olabilir; onayla birlikte “operasyonel” say.
         await tx.user.updateMany({
@@ -823,6 +832,23 @@ export class ShopService implements IShopService {
         );
       }
 
+      // Telefon + sifreyle kayit olan esnafin e-postasi yok; uygulamayi actiysa push ulasir.
+      let pushable = false;
+      try {
+        pushable = (await prisma.mobilePushToken.count({ where: { userId: shop.ownerId } })) > 0;
+      } catch (e) {
+        logger.warn({ err: e, shopId }, 'shop_approval_push_lookup_failed');
+      }
+      if (pushable) {
+        void notificationService
+          .sendMobilePush(
+            shop.ownerId,
+            'BagajPark: Başvurunuz onaylandı',
+            `${shop.name} mağazanız onaylandı, artık rezervasyon alabilirsiniz.`,
+          )
+          .catch((e) => logger.warn({ err: e, shopId }, 'shop_approval_push_failed'));
+      }
+
       if (partnerPhone) {
         void notificationService.sendSms(
           partnerPhone,
@@ -844,7 +870,7 @@ export class ShopService implements IShopService {
         );
       }
 
-      return { ok: true };
+      return { ok: true, notified: { email: Boolean(partnerEmail), push: pushable } };
     } catch (error) {
       logger.error({ err: error, shopId }, 'ShopService::approveShop error');
       // Beklenmeyen hata da "onaylanmadi" demek; cagiran ayni yolu izler.
@@ -1106,18 +1132,33 @@ export class ShopService implements IShopService {
    * rezervasyon kalirdi. Kontrol acikca yapiliyor.
    */
   async rejectShop(shopId: string): Promise<RejectShopResult> {
-    const shop = await prisma.shop.findUnique({
+    const exists = await prisma.shop.findUnique({
       where: { id: shopId },
       select: { id: true },
     });
-    if (!shop) return { ok: false, reason: "not_found" };
+    if (!exists) return { ok: false, reason: "not_found" };
 
-    const activeBookingCount = await prisma.booking.count({
-      where: { shopId, status: { in: ["APPROVED", "PAID", "CHECKED_IN"] } },
+    /*
+      Liste yalniz bekleyen basvuruyu gosterir ama bayat liste, eski uygulama
+      surumu ya da dogrudan POST canli dukkani da gonderebilir: ayni tanim burada
+      da uygulanir. Onayli/aktif/prelaunch dukkan SILINMEZ.
+    */
+    const pending = await prisma.shop.findFirst({
+      where: { id: shopId, ...PENDING_APPLICATION_WHERE },
+      select: { id: true },
     });
-    if (activeBookingCount > 0) {
-      return { ok: false, reason: "has_active_bookings" };
+
+    /*
+      HERHANGI bir rezervasyon (iptal/teslim dahil) varsa silinmez: Booking ve
+      PaymentLog `onDelete: Cascade`, silme gecmisi ve odeme defterini de goturur.
+      Gercek bir basvurunun gecmisi yoktur; gecmisi olan dukkan yalnizca pasife alinir.
+      Sayim ayrica yaris korumasidir (liste ile islem arasinda rezervasyon dusebilir).
+    */
+    const bookingCount = await prisma.booking.count({ where: { shopId } });
+    if (bookingCount > 0) {
+      return { ok: false, reason: "has_booking_history" };
     }
+    if (!pending) return { ok: false, reason: "not_pending" };
 
     await prisma.shop.delete({ where: { id: shopId } });
 
@@ -1201,7 +1242,7 @@ export class ShopService implements IShopService {
       pricePerDay = new Prisma.Decimal(data.pricePerDay);
     }
 
-    const exists = await prisma.shop.findUnique({ where: { id: shopId }, select: { id: true } });
+    const exists = await prisma.shop.findUnique({ where: { id: shopId }, select: { id: true, approvedAt: true } });
     if (!exists) return { ok: false, error: "Errors.notFound" };
 
     const shop = await prisma.shop.update({
@@ -1214,6 +1255,8 @@ export class ShopService implements IShopService {
         capacity: data.capacity,
         pricePerDay,
         isActive: data.isActive,
+        // Admin dukkani acarsa artik "onayli": basvuru listesine geri dusmesin.
+        ...(data.isActive === true && !exists.approvedAt ? { approvedAt: new Date() } : {}),
         isTest: data.isTest,
         isVerified: data.isVerified,
       },

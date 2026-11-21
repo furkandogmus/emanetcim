@@ -1,4 +1,6 @@
 import { moneyToNumber } from "@/lib/money";
+import { stripHtmlToText } from "@/lib/rich-text";
+import { toWhatsAppNumber } from "@/lib/whatsapp";
 import type { PricingRules } from "@/lib/pricing-rules";
 import { shopVisibilityIssues } from "@/lib/shop-visibility";
 import { storageCitiesListingShop } from "@/lib/storage-cities";
@@ -369,7 +371,12 @@ export function toMobileAdminApplication(s: AdminApplicationSource) {
     pricePerDay: moneyToNumber(s.pricePerDay),
     capacity: s.capacity,
     createdAt: s.createdAt.toISOString(),
-    owner: { name: s.owner.name, phone: s.owner.phone, email: s.owner.email },
+    owner: {
+      name: s.owner.name,
+      phone: s.owner.phone,
+      email: s.owner.email,
+      whatsapp: toWhatsAppNumber(s.owner.phone),
+    },
   };
 }
 
@@ -490,6 +497,11 @@ function adminShopVisibility(s: {
   return { cityPages, issues: shopVisibilityIssues({ ...s, cityPages }) };
 }
 
+/** "Bu kullanici olarak gor" yalniz ADMIN olmayan, yasaksiz hesap icin mumkun (sunucu kurali). */
+export function canViewAs(u: { role: string; isBanned: boolean }): boolean {
+  return u.role !== "ADMIN" && !u.isBanned;
+}
+
 /** `admin/bookings` satiri: ozet + misafir adi (yoksa e-posta) ve olusturulma ani. */
 export function toMobileAdminBookingRow(b: AdminBookingRowSource) {
   return {
@@ -505,15 +517,24 @@ export function toMobileAdminBookingDetail({ booking: b, events }: AdminBookingD
   return {
     ...toMobileAdminBookingRow(b),
     guest: {
+      // Kayitli kullanici degilse (misafir e-postasiyla alinmis) kimlik yok: "bu kullanici olarak gir" cizilmez.
+      id: b.guest?.id ?? null,
       name: b.guest?.name ?? "",
       email: b.guest?.email ?? b.guestEmail ?? "",
       phone: b.guest?.phone ?? b.guestPhone ?? "",
+      whatsapp: toWhatsAppNumber(b.guest?.phone ?? b.guestPhone),
+      // Sunucu ADMIN ve yasakli hesaba girisi reddeder; dugme hic cizilmesin.
+      canViewAs: b.guest ? canViewAs(b.guest) : false,
     },
     shop: {
+      id: b.shopId,
+      ownerId: b.shop.owner.id,
       name: b.shop.name,
       address: place,
       phone: b.shop.owner.phone ?? "",
+      whatsapp: toWhatsAppNumber(b.shop.owner.phone),
       ownerName: b.shop.owner.name ?? "",
+      canViewAsOwner: canViewAs(b.shop.owner),
       latitude: b.shop.latitude,
       longitude: b.shop.longitude,
     },
@@ -541,6 +562,7 @@ export function toMobileAdminShop(s: AdminShopSource) {
     isVerified: s.isVerified,
     issues: s.isPrelaunch || s.isTest ? [] : adminShopVisibility(s).issues,
     phone: s.owner.phone ?? "",
+    whatsapp: toWhatsAppNumber(s.owner.phone),
     bagsInStorage: s.bagsInStorage,
     arrivalsToday: s.arrivalsToday,
     pickupsToday: s.pickupsToday,
@@ -573,6 +595,8 @@ export function toMobileAdminShopDetail(d: AdminShopDetailSource) {
       name: s.owner.name ?? "",
       email: s.owner.email ?? "",
       phone: s.owner.phone ?? "",
+      whatsapp: toWhatsAppNumber(s.owner.phone),
+      canViewAs: canViewAs(s.owner),
     },
     bookingCount: s._count.bookings,
     reviewCount: s._count.reviews,
@@ -592,12 +616,46 @@ export function toMobileAdminUser(u: AdminUserSource) {
     name: u.name ?? "",
     email: u.email ?? "",
     phone: u.phone ?? "",
+    whatsapp: toWhatsAppNumber(u.phone),
     role: u.role,
     isBanned: u.isBanned,
     isTest: u.isTest,
     bookingCount: u._count.bookings,
     shopCount: u._count.shops,
     createdAt: u.createdAt.toISOString(),
+  };
+}
+
+type AdminMessageSource = {
+  id: string;
+  from: string;
+  subject: string | null;
+  text: string | null;
+  html: string | null;
+  isRead: boolean;
+  category: string;
+  createdAt: Date;
+  replies: { createdAt: Date }[];
+};
+
+/** Mobil gelen kutusunda bir mesajin govdesi bu kadar karakterle sinirli. */
+const ADMIN_MESSAGE_BODY_MAX = 4000;
+
+/**
+ * `admin/messages` satiri. Ham Prisma satiri (200 mesajin tam HTML'i) yerine: govde yalnizca
+ * duz metin (yalniz-HTML posta icin etiketlerden arindirilmis), `repliedAt` en son cevap.
+ */
+export function toMobileAdminMessage(m: AdminMessageSource) {
+  const body = (m.text?.trim() || stripHtmlToText(m.html).trim()).slice(0, ADMIN_MESSAGE_BODY_MAX);
+  return {
+    id: m.id,
+    from: m.from,
+    subject: m.subject,
+    text: body || null,
+    isRead: m.isRead,
+    category: m.category,
+    createdAt: m.createdAt.toISOString(),
+    repliedAt: m.replies[0]?.createdAt.toISOString() ?? null,
   };
 }
 

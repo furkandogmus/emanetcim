@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import prisma from "@/lib/db";
+import { PENDING_APPLICATION_WHERE } from "@/lib/pending-application";
 import { toMobileAdminApplication } from "@/lib/mobile-dto";
 import { getMobileSession } from "@/lib/mobile-auth";
 
@@ -12,7 +13,7 @@ export async function GET() {
   }
 
   const apps = await prisma.shop.findMany({
-    where: { isActive: false },
+    where: PENDING_APPLICATION_WHERE,
     include: {
       owner: {
         select: {

@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
 import { requireMobileUser, requireRole } from "@/lib/mobile-auth";
 import prisma from "@/lib/db";
+import { PENDING_APPLICATION_WHERE } from "@/lib/pending-application";
 import { toMobileAdminApplication } from "@/lib/mobile-dto";
 
 export const dynamic = 'force-dynamic';
@@ -13,7 +14,7 @@ export async function GET(req: NextRequest) {
   if (forbid) return forbid;
 
   const apps = await prisma.shop.findMany({
-    where: { isActive: false },
+    where: PENDING_APPLICATION_WHERE,
     include: {
       owner: {
         select: { name: true, phone: true, email: true },
