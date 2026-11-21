@@ -6,6 +6,7 @@ import { ArrowLeft, BadgeCheck, Star, Store } from "lucide-react-native";
 import { useTranslation } from "react-i18next";
 
 import { PhotoPager } from "@/components/PhotoPager";
+import { ReviewItem } from "@/components/ReviewItem";
 import { hoursLabel } from "@/components/ShopCard";
 import { AppText, Banner, Button, Card, CenterMessage, IconButton, Loading } from "@/components/ui";
 import { rememberCheckoutIntent, takeCheckoutIntent } from "@/lib/after-login";
@@ -243,23 +244,21 @@ function Reviews({ shopId }: { shopId: string }) {
   const query = useShopReviews(shopId);
   // Yorum yuklenemezse dukkan ekrani bozulmasin; bolum sessizce gizlenir.
   if (!query.data) return null;
-  const reviews = query.data.slice(0, 5);
+  const { items, total } = query.data;
   return (
     <Card style={{ gap: space.md }}>
-      <AppText variant="heading">{t("shop.reviews", { count: query.data.length })}</AppText>
-      {reviews.length === 0 ? <AppText variant="caption">{t("shop.noReviews")}</AppText> : null}
-      {reviews.map((r) => (
-        <View key={r.id} style={{ gap: 4 }}>
-          <View style={styles.meta}>
-            <Star size={14} color={colors.brand} fill={colors.brand} />
-            <AppText variant="bodyMedium">{r.rating}</AppText>
-            <AppText variant="caption">
-              {r.authorLabel || t("partner.guest")} · {formatDay(r.createdAt)}
-            </AppText>
-          </View>
-          {r.comment ? <AppText variant="body">{r.comment}</AppText> : null}
-        </View>
+      <AppText variant="heading">{t("shop.reviews", { count: total })}</AppText>
+      {items.length === 0 ? <AppText variant="caption">{t("shop.noReviews")}</AppText> : null}
+      {items.map((r) => (
+        <ReviewItem key={r.id} review={r} />
       ))}
+      {total > items.length ? (
+        <Button
+          variant="secondary"
+          title={t("shop.allReviews", { count: total })}
+          onPress={() => router.push(`/reviews/${encodeURIComponent(shopId)}`)}
+        />
+      ) : null}
     </Card>
   );
 }

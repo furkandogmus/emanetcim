@@ -99,6 +99,9 @@ export type ShopReview = {
   authorLabel: string;
 };
 
+/** `GET /shops/:id/reviews?paged=1`. */
+export type ShopReviewsPage = { items: ShopReview[]; total: number; nextCursor: string | null };
+
 export type BookingSummary = {
   id: string;
   shopId: string;

@@ -214,7 +214,9 @@
     },
     "nearbyAction": "Nearby spots",
     "selection": "Your search: {{when}} · {{bags}}",
-    "change": "Change"
+    "change": "Change",
+    "allReviews": "All reviews ({{count}})",
+    "reviewsTitle": "Reviews"
   },
   "checkout": {
     "pickOtherTime": "Pick another time",

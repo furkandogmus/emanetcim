@@ -214,7 +214,9 @@
     },
     "nearbyAction": "Orte in der Nähe",
     "selection": "Deine Suche: {{when}} · {{bags}}",
-    "change": "Ändern"
+    "change": "Ändern",
+    "allReviews": "Alle Bewertungen ({{count}})",
+    "reviewsTitle": "Bewertungen"
   },
   "checkout": {
     "pickOtherTime": "Andere Zeit wählen",
