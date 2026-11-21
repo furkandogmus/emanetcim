@@ -1,4 +1,6 @@
-import { FlatList, RefreshControl, StyleSheet, View } from "react-native";
+import { FlatList, Pressable, RefreshControl, StyleSheet, View } from "react-native";
+import { useRouter } from "expo-router";
+import { ChevronRight } from "lucide-react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useTranslation } from "react-i18next";
 
@@ -15,6 +17,7 @@ import { colors, fonts, radius, space } from "@/theme/tokens";
  */
 export default function PartnerEarningsScreen() {
   const { t } = useTranslation();
+  const router = useRouter();
   const query = usePartnerEarnings();
   const data = query.data;
   const commissionPct = data ? Math.round(data.commissionRate * 100) : 0;
@@ -44,6 +47,7 @@ export default function PartnerEarningsScreen() {
               <Card style={styles.totalCard}>
                 <AppText variant="label">{t("earnings.total")}</AppText>
                 <AppText style={styles.total}>{formatMoney(data.totalBalance)}</AppText>
+                <AppText variant="caption">{t("earnings.basis")}</AppText>
                 <View style={styles.todayRow}>
                   <AppText variant="caption">{t("earnings.today")}</AppText>
                   <AppText variant="bodyMedium" style={{ fontVariant: ["tabular-nums"] }}>
@@ -64,23 +68,45 @@ export default function PartnerEarningsScreen() {
             </View>
           }
           ListEmptyComponent={<AppText variant="caption">{t("earnings.empty")}</AppText>}
-          renderItem={({ item, index }) => (
-            <View
-              style={[
-                styles.row,
-                index === 0 && styles.rowFirst,
-                index === data.history.length - 1 && styles.rowLast,
-                index > 0 && styles.rowDivider,
-              ]}
-            >
-              <AppText variant="body" style={{ flex: 1 }}>
-                {item.createdAt ? formatDayTime(item.createdAt) : item.date}
-              </AppText>
-              <AppText variant="bodyMedium" style={{ fontFamily: fonts.bodySemibold, fontVariant: ["tabular-nums"] }}>
-                {formatMoney(item.amount)}
-              </AppText>
-            </View>
-          )}
+          renderItem={({ item, index }) => {
+            const at = item.collectedAt ?? item.createdAt;
+            const when = at ? formatDayTime(at) : item.date;
+            const amount = formatMoney(item.amount);
+            const guest = item.guestName || t("earnings.guestFallback");
+            const rowStyle = [
+              styles.row,
+              index === 0 && styles.rowFirst,
+              index === data.history.length - 1 && styles.rowLast,
+              index > 0 && styles.rowDivider,
+            ];
+            const content = (
+              <>
+                <View style={{ flex: 1 }}>
+                  {/* Eski sunucu misafir adini gondermez: o zaman yalnizca saat yazilir. */}
+                  {item.bookingId ? <AppText variant="bodyMedium" numberOfLines={1}>{guest}</AppText> : null}
+                  <AppText variant={item.bookingId ? "caption" : "body"}>{when}</AppText>
+                </View>
+                <AppText variant="bodyMedium" style={{ fontFamily: fonts.bodySemibold, fontVariant: ["tabular-nums"] }}>
+                  {amount}
+                </AppText>
+                {item.bookingId ? <ChevronRight size={18} color={colors.inkMuted} /> : null}
+              </>
+            );
+            const bookingId = item.bookingId;
+            // Satir kasadaki makbuzla eslestirilebilsin: rezervasyon detayina gider.
+            return bookingId ? (
+              <Pressable
+                accessibilityRole="button"
+                accessibilityLabel={t("earnings.rowA11y", { guest, when, amount })}
+                onPress={() => router.push(`/partner/${bookingId}`)}
+                style={rowStyle}
+              >
+                {content}
+              </Pressable>
+            ) : (
+              <View style={rowStyle}>{content}</View>
+            );
+          }}
           ListFooterComponent={
             // Yalnizca dukkanda tahsilatta dogru; online odemede para platformdan gelir.
             commissionPct === 0 ? (
@@ -120,7 +146,9 @@ const styles = StyleSheet.create({
   row: {
     flexDirection: "row",
     alignItems: "center",
+    gap: space.sm,
     minHeight: 52,
+    paddingVertical: space.sm,
     paddingHorizontal: space.lg,
     backgroundColor: colors.surface,
     borderLeftWidth: 1,

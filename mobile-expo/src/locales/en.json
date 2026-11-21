@@ -969,7 +969,8 @@
   "earnings": {
     "title": "My earnings",
     "total": "Net earnings",
-    "today": "Today",
+    "basis": "Completed bookings: each amount counts on the day the bags were handed back.",
+    "today": "Handed back today",
     "commissionTitle": "Platform commission {{pct}}%",
     "commissionBody": "A {{pct}}% platform fee is deducted from each payment and {{share}}% is yours. Amounts are shown after commission.",
     "noCommissionTitle": "Commission-free period",
@@ -977,6 +978,8 @@
     "recent": "Last {{count}} transactions",
     "empty": "No earnings yet.",
     "footnote": "You collect payment from the guest at your shop, so the money is already in your till.",
+    "guestFallback": "Guest",
+    "rowA11y": "{{guest}}, {{when}}, {{amount}}. Open booking.",
     "errors": {
       "no_shops": "You have no active shop."
     }
@@ -1076,6 +1079,7 @@
     "pickups": "Picking up",
     "inStorage": "Bags in shop",
     "thisMonth": "Earned this month",
+    "collectedBasis": "Completed bookings",
     "failed": "Couldn't load today's summary. Tap to retry.",
     "a11y": "{{shop}}, today: {{arrivals}} guests arriving, {{pickups}} pick-ups, {{bags}} bags in the shop. Earned {{month}} this month.",
     "moreThanLastMonth": "{{pct}}% more than last month",

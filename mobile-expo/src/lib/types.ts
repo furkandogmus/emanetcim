@@ -356,8 +356,20 @@ export type PartnerEarnings = {
   totalBalance: number;
   todayEarnings: number;
   pendingPayout: number;
-  /** `createdAt` sonradan eklendi; eski sunucuda yalnizca "MM DD" metni (`date`) var. */
-  history: { date: string; createdAt?: string; amount: number; shopId: string; status: "PAID" }[];
+  /**
+   * `toMobilePartnerEarningRow`. Tarih TESLIM anidir (`collectedAt`; `createdAt` ayni degerin eski adi).
+   * `bookingId`/`guestName`/`collectedAt` yeni sunucuda gelir; eski sunucuda yok.
+   */
+  history: {
+    date: string;
+    createdAt?: string;
+    collectedAt?: string;
+    bookingId?: string;
+    guestName?: string;
+    amount: number;
+    shopId: string;
+    status: "PAID";
+  }[];
   currency: string;
   /** Yururlukteki oran, 0..1. Dukkanda tahsilatta 0. */
   commissionRate: number;
