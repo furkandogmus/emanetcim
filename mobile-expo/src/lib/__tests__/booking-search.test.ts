@@ -28,6 +28,15 @@ describe("esnaf rezervasyon aramasi", () => {
     expect(searchBookings(items, "PETR")).toHaveLength(1);
   });
 
+  it("buyuk harfle yazilan I/i iceren adlar bulunur (klavye otomatik buyuk harf gonderir)", () => {
+    const list = [b("11110000-aaaa", "Ali Yilmaz"), b("22220000-bbbb", "John Smith"), b("33330000-cccc", "Dmitri Ivanov"), b("44440000-dddd", "İpek Kaya")];
+    expect(searchBookings(list, "ALI").map((x) => x.id)).toEqual(["11110000-aaaa"]);
+    expect(searchBookings(list, "SMITH")).toHaveLength(1);
+    expect(searchBookings(list, "DMITRI")).toHaveLength(1);
+    expect(searchBookings(list, "IPEK")).toHaveLength(1);
+    expect(searchBookings(list, "ipek")).toHaveLength(1);
+  });
+
   it("bos arama hicbir sey dondurmez", () => {
     expect(searchBookings(items, "   ")).toEqual([]);
   });

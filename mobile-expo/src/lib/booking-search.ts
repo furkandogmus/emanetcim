@@ -5,9 +5,19 @@ export function bookingCode(id: string): string {
   return id.slice(0, 8).toUpperCase();
 }
 
-/** Bosluk, tire ve buyuk/kucuk harf farki aramayi bozmasin. */
+/**
+ * Bosluk, tire, buyuk/kucuk harf ve aksan farki aramayi bozmasin. Noktali/noktasiz I
+ * once tek harfe ("i") indirilir: klavye "ALI" gonderir, `toLocaleLowerCase("tr")` bunu
+ * "alı" yapardi ve kayitli "Ali" ("ali") bulunamazdi. Turistlerin adlari (Maria, Smith)
+ * icin de ayni. Dil bagimsiz kucultme kullanilir.
+ */
 function squash(v: string): string {
-  return v.toLocaleLowerCase("tr").replace(/[\s-]/g, "");
+  return v
+    .replace(/[İıI]/g, "i")
+    .toLowerCase()
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .replace(/[\s-]/g, "");
 }
 
 /**
