@@ -32,6 +32,8 @@ export type MobileJwtClaims = {
   jti?: string;
   /** Yalniz yonetici goruntuleme token'larinda: oturumu baslatan ADMIN'in id'si. */
   imp?: string;
+  /** Goruntuleme token'inda ADMIN'in `tokenVersion`i: admin "her yerden cikis" yapinca goruntuleme de biter. */
+  impTv?: number;
 };
 
 /**
@@ -43,10 +45,12 @@ export async function signImpersonationToken(
   role: Role,
   adminId: string,
   tokenVersion?: number,
+  adminTokenVersion?: number,
 ) {
   const tv = await resolveTokenVersion(targetUserId, tokenVersion);
+  const impTv = await resolveTokenVersion(adminId, adminTokenVersion);
   const expiresAt = new Date(Date.now() + IMPERSONATION_TTL_SECONDS * 1000);
-  const token = await new SignJWT({ role, type: "access", tv, imp: adminId })
+  const token = await new SignJWT({ role, type: "access", tv, imp: adminId, impTv })
     .setProtectedHeader({ alg: "HS256" })
     .setIssuer(JWT_ISSUER)
     .setAudience(JWT_AUDIENCE.mobile)
@@ -219,6 +223,8 @@ export async function requireMobileUser(req: NextRequest) {
     // Oturum suresince ADMIN'e yukseltilen hedef de goruntulenemez.
     if (user.role === "ADMIN") return { error: unauthorized() } as const;
     if (!admin || admin.role !== "ADMIN" || admin.isBanned) return { error: unauthorized() } as const;
+    // `impTv` tasimayan (bu degisiklikten once basilmis) token da reddedilir: en fazla 30 dk'lik oturum.
+    if (admin.tokenVersion !== claims.impTv) return { error: unauthorized() } as const;
     actor.impersonatedBy = claims.imp;
     if (req.method !== "GET" && req.method !== "HEAD") {
       writeAuditLog({
