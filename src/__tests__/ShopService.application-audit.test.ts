@@ -67,7 +67,7 @@ describe("başvuru kararı denetim kaydı", () => {
   it("aktif rezervasyonlu dükkan silinmez, kayıt yazılmaz", async () => {
     mockPrisma.booking.count.mockResolvedValue(1);
     const r = await shopService.rejectApplication("s1", actor);
-    expect(r).toEqual({ ok: false, reason: "has_active_bookings" });
+    expect(r).toEqual({ ok: false, reason: "has_booking_history" });
     expect(mockPrisma.shop.delete).not.toHaveBeenCalled();
     expect(mockAuditLog).not.toHaveBeenCalled();
   });
@@ -84,11 +84,11 @@ describe("uç yanıtı: istemcinin çevirdiği kodlar", () => {
     expect(await res.json()).toEqual({ error: code });
   });
 
-  it("aktif rezervasyon → 409 has_active_bookings", async () => {
-    vi.spyOn(shopService, "rejectApplication").mockResolvedValue({ ok: false, reason: "has_active_bookings" });
+  it("aktif rezervasyon → 409 has_booking_history", async () => {
+    vi.spyOn(shopService, "rejectApplication").mockResolvedValue({ ok: false, reason: "has_booking_history" });
     const res = await applicationActionResponse("s1", "reject", actor);
     expect(res.status).toBe(409);
-    expect(await res.json()).toEqual({ error: "has_active_bookings" });
+    expect(await res.json()).toEqual({ error: "has_booking_history" });
   });
 
   it("bilinmeyen işlem → 400 invalid_action", async () => {

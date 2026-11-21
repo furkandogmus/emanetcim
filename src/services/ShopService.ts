@@ -1,4 +1,5 @@
 import { Prisma, type Shop } from '@prisma/client';
+import { PENDING_APPLICATION_WHERE } from "@/lib/pending-application";
 import { writeAuditLog } from "@/lib/audit-log";
 import { Role } from '@prisma/client';
 import prisma from '@/lib/db';
@@ -318,7 +319,7 @@ export type ApproveShopResult =
 
 export type RejectShopResult =
   | { ok: true; releasedSeals: number }
-  | { ok: false; reason: "not_found" | "has_active_bookings" };
+  | { ok: false; reason: "not_found" | "has_booking_history" };
 
 /** Basvuru karari veren admin; IP tasiyicidan gelir (web action / mobil uc). */
 export type ApplicationActor = { userId: string | null; ip: string | null };
@@ -711,7 +712,7 @@ export class ShopService implements IShopService {
 
   async getPendingShops(): Promise<ShopWithOwner[]> {
     return await prisma.shop.findMany({
-      where: { isActive: false },
+      where: PENDING_APPLICATION_WHERE,
       include: { owner: true }
     });
   }
@@ -751,7 +752,7 @@ export class ShopService implements IShopService {
       await prisma.$transaction(async (tx) => {
         await tx.shop.update({
           where: { id: shopId },
-          data: { isActive: true },
+          data: { isActive: true, approvedAt: shop.approvedAt ?? new Date() },
         });
         // Eski kayıtlar: esnaf e-postası doğrulanmamış olabilir; onayla birlikte “operasyonel” say.
         await tx.user.updateMany({
@@ -1112,11 +1113,14 @@ export class ShopService implements IShopService {
     });
     if (!shop) return { ok: false, reason: "not_found" };
 
-    const activeBookingCount = await prisma.booking.count({
-      where: { shopId, status: { in: ["APPROVED", "PAID", "CHECKED_IN"] } },
-    });
-    if (activeBookingCount > 0) {
-      return { ok: false, reason: "has_active_bookings" };
+    /*
+      HERHANGI bir rezervasyon (iptal/teslim dahil) varsa silinmez: Booking ve
+      PaymentLog `onDelete: Cascade`, silme gecmisi ve odeme defterini de goturur.
+      Gercek bir basvurunun gecmisi yoktur; gecmisi olan dukkan yalnizca pasife alinir.
+    */
+    const bookingCount = await prisma.booking.count({ where: { shopId } });
+    if (bookingCount > 0) {
+      return { ok: false, reason: "has_booking_history" };
     }
 
     await prisma.shop.delete({ where: { id: shopId } });
@@ -1201,7 +1205,7 @@ export class ShopService implements IShopService {
       pricePerDay = new Prisma.Decimal(data.pricePerDay);
     }
 
-    const exists = await prisma.shop.findUnique({ where: { id: shopId }, select: { id: true } });
+    const exists = await prisma.shop.findUnique({ where: { id: shopId }, select: { id: true, approvedAt: true } });
     if (!exists) return { ok: false, error: "Errors.notFound" };
 
     const shop = await prisma.shop.update({
@@ -1214,6 +1218,8 @@ export class ShopService implements IShopService {
         capacity: data.capacity,
         pricePerDay,
         isActive: data.isActive,
+        // Admin dukkani acarsa artik "onayli": basvuru listesine geri dusmesin.
+        ...(data.isActive === true && !exists.approvedAt ? { approvedAt: new Date() } : {}),
         isTest: data.isTest,
         isVerified: data.isVerified,
       },

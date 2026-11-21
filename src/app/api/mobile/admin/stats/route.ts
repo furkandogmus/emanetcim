@@ -3,6 +3,7 @@ import { NextRequest } from "next/server";
 import { EARNING_BOOKING_STATUSES } from "@/lib/platform-split";
 import { moneyToNumber } from "@/lib/money";
 import prisma from "@/lib/db";
+import { PENDING_APPLICATION_WHERE } from "@/lib/pending-application";
 import { requireMobileUser, requireRole } from "@/lib/mobile-auth";
 
 export async function GET(req: NextRequest) {
@@ -32,7 +33,7 @@ export async function GET(req: NextRequest) {
       _sum: { totalPrice: true },
     }),
     prisma.shop.count({ where: { isPrelaunch: false, isTest: false } }),
-    prisma.shop.count({ where: { isActive: false } }),
+    prisma.shop.count({ where: PENDING_APPLICATION_WHERE }),
     prisma.contactMessage.count({ where: { isRead: false } }),
   ]);
 
