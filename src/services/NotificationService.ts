@@ -1185,6 +1185,59 @@ export class NotificationService implements INotificationService {
   }
 
   /**
+   * Misafir rezervasyonu IPTAL ETTI ya da DEGISTIRDI: esnafin telefonu titrer.
+   *
+   * NEDEN (2026-11-21): esnaf yalnizca yeni rezervasyondan haberdar ediliyordu;
+   * iptal ve saat/valiz degisikligi ancak liste 30 sn'de bir yenilenince
+   * gorunuyordu (ve yalniz sekme odaktayken). Misafir gelmeyecekken esnaf hazirlik
+   * yapiyor, saat degismisken eski saati bekliyordu.
+   *
+   * Servis cagirir (`lifecycle.ts`), yani web ve mobil ayni bildirimi uretir.
+   * Metin Turkce: bu bildirim yalnizca Turkiye'deki esnafa gider (bkz.
+   * `notifyPartnerAndAdminsForNewPaidBooking`). Ateşle-unut: cagiran `.catch` tasir.
+   */
+  async notifyPartnerBookingChange(params: {
+    bookingId: string;
+    kind: "cancelled" | "modified";
+  }): Promise<void> {
+    const b = await prisma.booking.findUnique({
+      where: { id: params.bookingId },
+      select: {
+        checkInTime: true,
+        bagCountS: true,
+        bagCountM: true,
+        bagCountXl: true,
+        guest: { select: { name: true } },
+        shop: { select: { name: true, timezone: true, owner: { select: { id: true } } } },
+      },
+    });
+    const partnerUserId = b?.shop?.owner?.id;
+    if (!b || !partnerUserId) return;
+
+    const when = formatDateTimeInZone(b.checkInTime, {
+      locale: "tr-TR",
+      timeZone: b.shop.timezone || "Europe/Istanbul",
+      dateStyle: "medium",
+      timeStyle: "short",
+    });
+    const guestName = b.guest?.name?.trim() || "Misafir";
+    const bags = b.bagCountS + b.bagCountM + b.bagCountXl;
+    const shortId = bookingShortCode(params.bookingId);
+    const title = params.kind === "cancelled" ? "Rezervasyon iptal edildi" : "Rezervasyon değişti";
+    const body =
+      params.kind === "cancelled"
+        ? `${guestName} · ${when} · Kod: ${shortId}`
+        : `${guestName} · yeni bırakma ${when} · ${bags} valiz · Kod: ${shortId}`;
+
+    void this.sendPush(partnerUserId, title, body, params.bookingId).catch((e) => {
+      logger.error({ err: e, partnerUserId, bookingId: params.bookingId }, "notifyPartnerBookingChange_push_failed");
+    });
+    void this.sendMobilePush(partnerUserId, title, body, params.bookingId).catch((e) => {
+      logger.error({ err: e, partnerUserId, bookingId: params.bookingId }, "notifyPartnerBookingChange_mobile_push_failed");
+    });
+  }
+
+  /**
    * Şikayet açıldığında admin GSM listesine SMS ve tüm admin e-postalarına e-posta gönderir.
    */
   async notifyAdminsForDispute(params: {
