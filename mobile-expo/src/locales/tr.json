@@ -466,21 +466,22 @@
       "shops": "Dükkanlar",
       "inbox": "Gelen kutusu"
     },
-    "searchPlaceholder": "Kod, misafir ya da dükkan ara",
+    "searchPlaceholder": "Kod, misafir, dükkan ya da telefon ara",
     "filters": {
       "overdue": "Gecikmiş",
       "inStorage": "Dükkanda",
       "arrivals": "Bugün gelecek",
       "pickups": "Bugün alınacak",
       "upcoming": "Yaklaşan",
-      "all": "Tümü"
+      "all": "Tümü",
+      "noShow": "Gelmeyen"
     },
     "noSearchResult": "Bu aramayla rezervasyon bulunamadı",
     "noBookingsInFilter": "Bu listede rezervasyon yok",
     "lateDays_one": "{{count}} gün gecikti",
     "lateDays_other": "{{count}} gün gecikti",
     "lateToday": "Süresi geçti",
-    "lateBody": "Çıkış saati geçti ve valiz teslim edilmedi. Misafiri ya da dükkanı ara.",
+    "lateBody": "Alma saati geçti ve valiz hâlâ dükkanda. Misafiri ya da dükkanı ara.",
     "disputeOpen": "Bu rezervasyon için açık bir uyuşmazlık var.",
     "guest": "Misafir",
     "shop": "Dükkan",

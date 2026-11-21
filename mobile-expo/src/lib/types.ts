@@ -361,7 +361,7 @@ export type AdminOverview = {
   recent: (BookingSummary & { guestName: string; createdAt: string })[];
 };
 
-export type AdminBookingFilter = "arrivals" | "pickups" | "inStorage" | "overdue" | "upcoming" | "all";
+export type AdminBookingFilter = "arrivals" | "pickups" | "inStorage" | "overdue" | "noShow" | "upcoming" | "all";
 
 /** `admin/bookings` (`toMobileAdminBookingRow`). */
 export type AdminBookingRow = BookingSummary & { guestName: string; createdAt: string };

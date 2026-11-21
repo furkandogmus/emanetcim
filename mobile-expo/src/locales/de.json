@@ -466,21 +466,22 @@
       "shops": "Läden",
       "inbox": "Posteingang"
     },
-    "searchPlaceholder": "Code, Gast oder Laden suchen",
+    "searchPlaceholder": "Code, Gast, Laden oder Telefon suchen",
     "filters": {
       "overdue": "Überfällig",
       "inStorage": "Im Laden",
       "arrivals": "Heute ankommend",
       "pickups": "Heute abholend",
       "upcoming": "Bevorstehend",
-      "all": "Alle"
+      "all": "Alle",
+      "noShow": "Nicht erschienen"
     },
     "noSearchResult": "Keine Buchungen für diese Suche",
     "noBookingsInFilter": "Keine Buchungen in dieser Liste",
     "lateDays_one": "{{count}} Tag zu spät",
     "lateDays_other": "{{count}} Tage zu spät",
     "lateToday": "Überfällig",
-    "lateBody": "Die Abholzeit ist vorbei und das Gepäck wurde nicht abgeholt. Ruf den Gast oder den Laden an.",
+    "lateBody": "Die Abholzeit ist vorbei und das Gepäck ist noch im Laden. Ruf den Gast oder den Laden an.",
     "disputeOpen": "Für diese Buchung gibt es eine offene Beschwerde.",
     "guest": "Gast",
     "shop": "Laden",

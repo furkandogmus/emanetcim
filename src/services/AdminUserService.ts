@@ -1,6 +1,7 @@
 import type { Prisma } from "@prisma/client";
 import prisma from "@/lib/db";
 import { writeAuditLog } from "@/lib/audit-log";
+import { phoneSearchDigits } from "@/lib/admin-phone-search";
 
 export type AdminActor = { userId: string | null; ip: string | null };
 
@@ -20,13 +21,15 @@ export class AdminUserService {
   /** Ad, e-posta ya da telefonla arama; bos sorgu en yeni kullanicilari verir. */
   async search(q: string, take = 50) {
     const term = q.trim();
+    // Telefon: bosluk/tire/+90/0 onekleri ne olursa olsun saklanan bicimle eslesir.
+    const digits = phoneSearchDigits(term, 4);
     return prisma.user.findMany({
       where: term
         ? {
             OR: [
               { name: { contains: term, mode: "insensitive" } },
               { email: { contains: term, mode: "insensitive" } },
-              { phone: { contains: term.replace(/\s+/g, "") } },
+              ...(digits ? [{ phone: { contains: digits } }] : []),
             ],
           }
         : undefined,

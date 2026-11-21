@@ -466,21 +466,22 @@
       "shops": "Shops",
       "inbox": "Inbox"
     },
-    "searchPlaceholder": "Search code, guest or shop",
+    "searchPlaceholder": "Search code, guest, shop or phone",
     "filters": {
       "overdue": "Overdue",
       "inStorage": "In shop",
       "arrivals": "Arriving today",
       "pickups": "Picking up today",
       "upcoming": "Upcoming",
-      "all": "All"
+      "all": "All",
+      "noShow": "No-shows"
     },
     "noSearchResult": "No bookings match this search",
     "noBookingsInFilter": "No bookings in this list",
     "lateDays_one": "{{count}} day late",
     "lateDays_other": "{{count}} days late",
     "lateToday": "Overdue",
-    "lateBody": "The pickup time has passed and the bag was not collected. Call the guest or the shop.",
+    "lateBody": "The pickup time has passed and the bag is still in the shop. Call the guest or the shop.",
     "disputeOpen": "There is an open dispute for this booking.",
     "guest": "Guest",
     "shop": "Shop",

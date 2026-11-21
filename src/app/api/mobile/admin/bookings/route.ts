@@ -4,7 +4,7 @@ import { toMobileAdminBookingRow } from "@/lib/mobile-dto";
 import { requireMobileUser, requireRole } from "@/lib/mobile-auth";
 import { ADMIN_BOOKING_FILTERS, adminOpsService, type AdminBookingFilter } from "@/services/AdminOpsService";
 
-/** `?filter=arrivals|pickups|inStorage|overdue|upcoming|all&q=kod/ad/e-posta/dukkan` */
+/** `?filter=arrivals|pickups|inStorage|overdue|noShow|upcoming|all&q=kod/ad/e-posta/dukkan` */
 export async function GET(req: NextRequest) {
   const auth = await requireMobileUser(req);
   if ("error" in auth) return auth.error;
