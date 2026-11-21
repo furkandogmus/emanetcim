@@ -823,7 +823,7 @@
     "whenTitle": "When?",
     "bagsTitle": "How many bags?",
     "currentTotal": "Current total",
-    "newTotal": "Estimated new total",
+    "newTotal": "New total",
     "paidNote": "The total of a paid booking can't change. To make a change that alters the price, cancel and book again.",
     "noBags": "Select at least one bag.",
     "save": "Save changes",
