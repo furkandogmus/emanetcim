@@ -2,6 +2,7 @@ import { StyleSheet, Text, View } from "react-native";
 import { Image } from "expo-image";
 import Svg, { Circle, G, Path, Rect, Text as SvgText } from "react-native-svg";
 
+import { SEALS_ENABLED } from "@/lib/config";
 import { colors, fonts } from "@/theme/tokens";
 
 /**
@@ -68,7 +69,10 @@ export function MapSnippet({ width = 120, price = "₺70" }: { width?: number; p
   );
 }
 
-/** Gercek valiz gorseli + numarali plastik muhur: teslimin kaniti. */
+/**
+ * Gercek valiz gorseli. Muhur etiketi yalnizca muhur akisi acikken cizilir: kapaliyken
+ * ekranda hic olmayan bir "muhur" vaadi gostermesin.
+ */
 export function SealedBag({ size = 72, sealNo = "0412" }: { size?: number; sealNo?: string }) {
   return (
     <View style={{ width: size, height: size }}>
@@ -77,9 +81,11 @@ export function SealedBag({ size = 72, sealNo = "0412" }: { size?: number; sealN
         style={{ width: size, height: size }}
         contentFit="contain"
       />
-      <View style={[styles.seal, { top: size * 0.34, right: -size * 0.14 }]}>
-        <Text style={styles.sealText}>{sealNo}</Text>
-      </View>
+      {SEALS_ENABLED ? (
+        <View style={[styles.seal, { top: size * 0.34, right: -size * 0.14 }]}>
+          <Text style={styles.sealText}>{sealNo}</Text>
+        </View>
+      ) : null}
     </View>
   );
 }

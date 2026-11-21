@@ -57,9 +57,36 @@ export const ShopCard = memo(function ShopCard({
     // Satir yalnizca " · " arasinda kirilsin: "~60" ile "yer" ayri satira dusmesin.
     .map((f) => f.replace(/ /g, " "));
 
+  // Ekran okuyucu kartin icindeki parcalari tek tek gezmesin: tek ozet cumle.
+  const notice = closed
+    ? closedLabel(shop, t)
+    : shop.hoursNotice?.drop || shop.hoursNotice?.pickup
+      ? [
+          shop.hoursNotice.drop ? t("map.hoursOpens", { time: shop.hoursNotice.drop.at }) : null,
+          shop.hoursNotice.pickup
+            ? t(shop.hoursNotice.pickup.reason === "closes" ? "map.hoursCloses" : "map.hoursPickupOpens", {
+                time: shop.hoursNotice.pickup.at,
+              })
+            : null,
+        ]
+          .filter(Boolean)
+          .join(", ")
+      : hours;
+  const a11yLabel = [
+    shop.name,
+    shop.isVerified && !shop.isPrelaunch ? t("map.verified") : null,
+    shop.rating ? formatRating(shop.rating) : null,
+    ...facts,
+    notice,
+  ]
+    .filter(Boolean)
+    .join(", ");
+
   return (
     <Pressable
       accessibilityRole="button"
+      accessibilityLabel={a11yLabel}
+      accessibilityState={{ selected: !!selected }}
       onPress={() => onPress(shop)}
       style={({ pressed }) => [
         styles.card,
