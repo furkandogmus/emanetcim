@@ -7,6 +7,7 @@ import { AppText, Banner } from "@/components/ui";
 import { api, ApiError } from "@/lib/api";
 import { errorMessage } from "@/lib/errors";
 import type { Place } from "@/lib/search";
+import { placeLines, type GeocodeItem } from "@/lib/place-lines";
 import type { GeocodeResult } from "@/lib/types";
 import { colors, fonts, radius, space } from "@/theme/tokens";
 
@@ -17,17 +18,9 @@ const MIN_CHARS = 3;
 type State =
   | { kind: "idle" }
   | { kind: "loading" }
-  | { kind: "found"; places: { label: string; latitude: number; longitude: number }[] }
+  | { kind: "found"; places: GeocodeItem[] }
   | { kind: "empty" }
   | { kind: "error"; message: string };
-
-/**
- * Nominatim'in `display_name`i ulke ve posta koduna kadar uzanir; haritanin
- * basliginda ilk iki parca yeter ("Kadikoy, Istanbul").
- */
-function shortLabel(label: string) {
-  return label.split(",").map((p) => p.trim()).filter(Boolean).slice(0, 2).join(", ") || label;
-}
 
 export function PlaceSearch({ onChoose }: { onChoose: (place: Place) => void }) {
   const { t } = useTranslation();
@@ -100,13 +93,16 @@ export function PlaceSearch({ onChoose }: { onChoose: (place: Place) => void }) 
       {state.kind === "empty" ? <Banner tone="warning" body={t("placeSearch.empty")} /> : null}
       {state.kind === "error" ? <Banner tone="danger" body={state.message} /> : null}
       {state.kind === "found"
-        ? state.places.map((place) => (
+        ? state.places.map((place) => {
+            const { title, subtitle } = placeLines(place);
+            return (
             <Pressable
               key={`${place.latitude},${place.longitude}`}
               accessibilityRole="button"
               onPress={() =>
                 onChoose({
-                  label: shortLabel(place.label),
+                  // Harita basligi kisa kalsin: baslik + alt basligin ilk parcasi (ilce).
+                  label: subtitle ? `${title}, ${subtitle.split(",")[0]}` : title,
                   latitude: place.latitude,
                   longitude: place.longitude,
                 })
@@ -115,13 +111,16 @@ export function PlaceSearch({ onChoose }: { onChoose: (place: Place) => void }) 
             >
               <MapPin size={20} color={colors.accent} style={{ marginHorizontal: 12 }} />
               <View style={{ flex: 1 }}>
-                <AppText variant="bodyMedium">{shortLabel(place.label)}</AppText>
-                <AppText variant="caption" numberOfLines={2}>
-                  {place.label}
-                </AppText>
+                <AppText variant="bodyMedium">{title}</AppText>
+                {subtitle ? (
+                  <AppText variant="caption" numberOfLines={2}>
+                    {subtitle}
+                  </AppText>
+                ) : null}
               </View>
             </Pressable>
-          ))
+            );
+          })
         : null}
     </View>
   );

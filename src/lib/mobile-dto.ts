@@ -429,7 +429,7 @@ export function toMobileAdminApplication(s: AdminApplicationSource) {
   };
 }
 
-type GeocodedPlaceSource = { lat: number; lng: number; label: string };
+type GeocodedPlaceSource = { lat: number; lng: number; label: string; title?: string; subtitle?: string };
 
 /**
  * Adres arama sonucu. Alan adlari istemcinin `Place` tipiyle ayni
@@ -437,7 +437,8 @@ type GeocodedPlaceSource = { lat: number; lng: number; label: string };
  * `/api/mobile/geocode`in tek yaziciysi.
  */
 export function toMobileGeocodeResult(p: GeocodedPlaceSource) {
-  return { label: p.label, latitude: p.lat, longitude: p.lng };
+  // title/subtitle: liste satiri; eski sunucudan gelen/istemci cache'i yoksa label'a duser.
+  return { label: p.label, title: p.title ?? p.label, subtitle: p.subtitle ?? "", latitude: p.lat, longitude: p.lng };
 }
 
 type SealRequestSource = {
@@ -712,6 +713,7 @@ export function toMobileAdminMessage(m: AdminMessageSource) {
 export function toMobileCity(c: import("@/services/CityCoverageService").CityCoverage) {
   return {
     name: c.name,
+    slug: c.slug,
     shopCount: c.shopCount,
     latitude: c.latitude,
     longitude: c.longitude,
