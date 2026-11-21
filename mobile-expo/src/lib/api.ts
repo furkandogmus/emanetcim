@@ -88,14 +88,20 @@ export async function loadTokens() {
 
 /**
  * Once diske, sonra bellege: yazim basarisiz olursa bellekteki (sunucunun hala
- * tanidigi) cift degismez. Eski ayri kayitlar silinir.
+ * tanidigi) cift degismez.
+ *
+ * Eski ayri kayitlar BU SURUMDE de guncel yazilir (2026-11-21): OTA ayni runtime'da
+ * onceki JS paketine geri alinirsa eski paket yalniz onlari okur. Silinseydi geri
+ * almada herkes cikisa duserdi; bayat kalsaydi eski paket kullanilmis refresh
+ * token'la gelir, sunucu bunu replay sayip butun oturumlari iptal ederdi.
+ * Bir sonraki surumde yazim kalkar, silme yalniz `clearTokens`ta kalir.
  */
 export async function saveTokens(access: string, refresh: string) {
   await SecureStore.setItemAsync(SESSION_KEY, JSON.stringify({ accessToken: access, refreshToken: refresh }));
   accessToken = access;
   refreshToken = refresh;
-  await SecureStore.deleteItemAsync(ACCESS_KEY).catch(() => undefined);
-  await SecureStore.deleteItemAsync(REFRESH_KEY).catch(() => undefined);
+  await SecureStore.setItemAsync(ACCESS_KEY, access).catch(() => undefined);
+  await SecureStore.setItemAsync(REFRESH_KEY, refresh).catch(() => undefined);
 }
 
 /** Reddetmez: cikis ve oturum sonu yollari bunu beklerken takilmasin. */
