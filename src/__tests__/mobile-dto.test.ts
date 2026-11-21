@@ -11,6 +11,8 @@ import {
   toMobileBookingDetail,
   toMobilePartnerShop,
   toMobileSealRequest,
+  toMobileAppConfig,
+  isBookingExpired,
 } from "@/lib/mobile-dto";
 
 /**
@@ -134,6 +136,55 @@ describe("mobil rezervasyon gövdesi", () => {
     const summary = toMobileBookingSummary(BOOKING) as Record<string, unknown>;
     expect(summary.qrCodeToken).toBeUndefined();
     expect(summary.seals).toBeUndefined();
+  });
+});
+
+describe("suresi dolan rezervasyon (expired)", () => {
+  const now = new Date("2026-11-21T12:00:00Z");
+  const past = new Date("2026-11-21T10:00:00Z");
+  const future = new Date("2026-11-21T14:00:00Z");
+
+  it("onayli/odenmis, valiz birakilmamis ve alma saati gecmisse dolmustur", () => {
+    expect(isBookingExpired({ status: "APPROVED", checkOutTime: past }, now)).toBe(true);
+    expect(isBookingExpired({ status: "PAID", checkOutTime: past }, now)).toBe(true);
+  });
+
+  it("bekleyen ve onay bekleyen kayit da alma saati gecince dolmustur", () => {
+    expect(isBookingExpired({ status: "PENDING", checkOutTime: past }, now)).toBe(true);
+    expect(isBookingExpired({ status: "WAITING_APPROVAL", checkOutTime: past }, now)).toBe(true);
+    expect(isBookingExpired({ status: "WAITING_APPROVAL", checkOutTime: future }, now)).toBe(false);
+  });
+
+  it("alma saati gelmediyse dolmamistir", () => {
+    expect(isBookingExpired({ status: "APPROVED", checkOutTime: future }, now)).toBe(false);
+  });
+
+  it("valiz dukkandaysa (CHECKED_IN) gec kalsa da dolmus sayilmaz: QR gerekli", () => {
+    expect(isBookingExpired({ status: "CHECKED_IN", checkOutTime: past }, now)).toBe(false);
+  });
+
+  it("iptal ve tamamlanmis kayit 'dolmus' degildir", () => {
+    expect(isBookingExpired({ status: "CANCELLED", checkOutTime: past }, now)).toBe(false);
+    expect(isBookingExpired({ status: "CHECKED_OUT", checkOutTime: past }, now)).toBe(false);
+  });
+
+  it("ozet govdesi `expired` alanini tasir", () => {
+    const old = { ...BOOKING, status: "APPROVED", checkOutTime: new Date("2020-01-01T00:00:00Z") };
+    expect(toMobileBookingSummary(old).expired).toBe(true);
+    expect(toMobileBookingDetail(old).expired).toBe(true);
+  });
+});
+
+describe("mobil uygulama yapilandirmasi: odeme kipi", () => {
+  const base = { minAppVersion: null, latestAppVersion: null };
+
+  it("kip verilmezse ya da bilinmiyorsa dukkanda tahsilat (onsite)", () => {
+    expect(toMobileAppConfig(base).paymentMode).toBe("onsite");
+    expect(toMobileAppConfig({ ...base, paymentMode: "bogus" as never }).paymentMode).toBe("onsite");
+  });
+
+  it("online kip aynen gecer", () => {
+    expect(toMobileAppConfig({ ...base, paymentMode: "online" }).paymentMode).toBe("online");
   });
 });
 

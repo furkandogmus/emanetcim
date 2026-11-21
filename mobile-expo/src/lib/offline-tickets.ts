@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import * as SecureStore from "expo-secure-store";
 
 import { isImpersonating } from "./api";
+import { isBookingExpired } from "./booking-state";
 import type { BookingDetail } from "./types";
 
 /**
@@ -32,7 +33,8 @@ export async function saveOfflineTicket(b: BookingDetail): Promise<void> {
   // Goruntulemede hedefin QR'i admin cihazinda kalmasin (uygulama oldurulse bile).
   if (isImpersonating()) return;
   const ids = (await readIndex()).filter((x) => x !== b.id);
-  if (!ACTIVE.has(b.status) || !b.qrCodeToken) {
+  // Suresi dolan bilet cihazda tutulmaz: tezgahta gecersiz QR gosterilmesin.
+  if (!ACTIVE.has(b.status) || !b.qrCodeToken || isBookingExpired(b)) {
     await SecureStore.deleteItemAsync(key(b.id)).catch(() => undefined);
     await SecureStore.setItemAsync(INDEX_KEY, JSON.stringify(ids)).catch(() => undefined);
     return;

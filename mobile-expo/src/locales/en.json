@@ -301,6 +301,10 @@
     "cancelledTitle": "Booking cancelled",
     "cancelledRefund": "The full amount you paid will be refunded.",
     "cancelledNoCharge": "You haven't been charged anything.",
+    "cancelledRefundOnsite": "If you already paid at the shop, ask the shop about a refund.",
+    "expiredTitle": "Expired",
+    "expiredBody": "The pick-up time has passed and your bags were not dropped off. This booking can no longer be used.",
+    "rebook": "Book again",
     "cancelFailed": "Couldn't cancel the booking.",
     "code": "Booking code",
     "overdue": "Pick-up time passed",
@@ -326,7 +330,7 @@
     "CHECKED_IN": "Bags at the shop",
     "CHECKED_OUT": "Completed",
     "CANCELLED": "Cancelled",
-    "UNUSED": "Not used"
+    "UNUSED": "Expired"
   },
   "partner": {
     "title": "Bags",
@@ -834,7 +838,7 @@
     "bagsTitle": "How many bags?",
     "currentTotal": "Current total",
     "newTotal": "New total",
-    "paidNote": "The total of a paid booking can't change. To make a change that alters the price, cancel and book again.",
+    "paidNote": "The total of a booking with a recorded payment can't change. To make a change that alters the price, cancel and book again.",
     "noBags": "Select at least one bag.",
     "save": "Save changes",
     "savedTitle": "Booking updated",
@@ -842,7 +846,7 @@
     "errors": {
       "INVALID_DATES": "The time you picked is invalid or the shop is closed that day. Drop-off can't be in the past.",
       "INVALID_STATUS": "This booking can no longer be changed.",
-      "PRICE_INCREASE": "The total of a paid booking can't change. You can cancel and book again.",
+      "PRICE_INCREASE": "The total of a booking with a recorded payment can't change. You can cancel and book again.",
       "CAPACITY": "There isn't enough space at this spot for the time you picked.",
       "NOT_FOUND": "Booking not found.",
       "not_found": "Booking not found.",

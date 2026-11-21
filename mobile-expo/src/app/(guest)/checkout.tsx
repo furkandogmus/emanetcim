@@ -14,7 +14,7 @@ import { useAuth } from "@/lib/auth";
 import { errorMessage } from "@/lib/errors";
 import { newIdempotencyKey } from "@/lib/idempotency";
 import { formatMoney, formatStayWindow } from "@/lib/format";
-import { keys, useShop } from "@/lib/queries";
+import { keys, useOnlinePayments, useShop } from "@/lib/queries";
 import { totalBags, useSearch } from "@/lib/search";
 import type { CheckoutQuote, CheckoutRequest, CheckoutResponse } from "@/lib/types";
 import { colors, fonts, radius, space } from "@/theme/tokens";
@@ -24,6 +24,7 @@ export default function CheckoutScreen() {
   const { t } = useTranslation();
   const search = useSearch();
   const queryClient = useQueryClient();
+  const onlinePayments = useOnlinePayments();
   const shopQuery = useShop(shopId);
   const { state: authState } = useAuth();
   const [error, setError] = useState<string | null>(null);
@@ -343,11 +344,14 @@ export default function CheckoutScreen() {
           )}
         </Card>
 
-        <View style={styles.payNote}>
-          <AppText variant="body" style={{ flex: 1, color: colors.inkSecondary }}>
-            {t("checkout.payAtShop")}
-          </AppText>
-        </View>
+        {/* Dukkanda tahsilat modunda gecerli; online kipte bu cumle yanlis olur. */}
+        {onlinePayments ? null : (
+          <View style={styles.payNote}>
+            <AppText variant="body" style={{ flex: 1, color: colors.inkSecondary }}>
+              {t("checkout.payAtShop")}
+            </AppText>
+          </View>
+        )}
 
       </ScrollView>
       </KeyboardAvoidingView>
