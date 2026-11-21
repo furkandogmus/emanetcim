@@ -99,6 +99,9 @@ export type ShopReview = {
   authorLabel: string;
 };
 
+/** `GET /shops/:id/reviews?paged=1`. */
+export type ShopReviewsPage = { items: ShopReview[]; total: number; nextCursor: string | null };
+
 export type BookingSummary = {
   id: string;
   shopId: string;
@@ -197,6 +200,8 @@ export type PartnerBookingsResponse = {
   total: number;
   page: number;
   limit: number;
+  /** Gecmiste daha eski kayit varsa `?cursor=` ile istenir. Eski sunucu gondermez. */
+  nextCursor?: string | null;
 };
 
 export type CheckoutRequest = {
@@ -394,7 +399,7 @@ export type AdminBookingFilter = "arrivals" | "pickups" | "inStorage" | "overdue
 /** `admin/bookings` (`toMobileAdminBookingRow`). */
 export type AdminBookingRow = BookingSummary & { guestName: string; createdAt: string };
 
-export type AdminBookingsResponse = { bookings: AdminBookingRow[] };
+export type AdminBookingsResponse = { bookings: AdminBookingRow[]; nextCursor?: string | null };
 
 export type AdminBookingCounts = Record<AdminBookingFilter, number>;
 

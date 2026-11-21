@@ -1,10 +1,11 @@
-import { useQuery, useQueryClient, type QueryClient } from "@tanstack/react-query";
+import { useInfiniteQuery, useQuery, useQueryClient, type QueryClient } from "@tanstack/react-query";
 
 import { api, ApiError, isImpersonating } from "./api";
 import { deleteOfflineTicket, saveOfflineTicket } from "./offline-tickets";
 import { useAuth } from "./auth";
 import { usePartnerShopSelection, withShop } from "./partner-shop";
-import type { AdminApplication, AdminStats, BookingDetail, ContactMessage, PartnerEarnings, PartnerSealsResponse, PartnerShop, BookingSummary, NearbyShop, PartnerBookingsResponse, ShopDetail, ShopReview, PartnerShopSettings, PartnerSchedule, PartnerDashboard, AdminOverview, AdminBookingFilter, AdminBookingCounts, AdminBookingsResponse, AdminBookingDetail, AdminShop, AdminShopDetail, AdminUser, CityCoverage } from "./types";
+import { nextCursorOf } from "./paging";
+import type { AdminApplication, AdminStats, BookingDetail, ContactMessage, PartnerEarnings, PartnerSealsResponse, PartnerShop, BookingSummary, NearbyShop, PartnerBookingsResponse, ShopDetail, ShopReviewsPage, PartnerShopSettings, PartnerSchedule, PartnerDashboard, AdminOverview, AdminBookingFilter, AdminBookingCounts, AdminBookingsResponse, AdminBookingDetail, AdminShop, AdminShopDetail, AdminUser, CityCoverage } from "./types";
 
 export const keys = {
   myBookings: ["bookings", "me"] as const,
@@ -92,10 +93,25 @@ export function useShop(id: string) {
   return useQuery({ queryKey: keys.shop(id), queryFn: () => api<ShopDetail>(`/shops/${id}`, { auth: false }) });
 }
 
+/** Dukkan ekranindaki ozet: ilk 5 yorum ve gercek toplam (dizi ucu 50'de kesip toplam vermiyordu). */
 export function useShopReviews(id: string) {
   return useQuery({
-    queryKey: ["shops", id, "reviews"],
-    queryFn: () => api<ShopReview[]>(`/shops/${id}/reviews`, { auth: false }),
+    queryKey: ["shops", id, "reviews", "summary"],
+    queryFn: () => api<ShopReviewsPage>(`/shops/${id}/reviews?paged=1&limit=5`, { auth: false }),
+  });
+}
+
+/** "Tum yorumlar" ekrani. */
+export function useShopReviewsInfinite(id: string) {
+  return useInfiniteQuery({
+    queryKey: ["shops", id, "reviews", "all"],
+    initialPageParam: undefined as string | undefined,
+    queryFn: ({ pageParam }) =>
+      api<ShopReviewsPage>(
+        `/shops/${id}/reviews?paged=1&limit=20${pageParam ? `&cursor=${encodeURIComponent(pageParam)}` : ""}`,
+        { auth: false },
+      ),
+    getNextPageParam: nextCursorOf,
   });
 }
 
@@ -142,6 +158,23 @@ export function usePartnerBookings(polling = true) {
 }
 
 /**
+ * Gecmis sekmesinde "Daha eski kayitlar": ilk sayfanin `nextCursor`'undan devam eder.
+ * Baslangic imleci dokunuldugu andaki deger olarak sabit tutulur; ilk sayfa 30 sn'de
+ * bir yenilenip imleci kaydirsa da yuklenen eski sayfalar sifirlanmaz (tekrarlar
+ * ekranda id ile ayiklanir). `start` null iken istek atilmaz.
+ */
+export function usePartnerOlderBookings(start: string | null) {
+  return useInfiniteQuery({
+    queryKey: [...keys.partnerBookings, "older", start],
+    enabled: !!start,
+    initialPageParam: start ?? "",
+    queryFn: ({ pageParam }) =>
+      api<PartnerBookingsResponse>(`/partner/bookings?limit=100&cursor=${encodeURIComponent(pageParam)}`),
+    getNextPageParam: nextCursorOf,
+  });
+}
+
+/**
  * Henuz bitmemis rezervasyon. Valiz dukkandaysa (CHECKED_IN) alma saati gecse de
  * aktiftir: misafirin QR'a ihtiyaci var. Hic teslim edilmemis kayit ise alma saati
  * gecince aktif degildir: gelmeyen misafirin APPROVED/PAID kaydi sonsuza dek oyle
@@ -168,8 +201,18 @@ export function useAdminApplications() {
   });
 }
 
+export const adminMessagesKey = [...keys.admin, "messages", "paged"] as const;
+export type AdminMessagesPage = { messages: ContactMessage[]; nextCursor: string | null };
+
+/** Sayfali (30'ar); dizi ucu 100'de kesiliyordu ve devami yoktu. */
 export function useAdminMessages() {
-  return useQuery({ queryKey: [...keys.admin, "messages"], queryFn: () => api<ContactMessage[]>("/admin/messages") });
+  return useInfiniteQuery({
+    queryKey: adminMessagesKey,
+    initialPageParam: undefined as string | undefined,
+    queryFn: ({ pageParam }) =>
+      api<AdminMessagesPage>(`/admin/messages?paged=1${pageParam ? `&cursor=${encodeURIComponent(pageParam)}` : ""}`),
+    getNextPageParam: nextCursorOf,
+  });
 }
 
 export function usePartnerShop() {
@@ -239,10 +282,14 @@ export function usePartnerDashboard() {
  */
 export function useAdminBookings(filter: AdminBookingFilter, q: string) {
   const term = q.trim().length >= 2 ? q.trim() : "";
-  const qs = new URLSearchParams({ filter, ...(term ? { q: term } : {}) });
-  return useQuery({
-    queryKey: [...keys.admin, "bookings", filter, term],
-    queryFn: () => api<AdminBookingsResponse>(`/admin/bookings?${qs}`),
+  return useInfiniteQuery({
+    queryKey: [...keys.admin, "bookings", "list", filter, term],
+    initialPageParam: undefined as string | undefined,
+    queryFn: ({ pageParam }) => {
+      const qs = new URLSearchParams({ filter, ...(term ? { q: term } : {}), ...(pageParam ? { cursor: pageParam } : {}) });
+      return api<AdminBookingsResponse>(`/admin/bookings?${qs}`);
+    },
+    getNextPageParam: nextCursorOf,
     placeholderData: (prev) => prev,
   });
 }
@@ -280,10 +327,14 @@ export function useAdminShop(id: string) {
 
 export function useAdminUsers(q: string) {
   const term = q.trim();
-  return useQuery({
-    queryKey: [...keys.admin, "users", term],
-    queryFn: () =>
-      api<{ users: AdminUser[] }>(`/admin/users${term ? `?q=${encodeURIComponent(term)}` : ""}`).then((r) => r.users),
+  return useInfiniteQuery({
+    queryKey: [...keys.admin, "users", "list", term],
+    initialPageParam: undefined as string | undefined,
+    queryFn: ({ pageParam }) => {
+      const qs = new URLSearchParams({ ...(term ? { q: term } : {}), ...(pageParam ? { cursor: pageParam } : {}) });
+      return api<{ users: AdminUser[]; nextCursor?: string | null }>(`/admin/users?${qs}`);
+    },
+    getNextPageParam: nextCursorOf,
     placeholderData: (prev) => prev,
   });
 }

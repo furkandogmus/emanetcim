@@ -18,7 +18,9 @@
     "scrollForward": "Weiterblättern",
     "goHome": "Zur Startseite",
     "notFoundTitle": "Diese Seite lässt sich nicht öffnen",
-    "notFoundBody": "Der Link lässt sich mit diesem Konto nicht öffnen oder existiert nicht mehr. Du kannst zum Startbildschirm zurückkehren."
+    "notFoundBody": "Der Link lässt sich mit diesem Konto nicht öffnen oder existiert nicht mehr. Du kannst zum Startbildschirm zurückkehren.",
+    "loadMore": "Mehr anzeigen",
+    "loadMoreFailed": "Weitere Einträge konnten nicht geladen werden."
   },
   "auth": {
     "title": "Anmelden",
@@ -216,7 +218,9 @@
     },
     "nearbyAction": "Orte in der Nähe",
     "selection": "Deine Suche: {{when}} · {{bags}}",
-    "change": "Ändern"
+    "change": "Ändern",
+    "allReviews": "Alle Bewertungen ({{count}})",
+    "reviewsTitle": "Bewertungen"
   },
   "checkout": {
     "pickOtherTime": "Andere Zeit wählen",
@@ -416,7 +420,8 @@
     "searchNone": "Keine passende Buchung. Gib den 8-stelligen Code ein.",
     "statusWaiting": "Erwartet",
     "callGuest": "Gast anrufen",
-    "whatsappGuest": "Per WhatsApp schreiben"
+    "whatsappGuest": "Per WhatsApp schreiben",
+    "olderBookings": "Ältere Buchungen"
   },
   "profile": {
     "title": "Profil",

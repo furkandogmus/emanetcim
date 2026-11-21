@@ -18,7 +18,9 @@
     "scrollForward": "Scroll forward",
     "goHome": "Go home",
     "notFoundTitle": "This page can't be opened",
-    "notFoundBody": "The link doesn't open with this account, or it no longer exists. You can go back to the home screen."
+    "notFoundBody": "The link doesn't open with this account, or it no longer exists. You can go back to the home screen.",
+    "loadMore": "Show more",
+    "loadMoreFailed": "Could not load more."
   },
   "auth": {
     "title": "Sign in",
@@ -216,7 +218,9 @@
     },
     "nearbyAction": "Nearby spots",
     "selection": "Your search: {{when}} · {{bags}}",
-    "change": "Change"
+    "change": "Change",
+    "allReviews": "All reviews ({{count}})",
+    "reviewsTitle": "Reviews"
   },
   "checkout": {
     "pickOtherTime": "Pick another time",
@@ -416,7 +420,8 @@
     "searchNone": "No matching booking. Type the 8-character code.",
     "statusWaiting": "Expected",
     "callGuest": "Call guest",
-    "whatsappGuest": "Message on WhatsApp"
+    "whatsappGuest": "Message on WhatsApp",
+    "olderBookings": "Older bookings"
   },
   "profile": {
     "title": "Profile",

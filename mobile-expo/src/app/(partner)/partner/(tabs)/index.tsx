@@ -9,6 +9,7 @@ import { Avatar } from "@/components/Avatar";
 import { SealedBag } from "@/components/Illustrations";
 import { ShopSwitcher } from "@/components/ShopSwitcher";
 import { BookingRow } from "@/components/BookingRow";
+import { LoadMoreFooter } from "@/components/LoadMoreFooter";
 import { PartnerPulseCard } from "@/components/PartnerPulseCard";
 import { ShopSetupCard } from "@/components/ShopSetupCard";
 import { Segmented } from "@/components/Segmented";
@@ -18,7 +19,8 @@ import { Input } from "@/components/Field";
 import { searchBookings } from "@/lib/booking-search";
 import { useAuth } from "@/lib/auth";
 import { errorMessage } from "@/lib/errors";
-import { isActiveBooking, usePartnerBookings, usePartnerDashboard } from "@/lib/queries";
+import { flattenPages, mergeUniqueById } from "@/lib/paging";
+import { isActiveBooking, usePartnerBookings, usePartnerDashboard, usePartnerOlderBookings } from "@/lib/queries";
 import { wallInstant, wallParts } from "@/lib/time";
 import type { PartnerBooking } from "@/lib/types";
 import { colors, space } from "@/theme/tokens";
@@ -43,9 +45,13 @@ export default function PartnerBookingsScreen() {
   const [search, setSearch] = useState("");
   const { state } = useAuth();
   const user = state.status === "signedIn" ? state.user : null;
+  // Gecmis sekmesi eskiden son 100 kayitta sessizce bitiyordu. Dokunulana kadar istek yok.
+  const [olderStart, setOlderStart] = useState<string | null>(null);
+  const older = usePartnerOlderBookings(olderStart);
 
   function refreshAll() {
     void query.refetch();
+    if (olderStart) void older.refetch();
     void queryClient.invalidateQueries({ queryKey: ["partner", "dashboard"] });
   }
 
@@ -74,7 +80,8 @@ export default function PartnerBookingsScreen() {
   // derken liste baska dukkanin valizini gostermesin.
   const dash = usePartnerDashboard().data;
   const shopFilter = dash && dash.shops.length > 1 ? dash.shop.id : null;
-  const inShop = (query.data?.items ?? []).filter((b) => !shopFilter || b.shopId === shopFilter);
+  const allItems = mergeUniqueById(query.data?.items ?? [], flattenPages(older.data, (p) => p.items));
+  const inShop = allItems.filter((b) => !shopFilter || b.shopId === shopFilter);
   // Arama tum sekmelerde arar: misafir kodunu soyluyor ya da adini hatirliyor, hangi sekmede oldugunu degil.
   const searching = search.trim().length > 0;
   const items = (searching ? searchBookings(inShop, search) : inShop.filter((b) => bucket(b) === tab))
@@ -155,6 +162,21 @@ export default function PartnerBookingsScreen() {
             }}
           />
         )}
+        ListFooterComponent={
+          tab === "past" && !searching && !query.isLoading && !query.isError ? (
+            <LoadMoreFooter
+              label={t("partner.olderBookings")}
+              hasMore={olderStart ? !older.data || !!older.hasNextPage : !!query.data?.nextCursor}
+              loading={older.isFetching}
+              failed={older.isError || older.isFetchNextPageError}
+              onPress={() => {
+                if (!olderStart) setOlderStart(query.data?.nextCursor ?? null);
+                else if (older.isError && !older.data) void older.refetch();
+                else void older.fetchNextPage();
+              }}
+            />
+          ) : null
+        }
         ListEmptyComponent={
           query.isLoading ? (
             <RowSkeleton />

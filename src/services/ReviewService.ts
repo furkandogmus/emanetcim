@@ -1,4 +1,5 @@
 import prisma from "@/lib/db";
+import { cursorArgs, toPage } from "@/lib/cursor-page";
 
 /**
  * ReviewService - Misafir yorumlarını ve dükkan puanlarını yönetir.
@@ -123,6 +124,24 @@ export class ReviewService {
       orderBy: { createdAt: 'desc' },
       take: 50,
     });
+  }
+
+  /**
+   * Sayfali yorum listesi + gercek toplam. `getShopReviews` 50'de kesiyordu ve
+   * toplam donmuyordu: mobil baslik "Yorumlar (50)" yazip bes yorum gosteriyordu.
+   */
+  async listShopReviews(shopId: string, opts: { cursor?: string | null; take?: number } = {}) {
+    const take = Math.min(Math.max(1, opts.take ?? 20), 50);
+    const [rows, total] = await Promise.all([
+      prisma.review.findMany({
+        where: { shopId },
+        include: { guest: { select: { name: true, image: true } } },
+        orderBy: [{ createdAt: 'desc' }, { id: 'desc' }],
+        ...cursorArgs(opts.cursor ?? null, take),
+      }),
+      prisma.review.count({ where: { shopId } }),
+    ]);
+    return { ...toPage(rows, take), total };
   }
 }
 

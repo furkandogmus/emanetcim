@@ -13,9 +13,11 @@ vi.mock("@/lib/geocode", async (orig) => ({
   ...(await orig<typeof import("@/lib/geocode")>()),
   geocodePlaces: mockGeocode,
 }));
-vi.mock("@/lib/rate-limit", () => ({ rateLimit: mockRateLimit }));
+// Onbellek surec ici calissin (Redis yok); Redis yolu geocode-cache.test.ts'de.
+vi.mock("@/lib/rate-limit", () => ({ rateLimit: mockRateLimit, getRedis: () => null }));
 
 import { GET } from "@/app/api/mobile/geocode/route";
+import { resetGeocodeCacheForTests } from "@/lib/geocode-cache";
 
 const req = (q: string | null, headers: Record<string, string> = {}) =>
   new NextRequest(
@@ -23,9 +25,10 @@ const req = (q: string | null, headers: Record<string, string> = {}) =>
     { headers },
   );
 
-beforeEach(() => {
+beforeEach(async () => {
   vi.clearAllMocks();
   mockRateLimit.mockResolvedValue(true);
+  await resetGeocodeCacheForTests();
 });
 
 describe("GET /api/mobile/geocode", () => {
@@ -88,5 +91,46 @@ describe("GET /api/mobile/geocode", () => {
     expect(await res.json()).toEqual({ error: "too_many_requests" });
     expect(mockGeocode).not.toHaveBeenCalled();
     expect(mockRateLimit.mock.calls[0][0]).toMatch(/^mobile_geocode:/);
+  });
+
+  it("onbellek: ayni (bosluk/harf farkli) sorgu Nominatim'e ikinci kez gitmez, gevsek IP sinirindan gecer", async () => {
+    mockGeocode.mockResolvedValue({ ok: true, places: [{ lat: 40.99, lng: 29.02, label: "Kadıköy" }] });
+    expect((await GET(req("Kadıköy İskele"))).status).toBe(200);
+    const res = await GET(req("  kadıköy   iskele "));
+    expect(res.status).toBe(200);
+    expect((await res.json()).label).toBe("Kadıköy");
+    expect(mockGeocode).toHaveBeenCalledTimes(1);
+    const keys = mockRateLimit.mock.calls.map((c) => [c[0].replace(/:.*$/, ""), c[1]]);
+    expect(keys).toEqual([
+      ["mobile_geocode", 20],
+      ["mobile_geocode_upstream", 60],
+      ["mobile_geocode_hit", 120],
+    ]);
+  });
+
+  it("onbellek dile bagli: ayni metin baska dilde yeniden sorulur", async () => {
+    mockGeocode.mockResolvedValue({ ok: true, places: [{ lat: 1, lng: 2, label: "x" }] });
+    await GET(req("Taksim", { "accept-language": "tr" }));
+    await GET(req("Taksim", { "accept-language": "de" }));
+    expect(mockGeocode).toHaveBeenCalledTimes(2);
+  });
+
+  it("bos sonuc da saklanir (404), Nominatim hatasi saklanmaz", async () => {
+    mockGeocode.mockResolvedValueOnce({ ok: true, places: [] });
+    expect((await GET(req("qwertyzzz"))).status).toBe(404);
+    expect((await GET(req("qwertyzzz"))).status).toBe(404);
+    expect(mockGeocode).toHaveBeenCalledTimes(1);
+
+    mockGeocode.mockResolvedValueOnce({ ok: false, reason: "upstream" });
+    expect((await GET(req("Moda"))).status).toBe(503);
+    mockGeocode.mockResolvedValueOnce({ ok: true, places: [{ lat: 1, lng: 2, label: "Moda" }] });
+    expect((await GET(req("Moda"))).status).toBe(200);
+  });
+
+  it("sunucu geneli Nominatim kotasi dolunca 429, Nominatim'e gidilmez", async () => {
+    mockRateLimit.mockImplementation(async (key: string) => key !== "mobile_geocode_upstream");
+    const res = await GET(req("Kadıköy"));
+    expect(res.status).toBe(429);
+    expect(mockGeocode).not.toHaveBeenCalled();
   });
 });

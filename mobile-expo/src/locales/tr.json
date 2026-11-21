@@ -18,7 +18,9 @@
     "scrollForward": "İleri kaydır",
     "goHome": "Ana sayfaya git",
     "notFoundTitle": "Bu sayfa açılamadı",
-    "notFoundBody": "Bağlantı bu hesapta açılmıyor ya da artık yok. Ana ekrana dönebilirsin."
+    "notFoundBody": "Bağlantı bu hesapta açılmıyor ya da artık yok. Ana ekrana dönebilirsin.",
+    "loadMore": "Daha fazla göster",
+    "loadMoreFailed": "Devamı yüklenemedi."
   },
   "auth": {
     "title": "Giriş yap",
@@ -216,7 +218,9 @@
     },
     "nearbyAction": "Yakındaki noktalar",
     "selection": "Seçimin: {{when}} · {{bags}}",
-    "change": "Değiştir"
+    "change": "Değiştir",
+    "allReviews": "Tüm yorumlar ({{count}})",
+    "reviewsTitle": "Yorumlar"
   },
   "checkout": {
     "pickOtherTime": "Başka saat seç",
@@ -416,7 +420,8 @@
     "searchNone": "Eşleşen emanet yok. Kodu 8 haneli olarak yaz.",
     "statusWaiting": "Bekleniyor",
     "callGuest": "Misafiri ara",
-    "whatsappGuest": "WhatsApp ile yaz"
+    "whatsappGuest": "WhatsApp ile yaz",
+    "olderBookings": "Daha eski kayıtlar"
   },
   "profile": {
     "title": "Profil",
