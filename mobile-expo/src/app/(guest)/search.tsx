@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Pressable, ScrollView, StyleSheet, View } from "react-native";
+import { Linking, Pressable, ScrollView, StyleSheet, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { router, useLocalSearchParams } from "expo-router";
 import { getDevicePosition, type LocationFailure } from "@/lib/location";
@@ -11,7 +11,7 @@ import { BagCounter } from "@/components/BagCounter";
 import { PlaceSearch } from "@/components/PlaceSearch";
 import { StayWindowPicker, isStayWindowValid } from "@/components/StayWindowPicker";
 import { AppText, Banner, Button, IconButton } from "@/components/ui";
-import { CITY_IMAGES } from "@/lib/city-images";
+import { cityImage } from "@/lib/city-images";
 import { RemoteImage } from "@/components/RemoteImage";
 import { resolveImage } from "@/lib/images";
 import { useCities } from "@/lib/queries";
@@ -32,7 +32,7 @@ export default function SearchWizard() {
     "Aramayi duzenle": yer secili, tarih adiminda acilir; yer ve valiz satirlarindan
     ilgili adima gidilir.
   */
-  const params = useLocalSearchParams<{ step?: string; returnTo?: string; from?: string }>();
+  const params = useLocalSearchParams<{ step?: string; returnTo?: string; from?: string; locationError?: string }>();
   const editing = params.returnTo === "back" || (params.returnTo === "map" && !!search.place);
   // Ana sayfadaki sehir kartindan gelince yer secili: dogrudan "ne zaman" adimi.
   const [step, setStep] = useState(() =>
@@ -45,7 +45,12 @@ export default function SearchWizard() {
   const [checkOut, setCheckOut] = useState(search.checkOut);
   const [bags, setBags] = useState(search.bags);
   const [locating, setLocating] = useState(false);
-  const [locationError, setLocationError] = useState<LocationFailure | null>(null);
+  // "blocked": izin kalici reddedildi, sistem penceresi acilmaz; yalnizca Ayarlar yolu kalir.
+  const [locationError, setLocationError] = useState<LocationFailure | "blocked" | null>(() =>
+    params.locationError === "blocked" || params.locationError === "denied" || params.locationError === "unavailable"
+      ? params.locationError
+      : null,
+  );
   const cityList = useCities().data ?? [];
 
   function choosePlace(place: Place) {
@@ -58,7 +63,7 @@ export default function SearchWizard() {
     setLocationError(null);
     const res = await getDevicePosition();
     setLocating(false);
-    if (!res.ok) return setLocationError(res.reason);
+    if (!res.ok) return setLocationError(res.reason === "denied" && !res.canAskAgain ? "blocked" : res.reason);
     choosePlace({ label: t("map.nearYou"), ...res.position, isCurrent: true });
   }
 
@@ -113,10 +118,25 @@ export default function SearchWizard() {
             <AppText variant="bodyMedium">{locating ? t("search.locating") : t("search.useLocation")}</AppText>
           </Pressable>
           {locationError ? (
-            <Banner
-              tone="warning"
-              body={t(locationError === "denied" ? "search.locationDenied" : "search.locationUnavailable")}
-            />
+            <>
+              <Banner
+                tone="warning"
+                body={t(
+                  locationError === "blocked"
+                    ? "search.locationBlocked"
+                    : locationError === "denied"
+                      ? "search.locationDenied"
+                      : "search.locationUnavailable",
+                )}
+              />
+              {locationError === "blocked" ? (
+                <Button
+                  variant="secondary"
+                  title={t("search.openSettings")}
+                  onPress={() => void Linking.openSettings().catch(() => undefined)}
+                />
+              ) : null}
+            </>
           ) : null}
           {cityList.length > 0 ? (
             <>
@@ -125,7 +145,7 @@ export default function SearchWizard() {
               </AppText>
               <View style={styles.cityList}>
                 {cityList.map((c, i) => {
-                  const local = CITY_IMAGES[c.name]?.source;
+                  const local = cityImage(c)?.source;
                   const hasRemote = !local && resolveImage(c.coverImage) != null;
                   return (
                     <Pressable
