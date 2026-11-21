@@ -4,6 +4,7 @@ import { toWhatsAppNumber } from "@/lib/whatsapp";
 import type { PricingRules } from "@/lib/pricing-rules";
 import { shopVisibilityIssues } from "@/lib/shop-visibility";
 import { storageCitiesListingShop } from "@/lib/storage-cities";
+import { isBagRevisableStatus } from "@/lib/bag-revision-status";
 import type { PartnerDashboardSnapshot } from "@/services/PartnerDashboardService";
 
 /**
@@ -129,7 +130,13 @@ export function toMobileBookingDetail(b: BookingDetailSource, opts: { operator?:
     // yalnizca sunucunun 409'uyla ogreniyordu.
     hasReview: !!b.review,
     hasDispute: !!b.dispute,
-    pendingBagRevision: toMobilePendingBagRevision(b.pendingBagRevision),
+    /*
+      Yalnizca duzeltilebilir durumda: iptal edilmis/teslim edilmis rezervasyonda
+      kalmis bir oneri misafire onaylayamayacagi bir kart cizdiriyordu (bulgu 57).
+    */
+    pendingBagRevision: isBagRevisableStatus(b.status)
+      ? toMobilePendingBagRevision(b.pendingBagRevision)
+      : null,
     guestPhone,
   };
 }
