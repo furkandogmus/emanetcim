@@ -187,8 +187,21 @@ function ManualLookup() {
   const [text, setText] = useState("");
   const [matches, setMatches] = useState<{ id: string; guestName: string }[] | null>(null);
 
-  function search() {
-    const found = searchBookings(bookings.data?.items ?? [], text);
+  const [searching, setSearching] = useState(false);
+
+  async function search() {
+    let found = searchBookings(bookings.data?.items ?? [], text);
+    /*
+      Liste yoklamasiz onbellekten gelir; misafir dakikalar once rezervasyon yaptiysa
+      kod listede yoktur ve esnaf "bulunamadi" goruyordu. Bulunamazsa liste bir kez
+      tazelenip yeniden aranir.
+    */
+    if (found.length === 0) {
+      setSearching(true);
+      const fresh = await bookings.refetch().catch(() => null);
+      setSearching(false);
+      found = searchBookings(fresh?.data?.items ?? [], text);
+    }
     if (found.length === 1) {
       setMatches(null);
       router.push(`/partner/${found[0].id}`);
@@ -214,10 +227,15 @@ function ManualLookup() {
         autoCapitalize="none"
         autoCorrect={false}
         returnKeyType="search"
-        onSubmitEditing={search}
+        onSubmitEditing={() => void search()}
         maxLength={60}
       />
-      <Button title={t("scan.manualSearch")} disabled={text.trim().length === 0} onPress={search} />
+      <Button
+        title={t("scan.manualSearch")}
+        loading={searching}
+        disabled={text.trim().length === 0}
+        onPress={() => void search()}
+      />
       {matches && matches.length === 0 ? <Banner tone="danger" body={t("scan.manualNone")} /> : null}
       {matches && matches.length > 1 ? <AppText variant="caption">{t("scan.manualMany")}</AppText> : null}
       {matches && matches.length > 1
