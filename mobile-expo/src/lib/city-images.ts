@@ -57,3 +57,23 @@ export const CITY_IMAGES: Record<string, CityImage> = {
     url: "https://commons.wikimedia.org/wiki/File:%C4%B0zmir_Konak_saat_kulesi_ve_Konak_meydan%C4%B1.jpg",
   },
 };
+
+/** Sunucudaki `citySlug` (src/lib/city-slug.ts) ile ayni kural; eski sunucu `slug` gondermez. */
+export function citySlug(raw: string): string {
+  return raw
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .replace(/ı/g, "i")
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/^-+|-+$/g, "");
+}
+
+const BY_SLUG: Record<string, CityImage> = Object.fromEntries(
+  Object.entries(CITY_IMAGES).map(([name, img]) => [citySlug(name), img]),
+);
+
+/** Sehir kartinin yerel fotografi: "Istanbul" ile "İstanbul" ayni sonucu verir. */
+export function cityImage(city: { name: string; slug?: string }): CityImage | undefined {
+  return BY_SLUG[city.slug ?? citySlug(city.name)];
+}
