@@ -2,7 +2,7 @@ import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
 import { z } from "zod";
 import { requireMobileUser, requireRole } from "@/lib/mobile-auth";
-import { shopService, type ShopSettingsInput } from "@/services/ShopService";
+import { shopService, priceBand, type ShopSettingsInput } from "@/services/ShopService";
 import { shopGalleryService } from "@/services/ShopGalleryService";
 import { toMobileGalleryImage, toMobilePartnerShop } from "@/lib/mobile-dto";
 import prisma from "@/lib/db";
@@ -94,10 +94,7 @@ export async function GET(req: NextRequest) {
       gallery: gallery.map(toMobileGalleryImage),
       setup: { hasPhoto: !!shop.image, hoursConfigured },
       requireSealsOnCheckIn: rules.requireSealsOnCheckIn === true,
-      priceRange: {
-        min: Math.round(rules.defaultPricePerDay / 2),
-        max: rules.defaultPricePerDay * 2,
-      },
+      priceRange: priceBand(rules),
     }),
   );
 }
