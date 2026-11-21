@@ -91,6 +91,14 @@ describe("cancelBooking bildirimleri", () => {
     expect(m.pushGuestOnly).not.toHaveBeenCalled();
   });
 
+  // Bulgu 57: iptal edilen kayitta onaylanamayacak bir valiz onerisi kalmasin.
+  it("iptal bekleyen valiz onerisini ayni kosullu yazimda siler", async () => {
+    await cancelBooking("b1");
+    const { data } = m.prisma.booking.updateMany.mock.calls[0][0];
+    expect(data.status).toBe("CANCELLED");
+    expect(data).toHaveProperty("pendingBagRevision");
+  });
+
   // Bulgu 65: yonetici goruntulemede yapilan iptal olay satirinda yoneticiyi tasir.
   it("aktor ve goruntuleyen yonetici olay kaydina ve deftere gecer", async () => {
     const { bookingEventService } = await import("@/services/BookingEventService");

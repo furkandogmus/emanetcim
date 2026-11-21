@@ -127,12 +127,17 @@ export async function cancelBooking(
     Kaybedene donen cevap, SIRALI cagridaki cevabin aynisi (`INVALID_STATUS`):
     ikinci iptal her iki durumda da ayni seyi duymali.
   */
+  /*
+    Bekleyen valiz onerisi de ayni kosullu yazimda silinir (bulgu 57). Iptal
+    edilen rezervasyonda kalirsa misafir en ustte Onayla/Reddet karti goruyor ve
+    Onayla "artik degistirilemez" diyordu; check-out da ayni alani bosaltir.
+  */
   const kilit = await prisma.booking.updateMany({
     where: {
       id: bookingId,
       status: { notIn: ['CANCELLED', 'CHECKED_IN', 'CHECKED_OUT'] },
     },
-    data: { status: 'CANCELLED' },
+    data: { status: 'CANCELLED', pendingBagRevision: Prisma.JsonNull },
   });
   if (kilit.count === 0) {
     return {
