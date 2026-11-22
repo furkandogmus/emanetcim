@@ -96,6 +96,8 @@ interface PartnerClientProps {
    * valiz ALINIYOR ama listede bulunamıyor → teslim edilemiyordu.
    */
   shops?: Array<{ id: string; name: string }>;
+  /** Aktif dükkanın saat dilimi (`bookingTimeZone`). */
+  shopTimeZone?: string;
   /** DEFECT_BACKLOG D7: yeni esnaf için ilk giriş kontrol listesi. */
   hasShopImage?: boolean;
   hasShopLocation?: boolean;
@@ -111,6 +113,7 @@ export default function PartnerClient({
   marketPrice,
   bookings,
   shops = [],
+  shopTimeZone,
   initialBookingId,
   initialCheckoutBookingId,
   initialPhone = "",
@@ -610,6 +613,7 @@ export default function PartnerClient({
           overdueOf={overdueOf}
           checkingOutId={checkingOutId}
           onCheckout={handleCheckoutFromList}
+          timeZone={shopTimeZone}
         />
       )}
 
