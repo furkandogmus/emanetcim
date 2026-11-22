@@ -26,6 +26,22 @@ export const OVERDUE_GUEST_REMINDER_LOOKBACK_MS =
   overdueGuestReminderSlotOffsetMs(OVERDUE_GUEST_REMINDER_MAX) +
   OVERDUE_GUEST_REMINDER_INTERVAL_HOURS * 3_600_000;
 
+/** Ayni anda islenen rezervasyon sayisi. */
+export const OVERDUE_GUEST_REMINDER_CONCURRENCY = 5;
+
+/** `items`i en fazla `limit` es zamanli isciyle, verilen sirayla isler. */
+async function runWithConcurrency<T>(
+  items: readonly T[],
+  limit: number,
+  worker: (item: T) => Promise<void>,
+): Promise<void> {
+  let next = 0;
+  const lanes = Array.from({ length: Math.min(limit, items.length) }, async () => {
+    while (next < items.length) await worker(items[next++]);
+  });
+  await Promise.all(lanes);
+}
+
 export type OverdueGuestReminderReport = {
   scanned: number;
   /** En az bir kanaldan (push ya da e-posta) gercekten ulasan hatirlatma. */
@@ -119,22 +135,24 @@ export class OverdueGuestReminderService {
     let undelivered = 0;
     let noChannel = 0;
     let lostRace = 0;
-    for (const b of bookings) {
+    // Sirali await 100 x 8 sn e-posta zaman asimiyla `call-internal-job.sh`in 120 sn
+    // `--max-time` sinirini asabilir. Kilit rezervasyon basina; havuz onu degistirmez.
+    await runWithConcurrency(bookings, OVERDUE_GUEST_REMINDER_CONCURRENCY, async (b) => {
       const slot = nextOverdueGuestReminderSlot(
         now.getTime() - b.checkOutTime.getTime(),
         sentSlots.get(b.id) ?? [],
       );
-      if (slot == null) continue;
+      if (slot == null) return;
 
       const email = bookingNotificationEmail(b);
       if (email == null && b.guestId == null) {
         noChannel++;
-        continue;
+        return;
       }
       const claimed = await this.claimSlot(b.id, slot, { email: email != null, push: b.guestId != null });
       if (!claimed) {
         lostRace++;
-        continue;
+        return;
       }
 
       try {
@@ -161,7 +179,7 @@ export class OverdueGuestReminderService {
         undelivered++;
         logger.warn({ err, bookingId: b.id, slot }, "overdue_guest_reminder_send_failed");
       }
-    }
+    });
 
     return { scanned: bookings.length, sent, undelivered, noChannel, lostRace, limitReached };
   }
