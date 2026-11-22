@@ -25,9 +25,12 @@ function squash(v: string): string {
  * Sunucuya gitmez: aktif rezervasyonlarin hepsi zaten listede.
  */
 export function searchBookings(items: PartnerBooking[], query: string): PartnerBooking[] {
-  const q = squash(query);
+  // Fisteki "#ABCD1234" gibi yazilan kod da bulunsun.
+  const q = squash(query.trim().replace(/^#/, ""));
   if (q.length === 0) return [];
-  return items.filter((b) => squash(b.id).startsWith(q) || squash(b.guestName ?? "").includes(q));
+  // E-postadaki "EMN-ABCD1234" bicimi: sunucu (`bookingCodePrefix`) gibi on ek kod icin atilir.
+  const code = /^emn[0-9a-f]+$/.test(q) ? q.slice(3) : q;
+  return items.filter((b) => squash(b.id).startsWith(code) || squash(b.guestName ?? "").includes(q));
 }
 
 /** Sunucunun aramaya aldigi en kisa terim; altindaki `q` sunucuda yok sayilir. */
@@ -39,9 +42,12 @@ export function partnerSearchTerm(raw: string): string {
   return term.length >= SERVER_SEARCH_MIN ? term : "";
 }
 
-/** Sunucu telefonun son hanelerini de arar: 4+ rakamli terimde satirda gorunmeyen eslesme olabilir. */
+/**
+ * Sunucunun telefon kurali (`phoneDigitsTail`) ile birebir: yalnizca rakam ve telefon isaretleri,
+ * en az 4 rakam. "ab12cd34" gibi kod telefon sayilmaz; sayilsaydi eski sunucunun tum listesi suzulmezdi.
+ */
 export function isPhoneLikeTerm(term: string): boolean {
-  return term.replace(/\D/g, "").length >= 4;
+  return /^[\d\s+()-]+$/.test(term) && term.replace(/\D/g, "").length >= 4;
 }
 
 /**

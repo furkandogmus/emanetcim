@@ -8,7 +8,7 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { act, renderHook } from "@testing-library/react-native";
 
 import { PARTNER_SEARCH_DEBOUNCE_MS, usePartnerBookingSearch } from "../queries";
-import { refineServerSearch } from "../booking-search";
+import { isPhoneLikeTerm, refineServerSearch } from "../booking-search";
 import type { PartnerBooking } from "../types";
 
 jest.setTimeout(20_000);
@@ -102,7 +102,19 @@ describe("refineServerSearch (q'yu bilmeyen eski sunucu)", () => {
     expect(refineServerSearch(rows, "anna").map((r) => r.id)).toEqual(["abcd1234-0000"]);
   });
 
-  it("telefon gibi terimde sunucuya guvenilir (eslesme satirda olmayan telefondan)", () => {
+  it("yalnizca rakam ve telefon isaretlerinden olusan terimde sunucuya guvenilir", () => {
     expect(refineServerSearch(rows, "5551234")).toHaveLength(2);
+    expect(refineServerSearch(rows, "+90 (555) 12-34")).toHaveLength(2);
+  });
+
+  it("rakam iceren hex kod telefon sayilmaz: eski sunucunun tum listesinden yalnizca eslesen kalir", () => {
+    expect(isPhoneLikeTerm("abcd1234")).toBe(false);
+    expect(refineServerSearch(rows, "abcd1234").map((r) => r.id)).toEqual(["abcd1234-0000"]);
+    expect(refineServerSearch(rows, "ABCD-1234").map((r) => r.id)).toEqual(["abcd1234-0000"]);
+  });
+
+  it("e-postadaki EMN- on ekli kod da eslesir (sunucunun bookingCodePrefix kurali)", () => {
+    expect(refineServerSearch(rows, "EMN-ABCD1234").map((r) => r.id)).toEqual(["abcd1234-0000"]);
+    expect(refineServerSearch(rows, "emnffff").map((r) => r.id)).toEqual(["ffff0000-0000"]);
   });
 });
