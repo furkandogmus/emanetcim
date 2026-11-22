@@ -322,7 +322,7 @@ function EraseSheet({
           label={t("adminUsers.eraseConfirmLabel")}
           value={confirm}
           onChangeText={setConfirm}
-          placeholder={user.email || user.phone}
+          placeholder={t("adminUsers.eraseConfirmPlaceholder")}
           autoCapitalize="none"
           autoCorrect={false}
           editable={!erase.isPending}
