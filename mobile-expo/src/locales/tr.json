@@ -1342,6 +1342,7 @@
     "eraseDone": "Hesap silindi.",
     "eraseNotGuest": "Esnaf ve yönetici hesapları buradan silinemez.",
     "anonymized": "Bu hesap silinmiş (anonim). E-posta, şifre ve silme işlemleri kapalı.",
+    "eraseConfirmPlaceholder": "E-posta ya da telefonu yazın",
     "anonymizedLabel": "Silinmiş hesap",
     "errors": {
       "forbidden": "Bu işlem için yönetici yetkisi gerekir.",

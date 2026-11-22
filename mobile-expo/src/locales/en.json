@@ -1342,6 +1342,7 @@
     "eraseDone": "Account deleted.",
     "eraseNotGuest": "Partner and admin accounts cannot be deleted here.",
     "anonymized": "This account is deleted (anonymised). Email, password and delete actions are off.",
+    "eraseConfirmPlaceholder": "Type the email or phone",
     "anonymizedLabel": "Deleted account",
     "errors": {
       "forbidden": "This action needs admin access.",
