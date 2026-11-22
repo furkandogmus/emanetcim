@@ -12,6 +12,7 @@
 |---|---|---|---|---|
 | `generate-slots` | `17 4 * * *` | `generate-slots.sh` | POST | ✅ |
 | `overdue-scan` | `47 4 * * *` | `overdue-scan.sh` | POST | ✅ |
+| `close-expired-bookings` | `43 1 * * *` | — | POST | ✅ |
 | `booking-reminders` | `7 9 * * *` | — | GET | ✅ |
 | `cleanup` | `23 3 * * *` | — | POST | ✅ |
 | `seal-forecast` | `37 6 * * 1` | — | POST | ✅ |

@@ -41,6 +41,10 @@
 # Calismazsa: Yaşam döngüsünün sonlanmayan ucu görünmez kalır. 19 rezervasyonun 18'i böyleydi ve üç müşterinin bavulu Haziran'dan beri 'dükkanda' görünüyordu.
 47 4 * * * /opt/emanetci/scripts/overdue-scan.sh >> /opt/emanetci/logs/bagajpark-overdue-scan.log 2>&1
 
+# Valizi hiç bırakılmamış ve alma saatinin üzerinden 6 saat geçmiş rezervasyonları iptal (expired_no_dropoff) olarak kapatır.
+# Calismazsa: Gelmeyen misafirin rezervasyonu sonsuza dek açık kalır: slot kapasitesi ve kupon hakkı tutulu kalır, misafir hesabını silemez, esnaf listesi şişer.
+43 1 * * * /opt/emanetci/scripts/call-internal-job.sh --job close-expired-bookings --method POST >> /opt/emanetci/logs/bagajpark-close-expired-bookings.log 2>&1
+
 # Yaklaşan rezervasyonlar için misafire hatırlatma gönderir.
 # Calismazsa: Misafir check-in saatini kaçırır; no-show ve destek yükü artar.
 7,22,37,52 * * * * /opt/emanetci/scripts/call-internal-job.sh --job booking-reminders --method GET >> /opt/emanetci/logs/bagajpark-booking-reminders.log 2>&1
