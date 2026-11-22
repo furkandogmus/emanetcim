@@ -1,5 +1,5 @@
 import type { ReactNode } from "react";
-import { Modal, Pressable, StyleSheet, View } from "react-native";
+import { KeyboardAvoidingView, Modal, Pressable, StyleSheet, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useTranslation } from "react-i18next";
 
@@ -22,7 +22,8 @@ export function Sheet({ visible, onClose, children }: { visible: boolean; onClos
       onRequestClose={onClose}
     >
       {/* Karartma kokte: arka plan Pressable'inda Android'de ayri pencere katmaninda cizilmiyordu. */}
-      <View style={styles.root}>
+      {/* Not alani olan panelde (ReasonSheet) klavye onay dugmesini kapatmasin. */}
+      <KeyboardAvoidingView style={styles.root} behavior="padding">
         <Pressable
           style={{ flex: 1 }}
           accessibilityRole="button"
@@ -33,7 +34,7 @@ export function Sheet({ visible, onClose, children }: { visible: boolean; onClos
           <View style={styles.grabber} />
           {children}
         </View>
-      </View>
+      </KeyboardAvoidingView>
     </Modal>
   );
 }
