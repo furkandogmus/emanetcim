@@ -15,6 +15,7 @@ import PartnerBookingsFilterTabs from "@/components/partner/PartnerBookingsFilte
 import PartnerBookingActionLinks from "@/components/partner/PartnerBookingActionLinks";
 import PartnerBookingsSearchBox from "@/components/partner/PartnerBookingsSearchBox";
 import {
+  MAX_SEARCH_IDS,
   normalizePartnerSearchQuery,
   partnerBookingSearchWhere,
 } from "@/services/PartnerBookingSearchService";
@@ -61,7 +62,7 @@ export default async function PartnerBookingsPage({
   const ownShopIds = q
     ? (await prisma.shop.findMany({ where: { ownerId: userId }, select: { id: true } })).map((s) => s.id)
     : [];
-  const search = await partnerBookingSearchWhere(ownShopIds, q);
+  const { where: search, match } = await partnerBookingSearchWhere(ownShopIds, q);
   const where = {
     shop: { ownerId: userId },
     ...(filterStatuses ? { status: { in: filterStatuses } } : {}),
@@ -165,6 +166,11 @@ export default async function PartnerBookingsPage({
           placeholder={t("partnerBookingsSearchPlaceholder")}
           submitLabel={t("partnerBookingsSearchSubmit")}
         />
+        {match?.truncated ? (
+          <p role="status" className="text-xs font-medium text-gray-500">
+            {t("partnerBookingsSearchTruncated", { count: MAX_SEARCH_IDS, total: match.total })}
+          </p>
+        ) : null}
         {totalCount > 0 || q ? (
           <PartnerBookingsFilterTabs
             current={filter}

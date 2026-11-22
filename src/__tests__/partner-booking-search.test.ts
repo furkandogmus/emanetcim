@@ -72,12 +72,15 @@ describe("q kurallari", () => {
   });
 
   it("q yoksa filtre eklenmez ve SQL calismaz", async () => {
-    expect(await partnerBookingSearchWhere(["s1"], "a")).toEqual({});
+    expect(await partnerBookingSearchWhere(["s1"], "a")).toEqual({ where: {}, match: null });
     expect(db.$queryRaw).not.toHaveBeenCalled();
   });
 
   it("dukkansiz esnafta SQL calismaz, sonuc bos", async () => {
-    expect(await partnerBookingSearchWhere([], "ilker")).toEqual({ id: { in: [] } });
+    expect(await partnerBookingSearchWhere([], "ilker")).toEqual({
+      where: { id: { in: [] } },
+      match: { ids: [], total: 0, truncated: false },
+    });
     expect(db.$queryRaw).not.toHaveBeenCalled();
   });
 });
@@ -92,7 +95,7 @@ describe("GET /partner/bookings?q=", () => {
   });
 
   it("arama esnafin dukkanlariyla sinirli; eslesen kimlikler uc sorguya da girer", async () => {
-    db.$queryRaw.mockResolvedValue([{ id: "b1" }]);
+    db.$queryRaw.mockResolvedValue([{ id: "b1", total: BigInt(1) }]);
     await GET(req("?q=ilker"));
     // Kapsam: sorguya giden dukkan listesi yalnizca esnafin kendi dukkanlari.
     expect(db.shop.findMany).toHaveBeenCalledWith({ where: { ownerId: "partner-a" }, select: { id: true, name: true } });
@@ -118,14 +121,20 @@ describe("GET /partner/bookings?q=", () => {
   });
 
   it("sayfalama bicimi ve imlec semantigi degismez", async () => {
-    db.$queryRaw.mockResolvedValue([{ id: "id0" }, { id: "id1" }, { id: "id2" }]);
+    db.$queryRaw.mockResolvedValue([
+      { id: "id0", total: 3 },
+      { id: "id1", total: 3 },
+      { id: "id2", total: 3 },
+    ]);
     db.booking.findMany.mockImplementation(async (args: { where: { status?: unknown } }) =>
       args.where.status ? [row("id0"), row("id1"), row("id2")] : [],
     );
     db.booking.count.mockResolvedValue(3);
     const res = await GET(req("?q=ilker&limit=2&cursor=9f2c1e0a-1b2c-4d5e-8f90-123456789abc"));
     const body = await res!.json();
-    expect(Object.keys(body).sort()).toEqual(["items", "limit", "nextCursor", "page", "total"]);
+    // Bugunku alanlar aynen; aramada yalnizca `searchTruncated` eklenir.
+    expect(Object.keys(body).sort()).toEqual(["items", "limit", "nextCursor", "page", "searchTruncated", "total"]);
+    expect(body.searchTruncated).toBe(false);
     expect(body.items.map((i: { id: string }) => i.id)).toEqual(["id0", "id1"]);
     expect(body.nextCursor).toBe("id1");
     const history = db.booking.findMany.mock.calls.find((c) => c[0].where.status)![0];
@@ -133,10 +142,29 @@ describe("GET /partner/bookings?q=", () => {
   });
 });
 
+describe("tavan ve toplam", () => {
+  it("SQL deterministik sirayla keser; toplam tavandan bagimsiz, kesilme isaretlenir", async () => {
+    db.$queryRaw.mockResolvedValue([{ id: "b1", total: BigInt(1500) }]);
+    const res = await GET(req("?q=ilker"));
+    const body = await res!.json();
+    expect(body.total).toBe(1500);
+    expect(body.searchTruncated).toBe(true);
+    const sql = (db.$queryRaw.mock.calls[0][0] as string[]).join("?");
+    expect(sql).toMatch(/ORDER BY b\."checkOutTime" DESC, b\."id" DESC\s+LIMIT/);
+    expect(sql).toMatch(/COUNT\(\*\) OVER\(\)/);
+  });
+
+  it("q yokken yanitta searchTruncated alani YOK (bugunku bicim)", async () => {
+    const body = await (await GET(req("")))!.json();
+    expect(body).not.toHaveProperty("searchTruncated");
+  });
+});
+
 describe("web esnaf listesi ayni servisi kullanir", () => {
   it("sayfa partnerBookingSearchWhere'i kendi dukkan kimlikleriyle cagirir", () => {
     const src = fs.readFileSync(path.join(process.cwd(), "src/app/[locale]/partner/bookings/page.tsx"), "utf8");
     expect(src).toMatch(/partnerBookingSearchWhere\(ownShopIds, q\)/);
+    expect(src).toMatch(/partnerBookingsSearchTruncated/);
     expect(src).toMatch(/where: \{ ownerId: userId \}/);
   });
 });

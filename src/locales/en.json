@@ -365,7 +365,8 @@
     "partnerCloseKeep": "Go back",
     "partnerBookingsSearchLabel": "Search bookings",
     "partnerBookingsSearchPlaceholder": "Code, guest name or last 4 digits of phone",
-    "partnerBookingsSearchSubmit": "Search"
+    "partnerBookingsSearchSubmit": "Search",
+    "partnerBookingsSearchTruncated": "{total} matches; showing the latest {count}. Narrow your search."
   },
   "Guest": {
     "heroTitle": "Drop Your Bags, Explore Freely",

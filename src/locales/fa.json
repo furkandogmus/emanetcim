@@ -365,7 +365,8 @@
     "partnerCloseKeep": "بازگشت",
     "partnerBookingsSearchLabel": "جستجوی رزروها",
     "partnerBookingsSearchPlaceholder": "کد، نام مهمان یا ۴ رقم آخر تلفن",
-    "partnerBookingsSearchSubmit": "جستجو"
+    "partnerBookingsSearchSubmit": "جستجو",
+    "partnerBookingsSearchTruncated": "{total} نتیجه؛ {count} مورد جدیدتر نمایش داده می‌شود. جستجو را محدودتر کنید."
   },
   "Guest": {
     "heroTitle": "چمدان را بسپارید، آزاد بگردید",

@@ -31,7 +31,7 @@ export async function GET(req: NextRequest) {
   const shopIds = shops.map((s) => s.id).filter((id) => !shopIdParam || id === shopIdParam);
   const shopMap = new Map(shops.map((s) => [s.id, s.name]));
   // `q`: kod on eki / ad / telefon kuyrugu (`PartnerBookingSearchService`, web ile ortak).
-  const search = await partnerBookingSearchWhere(shopIds, searchParams.get("q"));
+  const { where: search, match } = await partnerBookingSearchWhere(shopIds, searchParams.get("q"));
 
   /*
     AKTIFLER HER ZAMAN, gecmis sayfali (2026-11-18). Liste "en son olusturulan
@@ -72,5 +72,16 @@ export async function GET(req: NextRequest) {
   );
 
   // `nextCursor`: gecmiste daha eski kayit var mi. `total` aktifleri de sayar, sayfalamayi suremez.
-  return NextResponse.json({ items: results, total, page, limit, nextCursor: historyPage.nextCursor });
+  /*
+    Aramada `total` GERCEK eslesme sayisi (kimlik tavani 1000'den bagimsiz);
+    `searchTruncated` tavan kestiyse true, istemci "ilk 1000 sonuc" der.
+  */
+  return NextResponse.json({
+    items: results,
+    total: match ? match.total : total,
+    page,
+    limit,
+    nextCursor: historyPage.nextCursor,
+    ...(match ? { searchTruncated: match.truncated } : {}),
+  });
 }
