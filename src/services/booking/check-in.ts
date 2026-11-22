@@ -206,9 +206,11 @@ export async function checkIn(
 
     await prisma.$transaction(async (tx) => {
       const updateResult = await tx.booking.updateMany({
-        where: { 
+        where: {
           id: bookingId,
           bookingRowVersion: existing.bookingRowVersion,
+          // Ikinci savunma: surum kacirilsa da iptal/teslim edilmis kayit geri acilmaz.
+          status: { in: ['PAID', 'APPROVED'] },
         },
         data: {
           status: 'CHECKED_IN',
