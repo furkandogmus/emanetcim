@@ -2,8 +2,7 @@ import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
 import { requireMobileUser } from "@/lib/mobile-auth";
 import { bookingService } from "@/services/BookingService";
-import { canAccessBooking } from "@/services/booking/access";
-import { selfCancelReason } from "@/services/booking/closure";
+import { canGuestSelfCancel } from "@/services/booking/access";
 
 export async function DELETE(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   const auth = await requireMobileUser(req);
@@ -14,18 +13,17 @@ export async function DELETE(req: NextRequest, { params }: { params: Promise<{ i
   if (!b) return NextResponse.json({ error: "not_found" }, { status: 404 });
 
   /*
-    DEGISTIRME: esnaf HARIC. Esnafin yolu "reddet"tir ve o yol iadeyi + slot
-    temizligini `cancelBooking` uzerinden yurutur; buradan iptal yapabilseydi
-    o muhasebe atlanirdi.
+    Yalniz misafirin kendisi. Esnafin yolu `partner/bookings/[id]/cancel`,
+    yoneticininki `admin/bookings/[id]/cancel` (zorunlu aciklama + denetim).
   */
-  if (!canAccessBooking(b, auth.user, { allowShopPartner: false })) {
+  if (!canGuestSelfCancel(b, auth.user)) {
     return NextResponse.json({ error: "forbidden" }, { status: 403 });
   }
 
   try {
     const result = await bookingService.cancelBooking(id, {
       actor: { id: auth.user.id, role: auth.user.role, impersonatedBy: auth.user.impersonatedBy ?? null },
-      reason: selfCancelReason(b, auth.user),
+      reason: "guest_cancel",
     });
     if (result.ok) {
       return NextResponse.json({ success: true, fullRefund: result.fullRefund });

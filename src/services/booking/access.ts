@@ -100,3 +100,13 @@ export function canOperateSealAtShop(
   if (actor.role === "ADMIN") return true;
   return seal.shop?.ownerId === actor.id;
 }
+
+/**
+ * MISAFIRIN KENDI IPTALI: yalnizca rezervasyonun sahibi. ADMIN DAHIL DEGIL --
+ * yonetici bu yoldan gecseydi zorunlu aciklama ve `admin.booking.cancel`
+ * denetim kaydi atlanirdi; onun yolu yonetici iptalidir. Goruntuleme
+ * oturumunda aktor misafirin kendisidir, o yuzden gecer.
+ */
+export function canGuestSelfCancel(booking: { guestId: string | null }, actor: BookingActor): boolean {
+  return !!booking.guestId && booking.guestId === actor.id;
+}
