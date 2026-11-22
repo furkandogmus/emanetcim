@@ -83,7 +83,7 @@ function Detail({ b, onWeb }: { b: AdminBookingDetail; onWeb: () => void }) {
         </View>
       ) : null}
 
-      <BookingTicket booking={b} showQr={false} title={b.guestName || t("partner.guest")} subtitle={b.shopName} />
+      <BookingTicket booking={b} showQr={false} title={b.guestName || t("partner.guest")} subtitle={b.shopName} audience="staff" />
 
       <Block title={t("admin.guest")}>
         <Card style={{ gap: space.md }}>
