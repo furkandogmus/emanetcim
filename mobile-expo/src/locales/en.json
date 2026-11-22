@@ -1201,7 +1201,8 @@
       "noShowBody": "The booking is closed as a no-show and the reserved space is freed. This can't be undone.",
       "noShowConfirm": "Yes, close",
       "noShowDoneTitle": "Booking closed",
-      "noShowDoneBody": "The reserved space has been freed."
+      "noShowDoneBody": "The reserved space has been freed.",
+      "noteRequiredHint": "A note is required when “Other” is selected."
     },
     "reasons": {
       "guest_request": "Guest asked",

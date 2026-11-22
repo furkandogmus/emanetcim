@@ -1201,7 +1201,8 @@
       "noShowBody": "Die Buchung wird als nicht erschienen geschlossen und der reservierte Platz freigegeben. Das kann nicht rückgängig gemacht werden.",
       "noShowConfirm": "Ja, schließen",
       "noShowDoneTitle": "Buchung geschlossen",
-      "noShowDoneBody": "Der reservierte Platz wurde freigegeben."
+      "noShowDoneBody": "Der reservierte Platz wurde freigegeben.",
+      "noteRequiredHint": "Bei „Sonstiges“ ist eine Notiz erforderlich."
     },
     "reasons": {
       "guest_request": "Gast hat gefragt",
