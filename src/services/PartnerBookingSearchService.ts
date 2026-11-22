@@ -18,7 +18,7 @@ import { normalizeBookingCode } from "@/lib/booking-code";
 export const MIN_PARTNER_SEARCH_LENGTH = 2;
 const MIN_PHONE_DIGITS = 4;
 /** Arama sonucu tavani: bir aramada bundan fazla eslesme anlamli degil. */
-const MAX_SEARCH_IDS = 1000;
+export const MAX_SEARCH_IDS = 1000;
 
 /*
   Katlama TEK tanim: hem sutuna hem q'ya SQL'de ayni `translate` uygulanir.
@@ -53,14 +53,27 @@ function escapeLike(value: string): string {
   return value.replace(/[\\%_]/g, (c) => `\\${c}`);
 }
 
-export async function findPartnerBookingIds(shopIds: string[], q: string): Promise<string[]> {
-  if (shopIds.length === 0) return [];
+export type PartnerBookingSearchMatch = {
+  ids: string[];
+  /** Tavandan bagimsiz GERCEK eslesme sayisi. */
+  total: number;
+  /** `ids` tavanda kesildi: istemci "ilk N sonuc" gosterebilir. */
+  truncated: boolean;
+};
+
+export async function findPartnerBookingIds(shopIds: string[], q: string): Promise<PartnerBookingSearchMatch> {
+  if (shopIds.length === 0) return { ids: [], total: 0, truncated: false };
   const code = bookingCodePrefix(q);
   const digits = phoneDigitsTail(q);
   const name = escapeLike(q);
 
-  const rows = await prisma.$queryRaw<{ id: string }[]>`
-    SELECT b."id"
+  /*
+    Tavan DETERMINISTIK: esnaf listesinin gecmis sirasi (bitis yeniden eskiye,
+    sonra id). Sirasiz LIMIT hangi 1000'in donecegini Postgres'e birakirdi.
+    `COUNT(*) OVER()` LIMIT'ten once hesaplanir: toplam kesilmez.
+  */
+  const rows = await prisma.$queryRaw<{ id: string; total: bigint | number }[]>`
+    SELECT b."id", COUNT(*) OVER() AS "total"
     FROM "Booking" b
     LEFT JOIN "User" u ON u."id" = b."guestId"
     WHERE b."shopId" = ANY(${shopIds}::text[])
@@ -73,20 +86,27 @@ export async function findPartnerBookingIds(shopIds: string[], q: string): Promi
           OR regexp_replace(coalesce(b."guestPhone", ''), '\\D', '', 'g') LIKE '%' || ${digits}::text
         ))
       )
+    ORDER BY b."checkOutTime" DESC, b."id" DESC
     LIMIT ${MAX_SEARCH_IDS}
   `;
-  return rows.map((r) => r.id);
+  const total = rows.length > 0 ? Number(rows[0].total) : 0;
+  return { ids: rows.map((r) => r.id), total, truncated: total > rows.length };
 }
 
-/**
- * Cagiranin `where`ine eklenecek parca. q yok sayildiysa bos nesne
- * (bugunku liste); varsa eslesen kimlikler (bos olabilir: sonuc yok).
- */
+export type PartnerBookingSearch = {
+  /** Cagiranin `where`ine eklenecek parca; q yoksa bos nesne. */
+  where: Prisma.BookingWhereInput;
+  /** q yok sayildiysa null. */
+  match: PartnerBookingSearchMatch | null;
+};
+
+/** q yok sayildiysa bugunku liste; varsa eslesen kimlikler (bos olabilir). */
 export async function partnerBookingSearchWhere(
   shopIds: string[],
   rawQ: string | null | undefined,
-): Promise<Prisma.BookingWhereInput> {
+): Promise<PartnerBookingSearch> {
   const q = normalizePartnerSearchQuery(rawQ);
-  if (!q) return {};
-  return { id: { in: await findPartnerBookingIds(shopIds, q) } };
+  if (!q) return { where: {}, match: null };
+  const match = await findPartnerBookingIds(shopIds, q);
+  return { where: { id: { in: match.ids } }, match };
 }

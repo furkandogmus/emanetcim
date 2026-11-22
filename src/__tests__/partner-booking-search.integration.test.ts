@@ -16,7 +16,10 @@ const run =
 describe.skipIf(!run)("esnaf rezervasyon aramasi (gercek DB)", () => {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   let prisma: any;
-  let findPartnerBookingIds: (shopIds: string[], q: string) => Promise<string[]>;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  let search: any;
+  const findPartnerBookingIds = async (shopIds: string[], q: string): Promise<string[]> =>
+    (await search(shopIds, q)).ids;
   const suf = `srch-${Date.now()}`;
   const ids: Record<string, string> = {};
   let shopA = "";
@@ -26,7 +29,7 @@ describe.skipIf(!run)("esnaf rezervasyon aramasi (gercek DB)", () => {
 
   beforeAll(async () => {
     prisma = (await import("@/lib/db")).default;
-    ({ findPartnerBookingIds } = await import("@/services/PartnerBookingSearchService"));
+    search = (await import("@/services/PartnerBookingSearchService")).findPartnerBookingIds;
 
     const owner = async (tag: string) => {
       const u = await prisma.user.create({ data: { email: `${tag}-${suf}@test.local`, role: "PARTNER" } });
@@ -58,10 +61,12 @@ describe.skipIf(!run)("esnaf rezervasyon aramasi (gercek DB)", () => {
       });
       ids[key] = b.id;
     };
-    await booking("ilker", { shopId: shopA, guestId: ilker });
+    await booking("ilker", { shopId: shopA, guestId: ilker, checkOutTime: new Date(Date.now() + 2 * 3600_000) });
     await booking("ayse", { shopId: shopA2, guestId: other });
     await booking("guestPhone", { shopId: shopA, guestEmail: `g-${suf}@test.local`, guestPhone: "(0532) 765-4321" });
     await booking("otherPartner", { shopId: shopB, guestId: sameNameOtherPartner });
+    // Ayni ada ikinci rezervasyon, daha erken bitis: siralamayi olcer.
+    await booking("ilkerOld", { shopId: shopA2, guestId: ilker, checkOutTime: new Date(Date.now() + 1800_000) });
   });
 
   afterAll(async () => {
@@ -75,7 +80,7 @@ describe.skipIf(!run)("esnaf rezervasyon aramasi (gercek DB)", () => {
 
   it("ad: harf ve Turkce aksan duyarsiz 'icerir'", async () => {
     for (const q of ["ilker", "İlker", "ILKER", "şahin", "SAHIN", "lker ş"]) {
-      expect(await findPartnerBookingIds(own(), q), q).toEqual([ids.ilker]);
+      expect(await findPartnerBookingIds(own(), q), q).toEqual([ids.ilker, ids.ilkerOld]);
     }
   });
 
@@ -96,8 +101,8 @@ describe.skipIf(!run)("esnaf rezervasyon aramasi (gercek DB)", () => {
   });
 
   it("telefon: >=4 rakam, rakamlarin SONU; misafir sutunu da taranir", async () => {
-    expect(await findPartnerBookingIds(own(), "2233")).toEqual([ids.ilker]);
-    expect(await findPartnerBookingIds(own(), "111 2233")).toEqual([ids.ilker]);
+    expect(await findPartnerBookingIds(own(), "2233")).toEqual([ids.ilker, ids.ilkerOld]);
+    expect(await findPartnerBookingIds(own(), "111 2233")).toEqual([ids.ilker, ids.ilkerOld]);
     expect(await findPartnerBookingIds(own(), "4321")).toEqual([ids.guestPhone]);
     // Sonu degil: eslesmez.
     expect(await findPartnerBookingIds(own(), "5551")).not.toContain(ids.ilker);
@@ -107,5 +112,10 @@ describe.skipIf(!run)("esnaf rezervasyon aramasi (gercek DB)", () => {
     expect(await findPartnerBookingIds(own(), "%%")).toEqual([]);
     expect(await findPartnerBookingIds(own(), "e_y")).toEqual([ids.ayse]);
     expect(await findPartnerBookingIds(own(), "a_")).toEqual([]);
+  });
+
+  it("sira deterministik (bitis yeniden eskiye) ve toplam gercek sayi", async () => {
+    const r = await search(own(), "ilker");
+    expect(r).toEqual({ ids: [ids.ilker, ids.ilkerOld], total: 2, truncated: false });
   });
 });

@@ -365,7 +365,8 @@
     "partnerCloseKeep": "Vazgeç",
     "partnerBookingsSearchLabel": "Rezervasyon ara",
     "partnerBookingsSearchPlaceholder": "Kod, misafir adı ya da telefonun son 4 hanesi",
-    "partnerBookingsSearchSubmit": "Ara"
+    "partnerBookingsSearchSubmit": "Ara",
+    "partnerBookingsSearchTruncated": "{total} eşleşme var; en yeni {count} tanesi gösteriliyor. Aramayı daraltın."
   },
   "Guest": {
     "heroTitle": "Valizini Güvenle Bırak, Özgürce Gez",

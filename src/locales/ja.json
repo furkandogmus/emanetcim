@@ -365,7 +365,8 @@
     "partnerCloseKeep": "戻る",
     "partnerBookingsSearchLabel": "予約を検索",
     "partnerBookingsSearchPlaceholder": "予約コード、ゲスト名、または電話番号の下4桁",
-    "partnerBookingsSearchSubmit": "検索"
+    "partnerBookingsSearchSubmit": "検索",
+    "partnerBookingsSearchTruncated": "{total}件一致。最新の{count}件を表示しています。検索を絞り込んでください。"
   },
   "Guest": {
     "heroTitle": "荷物を預けて、身軽に街へ",

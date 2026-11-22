@@ -365,7 +365,8 @@
     "partnerCloseKeep": "Zurück",
     "partnerBookingsSearchLabel": "Buchungen suchen",
     "partnerBookingsSearchPlaceholder": "Code, Gastname oder letzte 4 Ziffern der Telefonnummer",
-    "partnerBookingsSearchSubmit": "Suchen"
+    "partnerBookingsSearchSubmit": "Suchen",
+    "partnerBookingsSearchTruncated": "{total} Treffer; die neuesten {count} werden angezeigt. Grenzen Sie die Suche ein."
   },
   "Guest": {
     "heroTitle": "Gepäck abgeben, die Stadt frei erkunden",
