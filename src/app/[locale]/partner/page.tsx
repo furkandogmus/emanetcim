@@ -12,6 +12,7 @@ import { moneyToNumber } from "@/lib/money";
 import { requirePartnerPage } from "@/lib/page-auth";
 import { resolvePartnerShops } from "@/lib/partner-shop";
 import PartnerClient from "@/components/partner/PartnerClient";
+import { bookingTimeZone } from "@/lib/format-datetime";
 
 /**
  * Esnaf Ana Sayfası — Partner Dashboard (Server Component)
@@ -126,6 +127,7 @@ export default async function PartnerPage({
       totalEarnings={totals.gross}
       merchantShareRatio={commission.merchantShareRatio}
       initialCapacity={shopDetail.capacity}
+      shopTimeZone={bookingTimeZone(shopDetail)}
       initialPricePerDay={moneyToNumber(shopDetail.pricePerDay) || marketPrice}
       marketPrice={marketPrice}
       bookings={JSON.parse(JSON.stringify(bookings))}
