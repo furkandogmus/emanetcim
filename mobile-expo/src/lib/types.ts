@@ -2,6 +2,7 @@
  * Mobil API govdeleri. Kaynak: `../../src/lib/mobile-dto.ts` (web reposu) ve
  * uclarin kendisi. Orada bir alan degisirse burasi da degismeli.
  */
+import type { CancelReason } from "./booking-state";
 
 export type Role = "GUEST" | "PARTNER" | "ADMIN";
 
@@ -128,7 +129,6 @@ export type BookingSummary = {
 };
 
 export type { CancelReason } from "./booking-state";
-import type { CancelReason } from "./booking-state";
 
 export type BookingDetail = BookingSummary & {
   qrCodeToken: string | null;
