@@ -81,7 +81,11 @@ export async function unregisterPush(bearer?: string | DetachedSession): Promise
   await api("/push/register", { method: "DELETE", body: { token }, bearer }).catch(() => undefined);
 }
 
-/** Bildirime dokununca ilgili rezervasyon acilir; role gore misafir ya da esnaf ekrani. */
+/**
+ * Bildirime dokununca ilgili rezervasyon acilir; role gore misafir ya da esnaf ekrani.
+ * `bookingId` tasimayan bildirim (yonetici duyurusu) hicbir yere yonlendirmez: uygulama
+ * oldugu yerde one gelir, soguk acilista capa rota (`index.tsx`) role gore ana sayfayi acar.
+ */
 export function openFromNotification(response: Notifications.NotificationResponse, role: Role | null) {
   const bookingId = response.notification.request.content.data?.bookingId;
   if (typeof bookingId !== "string" || !role) return;
