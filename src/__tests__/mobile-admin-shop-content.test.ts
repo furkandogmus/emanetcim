@@ -117,6 +117,30 @@ describe("yonetici herhangi bir dukkanin fotograf ve saatini duzenler", () => {
   });
 });
 
+describe("olmayan dukkan", () => {
+  it("saat ucu dort yontemde de 404 doner, servise inmez", async () => {
+    db.shop.findUnique.mockResolvedValue(null);
+    const c = ctx({ id: "yok" });
+    const yanitlar = [
+      await adminSchedule.GET(req("/admin/shops/yok/schedule"), c),
+      await adminSchedule.PUT(req("/admin/shops/yok/schedule", json("PUT", week)), ctx({ id: "yok" })),
+      await adminSchedule.POST(
+        req("/admin/shops/yok/schedule", json("POST", { startDate: "2099-01-01", endDate: "2099-01-01" })),
+        ctx({ id: "yok" }),
+      ),
+      await adminSchedule.DELETE(req("/admin/shops/yok/schedule?closureId=c1", { method: "DELETE" }), ctx({ id: "yok" })),
+    ];
+    for (const r of yanitlar) {
+      expect(r?.status).toBe(404);
+      expect(await r?.json()).toEqual({ error: "not_found" });
+    }
+    expect(svc.getScheduleView).not.toHaveBeenCalled();
+    expect(svc.saveWeeklyHours).not.toHaveBeenCalled();
+    expect(svc.addClosure).not.toHaveBeenCalled();
+    expect(svc.removeClosure).not.toHaveBeenCalled();
+  });
+});
+
 describe("kapi", () => {
   it("esnaf ve misafir admin uclarinda 403 alir, servis cagrilmaz", async () => {
     for (const role of ["PARTNER", "GUEST"]) {
