@@ -26,11 +26,12 @@ function matches(r: Row, where: Record<string, unknown> = {}) {
 const db = vi.hoisted(() => ({
   review: {
     findUnique: vi.fn(),
-    update: vi.fn(),
-    delete: vi.fn(),
+    updateMany: vi.fn(),
+    deleteMany: vi.fn(),
     aggregate: vi.fn(),
   },
   shop: { update: vi.fn() },
+  $transaction: vi.fn(),
 }));
 const audit = vi.hoisted(() => vi.fn());
 
@@ -52,13 +53,26 @@ beforeEach(() => {
   db.review.findUnique.mockImplementation(async ({ where }: { where: { id: string } }) =>
     state.reviews.find((r) => r.id === where.id) ?? null,
   );
-  db.review.update.mockImplementation(async ({ where, data }: { where: { id: string }; data: Partial<Row> }) => {
-    const r = state.reviews.find((x) => x.id === where.id)!;
-    Object.assign(r, data);
-    return r;
+  // Kosullu yazma: `where` gercekten uygulanir (`hiddenAt: null` / `{ not: null }`).
+  db.review.updateMany.mockImplementation(async ({ where, data }: { where: Record<string, unknown> & { id: string }; data: Partial<Row> }) => {
+    const rows = state.reviews.filter((r) => r.id === where.id && matches(r, where));
+    rows.forEach((r) => Object.assign(r, data));
+    return { count: rows.length };
   });
-  db.review.delete.mockImplementation(async ({ where }: { where: { id: string } }) => {
+  db.review.deleteMany.mockImplementation(async ({ where }: { where: { id: string } }) => {
+    const before = state.reviews.length;
     state.reviews = state.reviews.filter((r) => r.id !== where.id);
+    return { count: before - state.reviews.length };
+  });
+  // Satir kilidi gibi: islemler sirayla calisir, ikincisi birincinin yazdigini gorur.
+  let lock = Promise.resolve();
+  db.$transaction.mockImplementation((fn: (tx: typeof db) => Promise<unknown>) => {
+    const run = lock.then(() => fn(db));
+    lock = run.then(
+      () => undefined,
+      () => undefined,
+    );
+    return run;
   });
   db.review.aggregate.mockImplementation(async ({ where }: { where: Record<string, unknown> }) => {
     const rows = state.reviews.filter((r) => matches(r, where));
@@ -143,9 +157,50 @@ describe("ReviewService.moderate", () => {
       ok: false,
       reason: "already_hidden",
     });
-    expect(db.review.update).not.toHaveBeenCalled();
-    expect(db.review.delete).not.toHaveBeenCalled();
     expect(db.shop.update).not.toHaveBeenCalled();
+    expect(audit).not.toHaveBeenCalled();
+  });
+});
+
+describe("eszamanli moderasyon", () => {
+  it("iki yonetici ayni anda siler: biri basarili, digeri not_found (500 degil); tek kayit", async () => {
+    const [a, b] = await Promise.all([
+      reviewService.moderate({ reviewId: "r1", action: "delete", reason: "Spam", actor: ADMIN }),
+      reviewService.moderate({ reviewId: "r1", action: "delete", reason: "Spam", actor: { id: "admin-2" } }),
+    ]);
+    expect([a.ok, b.ok].sort()).toEqual([false, true]);
+    expect([a, b].find((r) => !r.ok)).toEqual({ ok: false, reason: "not_found" });
+    expect(audit).toHaveBeenCalledTimes(1);
+    expect(state.shopRating.get("s1")).toBe(5);
+  });
+
+  it("iki yonetici ayni anda gizler: biri basarili, digeri already_hidden; tek kayit", async () => {
+    const [a, b] = await Promise.all([
+      reviewService.moderate({ reviewId: "r1", action: "hide", reason: "Hakaret", actor: ADMIN }),
+      reviewService.moderate({ reviewId: "r1", action: "hide", reason: "Kufur", actor: { id: "admin-2" } }),
+    ]);
+    expect([a.ok, b.ok].sort()).toEqual([false, true]);
+    expect([a, b].find((r) => !r.ok)).toEqual({ ok: false, reason: "already_hidden" });
+    expect(audit).toHaveBeenCalledTimes(1);
+    // Ilk yazanin gerekcesi kalir, ikincisi uzerine yazmaz.
+    expect(state.reviews.find((r) => r.id === "r1")).toMatchObject({ hiddenReason: "Hakaret" });
+  });
+
+  it("silme ile gizleme yarisir: gizleme not_found doner, already_hidden degil", async () => {
+    const [del, hide] = await Promise.all([
+      reviewService.moderate({ reviewId: "r1", action: "delete", reason: "Spam", actor: ADMIN }),
+      reviewService.moderate({ reviewId: "r1", action: "hide", reason: "Hakaret", actor: { id: "admin-2" } }),
+    ]);
+    expect(del.ok).toBe(true);
+    expect(hide).toEqual({ ok: false, reason: "not_found" });
+  });
+
+  it("yazma ve ortalama ayni islemde: ortalama hesabi patlarsa denetim kaydi dusmez", async () => {
+    db.shop.update.mockRejectedValueOnce(new Error("db down"));
+    await expect(
+      reviewService.moderate({ reviewId: "r1", action: "hide", reason: "Hakaret", actor: ADMIN }),
+    ).rejects.toThrow("db down");
+    expect(db.$transaction).toHaveBeenCalledTimes(1);
     expect(audit).not.toHaveBeenCalled();
   });
 });
