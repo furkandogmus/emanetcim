@@ -27,6 +27,8 @@ import logger from "@/lib/logger";
 import { couponService } from "@/services/CouponService";
 import { referralService } from "@/services/ReferralService";
 import { requireUser } from "@/lib/action-auth";
+import { canAccessBooking } from "@/services/booking/access";
+import { selfCancelReason } from "@/services/booking/closure";
 import type {
   CancelBookingErrorCode,
   ModifyBookingErrorCode,
@@ -396,12 +398,15 @@ export async function cancelBookingAction(bookingId: string) {
     return { success: false, error: "Errors.bookingNotFound" };
   }
 
-  if (booking.guestId !== auth.actor.id && auth.actor.role !== "ADMIN") {
+  if (!canAccessBooking(booking, auth.actor, { allowShopPartner: false })) {
     return { success: false, error: "Errors.unauthorized" };
   }
 
   try {
-    const result = await bookingService.cancelBooking(bookingId);
+    const result = await bookingService.cancelBooking(bookingId, {
+      actor: { id: auth.actor.id, role: auth.actor.role },
+      reason: selfCancelReason(booking, auth.actor),
+    });
 
     if (result.ok) {
       revalidatePathAllLocales("/bookings");

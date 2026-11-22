@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { NextRequest } from "next/server";
 import { toMobileAdminBookingRow } from "@/lib/mobile-dto";
+import { withCancelReasons } from "@/services/booking/cancel-reason";
 import { requireMobileUser, requireRole } from "@/lib/mobile-auth";
 import { parseCursor } from "@/lib/cursor-page";
 import { ADMIN_BOOKING_FILTERS, adminOpsService, type AdminBookingFilter } from "@/services/AdminOpsService";
@@ -23,5 +24,5 @@ export async function GET(req: NextRequest) {
   const q = (sp.get("q") ?? "").slice(0, 80);
 
   const page = await adminOpsService.listBookingsPage({ filter, q, cursor: parseCursor(sp.get("cursor")) });
-  return NextResponse.json({ bookings: page.items.map(toMobileAdminBookingRow), nextCursor: page.nextCursor });
+  return NextResponse.json({ bookings: (await withCancelReasons(page.items)).map(toMobileAdminBookingRow), nextCursor: page.nextCursor });
 }
