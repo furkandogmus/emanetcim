@@ -89,7 +89,8 @@ export default function PWAInstallBanner() {
       // 2026-08-21: 4.5rem -> 6rem, ayni sebep CheckoutClient.tsx'teki footer'la ayni
       // (mobil alt nav gercek yuksekligi ~80px, 4.5rem=72px yetersizdi)
       className="fixed z-[45] max-md:bottom-[calc(6rem+env(safe-area-inset-bottom))] max-md:left-3 max-md:right-3 md:bottom-4 md:right-4 md:left-auto md:max-w-sm"
-      role="dialog"
+      // Modal degil (arka plani kilitlemiyor): `dialog` rolu ekran okuyucuya yanlis soyluyordu.
+      role="region"
       aria-labelledby="pwa-install-title"
     >
       <div className="flex gap-3 rounded-2xl border border-gray-100 bg-white p-4 shadow-xl shadow-gray-200/50">
