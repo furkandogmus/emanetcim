@@ -3,7 +3,7 @@
 import { signOut, useSession } from 'next-auth/react';
 import type { LucideIcon } from 'lucide-react';
 import { User, LogOut, Shield, Store, ChevronDown, Fingerprint } from 'lucide-react';
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useId, useRef, useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Link } from '@/i18n/routing';
 import { useTranslations } from 'next-intl';
@@ -13,7 +13,15 @@ export default function UserNav() {
   const { data: session, status } = useSession();
   const [isOpen, setIsOpen] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
+  const buttonRef = useRef<HTMLButtonElement>(null);
+  const panelId = useId();
 
+  /*
+    Aciklama (disclosure) deseni: dugme + aria-expanded/aria-controls + duz bir
+    baglanti listesi. Eskiden role="menu"/"menuitem" ilan ediliyordu ama ok
+    tuslari yoktu; ekran okuyucu "menu" deyince kullanici oklari deniyor ve
+    hicbir sey olmuyordu. Escape kapatir ve odagi dugmeye geri verir.
+  */
   useEffect(() => {
     if (!isOpen) return;
     const handlePointerDown = (event: MouseEvent) => {
@@ -22,7 +30,10 @@ export default function UserNav() {
       }
     };
     const handleEsc = (event: KeyboardEvent) => {
-      if (event.key === 'Escape') setIsOpen(false);
+      if (event.key === 'Escape') {
+        setIsOpen(false);
+        buttonRef.current?.focus();
+      }
     };
     document.addEventListener('mousedown', handlePointerDown);
     document.addEventListener('keydown', handleEsc);
@@ -70,9 +81,10 @@ export default function UserNav() {
     <div className="relative" ref={menuRef}>
       <button 
         type="button"
+        ref={buttonRef}
         onClick={() => setIsOpen(!isOpen)}
         aria-expanded={isOpen}
-        aria-haspopup="menu"
+        aria-controls={panelId}
         className="flex items-center gap-3 bg-white border border-gray-100 p-2 pr-4 rounded-full shadow-sm hover:shadow-md transition-all active:scale-95"
       >
         <div className="w-8 h-8 rounded-full bg-orange-50 text-orange-600 flex items-center justify-center font-bold text-sm">
@@ -91,7 +103,7 @@ export default function UserNav() {
             initial={{ opacity: 0, y: 10, scale: 0.95 }}
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={{ opacity: 0, y: 10, scale: 0.95 }}
-            role="menu"
+            id={panelId}
             className="absolute right-0 mt-3 w-56 bg-white rounded-3xl shadow-2xl border border-gray-100 overflow-hidden z-[100]"
           >
             <div className="p-6 border-b border-gray-100 bg-gray-50/50">
@@ -102,39 +114,42 @@ export default function UserNav() {
                <p className="text-xs font-bold text-gray-500 truncate">{session?.user?.email}</p>
             </div>
 
-            <div className="p-2">
-              <Link 
-                href={session?.user?.role === 'PARTNER' ? '/partner' : session?.user?.role === 'ADMIN' ? '/admin' : '/bookings'}
-                onClick={() => setIsOpen(false)}
-                role="menuitem"
-                className="flex items-center gap-3 w-full p-4 hover:bg-gray-50 rounded-2xl transition-colors text-sm font-bold text-gray-700 cursor-pointer"
-              >
-                <Icon size={18} />
-                {session?.user?.role === 'ADMIN' ? t('navAdminPanel') : session?.user?.role === 'PARTNER' ? t('navPartnerPanel') : t('navBookings')}
-              </Link>
-
-              {session?.user?.role === 'GUEST' ? (
+            <ul className="p-2">
+              <li>
                 <Link
-                  href="/account/privacy"
+                  href={session?.user?.role === 'PARTNER' ? '/partner' : session?.user?.role === 'ADMIN' ? '/admin' : '/bookings'}
                   onClick={() => setIsOpen(false)}
-                  role="menuitem"
                   className="flex items-center gap-3 w-full p-4 hover:bg-gray-50 rounded-2xl transition-colors text-sm font-bold text-gray-700 cursor-pointer"
                 >
-                  <Fingerprint size={18} />
-                  {t('navPrivacyData')}
+                  <Icon size={18} aria-hidden />
+                  {session?.user?.role === 'ADMIN' ? t('navAdminPanel') : session?.user?.role === 'PARTNER' ? t('navPartnerPanel') : t('navBookings')}
                 </Link>
+              </li>
+
+              {session?.user?.role === 'GUEST' ? (
+                <li>
+                  <Link
+                    href="/account/privacy"
+                    onClick={() => setIsOpen(false)}
+                    className="flex items-center gap-3 w-full p-4 hover:bg-gray-50 rounded-2xl transition-colors text-sm font-bold text-gray-700 cursor-pointer"
+                  >
+                    <Fingerprint size={18} aria-hidden />
+                    {t('navPrivacyData')}
+                  </Link>
+                </li>
               ) : null}
-              
-              <button 
-                type="button"
-                role="menuitem"
-                onClick={() => signOut()}
-                className="flex items-center gap-3 w-full p-4 hover:bg-red-50 rounded-2xl transition-colors text-sm font-bold text-red-600"
-              >
-                <LogOut size={18} />
-                {t('signOut')}
-              </button>
-            </div>
+
+              <li>
+                <button
+                  type="button"
+                  onClick={() => signOut()}
+                  className="flex items-center gap-3 w-full p-4 hover:bg-red-50 rounded-2xl transition-colors text-sm font-bold text-red-600"
+                >
+                  <LogOut size={18} aria-hidden />
+                  {t('signOut')}
+                </button>
+              </li>
+            </ul>
           </motion.div>
         )}
       </AnimatePresence>
