@@ -1,4 +1,4 @@
-import { Pressable, StyleSheet, View } from "react-native";
+import { Keyboard, Pressable, StyleSheet, View } from "react-native";
 import { Check } from "lucide-react-native";
 import { useTranslation } from "react-i18next";
 
@@ -96,7 +96,17 @@ export function ReasonSheet({
       />
       {error ? <Banner tone="danger" body={error} /> : null}
       <View style={{ gap: space.sm }}>
-        <Button variant="danger" title={confirmLabel} disabled={!canSubmit} loading={loading} onPress={onConfirm} />
+        <Button
+          variant="danger"
+          title={confirmLabel}
+          disabled={!canSubmit}
+          loading={loading}
+          onPress={() => {
+            // Once islem, sonra klavye: kapanan klavyenin kaydirdigi dugme basisla yarismasin.
+            onConfirm();
+            Keyboard.dismiss();
+          }}
+        />
         <Button variant="ghost" title={t("common.cancel")} disabled={loading} onPress={onClose} />
       </View>
     </Sheet>

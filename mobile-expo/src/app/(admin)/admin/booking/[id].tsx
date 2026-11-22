@@ -73,7 +73,8 @@ function Detail({ b, onWeb }: { b: AdminBookingDetail; onWeb: () => void }) {
       : null;
 
   return (
-    <ScrollView contentContainerStyle={styles.content}>
+    // Modal'daki dokunus React agacinda bu ScrollView'dan da gecer: "never" iken klavye acikken ilk dokunusu panelin onay dugmesinden calar.
+    <ScrollView contentContainerStyle={styles.content} keyboardShouldPersistTaps="handled">
       {lateDays >= 1 ? (
         <Banner tone="danger" title={t("admin.lateDays", { count: lateDays })} body={t("admin.lateBody")} />
       ) : null}
