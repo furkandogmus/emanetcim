@@ -22,8 +22,14 @@ export async function POST(req: NextRequest) {
   if ("error" in auth) return auth.error;
   const forbid = requireRole(auth.user, ["ADMIN"]) ?? forbidWhileImpersonatingBroadcast(auth.user);
   if (forbid) return forbid;
-  const body = await readObjectBody(req);
-  const result = await createBroadcast(auth.user, body, { ip: clientIp(req) });
+  // Kabul edilen alanlar burada acikca: mobil sozlesme testi istemcinin gonderdigi
+  // her alanin bu ucta adiyla gectigini dogruluyor; dogrulama serviste.
+  const { audience, titleTr, bodyTr, titleEn, bodyEn, reason } = await readObjectBody(req);
+  const result = await createBroadcast(
+    auth.user,
+    { audience, titleTr, bodyTr, titleEn, bodyEn, reason },
+    { ip: clientIp(req) },
+  );
   if (!result.ok) {
     return result.code === "too_soon"
       ? broadcastError(result.code, { retryAfterSeconds: result.retryAfterSeconds })
