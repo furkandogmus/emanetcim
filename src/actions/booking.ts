@@ -27,8 +27,7 @@ import logger from "@/lib/logger";
 import { couponService } from "@/services/CouponService";
 import { referralService } from "@/services/ReferralService";
 import { requireUser } from "@/lib/action-auth";
-import { canAccessBooking } from "@/services/booking/access";
-import { selfCancelReason } from "@/services/booking/closure";
+import { canGuestSelfCancel } from "@/services/booking/access";
 import type {
   CancelBookingErrorCode,
   ModifyBookingErrorCode,
@@ -398,14 +397,15 @@ export async function cancelBookingAction(bookingId: string) {
     return { success: false, error: "Errors.bookingNotFound" };
   }
 
-  if (!canAccessBooking(booking, auth.actor, { allowShopPartner: false })) {
+  // Yonetici baskasinin rezervasyonunu `adminCancelBookingAction` ile iptal eder.
+  if (!canGuestSelfCancel(booking, auth.actor)) {
     return { success: false, error: "Errors.unauthorized" };
   }
 
   try {
     const result = await bookingService.cancelBooking(bookingId, {
       actor: { id: auth.actor.id, role: auth.actor.role },
-      reason: selfCancelReason(booking, auth.actor),
+      reason: "guest_cancel",
     });
 
     if (result.ok) {
