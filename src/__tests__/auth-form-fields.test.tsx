@@ -85,6 +85,21 @@ describe("LoginClient", () => {
     expect(identity).toHaveAccessibleDescription("invalidCredentials");
     expect(document.activeElement).toBe(identity);
   });
+  it.each([
+    ["tooManyRequests", "tooManyAttempts"],
+    ["UserBanned", "UserBanned"],
+])("%s alan hatası değil: kimlik işaretlenmez, özet gösterilir", async (code, text) => {
+    signIn.mockResolvedValue({ error: "CredentialsSignin", code });
+    render(<LoginClient />);
+    const identity = screen.getByLabelText("emailOrPhone");
+    fireEvent.change(identity, { target: { value: "a@b.co" } });
+    fireEvent.change(screen.getByLabelText("password"), { target: { value: "x" } });
+    fireEvent.submit(identity.closest("form")!);
+    await waitFor(() => expect(screen.getByRole("alert")).toBeInTheDocument());
+    expect(screen.getByRole("alert").textContent).toContain(text);
+    expect(identity).not.toHaveAttribute("aria-invalid");
+    expect(identity).not.toHaveAttribute("aria-describedby");
+  });
 });
 
 describe("RegisterClient", () => {
