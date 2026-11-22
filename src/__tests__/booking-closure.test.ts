@@ -190,6 +190,7 @@ describe("partnerCancelBooking", () => {
       reason: "partner_cancel",
       detail: "shop_closed",
       note: null,
+      notifyPartner: false,
     });
   });
 
@@ -226,9 +227,10 @@ describe("partnerCancelBooking", () => {
     }
   });
 
-  it("admin de esnaf iptali yapabilir", async () => {
+  it("admin de esnaf iptali yapabilir; o zaman dukkana haber verilir", async () => {
     m.prisma.booking.findUnique.mockResolvedValue(booking("PENDING"));
     expect((await partnerCancelBooking("b1", ADMIN, { reason: "guest_request" })).ok).toBe(true);
+    expect(m.cancelBooking).toHaveBeenCalledWith("b1", expect.objectContaining({ notifyPartner: true }));
   });
 });
 
@@ -248,6 +250,7 @@ describe("markNoShow", () => {
     expect(m.cancelBooking).toHaveBeenCalledWith("b1", {
       actor: { id: "owner-1", role: "PARTNER", impersonatedBy: null },
       reason: "no_show",
+      notifyPartner: false,
     });
   });
 
@@ -256,6 +259,12 @@ describe("markNoShow", () => {
       m.prisma.booking.findUnique.mockResolvedValue(booking(status));
       expect(await markNoShow("b1", OWNER, at(600)), status).toEqual({ ok: false, code: "INVALID_STATUS" });
     }
+  });
+
+  it("yonetici isaretlerse dukkana haber verilir", async () => {
+    m.prisma.booking.findUnique.mockResolvedValue(booking("PAID"));
+    expect(await markNoShow("b1", ADMIN, at(600))).toEqual({ ok: true });
+    expect(m.cancelBooking).toHaveBeenCalledWith("b1", expect.objectContaining({ reason: "no_show", notifyPartner: true }));
   });
 
   it("baska dukkanin esnafi forbidden, olmayan kayit not_found", async () => {

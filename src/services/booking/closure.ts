@@ -67,6 +67,11 @@ function loadBooking(bookingId: string) {
   });
 }
 
+/** Esnaf islemini dukkan sahibi degil (yonetici) yaptiysa dukkan haberdar edilir. */
+function isShopOwner(booking: { shop: { ownerId: string } }, actor: ClosureActor): boolean {
+  return booking.shop.ownerId === actor.id;
+}
+
 function fromCancelFailure(code: string): ClosureErrorCode {
   return code === 'NOT_FOUND' || code === 'INVALID_STATUS' ? code : 'UNKNOWN';
 }
@@ -164,6 +169,7 @@ export async function partnerCancelBooking(
     reason: 'partner_cancel',
     detail: input.reason,
     note: note || null,
+    notifyPartner: !isShopOwner(booking, actor),
   });
   return result.ok ? { ok: true } : { ok: false, code: fromCancelFailure(result.code) };
 }
@@ -181,7 +187,11 @@ export async function markNoShow(
   if (!availableAt) return { ok: false, code: 'INVALID_STATUS' };
   if (now.getTime() < availableAt.getTime()) return { ok: false, code: 'TOO_EARLY' };
 
-  const result = await cancelBooking(bookingId, { actor: paymentActor(actor), reason: 'no_show' });
+  const result = await cancelBooking(bookingId, {
+    actor: paymentActor(actor),
+    reason: 'no_show',
+    notifyPartner: !isShopOwner(booking, actor),
+  });
   return result.ok ? { ok: true } : { ok: false, code: fromCancelFailure(result.code) };
 }
 
