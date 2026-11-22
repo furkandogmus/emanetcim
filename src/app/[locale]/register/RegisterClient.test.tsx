@@ -50,18 +50,21 @@ describe("RegisterClient UI Validation", () => {
     fireEvent.click(partnerTab);
 
     // Fill name and password
-    fireEvent.change(screen.getByPlaceholderText("Auth.fullName"), { target: { value: "John Doe" } });
-    fireEvent.change(screen.getByPlaceholderText("Auth.password"), { target: { value: "password123" } });
-    fireEvent.change(screen.getByPlaceholderText("Auth.shopName"), { target: { value: "Excellent Shop" } });
+    fireEvent.change(screen.getByLabelText("Auth.fullName"), { target: { value: "John Doe" } });
+    fireEvent.change(screen.getByLabelText("Auth.password"), { target: { value: "password123" } });
+    fireEvent.change(screen.getByLabelText("Auth.shopName"), { target: { value: "Excellent Shop" } });
     
     // Fill invalid phone
-    fireEvent.change(screen.getByPlaceholderText("Auth.phonePlaceholder"), { target: { value: "123" } });
+    fireEvent.change(screen.getByLabelText("Auth.phonePlaceholder"), { target: { value: "123" } });
 
     // Submit
     fireEvent.click(screen.getByText("Auth.registerSubmitPartner"));
 
     // Check for error (Errors.invalidTrPhone)
-    expect(screen.getByText("Errors.invalidTrPhone")).toBeInTheDocument();
+    // Ozet (role="alert") + alan duzeyi hata: telefon alani gecersiz ve metne bagli.
+    expect(screen.getByRole("alert")).toHaveTextContent("Errors.invalidTrPhone");
+    expect(screen.getByLabelText("Auth.phonePlaceholder")).toHaveAttribute("aria-invalid", "true");
+    expect(screen.getByLabelText("Auth.phonePlaceholder")).toHaveAccessibleDescription("Errors.invalidTrPhone");
     expect(actions.registerPartnerApplicationAction).not.toHaveBeenCalled();
   });
 
@@ -73,15 +76,15 @@ describe("RegisterClient UI Validation", () => {
 
     render(<RegisterClient />);
 
-    fireEvent.change(screen.getByPlaceholderText("Auth.fullName"), { target: { value: "Jane Doe" } });
-    fireEvent.change(screen.getByPlaceholderText("Auth.email"), { target: { value: "jane@test.com" } });
-    fireEvent.change(screen.getByPlaceholderText("Auth.password"), { target: { value: "password123" } });
+    fireEvent.change(screen.getByLabelText("Auth.fullName"), { target: { value: "Jane Doe" } });
+    fireEvent.change(screen.getByLabelText("Auth.email"), { target: { value: "jane@test.com" } });
+    fireEvent.change(screen.getByLabelText("Auth.password"), { target: { value: "password123" } });
 
     fireEvent.click(screen.getByText("Auth.registerSubmitGuest"));
 
     await waitFor(() => {
       // translateServerError logic in RegisterClient
-      expect(screen.getByText("Errors.emailAlreadyRegistered")).toBeInTheDocument();
+      expect(screen.getByRole("alert")).toHaveTextContent("Errors.emailAlreadyRegistered");
     });
   });
 
@@ -90,9 +93,9 @@ describe("RegisterClient UI Validation", () => {
 
     render(<RegisterClient />);
 
-    fireEvent.change(screen.getByPlaceholderText("Auth.fullName"), { target: { value: "Success User" } });
-    fireEvent.change(screen.getByPlaceholderText("Auth.email"), { target: { value: "success@test.com" } });
-    fireEvent.change(screen.getByPlaceholderText("Auth.password"), { target: { value: "password123" } });
+    fireEvent.change(screen.getByLabelText("Auth.fullName"), { target: { value: "Success User" } });
+    fireEvent.change(screen.getByLabelText("Auth.email"), { target: { value: "success@test.com" } });
+    fireEvent.change(screen.getByLabelText("Auth.password"), { target: { value: "password123" } });
 
     fireEvent.click(screen.getByText("Auth.registerSubmitGuest"));
 
