@@ -947,6 +947,8 @@ export default function CheckoutClient({
                 type="email"
                 inputMode="email"
                 autoComplete="email"
+                required
+                aria-required="true"
                 aria-label={t("checkoutGuestEmailPlaceholder")}
                 placeholder={t("checkoutGuestEmailPlaceholder")}
                 value={guestEmail}
@@ -997,7 +999,8 @@ export default function CheckoutClient({
                 onClick={() => {
                   const email = guestEmail.trim();
                   const phone = guestPhone.trim();
-                  if (!email && !phone) {
+                  // E-posta zorunlu: yonetim bagi ve hesaba baglama ona dayanir (sunucu da reddeder).
+                  if (!email) {
                     setError(t("checkoutGuestContactRequired"));
                     return;
                   }
@@ -1011,7 +1014,7 @@ export default function CheckoutClient({
                     modalin içinde var. Aynı kurallar burada, modal kapanmadan
                     önce çalışıyor ki hata hâlâ görünür alanların yanında kalsın.
                   */
-                  if (email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+                  if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
                     setError(errorText("Errors.invalidEmail"));
                     return;
                   }
