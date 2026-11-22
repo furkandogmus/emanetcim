@@ -888,3 +888,43 @@ export function toMobileAdminBroadcast(b: AdminBroadcastSource) {
     createdByName: b.createdByName,
   };
 }
+
+/* ===================== Admin kullanici yonetimi (detay, denetim kaydi) ===================== */
+
+type AdminUserDetailSource = NonNullable<
+  Awaited<ReturnType<import("@/services/AdminUserService").AdminUserService["getDetail"]>>
+>;
+
+/** `admin/users/[id]`: liste satiri + islem kapilari icin gereken durum. Sifre ozeti bile cikmaz. */
+export function toMobileAdminUserDetail(u: AdminUserDetailSource) {
+  return {
+    ...toMobileAdminUser(u),
+    emailVerified: u.emailVerified != null,
+    hasPassword: u.passwordHash != null,
+    // Ikinci admin onayini bekleyen rol istegi (web `/admin/role-approvals`).
+    pendingRole: u.adminRoleChangeTargets?.requestedRole ?? null,
+  };
+}
+
+type AdminAuditSource = Awaited<
+  ReturnType<import("@/services/AuditLogService").AuditLogService["listPage"]>
+>["items"][number];
+
+/** Mobilde metadata ozeti bu kadar karakterle sinirli; tamami webde. */
+const AUDIT_METADATA_MAX = 600;
+
+/** `admin/audit-log` satiri. */
+export function toMobileAdminAuditEntry(e: AdminAuditSource) {
+  const metadata = e.metadata == null ? null : JSON.stringify(e.metadata);
+  return {
+    id: e.id,
+    action: e.action,
+    actorRole: e.actorRole,
+    actorUserId: e.actorUserId,
+    actorLabel: e.actorLabel,
+    entityType: e.entityType,
+    entityId: e.entityId,
+    metadata: metadata && metadata.length > AUDIT_METADATA_MAX ? `${metadata.slice(0, AUDIT_METADATA_MAX)}…` : metadata,
+    createdAt: e.createdAt.toISOString(),
+  };
+}
