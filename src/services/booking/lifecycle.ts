@@ -80,6 +80,12 @@ export type CancelBookingOptions = {
   note?: string | null;
   /** Alt neden, ornegin esnafin sectigi `shop_closed`. */
   detail?: string | null;
+  /**
+   * Esnafa "iptal edildi" push'u. Verilmezse esnaf kaynakli nedenlerde
+   * (partner_cancel, no_show) gitmez; islemi dukkan sahibi DEGIL de yonetici
+   * yaptiysa cagiran `true` gecer.
+   */
+  notifyPartner?: boolean;
 };
 
 export async function cancelBooking(
@@ -241,8 +247,8 @@ export async function cancelBooking(
 
   if (!opts.silent) {
     const reason = opts.reason ?? 'guest_cancel';
-    // Iptali esnafin kendisi yaptiysa ona "iptal edildi" demek anlamsiz.
-    if (reason !== 'partner_cancel' && reason !== 'no_show') {
+    const partnerReason = reason === 'partner_cancel' || reason === 'no_show';
+    if (opts.notifyPartner ?? !partnerReason) {
       void notificationService
         .notifyPartnerBookingChange({ bookingId, kind: 'cancelled' })
         .catch((err) => logger.error({ err, bookingId }, 'notify_partner_booking_cancelled_failed'));
