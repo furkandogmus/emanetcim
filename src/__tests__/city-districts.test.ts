@@ -100,6 +100,36 @@ describe("CityCoverageService.districts", () => {
     expect(d.longitude).toBeCloseTo(30.7);
   });
 
+  it("yaricap: en az 15 km, uzak dukkani merkezden + 3 km payla kapsar", async () => {
+    findMany.mockResolvedValue([
+      shop("İstanbul", "Kadıköy", 40.99, 29.03),
+      // Sile: tek basina bir "ilce", 15 km taban.
+      shop("İstanbul", "Şile", 41.17, 29.61),
+      // Iki dukkan ~0.4 derece (~44 km) arayla: merkez ortada, yaricap ~22 km + 3 km.
+      shop("İstanbul", "Çatalca", 41.14, 28.26),
+      shop("İstanbul", "Çatalca", 41.14, 28.79),
+    ]);
+    const list = await new CityCoverageService().districts("istanbul");
+    expect(list.find((d) => d.slug === "sile")!.radiusM).toBe(15_000);
+    const catalca = list.find((d) => d.slug === "catalca")!;
+    expect(catalca.longitude).toBeCloseTo(28.525, 6);
+    // Merkezden her dukkana ~22.2 km.
+    expect(catalca.radiusM).toBeGreaterThan(24_500);
+    expect(catalca.radiusM).toBeLessThan(25_800);
+  });
+
+  it("soguk onbellekte ayni anda gelen istekler tek sorgu calistirir", async () => {
+    let release!: (v: unknown[]) => void;
+    findMany.mockReturnValue(new Promise((r) => (release = r)));
+    const svc = new CityCoverageService();
+    const a = svc.districts("istanbul", 0);
+    const b = svc.districts("ankara", 0);
+    release([shop("İstanbul", "Kadıköy", 41, 29)]);
+    expect((await a).map((d) => d.slug)).toEqual(["kadikoy"]);
+    expect(await b).toEqual([]);
+    expect(findMany).toHaveBeenCalledTimes(1);
+  });
+
   it("10 dk onbellekte tutar", async () => {
     findMany.mockResolvedValue([]);
     const svc = new CityCoverageService();
@@ -122,11 +152,11 @@ describe("GET /api/mobile/cities/[city]/districts", () => {
     expect(await res.json()).toEqual({ districts: [] });
   });
 
-  it("govde mobile-dto bicimi: name, slug, shopCount, latitude, longitude", async () => {
+  it("govde mobile-dto bicimi: name, slug, shopCount, latitude, longitude, radiusM", async () => {
     // Ayni onbellek (bir onceki test doldurdu): Istanbul'da tek dukkan.
     const res = await call("istanbul");
     expect(await res.json()).toEqual({
-      districts: [{ name: "Kadıköy", slug: "kadikoy", shopCount: 1, latitude: 41, longitude: 29 }],
+      districts: [{ name: "Kadıköy", slug: "kadikoy", shopCount: 1, latitude: 41, longitude: 29, radiusM: 15_000 }],
     });
   });
 });

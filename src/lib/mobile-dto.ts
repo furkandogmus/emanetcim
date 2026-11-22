@@ -818,6 +818,7 @@ export function toMobileDistrict(d: import("@/services/CityCoverageService").Dis
     shopCount: d.shopCount,
     latitude: d.latitude,
     longitude: d.longitude,
+    radiusM: d.radiusM,
   };
 }
 
