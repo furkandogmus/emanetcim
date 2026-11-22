@@ -3,6 +3,17 @@
 #
 #   npm run update:production -- --message "kisa aciklama"
 #
+# Bir surumde ayni commit birden cok runtime'a yayinlanir. `npm run verify` yalnizca
+# ilk cagrida kosar; sonrakiler OTA_SKIP_VERIFY=1 ile ayni HEAD'in kaydini kullanir:
+#
+#   npm run update:production -- --message "..."                    # verify kosar
+#   OTA_SKIP_VERIFY=1 OTA_RUNTIME=0.3.2 npm run update:production -- --message "..."
+#   OTA_SKIP_VERIFY=1 OTA_RUNTIME=0.3.1 npm run update:production -- --message "..."
+#
+# Kayit (.git icinde, bu checkout'a ozel) verify'in GECTIGI HEAD'i tutar. HEAD farkliysa
+# ya da kayit yoksa OTA_SKIP_VERIFY=1 olsa bile verify kosar. Temiz agac ve main ==
+# origin/main kapilari her cagrida yine calisir.
+#
 # `eas update`, eas.json'daki derleme `env`ini OKUMAZ ve EAS'ta tanimli ortam degiskeni
 # yok. 2026-11-18'de bu yuzden yayinlanan guncelleme API adresi olarak varsayilan
 # emulator adresini (10.0.2.2) tasidi; uygulama sunucuya baglanamaz oldu. Degerler burada
@@ -36,8 +47,20 @@ if [ "$(git rev-parse HEAD)" != "$(git rev-parse origin/main)" ]; then
   exit 1
 fi
 
-# CI ile ayni kapi: tip, lint, locale paritesi, testler.
-npm run verify
+# CI ile ayni kapi: tip, lint, locale paritesi, testler. Ayni HEAD icin tekrar
+# kosturulmaz (bkz. baslik); kayit yalnizca verify GECERSE yazilir.
+head_sha="$(git rev-parse HEAD)"
+verify_marker="$(git rev-parse --git-path bagajpark-ota-verified-head)"
+if [ "${OTA_SKIP_VERIFY:-}" = "1" ] && [ -f "$verify_marker" ] \
+  && [ "$(cat "$verify_marker")" = "$head_sha" ]; then
+  echo "verify atlandi: $head_sha bu checkout'ta zaten dogrulandi"
+else
+  if [ "${OTA_SKIP_VERIFY:-}" = "1" ]; then
+    echo "OTA_SKIP_VERIFY=1 ama $head_sha icin verify kaydi yok; verify kosuyor" >&2
+  fi
+  npm run verify
+  printf '%s\n' "$head_sha" > "$verify_marker"
+fi
 
 eval "$(node -e '
 const env = require("./eas.json").build.production.env || {};
