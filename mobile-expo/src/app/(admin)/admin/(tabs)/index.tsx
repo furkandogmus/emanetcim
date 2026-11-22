@@ -3,7 +3,7 @@ import { Linking, Pressable, RefreshControl, ScrollView, StyleSheet, View } from
 import { SafeAreaView } from "react-native-safe-area-context";
 import { router } from "expo-router";
 import type { Href } from "expo-router";
-import { ChevronRight, ExternalLink, User, Users } from "lucide-react-native";
+import { ChevronRight, ExternalLink, Megaphone, User, Users } from "lucide-react-native";
 import { useTranslation } from "react-i18next";
 
 import { LuggageTag, MapSnippet } from "@/components/Illustrations";
@@ -159,6 +159,12 @@ function Dashboard({
             icon={<Users size={18} color={colors.inkSecondary} />}
             label={t("admin.users")}
             onPress={() => router.push("/admin/users")}
+          />
+          {/* Yonetim araclari burada (Kullanicilar'in yaninda): gelen kutusu bir okuma ekrani, duyuru bir eylem. */}
+          <LinkRow
+            icon={<Megaphone size={18} color={colors.inkSecondary} />}
+            label={t("admin.broadcast")}
+            onPress={() => router.push("/admin/broadcast")}
           />
         </LinkGroup>
       </Section>
