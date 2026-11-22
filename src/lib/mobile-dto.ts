@@ -14,7 +14,6 @@ import type { PartnerDashboardSnapshot } from "@/services/PartnerDashboardServic
 import type { PaymentsLedger } from "@/services/AdminPaymentsService";
 import type { PlatformSettingsValues } from "@/services/PlatformSettingsService";
 import {
-  PLATFORM_SETTINGS_CONFIRM_PHRASE,
   RISKY_PLATFORM_SETTING_FIELDS,
   isRiskyFeatureFlag,
 } from "@/lib/admin-risky-settings";
@@ -1012,7 +1011,7 @@ export function toMobileAdminPayments(l: PaymentsLedger) {
   };
 }
 
-/** Her alan `risky` bayragiyla: istemci yazarak onayi kendi listesinden degil buradan bilir. */
+/** `riskyFields` onay isteyebilecek alanlar (etiket icin); onay ifadesi 428 yanitinda gelir. */
 export function toMobileAdminPlatformSettings(s: {
   values: PlatformSettingsValues;
   updatedAt: Date | null;
@@ -1020,7 +1019,6 @@ export function toMobileAdminPlatformSettings(s: {
   return {
     values: { ...s.values, platformHolidayDates: [...s.values.platformHolidayDates] },
     riskyFields: [...RISKY_PLATFORM_SETTING_FIELDS],
-    confirmPhrase: PLATFORM_SETTINGS_CONFIRM_PHRASE,
     updatedAt: s.updatedAt?.toISOString() ?? null,
   };
 }

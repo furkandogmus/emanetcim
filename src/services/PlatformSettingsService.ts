@@ -8,9 +8,10 @@ import { parsePlatformHolidayDates } from "@/lib/booking-holidays";
 import { invalidatePricingRulesCache } from "@/lib/platform-settings";
 import { invalidateAppVersionGateCache } from "@/lib/app-version";
 import {
-  PLATFORM_SETTINGS_CONFIRM_PHRASE,
-  changedRiskyPlatformFields,
-  type RiskyPlatformSettingField,
+  compareSemver,
+  platformSettingsConfirmPhrase,
+  riskyPlatformChanges,
+  type RiskyChange,
 } from "@/lib/admin-risky-settings";
 
 /**
@@ -46,7 +47,22 @@ export const platformSettingsUpdateSchema = z.object({
     .default([]),
   minAppVersion: semverOrEmpty,
   latestAppVersion: semverOrEmpty,
-});
+})
+  /*
+    KILITLENME KAPISI: en yeni yayindaki surumun ustunde bir `minAppVersion`
+    her kullaniciyi (yonetici dahil) guncelleme ekranina kilitler, Play'de daha
+    yeni build yoksa donguden cikis yok. `latestAppVersion` yayindaki en yeni
+    ikilidir; min onu asamaz ve latest bosken min konamaz.
+  */
+  .superRefine((d, ctx) => {
+    if (d.minAppVersion === null) return;
+    const cmp = d.latestAppVersion === null ? null : compareSemver(d.minAppVersion, d.latestAppVersion);
+    if (cmp === null || cmp > 0) {
+      ctx.addIssue({ code: "custom", path: ["minAppVersion"], message: VERSION_GATE_ISSUE });
+    }
+  });
+
+const VERSION_GATE_ISSUE = "min_above_latest";
 
 export type PlatformSettingsValues = {
   maxStayDays: number;
@@ -127,27 +143,41 @@ export type PlatformSettingsActor = { id: string; role: string };
 
 export type UpdatePlatformSettingsResult =
   | { ok: true }
-  | { ok: false; reason: "invalid_data" }
-  | { ok: false; reason: "confirmation_required"; fields: RiskyPlatformSettingField[] };
+  | { ok: false; reason: "invalid_data" | "invalid_version_gate" | "stale_settings" }
+  | { ok: false; reason: "confirmation_required"; changes: RiskyChange[]; phrase: string };
 
 /**
- * `requireConfirmation`: mobil ucu acar. Riskli bir alan DEGISIYORSA
- * `confirmation` tam olarak `PLATFORM_SETTINGS_CONFIRM_PHRASE` olmali.
- * Web formu bu adimi tasimiyor; davranisi degismesin diye kapali.
+ * Mobil uc iki kapi acar, web formu ikisini de tasimiyor (davranisi degismedi):
+ * - `requireConfirmation`: riskli degisiklikte `confirmation` = `platformSettingsConfirmPhrase`.
+ * - `expectedUpdatedAt` (verilirse; `null` = hic kaydedilmemis): arada baskasi
+ *   kaydettiyse `stale_settings`. Yazma kosullu: okuma ile yazma arasindaki yarisi da yakalar.
  */
 export async function updatePlatformSettings(
   actor: PlatformSettingsActor,
   data: unknown,
-  opts: { ip?: string | null; requireConfirmation?: boolean; confirmation?: unknown } = {},
+  opts: {
+    ip?: string | null;
+    requireConfirmation?: boolean;
+    confirmation?: unknown;
+    expectedUpdatedAt?: string | null;
+  } = {},
 ): Promise<UpdatePlatformSettingsResult> {
   const parsed = platformSettingsUpdateSchema.safeParse(data);
-  if (!parsed.success) return { ok: false, reason: "invalid_data" };
+  if (!parsed.success) {
+    const gate = parsed.error.issues.some((i) => i.message === VERSION_GATE_ISSUE);
+    return { ok: false, reason: gate ? "invalid_version_gate" : "invalid_data" };
+  }
   const d = parsed.data;
 
-  const current = (await getPlatformSettingsForAdmin()).values;
-  const riskyChanged = changedRiskyPlatformFields(current, d);
-  if (opts.requireConfirmation && riskyChanged.length > 0 && opts.confirmation !== PLATFORM_SETTINGS_CONFIRM_PHRASE) {
-    return { ok: false, reason: "confirmation_required", fields: riskyChanged };
+  const snapshot = await getPlatformSettingsForAdmin();
+  const versioned = opts.expectedUpdatedAt !== undefined;
+  if (versioned && (snapshot.updatedAt?.toISOString() ?? null) !== opts.expectedUpdatedAt) {
+    return { ok: false, reason: "stale_settings" };
+  }
+  const changes = riskyPlatformChanges(snapshot.values, d);
+  const phrase = platformSettingsConfirmPhrase(changes);
+  if (opts.requireConfirmation && changes.length > 0 && opts.confirmation !== phrase) {
+    return { ok: false, reason: "confirmation_required", changes, phrase };
   }
 
   const holidayJson = d.platformHolidayDates.length > 0 ? d.platformHolidayDates : Prisma.JsonNull;
@@ -170,11 +200,24 @@ export async function updatePlatformSettings(
     minAppVersion: d.minAppVersion,
     latestAppVersion: d.latestAppVersion,
   };
-  await prisma.platformSettings.upsert({
-    where: { id: "default" },
-    create: { id: "default", ...fields },
-    update: fields,
-  });
+  if (!versioned) {
+    await prisma.platformSettings.upsert({ where: { id: "default" }, create: { id: "default", ...fields }, update: fields });
+  } else if (snapshot.updatedAt) {
+    const res = await prisma.platformSettings.updateMany({
+      where: { id: "default", updatedAt: snapshot.updatedAt },
+      data: fields,
+    });
+    if (res.count === 0) return { ok: false, reason: "stale_settings" };
+  } else {
+    try {
+      await prisma.platformSettings.create({ data: { id: "default", ...fields } });
+    } catch (err) {
+      if (err instanceof Prisma.PrismaClientKnownRequestError && err.code === "P2002") {
+        return { ok: false, reason: "stale_settings" };
+      }
+      throw err;
+    }
+  }
   invalidatePricingRulesCache();
   invalidateAppVersionGateCache();
   writeAuditLog({
@@ -183,7 +226,7 @@ export async function updatePlatformSettings(
     action: "platform_settings.update",
     entityType: "PlatformSettings",
     entityId: "default",
-    metadata: { riskyChanged },
+    metadata: { riskyChanged: changes.map((c) => c.field) },
     ip: opts.ip ?? null,
   });
   return { ok: true };

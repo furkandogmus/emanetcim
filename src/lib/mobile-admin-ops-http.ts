@@ -10,6 +10,7 @@ export async function readOpsBody(req: NextRequest): Promise<Record<string, unkn
 const STATUS: Record<string, number> = {
   not_found: 404,
   duplicate_code: 409,
+  stale_settings: 409,
   confirmation_required: 428,
 };
 
