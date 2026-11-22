@@ -362,7 +362,10 @@
     "partnerNoShowAvailableAt": "You can mark this from {time} (60 min after drop-off time).",
     "partnerCancelDone": "Booking cancelled.",
     "partnerNoShowDone": "Booking closed as a no-show.",
-    "partnerCloseKeep": "Go back"
+    "partnerCloseKeep": "Go back",
+    "partnerBookingsSearchLabel": "Search bookings",
+    "partnerBookingsSearchPlaceholder": "Code, guest name or last 4 digits of phone",
+    "partnerBookingsSearchSubmit": "Search"
   },
   "Guest": {
     "heroTitle": "Drop Your Bags, Explore Freely",
@@ -490,7 +493,7 @@
     "checkoutReservationIdLabel": "Reservation ID",
     "checkoutDeliveryPointLabel": "Pickup location",
     "checkoutCardValidationError": "Please fill in all card fields.",
-    "checkoutGuestContactRequired": "Please enter email or phone",
+    "checkoutGuestContactRequired": "Please enter your email",
     "checkoutCardHolderPlaceholder": "Name on card",
     "checkoutCardNumberPlaceholder": "0000 0000 0000 0000",
     "checkoutExpiryPlaceholder": "MM/YY",
@@ -636,7 +639,7 @@
     "totalBags": "Total bags",
     "authModalLogin": "Sign In",
     "authModalRegister": "Sign Up",
-    "checkoutGuestEmailPlaceholder": "Your email (optional)",
+    "checkoutGuestEmailPlaceholder": "Your email",
     "checkoutGuestPhonePlaceholder": "Your phone (optional)",
     "checkoutGuestContinue": "Continue as Guest",
     "checkoutGuestOr": "or",
@@ -713,7 +716,7 @@
     "checkoutManageBooking": "Manage Booking",
     "checkoutFreeCancelUntilDropOff": "Free cancellation until drop-off time.",
     "checkoutContinueWithoutAccount": "Continue without account",
-    "checkoutGuestContactHint": "Just an email or phone for booking notifications.",
+    "checkoutGuestContactHint": "Email is required to manage your booking; phone is optional.",
     "checkoutOrWithAccount": "or with account",
     "shopVerifiedPartner": "Verified Partner",
     "shopInsuredStorage": "Protected Storage",
@@ -1855,7 +1858,7 @@
     "emailAlreadyRegistered": "This email address is already registered.",
     "emailSendFailed": "The email could not be sent. Please try again later.",
     "generic": "An unknown error occurred.",
-    "guestContactRequired": "Please provide email or phone to continue",
+    "guestContactRequired": "Please enter your email to continue",
     "guestLinkExpired": "This link has expired. Use the newest link in your email or look up your booking again.",
     "insufficientCapacity": "Insufficient shop capacity for these dates.",
     "invalidBookingDates": "Booking dates are invalid or outside allowed duration.",
@@ -1911,7 +1914,10 @@
     "cannotBanSelf": "You can't ban your own account.",
     "closureNoteRequired": "Please write a note.",
     "closureInvalidReason": "Choose a valid cancellation reason.",
-    "noShowTooEarly": "A no-show can only be marked 60 minutes after the drop-off time."
+    "noShowTooEarly": "A no-show can only be marked 60 minutes after the drop-off time.",
+    "invalidName": "Name must be 1-100 characters.",
+    "currentPasswordRequired": "Enter your current password.",
+    "invalidCurrentPassword": "Current password is incorrect."
   },
   "Emails": {
     "verificationSubject": "Verify Your Email",
@@ -2301,7 +2307,9 @@
     "referralBody": "Share your referral code with a friend. They get {pct}% off their first booking.",
     "referralReveal": "Show My Referral Code",
     "referralLoading": "Loading...",
-    "referralCopyTitle": "Copy link"
+    "referralCopyTitle": "Copy link",
+    "editProfile": "Profile details",
+    "editProfileDesc": "Name, phone and password"
   },
   "Home": {
     "seoTitle": "Luggage Storage and Bag Drop",
@@ -2591,5 +2599,28 @@
     "toastDeleted": "Issue and its photos deleted.",
     "toastErrorGeneric": "Operation could not be completed.",
     "toastAnnotationError": "Annotated photo could not be created."
+  },
+  "AccountProfile": {
+    "back": "My account",
+    "pageTitle": "Profile details",
+    "pageIntro": "Update your name, phone and password here.",
+    "nameLabel": "Full name",
+    "phoneLabel": "Phone",
+    "phoneHint": "Turkish mobile number; you can leave it empty.",
+    "emailLabel": "Email",
+    "emailReadOnly": "Email cannot be changed here.",
+    "save": "Save",
+    "saving": "Saving…",
+    "saved": "Profile updated.",
+    "passwordTitle": "Password",
+    "passwordIntroSet": "Your account has no password yet; you can set one.",
+    "passwordIntroChange": "Enter your current password to change it.",
+    "currentPassword": "Current password",
+    "newPassword": "New password",
+    "confirmPassword": "New password (again)",
+    "passwordSave": "Save password",
+    "passwordMismatch": "The new passwords do not match.",
+    "passwordSet": "Password set.",
+    "passwordChanged": "Password changed. Please sign in again for your security."
   }
 }
