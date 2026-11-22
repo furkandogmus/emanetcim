@@ -1,13 +1,14 @@
-import { useInfiniteQuery, useQuery, useQueryClient, type QueryClient } from "@tanstack/react-query";
+import { useInfiniteQuery, useMutation, useQuery, useQueryClient, type QueryClient } from "@tanstack/react-query";
 
 import { api, ApiError, isImpersonating } from "./api";
+import { adminCancelBooking, adminForceCheckout, partnerCancelBooking, partnerNoShow, type AdminBookingAction } from "./booking-actions";
 import { isBookingExpired } from "./booking-state";
 import { deleteOfflineTicket, saveOfflineTicket } from "./offline-tickets";
 import { useAuth } from "./auth";
 import { usePartnerShopSelection, withShop } from "./partner-shop";
 import { nextCursorOf } from "./paging";
 import { totalBags, type Bags } from "./search";
-import type { AdminApplication, AdminStats, BookingDetail, ContactMessage, PartnerEarnings, PartnerSealsResponse, PartnerShop, BookingSummary, NearbyShop, PartnerBookingsResponse, ShopDetail, ShopReviewsPage, PartnerShopSettings, PartnerSchedule, PartnerDashboard, AdminOverview, AdminBookingFilter, AdminBookingCounts, AdminBookingsResponse, AdminBookingDetail, AdminShop, AdminShopDetail, AdminUser, CityCoverage, AppConfig } from "./types";
+import type { AdminApplication, AdminStats, BookingDetail, ContactMessage, PartnerEarnings, PartnerSealsResponse, PartnerShop, BookingSummary, NearbyShop, PartnerBookingsResponse, ShopDetail, ShopReviewsPage, PartnerShopSettings, PartnerSchedule, PartnerDashboard, AdminOverview, AdminBookingFilter, AdminBookingCounts, AdminBookingsResponse, AdminBookingDetail, AdminShop, AdminShopDetail, AdminUser, CityCoverage, AppConfig, PartnerCancelRequest } from "./types";
 
 export const keys = {
   myBookings: ["bookings", "me"] as const,
@@ -364,4 +365,55 @@ export function useAdminUsers(q: string) {
     getNextPageParam: nextCursorOf,
     placeholderData: (prev) => prev,
   });
+}
+
+/*
+  Yonetim islemleri. Hata da `onSettled`da yeniler: `invalid_status` cogu zaman baska
+  birinin (misafir, esnaf, zamanlanmis is) rezervasyonu degistirdigi demek; ekran eski
+  durumda kalirsa ayni dugme tekrar tekrar reddedilir.
+*/
+type InvalidatingClient = Pick<QueryClient, "invalidateQueries">;
+
+function refreshAfterAdminAction(qc: InvalidatingClient, id: string) {
+  void qc.invalidateQueries({ queryKey: [...keys.admin, "booking", id] });
+  void qc.invalidateQueries({ queryKey: [...keys.admin, "bookings"] });
+  void qc.invalidateQueries({ queryKey: [...keys.admin, "overview"] });
+  void qc.invalidateQueries({ queryKey: [...keys.admin, "shop"] });
+  void qc.invalidateQueries({ queryKey: keys.booking(id) });
+}
+
+function refreshAfterPartnerAction(qc: InvalidatingClient) {
+  void qc.invalidateQueries({ queryKey: ["bookings"] });
+  void qc.invalidateQueries({ queryKey: ["partner"] });
+}
+
+export function adminBookingActionOptions(qc: InvalidatingClient, id: string) {
+  return {
+    mutationFn: ({ action, note }: { action: AdminBookingAction; note: string }) =>
+      action === "cancel" ? adminCancelBooking(id, note) : adminForceCheckout(id, note),
+    onSettled: () => refreshAfterAdminAction(qc, id),
+  };
+}
+
+export function partnerCancelOptions(qc: InvalidatingClient, id: string) {
+  return {
+    mutationFn: (body: PartnerCancelRequest) => partnerCancelBooking(id, body),
+    onSettled: () => refreshAfterPartnerAction(qc),
+  };
+}
+
+export function partnerNoShowOptions(qc: InvalidatingClient, id: string) {
+  return { mutationFn: () => partnerNoShow(id), onSettled: () => refreshAfterPartnerAction(qc) };
+}
+
+export function useAdminBookingAction(id: string) {
+  return useMutation(adminBookingActionOptions(useQueryClient(), id));
+}
+
+export function usePartnerCancel(id: string) {
+  return useMutation(partnerCancelOptions(useQueryClient(), id));
+}
+
+export function usePartnerNoShow(id: string) {
+  return useMutation(partnerNoShowOptions(useQueryClient(), id));
 }

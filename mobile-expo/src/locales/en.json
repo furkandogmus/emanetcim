@@ -320,10 +320,17 @@
     "notFound": "This booking can no longer be found.",
     "errors": {
       "invalid_status": "Your bags were already handed to the shop or the booking is already cancelled, so it can't be cancelled.",
-      "not_found": "This booking was not found."
+      "not_found": "This booking was not found.",
+      "forbidden": "This booking doesn't belong to your account.",
+      "cancel_failed": "The booking couldn't be cancelled right now; try again shortly.",
+      "server_error": "Something went wrong on the server; try again shortly."
     },
     "address": "Address",
-    "addressHint": "Press and hold to copy; you can show it to a taxi driver."
+    "addressHint": "Press and hold to copy; you can show it to a taxi driver.",
+    "closeExpired": "Close booking",
+    "closeExpiredTitle": "Close this booking?",
+    "closeExpiredBody": "If you didn't drop off your bags, you can close this booking. This can't be undone.",
+    "closeExpiredConfirm": "Yes, close"
   },
   "status": {
     "PENDING": "Pending",
@@ -1145,5 +1152,72 @@
     "sloganLine1": "Drop the load,",
     "sloganLine2": "hit the road.",
     "skipHint": "Tap to skip"
+  },
+  "cancelReason": {
+    "short": {
+      "guest_cancel": "Cancelled",
+      "partner_cancel": "Shop cancelled",
+      "no_show": "No-show",
+      "admin_cancel": "Admin cancelled",
+      "expired_no_dropoff": "Expired"
+    },
+    "long": {
+      "guest_cancel": "Cancelled by the guest",
+      "partner_cancel": "Cancelled by the shop",
+      "no_show": "Closed as a no-show",
+      "admin_cancel": "Cancelled by an admin",
+      "expired_no_dropoff": "Closed because it expired"
+    },
+    "guestSelf": "You cancelled this booking"
+  },
+  "bookingActions": {
+    "admin": {
+      "title": "Booking actions",
+      "cancel": "Cancel booking",
+      "forceCheckout": "Force check-out",
+      "cancelBody": "The booking is closed and the reserved space is freed. This can't be undone.",
+      "forceCheckoutBody": "The bags are marked as handed back and the booking is completed. This can't be undone.",
+      "noteLabel": "Reason",
+      "notePlaceholder": "Why are you doing this?",
+      "noteHint": "At least {{min}} characters; saved to the booking history.",
+      "cancelConfirm": "Cancel booking",
+      "forceCheckoutConfirm": "Mark as handed back",
+      "cancelledDone": "Booking cancelled.",
+      "forcedDone": "Booking closed as handed back."
+    },
+    "partner": {
+      "cancel": "Cancel booking",
+      "cancelTitle": "Why are you cancelling?",
+      "cancelBody": "The guest is notified and the reserved space is freed. This can't be undone.",
+      "noteLabel": "Note",
+      "noteRequired": "Briefly, why",
+      "noteOptional": "Optional note",
+      "cancelConfirm": "Cancel booking",
+      "cancelledTitle": "Booking cancelled",
+      "cancelledBody": "The guest has been notified.",
+      "noShow": "Guest didn't show up",
+      "noShowAt": "Available after {{time}}",
+      "noShowTitle": "Guest didn't show up?",
+      "noShowBody": "The booking is closed as a no-show and the reserved space is freed. This can't be undone.",
+      "noShowConfirm": "Yes, close",
+      "noShowDoneTitle": "Booking closed",
+      "noShowDoneBody": "The reserved space has been freed."
+    },
+    "reasons": {
+      "guest_request": "Guest asked",
+      "shop_closed": "Shop is closed",
+      "capacity": "No space",
+      "other": "Other"
+    },
+    "errors": {
+      "not_found": "This booking was not found.",
+      "forbidden": "You're not allowed to do this on this booking.",
+      "invalid_status": "The booking's status has changed; this action no longer applies.",
+      "note_required": "Please write a short note.",
+      "invalid_reason": "Invalid cancellation reason; pick one from the list.",
+      "too_early": "The waiting time isn't over yet; the guest can't be marked as a no-show.",
+      "server_error": "Something went wrong on the server; try again shortly.",
+      "http_404": "This action isn't available yet; use the web panel for now."
+    }
   }
 }
