@@ -8,6 +8,8 @@ import { useAuth } from "./auth";
 import { usePartnerShopSelection, withShop } from "./partner-shop";
 import { nextCursorOf } from "./paging";
 import { totalBags, type Bags } from "./search";
+import { partnerSearchTerm } from "./booking-search";
+import { useDebouncedValue } from "./use-debounced-value";
 import type { AdminApplication, AdminStats, BookingDetail, ContactMessage, PartnerEarnings, PartnerSealsResponse, PartnerShop, BookingSummary, NearbyShop, PartnerBookingsResponse, ShopDetail, ShopReviewsPage, PartnerShopSettings, PartnerSchedule, PartnerDashboard, AdminOverview, AdminBookingFilter, AdminBookingCounts, AdminBookingsResponse, AdminBookingDetail, AdminShop, AdminShopDetail, AdminUser, CityCoverage, AppConfig, PartnerCancelRequest } from "./types";
 
 export const keys = {
@@ -196,6 +198,38 @@ export function usePartnerOlderBookings(start: string | null) {
       api<PartnerBookingsResponse>(`/partner/bookings?limit=100&cursor=${encodeURIComponent(pageParam)}`),
     getNextPageParam: nextCursorOf,
   });
+}
+
+/** Arama yazma durduktan bu kadar sonra gider. */
+export const PARTNER_SEARCH_DEBOUNCE_MS = 300;
+
+export function partnerSearchKey(shopId: string | null, term: string) {
+  return [...keys.partnerBookings, "search", shopId ?? "all", term] as const;
+}
+
+/** Sunucu aramasi: kod on eki, misafir adi, telefonun son haneleri; tum tarihler. `shopId` yalnizca cok dukkanlida. */
+export function fetchPartnerBookingSearch(term: string, shopId: string | null, cursor?: string) {
+  const qs = new URLSearchParams({ q: term, limit: "50", ...(shopId ? { shopId } : {}), ...(cursor ? { cursor } : {}) });
+  return api<PartnerBookingsResponse>(`/partner/bookings?${qs}`);
+}
+
+/**
+ * Esnaf listesindeki arama kutusu. `term` bos donerse ekran normal sekme listesini gosterir
+ * (istek de yok). Anahtar `["partner", "bookings", ...]` ailesinde: islem sonrasi gecersiz
+ * kilinan liste aramayi da yeniler.
+ */
+export function usePartnerBookingSearch(raw: string, shopId: string | null) {
+  const term = partnerSearchTerm(useDebouncedValue(raw, PARTNER_SEARCH_DEBOUNCE_MS, (v) => !partnerSearchTerm(v)));
+  const query = useInfiniteQuery({
+    queryKey: partnerSearchKey(shopId, term),
+    enabled: term.length > 0,
+    initialPageParam: undefined as string | undefined,
+    queryFn: ({ pageParam }) => fetchPartnerBookingSearch(term, shopId, pageParam),
+    getNextPageParam: nextCursorOf,
+  });
+  // Yazilan terim henuz gonderilmediyse (geciktirme suruyor) sonuc eskidir.
+  const pending = partnerSearchTerm(raw) !== term;
+  return { term, pending, query };
 }
 
 /**
