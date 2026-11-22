@@ -107,7 +107,8 @@ export default async function BookingDetailPage({
     booking.status === "CHECKED_OUT";
   const confirmedAtShop = booking.status === "APPROVED";
   const waitingShop = booking.status === "WAITING_APPROVAL";
-  const canCancel = ["PENDING", "APPROVED", "PAID"].includes(booking.status);
+  // Liste (BookingsClient) ile ayni kume: onay bekleyen talep de iptal edilebilir.
+  const canCancel = ["PENDING", "WAITING_APPROVAL", "APPROVED", "PAID"].includes(booking.status);
 
   return (
     <div className="min-h-screen bg-gray-50 pt-32 pb-20 px-6 font-sans">
