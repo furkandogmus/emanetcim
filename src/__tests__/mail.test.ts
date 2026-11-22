@@ -156,8 +156,9 @@ describe("mail.ts — 6 dil desteği", () => {
     await sendMobileOtp("a@b.com", "483920", "tr");
 
     for (const g of sendMock.mock.calls.map((c) => c[0])) {
-      expect(g.html).toContain("background: #ffffff");
-      expect(g.html).toContain("color: #111827");
+      // Kabuk ya elle (bosluklu) ya `renderEmailHtml` ile (bosluksuz) yazilmis olabilir.
+      expect(g.html).toMatch(/background: ?#ffffff/);
+      expect(g.html).toMatch(/color: ?#111827/);
       // rem, Outlook masaustunde guvenilir cozulmez.
       expect(g.html).not.toContain("rem;");
     }

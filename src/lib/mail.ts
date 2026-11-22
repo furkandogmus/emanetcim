@@ -136,7 +136,13 @@ export const sendVerificationEmail = async (email: string, token: string, locale
   }
 };
 
-export const sendPasswordResetEmail = async (email: string, token: string, locale: string = "tr") => {
+export const sendPasswordResetEmail = async (
+  email: string,
+  token: string,
+  locale: string = "tr",
+  /** Mobil uygulamada girilen 6 haneli kod; yoksa e-posta yalnizca bagi tasir. */
+  code?: string,
+) => {
   const resend = getResendClient();
   if (!resend) {
     logger.warn({}, "mail_password_reset_skipped_no_resend_key");
@@ -149,12 +155,14 @@ export const sendPasswordResetEmail = async (email: string, token: string, local
    * NEDEN 6 DİL: bu nesne yalnızca `tr`/`en` içeriyordu; şifre sıfırlama —
    * hesabınıza tekrar erişmenin tek yolu — diğer 4 dilde Türkçe geliyordu.
    */
-  const content = {
+  const byLocale = {
     tr: {
       subject: "Şifrenizi Sıfırlayın",
       title: "Şifre Sıfırlama İsteği",
       text: "Şifrenizi sıfırlamak için lütfen aşağıdaki butona tıklayın:",
       button: "Şifreyi Sıfırla",
+      codeText: "Mobil uygulamadan sıfırlıyorsanız bu kodu girin (30 dakika geçerli):",
+      codeLabel: "Sıfırlama kodu",
       footer: "Eğer bu işlemi siz yapmadıysanız bu e-postayı görmezden gelebilirsiniz."
     },
     en: {
@@ -162,6 +170,8 @@ export const sendPasswordResetEmail = async (email: string, token: string, local
       title: "Password Reset Request",
       text: "Please click the button below to reset your password:",
       button: "Reset Password",
+      codeText: "Resetting from the mobile app? Enter this code (valid for 30 minutes):",
+      codeLabel: "Reset code",
       footer: "If you did not perform this action, you can safely ignore this email."
     },
     de: {
@@ -169,6 +179,8 @@ export const sendPasswordResetEmail = async (email: string, token: string, local
       title: "Anfrage zum Zurücksetzen des Passworts",
       text: "Bitte klicken Sie auf die Schaltfläche unten, um Ihr Passwort zurückzusetzen:",
       button: "Passwort zurücksetzen",
+      codeText: "Sie setzen es in der App zurück? Geben Sie diesen Code ein (30 Minuten gültig):",
+      codeLabel: "Code zum Zurücksetzen",
       footer: "Wenn Sie diese Aktion nicht durchgeführt haben, können Sie diese E-Mail ignorieren."
     },
     fr: {
@@ -176,6 +188,8 @@ export const sendPasswordResetEmail = async (email: string, token: string, local
       title: "Demande de réinitialisation du mot de passe",
       text: "Veuillez cliquer sur le bouton ci-dessous pour réinitialiser votre mot de passe :",
       button: "Réinitialiser le mot de passe",
+      codeText: "Vous réinitialisez depuis l'application ? Saisissez ce code (valable 30 minutes) :",
+      codeLabel: "Code de réinitialisation",
       footer: "Si vous n'êtes pas à l'origine de cette action, vous pouvez ignorer cet e-mail en toute sécurité."
     },
     ja: {
@@ -183,6 +197,8 @@ export const sendPasswordResetEmail = async (email: string, token: string, local
       title: "パスワードリセットのリクエスト",
       text: "パスワードをリセットするには、下のボタンをクリックしてください：",
       button: "パスワードをリセット",
+      codeText: "モバイルアプリからリセットする場合は、このコードを入力してください（30分間有効）：",
+      codeLabel: "リセットコード",
       footer: "このアクションに心当たりがない場合は、このメールを無視していただいて構いません。"
     },
     fa: {
@@ -190,17 +206,23 @@ export const sendPasswordResetEmail = async (email: string, token: string, local
       title: "درخواست بازنشانی رمز عبور",
       text: "برای بازنشانی رمز عبور خود، لطفاً روی دکمه زیر کلیک کنید:",
       button: "بازنشانی رمز عبور",
+      codeText: "اگر از اپلیکیشن موبایل بازنشانی می‌کنید، این کد را وارد کنید (۳۰ دقیقه اعتبار دارد):",
+      codeLabel: "کد بازنشانی",
       footer: "اگر این کار را شما انجام نداده‌اید، می‌توانید این ایمیل را نادیده بگیرید."
     }
-  }[locale] || {
-    tr: {
-      subject: "Şifrenizi Sıfırlayın",
-      title: "Şifre Sıfırlama İsteği",
-      text: "Şifrenizi sıfırlamak için lütfen aşağıdaki butona tıklayın:",
-      button: "Şifreyi Sıfırla",
-      footer: "Eğer bu işlemi siz yapmadıysanız bu e-postayı görmezden gelebilirsiniz."
-    }
-  }.tr;
+  };
+  const content = byLocale[locale as keyof typeof byLocale] ?? byLocale.tr;
+
+  const codeText = code ? `\n\n${content.codeText}\n${code}` : "";
+  // Kod tablo satirinda: kopyalanabilir duz metin, ayri bir elle yazilmis kutu degil.
+  const html = renderEmailHtml({
+    locale,
+    heading: content.title,
+    paragraphs: code ? [content.text, content.codeText] : [content.text],
+    rows: code ? [{ label: content.codeLabel, value: code, emphasized: true }] : undefined,
+    cta: { href: resetLink, label: content.button, variant: "button" },
+    footer: content.footer,
+  });
 
   try {
     const { data, error } = await withTimeout(
@@ -208,20 +230,8 @@ export const sendPasswordResetEmail = async (email: string, token: string, local
         from: process.env.RESEND_FROM || "BagajPark <info@bagajpark.com>",
         to: email,
         subject: content.subject,
-        text: `${content.title}\n\n${content.text}\n\n${resetLink}\n\n${content.footer}`,
-        html: `
-        <div dir="${locale === "fa" ? "rtl" : "ltr"}" style="font-family: sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; background: #ffffff; color: #111827;">
-          <h1 style="color: #ea580c;">${content.title}</h1>
-          <p style="color: #374151;">${content.text}</p>
-          <a href="${resetLink}"
-             style="display: inline-block; background-color: #ea580c; color: white; padding: 12px 24px; text-decoration: none; border-radius: 8px; font-weight: bold; margin: 20px 0;">
-            ${content.button}
-          </a>
-          <p style="margin-top: 24px; font-size: 14px; color: #6b7280;">
-            ${content.footer}
-          </p>
-        </div>
-      `,
+        text: `${content.title}\n\n${content.text}\n\n${resetLink}${codeText}\n\n${content.footer}`,
+        html,
       }),
       MAIL_SEND_TIMEOUT_MS,
       "password_reset_email_send",

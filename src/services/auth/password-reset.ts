@@ -1,3 +1,4 @@
+import type { Role } from "@prisma/client";
 import prisma from "@/lib/db";
 import {
   hashPassword,
@@ -10,6 +11,18 @@ import {
   isPhoneResetIdentifier,
 } from "@/lib/password-reset-token";
 import logger from "@/lib/logger";
+import { generatePasswordResetToken } from "@/lib/password-reset-token";
+import {
+  PASSWORD_RESET_CODE_MAX_ATTEMPTS,
+  PASSWORD_RESET_CODE_TTL_MS,
+  generatePasswordResetCode,
+  hashPasswordResetCode,
+  isWellFormedResetCode,
+  normalizeResetEmail,
+  resetCodeMatches,
+} from "@/lib/password-reset-code";
+import { sendPasswordResetEmail } from "@/lib/mail";
+import { markEmailVerifiedByCode } from "@/services/auth/verify-email";
 
 /**
  * Sifre sifirlama token'inin TUKETILMESI — tek govde.
@@ -109,25 +122,152 @@ export async function consumePasswordResetToken(
     }
 
     const passwordHash = await hashPassword(password);
+    const resetEmail = isPhoneResetIdentifier(row.identifier)
+      ? null
+      : row.identifier.slice(PASSWORD_RESET_IDENTIFIER_PREFIX.length);
 
-    /*
-      `tokenVersion` artisi bu islemin ASIL YARISI. Sifreyi degistirip eski
-      token'lari ayakta birakmak, sifreyi hic degistirmemekten daha kotudur:
-      kullanici korundugunu sanir.
-    */
-    await prisma.$transaction([
-      prisma.user.update({
-        where: { id: user.id },
-        data: { passwordHash, tokenVersion: { increment: 1 } },
-      }),
-      prisma.verificationToken.deleteMany({ where: { identifier: row.identifier } }),
-      // Oturumu dusen cihazlar bildirim de almasin (bkz. `revokeAllUserSessions`).
-      prisma.mobilePushToken.deleteMany({ where: { userId: user.id } }),
-    ]);
+    await applyPasswordReset(user.id, passwordHash, resetEmail, row.identifier);
+    // E-postadaki baglanti adresin sahibini kanitlar (telefon bagi kanitlamaz).
+    if (resetEmail) await markEmailVerifiedByCode(user.id);
 
     return { ok: true, userId: user.id };
   } catch (err) {
     logger.error({ err }, "password_reset_consume_failed");
+    return { ok: false, code: "UNKNOWN" };
+  }
+}
+
+/**
+ * Bag ve kod yollarinin ORTAK kuyrugu: ikisi oturumlari ayni sekilde dusurur.
+ *
+ * `tokenVersion` artisi bu islemin ASIL YARISI. Sifreyi degistirip eski
+ * token'lari ayakta birakmak, sifreyi hic degistirmemekten daha kotudur:
+ * kullanici korundugunu sanir. Bag ve kod birlikte olur: biri kullanilinca
+ * digeri yeniden kullanilamaz.
+ */
+async function applyPasswordReset(
+  userId: string,
+  passwordHash: string,
+  email: string | null,
+  identifier: string,
+): Promise<{ tokenVersion: number }> {
+  const [updated] = await prisma.$transaction([
+    prisma.user.update({
+      where: { id: userId },
+      data: { passwordHash, tokenVersion: { increment: 1 } },
+      select: { tokenVersion: true },
+    }),
+    prisma.verificationToken.deleteMany({ where: { identifier } }),
+    // Oturumu dusen cihazlar bildirim de almasin (bkz. `revokeAllUserSessions`).
+    prisma.mobilePushToken.deleteMany({ where: { userId } }),
+    ...(email ? [prisma.passwordResetCode.deleteMany({ where: { email } })] : []),
+  ]);
+  return { tokenVersion: updated.tokenVersion };
+}
+
+/**
+ * Sifirlama ISTEGI -- web action'i ve mobil uc ayni govdeyi cagirir.
+ *
+ * E-posta hem web bagini hem 6 haneli kodu tasir. Hesap yoksa sessizce
+ * doner: cagiran her durumda ayni yaniti verir (hesap taramasi yok).
+ */
+export async function requestPasswordReset(rawEmail: string, locale: string): Promise<void> {
+  const email = normalizeResetEmail(rawEmail);
+  const user = await prisma.user.findUnique({ where: { email }, select: { email: true } });
+  if (!user?.email) return;
+
+  const row = await generatePasswordResetToken(user.email);
+  const code = generatePasswordResetCode();
+  const codeRow = {
+    codeHash: hashPasswordResetCode(email, code),
+    attempts: 0,
+    expires: new Date(Date.now() + PASSWORD_RESET_CODE_TTL_MS),
+  };
+  // Yeni istek eski kodu ezer; deneme sayaci da sifirlanir.
+  await prisma.passwordResetCode.upsert({
+    where: { email },
+    create: { email, ...codeRow },
+    update: codeRow,
+  });
+  await sendPasswordResetEmail(user.email, row.token, locale, code);
+}
+
+export type PasswordResetCodeErrorCode =
+  | "INVALID_CODE"
+  | "EXPIRED_CODE"
+  | "TOO_MANY_ATTEMPTS"
+  | "INVALID_PASSWORD"
+  | "ACCOUNT_BANNED"
+  | "UNKNOWN";
+
+export type PasswordResetCodeResult =
+  | { ok: true; userId: string; role: Role; tokenVersion: number }
+  | { ok: false; code: PasswordResetCodeErrorCode };
+
+/**
+ * Kodla sifirlama (mobil). Bag yoluyla ayni sonuc: sifre yazilir, oturumlar
+ * duser, e-posta dogrulanmis sayilir; cagiran yeni token ciftini uretir.
+ *
+ * Deneme sayaci KARSILASTIRMADAN ONCE atomik artirilir: es zamanli tahminler
+ * sinirin uzerine cikamaz. Besinci yanlis cevap ve sonrasi TOO_MANY_ATTEMPTS;
+ * dogru kod da artik kabul edilmez. Hesabi olmayan e-posta INVALID_CODE alir.
+ */
+export async function consumePasswordResetCode(
+  rawEmail: unknown,
+  rawCode: unknown,
+  rawPassword: unknown,
+): Promise<PasswordResetCodeResult> {
+  const email = typeof rawEmail === "string" ? normalizeResetEmail(rawEmail) : "";
+  const code = typeof rawCode === "string" ? rawCode.trim() : "";
+  const password = typeof rawPassword === "string" ? rawPassword : "";
+
+  if (!email || !isWellFormedResetCode(code)) return { ok: false, code: "INVALID_CODE" };
+  // Sifre kurali denemeyi YAKMAZ: kullanici kodu dogru, sifreyi kisa yazmis olabilir.
+  if (password.trim().length < MIN_NEW_PASSWORD_LENGTH || password.length > MAX_NEW_PASSWORD_LENGTH) {
+    return { ok: false, code: "INVALID_PASSWORD" };
+  }
+
+  try {
+    const row = await prisma.passwordResetCode.findUnique({ where: { email } });
+    if (!row) return { ok: false, code: "INVALID_CODE" };
+    if (row.attempts >= PASSWORD_RESET_CODE_MAX_ATTEMPTS) return { ok: false, code: "TOO_MANY_ATTEMPTS" };
+    if (row.expires < new Date()) {
+      await prisma.passwordResetCode
+        .deleteMany({ where: { email } })
+        .catch((err) => logger.error({ err }, "expired_reset_code_cleanup_failed"));
+      return { ok: false, code: "EXPIRED_CODE" };
+    }
+
+    const user = await prisma.user.findUnique({
+      where: { email },
+      select: { id: true, role: true, isBanned: true },
+    });
+    if (!user) return { ok: false, code: "INVALID_CODE" };
+    if (user.isBanned) return { ok: false, code: "ACCOUNT_BANNED" };
+
+    const claimed = await prisma.passwordResetCode.updateMany({
+      where: { email, codeHash: row.codeHash, attempts: { lt: PASSWORD_RESET_CODE_MAX_ATTEMPTS } },
+      data: { attempts: { increment: 1 } },
+    });
+    // Arada yeni kod istendi ya da sinir doldu.
+    if (claimed.count === 0) return { ok: false, code: "INVALID_CODE" };
+
+    if (!resetCodeMatches(email, code, row.codeHash)) {
+      const used = row.attempts + 1;
+      return { ok: false, code: used >= PASSWORD_RESET_CODE_MAX_ATTEMPTS ? "TOO_MANY_ATTEMPTS" : "INVALID_CODE" };
+    }
+
+    const passwordHash = await hashPassword(password);
+    const { tokenVersion } = await applyPasswordReset(
+      user.id,
+      passwordHash,
+      email,
+      `${PASSWORD_RESET_IDENTIFIER_PREFIX}${email}`,
+    );
+    await markEmailVerifiedByCode(user.id);
+    return { ok: true, userId: user.id, role: user.role, tokenVersion };
+  } catch (err) {
+    logger.error({ err }, "password_reset_code_consume_failed");
     return { ok: false, code: "UNKNOWN" };
   }
 }
