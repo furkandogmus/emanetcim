@@ -77,6 +77,38 @@ const securityHeaders = [
   },
 ];
 
+const CSP_REPORT_PATH = "/api/csp-report";
+const CSP_REPORT_GROUP = "csp-endpoint";
+
+/**
+ * YALNIZCA RAPOR EDEN, daha siki politika (2026-11-23): hicbir seyi engellemez,
+ * nonce'lu zorunlu CSP'den once neyin kirilacagini olcer. Zorunlu politikadan
+ * TURETILIR ki host listeleri ayrismasin; zorunlu deger bayt bayt ayni kalir
+ * (security-headers testi). `report-to` Chromium'da, `report-uri` digerlerinde.
+ */
+function reportOnlyCsp(enforced: string): string {
+  const directives = enforced
+    .split("; ")
+    .map((d) =>
+      d.startsWith("script-src ")
+        ? d.split(" ").filter((t) => t !== "'unsafe-inline'").join(" ")
+        : d,
+    );
+  return [
+    ...directives,
+    "object-src 'none'",
+    "require-trusted-types-for 'script'",
+    `report-uri ${CSP_REPORT_PATH}`,
+    `report-to ${CSP_REPORT_GROUP}`,
+  ].join("; ");
+}
+
+const enforcedCsp = securityHeaders.find((h) => h.key === "Content-Security-Policy")?.value ?? "";
+securityHeaders.push(
+  { key: "Content-Security-Policy-Report-Only", value: reportOnlyCsp(enforcedCsp) },
+  { key: "Reporting-Endpoints", value: `${CSP_REPORT_GROUP}="${CSP_REPORT_PATH}"` },
+);
+
 /**
  * PWA service worker KALDIRILDI (2026-08-23).
  *
