@@ -11,9 +11,9 @@ import { useTranslation } from "react-i18next";
 import { LuggageTag } from "@/components/Illustrations";
 import { Input } from "@/components/Field";
 import { AppText, Banner, Button, CenterMessage } from "@/components/ui";
-import { bookingCode, partnerSearchTerm, refineServerSearch, searchBookings } from "@/lib/booking-search";
+import { bookingCode } from "@/lib/booking-search";
+import { manualLookup } from "@/lib/manual-lookup";
 import { fetchPartnerBookingSearch, partnerSearchKey, usePartnerBookings } from "@/lib/queries";
-import type { PartnerBooking } from "@/lib/types";
 import { api } from "@/lib/api";
 import { errorMessage } from "@/lib/errors";
 import { colors, radius, space } from "@/theme/tokens";
@@ -180,7 +180,7 @@ const styles = StyleSheet.create({
 
 /**
  * QR okunamiyorsa (kirik ekran, bos pil, kamera izni yok): 8 haneli kod ya da misafir adi.
- * Once yuklu listede, yoksa sunucuda aranir; tek eslesmede detay acilir, birden fazlada secilir.
+ * Kural `manualLookup`'ta: kesin tek eslesmede detay acilir, aksi halde esnaf secer.
  */
 function ManualLookup() {
   const { t } = useTranslation();
@@ -193,36 +193,25 @@ function ManualLookup() {
   const [searching, setSearching] = useState(false);
 
   async function search() {
-    let found: PartnerBooking[] = searchBookings(bookings.data?.items ?? [], text);
-    /*
-      Yuklu liste yalnizca aktifler + son gecmis; dakikalar once yapilan ya da eski
-      rezervasyon orada yok. Bulunamazsa sunucu aramasi (tum tarihler, telefon dahil).
-      Arama ucu hata verirse eski yol: liste tazelenip yeniden aranir.
-    */
-    const term = partnerSearchTerm(text);
-    if (found.length === 0 && term) {
-      setSearching(true);
-      try {
-        const res = await queryClient.fetchQuery({
-          // "lookup" eki: liste ekranindaki ayni anahtar sonsuz sorgu ({ pages }) tutuyor.
-          queryKey: [...partnerSearchKey(null, term), "lookup"],
-          queryFn: () => fetchPartnerBookingSearch(term, null),
-          staleTime: 10_000,
-        });
-        found = refineServerSearch(res.items, term);
-      } catch {
-        const fresh = await bookings.refetch().catch(() => null);
-        found = searchBookings(fresh?.data?.items ?? [], text);
-      } finally {
-        setSearching(false);
-      }
-    }
-    if (found.length === 1) {
+    setSearching(true);
+    const result = await manualLookup(text, bookings.data?.items ?? [], {
+      searchServer: (term) =>
+        queryClient
+          .fetchQuery({
+            // "lookup" eki: liste ekranindaki ayni anahtar sonsuz sorgu ({ pages }) tutuyor.
+            queryKey: [...partnerSearchKey(null, term), "lookup"],
+            queryFn: ({ signal }) => fetchPartnerBookingSearch(term, null, undefined, signal),
+            staleTime: 10_000,
+          })
+          .then((r) => r.items),
+      refetchList: () => bookings.refetch().then((r) => r.data?.items ?? []),
+    }).finally(() => setSearching(false));
+    if (result.open) {
       setMatches(null);
-      router.push(`/partner/${found[0].id}`);
+      router.push(`/partner/${result.open.id}`);
       return;
     }
-    setMatches(found.slice(0, 5));
+    setMatches(result.choices);
   }
 
   if (!open) {
@@ -253,7 +242,7 @@ function ManualLookup() {
       />
       {matches && matches.length === 0 ? <Banner tone="danger" body={t("scan.manualNone")} /> : null}
       {matches && matches.length > 1 ? <AppText variant="caption">{t("scan.manualMany")}</AppText> : null}
-      {matches && matches.length > 1
+      {matches && matches.length > 0
         ? matches.map((m) => (
             <Button
               key={m.id}
