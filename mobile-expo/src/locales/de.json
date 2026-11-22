@@ -139,7 +139,11 @@
     "step": "Schritt {{current}} von {{total}}",
     "dropOffInPast": "Diese Abgabezeit ist vorbei. Wähle eine neue Zeit.",
     "locationUnavailable": "Dein Standort konnte nicht ermittelt werden. Suche eine Adresse oder wähle eine Stadt aus der Liste.",
-    "changePlace": "Ändern"
+    "changePlace": "Ändern",
+    "districtTitle": "Wo in {{city}}?",
+    "cityCenter": "Zentrum",
+    "cityCenterHint": "Ganze Stadt",
+    "districtsLoading": "Stadtteile werden geladen…"
   },
   "bags": {
     "s": "Klein (S)",
