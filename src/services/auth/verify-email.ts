@@ -91,3 +91,15 @@ export async function markEmailVerifiedByCode(userId: string): Promise<void> {
   });
   await linkGuestBookingsToVerifiedUser(userId);
 }
+
+/**
+ * Google/Apple'in DOGRULANMIS dedigi e-posta da kanittir: ayni isaretleme ve
+ * hesapsiz rezervasyon baglama. Cagiran yalnizca saglayicinin dogrulanmis
+ * iddiasi bu hesabin e-postasiyla eslesince cagirir.
+ */
+export async function markEmailVerifiedByProvider(userId: string): Promise<void> {
+  // Girisi dusurmez: token zaten dogrulandi, isaret bir sonraki giriste tekrar denenir.
+  await markEmailVerifiedByCode(userId).catch((err) =>
+    logger.error({ err, userId }, "provider_email_verify_mark_failed"),
+  );
+}
