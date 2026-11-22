@@ -9,7 +9,12 @@ import { resetPasswordWithTokenAction } from "@/actions/password-reset";
 import AmbientBackdrop from "@/components/common/AmbientBackdrop";
 import BrandMark from "@/components/common/BrandMark";
 
-export default function NewPasswordClient() {
+export default function NewPasswordClient({
+  accountLogin = null,
+}: {
+  /** Bağın ait olduğu hesabın giriş kimliği; şifre yöneticisi için (bkz. `resolvePasswordResetLogin`). */
+  accountLogin?: string | null;
+}) {
   const t = useTranslations("Auth");
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -101,6 +106,26 @@ export default function NewPasswordClient() {
           <p className="text-center text-sm font-medium text-green-700">{t("newPasswordSuccess")}</p>
         ) : (
           <form onSubmit={onSubmit} className="flex flex-col gap-4">
+            {/*
+              Şifre yöneticisi yeni şifreyi bu kimliğe kaydeder. `hidden` DEĞİL:
+              Chrome/Safari `type=hidden` alanı kullanıcı adı olarak okumuyor;
+              görsel olarak gizli, erişilebilirlik ağacından çıkarılmış bir metin alanı.
+            */}
+            {accountLogin ? (
+              <input
+                type="text"
+                name="username"
+                autoComplete="username"
+                value={accountLogin}
+                readOnly
+                tabIndex={-1}
+                aria-hidden="true"
+                className="sr-only"
+              />
+            ) : null}
+            <label htmlFor="new-password" className="-mb-2 text-xs font-bold text-gray-600">
+              {t("newPasswordLabel")}
+            </label>
             <div className="relative">
               <Lock
                 size={16}
@@ -115,11 +140,14 @@ export default function NewPasswordClient() {
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 disabled={busy || !token}
-                aria-label={t("newPasswordLabel")}
-                placeholder={t("newPasswordLabel")}
+                id="new-password"
+                name="new-password"
                 className="h-12 w-full rounded-xl border-2 border-gray-100 pl-10 pr-4 text-sm font-medium text-gray-800 placeholder-gray-300 transition disabled:opacity-50"
               />
             </div>
+            <label htmlFor="new-password-confirm" className="-mb-2 text-xs font-bold text-gray-600">
+              {t("newPasswordConfirm")}
+            </label>
             <div className="relative">
               <Lock
                 size={16}
@@ -134,8 +162,8 @@ export default function NewPasswordClient() {
                 value={confirm}
                 onChange={(e) => setConfirm(e.target.value)}
                 disabled={busy || !token}
-                aria-label={t("newPasswordConfirm")}
-                placeholder={t("newPasswordConfirm")}
+                id="new-password-confirm"
+                name="new-password-confirm"
                 className="h-12 w-full rounded-xl border-2 border-gray-100 pl-10 pr-4 text-sm font-medium text-gray-800 placeholder-gray-300 transition disabled:opacity-50"
               />
             </div>

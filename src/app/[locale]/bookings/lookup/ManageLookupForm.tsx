@@ -80,6 +80,8 @@ export default function ManageLookupForm() {
               type="email"
               autoComplete="email"
               inputMode="email"
+              autoCapitalize="none"
+              spellCheck={false}
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               placeholder="name@example.com"
@@ -111,6 +113,10 @@ export default function ManageLookupForm() {
               type="text"
               value={bookingId}
               onChange={(e) => setBookingId(e.target.value)}
+              autoComplete="off"
+              autoCapitalize="characters"
+              autoCorrect="off"
+              spellCheck={false}
               placeholder="D8A7FF57"
               className="w-full bg-gray-50 border border-gray-100 p-4 rounded-2xl text-sm font-mono font-bold uppercase"
               required

@@ -60,3 +60,25 @@ export async function generatePasswordResetToken(email: string) {
 export async function generatePasswordResetTokenByPhone(phone: string, ttlMs: number = PASSWORD_RESET_TTL_MS) {
   return createToken(passwordResetPhoneIdentifier(phone), ttlMs);
 }
+
+/**
+ * Sıfırlama bağının ait olduğu hesabın giriş kimliği (e-posta ya da telefon).
+ *
+ * Yalnızca şifre yöneticisi için: yeni şifre formuna gizli bir `username`
+ * alanı olarak konur ki tarayıcı şifreyi DOĞRU hesaba kaydetsin (yoksa kimliksiz
+ * bir kayıt açıyor ya da başka bir hesabın şifresini eziyordu). Bağı elinde
+ * tutan kişi zaten o hesabın sahibi; geçersiz/süresi dolmuş bağda `null`.
+ */
+export async function resolvePasswordResetLogin(token: string): Promise<string | null> {
+  const trimmed = token.trim();
+  if (!trimmed) return null;
+  const row = await prisma.verificationToken.findUnique({ where: { token: trimmed } });
+  if (!row || row.expires.getTime() < Date.now()) return null;
+  if (isPhoneResetIdentifier(row.identifier)) {
+    return row.identifier.slice(PASSWORD_RESET_PHONE_PREFIX.length) || null;
+  }
+  if (row.identifier.startsWith(PASSWORD_RESET_IDENTIFIER_PREFIX)) {
+    return row.identifier.slice(PASSWORD_RESET_IDENTIFIER_PREFIX.length) || null;
+  }
+  return null;
+}
