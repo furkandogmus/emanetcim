@@ -1,4 +1,5 @@
 import type { ReactNode } from "react";
+import Image from "next/image";
 import { getTranslations, setRequestLocale } from "next-intl/server";
 import { MapPin, ShieldCheck, Clock, Star, Smartphone, CalendarCheck, Map, QrCode, ArrowRight, Store, PackageCheck } from "lucide-react";
 import { Link } from "@/i18n/routing";
@@ -454,11 +455,21 @@ export default async function GuestPage({ params }: { params: Promise<{ locale: 
               key={card.title}
               className="overflow-hidden rounded-2xl border border-gray-100 bg-white shadow-sm"
             >
-              <div
-                className="h-44 w-full bg-cover bg-center"
-                style={{ backgroundImage: `url(${card.image})` }}
-                aria-hidden
-              />
+              {/*
+                CSS arka plani yerine next/image: 1200px'lik kaynak her ekranda aynen
+                iniyordu ve tembel yuklenmiyordu. Ekranin altinda, LCP degil ->
+                varsayilan lazy. alt="": gorsel basligin ve metnin yanindaki
+                susleme; ayni bilgiyi ikinci kez okutmaz.
+              */}
+              <div className="relative h-44 w-full">
+                <Image
+                  src={card.image}
+                  alt=""
+                  fill
+                  sizes="(min-width: 1152px) 370px, (min-width: 768px) 33vw, 100vw"
+                  className="object-cover"
+                />
+              </div>
               <div className="p-4">
                 <h3 className="text-sm font-black text-gray-900">{card.title}</h3>
                 <p className="mt-2 text-sm leading-relaxed text-gray-500">{card.text}</p>
