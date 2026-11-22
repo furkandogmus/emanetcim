@@ -208,10 +208,17 @@ function uploadWithXhr(
   });
 }
 
-function fetchWithTimeout(url: string, init: RequestInit, ms = REQUEST_TIMEOUT_MS): Promise<Response> {
+function fetchWithTimeout(url: string, init: RequestInit, ms = REQUEST_TIMEOUT_MS, outer?: AbortSignal): Promise<Response> {
   const controller = new AbortController();
   const timer = setTimeout(() => controller.abort(), ms);
-  return fetch(url, { ...init, signal: controller.signal }).finally(() => clearTimeout(timer));
+  // Cagiranin iptali (React Query'nin `signal`i) de istegi keser.
+  const cancel = () => controller.abort();
+  if (outer?.aborted) controller.abort();
+  else outer?.addEventListener("abort", cancel);
+  return fetch(url, { ...init, signal: controller.signal }).finally(() => {
+    clearTimeout(timer);
+    outer?.removeEventListener("abort", cancel);
+  });
 }
 
 /**
@@ -280,10 +287,12 @@ type RequestOptions = {
   bearer?: string | DetachedSession;
   /** Ek basliklar (ornegin `Idempotency-Key`); Authorization/Accept bunlari ezmez. */
   headers?: Record<string, string>;
+  /** Iptal edilirse istek kesilir (React Query `signal`). */
+  signal?: AbortSignal;
 };
 
 export async function api<T>(path: string, opts: RequestOptions = {}): Promise<T> {
-  const { method = "GET", body, bearer: explicitBearer, headers: extraHeaders } = opts;
+  const { method = "GET", body, bearer: explicitBearer, headers: extraHeaders, signal } = opts;
   const auth = explicitBearer ? false : (opts.auth ?? true);
 
   const send = () => {
@@ -305,6 +314,7 @@ export async function api<T>(path: string, opts: RequestOptions = {}): Promise<T
       `${API_BASE_URL}${path}`,
       { method, headers, body: body === undefined ? undefined : JSON.stringify(body) },
       REQUEST_TIMEOUT_MS,
+      signal,
     ) as Promise<HttpResponse>;
   };
 

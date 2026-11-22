@@ -208,9 +208,9 @@ export function partnerSearchKey(shopId: string | null, term: string) {
 }
 
 /** Sunucu aramasi: kod on eki, misafir adi, telefonun son haneleri; tum tarihler. `shopId` yalnizca cok dukkanlida. */
-export function fetchPartnerBookingSearch(term: string, shopId: string | null, cursor?: string) {
+export function fetchPartnerBookingSearch(term: string, shopId: string | null, cursor?: string, signal?: AbortSignal) {
   const qs = new URLSearchParams({ q: term, limit: "50", ...(shopId ? { shopId } : {}), ...(cursor ? { cursor } : {}) });
-  return api<PartnerBookingsResponse>(`/partner/bookings?${qs}`);
+  return api<PartnerBookingsResponse>(`/partner/bookings?${qs}`, { signal });
 }
 
 /**
@@ -224,7 +224,8 @@ export function usePartnerBookingSearch(raw: string, shopId: string | null) {
     queryKey: partnerSearchKey(shopId, term),
     enabled: term.length > 0,
     initialPageParam: undefined as string | undefined,
-    queryFn: ({ pageParam }) => fetchPartnerBookingSearch(term, shopId, pageParam),
+    // Yeni terim eski istegi iptal eder (signal): gec gelen eski yanit bant genisligi yemesin.
+    queryFn: ({ pageParam, signal }) => fetchPartnerBookingSearch(term, shopId, pageParam, signal),
     getNextPageParam: nextCursorOf,
   });
   // Yazilan terim henuz gonderilmediyse (geciktirme suruyor) sonuc eskidir.
