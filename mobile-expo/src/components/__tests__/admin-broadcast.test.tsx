@@ -97,9 +97,32 @@ describe("gonderim kapisi", () => {
   it("gerekce 5 karakterden kisayken kapali, tamamlaninca acik", async () => {
     await render(<AdminBroadcastScreen />, { wrapper });
     await fillValid({ reason: "abc" });
+    await waitFor(() => expect(screen.getByTestId("broadcast-preview")).toHaveTextContent("12 cihaz", { exact: false }));
     expect(isDisabled(sendButton())).toBe(true);
     await fireEvent.changeText(screen.getByLabelText("Gerekçe"), "planli bakim");
     expect(isDisabled(sendButton())).toBe(false);
+  });
+
+  it("alici sayisi yuklenirken ya da alinamadiysa kapali", async () => {
+    const base = mockHandler;
+    mockHandler = (path, body) =>
+      path === "/admin/broadcasts/preview" ? new Promise(() => undefined) : base(path, body);
+    await render(<AdminBroadcastScreen />, { wrapper });
+    await fillValid();
+    expect(screen.getByTestId("broadcast-preview")).toHaveTextContent("Hesaplanıyor…");
+    expect(isDisabled(sendButton())).toBe(true);
+  });
+
+  it("alici sayisi hata verdiyse kapali", async () => {
+    const base = mockHandler;
+    mockHandler = async (path, body) => {
+      if (path === "/admin/broadcasts/preview") throw new ApiError(0, "network");
+      return base(path, body);
+    };
+    await render(<AdminBroadcastScreen />, { wrapper });
+    await fillValid();
+    await waitFor(() => expect(screen.getByTestId("broadcast-preview")).toHaveTextContent("Alıcı sayısı alınamadı", { exact: false }));
+    expect(isDisabled(sendButton())).toBe(true);
   });
 
   it("TR baslik ya da metin bossa kapali; yarim Ingilizce de kapatir", () => {
@@ -134,8 +157,9 @@ describe("onay penceresi", () => {
     await waitFor(() => expect(screen.getByTestId("broadcast-preview")).toHaveTextContent("40 cihaz", { exact: false }));
     await fireEvent.press(sendButton());
 
-    const dialog = screen.getByTestId("broadcast-confirm");
-    expect(dialog).toHaveTextContent("Misafirler · 40 cihaz", { exact: false });
+    await waitFor(() =>
+      expect(screen.getByTestId("broadcast-confirm")).toHaveTextContent("Misafirler · 40 cihaz", { exact: false }),
+    );
     expect(mockCalls.some((c) => c.path === "/admin/broadcasts")).toBe(false);
 
     await fireEvent.press(screen.getByRole("button", { name: "Evet, gönder" }));
@@ -148,6 +172,57 @@ describe("onay penceresi", () => {
     });
   });
 
+  it("onay acilinca alici sayisi yeniden sorulur; taze sayi gelene kadar onay kapali", async () => {
+    let release: (v: unknown) => void = () => undefined;
+    const base = mockHandler;
+    mockHandler = (path, body) => {
+      if (path === "/admin/broadcasts/preview" && previewCalls().length > 1) {
+        return new Promise((resolve) => (release = resolve));
+      }
+      return base(path, body);
+    };
+    await render(<AdminBroadcastScreen />, { wrapper });
+    await fillValid({ audience: "Misafirler" });
+    await waitFor(() => expect(screen.getByTestId("broadcast-preview")).toHaveTextContent("40 cihaz", { exact: false }));
+    await fireEvent.press(sendButton());
+
+    expect(previewCalls()).toHaveLength(2);
+    const confirm = screen.getByRole("button", { name: "Evet, gönder" });
+    expect(isDisabled(confirm)).toBe(true);
+    expect(screen.getByTestId("broadcast-confirm")).not.toHaveTextContent("40 cihaz", { exact: false });
+
+    await act(async () => release({ users: 44, devices: 45 }));
+    await waitFor(() =>
+      expect(screen.getByTestId("broadcast-confirm")).toHaveTextContent("Misafirler · 45 cihaz", { exact: false }),
+    );
+    expect(isDisabled(screen.getByRole("button", { name: "Evet, gönder" }))).toBe(false);
+  });
+
+  it("yeni duyuruya baslarken onceki hata bandi temizlenir", async () => {
+    let fail = true;
+    const base = mockHandler;
+    mockHandler = async (path, body) => {
+      if (path === "/admin/broadcasts" && fail) throw new ApiError(400, "no_recipients");
+      return base(path, body);
+    };
+    const confirmSend = async () => {
+      await waitFor(() => expect(isDisabled(sendButton())).toBe(false));
+      await fireEvent.press(sendButton());
+      await waitFor(() => expect(isDisabled(screen.getByRole("button", { name: "Evet, gönder" }))).toBe(false));
+      await fireEvent.press(screen.getByRole("button", { name: "Evet, gönder" }));
+    };
+    await render(<AdminBroadcastScreen />, { wrapper });
+    await fillValid();
+    await confirmSend();
+    await waitFor(() => expect(screen.getByText("Bu kitlede bildirim alan cihaz yok.")).toBeTruthy());
+
+    fail = false;
+    await confirmSend();
+    await waitFor(() => expect(screen.getByText("Duyuru sıraya alındı")).toBeTruthy());
+    await fireEvent.press(screen.getByRole("button", { name: "Yeni duyuru" }));
+    expect(screen.queryByText("Bu kitlede bildirim alan cihaz yok.")).toBeNull();
+  });
+
   it("sunucu too_soon donerse kalan dakikayla hata bandi gosterir", async () => {
     const base = mockHandler;
     mockHandler = async (path, body) => {
@@ -156,7 +231,9 @@ describe("onay penceresi", () => {
     };
     await render(<AdminBroadcastScreen />, { wrapper });
     await fillValid();
+    await waitFor(() => expect(isDisabled(sendButton())).toBe(false));
     await fireEvent.press(sendButton());
+    await waitFor(() => expect(isDisabled(screen.getByRole("button", { name: "Evet, gönder" }))).toBe(false));
     await fireEvent.press(screen.getByRole("button", { name: "Evet, gönder" }));
     await waitFor(() => expect(screen.getByText("Az önce bir duyuru gönderildi. 3 dakika sonra tekrar dene.")).toBeTruthy());
   });
@@ -170,6 +247,8 @@ describe("hata metinleri", () => {
     ["reason_required", "Gerekçe en az 5 karakter olmalı."],
     ["forbidden", "Bu işlem için yönetici olman gerekiyor; kullanıcı olarak görüntülerken yapılamaz."],
     ["no_recipients", "Bu kitlede bildirim alan cihaz yok."],
+    ["broadcast_in_progress", "Önceki duyuru hâlâ gönderiliyor. Bitince yeniden dene; aşağıdaki listeden izleyebilirsin."],
+    ["reason_too_long", "Gerekçe en fazla 500 karakter olabilir."],
   ])("%s cevrilir", (code, text) => {
     expect(broadcastErrorMessage(new ApiError(400, code))).toBe(text);
   });

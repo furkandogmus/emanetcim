@@ -67,6 +67,7 @@ export default function AdminBroadcastScreen() {
     onSuccess: (r) => {
       setConfirming(false);
       setSent({ devices: r.devices });
+      setSendError(null);
       setForm(EMPTY_BROADCAST_FORM);
       setShowEn(false);
       void qc.invalidateQueries({ queryKey: adminBroadcastsKey });
@@ -78,7 +79,9 @@ export default function AdminBroadcastScreen() {
   });
 
   const audienceLabel = (a: BroadcastAudience) => t(`broadcast.audience.${a}`);
-  const ready = canSendBroadcast(form);
+  // Onay paneli bir cihaz sayisi tekrarlar: sayi yuklenirken ya da hatadayken 0 / bayat sayi gostermesin.
+  const previewFresh = preview.isSuccess && !preview.isFetching;
+  const ready = canSendBroadcast(form) && previewFresh;
 
   return (
     <SafeAreaView style={styles.safe} edges={["top"]}>
@@ -101,7 +104,14 @@ export default function AdminBroadcastScreen() {
           {sent ? (
             <View style={{ gap: space.md }}>
               <Banner tone="success" title={t("broadcast.sentTitle")} body={t("broadcast.sentBody", { count: sent.devices })} />
-              <Button variant="secondary" title={t("broadcast.newBroadcast")} onPress={() => setSent(null)} />
+              <Button
+                variant="secondary"
+                title={t("broadcast.newBroadcast")}
+                onPress={() => {
+                  setSent(null);
+                  setSendError(null);
+                }}
+              />
             </View>
           ) : (
             <View style={{ gap: space.lg }}>
@@ -200,6 +210,8 @@ export default function AdminBroadcastScreen() {
                 onPress={() => {
                   setSendError(null);
                   setConfirming(true);
+                  // Onizleme ekran acildigindan beri eskimis olabilir: onayda taze sayi gosterilir.
+                  void preview.refetch();
                 }}
               />
             </View>
@@ -222,16 +234,23 @@ export default function AdminBroadcastScreen() {
         <View style={{ gap: space.lg }} testID="broadcast-confirm">
           <AppText variant="heading">{t("broadcast.confirmTitle")}</AppText>
           <AppText variant="body">
-            {t("broadcast.confirmBody", {
-              audience: form.audience ? audienceLabel(form.audience) : "",
-              devices: preview.data?.devices ?? 0,
-            })}
+            {previewFresh && preview.data
+              ? t("broadcast.confirmBody", {
+                  audience: form.audience ? audienceLabel(form.audience) : "",
+                  devices: preview.data.devices,
+                })
+              : t("broadcast.previewLoading")}
           </AppText>
           <Card style={{ gap: 2 }}>
             <AppText variant="bodyMedium">{form.titleTr.trim()}</AppText>
             <AppText variant="caption">{form.bodyTr.trim()}</AppText>
           </Card>
-          <Button title={t("broadcast.confirmSend")} loading={send.isPending} onPress={() => send.mutate()} />
+          <Button
+            title={t("broadcast.confirmSend")}
+            disabled={!previewFresh}
+            loading={send.isPending}
+            onPress={() => send.mutate()}
+          />
           <Button variant="ghost" title={t("common.cancel")} onPress={() => setConfirming(false)} />
         </View>
       </Sheet>
