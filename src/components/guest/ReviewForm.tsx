@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from 'react';
+import { useState, useRef } from 'react';
 import { useTranslations } from 'next-intl';
 import { X, Loader2, Send } from 'lucide-react';
 import { addReviewAction } from '@/actions/review';
@@ -32,7 +32,8 @@ export default function ReviewForm({
    * Escape ile kapanmıyordu ve `role="dialog"` taşımıyordu: klavye kullanıcısı
    * göndermek dışında çıkış yolu olmayan bir formun içinde kalıyordu.
    */
-  useModalBehavior({ open: true, onClose });
+  const modalRef = useRef<HTMLDivElement>(null);
+  useModalBehavior({ open: true, onClose, ref: modalRef });
 
   const [rating, setRating] = useState(5);
   const [comment, setComment] = useState("");
@@ -69,7 +70,7 @@ export default function ReviewForm({
   };
 
   return (
-    <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/60 backdrop-blur-md p-4 animate-in fade-in duration-300">
+    <div ref={modalRef} className="fixed inset-0 z-[100] flex items-center justify-center bg-black/60 backdrop-blur-md p-4 animate-in fade-in duration-300">
       <div
         role="dialog"
         aria-modal="true"

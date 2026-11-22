@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useState, useRef } from "react";
 import { useTranslations } from "next-intl";
 import { Link } from "@/i18n/routing";
 import { X, Store, Percent, Sparkles, ArrowRight } from "lucide-react";
@@ -30,12 +30,13 @@ export default function PartnerPromoModal() {
   }, []);
 
   // Davetsiz acilan bir katman Escape ile kapanabilmeli — kullanici onu istemedi.
-  useModalBehavior({ open: isMounted && isOpen, onClose: handleClose });
+  const modalRef = useRef<HTMLDivElement>(null);
+  useModalBehavior({ open: isMounted && isOpen, onClose: handleClose, ref: modalRef });
 
   if (!isMounted || !isOpen) return null;
 
   return (
-    <div 
+    <div ref={modalRef} 
       className="fixed inset-0 bg-black/40 backdrop-blur-sm z-[100] flex items-center justify-center p-4 animate-fade-in"
       onClick={handleClose}
     >

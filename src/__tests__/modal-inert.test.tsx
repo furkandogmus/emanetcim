@@ -1,9 +1,11 @@
 /**
  * @vitest-environment jsdom
  */
-import { useState } from "react";
+import fs from "node:fs";
+import path from "node:path";
+import { useRef, useState } from "react";
 import { describe, it, expect } from "vitest";
-import { render, screen, fireEvent, waitFor } from "@testing-library/react";
+import { render, screen, fireEvent, waitFor, act } from "@testing-library/react";
 import { useModalBehavior } from "@/lib/hooks/useModalBehavior";
 
 /**
@@ -21,9 +23,10 @@ function Dialog({
   onClose: () => void;
   children?: React.ReactNode;
 }) {
-  useModalBehavior({ open: true, onClose });
+  const ref = useRef<HTMLDivElement>(null);
+  useModalBehavior({ open: true, onClose, ref });
   return (
-    <div className="fixed inset-0" data-testid={`${label}-overlay`}>
+    <div ref={ref} className="fixed inset-0" data-testid={`${label}-overlay`}>
       <div role="dialog" aria-modal="true" aria-label={label}>
         <button type="button">{label}-ilk</button>
         {children}
@@ -45,6 +48,7 @@ function Page() {
           <button type="button" onClick={() => setOuter(true)}>
             dis-ac
           </button>
+          <p aria-live="polite" data-testid="form-status" />
         </section>
         {outer && (
           <Dialog label="dis" onClose={() => setOuter(false)}>
@@ -56,12 +60,13 @@ function Page() {
         {inner && <Dialog label="ic" onClose={() => setInner(false)} />}
       </main>
       <footer data-testid="footer">altbilgi</footer>
-      <div aria-live="polite" data-testid="live" />
+      <section aria-live="polite" data-testid="toaster" />
     </>
   );
 }
 
 const isInert = (id: string) => screen.getByTestId(id).hasAttribute("inert");
+const inInert = (id: string) => screen.getByTestId(id).closest("[inert]") !== null;
 
 describe("useModalBehavior — arka plan inert", () => {
   it("açılınca modal dışındaki kardeşler inert olur; modalın ataları ve kendisi olmaz", () => {
@@ -73,10 +78,10 @@ describe("useModalBehavior — arka plan inert", () => {
     expect(isInert("content")).toBe(true);
     // Modal `<main>` içinde çiziliyor: `<main>` inert olsaydı modal da kilitlenirdi.
     expect(isInert("main")).toBe(false);
-    expect(isInert("dis-overlay")).toBe(false);
-    expect(screen.getByRole("dialog").closest("[inert]")).toBeNull();
-    // Canlı bölge açık kalır: modal açıkken çıkan bildirim okunmalı.
-    expect(isInert("live")).toBe(false);
+    expect(inInert("dis-overlay")).toBe(false);
+    // Yalnızca bildirim kabı açık kalır; sayfa içindeki canlı bölge kilitlenir.
+    expect(isInert("toaster")).toBe(false);
+    expect(inInert("form-status")).toBe(true);
   });
 
   it("kapanınca bütün inert'ler kalkar ve odak açan düğmeye döner", () => {
@@ -103,7 +108,7 @@ describe("useModalBehavior — arka plan inert", () => {
     fireEvent.click(innerOpener);
 
     expect(isInert("dis-overlay")).toBe(true);
-    expect(isInert("ic-overlay")).toBe(false);
+    expect(inInert("ic-overlay")).toBe(false);
     expect(isInert("header")).toBe(true);
 
     // Escape yalnızca en üsttekini kapatır (eskiden ikisi birden kapanıyordu).
@@ -140,17 +145,17 @@ describe("useModalBehavior — arka plan inert", () => {
     }
     render(<WithClosedSheet />);
     fireEvent.click(screen.getByText("ac"));
-    // Kapalı sheet DOM'da sonra değil önce, ama yine de etkin diyalog açık olan.
     expect(document.activeElement?.textContent).toBe("acik-ilk");
     fireEvent.keyDown(document, { key: "Escape" });
     expect(isInert("kapali-sheet")).toBe(true);
   });
 
-  it("data-modal-root: diyaloğun kardeşi olan karartma inert olmaz", () => {
+  it("ref kökü karartmayı da kapsar: diyaloğun kardeşi olan karartma inert olmaz (BottomSheet)", () => {
     function Sheet() {
-      useModalBehavior({ open: true, onClose: () => {} });
+      const ref = useRef<HTMLDivElement>(null);
+      useModalBehavior({ open: true, onClose: () => {}, ref });
       return (
-        <div data-modal-root="">
+        <div ref={ref}>
           <div data-testid="backdrop" />
           <div role="dialog" aria-label="sheet">
             <button type="button">x</button>
@@ -165,7 +170,7 @@ describe("useModalBehavior — arka plan inert", () => {
       </>,
     );
     expect(isInert("nav")).toBe(true);
-    expect(isInert("backdrop")).toBe(false);
+    expect(inInert("backdrop")).toBe(false);
   });
 
   it("modal açıkken arka plana sonradan eklenen öğe de inert olur", async () => {
@@ -173,23 +178,133 @@ describe("useModalBehavior — arka plan inert", () => {
       const [late, setLate] = useState(false);
       return (
         <>
-          <main>
-            <button type="button" onClick={() => setLate(true)} data-testid="tetik">
-              t
-            </button>
-          </main>
-          {/* `<main>` zaten inert; geç öğe onun KARDEŞİ olmalı ki gözlemci sınansın. */}
-          {late && <div data-testid="gec" />}
+          <main />
           <Dialog label="m" onClose={() => {}}>
             <button type="button" onClick={() => setLate(true)}>
               gec-ekle
             </button>
           </Dialog>
+          {/* `<main>` zaten inert; geç öğe onun KARDEŞİ olmalı ki gözlemci sınansın. */}
+          {late && <div data-testid="gec" />}
         </>
       );
     }
     render(<Late />);
     fireEvent.click(screen.getByText("gec-ekle"));
-    await waitFor(() => expect(screen.getByTestId("gec").closest("[inert]")).not.toBeNull());
+    await waitFor(() => expect(isInert("gec")).toBe(true));
+  });
+});
+
+/**
+ * REGRESYON (QA, 2026-11-23): kök DOM'dan tahmin ediliyordu. `<main>`den SONRA
+ * çizilen ve `role="dialog"` taşıyan modal olmayan bir şerit (PWA kurulum
+ * şeridi) kök seçiliyor, `<main>` modalla birlikte `inert` oluyor, odak şeride
+ * kaçıyordu; şerit kapatılınca da kilit hiç kalkmıyordu.
+ */
+describe("useModalBehavior — kök ref'ten gelir, DOM'dan tahmin edilmez", () => {
+  function Modal({ onClose }: { onClose: () => void }) {
+    const ref = useRef<HTMLDivElement>(null);
+    useModalBehavior({ open: true, onClose, ref });
+    return (
+      <div ref={ref} role="dialog" data-testid="modal">
+        <button type="button">ok</button>
+      </div>
+    );
+  }
+  function WithBanner() {
+    const [open, setOpen] = useState(false);
+    const [banner, setBanner] = useState(true);
+    return (
+      <>
+        <main data-testid="main">
+          <button type="button" onClick={() => setOpen(true)}>
+            ac
+          </button>
+          {open && <Modal onClose={() => setOpen(false)} />}
+        </main>
+        {banner && (
+          <div role="dialog" data-testid="banner">
+            <button type="button" onClick={() => setBanner(false)}>
+              kapat-serit
+            </button>
+          </div>
+        )}
+      </>
+    );
+  }
+
+  it("sonda başka bir role=dialog varken modal etkileşimli kalır, şerit inert olur", async () => {
+    render(<WithBanner />);
+    fireEvent.click(screen.getByText("ac"));
+
+    expect(inInert("modal")).toBe(false);
+    expect(isInert("main")).toBe(false);
+    expect(isInert("banner")).toBe(true);
+    expect(document.activeElement?.textContent).toBe("ok");
+
+    // Şerit kendi durumuyla (ör. zaman aşımı) kaldırılınca kilit doğru kalır.
+    // jsdom `inert`i uygulamadığı için tıklama, programatik kapanışın yerine geçiyor.
+    await act(async () => {
+      fireEvent.click(screen.getByText("kapat-serit"));
+    });
+    expect(screen.queryByTestId("banner")).toBeNull();
+    expect(inInert("modal")).toBe(false);
+    expect(isInert("main")).toBe(false);
+
+    fireEvent.keyDown(document, { key: "Escape" });
+    expect(document.querySelectorAll("[inert]")).toHaveLength(0);
+  });
+
+  it("kök kaldırılıp yeniden bağlanınca (remount) kilit ve Tab yeni düğüme geçer", () => {
+    function Remount() {
+      const ref = useRef<HTMLDivElement>(null);
+      const [k, setK] = useState(0);
+      useModalBehavior({ open: true, onClose: () => {}, ref });
+      return (
+        <>
+          <nav data-testid="nav2" />
+          <div key={k} ref={ref} data-testid={`root-${k}`}>
+            <button type="button" onClick={() => setK(1)}>
+              yenile
+            </button>
+          </div>
+        </>
+      );
+    }
+    render(<Remount />);
+    fireEvent.click(screen.getByText("yenile"));
+    expect(inInert("root-1")).toBe(false);
+    expect(isInert("nav2")).toBe(true);
+
+    // Tab tuzağı yeni kökte: tek odaklanabilir öğede Tab yerinde kalır.
+    const btn = screen.getByText("yenile");
+    btn.focus();
+    const ev = new KeyboardEvent("keydown", { key: "Tab", bubbles: true, cancelable: true });
+    document.dispatchEvent(ev);
+    expect(ev.defaultPrevented).toBe(true);
+  });
+
+  it("kök DOM'dan React dışı bir yolla kaldırılırsa kilit kalkar (gözlemci silmeyi de izler)", async () => {
+    const el = document.createElement("div");
+    document.body.append(el);
+    function External() {
+      useModalBehavior({ open: true, onClose: () => {}, ref: { current: el } });
+      return <nav data-testid="nav3" />;
+    }
+    render(<External />);
+    expect(inInert("nav3")).toBe(true);
+    await act(async () => {
+      el.remove();
+    });
+    expect(inInert("nav3")).toBe(false);
+  });
+
+  it("PWA kurulum şeridi modal değil: role=dialog taşımaz", () => {
+    const src = fs.readFileSync(
+      path.join(process.cwd(), "src/components/PWAInstallBanner.tsx"),
+      "utf8",
+    );
+    expect(src).not.toMatch(/role=["']dialog["']/);
+    expect(src).toMatch(/role=["']region["']/);
   });
 });

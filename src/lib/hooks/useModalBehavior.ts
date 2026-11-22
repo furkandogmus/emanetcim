@@ -1,7 +1,7 @@
 "use client";
 
-import { useEffect, useRef } from "react";
-import { isTopModal, modalDialog, popModal, pushModal, resolveNewDialog } from "@/lib/modal-inert";
+import { useEffect, useRef, type RefObject } from "react";
+import { isTopModal, modalNode, popModal, pushModal, setModalNode } from "@/lib/modal-inert";
 
 /**
  * Bir modalın klavye ve odak davranışı — tek yerde.
@@ -24,9 +24,7 @@ import { isTopModal, modalDialog, popModal, pushModal, resolveNewDialog } from "
  *  4. **Tab, modal içinde döner (focus trap).** Aksi halde Tab'a basmaya devam eden
  *     klavye kullanıcısı arka plandaki (görsel olarak kapalı ama DOM'da hâlâ
  *     odaklanabilir) içeriğe geçer — modal açık göründüğü halde odak kaybolur.
- *     Ref almadan çalışması için DOM'daki en son `[role="dialog"]` öğesi baz
- *     alınır (iç içe modallarda en üstteki); hook zaten Escape/scroll-kilidi
- *     için de ref istemiyordu.
+ *     Tuzak, çağıranın `ref` ile verdiği modal kökünün içinde kurulur.
  *  5. **Açılışta odak modala taşınır.** `ConfirmDialog` gibi kendi odak hedefini
  *     seçen bileşenler ayrıca kendi `useEffect`'iyle üzerine yazabilir (bu hook
  *     önce çalışır); ama `CheckoutSealsDialog` / galeri lightbox'ı gibi özel
@@ -36,55 +34,36 @@ import { isTopModal, modalDialog, popModal, pushModal, resolveNewDialog } from "
  *  6. **Arka plan `inert` olur** (`src/lib/modal-inert.ts`): ekran okuyucunun
  *     sanal imleci de modaldan çıkamaz. İç içe modallarda Escape/Tab yalnızca
  *     en üsttekinde çalışır; eskiden Escape ikisini birden kapatıyordu.
+ *     Açılır pencereler (`DateTimePicker`) `inertBackground: false` verir.
+ *
+ * `ref` ZORUNLU ve modalın en dış kökünü (karartma dahil) göstermeli. Kök
+ * DOM'dan tahmin EDİLMEZ (2026-11-23): `[role="dialog"]` aramak, sayfadaki
+ * modal olmayan bir şeridi ya da kapalı bir `BottomSheet`i kök seçiyor ve
+ * modalın kendisini `inert` yapıyordu. Ref ilk render'da boş olabilir (takvim
+ * bir sonraki render'da çiziliyor); kilit ve açılış odağı ref bağlanınca kurulur.
  */
 const FOCUSABLE_SELECTOR =
   'a[href], button:not([disabled]), textarea:not([disabled]), input:not([disabled]), select:not([disabled]), [tabindex]:not([tabindex="-1"])';
 export function useModalBehavior({
   open,
   onClose,
+  ref,
+  inertBackground = true,
 }: {
   open: boolean;
   onClose: () => void;
+  ref: RefObject<HTMLElement | null>;
+  inertBackground?: boolean;
 }): void {
   const previouslyFocused = useRef<HTMLElement | null>(null);
+  const modalIdRef = useRef<number | null>(null);
   /**
    * `onClose` cogu cagirandan INLINE bir fonksiyon olarak geliyor (ornek:
-   * `ConfirmDialog`'un `onCancel` prop'u -- `onCancel={() => setX(null)}`).
-   * Bu her render'da YENI bir referans demek. Eskiden `onClose` bagimlilik
-   * dizisindeydi: modal acikken ebeveyn BASKA bir nedenle yeniden render
-   * olursa (ilgisiz bir state degisikligi) efekt tamamen sokulup yeniden
-   * kuruluyordu -- temizleme adimi odagi ONCEKI (tetikleyici) elemana geri
-   * tasiyor, sonra kurulum tekrar modalin icine odaklaniyordu. Klavye/ekran
-   * okuyucu kullanicisi icin odak bir anlik disari-iceri titriyordu; bir
-   * form alanina yazarken bu yasanirsa imlec tamamen kayboluyordu. Ref'e
-   * alinip bagimliliktan cikarilarak efekt yalnizca `open` degisince
-   * yeniden kuruluyor.
+   * `ConfirmDialog`'un `onCancel={() => setX(null)}`). Bagimlilikta olsaydi
+   * modal acikken ilgisiz her yeniden render efekti sokup kurar, odak
+   * tetikleyiciye gidip geri gelirdi; yazilan alanda imlec kayboluyordu.
    */
   const onCloseRef = useRef(onClose);
-/**
- * ETKIN diyalogu bulur -- DOM'daki sonuncuyu degil.
- *
- * NEDEN (2026-08-31'de olculdu): hook `querySelectorAll('[role="dialog"]')`
- * sonucunun SONUNCUSUNU aliyordu. Ana sayfada iki `BottomSheet` var (birakis
- * ve alis tarih secicileri) ve ikisi de KAPALIYKEN BILE DOM'da duruyor --
- * kapali olan `inert` ile erisilebilirlik agacindan cikarilmis halde.
- *
- * Sonuc: kullanici BIRINCI seciciyi aciyor, hook odagi IKINCININ (kapali,
- * `inert`) ilk ogesine tasimaya calisiyor ve `inert` icindeki bir oge
- * odaklanamadigi icin odak tetikleyici dugmede kaliyor. Olculdu: panel
- * acildiktan sonra `document.activeElement` hala "Birakis" dugmesi.
- *
- * Ekran okuyucu kullanicisi acisindan bu, "dugmeye bastim ama bir sey
- * olmadi" demek. Ayni hata Tab tuzagini da yanlis diyaloga bagliyordu.
- *
- * `inert` iceren bir ata varsa o diyalog etkin degildir; filtre bu.
- */
-function etkinDiyalog(): HTMLElement | null {
-  const hepsi = [...document.querySelectorAll<HTMLElement>('[role="dialog"]')];
-  const etkinler = hepsi.filter((d) => !d.closest("[inert]"));
-  const liste = etkinler.length > 0 ? etkinler : hepsi;
-  return liste[liste.length - 1] ?? null;
-}
 
   useEffect(() => {
     onCloseRef.current = onClose;
@@ -93,12 +72,9 @@ function etkinDiyalog(): HTMLElement | null {
   useEffect(() => {
     if (!open) return;
 
-    previouslyFocused.current =
-      typeof document !== "undefined"
-        ? (document.activeElement as HTMLElement | null)
-        : null;
-
-    const modalId = pushModal(resolveNewDialog() ?? etkinDiyalog());
+    previouslyFocused.current = document.activeElement as HTMLElement | null;
+    const modalId = pushModal({ node: null, inert: inertBackground });
+    modalIdRef.current = modalId;
 
     const onKeyDown = (e: KeyboardEvent) => {
       if (!isTopModal(modalId)) return;
@@ -109,10 +85,10 @@ function etkinDiyalog(): HTMLElement | null {
       }
       if (e.key !== "Tab") return;
 
-      const dialog = modalDialog(modalId) ?? etkinDiyalog();
-      if (!dialog) return;
+      const root = modalNode(modalId);
+      if (!root) return;
 
-      const focusable = dialog.querySelectorAll<HTMLElement>(FOCUSABLE_SELECTOR);
+      const focusable = root.querySelectorAll<HTMLElement>(FOCUSABLE_SELECTOR);
       if (focusable.length === 0) return;
 
       const first = focusable[0];
@@ -128,12 +104,6 @@ function etkinDiyalog(): HTMLElement | null {
     };
     document.addEventListener("keydown", onKeyDown);
 
-    const dialogOnOpen = modalDialog(modalId) ?? etkinDiyalog();
-    if (dialogOnOpen && !dialogOnOpen.contains(document.activeElement)) {
-      const firstFocusable = dialogOnOpen.querySelector<HTMLElement>(FOCUSABLE_SELECTOR);
-      firstFocusable?.focus();
-    }
-
     /**
      * Önceki değeri saklayıp geri koyuyoruz: iç içe iki modal açıldığında
      * içteki kapanınca dıştakinin kilidi bozulmamalı.
@@ -144,10 +114,28 @@ function etkinDiyalog(): HTMLElement | null {
     return () => {
       document.removeEventListener("keydown", onKeyDown);
       document.body.style.overflow = previousOverflow;
+      modalIdRef.current = null;
       // SIRA ONEMLI: `inert` once kalkmali; `inert` icindeki acici odak alamaz.
       popModal(modalId);
       previouslyFocused.current?.focus?.();
     };
     // `onClose` bilerek burada degil -- yukaridaki `onCloseRef`e bakin.
-  }, [open]);
+  }, [open, inertBackground]);
+
+  /**
+   * Her render'dan sonra kök düğümü eşitler: ilk bağlanışta (gecikmeli
+   * çizilen takvim dahil) kilidi kurar ve odağı içeri taşır; remount'ta
+   * düğümü günceller ki Escape/Tab ve `inert` aynı düğüme baksın.
+   */
+  useEffect(() => {
+    const id = modalIdRef.current;
+    if (id === null) return;
+    const node = ref.current;
+    const prev = modalNode(id);
+    if (node === prev) return;
+    setModalNode(id, node);
+    if (!prev && node && !node.contains(document.activeElement)) {
+      node.querySelector<HTMLElement>(FOCUSABLE_SELECTOR)?.focus();
+    }
+  });
 }

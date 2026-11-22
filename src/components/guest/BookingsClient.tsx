@@ -1,7 +1,7 @@
 "use client";
 
 import { formatDateInZone, bookingTimeZone } from "@/lib/format-datetime";
-import { useCallback, useState } from 'react';
+import { useCallback, useState, useRef } from 'react';
 import { useLocale, useTranslations } from 'next-intl';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
@@ -79,9 +79,11 @@ export default function BookingsClient({
     setCancelModalBooking(null);
   }, [cancelSubmitting]);
 
+  const modalRef = useRef<HTMLDivElement>(null);
   useModalBehavior({
     open: cancelModalBooking !== null,
     onClose: closeCancelModal,
+    ref: modalRef,
   });
   const isPastBooking = (status: string) =>
     status === 'CHECKED_OUT' || status === 'CANCELLED';
@@ -444,7 +446,7 @@ export default function BookingsClient({
       )}
 
       {cancelModalBooking && (
-        <div
+        <div ref={modalRef}
           className="fixed inset-0 z-[100] flex items-end sm:items-center justify-center p-0 sm:p-4 bg-black/50"
           role="dialog"
           aria-modal="true"
