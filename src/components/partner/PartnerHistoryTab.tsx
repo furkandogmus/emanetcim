@@ -6,6 +6,7 @@ import type { PartnerBookingListItem } from "@/services/BookingService";
 import { moneyToNumber } from "@/lib/money";
 import type { computeOverdue } from "@/lib/overdue-display";
 import { formatInstant } from "@/lib/format-datetime";
+import { PLATFORM_TIMEZONE } from "@/lib/datetime-local";
 
 interface PartnerHistoryTabProps {
   bookings: PartnerBookingListItem[];
@@ -14,6 +15,8 @@ interface PartnerHistoryTabProps {
   overdueOf: (checkOutTime: string | Date) => ReturnType<typeof computeOverdue>;
   checkingOutId: string | null;
   onCheckout: (bookingId: string) => void;
+  /** Dükkanın saat dilimi (`bookingTimeZone`); tarih sınırı onun takviminde geçer. */
+  timeZone?: string;
 }
 
 /** Esnaf paneli "geçmiş" sekmesi: tüm rezervasyonlar, gecikme rozeti, teslim butonu. */
@@ -24,6 +27,7 @@ export default function PartnerHistoryTab({
   overdueOf,
   checkingOutId,
   onCheckout,
+  timeZone = PLATFORM_TIMEZONE,
 }: PartnerHistoryTabProps) {
   const t = useTranslations("Partner");
   return (
@@ -70,7 +74,7 @@ export default function PartnerHistoryTab({
                           t("guestFallback", { id: booking.id.slice(0, 4) })}
                       </h3>
                       <p className="id-eyebrow text-gray-400">
-                        {formatInstant(booking.checkInTime, dateLocale, { year: "numeric", month: "numeric", day: "numeric" })}
+                        {formatInstant(booking.checkInTime, dateLocale, { year: "numeric", month: "numeric", day: "numeric" }, timeZone)}
                       </p>
                     </div>
                   </div>
