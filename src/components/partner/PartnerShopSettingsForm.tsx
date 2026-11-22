@@ -10,6 +10,7 @@ import { isValidPartnerTrPhone } from "@/lib/netgsm";
 import { useActionErrorText } from "@/lib/use-action-error";
 import dynamic from "next/dynamic";
 import { Link } from "@/i18n/routing";
+import { formatInstant } from "@/lib/format-datetime";
 
 const LocationPicker = dynamic(() => import("./LocationPicker"), { ssr: false });
 
@@ -314,7 +315,7 @@ export default function PartnerShopSettingsForm({
                   {impact.affectedBookings.map((b) => (
                     <li key={b.id}>
                       {b.guestName ?? t("settingsImpactUnknownGuest")} —{" "}
-                      {new Date(b.checkInTime).toLocaleString(locale, {
+                      {formatInstant(b.checkInTime, locale, {
                         day: "2-digit",
                         month: "2-digit",
                         hour: "2-digit",

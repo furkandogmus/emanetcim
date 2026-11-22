@@ -1,4 +1,5 @@
 import { PLATFORM_TIMEZONE } from "@/lib/datetime-local";
+import { bcp47ForUiLocale } from "@/lib/intl-locale";
 
 /**
  * Bir anı BELİRLİ bir saat diliminde biçimlendirir.
@@ -54,4 +55,50 @@ export function formatDateInZone(
  */
 export function bookingTimeZone(shop: { timezone?: string | null } | null | undefined): string {
   return shop?.timezone ?? PLATFORM_TIMEZONE;
+}
+
+/** `formatInstant` seçenekleri: `timeZone` bilerek DIŞARIDA, ayrı parametre. */
+export type InstantFormatOptions = Omit<Intl.DateTimeFormatOptions, "timeZone">;
+
+const DEFAULT_INSTANT_OPTIONS: InstantFormatOptions = {
+  dateStyle: "short",
+  timeStyle: "short",
+};
+
+/**
+ * Bir ANI (rezervasyon saati, kayıt zamanı, iş çalışması) her zaman sabit bir
+ * saat diliminde ve etkin dilde biçimlendirir. Varsayılan dilim platformun
+ * dilimi (`PLATFORM_TIMEZONE`, İstanbul).
+ *
+ * NEDEN (2026-11-22, web kalite taraması): admin ve esnaf panellerinde ~20
+ * yerde `new Date(iso).toLocaleString(dateLocale, {...})` vardı, `timeZone`
+ * yoktu. İki ayrı hata üretiyordu:
+ *
+ *   1. SSR uyuşmazlığı: sunucu (konteyner UTC) "10:00", tarayıcı (İstanbul)
+ *      "13:00" basıyordu; React hydration'da metin uyuşmazlığı verip ağacı
+ *      istemcide yeniden çiziyordu.
+ *   2. Yanlış saat: yurt dışından bakan bir yönetici ya da esnaf (Berlin'de
+ *      tatildeki dükkan sahibi) rezervasyon saatini KENDİ cihazının saatinde
+ *      görüyordu, dükkanınkinde değil.
+ *
+ * `locale` uygulama dili (`tr`) ya da BCP 47 etiketi (`tr-TR`) olabilir;
+ * ikisi de `bcp47ForUiLocale`dan geçer. Geçersiz/boş girdi boş dize döner —
+ * `Intl` geçersiz tarihte `RangeError` fırlatıp sayfayı düşürür.
+ *
+ * Mandal: `no-timezone-date-format.test.ts` — `src` altında `timeZone`suz
+ * tarih biçimlendirmesi kalmadı.
+ */
+export function formatInstant(
+  date: Date | string | number | null | undefined,
+  locale: string,
+  options: InstantFormatOptions = DEFAULT_INSTANT_OPTIONS,
+  timeZone: string = PLATFORM_TIMEZONE,
+): string {
+  if (date == null || date === "") return "";
+  const d = date instanceof Date ? date : new Date(date);
+  if (Number.isNaN(d.getTime())) return "";
+  return new Intl.DateTimeFormat(bcp47ForUiLocale(locale), {
+    ...options,
+    timeZone,
+  }).format(d);
 }

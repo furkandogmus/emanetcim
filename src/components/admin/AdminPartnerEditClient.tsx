@@ -23,6 +23,7 @@ import ConfirmDialog from "@/components/common/ConfirmDialog";
 import { formatDecimal } from "@/lib/currency";
 import { bcp47ForUiLocale } from "@/lib/intl-locale";
 import { actionErrorKey } from "@/lib/action-error";
+import { formatInstant } from "@/lib/format-datetime";
 
 interface AdminPartnerEditClientProps {
   /** Vitrin fotoğrafı yükleyici; depolama yapılandırılmamışsa kendini çizmez. */
@@ -373,7 +374,7 @@ export default function AdminPartnerEditClient({ shop, photoSection, scheduleSec
                          &quot;{review.comment}&quot;
                        </p>
                        <p className="text-[8px] id-eyebrow text-gray-300">
-                         {new Date(review.createdAt).toLocaleDateString(dateLocale)}
+                         {formatInstant(review.createdAt, dateLocale, { year: "numeric", month: "numeric", day: "numeric" })}
                        </p>
                     </div>
                   ))

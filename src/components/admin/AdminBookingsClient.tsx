@@ -7,6 +7,7 @@ import { useLocale, useTranslations } from "next-intl";
 import { bcp47ForUiLocale } from "@/lib/intl-locale";
 import Money from "@/components/common/Money";
 import type { AdminBookingRow } from "@/lib/admin/booking-search";
+import { formatInstant } from "@/lib/format-datetime";
 
 const STATUS_OPTIONS = [
   "ALL",
@@ -61,7 +62,7 @@ export default function AdminBookingsClient({
   }
 
   function fmtDateTime(iso: string) {
-    return new Date(iso).toLocaleString(dateLocale, {
+    return formatInstant(iso, dateLocale, {
       day: "2-digit",
       month: "short",
       year: "numeric",

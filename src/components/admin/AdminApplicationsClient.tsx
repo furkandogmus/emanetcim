@@ -20,6 +20,7 @@ import { toast } from "sonner";
 import ConfirmDialog from "@/components/common/ConfirmDialog";
 import { bcp47ForUiLocale } from "@/lib/intl-locale";
 import { actionErrorKey } from "@/lib/action-error";
+import { formatInstant } from "@/lib/format-datetime";
 
 interface Application {
   id: string;
@@ -183,7 +184,7 @@ export default function AdminApplicationsClient({ applications: initialApps }: A
                     <td className="px-8 py-6">
                       <p className="text-xs text-gray-500 font-bold flex items-center gap-2">
                         <Calendar size={14} />
-                        {new Date(app.createdAt).toLocaleDateString(dateLocale)}
+                        {formatInstant(app.createdAt, dateLocale, { year: "numeric", month: "numeric", day: "numeric" })}
                       </p>
                     </td>
                     <td className="px-8 py-6 text-right">
