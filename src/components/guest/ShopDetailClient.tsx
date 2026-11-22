@@ -210,7 +210,7 @@ export default function ShopDetailClient({
               alt={shop.name}
               fill
               sizes="100vw"
-              priority
+              preload
               className="object-cover"
             />
           ) : (
