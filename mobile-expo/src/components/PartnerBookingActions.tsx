@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useRouter } from "expo-router";
 import { Alert, Pressable, StyleSheet, View } from "react-native";
 import { Image } from "expo-image";
@@ -8,13 +8,22 @@ import { useTranslation } from "react-i18next";
 
 import { AppText, Banner, Button, Card } from "@/components/ui";
 import { Input } from "@/components/Field";
+import { ReasonSheet } from "@/components/ReasonSheet";
 import { ApiError, api } from "@/lib/api";
+import {
+  BOOKING_ACTIONS_NS,
+  PARTNER_CANCEL_REASONS,
+  canPartnerCancel,
+  isSameWallDay,
+  noShowState,
+  partnerCancelBody,
+} from "@/lib/booking-actions";
 import { errorMessage } from "@/lib/errors";
 import { buildCheckInBody, shouldOfferOutsideHours } from "@/lib/check-in-request";
 import { SEALS_ENABLED } from "@/lib/config";
-import { formatMoney } from "@/lib/format";
-import { usePartnerShop } from "@/lib/queries";
-import type { BookingDetail } from "@/lib/types";
+import { formatDayTime, formatMoney, formatTime } from "@/lib/format";
+import { usePartnerCancel, usePartnerNoShow, usePartnerShop } from "@/lib/queries";
+import type { BookingDetail, PartnerCancelReason } from "@/lib/types";
 import { notify } from "@/lib/notify";
 import { colors, fonts, radius, space } from "@/theme/tokens";
 
@@ -233,6 +242,7 @@ export function PartnerBookingActions({ booking }: { booking: BookingDetail }) {
           disabled={partial}
           onPress={confirmCheckIn}
         />
+        <PartnerManageActions booking={booking} />
       </Card>
     );
   }
@@ -308,7 +318,134 @@ export function PartnerBookingActions({ booking }: { booking: BookingDetail }) {
     );
   }
 
+  if (canPartnerCancel(booking.status)) {
+    return (
+      <Card style={styles.card}>
+        <PartnerManageActions booking={booking} />
+      </Card>
+    );
+  }
+
   return null;
+}
+
+/** setTimeout ~24,8 gunden uzun gecikmede hemen tetiklenir. */
+const MAX_TIMER_MS = 2 ** 31 - 1;
+
+/**
+ * Teslim almadan once esnafin ikincil islemleri: "Misafir gelmedi" (sunucu
+ * `noShowAvailableAt` verdiyse, o andan sonra) ve nedenli iptal. Asil is teslim
+ * almak oldugu icin ikisi de ikincil gorunumde, teslim dugmesinin altinda.
+ */
+function PartnerManageActions({ booking }: { booking: BookingDetail }) {
+  const { t } = useTranslation();
+  const cancel = usePartnerCancel(booking.id);
+  const noShow = usePartnerNoShow(booking.id);
+  const [open, setOpen] = useState(false);
+  const [reason, setReason] = useState<PartnerCancelReason | null>(null);
+  const [note, setNote] = useState("");
+  const [sheetError, setSheetError] = useState<string | null>(null);
+  const [error, setError] = useState<string | null>(null);
+
+  // Bekleme bitince dugme ekran acikken de acilsin: an tek zamanlayiciyla ilerletilir.
+  const [now, setNow] = useState(() => Date.now());
+  const state = noShowState(booking.noShowAvailableAt, now);
+  const waitUntil = state.kind === "waiting" ? state.at.getTime() : null;
+  useEffect(() => {
+    if (waitUntil === null) return;
+    const id = setTimeout(() => setNow(Date.now()), Math.min(Math.max(waitUntil - Date.now(), 0) + 250, MAX_TIMER_MS));
+    return () => clearTimeout(id);
+  }, [waitUntil, now]);
+
+  const body = partnerCancelBody(reason, note);
+
+  function submitCancel() {
+    if (!body) return;
+    setSheetError(null);
+    cancel.mutate(body, {
+      onSuccess: () => {
+        setOpen(false);
+        notify(t("bookingActions.partner.cancelledTitle"), t("bookingActions.partner.cancelledBody"));
+      },
+      onError: (e) => setSheetError(errorMessage(e, BOOKING_ACTIONS_NS)),
+    });
+  }
+
+  function confirmNoShow() {
+    Alert.alert(t("bookingActions.partner.noShowTitle"), t("bookingActions.partner.noShowBody"), [
+      { text: t("common.cancel"), style: "cancel" },
+      {
+        text: t("bookingActions.partner.noShowConfirm"),
+        style: "destructive",
+        onPress: () => {
+          setError(null);
+          noShow.mutate(undefined, {
+            onSuccess: () => notify(t("bookingActions.partner.noShowDoneTitle"), t("bookingActions.partner.noShowDoneBody")),
+            onError: (e) => setError(errorMessage(e, BOOKING_ACTIONS_NS)),
+          });
+        },
+      },
+    ]);
+  }
+
+  const busy = cancel.isPending || noShow.isPending;
+  const waitingLabel =
+    state.kind === "waiting"
+      ? t("bookingActions.partner.noShowAt", {
+          time: isSameWallDay(state.at, new Date(now)) ? formatTime(state.at) : formatDayTime(state.at),
+        })
+      : null;
+
+  return (
+    <View style={{ gap: space.sm }}>
+      {error ? <Banner tone="danger" body={error} /> : null}
+      {state.kind !== "hidden" ? (
+        <View style={{ gap: 4 }}>
+          <Button
+            variant="secondary"
+            title={t("bookingActions.partner.noShow")}
+            disabled={state.kind === "waiting" || busy}
+            loading={noShow.isPending}
+            onPress={confirmNoShow}
+            accessibilityHint={waitingLabel ?? undefined}
+          />
+          {waitingLabel ? (
+            <AppText variant="caption" style={{ textAlign: "center" }}>
+              {waitingLabel}
+            </AppText>
+          ) : null}
+        </View>
+      ) : null}
+      <Button
+        variant="ghost"
+        textColor={colors.danger}
+        title={t("bookingActions.partner.cancel")}
+        disabled={busy}
+        onPress={() => {
+          setSheetError(null);
+          setOpen(true);
+        }}
+      />
+      <ReasonSheet
+        visible={open}
+        onClose={() => setOpen(false)}
+        title={t("bookingActions.partner.cancelTitle")}
+        body={t("bookingActions.partner.cancelBody")}
+        choices={PARTNER_CANCEL_REASONS.map((r) => ({ value: r, label: t(`bookingActions.reasons.${r}`) }))}
+        selected={reason}
+        onSelect={(v) => setReason(v as PartnerCancelReason)}
+        note={note}
+        onNoteChange={setNote}
+        noteLabel={t("bookingActions.partner.noteLabel")}
+        notePlaceholder={t(reason === "other" ? "bookingActions.partner.noteRequired" : "bookingActions.partner.noteOptional")}
+        confirmLabel={t("bookingActions.partner.cancelConfirm")}
+        canSubmit={body !== null}
+        loading={cancel.isPending}
+        error={sheetError}
+        onConfirm={submitCancel}
+      />
+    </View>
+  );
 }
 
 const styles = StyleSheet.create({
