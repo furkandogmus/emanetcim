@@ -366,16 +366,15 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         body: { email, code, newPassword },
         auth: false,
       });
-      await saveTokens(res.accessToken, res.refreshToken);
-      let user = res.user;
-      if (!user) {
-        try {
-          user = await api<MobileUser>("/auth/me");
-        } catch {
-          // Sifre degisti ama oturum acilamadi: yarim oturum birakilmaz, ekran "sifren guncellendi" der.
-          await clearTokens();
-          throw new PasswordResetSignInError();
-        }
+      // Kod artik harcandi: token yazimi ya da /auth/me basarisizsa yarim oturum birakilmaz,
+      // ekran genel hata yerine "sifren guncellendi, giris yap" der.
+      let user: MobileUser;
+      try {
+        await saveTokens(res.accessToken, res.refreshToken);
+        user = res.user ?? (await api<MobileUser>("/auth/me"));
+      } catch {
+        await clearTokens().catch(() => undefined);
+        throw new PasswordResetSignInError();
       }
       void rememberUser(user);
       update({ status: "signedIn", user });
