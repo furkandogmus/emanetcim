@@ -758,10 +758,9 @@
   "reset": {
     "forgotPassword": "Şifremi unuttum",
     "title": "Şifreni sıfırla",
-    "requestSubtitle": "Hesabının e-posta adresini yaz; şifreni yenilemen için bir bağlantı gönderelim.",
-    "sendLink": "Bağlantı gönder",
+    "requestSubtitle": "Hesabının e-posta adresini yaz; şifreni yenilemen için 6 haneli bir kod gönderelim.",
+    "sendLink": "Kod gönder",
     "sentTitle": "E-postanı kontrol et",
-    "sentBody": "Bu adresle bir hesap varsa {{email}} adresine bir şifre yenileme bağlantısı gönderdik. Bağlantı 1 saat geçerli. E-postadaki bağlantıya dokunup yeni şifreni orada belirle, sonra buraya dönüp giriş yap.",
     "linkLabel": "Yenileme bağlantısı",
     "linkPlaceholder": "E-postadaki bağlantıyı yapıştır",
     "linkRequired": "E-postadaki bağlantıyı yapıştır.",
@@ -770,7 +769,7 @@
     "passwordRule": "En az {{min}} karakter.",
     "passwordMismatch": "Şifreler aynı değil.",
     "save": "Şifreyi güncelle",
-    "resendLink": "Yeni bağlantı iste",
+    "resendLink": "Başka bir e-posta adresi dene",
     "doneTitle": "Şifren güncellendi",
     "doneBody": "Yeni şifrenle giriş yapabilirsin. Güvenliğin için diğer cihazlardaki oturumların kapatıldı.",
     "backToSignIn": "Girişe dön",
@@ -778,11 +777,23 @@
       "invalid_data": "Bağlantı ya da şifre geçersiz. Şifren en az 8 karakter olmalı.",
       "invalid_or_expired_token": "Bağlantı geçersiz ya da süresi dolmuş. Yeni bir bağlantı iste.",
       "user_not_found": "Bu bağlantıya ait hesap bulunamadı.",
-      "too_many_requests": "Çok fazla deneme. Biraz sonra tekrar dene."
+      "too_many_requests": "Çok fazla deneme. Biraz sonra tekrar dene.",
+      "invalid_code": "Kod hatalı. E-postadaki 6 haneli kodu kontrol et.",
+      "expired_code": "Kodun süresi dolmuş. Yeni bir kod iste.",
+      "too_many_attempts": "Çok fazla hatalı deneme. Yeni bir kod iste.",
+      "invalid_password": "Bu şifre kullanılamaz. En az 8 karakter olmalı.",
+      "http_404": "Kodla sıfırlama şu an kullanılamıyor. E-postadaki bağlantıyı kullan."
     },
     "openMail": "E-posta uygulamasını aç",
     "pasteLink": "Bağlantıyı yapıştırarak devam et",
-    "linkModeBody": "Bize ilettiğimiz şifre yenileme bağlantısını yapıştır ve yeni şifreni belirle."
+    "linkModeBody": "Bize ilettiğimiz şifre yenileme bağlantısını yapıştır ve yeni şifreni belirle.",
+    "codeSentBody": "Bu adresle bir hesap varsa {{email}} adresine 6 haneli bir kod gönderdik. Kodu ve yeni şifreni aşağıya yaz. E-postadaki bağlantı da 1 saat geçerli.",
+    "codeLabel": "6 haneli kod",
+    "submitCode": "Şifreyi güncelle ve giriş yap",
+    "resendCode": "Kodu tekrar gönder",
+    "resendCodeIn": "Tekrar gönder ({{seconds}} sn)",
+    "codeResent": "Yeni bir kod gönderdik. En son gelen kodu kullan.",
+    "requestNew": "E-postama kod gönder"
   },
   "profileEdit": {
     "open": "Profili düzenle",

@@ -758,10 +758,9 @@
   "reset": {
     "forgotPassword": "Forgot password",
     "title": "Reset your password",
-    "requestSubtitle": "Enter your account's email address and we'll send you a link to set a new password.",
-    "sendLink": "Send link",
+    "requestSubtitle": "Enter your account's email address and we'll send you a 6-digit code to reset your password.",
+    "sendLink": "Send code",
     "sentTitle": "Check your email",
-    "sentBody": "If an account exists for {{email}}, we've sent it a password reset link. It is valid for 1 hour. Tap the link in the email, set your new password there, then come back here to sign in.",
     "linkLabel": "Reset link",
     "linkPlaceholder": "Paste the link from the email",
     "linkRequired": "Paste the link from the email.",
@@ -770,7 +769,7 @@
     "passwordRule": "At least {{min}} characters.",
     "passwordMismatch": "The passwords don't match.",
     "save": "Update password",
-    "resendLink": "Request a new link",
+    "resendLink": "Try a different email address",
     "doneTitle": "Password updated",
     "doneBody": "You can now sign in with your new password. For your security, your sessions on other devices were signed out.",
     "backToSignIn": "Back to sign in",
@@ -778,11 +777,23 @@
       "invalid_data": "The link or password is invalid. Your password must be at least 8 characters.",
       "invalid_or_expired_token": "This link is invalid or has expired. Request a new one.",
       "user_not_found": "No account was found for this link.",
-      "too_many_requests": "Too many attempts. Please try again later."
+      "too_many_requests": "Too many attempts. Please try again later.",
+      "invalid_code": "That code is wrong. Check the 6-digit code in the email.",
+      "expired_code": "This code has expired. Request a new one.",
+      "too_many_attempts": "Too many wrong attempts. Request a new code.",
+      "invalid_password": "This password can't be used. It must be at least 8 characters.",
+      "http_404": "Resetting with a code isn't available right now. Use the link in the email."
     },
     "openMail": "Open email app",
     "pasteLink": "Continue by pasting the link",
-    "linkModeBody": "Paste the password reset link we sent you and set your new password."
+    "linkModeBody": "Paste the password reset link we sent you and set your new password.",
+    "codeSentBody": "If an account exists for {{email}}, we sent a 6-digit code there. Enter the code and your new password below. The link in the email also works for 1 hour.",
+    "codeLabel": "6-digit code",
+    "submitCode": "Update password and sign in",
+    "resendCode": "Resend code",
+    "resendCodeIn": "Resend ({{seconds}} s)",
+    "codeResent": "We sent a new code. Use the most recent one.",
+    "requestNew": "Email me a code"
   },
   "profileEdit": {
     "open": "Edit profile",
