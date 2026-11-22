@@ -4,6 +4,7 @@ import { useTranslation } from "react-i18next";
 
 import { StatusBadge } from "@/components/StatusBadge";
 import { AppText, Banner } from "@/components/ui";
+import { cancelReasonKey, cancelReasonOf } from "@/lib/booking-actions";
 import { formatDay, formatMoney, formatTime } from "@/lib/format";
 import type { BookingSummary } from "@/lib/types";
 import { colors, fonts, radius, space } from "@/theme/tokens";
@@ -21,12 +22,15 @@ export function BookingTicket({
   showQr,
   title,
   subtitle,
+  audience = "guest",
 }: {
   booking: TicketBooking;
   showQr: boolean;
   /** Esnaf gorunumunde misafir adi; varsayilan dukkan adi. */
   title?: string;
   subtitle?: string;
+  /** Iptal nedeni metni icin: misafir kendi iptalini "sen iptal ettin" diye okur. */
+  audience?: "guest" | "staff";
 }) {
   const { t } = useTranslation();
   const code = b.id.slice(0, 8).toUpperCase();
@@ -35,6 +39,7 @@ export function BookingTicket({
     { size: "m", count: b.bagCountM },
     { size: "xl", count: b.bagCountXl },
   ].filter((l) => l.count > 0);
+  const reasonKey = cancelReasonKey(cancelReasonOf(b), "long", audience);
 
   return (
     <View style={styles.ticket}>
@@ -45,6 +50,11 @@ export function BookingTicket({
             {title ?? b.shopName}
           </AppText>
           {subtitle ? <AppText variant="caption">{subtitle}</AppText> : null}
+          {reasonKey ? (
+            <AppText variant="caption" style={{ color: colors.danger }}>
+              {t(reasonKey)}
+            </AppText>
+          ) : null}
         </View>
 
         <View style={styles.times}>

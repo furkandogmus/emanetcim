@@ -238,6 +238,7 @@ export function BookingDetailView({ id, mode }: { id: string; mode: "guest" | "p
           showQr={showQr}
           title={mode === "partner" ? b.guestName || t("partner.guest") : undefined}
           subtitle={mode === "partner" ? b.shopName : undefined}
+          audience={mode === "partner" ? "staff" : "guest"}
         />
 
         {/*

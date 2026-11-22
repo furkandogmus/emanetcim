@@ -325,7 +325,7 @@ function Detail({ shop: s }: { shop: AdminShopDetail }) {
                       {formatDayTime(b.checkInTime)}
                     </AppText>
                   </View>
-                  <StatusBadge status={b.status} />
+                  <StatusBadge status={b.status} cancelReason={b.cancelReason} />
                   <ChevronRight size={16} color={colors.inkMuted} />
                 </Pressable>
               ))}

@@ -2,6 +2,7 @@ import { useState } from "react";
 import { StyleSheet, Text, View } from "react-native";
 import { useTranslation } from "react-i18next";
 
+import { cancelReasonKey, cancelReasonOf } from "@/lib/booking-actions";
 import type { BookingStatus } from "@/lib/types";
 import { colors, fonts, radius } from "@/theme/tokens";
 
@@ -28,6 +29,7 @@ export function StatusBadge({
   checkOutTime,
   expired,
   partnerView,
+  cancelReason,
 }: {
   status: BookingStatus;
   checkOutTime?: string;
@@ -35,6 +37,8 @@ export function StatusBadge({
   expired?: boolean;
   /** Esnafa "Onaylandi" degil "Bekleniyor": o onay esnafin isi degil, misafir henuz gelmedi. */
   partnerView?: boolean;
+  /** Iptal nedeni: "Iptal edildi" yerine kimin kapattigi ("Gelinmedi", "Dukkan iptal etti"). */
+  cancelReason?: string | null;
 }) {
   const { t } = useTranslation();
   // BookingRow ile ayni desen: an bir kez okunur, cizim saf kalir.
@@ -44,9 +48,10 @@ export function StatusBadge({
       ? expired
       : !!checkOutTime && NEVER_DROPPED.has(status) && new Date(checkOutTime).getTime() < now;
   const tone = unused ? TONES.CHECKED_OUT : (TONES[status] ?? TONES.PENDING);
+  const reasonKey = cancelReasonKey(cancelReasonOf({ status, cancelReason }), "short");
   return (
     <View style={[styles.badge, { backgroundColor: tone.bg }]}>
-      <Text style={[styles.text, { color: tone.fg }]}>{unused ? t("status.UNUSED") : partnerView && (status === "APPROVED" || status === "PAID") ? t("partner.statusWaiting") : t(`status.${status}`)}</Text>
+      <Text style={[styles.text, { color: tone.fg }]}>{unused ? t("status.UNUSED") : reasonKey ? t(reasonKey) : partnerView && (status === "APPROVED" || status === "PAID") ? t("partner.statusWaiting") : t(`status.${status}`)}</Text>
     </View>
   );
 }
