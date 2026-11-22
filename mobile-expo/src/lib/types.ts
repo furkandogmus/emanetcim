@@ -24,6 +24,14 @@ export type SessionResponse = {
   user: MobileUser;
 };
 
+/** `auth/password-reset/confirm-code` POST; `user` eski/yeni sunucuda gelmeyebilir. */
+export type ResetCodeSessionResponse = {
+  success: true;
+  accessToken: string;
+  refreshToken: string;
+  user?: MobileUser;
+};
+
 export type BookingStatus =
   | "PENDING"
   | "PAID"
