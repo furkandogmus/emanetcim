@@ -102,6 +102,22 @@ model VerificationToken {
   @@index([expires])
 }
 
+/// Mobil sifre sifirlama KODU (6 hane). Baglanti `VerificationToken`da kalir;
+/// kod ayri durur cunku deneme sayaci tasir ve yalnizca HASH'i saklanir.
+/// E-posta basina tek satir: yeni istek eskisini ezer.
+model PasswordResetCode {
+  /// Kucuk harfe indirilmis e-posta.
+  email     String   @id
+  /// HMAC-SHA256(AUTH_SECRET, email:kod), hex. Kodun kendisi saklanmaz.
+  codeHash  String
+  /// Yanlis deneme sayaci; sinira ulasinca kod olur (too_many_attempts).
+  attempts  Int      @default(0)
+  expires   DateTime
+  createdAt DateTime @default(now())
+
+  @@index([expires])
+}
+
 model Shop {
   id                  String              @id @default(uuid())
   ownerId             String

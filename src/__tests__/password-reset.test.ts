@@ -8,7 +8,9 @@ const { mockPrisma, mockRateLimit, mockMail } = vi.hoisted(() => {
       user: {
         findUnique: vi.fn(),
         update: vi.fn(),
+        updateMany: vi.fn(),
       },
+      booking: { findMany: vi.fn().mockResolvedValue([]), updateMany: vi.fn() },
       verificationToken: {
         findUnique: vi.fn(),
         findFirst: vi.fn(),
@@ -17,6 +19,7 @@ const { mockPrisma, mockRateLimit, mockMail } = vi.hoisted(() => {
         deleteMany: vi.fn(),
       },
       mobilePushToken: { deleteMany: vi.fn() },
+      passwordResetCode: { upsert: vi.fn(), deleteMany: vi.fn() },
       $transaction: vi.fn((fn) => {
         if (typeof fn === 'function') return fn(mockPrisma);
         return Promise.all(fn);
@@ -28,6 +31,7 @@ const { mockPrisma, mockRateLimit, mockMail } = vi.hoisted(() => {
 });
 
 vi.mock("@/lib/db", () => ({ default: mockPrisma }));
+vi.stubEnv("AUTH_SECRET", "test-secret");
 vi.mock("@/lib/rate-limit", () => ({ rateLimit: mockRateLimit }));
 vi.mock("@/lib/mail", () => ({ 
   sendPasswordResetEmail: mockMail,
@@ -53,6 +57,7 @@ describe("Password Reset Actions", () => {
   beforeEach(() => {
     vi.clearAllMocks();
     mockRateLimit.mockResolvedValue(true);
+    mockPrisma.user.update.mockResolvedValue({ tokenVersion: 1 });
   });
 
   describe("requestPasswordResetAction", () => {
@@ -75,7 +80,8 @@ describe("Password Reset Actions", () => {
       const result = await requestPasswordResetAction("user@test.com");
       
       expect(result.ok).toBe(true);
-      expect(mockMail).toHaveBeenCalledWith("user@test.com", "token123", "tr");
+      // Ayni e-posta mobil uygulama icin 6 haneli kodu da tasir.
+      expect(mockMail).toHaveBeenCalledWith("user@test.com", "token123", "tr", expect.stringMatching(/^\d{6}$/));
     });
 
     it("should send email for OAuth users (no passwordHash)", async () => {
@@ -90,7 +96,7 @@ describe("Password Reset Actions", () => {
       const result = await requestPasswordResetAction("oauth@test.com");
       
       expect(result.ok).toBe(true);
-      expect(mockMail).toHaveBeenCalledWith("oauth@test.com", "token123", "tr");
+      expect(mockMail).toHaveBeenCalledWith("oauth@test.com", "token123", "tr", expect.stringMatching(/^\d{6}$/));
     });
 
     it("should enforce rate limits", async () => {
