@@ -735,6 +735,7 @@ export function toMobileAdminShopDetail(d: AdminShopDetailSource) {
       canViewAs: canViewAs(s.owner),
     },
     bookingCount: s._count.bookings,
+    // Yonetici sayisi gizlenen yorumlari DA sayar (moderasyon listesiyle ayni); misafir sayilari saymaz.
     reviewCount: s._count.reviews,
     bagsInStorage: d.bagsInStorage,
     arrivalsToday: d.arrivalsToday,
