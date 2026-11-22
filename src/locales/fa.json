@@ -362,7 +362,10 @@
     "partnerNoShowAvailableAt": "از {time} قابل ثبت است (۶۰ دقیقه پس از زمان تحویل).",
     "partnerCancelDone": "رزرو لغو شد.",
     "partnerNoShowDone": "رزرو به عنوان عدم حضور بسته شد.",
-    "partnerCloseKeep": "بازگشت"
+    "partnerCloseKeep": "بازگشت",
+    "partnerBookingsSearchLabel": "جستجوی رزروها",
+    "partnerBookingsSearchPlaceholder": "کد، نام مهمان یا ۴ رقم آخر تلفن",
+    "partnerBookingsSearchSubmit": "جستجو"
   },
   "Guest": {
     "heroTitle": "چمدان را بسپارید، آزاد بگردید",
@@ -484,7 +487,7 @@
     "checkoutReservationIdLabel": "شناسه رزرو",
     "checkoutDeliveryPointLabel": "محل تحویل",
     "checkoutCardValidationError": "همه فیلدهای کارت را پر کنید.",
-    "checkoutGuestContactRequired": "لطفاً ایمیل یا شماره تلفن را وارد کنید",
+    "checkoutGuestContactRequired": "لطفاً ایمیل خود را وارد کنید",
     "checkoutCardHolderPlaceholder": "نام روی کارت",
     "checkoutCardNumberPlaceholder": "0000 0000 0000 0000",
     "checkoutExpiryPlaceholder": "MM/YY",
@@ -657,7 +660,7 @@
     "checkoutPaymentAfterApprovalNote": "کارت شما فقط پس از تأیید درخواست توسط فروشگاه شارژ می‌شود. پرداخت را در مرحلهٔ بعد یا از «رزروهای من» کامل می‌کنید.",
     "bookingDetailPaymentUnavailableNote": "پرداخت آنلاین در دسترس نیست (پرداخت‌ها غیرفعال است یا کلیدها موجود نیست). برای راهنمایی پرداخت با پشتیبانی یا فروشگاه تماس بگیرید.",
     "payBookingError_guest_email_required": "پیش از پرداخت، یک ایمیل به حساب خود اضافه کنید.",
-    "checkoutGuestEmailPlaceholder": "ایمیل شما (اختیاری)",
+    "checkoutGuestEmailPlaceholder": "ایمیل شما",
     "checkoutGuestPhonePlaceholder": "شماره تلفن شما (اختیاری)",
     "checkoutGuestContinue": "ادامه به‌عنوان مهمان",
     "checkoutGuestOr": "or",
@@ -713,7 +716,7 @@
     "checkoutManageBooking": "مدیریت رزرو",
     "checkoutFreeCancelUntilDropOff": "لغو رایگان تا زمان تحویل.",
     "checkoutContinueWithoutAccount": "ادامه بدون حساب کاربری",
-    "checkoutGuestContactHint": "برای اطلاع‌رسانی رزرو، ایمیل یا تلفن کافی است.",
+    "checkoutGuestContactHint": "برای مدیریت رزرو، ایمیل لازم است؛ تلفن اختیاری است.",
     "checkoutOrWithAccount": "یا با حساب کاربری",
     "shopVerifiedPartner": "شریک تأییدشده",
     "shopInsuredStorage": "نگهداری دارای ضمانت",
@@ -1791,7 +1794,7 @@
     "emailAlreadyRegistered": "این ایمیل قبلاً ثبت شده.",
     "emailSendFailed": "ایمیل ارسال نشد. لطفاً بعداً دوباره تلاش کنید.",
     "generic": "خطای ناشناخته.",
-    "guestContactRequired": "برای ادامه، ایمیل یا شماره تلفن را وارد کنید",
+    "guestContactRequired": "برای ادامه، ایمیل خود را وارد کنید",
     "guestLinkExpired": "این پیوند منقضی شده است. از جدیدترین پیوند در ایمیل خود استفاده کنید یا رزرو خود را دوباره جست‌وجو کنید.",
     "insufficientCapacity": "ظرفیت فروشگاه برای این تاریخ‌ها کافی نیست.",
     "invalidBookingDates": "تاریخ‌های رزرو نامعتبر یا خارج از مدت مجاز.",
@@ -1847,7 +1850,10 @@
     "cannotBanSelf": "نمی‌توانید حساب خودتان را مسدود کنید.",
     "closureNoteRequired": "لطفاً توضیحی بنویسید.",
     "closureInvalidReason": "یک دلیل لغو معتبر انتخاب کنید.",
-    "noShowTooEarly": "عدم حضور فقط ۶۰ دقیقه پس از زمان تحویل قابل ثبت است."
+    "noShowTooEarly": "عدم حضور فقط ۶۰ دقیقه پس از زمان تحویل قابل ثبت است.",
+    "invalidName": "نام باید ۱ تا ۱۰۰ نویسه باشد.",
+    "currentPasswordRequired": "رمز عبور فعلی خود را وارد کنید.",
+    "invalidCurrentPassword": "رمز عبور فعلی نادرست است."
   },
   "Emails": {
     "verificationSubject": "ایمیل خود را تأیید کنید",
@@ -2097,7 +2103,9 @@
     "referralBody": "کد معرفی خود را با یک دوست به اشتراک بگذارید. او {pct}٪ تخفیف در اولین رزرو خود دریافت می‌کند.",
     "referralReveal": "نمایش کد معرفی من",
     "referralLoading": "در حال بارگذاری...",
-    "referralCopyTitle": "کپی لینک"
+    "referralCopyTitle": "کپی لینک",
+    "editProfile": "اطلاعات نمایه",
+    "editProfileDesc": "نام، تلفن و رمز عبور"
   },
   "Home": {
     "seoTitle": "نگهداری چمدان و تحویل بار",
@@ -2433,5 +2441,28 @@
     "toastDeleted": "مشکل و تصاویر آن حذف شد.",
     "toastErrorGeneric": "عملیات انجام نشد.",
     "toastAnnotationError": "ایجاد تصویر علامت‌گذاری‌شده ناموفق بود."
+  },
+  "AccountProfile": {
+    "back": "حساب من",
+    "pageTitle": "اطلاعات نمایه",
+    "pageIntro": "نام، تلفن و رمز عبور خود را اینجا به‌روز کنید.",
+    "nameLabel": "نام و نام خانوادگی",
+    "phoneLabel": "تلفن",
+    "phoneHint": "شماره موبایل ترکیه؛ می‌توانید خالی بگذارید.",
+    "emailLabel": "ایمیل",
+    "emailReadOnly": "ایمیل را نمی‌توان از اینجا تغییر داد.",
+    "save": "ذخیره",
+    "saving": "در حال ذخیره…",
+    "saved": "نمایه به‌روز شد.",
+    "passwordTitle": "رمز عبور",
+    "passwordIntroSet": "حساب شما هنوز رمز عبور ندارد؛ می‌توانید یکی تعیین کنید.",
+    "passwordIntroChange": "برای تغییر، رمز عبور فعلی خود را وارد کنید.",
+    "currentPassword": "رمز عبور فعلی",
+    "newPassword": "رمز عبور جدید",
+    "confirmPassword": "تکرار رمز عبور جدید",
+    "passwordSave": "ذخیره رمز عبور",
+    "passwordMismatch": "رمزهای عبور جدید یکسان نیستند.",
+    "passwordSet": "رمز عبور تعیین شد.",
+    "passwordChanged": "رمز عبور تغییر کرد. برای امنیت، دوباره وارد شوید."
   }
 }

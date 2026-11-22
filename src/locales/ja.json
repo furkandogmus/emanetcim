@@ -362,7 +362,10 @@
     "partnerNoShowAvailableAt": "{time}から記録できます（預け入れ時刻の60分後）。",
     "partnerCancelDone": "予約をキャンセルしました。",
     "partnerNoShowDone": "予約を来店なしとして終了しました。",
-    "partnerCloseKeep": "戻る"
+    "partnerCloseKeep": "戻る",
+    "partnerBookingsSearchLabel": "予約を検索",
+    "partnerBookingsSearchPlaceholder": "予約コード、ゲスト名、または電話番号の下4桁",
+    "partnerBookingsSearchSubmit": "検索"
   },
   "Guest": {
     "heroTitle": "荷物を預けて、身軽に街へ",
@@ -484,7 +487,7 @@
     "checkoutReservationIdLabel": "予約ID",
     "checkoutDeliveryPointLabel": "乗車場所",
     "checkoutCardValidationError": "すべてのカードフィールドに入力してください。",
-    "checkoutGuestContactRequired": "メールアドレスまたは電話番号を入力してください",
+    "checkoutGuestContactRequired": "メールアドレスを入力してください",
     "checkoutCardHolderPlaceholder": "カードに記載されている名前",
     "checkoutCardNumberPlaceholder": "0000 0000 0000 0000",
     "checkoutExpiryPlaceholder": "YY/MM",
@@ -657,7 +660,7 @@
     "checkoutPaymentAfterApprovalNote": "店舗がリクエストを承認した後にのみカードへ請求されます。お支払いは次のステップ、または「私の予約」から完了できます。",
     "bookingDetailPaymentUnavailableNote": "オンライン決済はご利用いただけません（決済が無効、または鍵が未設定）。お支払い方法についてはサポートまたは店舗にお問い合わせください。",
     "payBookingError_guest_email_required": "お支払いの前に、アカウントにメールアドレスを追加してください。",
-    "checkoutGuestEmailPlaceholder": "メールアドレス（任意）",
+    "checkoutGuestEmailPlaceholder": "メールアドレス",
     "checkoutGuestPhonePlaceholder": "電話番号（任意）",
     "checkoutGuestContinue": "ゲストとして続ける",
     "checkoutGuestOr": "or",
@@ -713,7 +716,7 @@
     "checkoutManageBooking": "予約を管理",
     "checkoutFreeCancelUntilDropOff": "お預け時刻まで無料でキャンセルできます。",
     "checkoutContinueWithoutAccount": "アカウントなしで続ける",
-    "checkoutGuestContactHint": "予約通知にはメールまたは電話番号だけで十分です。",
+    "checkoutGuestContactHint": "予約の管理にはメールアドレスが必要です。電話番号は任意です。",
     "checkoutOrWithAccount": "またはアカウントで",
     "shopVerifiedPartner": "認証パートナー",
     "shopInsuredStorage": "補償付き預かり",
@@ -1791,7 +1794,7 @@
     "emailAlreadyRegistered": "このメールアドレスはすでに登録されています。",
     "emailSendFailed": "メールを送信できませんでした。しばらくしてからもう一度お試しください。",
     "generic": "不明なエラーが発生しました。",
-    "guestContactRequired": "続けるにはメールアドレスまたは電話番号を入力してください",
+    "guestContactRequired": "続けるにはメールアドレスを入力してください",
     "guestLinkExpired": "このリンクは有効期限が切れています。メール内の最新のリンクをご利用いただくか、予約を再度検索してください。",
     "insufficientCapacity": "これらの日付ではショップのキャパシティが不十分です。",
     "invalidBookingDates": "予約日が無効であるか、許可された期間を超えています。",
@@ -1847,7 +1850,10 @@
     "cannotBanSelf": "自分のアカウントは停止できません。",
     "closureNoteRequired": "メモを入力してください。",
     "closureInvalidReason": "有効なキャンセル理由を選んでください。",
-    "noShowTooEarly": "来店なしは預け入れ時刻の60分後から記録できます。"
+    "noShowTooEarly": "来店なしは預け入れ時刻の60分後から記録できます。",
+    "invalidName": "名前は1～100文字で入力してください。",
+    "currentPasswordRequired": "現在のパスワードを入力してください。",
+    "invalidCurrentPassword": "現在のパスワードが正しくありません。"
   },
   "Emails": {
     "verificationSubject": "メールアドレスを確認してください",
@@ -2097,7 +2103,9 @@
     "referralBody": "紹介コードを友達と共有しましょう。友達は初回予約で{pct}%割引になります。",
     "referralReveal": "紹介コードを表示",
     "referralLoading": "読み込み中...",
-    "referralCopyTitle": "リンクをコピー"
+    "referralCopyTitle": "リンクをコピー",
+    "editProfile": "プロフィール情報",
+    "editProfileDesc": "名前・電話番号・パスワード"
   },
   "Home": {
     "seoTitle": "荷物預かり・手荷物一時預け",
@@ -2433,5 +2441,28 @@
     "toastDeleted": "課題と画像を削除しました。",
     "toastErrorGeneric": "処理を完了できませんでした。",
     "toastAnnotationError": "書き込み済み画像を生成できませんでした。"
+  },
+  "AccountProfile": {
+    "back": "マイアカウント",
+    "pageTitle": "プロフィール情報",
+    "pageIntro": "名前、電話番号、パスワードをここで更新できます。",
+    "nameLabel": "氏名",
+    "phoneLabel": "電話番号",
+    "phoneHint": "トルコの携帯番号。空欄でも構いません。",
+    "emailLabel": "メールアドレス",
+    "emailReadOnly": "メールアドレスはここでは変更できません。",
+    "save": "保存",
+    "saving": "保存中…",
+    "saved": "プロフィールを更新しました。",
+    "passwordTitle": "パスワード",
+    "passwordIntroSet": "アカウントにはまだパスワードがありません。設定できます。",
+    "passwordIntroChange": "変更するには現在のパスワードを入力してください。",
+    "currentPassword": "現在のパスワード",
+    "newPassword": "新しいパスワード",
+    "confirmPassword": "新しいパスワード（確認）",
+    "passwordSave": "パスワードを保存",
+    "passwordMismatch": "新しいパスワードが一致しません。",
+    "passwordSet": "パスワードを設定しました。",
+    "passwordChanged": "パスワードを変更しました。安全のため、もう一度ログインしてください。"
   }
 }
