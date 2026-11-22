@@ -365,7 +365,8 @@
     "partnerCloseKeep": "Retour",
     "partnerBookingsSearchLabel": "Rechercher des réservations",
     "partnerBookingsSearchPlaceholder": "Code, nom du client ou 4 derniers chiffres du téléphone",
-    "partnerBookingsSearchSubmit": "Rechercher"
+    "partnerBookingsSearchSubmit": "Rechercher",
+    "partnerBookingsSearchTruncated": "{total} résultats ; les {count} plus récents sont affichés. Affinez votre recherche."
   },
   "Guest": {
     "heroTitle": "Déposez vos bagages, explorez librement",
