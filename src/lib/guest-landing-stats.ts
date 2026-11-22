@@ -1,5 +1,6 @@
 import { BookingStatus } from "@prisma/client";
 import prisma from "@/lib/db";
+import { VISIBLE_REVIEW } from "@/lib/review-visibility";
 import { OPERATING_SHOP_FILTER } from "@/lib/public-shop-filter";
 
 export type GuestLandingStats = {
@@ -34,6 +35,8 @@ export async function getGuestLandingStats(): Promise<GuestLandingStats> {
       prisma.shop.count({ where: OPERATING_SHOP_FILTER }),
       prisma.booking.count({ where: { status: BookingStatus.CHECKED_OUT } }),
       prisma.review.aggregate({
+        // Gizlenen yorum guven istatistigine de girmez (`Shop.rating` ile ayni kural).
+        where: VISIBLE_REVIEW,
         _count: { _all: true },
         _avg: { rating: true },
       }),

@@ -4,10 +4,11 @@ import { Alert, KeyboardAvoidingView, Linking, Platform, Pressable, ScrollView, 
 import { SafeAreaView } from "react-native-safe-area-context";
 import { router, useLocalSearchParams } from "expo-router";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { BadgeCheck, ChevronRight, ExternalLink, Mail, MapPin, MessageCircle, Phone } from "lucide-react-native";
+import { BadgeCheck, CalendarClock, ChevronRight, ExternalLink, Images, Mail, MapPin, MessageCircle, MessageSquareText, Phone } from "lucide-react-native";
 import { useTranslation } from "react-i18next";
 
 import { Field } from "@/components/Field";
+import { LinkGroup, LinkRow } from "@/components/LinkRow";
 import { StackHeader } from "@/components/StackHeader";
 import { StatusBadge } from "@/components/StatusBadge";
 import { AppText, Banner, Button, Card, CenterMessage, IconButton, Loading } from "@/components/ui";
@@ -228,6 +229,28 @@ function Detail({ shop: s }: { shop: AdminShopDetail }) {
           ) : (
             <AppText variant="caption">{t("admin.open247")}</AppText>
           )}
+        </Block>
+
+        {/* Fotograf, saat ve yorumlar ayri ekranlarda: esnafin ayni bilesenleri, yonetici uclariyla. */}
+        <Block title={t("adminShop.content")}>
+          <LinkGroup>
+            <LinkRow
+              icon={<Images size={18} color={colors.inkSecondary} />}
+              label={t("adminShop.photos")}
+              onPress={() => router.push(`/admin/shop-photos/${s.id}`)}
+            />
+            <LinkRow
+              icon={<CalendarClock size={18} color={colors.inkSecondary} />}
+              label={t("adminShop.hours")}
+              onPress={() => router.push(`/admin/shop-schedule/${s.id}`)}
+            />
+            <LinkRow
+              icon={<MessageSquareText size={18} color={colors.inkSecondary} />}
+              label={`${t("adminShop.reviews")} · ${t("adminShop.reviewsCount", { count: s.reviewCount })}`}
+              onPress={() => router.push({ pathname: "/admin/reviews", params: { shop: s.id, name: s.name } })}
+            />
+          </LinkGroup>
+          <AppText variant="caption">{t("adminShop.contentHint")}</AppText>
         </Block>
 
         <Block title={t("admin.location")}>

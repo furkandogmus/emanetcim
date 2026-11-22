@@ -1014,6 +1014,8 @@
     "fullName": "Ad Soyad",
     "phone": "Telefon",
     "reviews": "Yorumlar",
+    "reviewHiddenBadge": "Gizli",
+    "reviewHiddenReason": "Gizleme nedeni: {reason}",
     "noReviewsYet": "Henüz yorum yok.",
     "messagesTitle": "Gelen Kutusu",
     "messagesSearchPlaceholder": "Gönderen veya e-posta ara...",

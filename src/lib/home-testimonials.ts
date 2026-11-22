@@ -1,4 +1,5 @@
 import prisma from "@/lib/db";
+import { VISIBLE_REVIEW } from "@/lib/review-visibility";
 
 export type HomeTestimonial = {
   id: string;
@@ -16,7 +17,7 @@ export async function getHomeTestimonials(
 ): Promise<HomeTestimonial[]> {
   try {
     const rows = await prisma.review.findMany({
-      where: { comment: { not: null } },
+      where: { comment: { not: null }, ...VISIBLE_REVIEW },
       orderBy: { createdAt: "desc" },
       take: limit,
       include: {

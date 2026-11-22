@@ -1,6 +1,8 @@
 import prisma from "@/lib/db";
 import logger from "@/lib/logger";
 import { generateSlotsForShop } from "@/services/SlotService";
+import { auditAdminShopEdit, type ShopEditActor } from "@/services/admin-shop-audit";
+import { todayInZone } from "@/lib/stay-days";
 import { PLATFORM_TIMEZONE, toDatetimeLocalValueInTimeZone } from "@/lib/datetime-local";
 import { getPricingRules } from "@/lib/platform-settings";
 import {
@@ -158,6 +160,7 @@ export async function saveWeeklyHours(
   shopId: string,
   days: WeeklyDay[],
   open247: boolean,
+  actor?: ShopEditActor,
 ): Promise<SaveScheduleResult> {
   const valid =
     days.length === 7 &&
@@ -205,6 +208,10 @@ export async function saveWeeklyHours(
   generateSlotsForShop(shopId).catch((err: unknown) =>
     logger.warn({ err, shopId }, "save_weekly_hours_slot_generation_failed"),
   );
+  auditAdminShopEdit(actor, shopId, "hours_update", {
+    open247,
+    days: days.map((d) => ({ weekday: d.weekday, isClosed: d.isClosed, openingTime: d.openingTime, closingTime: d.closingTime })),
+  });
   return { ok: true };
 }
 
@@ -212,6 +219,7 @@ export async function addClosure(
   shopId: string,
   range: { startDate: string; endDate: string; reason?: string | null },
   now: Date = new Date(),
+  actor?: ShopEditActor,
 ): Promise<SaveScheduleResult> {
   const { startDate, endDate } = range;
   if (!DATE_RE.test(startDate) || !DATE_RE.test(endDate) || endDate < startDate) {
@@ -231,14 +239,16 @@ export async function addClosure(
   );
   if (conflicts.length > 0) return { ok: false, code: "CONFLICT", conflicts };
 
-  await prisma.shopClosure.create({
+  const closure = await prisma.shopClosure.create({
     data: { shopId, startDate, endDate, reason: range.reason?.trim().slice(0, 200) || null },
   });
+  auditAdminShopEdit(actor, shopId, "closure_add", { closureId: closure.id, startDate, endDate });
   return { ok: true };
 }
 
-export async function removeClosure(shopId: string, closureId: string): Promise<void> {
-  await prisma.shopClosure.deleteMany({ where: { id: closureId, shopId } });
+export async function removeClosure(shopId: string, closureId: string, actor?: ShopEditActor): Promise<void> {
+  const { count } = await prisma.shopClosure.deleteMany({ where: { id: closureId, shopId } });
+  if (count > 0) auditAdminShopEdit(actor, shopId, "closure_remove", { closureId });
   // Kapanis kalkinca o gunlerin slotu cron'u beklemeden uretilir.
   generateSlotsForShop(shopId).catch((err: unknown) =>
     logger.warn({ err, shopId }, "remove_closure_slot_generation_failed"),
@@ -274,4 +284,49 @@ export async function findClosedStayDay(
     if (!hoursForDate(current, date)) return date;
   }
   return null;
+}
+
+const ISO_DAYS = [1, 2, 3, 4, 5, 6, 7];
+
+/**
+ * Saat duzenleme ekraninin govdesi: yedi gun (kayit yoksa dukkanin tek cift
+ * saati) + bugunden itibaren izinler. Esnafin ve yoneticinin mobil ucu AYNI
+ * govdeyi doner; esnaf ucunda satir ici yaziliydi (2026-11-23'te tasindi).
+ */
+export async function getScheduleView(shopId: string) {
+  const shop = await prisma.shop.findUnique({
+    where: { id: shopId },
+    select: { open247: true, openingTime: true, closingTime: true, timezone: true },
+  });
+  if (!shop) return null;
+  const [rows, closures] = await Promise.all([
+    prisma.shopWeeklyHours.findMany({ where: { shopId } }),
+    prisma.shopClosure.findMany({
+      /*
+        "Bugun" dukkanin gunu (Europe/Istanbul), UTC degil (bulgu 146): 00:00-03:00
+        arasinda dun biten izin hala "yaklasan" diye listeleniyordu.
+      */
+      where: { shopId, endDate: { gte: todayInZone(shop.timezone || undefined) } },
+      orderBy: { startDate: "asc" },
+    }),
+  ]);
+  const byDay = new Map(rows.map((r) => [r.weekday, r]));
+  return {
+    open247: shop.open247,
+    days: ISO_DAYS.map((weekday) => {
+      const r = byDay.get(weekday);
+      return {
+        weekday,
+        isClosed: r?.isClosed ?? false,
+        openingTime: r?.openingTime ?? shop.openingTime ?? "09:00",
+        closingTime: r?.closingTime ?? shop.closingTime ?? "20:00",
+      };
+    }),
+    closures: closures.map((c) => ({
+      id: c.id,
+      startDate: c.startDate,
+      endDate: c.endDate,
+      reason: c.reason,
+    })),
+  };
 }

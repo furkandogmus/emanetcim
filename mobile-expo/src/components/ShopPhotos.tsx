@@ -14,11 +14,13 @@ import { notify } from "@/lib/notify";
 import { withShop } from "@/lib/partner-shop";
 import { keys } from "@/lib/queries";
 import { prepareShopPhoto } from "@/lib/shop-photo";
-import type { PartnerShop } from "@/lib/types";
+import type { PartnerShop, ShopGalleryImage } from "@/lib/types";
 import { colors, radius, space } from "@/theme/tokens";
 
 /** Sunucudaki `MAX_GALLERY_IMAGES` ile ayni; son karar sunucunun (`limit`). */
 const MAX_GALLERY = 8;
+/** Kapak dahil toplam. */
+export const MAX_SHOP_PHOTOS = MAX_GALLERY + 1;
 const COLS = 3;
 
 type Selected = { kind: "cover"; url: string } | { kind: "gallery"; id: string; url: string };
@@ -30,27 +32,67 @@ type Selected = { kind: "cover"; url: string } | { kind: "gallery"; id: string; 
  * Sistem secicisi izin istemez (medya izni app.json'da kapali, Play veri formu ayni).
  */
 export function ShopPhotos({ shop, shopId }: { shop: PartnerShop; shopId: string | null }) {
-  const { t } = useTranslation();
   const queryClient = useQueryClient();
+  return (
+    <ShopPhotoGrid
+      image={shop.image}
+      gallery={shop.gallery ?? []}
+      basePath="/partner/shop"
+      shopId={shopId}
+      onChanged={() => queryClient.invalidateQueries({ queryKey: keys.partnerShop })}
+      errorNamespace="partner"
+    />
+  );
+}
+
+/**
+ * Izgaranin kendisi; esnaf (`/partner/shop` + `shopId`) ve yonetici (`/admin/shops/:id`)
+ * ayni alt yollari kullanir: `/image` kapak, `/images` galeri, `/images/:id[/cover]`.
+ * `basePath` duz metin kalmali: alan taramasi uc adresini oradan okur.
+ * `readOnly` yazma dugmelerini gizler (yonetici goruntuleme oturumu).
+ */
+export function ShopPhotoGrid({
+  image,
+  gallery,
+  basePath,
+  shopId = null,
+  onChanged,
+  errorNamespace,
+  hint,
+  emptyHint,
+  readOnly = false,
+}: {
+  image: string | null;
+  gallery: ShopGalleryImage[];
+  basePath: string;
+  shopId?: string | null;
+  onChanged: () => Promise<unknown>;
+  errorNamespace: string;
+  /** Kapak varken gosterilen aciklama; verilmezse esnafa yazilmis metin. */
+  hint?: string;
+  emptyHint?: string;
+  readOnly?: boolean;
+}) {
+  const { t } = useTranslation();
   const { width } = useWindowDimensions();
+  const url = (sub: string) => withShop(`${basePath}${sub}`, shopId);
   const [progress, setProgress] = useState<{ done: number; total: number } | null>(null);
   const [selected, setSelected] = useState<Selected | null>(null);
   const [busy, setBusy] = useState(false);
 
-  const gallery = shop.gallery ?? [];
   const tile = Math.floor((width - space.xl * 2 - space.sm * (COLS - 1)) / COLS);
-  const canAdd = gallery.length < MAX_GALLERY || !shop.image;
-  const refresh = () => queryClient.invalidateQueries({ queryKey: keys.partnerShop });
+  const canAdd = !readOnly && (gallery.length < MAX_GALLERY || !image);
+  const refresh = onChanged;
 
-  async function send(path: string, asset: ImagePicker.ImagePickerAsset) {
+  async function send(sub: string, asset: ImagePicker.ImagePickerAsset) {
     const file = await prepareShopPhoto(asset);
     const form = new FormData();
     form.append("file", file as unknown as Blob);
-    await api(withShop(path, shopId), { method: "POST", body: form });
+    await api(url(sub), { method: "POST", body: form });
   }
 
   async function addPhotos() {
-    const room = (shop.image ? 0 : 1) + (MAX_GALLERY - gallery.length);
+    const room = (image ? 0 : 1) + (MAX_GALLERY - gallery.length);
     const res = await ImagePicker.launchImageLibraryAsync({
       mediaTypes: ["images"],
       allowsMultipleSelection: true,
@@ -65,7 +107,7 @@ export function ShopPhotos({ shop, shopId }: { shop: PartnerShop; shopId: string
     for (const [i, asset] of assets.entries()) {
       try {
         // Kapak yoksa ilk secilen kapak olur: listede gorunen fotograf o.
-        await send(i === 0 && !shop.image ? "/partner/shop/image" : "/partner/shop/images", asset);
+        await send(i === 0 && !image ? "/image" : "/images", asset);
       } catch (e) {
         failed = e;
         break;
@@ -74,7 +116,7 @@ export function ShopPhotos({ shop, shopId }: { shop: PartnerShop; shopId: string
     }
     setProgress(null);
     await refresh();
-    if (failed) notify(t("partner.photoFailed"), errorMessage(failed, "partner"));
+    if (failed) notify(t("partner.photoFailed"), errorMessage(failed, errorNamespace));
     else notify(t("partner.photosSaved", { count: assets.length }));
   }
 
@@ -86,7 +128,7 @@ export function ShopPhotos({ shop, shopId }: { shop: PartnerShop; shopId: string
       quality: 1,
     });
     if (res.canceled || !res.assets[0]) return;
-    await run(() => send("/partner/shop/image", res.assets[0]));
+    await run(() => send("/image", res.assets[0]));
   }
 
   async function run(action: () => Promise<unknown>) {
@@ -96,7 +138,7 @@ export function ShopPhotos({ shop, shopId }: { shop: PartnerShop; shopId: string
       await refresh();
       setSelected(null);
     } catch (e) {
-      notify(t("partner.actionFailed"), errorMessage(e, "partner"));
+      notify(t("partner.actionFailed"), errorMessage(e, errorNamespace));
     } finally {
       setBusy(false);
     }
@@ -108,13 +150,13 @@ export function ShopPhotos({ shop, shopId }: { shop: PartnerShop; shopId: string
       {
         text: t("partner.deletePhoto"),
         style: "destructive",
-        onPress: () => void run(() => api(withShop(`/partner/shop/images/${id}`, shopId), { method: "DELETE" })),
+        onPress: () => void run(() => api(url(`/images/${encodeURIComponent(id)}`), { method: "DELETE" })),
       },
     ]);
   }
 
   const tiles: Selected[] = [
-    ...(shop.image ? [{ kind: "cover" as const, url: shop.image }] : []),
+    ...(image ? [{ kind: "cover" as const, url: image }] : []),
     ...gallery.map((g) => ({ kind: "gallery" as const, id: g.id, url: g.url })),
   ];
 
@@ -160,7 +202,7 @@ export function ShopPhotos({ shop, shopId }: { shop: PartnerShop; shopId: string
         ) : null}
       </View>
       <AppText variant="caption" style={{ fontSize: 13 }}>
-        {shop.image ? t("partner.photosHint", { max: MAX_GALLERY + 1 }) : t("partner.photoHint")}
+        {image ? (hint ?? t("partner.photosHint", { max: MAX_GALLERY + 1 })) : (emptyHint ?? t("partner.photoHint"))}
       </AppText>
 
       <Sheet visible={selected != null} onClose={() => setSelected(null)}>
@@ -174,7 +216,7 @@ export function ShopPhotos({ shop, shopId }: { shop: PartnerShop; shopId: string
               contentFit="cover"
             />
             <View style={{ gap: space.sm }}>
-              {selected.kind === "cover" ? (
+              {readOnly ? null : selected.kind === "cover" ? (
                 <Button title={t("partner.changeCover")} loading={busy} onPress={() => void replaceCover()} />
               ) : (
                 <>
@@ -183,7 +225,7 @@ export function ShopPhotos({ shop, shopId }: { shop: PartnerShop; shopId: string
                     loading={busy}
                     onPress={() =>
                       void run(() =>
-                        api(withShop(`/partner/shop/images/${selected.id}/cover`, shopId), { method: "POST" }),
+                        api(url(`/images/${encodeURIComponent(selected.id)}/cover`), { method: "POST" }),
                       )
                     }
                   />

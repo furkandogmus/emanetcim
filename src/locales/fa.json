@@ -1008,6 +1008,8 @@
     "fullName": "نام کامل",
     "phone": "تلفن",
     "reviews": "نظرات",
+    "reviewHiddenBadge": "پنهان",
+    "reviewHiddenReason": "دلیل پنهان‌سازی: {reason}",
     "noReviewsYet": "هنوز نظری نیست.",
     "messagesTitle": "صندوق ورودی",
     "messagesSearchPlaceholder": "جستجو...",
