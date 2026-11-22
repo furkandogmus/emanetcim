@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from "react";
-import { Pressable, StyleSheet, View } from "react-native";
+import { InteractionManager, Pressable, StyleSheet, View } from "react-native";
 import Animated, {
   cancelAnimation,
   Easing,
@@ -103,10 +103,7 @@ export function BrandIntro() {
     setTimeout(() => setVisible(false), FADE_OUT_MS + 20);
   }
 
-  useEffect(() => {
-    if (!visible) return;
-    playedThisLaunch = true;
-
+  function play() {
     if (reduceMotion) {
       lift.value = 1;
       word.value = withTiming(1, { duration: 220 });
@@ -151,15 +148,35 @@ export function BrandIntro() {
         withRepeat(withTiming(1, { duration: 480, easing: Easing.linear }), -1, false),
       );
     }
+  }
 
-    const timer = setTimeout(close, reduceMotion ? CLOSE_AT_REDUCED : CLOSE_AT);
+  useEffect(() => {
+    if (!visible) return;
+    playedThisLaunch = true;
+    let timer: ReturnType<typeof setTimeout> | undefined;
+    let started = false;
+
+    // Ilk kare yerel acilis ekraniyla ayni, durgun: alttaki ekranlarin ilk kurulumu
+    // bitmeden baslarsa UI ipligi kurulumla yarisir ve animasyon takilir (2026-11-23,
+    // emulatorde 99. yuzdelik 200 ms). Kurulum bitince ya da en gec 450 ms sonra baslar.
+    const start = () => {
+      if (started) return;
+      started = true;
+      play();
+      timer = setTimeout(close, reduceMotion ? CLOSE_AT_REDUCED : CLOSE_AT);
+    };
+    const task = InteractionManager.runAfterInteractions(() => requestAnimationFrame(start));
+    const fallback = setTimeout(start, 450);
     return () => {
-      clearTimeout(timer);
+      task.cancel();
+      clearTimeout(fallback);
+      if (timer) clearTimeout(timer);
       cancelAnimation(march);
     };
     // Yalnizca ilk kurulumda oynar; paylasilan degerler ve close sabit.
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
+
 
   const overlayStyle = useAnimatedStyle(() => ({ opacity: 1 - exit.value }));
   const contentStyle = useAnimatedStyle(() => ({ transform: [{ translateY: -12 * exit.value }] }));
@@ -185,7 +202,11 @@ export function BrandIntro() {
   const coreStyle = useAnimatedStyle(() => ({ transform: [{ scale: core.value }] }));
   const line1Style = useAnimatedStyle(() => rise(line1));
   const line2Style = useAnimatedStyle(() => rise(line2));
-  const roadRevealStyle = useAnimatedStyle(() => ({ width: ROAD_WIDTH * road.value }));
+  // Genislik degil kaydirma: yerlesim ozelligini her karede canlandirmak yeni
+  // mimaride her karede yerlesim hesabi demek; sabit genislikte kirpilan serit kayar.
+  const roadRevealStyle = useAnimatedStyle(() => ({
+    transform: [{ translateX: -ROAD_WIDTH * (1 - road.value) }],
+  }));
   const roadMarchStyle = useAnimatedStyle(() => ({ transform: [{ translateX: -DASH_PERIOD * march.value }] }));
 
   if (!visible) return null;
@@ -204,9 +225,14 @@ export function BrandIntro() {
       >
         <Animated.View style={[styles.center, contentStyle]} pointerEvents="none">
           <Animated.View style={[styles.logoBox, logoStyle]}>
-            <Animated.View style={[styles.ring, ringStyle]} />
+            {/* Donanim katmani: SVG ve kenarlik her karede yeniden cizilmez, GPU'da olceklenir. */}
+            <Animated.View style={[styles.ring, ringStyle]} renderToHardwareTextureAndroid />
             <Animated.View style={[styles.shadow, shadowStyle]} />
-            <Animated.View style={[StyleSheet.absoluteFill, { transformOrigin: SQUASH_ORIGIN }, markStyle]}>
+            <Animated.View
+              style={[StyleSheet.absoluteFill, { transformOrigin: SQUASH_ORIGIN }, markStyle]}
+              renderToHardwareTextureAndroid
+              shouldRasterizeIOS
+            >
               <Svg width={BOX} height={BOX} viewBox={VIEW_BOX}>
                 <Path
                   d="M170 140 V92 a36 36 0 0 1 36 -36 h68 a36 36 0 0 1 36 36 V140"
@@ -232,13 +258,15 @@ export function BrandIntro() {
             </View>
             <Animated.Text style={[styles.line1, line1Style]}>{line1Text}</Animated.Text>
             <Animated.Text style={[styles.line2, line2Style]}>{line2Text}</Animated.Text>
-            <Animated.View style={[styles.roadTrack, roadRevealStyle]}>
-              <Animated.View style={[styles.road, roadMarchStyle]}>
-                {Array.from({ length: Math.ceil(ROAD_WIDTH / DASH_PERIOD) + 2 }, (_, i) => (
-                  <View key={i} style={styles.dash} />
-                ))}
+            <View style={styles.roadTrack}>
+              <Animated.View style={roadRevealStyle}>
+                <Animated.View style={[styles.road, roadMarchStyle]}>
+                  {Array.from({ length: Math.ceil(ROAD_WIDTH / DASH_PERIOD) + 2 }, (_, i) => (
+                    <View key={i} style={styles.dash} />
+                  ))}
+                </Animated.View>
               </Animated.View>
-            </Animated.View>
+            </View>
           </View>
         </Animated.View>
       </Pressable>
@@ -306,7 +334,7 @@ const styles = StyleSheet.create({
     textAlign: "center",
   },
   line2: { fontFamily: fonts.display, fontSize: 22, lineHeight: 28, color: colors.accent, textAlign: "center" },
-  roadTrack: { marginTop: 16, height: 3, overflow: "hidden", alignSelf: "center" },
+  roadTrack: { marginTop: 16, width: ROAD_WIDTH, height: 3, overflow: "hidden", alignSelf: "center" },
   road: { width: ROAD_WIDTH + DASH_PERIOD * 2, height: 3, flexDirection: "row", gap: GAP },
   dash: { width: DASH, height: 3, borderRadius: 2, backgroundColor: colors.accent, opacity: 0.5 },
 });
