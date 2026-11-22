@@ -68,7 +68,7 @@ export async function updateDisputeStatusAction(
   if (!result.ok) {
     return {
       success: false as const,
-      error: result.reason === "invalid_status" ? "Errors.invalidData" : "Errors.generic",
+      error: result.reason === "not_found" ? "Errors.generic" : "Errors.invalidData",
     };
   }
   revalidatePathAllLocales("/admin");

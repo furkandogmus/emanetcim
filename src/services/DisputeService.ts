@@ -1,4 +1,4 @@
-import { DISPUTE_INITIAL_STATUS, DISPUTE_STATUSES, type DisputeStatus } from "@/lib/dispute-status";
+import { DISPUTE_ADMIN_NOTE_MAX, DISPUTE_INITIAL_STATUS, DISPUTE_STATUSES, type DisputeStatus } from "@/lib/dispute-status";
 import prisma from "@/lib/db";
 import logger from "@/lib/logger";
 import { writeAuditLog } from "@/lib/audit-log";
@@ -43,7 +43,8 @@ export type DisputeAdminActor = { id: string; role: string };
 
 export type UpdateDisputeStatusResult =
   | { ok: true; status: DisputeStatus; adminNote: string | null }
-  | { ok: false; reason: "invalid_status" | "not_found" };
+  | { ok: false; reason: "invalid_status" | "note_too_long" | "not_found" };
+
 
 const ADMIN_DISPUTE_INCLUDE = {
   booking: {
@@ -92,6 +93,7 @@ class DisputeService {
     }
     const status = statusRaw as DisputeStatus;
     const adminNote = typeof adminNoteRaw === "string" ? adminNoteRaw.trim() || null : null;
+    if (adminNote !== null && adminNote.length > DISPUTE_ADMIN_NOTE_MAX) return { ok: false, reason: "note_too_long" };
 
     const existing = await prisma.dispute.findUnique({ where: { id: disputeId }, select: { status: true } });
     if (!existing) return { ok: false, reason: "not_found" };
