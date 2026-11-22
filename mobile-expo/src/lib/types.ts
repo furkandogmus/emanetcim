@@ -608,6 +608,8 @@ export type AdminUserDetail = AdminUser & {
   hasPassword: boolean;
   /** Ikinci admin onayini bekleyen rol istegi. */
   pendingRole: Role | null;
+  /** Silinmis (anonim) hesap: e-posta/sifre/silme islemleri kapali. */
+  isAnonymized: boolean;
 };
 
 /** `POST /admin/users/[id]/role`. */
