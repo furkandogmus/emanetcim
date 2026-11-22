@@ -434,12 +434,15 @@
     "outsideHoursTitle": "Dükkan şu an kapalı görünüyor. Yine de teslim al?",
     "outsideHoursBody": "Kayıtlı çalışma saatlerinin dışındasın. Dükkan şu an açıksa valizi teslim alabilirsin; kayda saat dışı teslim olarak geçer. Saatlerin yanlışsa düzeltmeyi unutma.",
     "outsideHoursConfirm": "Yine de teslim al",
-    "searchPlaceholder": "Misafir adı veya kod ara",
-    "searchNone": "Eşleşen emanet yok. Kodu 8 haneli olarak yaz.",
+    "searchPlaceholder": "Misafir adı, kod veya telefon ara",
+    "searchNone": "Eşleşen emanet yok. Kodun ilk harflerini, misafirin adını ya da telefonunun son 4 hanesini dene.",
     "statusWaiting": "Bekleniyor",
     "callGuest": "Misafiri ara",
     "whatsappGuest": "WhatsApp ile yaz",
-    "olderBookings": "Daha eski kayıtlar"
+    "olderBookings": "Daha eski kayıtlar",
+    "searchResults": "Arama sonuçları",
+    "searchMinHint": "Tüm tarihlerde aramak için en az 2 karakter yaz.",
+    "searchMore": "Daha fazla sonuç"
   },
   "profile": {
     "title": "Profil",

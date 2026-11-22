@@ -434,12 +434,15 @@
     "outsideHoursTitle": "Der Laden scheint gerade geschlossen. Trotzdem annehmen?",
     "outsideHoursBody": "Du bist außerhalb deiner gespeicherten Öffnungszeiten. Wenn der Laden jetzt geöffnet ist, kannst du das Gepäck trotzdem annehmen; es wird als Annahme außerhalb der Öffnungszeiten vermerkt. Stimmen deine Zeiten nicht, korrigiere sie bitte.",
     "outsideHoursConfirm": "Trotzdem annehmen",
-    "searchPlaceholder": "Gastname oder Code suchen",
-    "searchNone": "Keine passende Buchung. Gib den 8-stelligen Code ein.",
+    "searchPlaceholder": "Gastname, Code oder Telefon suchen",
+    "searchNone": "Keine passende Buchung. Versuch den Anfang des Codes, den Namen des Gastes oder die letzten 4 Ziffern seiner Telefonnummer.",
     "statusWaiting": "Erwartet",
     "callGuest": "Gast anrufen",
     "whatsappGuest": "Per WhatsApp schreiben",
-    "olderBookings": "Ältere Buchungen"
+    "olderBookings": "Ältere Buchungen",
+    "searchResults": "Suchergebnisse",
+    "searchMinHint": "Gib mindestens 2 Zeichen ein, um alle Daten zu durchsuchen.",
+    "searchMore": "Weitere Ergebnisse"
   },
   "profile": {
     "title": "Profil",
