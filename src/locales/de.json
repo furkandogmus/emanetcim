@@ -347,7 +347,22 @@
     "outsideHoursConfirm": "Trotzdem annehmen",
     "outsideHoursEditHours": "Öffnungszeiten bearbeiten",
     "earningsBasisNote": "Abgeschlossene Aufbewahrungen, nach Rückgabedatum",
-    "pulseCollectedBasis": "Abgeschlossene Aufbewahrungen"
+    "pulseCollectedBasis": "Abgeschlossene Aufbewahrungen",
+    "partnerCancelBooking": "Buchung stornieren",
+    "partnerCancelConfirm": "Die Buchung wird storniert und der Gast erfährt den Grund. Deine Kapazität wird frei.",
+    "partnerCancelReasonLabel": "Stornogrund",
+    "partnerCancelReason_guest_request": "Gast hat gebeten",
+    "partnerCancelReason_shop_closed": "Laden zu dieser Zeit geschlossen",
+    "partnerCancelReason_capacity": "Kein Platz mehr",
+    "partnerCancelReason_other": "Sonstiges",
+    "partnerCancelNoteLabel": "Notiz (optional)",
+    "partnerCancelNoteRequiredLabel": "Notiz (Pflicht)",
+    "partnerNoShow": "Gast nicht erschienen",
+    "partnerNoShowConfirm": "Die Buchung wird als nicht erschienen geschlossen und deine Kapazität frei. Der Gast erhält eine freundliche Nachricht.",
+    "partnerNoShowAvailableAt": "Ab {time} möglich (60 Min. nach der Abgabezeit).",
+    "partnerCancelDone": "Buchung storniert.",
+    "partnerNoShowDone": "Buchung als nicht erschienen geschlossen.",
+    "partnerCloseKeep": "Zurück"
   },
   "Guest": {
     "heroTitle": "Gepäck abgeben, die Stadt frei erkunden",
@@ -1315,7 +1330,17 @@
       "noLocation": "Kein Standort: nicht in Suche und Karte",
       "noCityPage": "Auf keiner Stadtseite",
       "noPhoto": "Kein Foto"
-    }
+    },
+    "bookingCloseSectionTitle": "Buchung schließen",
+    "bookingCloseCancel": "Stornieren",
+    "bookingCloseCancelConfirm": "Die Buchung wird storniert; Gast und Laden werden benachrichtigt, eine Zahlung wird als erstattet erfasst.",
+    "bookingCloseForceCheckout": "Zwangsweise abschließen",
+    "bookingCloseForceCheckoutConfirm": "Das Gepäck wird als übergeben markiert; es fällt keine Verspätungsgebühr an. Gast und Laden werden benachrichtigt.",
+    "bookingCloseNoteLabel": "Notiz (Pflicht)",
+    "bookingCloseNoteHint": "Mindestens {min} Zeichen. Wird im Prüfprotokoll gespeichert und an den Laden gesendet.",
+    "bookingCloseKeep": "Zurück",
+    "bookingCloseCancelDone": "Buchung storniert.",
+    "bookingCloseForceDone": "Buchung als abgeholt geschlossen."
   },
   "Auth": {
     "loginTitle": "Melden Sie sich bei BagajPark an",
@@ -1819,7 +1844,10 @@
     "userNotFound": "Benutzer nicht gefunden.",
     "userNotGuest": "Dieses Konto ist kein Gastkonto; nur Gastkonten können zu Partnern werden.",
     "passwordTooShort": "Das Passwort muss mindestens 8 Zeichen lang sein.",
-    "cannotBanSelf": "Sie können Ihr eigenes Konto nicht sperren."
+    "cannotBanSelf": "Sie können Ihr eigenes Konto nicht sperren.",
+    "closureNoteRequired": "Bitte schreib eine Notiz.",
+    "closureInvalidReason": "Wähle einen gültigen Stornogrund.",
+    "noShowTooEarly": "Ein Nichterscheinen kann erst 60 Minuten nach der Abgabezeit markiert werden."
   },
   "Emails": {
     "verificationSubject": "Bestätigen Sie Ihre E-Mail",

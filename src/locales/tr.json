@@ -347,7 +347,22 @@
     "outsideHoursConfirm": "Yine de teslim al",
     "outsideHoursEditHours": "Çalışma saatlerini düzenle",
     "earningsBasisNote": "Teslim edilen emanetler, teslim tarihine göre",
-    "pulseCollectedBasis": "Teslim edilen emanetler"
+    "pulseCollectedBasis": "Teslim edilen emanetler",
+    "partnerCancelBooking": "Rezervasyonu iptal et",
+    "partnerCancelConfirm": "Rezervasyon iptal edilecek ve misafire nedeniyle birlikte bildirilecek. Kapasiten serbest kalır.",
+    "partnerCancelReasonLabel": "İptal nedeni",
+    "partnerCancelReason_guest_request": "Misafir istedi",
+    "partnerCancelReason_shop_closed": "Dükkan o saatte kapalı",
+    "partnerCancelReason_capacity": "Yer kalmadı",
+    "partnerCancelReason_other": "Diğer",
+    "partnerCancelNoteLabel": "Not (isteğe bağlı)",
+    "partnerCancelNoteRequiredLabel": "Açıklama (zorunlu)",
+    "partnerNoShow": "Misafir gelmedi",
+    "partnerNoShowConfirm": "Rezervasyon \"misafir gelmedi\" olarak kapatılacak ve kapasiten serbest kalacak. Misafire nazik bir bildirim gider.",
+    "partnerNoShowAvailableAt": "{time} itibarıyla işaretleyebilirsin (bırakma saatinden 60 dk sonra).",
+    "partnerCancelDone": "Rezervasyon iptal edildi.",
+    "partnerNoShowDone": "Rezervasyon \"misafir gelmedi\" olarak kapatıldı.",
+    "partnerCloseKeep": "Vazgeç"
   },
   "Guest": {
     "heroTitle": "Valizini Güvenle Bırak, Özgürce Gez",
@@ -1315,7 +1330,17 @@
       "noLocation": "Konum yok: arama ve haritada çıkmaz",
       "noCityPage": "Hiçbir şehir sayfasında yok",
       "noPhoto": "Fotoğraf yok"
-    }
+    },
+    "bookingCloseSectionTitle": "Rezervasyonu kapat",
+    "bookingCloseCancel": "İptal et",
+    "bookingCloseCancelConfirm": "Rezervasyon iptal edilecek; misafir ve esnaf bilgilendirilecek, ödeme varsa iadesi kaydedilecek.",
+    "bookingCloseForceCheckout": "Zorla teslim et",
+    "bookingCloseForceCheckoutConfirm": "Valiz teslim edildi olarak kapatılacak; gecikme ücreti alınmaz. Misafir ve esnaf bilgilendirilecek.",
+    "bookingCloseNoteLabel": "Açıklama (zorunlu)",
+    "bookingCloseNoteHint": "En az {min} karakter. Denetim kaydına ve esnafa giden bildirime yazılır.",
+    "bookingCloseKeep": "Vazgeç",
+    "bookingCloseCancelDone": "Rezervasyon iptal edildi.",
+    "bookingCloseForceDone": "Rezervasyon teslim edildi olarak kapatıldı."
   },
   "Auth": {
     "loginTitle": "BagajPark'a Giriş Yap",
@@ -1883,7 +1908,10 @@
     "userNotFound": "Kullanıcı bulunamadı.",
     "userNotGuest": "Bu hesap misafir değil; yalnızca misafir hesapları esnafa çevrilebilir.",
     "passwordTooShort": "Şifre en az 8 karakter olmalı.",
-    "cannotBanSelf": "Kendi hesabınızı engelleyemezsiniz."
+    "cannotBanSelf": "Kendi hesabınızı engelleyemezsiniz.",
+    "closureNoteRequired": "Lütfen bir açıklama yazın.",
+    "closureInvalidReason": "Geçerli bir iptal nedeni seçin.",
+    "noShowTooEarly": "Misafir gelmedi, ancak bırakma saatinden 60 dakika sonra işaretlenebilir."
   },
   "Emails": {
     "verificationSubject": "E-postanızı Doğrulayın",
