@@ -362,7 +362,10 @@
     "partnerNoShowAvailableAt": "Possible à partir de {time} (60 min après l'heure de dépôt).",
     "partnerCancelDone": "Réservation annulée.",
     "partnerNoShowDone": "Réservation clôturée pour absence.",
-    "partnerCloseKeep": "Retour"
+    "partnerCloseKeep": "Retour",
+    "partnerBookingsSearchLabel": "Rechercher des réservations",
+    "partnerBookingsSearchPlaceholder": "Code, nom du client ou 4 derniers chiffres du téléphone",
+    "partnerBookingsSearchSubmit": "Rechercher"
   },
   "Guest": {
     "heroTitle": "Déposez vos bagages, explorez librement",
@@ -484,7 +487,7 @@
     "checkoutReservationIdLabel": "Numéro de réservation",
     "checkoutDeliveryPointLabel": "Lieu de prise en charge",
     "checkoutCardValidationError": "Veuillez remplir tous les champs de la carte.",
-    "checkoutGuestContactRequired": "Veuillez saisir un e-mail ou un téléphone",
+    "checkoutGuestContactRequired": "Veuillez saisir votre e-mail",
     "checkoutCardHolderPlaceholder": "Nom sur la carte",
     "checkoutCardNumberPlaceholder": "0000 0000 0000 0000",
     "checkoutExpiryPlaceholder": "MM/AA",
@@ -657,7 +660,7 @@
     "checkoutPaymentAfterApprovalNote": "Votre carte n'est débitée qu'après l'approbation de votre demande par le commerce. Vous finaliserez le paiement à l'étape suivante ou depuis « Mes réservations ».",
     "bookingDetailPaymentUnavailableNote": "Le paiement en ligne n'est pas disponible (paiements désactivés ou clés manquantes). Contactez l'assistance ou le commerce pour les instructions de paiement.",
     "payBookingError_guest_email_required": "Ajoutez une adresse e-mail à votre compte avant de payer.",
-    "checkoutGuestEmailPlaceholder": "Votre e-mail (facultatif)",
+    "checkoutGuestEmailPlaceholder": "Votre e-mail",
     "checkoutGuestPhonePlaceholder": "Votre téléphone (facultatif)",
     "checkoutGuestContinue": "Continuer en tant qu'invité",
     "checkoutGuestOr": "or",
@@ -713,7 +716,7 @@
     "checkoutManageBooking": "Gérer la réservation",
     "checkoutFreeCancelUntilDropOff": "Annulation gratuite jusqu'à l'heure de dépôt.",
     "checkoutContinueWithoutAccount": "Continuer sans compte",
-    "checkoutGuestContactHint": "Un e-mail ou un téléphone suffit pour les notifications de réservation.",
+    "checkoutGuestContactHint": "Un e-mail est requis pour gérer votre réservation ; le téléphone est facultatif.",
     "checkoutOrWithAccount": "ou avec un compte",
     "shopVerifiedPartner": "Partenaire vérifié",
     "shopInsuredStorage": "Consigne protégée",
@@ -1791,7 +1794,7 @@
     "emailAlreadyRegistered": "Cette adresse email est déjà enregistrée.",
     "emailSendFailed": "L'e-mail n'a pas pu être envoyé. Veuillez réessayer plus tard.",
     "generic": "Une erreur inconnue s'est produite.",
-    "guestContactRequired": "Veuillez indiquer un e-mail ou un téléphone pour continuer",
+    "guestContactRequired": "Veuillez saisir votre e-mail pour continuer",
     "guestLinkExpired": "Ce lien a expiré. Utilisez le lien le plus récent dans votre e-mail ou recherchez à nouveau votre réservation.",
     "insufficientCapacity": "Capacité des magasins insuffisante pour ces dates.",
     "invalidBookingDates": "Les dates de réservation sont invalides ou en dehors de la durée autorisée.",
@@ -1847,7 +1850,10 @@
     "cannotBanSelf": "Vous ne pouvez pas bloquer votre propre compte.",
     "closureNoteRequired": "Veuillez écrire une remarque.",
     "closureInvalidReason": "Choisissez un motif d'annulation valide.",
-    "noShowTooEarly": "Une absence ne peut être signalée que 60 minutes après l'heure de dépôt."
+    "noShowTooEarly": "Une absence ne peut être signalée que 60 minutes après l'heure de dépôt.",
+    "invalidName": "Le nom doit contenir 1 à 100 caractères.",
+    "currentPasswordRequired": "Saisissez votre mot de passe actuel.",
+    "invalidCurrentPassword": "Le mot de passe actuel est incorrect."
   },
   "Emails": {
     "verificationSubject": "Vérifiez votre e-mail",
@@ -2097,7 +2103,9 @@
     "referralBody": "Partagez votre code de parrainage avec un ami. Il obtient {pct}% de réduction sur sa première réservation.",
     "referralReveal": "Afficher mon code de parrainage",
     "referralLoading": "Chargement...",
-    "referralCopyTitle": "Copier le lien"
+    "referralCopyTitle": "Copier le lien",
+    "editProfile": "Informations du profil",
+    "editProfileDesc": "Nom, téléphone et mot de passe"
   },
   "Home": {
     "seoTitle": "Consigne à bagages et dépôt de valises",
@@ -2433,5 +2441,28 @@
     "toastDeleted": "Problème et photos supprimés.",
     "toastErrorGeneric": "L'opération n'a pas pu être effectuée.",
     "toastAnnotationError": "Impossible de générer la photo annotée."
+  },
+  "AccountProfile": {
+    "back": "Mon compte",
+    "pageTitle": "Informations du profil",
+    "pageIntro": "Mettez à jour votre nom, téléphone et mot de passe ici.",
+    "nameLabel": "Nom complet",
+    "phoneLabel": "Téléphone",
+    "phoneHint": "Numéro mobile turc ; vous pouvez le laisser vide.",
+    "emailLabel": "E-mail",
+    "emailReadOnly": "L'e-mail ne peut pas être modifié ici.",
+    "save": "Enregistrer",
+    "saving": "Enregistrement…",
+    "saved": "Profil mis à jour.",
+    "passwordTitle": "Mot de passe",
+    "passwordIntroSet": "Votre compte n'a pas encore de mot de passe ; vous pouvez en définir un.",
+    "passwordIntroChange": "Saisissez votre mot de passe actuel pour le modifier.",
+    "currentPassword": "Mot de passe actuel",
+    "newPassword": "Nouveau mot de passe",
+    "confirmPassword": "Nouveau mot de passe (confirmation)",
+    "passwordSave": "Enregistrer le mot de passe",
+    "passwordMismatch": "Les nouveaux mots de passe ne correspondent pas.",
+    "passwordSet": "Mot de passe défini.",
+    "passwordChanged": "Mot de passe modifié. Veuillez vous reconnecter pour votre sécurité."
   }
 }

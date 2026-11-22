@@ -362,7 +362,10 @@
     "partnerNoShowAvailableAt": "{time} itibarıyla işaretleyebilirsin (bırakma saatinden 60 dk sonra).",
     "partnerCancelDone": "Rezervasyon iptal edildi.",
     "partnerNoShowDone": "Rezervasyon \"misafir gelmedi\" olarak kapatıldı.",
-    "partnerCloseKeep": "Vazgeç"
+    "partnerCloseKeep": "Vazgeç",
+    "partnerBookingsSearchLabel": "Rezervasyon ara",
+    "partnerBookingsSearchPlaceholder": "Kod, misafir adı ya da telefonun son 4 hanesi",
+    "partnerBookingsSearchSubmit": "Ara"
   },
   "Guest": {
     "heroTitle": "Valizini Güvenle Bırak, Özgürce Gez",
@@ -490,7 +493,7 @@
     "checkoutReservationIdLabel": "Rezervasyon ID",
     "checkoutDeliveryPointLabel": "Teslimat noktası",
     "checkoutCardValidationError": "Lütfen tüm kart bilgilerini eksiksiz doldurun.",
-    "checkoutGuestContactRequired": "Lütfen e-posta veya telefon girin",
+    "checkoutGuestContactRequired": "Lütfen e-posta adresinizi girin",
     "checkoutCardHolderPlaceholder": "Kart üzerindeki isim",
     "checkoutCardNumberPlaceholder": "0000 0000 0000 0000",
     "checkoutExpiryPlaceholder": "AA/YY",
@@ -635,7 +638,7 @@
     "totalBags": "Toplam valiz",
     "authModalLogin": "Giriş Yap",
     "authModalRegister": "Kayıt Ol",
-    "checkoutGuestEmailPlaceholder": "E-posta adresiniz (isteğe bağlı)",
+    "checkoutGuestEmailPlaceholder": "E-posta adresiniz",
     "checkoutGuestPhonePlaceholder": "Telefon numaranız (isteğe bağlı)",
     "checkoutGuestContinue": "Misafir Olarak Devam Et",
     "checkoutGuestOr": "veya",
@@ -713,7 +716,7 @@
     "checkoutManageBooking": "Rezervasyonu Yönet",
     "checkoutFreeCancelUntilDropOff": "Teslim saatine kadar ücretsiz iptal edebilirsiniz.",
     "checkoutContinueWithoutAccount": "Üye olmadan devam et",
-    "checkoutGuestContactHint": "Rezervasyon bildirimleri için e-posta veya telefon yeterli.",
+    "checkoutGuestContactHint": "Rezervasyonunuzu yönetmek için e-posta gerekli; telefon isteğe bağlı.",
     "checkoutOrWithAccount": "veya hesabınla",
     "shopVerifiedPartner": "Doğrulanmış Partner",
     "shopInsuredStorage": "Güvenceli Emanet",
@@ -1855,7 +1858,7 @@
     "emailAlreadyRegistered": "Bu e-posta adresi zaten kayıtlı.",
     "emailSendFailed": "E-posta gönderilemedi. Lütfen daha sonra tekrar deneyin.",
     "generic": "Bilinmeyen bir hata oluştu.",
-    "guestContactRequired": "Lütfen e-posta veya telefon girin",
+    "guestContactRequired": "Devam etmek için e-posta adresinizi girin",
     "guestLinkExpired": "Bu bağlantının süresi dolmuş. E-postanızdaki yeni bağlantıyı kullanın veya rezervasyonunuzu tekrar sorgulayın.",
     "insufficientCapacity": "Bu tarih aralığında dükkan kapasitesi yetersiz.",
     "invalidBookingDates": "Rezervasyon tarihleri geçersiz veya izin verilen sürenin dışında.",
@@ -1911,7 +1914,10 @@
     "cannotBanSelf": "Kendi hesabınızı engelleyemezsiniz.",
     "closureNoteRequired": "Lütfen bir açıklama yazın.",
     "closureInvalidReason": "Geçerli bir iptal nedeni seçin.",
-    "noShowTooEarly": "Misafir gelmedi, ancak bırakma saatinden 60 dakika sonra işaretlenebilir."
+    "noShowTooEarly": "Misafir gelmedi, ancak bırakma saatinden 60 dakika sonra işaretlenebilir.",
+    "invalidName": "Ad 1-100 karakter olmalı.",
+    "currentPasswordRequired": "Mevcut şifrenizi girin.",
+    "invalidCurrentPassword": "Mevcut şifre hatalı."
   },
   "Emails": {
     "verificationSubject": "E-postanızı Doğrulayın",
@@ -2288,7 +2294,9 @@
     "referralBody": "Referans kodunu arkadaşınla paylaş. İlk rezervasyonunda %{pct} indirim alır.",
     "referralReveal": "Referans Kodumu Göster",
     "referralLoading": "Yükleniyor...",
-    "referralCopyTitle": "Linki kopyala"
+    "referralCopyTitle": "Linki kopyala",
+    "editProfile": "Profil bilgileri",
+    "editProfileDesc": "Ad, telefon ve şifre"
   },
   "Home": {
     "seoTitle": "Emanetçi Bul — Valiz ve Bagaj Emanet",
@@ -2578,5 +2586,28 @@
     "toastDeleted": "Sorun ve fotoğrafları silindi.",
     "toastErrorGeneric": "İşlem tamamlanamadı.",
     "toastAnnotationError": "İşaretlenmiş fotoğraf oluşturulamadı."
+  },
+  "AccountProfile": {
+    "back": "Hesabım",
+    "pageTitle": "Profil bilgileri",
+    "pageIntro": "Adını, telefonunu ve şifreni buradan güncelle.",
+    "nameLabel": "Ad soyad",
+    "phoneLabel": "Telefon",
+    "phoneHint": "Türkiye GSM numarası; boş bırakabilirsin.",
+    "emailLabel": "E-posta",
+    "emailReadOnly": "E-posta buradan değiştirilemez.",
+    "save": "Kaydet",
+    "saving": "Kaydediliyor…",
+    "saved": "Profil güncellendi.",
+    "passwordTitle": "Şifre",
+    "passwordIntroSet": "Hesabının henüz şifresi yok; bir şifre belirleyebilirsin.",
+    "passwordIntroChange": "Şifreni değiştirmek için mevcut şifreni gir.",
+    "currentPassword": "Mevcut şifre",
+    "newPassword": "Yeni şifre",
+    "confirmPassword": "Yeni şifre (tekrar)",
+    "passwordSave": "Şifreyi kaydet",
+    "passwordMismatch": "Yeni şifreler eşleşmiyor.",
+    "passwordSet": "Şifre belirlendi.",
+    "passwordChanged": "Şifre değişti. Güvenliğin için yeniden giriş yapman gerekiyor."
   }
 }
