@@ -15,6 +15,7 @@ import {
 } from "@/lib/netgsm";
 import { bookingShortCode } from "@/lib/booking-code";
 import { getSiteBaseUrl } from "@/lib/site-base-url";
+import { signGuestManageLinkToken } from "@/lib/guest-lookup-token";
 import { bookingNotificationEmail } from "@/services/booking/guest-contact";
 
 /**
@@ -536,7 +537,17 @@ export class NotificationService implements INotificationService {
    * orada BINLIK ayracidir, yani tutar yanlis okunabilir. Rezervasyon onayi
    * misafirin sakladigi belgedir, rakamin okunusunda belirsizlik olmamali.
    */
-  async notifyBookingSuccess(emailOrPlaceholder: string, bookingId: string, totalPrice: number, locale: string = "tr"): Promise<void> {
+  async notifyBookingSuccess(
+    emailOrPlaceholder: string,
+    bookingId: string,
+    totalPrice: number,
+    locale: string = "tr",
+    /**
+     * Hesapsiz rezervasyon: bilet sayfasi oturum ister, misafir onu acamaz.
+     * Ana dugme yerine imzali yonetim bagi gider (`signGuestManageLinkToken`).
+     */
+    opts?: { guestManage?: { checkOutTime: Date } },
+  ): Promise<void> {
     /*
       KOK ADRES ORTAK YARDIMCIDAN (2026-08-31). Burasi yedek olarak URETIM alan
       adini SABITLIYORDU (`https://bagajpark.com`): degisken tanimsiz kalan bir
@@ -544,7 +555,14 @@ export class NotificationService implements INotificationService {
       gonderiyordu. Ayrica `NEXT_PUBLIC_BASE_URL`i yok sayiyordu.
     */
     const domain = getSiteBaseUrl();
-    const bookingUrl = `${domain}/${locale}/bookings/${bookingId}`;
+    const guestManage = opts?.guestManage && emailOrPlaceholder.includes("@");
+    const bookingUrl = guestManage
+      ? `${domain}/${locale}/bookings/manage/${await signGuestManageLinkToken({
+          bookingId,
+          email: emailOrPlaceholder,
+          checkOutTime: opts.guestManage!.checkOutTime,
+        })}`
+      : `${domain}/${locale}/bookings/${bookingId}`;
     const shortId = bookingShortCode(bookingId);
     /* Eskiden ALTI dilin tutari da her gonderimde hesaplaniyordu; besi bosa. */
     const price = formatTryCurrency(Number(totalPrice), bcp47ForUiLocale(locale));
@@ -558,6 +576,7 @@ export class NotificationService implements INotificationService {
         row1: `Rezervasyon Kodu`,
         row2: `Toplam Tutar`,
         cta: `Biletimi Görüntüle`,
+        manageCta: `Rezervasyonunu yönet`,
         footer: `BagajPark — Güvenli Bagaj Emaneti`,
       },
       en: {
@@ -568,6 +587,7 @@ export class NotificationService implements INotificationService {
         row1: `Booking code`,
         row2: `Total`,
         cta: `View My Ticket`,
+        manageCta: `Manage your booking`,
         footer: `BagajPark — Secure Luggage Storage`,
       },
       de: {
@@ -578,6 +598,7 @@ export class NotificationService implements INotificationService {
         row1: `Buchungscode`,
         row2: `Gesamtbetrag`,
         cta: `Mein Ticket ansehen`,
+        manageCta: `Buchung verwalten`,
         footer: `BagajPark — Sichere Gepäckaufbewahrung`,
       },
       fr: {
@@ -588,6 +609,7 @@ export class NotificationService implements INotificationService {
         row1: `Code de réservation`,
         row2: `Montant total`,
         cta: `Voir mon billet`,
+        manageCta: `Gérer ma réservation`,
         footer: `BagajPark — Consigne à bagages sécurisée`,
       },
       ja: {
@@ -598,6 +620,7 @@ export class NotificationService implements INotificationService {
         row1: `予約コード`,
         row2: `合計金額`,
         cta: `チケットを見る`,
+        manageCta: `予約を管理する`,
         footer: `BagajPark — 安全な荷物預かりサービス`,
       },
       fa: {
@@ -608,6 +631,7 @@ export class NotificationService implements INotificationService {
         row1: `کد رزرو`,
         row2: `مبلغ کل`,
         cta: `مشاهده بلیط من`,
+        manageCta: `مدیریت رزرو`,
         footer: `BagajPark — نگهداری امن چمدان`,
       },
     }, locale);
@@ -620,7 +644,7 @@ export class NotificationService implements INotificationService {
         { label: content.row1, value: shortId },
         { label: content.row2, value: price },
       ],
-      cta: { href: bookingUrl, label: content.cta, variant: "button" },
+      cta: { href: bookingUrl, label: guestManage ? content.manageCta : content.cta, variant: "button" },
       footer: content.footer,
     });
 
