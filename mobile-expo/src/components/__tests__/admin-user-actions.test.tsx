@@ -190,6 +190,15 @@ describe("hesap silme", () => {
     );
   });
 
+  it("onay alaninin ipucu hesabin e-postasi/telefonu degil", async () => {
+    await renderUser();
+    await fireEvent.press(screen.getByRole("button", { name: "Hesabı sil" }));
+    const field = await screen.findByLabelText("Onaylamak için e-postayı ya da telefonu yaz");
+    expect(field.props.placeholder).toBe("E-posta ya da telefonu yazın");
+    expect(screen.queryByPlaceholderText(GUEST.email)).toBeNull();
+    expect(screen.queryByPlaceholderText(GUEST.phone)).toBeNull();
+  });
+
   it("anonim hesapta silme, sifirlama, dogrulama ve sifre islemleri yok", async () => {
     user = { ...GUEST, email: "gdpr_abc@invalid.local", phone: "", name: "", isAnonymized: true };
     await renderUser();

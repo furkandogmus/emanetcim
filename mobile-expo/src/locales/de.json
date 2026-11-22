@@ -1342,6 +1342,7 @@
     "eraseDone": "Konto gelöscht.",
     "eraseNotGuest": "Partner- und Admin-Konten können hier nicht gelöscht werden.",
     "anonymized": "Dieses Konto ist gelöscht (anonymisiert). E-Mail-, Passwort- und Löschaktionen sind deaktiviert.",
+    "eraseConfirmPlaceholder": "E-Mail oder Telefonnummer eingeben",
     "anonymizedLabel": "Gelöschtes Konto",
     "errors": {
       "forbidden": "Für diese Aktion sind Admin-Rechte nötig.",
