@@ -747,7 +747,7 @@
     "openSettings": "Ayarlardan izin ver",
     "manualOpen": "Kodu elle gir",
     "manualTitle": "Kod veya isimle bul",
-    "manualPlaceholder": "8 haneli kod ya da misafir adı",
+    "manualPlaceholder": "8 haneli kod, misafir adı ya da telefon",
     "manualSearch": "Ara",
     "manualNone": "Eşleşen rezervasyon bulunamadı.",
     "manualMany": "Birden fazla eşleşme var, birini seç.",

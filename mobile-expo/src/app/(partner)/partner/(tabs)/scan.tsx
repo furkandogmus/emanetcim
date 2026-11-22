@@ -5,13 +5,15 @@ import { Flashlight, FlashlightOff } from "lucide-react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { CameraView, useCameraPermissions } from "expo-camera";
 import { router, useFocusEffect, useIsFocused } from "expo-router";
+import { useQueryClient } from "@tanstack/react-query";
 import { useTranslation } from "react-i18next";
 
 import { LuggageTag } from "@/components/Illustrations";
 import { Input } from "@/components/Field";
 import { AppText, Banner, Button, CenterMessage } from "@/components/ui";
-import { bookingCode, searchBookings } from "@/lib/booking-search";
-import { usePartnerBookings } from "@/lib/queries";
+import { bookingCode, partnerSearchTerm, refineServerSearch, searchBookings } from "@/lib/booking-search";
+import { fetchPartnerBookingSearch, partnerSearchKey, usePartnerBookings } from "@/lib/queries";
+import type { PartnerBooking } from "@/lib/types";
 import { api } from "@/lib/api";
 import { errorMessage } from "@/lib/errors";
 import { colors, radius, space } from "@/theme/tokens";
@@ -178,11 +180,12 @@ const styles = StyleSheet.create({
 
 /**
  * QR okunamiyorsa (kirik ekran, bos pil, kamera izni yok): 8 haneli kod ya da misafir adi.
- * Arama esnafin yuklu listesinde yapilir; tek eslesmede detay acilir, birden fazlada secilir.
+ * Once yuklu listede, yoksa sunucuda aranir; tek eslesmede detay acilir, birden fazlada secilir.
  */
 function ManualLookup() {
   const { t } = useTranslation();
   const bookings = usePartnerBookings(false);
+  const queryClient = useQueryClient();
   const [open, setOpen] = useState(false);
   const [text, setText] = useState("");
   const [matches, setMatches] = useState<{ id: string; guestName: string }[] | null>(null);
@@ -190,17 +193,29 @@ function ManualLookup() {
   const [searching, setSearching] = useState(false);
 
   async function search() {
-    let found = searchBookings(bookings.data?.items ?? [], text);
+    let found: PartnerBooking[] = searchBookings(bookings.data?.items ?? [], text);
     /*
-      Liste yoklamasiz onbellekten gelir; misafir dakikalar once rezervasyon yaptiysa
-      kod listede yoktur ve esnaf "bulunamadi" goruyordu. Bulunamazsa liste bir kez
-      tazelenip yeniden aranir.
+      Yuklu liste yalnizca aktifler + son gecmis; dakikalar once yapilan ya da eski
+      rezervasyon orada yok. Bulunamazsa sunucu aramasi (tum tarihler, telefon dahil).
+      Arama ucu hata verirse eski yol: liste tazelenip yeniden aranir.
     */
-    if (found.length === 0) {
+    const term = partnerSearchTerm(text);
+    if (found.length === 0 && term) {
       setSearching(true);
-      const fresh = await bookings.refetch().catch(() => null);
-      setSearching(false);
-      found = searchBookings(fresh?.data?.items ?? [], text);
+      try {
+        const res = await queryClient.fetchQuery({
+          // "lookup" eki: liste ekranindaki ayni anahtar sonsuz sorgu ({ pages }) tutuyor.
+          queryKey: [...partnerSearchKey(null, term), "lookup"],
+          queryFn: () => fetchPartnerBookingSearch(term, null),
+          staleTime: 10_000,
+        });
+        found = refineServerSearch(res.items, term);
+      } catch {
+        const fresh = await bookings.refetch().catch(() => null);
+        found = searchBookings(fresh?.data?.items ?? [], text);
+      } finally {
+        setSearching(false);
+      }
     }
     if (found.length === 1) {
       setMatches(null);
