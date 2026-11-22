@@ -19,7 +19,6 @@ import PartnerShopSettingsForm from "@/components/partner/PartnerShopSettingsFor
 import CheckInDialog, { type CheckInPreview } from "@/components/partner/CheckInDialog";
 import CheckoutSealsDialog, { type CheckoutSeal } from "@/components/partner/CheckoutSealsDialog";
 import PartnerHistoryTab from "@/components/partner/PartnerHistoryTab";
-import PartnerRequestsTab from "@/components/partner/PartnerRequestsTab";
 import PartnerBottomNav, { type PartnerTab } from "@/components/partner/PartnerBottomNav";
 import PartnerReferralCard from "@/components/partner/PartnerReferralCard";
 import WebPushOptIn from "@/components/WebPushOptIn";
@@ -31,8 +30,6 @@ import {
   checkOutAction,
   getPartnerBookingPreviewAction,
   getPartnerBookingSealsAction,
-  approveBookingAction,
-  rejectBookingAction,
 } from "@/actions/partner";
 import type { PartnerBookingListItem } from "@/services/BookingService";
 import { bcp47ForUiLocale } from "@/lib/intl-locale";
@@ -170,7 +167,6 @@ export default function PartnerClient({
 
   const [activeTab, setActiveTab] = useState<PartnerTab>("PANEL");
   const [isScanning, setIsScanning] = useState(false);
-  const [isProcessing, setIsProcessing] = useState(false);
   const [scanResult, setScanResult] = useState<CheckInPreview | null>(null);
   const [successBanner, setSuccessBanner] = useState<string | null>(null);
   /**
@@ -266,49 +262,6 @@ export default function PartnerClient({
     },
     [showError, t]
   );
-
-  const handleApprove = async (id: string) => {
-    setIsProcessing(true);
-    /*
-      Ne action ne de bu handler try/catch icermiyordu -- beklenmeyen bir
-      hata (DB baglanti sorunu vb.) firlarsa setIsProcessing hic sifirlanmiyor,
-      buton SONSUZA dek "isleniyor" durumunda kaliyordu.
-    */
-    try {
-      const res = await approveBookingAction(id);
-      if (res.success) {
-        showSuccessBanner(t("approvedSuccess"));
-        router.refresh();
-      } else {
-        showError(res.error);
-      }
-    } catch (e) {
-      showError(e instanceof Error ? e.message : undefined);
-    } finally {
-      setIsProcessing(false);
-    }
-  };
-
-  const handleReject = async (id: string) => {
-    askConfirm(t("confirmReject"), async () => {
-      setIsProcessing(true);
-      try {
-        const res = await rejectBookingAction(id);
-        if (res.success) {
-          showSuccessBanner(t("rejectedSuccess"));
-          router.refresh();
-        } else {
-          showError(res.error);
-        }
-      } catch (e) {
-        showError(e instanceof Error ? e.message : undefined);
-      } finally {
-        setIsProcessing(false);
-      }
-    });
-  };
-
-
 
   const executeCheckout = useCallback(
     async (bookingId: string): Promise<boolean> => {
@@ -660,16 +613,6 @@ export default function PartnerClient({
         />
       )}
 
-      {activeTab === "TALEPLER" && (
-        <PartnerRequestsTab
-          bookings={bookings}
-          dateLocale={dateLocale}
-          isProcessing={isProcessing}
-          onApprove={(id) => void handleApprove(id)}
-          onReject={(id) => void handleReject(id)}
-        />
-      )}
-
       {activeTab === "AYARLAR" && (
         <div className="flex-1 max-w-md mx-auto w-full flex flex-col gap-8 animate-in slide-in-from-bottom-4 duration-500">
           <PartnerShopSettingsForm
@@ -686,7 +629,6 @@ export default function PartnerClient({
       <PartnerBottomNav
         activeTab={activeTab}
         onChange={setActiveTab}
-        pendingCount={bookings.filter((b) => (b.status as string) === "WAITING_APPROVAL").length}
       />
     </div>
   );
