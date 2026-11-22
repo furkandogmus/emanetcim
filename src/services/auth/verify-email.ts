@@ -16,6 +16,7 @@
  */
 import prisma from "@/lib/db";
 import logger from "@/lib/logger";
+import { linkGuestBookingsToVerifiedUser } from "@/services/booking/guest-link";
 
 export type VerifyEmailErrorCode =
   | "INVALID_TOKEN"
@@ -67,6 +68,8 @@ export async function verifyEmailToken(
       prisma.verificationToken.delete({ where: { token: value } }),
     ]);
 
+    // Adres kanitlandi: ayni e-postayla yapilmis hesapsiz rezervasyonlar baglanir.
+    await linkGuestBookingsToVerifiedUser(existingUser.id);
     return { ok: true, email: existingToken.identifier };
   } catch (err) {
     logger.error({ err }, "verify_email_token_failed");
@@ -78,10 +81,13 @@ export async function verifyEmailToken(
  * E-postaya gelen kodla giris, adresin sahibi oldugunu kanitlar: kodu alan kisi
  * o kutuya erisiyor. Mobil OTP girisi bunu hic isaretlemiyordu; kodla giren her
  * misafir "dogrulanmamis" kaliyordu (2026-10-18). Yalnizca bos alani doldurur.
+ *
+ * Zaten dogrulanmis hesapta da cagrilir: aradaki hesapsiz rezervasyonlar baglanir.
  */
 export async function markEmailVerifiedByCode(userId: string): Promise<void> {
   await prisma.user.updateMany({
     where: { id: userId, emailVerified: null },
     data: { emailVerified: new Date() },
   });
+  await linkGuestBookingsToVerifiedUser(userId);
 }
