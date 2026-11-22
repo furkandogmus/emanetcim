@@ -6,7 +6,7 @@ import type { Prisma } from "@prisma/client";
  * Yonetici duyurusu: hedef kitle, dil secimi, 10 dakika siniri, test gonderiminin
  * kapsami, goruntuleme yasagi, gerekce, arka plan sayaclari ve asili satir temizligi.
  */
-const { mockPrisma, mockRequireMobileUser, mockAudit, mockExpo } = vi.hoisted(() => {
+const { mockPrisma, mockRequireMobileUser, mockAudit, mockExpo, mockRateLimit } = vi.hoisted(() => {
   const mockPrisma = {
     user: { count: vi.fn(), findMany: vi.fn() },
     mobilePushToken: { count: vi.fn(), findMany: vi.fn(), deleteMany: vi.fn() },
@@ -22,10 +22,11 @@ const { mockPrisma, mockRequireMobileUser, mockAudit, mockExpo } = vi.hoisted(()
     $executeRaw: vi.fn(),
     $transaction: vi.fn(),
   };
-  return { mockPrisma, mockRequireMobileUser: vi.fn(), mockAudit: vi.fn(), mockExpo: vi.fn() };
+  return { mockPrisma, mockRequireMobileUser: vi.fn(), mockAudit: vi.fn(), mockExpo: vi.fn(), mockRateLimit: vi.fn() };
 });
 vi.mock("@/lib/db", () => ({ default: mockPrisma }));
 vi.mock("@/lib/audit-log", () => ({ writeAuditLog: mockAudit }));
+vi.mock("@/lib/rate-limit", () => ({ rateLimit: mockRateLimit }));
 vi.mock("@/lib/expo-push", async (orig) => ({
   ...(await orig<typeof import("@/lib/expo-push")>()),
   sendExpoPush: mockExpo,
@@ -155,11 +156,28 @@ const req = (path: string, body?: unknown, method = "POST") =>
   });
 const NOW = new Date("2026-11-22T12:00:00Z");
 
+type FakeRow = { status: string; createdAt: Date; updatedAt: Date };
+/** `broadcast.findFirst`'u satir listesine karsi calistirir: hem "devam eden" hem "son kayit" sorgusu. */
+function setRows(rows: FakeRow[]) {
+  mockPrisma.broadcast.findFirst.mockImplementation(
+    async (args: { where?: { status: { in: string[] }; updatedAt: { gte: Date } } }) => {
+      if (args.where) {
+        const w = args.where;
+        return rows.find((r) => w.status.in.includes(r.status) && r.updatedAt >= w.updatedAt.gte) ?? null;
+      }
+      return [...rows].sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime())[0] ?? null;
+    },
+  );
+}
+const ago = (min: number, base = NOW) => new Date(base.getTime() - min * 60_000);
+const done = (min: number, base = NOW): FakeRow => ({ status: "DONE", createdAt: ago(min, base), updatedAt: ago(min, base) });
+
 beforeEach(() => {
   vi.clearAllMocks();
   mockRequireMobileUser.mockResolvedValue({ user: ADMIN });
   mockPrisma.$transaction.mockImplementation(async (fn: (tx: typeof mockPrisma) => unknown) => fn(mockPrisma));
-  mockPrisma.broadcast.findFirst.mockResolvedValue(null);
+  setRows([]);
+  mockRateLimit.mockResolvedValue(true);
   mockPrisma.broadcast.create.mockResolvedValue({ id: "b1" });
   mockPrisma.broadcast.findUnique.mockResolvedValue(null);
   mockPrisma.broadcast.update.mockResolvedValue({});
@@ -255,22 +273,54 @@ describe("POST / (gercek gonderim)", () => {
   });
 
   it("10 dakika icinde ikinci duyuru 429 too_soon ve kalan saniye", async () => {
-    mockPrisma.broadcast.findFirst.mockResolvedValue({ createdAt: new Date(NOW.getTime() - 3 * 60_000) });
+    setRows([done(3)]);
     const r = await createBroadcast({ id: "a1" }, body, { now: NOW });
     expect(r).toEqual({ ok: false, code: "too_soon", retryAfterSeconds: 420 });
     expect(mockPrisma.broadcast.create).not.toHaveBeenCalled();
     // Kontrol kilit altinda yapiliyor.
     expect(mockPrisma.$executeRaw).toHaveBeenCalled();
 
-    mockPrisma.broadcast.findFirst.mockResolvedValue({ createdAt: new Date(Date.now() - 60_000) });
+    setRows([done(1, new Date())]);
     const res = await sendRoute(req("", body));
     expect(res.status).toBe(429);
     expect(await res.json()).toMatchObject({ error: "too_soon", retryAfterSeconds: expect.any(Number) });
   });
 
   it("10 dakika gectiyse yeniden gonderilebilir", async () => {
-    mockPrisma.broadcast.findFirst.mockResolvedValue({ createdAt: new Date(NOW.getTime() - 10 * 60_000 - 1000) });
+    setRows([done(10.02)]);
     expect((await createBroadcast({ id: "a1" }, body, { now: NOW })).ok).toBe(true);
+  });
+
+  it("ilerleyen QUEUED/SENDING varken 409 broadcast_in_progress (10 dakika gecmis olsa da)", async () => {
+    setRows([{ status: "SENDING", createdAt: ago(25), updatedAt: ago(5) }]);
+    expect(await createBroadcast({ id: "a1" }, body, { now: NOW })).toEqual({ ok: false, code: "broadcast_in_progress" });
+    setRows([{ status: "QUEUED", createdAt: ago(12), updatedAt: ago(12) }]);
+    expect(await createBroadcast({ id: "a1" }, body, { now: NOW })).toEqual({ ok: false, code: "broadcast_in_progress" });
+    expect(mockPrisma.broadcast.create).not.toHaveBeenCalled();
+
+    setRows([{ status: "SENDING", createdAt: new Date(Date.now() - 20 * 60_000), updatedAt: new Date(Date.now() - 60_000) }]);
+    const res = await sendRoute(req("", body));
+    expect(res.status).toBe(409);
+    expect(await res.json()).toEqual({ error: "broadcast_in_progress" });
+  });
+
+  it("30 dakikadir ilerlemeyen (asili) satir yeni duyuruyu engellemez", async () => {
+    setRows([{ status: "SENDING", createdAt: ago(45), updatedAt: ago(31) }]);
+    expect((await createBroadcast({ id: "a1" }, body, { now: NOW })).ok).toBe(true);
+  });
+
+  it("gerekce 500 karakteri gecerse reason_too_long; sinirdaki deger kayda ve denetime ayni yazilir", async () => {
+    expect(await createBroadcast({ id: "a1" }, { ...body, reason: "r".repeat(501) }, { now: NOW })).toEqual({
+      ok: false,
+      code: "reason_too_long",
+    });
+    expect(mockPrisma.broadcast.create).not.toHaveBeenCalled();
+
+    const reason = `  ${"r".repeat(500)}  `;
+    expect((await createBroadcast({ id: "a1" }, { ...body, reason }, { now: NOW })).ok).toBe(true);
+    const stored = mockPrisma.broadcast.create.mock.calls[0][0].data.reason;
+    expect(stored).toBe("r".repeat(500));
+    expect(mockAudit.mock.calls.at(-1)?.[0].metadata.reason).toBe(stored);
   });
 
   it("cihaz yoksa 400 no_recipients ve kayit yok", async () => {
@@ -297,6 +347,16 @@ describe("POST /test (kendime gonder)", () => {
     expect(mockPrisma.broadcast.create).not.toHaveBeenCalled();
     expect(mockPrisma.broadcast.findFirst).not.toHaveBeenCalled();
   });
+  it("yonetici basina dakikada 5 ile sinirli: asilirsa 429 too_soon ve gonderim yok", async () => {
+    mockPrisma.mobilePushToken.findMany.mockResolvedValue([{ token: "ExponentPushToken[own1]", locale: "tr" }]);
+    mockRateLimit.mockResolvedValue(false);
+    const res = await testRoute(req("/test", TR));
+    expect(res.status).toBe(429);
+    expect(await res.json()).toEqual({ error: "too_soon", retryAfterSeconds: 60 });
+    expect(mockRateLimit).toHaveBeenCalledWith("broadcast_test:a1", 5, 60_000);
+    expect(mockExpo).not.toHaveBeenCalled();
+  });
+
   it("cihazi olmayan yonetici icin devices 0 hata degil", async () => {
     const res = await testRoute(req("/test", TR));
     expect(res.status).toBe(200);

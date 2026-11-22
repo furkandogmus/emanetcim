@@ -15,7 +15,7 @@ export async function readObjectBody(req: NextRequest): Promise<Record<string, u
   return json && typeof json === "object" && !Array.isArray(json) ? (json as Record<string, unknown>) : {};
 }
 
-const STATUS: Record<string, number> = { forbidden: 403, too_soon: 429 };
+const STATUS: Record<string, number> = { forbidden: 403, too_soon: 429, broadcast_in_progress: 409 };
 
 export function broadcastError(code: string, extra: Record<string, unknown> = {}) {
   return NextResponse.json({ error: code, ...extra }, { status: STATUS[code] ?? 400 });
