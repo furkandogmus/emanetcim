@@ -1,14 +1,11 @@
 "use server";
 
-import { DISPUTE_STATUSES } from "@/lib/dispute-status";
-import prisma from "@/lib/db";
+import { getClientIpOrNull } from "@/lib/client-ip";
 import { revalidatePathAllLocales } from "@/lib/revalidate-locales";
 import { disputeService } from "@/services/DisputeService";
 import { z } from "zod";
 import { requireAdmin, requireUser } from "@/lib/action-auth";
 
-// Liste `@/lib/dispute-status`ta; gerekcesi orada.
-const disputeStatusSchema = z.enum(DISPUTE_STATUSES);
 // Mobil ucla (src/app/api/mobile/disputes/route.ts) AYNI sema. TS tipi
 // derleme zamaninda kisitliyordu ama server action'lar dogrudan cagirilabilen
 // bir RPC ucu -- calisma zamaninda hicbir sey `reason`i bu uc degerle
@@ -64,15 +61,16 @@ export async function updateDisputeStatusAction(
 ) {
   const auth = await requireAdmin();
   if (!auth.ok) return { success: false as const, error: auth.error };
-  const parsed = disputeStatusSchema.safeParse(status);
-  if (!parsed.success) {
-    return { success: false as const, error: "Errors.invalidData" };
-  }
-
-  await prisma.dispute.update({
-    where: { id: disputeId },
-    data: { status: parsed.data, adminNote: adminNote?.trim() || null },
+  // Govde `DisputeService.updateStatus`ta; mobil yonetici ucu da onu cagirir.
+  const result = await disputeService.updateStatus(auth.actor, disputeId, status, adminNote, {
+    ip: await getClientIpOrNull(),
   });
+  if (!result.ok) {
+    return {
+      success: false as const,
+      error: result.reason === "invalid_status" ? "Errors.invalidData" : "Errors.generic",
+    };
+  }
   revalidatePathAllLocales("/admin");
   revalidatePathAllLocales("/admin/disputes");
   revalidatePathAllLocales("/bookings");

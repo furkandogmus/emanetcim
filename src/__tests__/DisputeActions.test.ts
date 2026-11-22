@@ -25,6 +25,8 @@ vi.mock("@/services/NotificationService", () => ({
   },
 }));
 vi.mock("@/lib/revalidate-locales", () => ({ revalidatePathAllLocales: vi.fn() }));
+vi.mock("@/lib/client-ip", () => ({ getClientIpOrNull: vi.fn().mockResolvedValue(null) }));
+vi.mock("@/lib/audit-log", () => ({ writeAuditLog: vi.fn() }));
 
 describe("Dispute Actions", () => {
   beforeEach(() => {
@@ -141,6 +143,7 @@ describe("Dispute Actions", () => {
 
     it("should update status for admins", async () => {
       mockAuth.mockResolvedValue({ user: { id: "admin-1", role: "ADMIN" } });
+      mockPrisma.dispute.findUnique.mockResolvedValue({ status: "OPEN" });
       const result = await updateDisputeStatusAction("d1", "RESOLVED", "Log note");
       expect(result.success).toBe(true);
       expect(mockPrisma.dispute.update).toHaveBeenCalledWith({
