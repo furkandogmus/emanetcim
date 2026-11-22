@@ -79,14 +79,16 @@ export default function LoginPage({
   const [password, setPassword] = useState('');
   const [credError, setCredError] = useState('');
   /*
-    Kimlik hatasi tek mesaj: ozet (role="alert") ayni zamanda kimlik alaninin
-    hata metni, yani aria-describedby ona baglaniyor ve metin iki kez yazilmiyor.
+    Ozet (role="alert") ayni zamanda kimlik alaninin hata metni: aria-describedby
+    ona baglaniyor, metin iki kez yazilmiyor. Yalnizca hatali kimlik/sifre ALAN
+    hatasidir; hiz siniri, yasak, dogrulanmamis e-posta hesabin durumu, girdi
+    dogru oldugu halde alani "gecersiz" ilan etmek yaniltirdi.
   */
   const { attachForm, setErrors: setFieldErrors, clearError, fieldProps, errorId } =
     useFieldErrors<'identity'>('login');
-  const failCredentials = (message: string) => {
+  const failCredentials = (message: string, { field }: { field: boolean }) => {
     setCredError(message);
-    setFieldErrors({ identity: message });
+    setFieldErrors(field ? { identity: message } : {});
   };
   const [oauthActionError, setOauthActionError] = useState<string | null>(null);
 
@@ -121,13 +123,13 @@ export default function LoginPage({
       if (res?.error) {
         // `code`, authorize içindeki CredentialsSignin alt sınıfından gelir.
         if (res.error === "EmailVerificationRequired" || res.code === "EmailVerificationRequired") {
-          failCredentials(authErrorMessage(t, "EmailVerificationRequired"));
+          failCredentials(authErrorMessage(t, "EmailVerificationRequired"), { field: false });
         } else if (res.code === "UserBanned") {
-          failCredentials(authErrorMessage(t, "UserBanned"));
+          failCredentials(authErrorMessage(t, "UserBanned"), { field: false });
         } else if (res.code === "tooManyRequests") {
-          failCredentials(t("tooManyAttempts"));
+          failCredentials(t("tooManyAttempts"), { field: false });
         } else {
-          failCredentials(t('invalidCredentials'));
+          failCredentials(t('invalidCredentials'), { field: true });
         }
         setIsLoggingIn(null);
       } else if (res?.ok) {
@@ -152,7 +154,7 @@ export default function LoginPage({
         window.location.href = landing;
       }
     } catch {
-      failCredentials(t('invalidCredentials'));
+      failCredentials(t('invalidCredentials'), { field: true });
       setIsLoggingIn(null);
     }
   };
