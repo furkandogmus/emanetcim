@@ -18,7 +18,6 @@ import {
   isNotDroppedStatus,
   isPartnerCancelReason,
   noShowAvailableAt,
-  type CancelReason,
 } from '@/lib/booking-closure';
 import { cancelBooking } from '@/services/booking/lifecycle';
 import { checkOut } from '@/services/booking/check-out';
