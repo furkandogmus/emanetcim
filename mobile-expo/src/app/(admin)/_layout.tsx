@@ -11,6 +11,10 @@ export default function AdminLayout() {
       <Stack.Screen name="admin/booking/[id]" />
       <Stack.Screen name="admin/shop/[id]" />
       <Stack.Screen name="admin/users" />
+      {/* Dukkan icerigi + yorum moderasyonu */}
+      <Stack.Screen name="admin/shop-photos/[id]" />
+      <Stack.Screen name="admin/shop-schedule/[id]" />
+      <Stack.Screen name="admin/reviews" />
     </Stack>
   );
 }
