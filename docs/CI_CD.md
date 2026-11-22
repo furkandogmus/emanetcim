@@ -1,6 +1,6 @@
 # CI/CD — tek pipeline, ölçülmüş maliyet
 
-> Durum: 2026-08-26. Tek giriş noktası `.github/workflows/ci.yml`.
+> Durum: 2026-11-23 (paralel job grafiği). Tek giriş noktası `.github/workflows/ci.yml`.
 
 ## Neden yeniden kurgulandı
 
@@ -35,14 +35,21 @@ Bu tabloyu bir kez görüp tanımak, yarım saat kod aramaktan ucuzdur.
 ```
 push/PR → main                     ci.yml
    │
-   ├─ verify   (ubuntu, ~11 dk)    lint → typecheck → migrate → db:verify
-   │                               → birim testleri → build → seed → E2E
-   │                               iptal edilebilir
-   ├─ image    (ubuntu, ~4 dk)     needs: verify — GHCR'a Docker imajı
-   │                               yalnızca main push; iptal edilebilir
-   └─ deploy   (ubuntu, ~2 dk)     needs: image — S3 + SSM Run Command
-                                   ASLA iptal edilmez, tek sırada
+   changes ─┬─ checks  lint → typecheck → nginx -t → audit → migrate
+            │          → db:verify → birim/entegrasyon testleri
+            ├─ e2e     build → Playwright → migrate → seed → E2E
+            │          (ikisi paralel, iptal edilebilir)
+            └─ verify  "Dogrula (lint, tip, test, e2e)" — ZORUNLU kontrol;
+                       checks + e2e'yi toplar, biri geçmezse kırmızı
+   image    (yalnızca main push)   verify ile PARALEL; yalnızca sha-<sha>
+                                   etiketini basar, `latest`i DEĞİL
+   deploy   needs: verify, checks, e2e, image — önce `latest`i doğrulanmış
+            digest'e taşır, sonra S3 + SSM. ASLA iptal edilmez, tek sırada
 ```
+
+Ölçüm (2026-11-23, main koşusu 45069706602, eski sıralı kurgu): verify 367 sn +
+image 228 sn + deploy 74 sn ≈ 11 dk. Paralel kurguda kritik yol en uzun doğrulama
+kolu (`e2e`) + deploy; imaj onun arkasında saklanır.
 
 `mobile-expo-ci.yml` ayrı kalır (yol filtreli, zorunlu değil), `release.yml` yalnızca
 sürüm etiketinde çalışır. Flutter'ın `mobile-ci.yml`'i uygulamayla birlikte 2026-10-18'de
@@ -50,15 +57,29 @@ kaldırıldı.
 
 ### Kurallar
 
-- **Tek `npm ci`, tek `npm run build`.** `verify` her şeyi tek job'da yapar; ayrı
-  job'lar ayrı makinelerdir, `node_modules` ve `.next` paylaşılamaz. Ucuz
-  kontroller (lint, typecheck) önce koşar — bir yazım hatası 10 dakikalık E2E'yi
-  hiç başlatmadan yakalanır.
+- **Doğrulama iki paralel job, tek Next build.** `checks` statik kapıları, DB
+  kontrollerini ve birim testlerini, `e2e` build + E2E'yi koşar. Ayrı job'lar ayrı
+  makinedir; `node_modules` bu yüzden `package.json` + `package-lock.json` + Node
+  sürümü hash'iyle önbellekten gelir. İska olursa `npm ci` koşar (lockfile ile
+  package.json uyumsuzluğu kapısı korunur); isabette `postinstall` çalışmadığı için
+  `prisma generate` elle çağrılır.
+- **Zorunlu kontrolün adı sabit.** Ruleset `main-korumasi` `Dogrula (lint, tip,
+  test, e2e)` ve `PR kurallari` adlarını bekler. O ad artık toplayıcı `verify`
+  job'unda: `if: always()` ile her koşuda rapor verir (`!cancelled()` olsaydı
+  iptal edilen koşuda atlanır, atlanan job geçmiş sayılırdı). Job adını
+  değiştirmek PR'ları sonsuza dek bekletir.
+- **`latest` yalnızca doğrulanmış imaja.** Sunucu (`docker-compose.yml`,
+  `scripts/update.sh`) `:latest` çeker. İmaj doğrulamayla paralel derlendiği için
+  yalnızca `sha-<sha>` etiketini alır; `deploy` her şey geçtikten sonra
+  `docker buildx imagetools create` ile `latest`i o digest'e taşır (katman
+  çekilmez, yalnızca manifest). Kırmızı bir commit'in imajı GHCR'da durur ama
+  `latest`e hiç ulaşmaz.
 - **Docker imajı BİLEREK kendi build'ini yapar.** `verify`'daki build, E2E için
   `NEXT_PUBLIC_ENABLE_AUTH_DEMO=true` ile derlendi ve bu bayrak derleme anında
   gömülüyor. O çıktıyı üretime göndermek **demo giriş düğmelerini canlıya
   taşırdı**. Katman önbelleği (`type=gha`) tekrarın maliyetini düşük tutar.
-- **Deploy doğrulamaya `needs` ile bağlı.** Zincir kırılırsa deploy hiç başlamaz.
+- **Deploy doğrulamaya `needs` ile bağlı** (`verify`, `checks`, `e2e`, `image`).
+  Biri geçmezse deploy ve `latest` terfisi hiç başlamaz.
 - **Deploy'un sunucuya gönderdiği şeyler S3 üzerinden gider**, kutudaki git
   kopyasından değil: `docker-compose.yml`, `public/`, `scripts/`,
   `ops/secrets.manifest` ve (2026-08-30'dan beri) **`nginx/conf.d/`**. Bu listeye
@@ -67,7 +88,7 @@ kaldırıldı.
   konfigi ile canlıdaki ayrı yaşıyordu — `scripts/` ile birebir aynı hatanın
   ikiziydi (o delik sekiz cron işini birden düşürmüştü).
 - **nginx konfigi artık canlıya gidiyor, yani bozuk konfig siteyi kapatabilir.**
-  İki kapı var: `verify` işinde `scripts/verify-nginx-conf.sh --engine docker`
+  İki kapı var: `checks` işinde `scripts/verify-nginx-conf.sh --engine docker`
   (üretimin **kendi imajıyla** gerçek `nginx -t`; bozuk konfig S3'e hiç ulaşmaz —
   imaj `docker-compose.yml`'den okunur, çünkü apt'in verdiği nginx 1.24 `http2 on;`
   tanımıyor ve doğru konfigi reddediyordu) ve sunucuda `up -d`'den sonra
@@ -80,11 +101,11 @@ kaldırıldı.
 - **Push'ta `paths-ignore`:** `docs/**`, `ops/**`, `**/*.md`. Bunlar
   uygulamanın davranışını değiştirmez. Path filtresi yüzünden atlanan bir
   değişikliği elle doğrulamak için `workflow_dispatch` var.
-- **PR'da path filtresi YOK (2026-09-23).** `verify` main'de zorunlu kontrol (Flutter'ın
+- **PR'da path filtresi YOK (2026-09-23).** `Dogrula (lint, tip, test, e2e)` main'de zorunlu kontrol (Flutter'ın
   `Build Android`'i 2026-10-18'e kadar zorunluydu; uygulamayla birlikte kalktı). Path filtresi yüzünden hiç tetiklenmeyen bir zorunlu
   kontrol PR'ı sonsuza dek "bekliyor"da bırakır. Kapsamı `changes` job'u ölçer;
-  uygulamaya dokunmayan PR'da iş **koşulla atlanır** ve GitHub
-  atlanan işi geçmiş sayar. Üçüncü zorunlu kontrol `pr-gate.yml` → `PR kurallari`
+  uygulamaya dokunmayan PR'da `checks`/`e2e` **koşulla atlanır** ve toplayıcı
+  `verify` yeşil döner. Üçüncü zorunlu kontrol `pr-gate.yml` → `PR kurallari`
   (commit başlıkları). Süreç: `docs/GIT_COMMIT_GUIDE.md`.
 - **`timeout-minutes` her job'da.** Asılı kalan bir job, kotayı sessizce yer.
 
@@ -112,7 +133,7 @@ gh api repos/<owner>/<repo>/actions/runs/<id>/jobs \
 
 ## Daha ileri gidilebilir
 
-E2E şu an `verify` içindeki Next build'ine karşı koşuyor; imaj ayrıca derleniyor.
+E2E şu an `e2e` job'undaki Next build'ine karşı koşuyor; imaj ayrıca derleniyor.
 Tek build'e inmenin yolu, E2E'yi **Docker imajına karşı** compose ile koşturmak.
 Kazanç push başına ~4 dakika, bedeli ise demo-auth bayrağının imaj tarafında nasıl
 ayrıştırılacağı — bugünkü ayrım tam da o bayrak yüzünden var. Kota rahatlayınca
