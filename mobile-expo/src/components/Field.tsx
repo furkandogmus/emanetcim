@@ -39,12 +39,13 @@ export function Field({
   label,
   hint,
   style,
+  inputStyle,
   ...input
-}: TextInputProps & { label: string; hint?: string; style?: StyleProp<ViewStyle> }) {
+}: TextInputProps & { label: string; hint?: string; style?: StyleProp<ViewStyle>; inputStyle?: StyleProp<TextStyle> }) {
   return (
     <View style={[styles.wrap, style]}>
       <AppText variant="label">{label}</AppText>
-      <Input accessibilityLabel={label} {...input} />
+      <Input accessibilityLabel={label} {...input} style={inputStyle} />
       {hint ? <AppText variant="caption">{hint}</AppText> : null}
     </View>
   );
