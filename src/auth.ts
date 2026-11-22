@@ -11,6 +11,7 @@ import { analyticsService } from "@/services/AnalyticsService";
 import { resolveServerSessionId } from "@/lib/analytics-server";
 import logger from "@/lib/logger";
 import { getClientIpOrNull } from "@/lib/client-ip";
+import { linkGuestBookingsToVerifiedUser } from "@/services/booking/guest-link";
 
 /**
  * Auth.js (v5) - Merkezi Kimlik Doğrulama Konfigürasyonu
@@ -133,6 +134,8 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
             });
           }
           token.emailVerified = new Date();
+          // Saglayici dogruladi: ayni e-postayla yapilmis hesapsiz rezervasyonlar baglanir (hata girisi dusurmez).
+          await linkGuestBookingsToVerifiedUser(dbUser.id);
         } else {
           token.emailVerified = dbUser.emailVerified || null;
         }

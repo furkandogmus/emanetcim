@@ -13,6 +13,7 @@ import { resolveServerSessionId } from "@/lib/analytics-server";
 import logger from "@/lib/logger";
 import { toMobileUser } from "@/lib/mobile-dto";
 import { recordMobileLegalAcceptance } from "@/services/auth/legal-acceptance";
+import { markEmailVerifiedByProvider } from "@/services/auth/verify-email";
 
 const GOOGLE_JWKS = createRemoteJWKSet(new URL("https://www.googleapis.com/oauth2/v3/certs"));
 
@@ -89,6 +90,8 @@ export async function POST(req: NextRequest) {
     if (user.isBanned) {
       return NextResponse.json({ error: "account_banned" }, { status: 403 });
     }
+    // `email_verified === true` yukarida zorunlu: adres kanitli, hesapsiz rezervasyonlar baglanir.
+    await markEmailVerifiedByProvider(user.id);
 
     const access = await signAccessToken(user.id, user.role, user.tokenVersion);
     const refresh = await signRefreshToken(user.id, user.role, user.tokenVersion);

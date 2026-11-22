@@ -4,6 +4,7 @@ import { z } from "zod";
 import { createRemoteJWKSet, jwtVerify } from "jose";
 import prisma from "@/lib/db";
 import { signAccessToken, signRefreshToken } from "@/lib/mobile-auth";
+import { markEmailVerifiedByProvider } from "@/services/auth/verify-email";
 import { rateLimit } from "@/lib/rate-limit";
 import { isBlockedSignupEmail } from "@/lib/disposable-emails";
 import { clientIp } from "@/lib/internal-api-guard";
@@ -137,6 +138,10 @@ export async function POST(req: NextRequest) {
 
     if (user.isBanned) {
       return NextResponse.json({ error: "account_banned" }, { status: 403 });
+    }
+    // Yalnizca Apple'in dogruladigi ve BU hesabin olan e-posta: baglama icin kanit.
+    if (email && user.email?.toLowerCase() === email) {
+      await markEmailVerifiedByProvider(user.id);
     }
 
     const access = await signAccessToken(user.id, user.role, user.tokenVersion);
