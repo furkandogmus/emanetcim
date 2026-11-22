@@ -107,13 +107,17 @@ model VerificationToken {
 /// E-posta basina tek satir: yeni istek eskisini ezer.
 model PasswordResetCode {
   /// Kucuk harfe indirilmis e-posta.
-  email     String   @id
+  email           String   @id
   /// HMAC-SHA256(AUTH_SECRET, email:kod), hex. Kodun kendisi saklanmaz.
-  codeHash  String
-  /// Yanlis deneme sayaci; sinira ulasinca kod olur (too_many_attempts).
-  attempts  Int      @default(0)
-  expires   DateTime
-  createdAt DateTime @default(now())
+  codeHash        String
+  /// Bu kodun yanlis deneme sayaci; sinira ulasinca kod olur (too_many_attempts).
+  attempts        Int      @default(0)
+  /// E-posta basina 24 saatlik kayan pencere: yeni istek bunlari SIFIRLAMAZ,
+  /// yoksa her yeni kod 5 tahmin daha verirdi.
+  windowStartedAt DateTime @default(now())
+  windowFailures  Int      @default(0)
+  expires         DateTime
+  createdAt       DateTime @default(now())
 
   @@index([expires])
 }
@@ -370,6 +374,7 @@ model Booking {
   paymentLog             PaymentLog?
   review                 Review?
 
+  @@unique([guestId, idempotencyKey])
   @@index([guestId])
   @@index([shopId])
   @@index([status])
@@ -389,7 +394,6 @@ model Booking {
   /// (guest checkout) rezervasyonların sorgulanması her seferinde tam tablo
   /// taraması yapıyordu. 2026-08-31'de ölçüldü.
   @@index([guestEmail])
-  @@unique([guestId, idempotencyKey])
 }
 
 /// Rezervasyon başına tek ödeme defteri satırı.

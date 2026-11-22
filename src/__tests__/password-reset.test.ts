@@ -19,7 +19,7 @@ const { mockPrisma, mockRateLimit, mockMail } = vi.hoisted(() => {
         deleteMany: vi.fn(),
       },
       mobilePushToken: { deleteMany: vi.fn() },
-      passwordResetCode: { upsert: vi.fn(), deleteMany: vi.fn() },
+      passwordResetCode: { upsert: vi.fn(), deleteMany: vi.fn(), findMany: vi.fn().mockResolvedValue([]) },
       $transaction: vi.fn((fn) => {
         if (typeof fn === 'function') return fn(mockPrisma);
         return Promise.all(fn);
@@ -78,6 +78,8 @@ describe("Password Reset Actions", () => {
       mockPrisma.verificationToken.create.mockResolvedValue({ token: "token123" });
 
       const result = await requestPasswordResetAction("user@test.com");
+      // E-posta atesle-unut gidiyor (yanit suresi hesap varligini soylemesin).
+      await new Promise((r) => setTimeout(r, 0));
       
       expect(result.ok).toBe(true);
       // Ayni e-posta mobil uygulama icin 6 haneli kodu da tasir.
@@ -94,6 +96,7 @@ describe("Password Reset Actions", () => {
       mockPrisma.verificationToken.create.mockResolvedValue({ token: "token123" });
 
       const result = await requestPasswordResetAction("oauth@test.com");
+      await new Promise((r) => setTimeout(r, 0));
       
       expect(result.ok).toBe(true);
       expect(mockMail).toHaveBeenCalledWith("oauth@test.com", "token123", "tr", expect.stringMatching(/^\d{6}$/));

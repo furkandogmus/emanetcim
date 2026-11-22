@@ -2,7 +2,7 @@ import { describe, it, expect, vi, beforeEach } from "vitest";
 import { NextRequest } from "next/server";
 
 const { mockPrisma, sendMail } = vi.hoisted(() => ({
-  mockPrisma: { user: { findUnique: vi.fn() }, passwordResetCode: { upsert: vi.fn() } },
+  mockPrisma: { user: { findUnique: vi.fn() }, passwordResetCode: { upsert: vi.fn(), findMany: vi.fn(async () => []) } },
   sendMail: vi.fn(async () => undefined),
 }));
 
@@ -31,16 +31,19 @@ describe("password-reset/request dil", () => {
 
   it("istemcinin gonderdigi Almanca dil e-postaya gecer", async () => {
     await POST(req({ email: "gast@example.com", locale: "de" }));
+    await new Promise((r) => setTimeout(r, 0));
     expect(sendMail).toHaveBeenCalledWith("gast@example.com", "tok", "de", expect.stringMatching(/^\d{6}$/));
   });
 
   it("dil yoksa Accept-Language'e duser", async () => {
     await POST(req({ email: "gast@example.com" }, { "accept-language": "de-DE,de;q=0.9" }));
+    await new Promise((r) => setTimeout(r, 0));
     expect(sendMail).toHaveBeenCalledWith("gast@example.com", "tok", "de", expect.stringMatching(/^\d{6}$/));
   });
 
   it("taninmayan dil istegi dusurmez, Accept-Language'e duser", async () => {
     await POST(req({ email: "gast@example.com", locale: "ru" }, { "accept-language": "en" }));
+    await new Promise((r) => setTimeout(r, 0));
     expect(sendMail).toHaveBeenCalledWith("gast@example.com", "tok", "en", expect.stringMatching(/^\d{6}$/));
   });
 });

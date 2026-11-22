@@ -20,6 +20,9 @@ export const PASSWORD_RESET_CODE_LENGTH = 6;
 export const PASSWORD_RESET_CODE_TTL_MS = 30 * 60 * 1000;
 /** Bir kod icin izin verilen yanlis deneme. Besinci yanlista kod olur. */
 export const PASSWORD_RESET_CODE_MAX_ATTEMPTS = 5;
+/** E-posta basina kayan pencerede toplam yanlis siniri; yeni kod istemek sifirlamaz. */
+export const PASSWORD_RESET_CODE_WINDOW_MS = 24 * 60 * 60 * 1000;
+export const PASSWORD_RESET_CODE_WINDOW_MAX_FAILURES = 10;
 
 function codeSecret(): string {
   const s = process.env.AUTH_SECRET || process.env.NEXTAUTH_SECRET;
