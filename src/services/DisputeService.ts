@@ -1,6 +1,7 @@
-import { DISPUTE_INITIAL_STATUS } from "@/lib/dispute-status";
+import { DISPUTE_INITIAL_STATUS, DISPUTE_STATUSES, type DisputeStatus } from "@/lib/dispute-status";
 import prisma from "@/lib/db";
 import logger from "@/lib/logger";
+import { writeAuditLog } from "@/lib/audit-log";
 import { notificationService } from "@/services/NotificationService";
 import { bookingEventService } from "@/services/BookingEventService";
 
@@ -38,7 +39,76 @@ export type CreateDisputeResult =
 /** Uyuşmazlık ancak valiz teslim alındıktan SONRA açılabilir. */
 const DISPUTABLE_STATUSES = ["CHECKED_IN", "CHECKED_OUT"];
 
+export type DisputeAdminActor = { id: string; role: string };
+
+export type UpdateDisputeStatusResult =
+  | { ok: true; status: DisputeStatus; adminNote: string | null }
+  | { ok: false; reason: "invalid_status" | "not_found" };
+
+const ADMIN_DISPUTE_INCLUDE = {
+  booking: {
+    select: {
+      id: true,
+      totalPrice: true,
+      checkInTime: true,
+      checkOutTime: true,
+      status: true,
+      guest: { select: { name: true, email: true } },
+      shop: { select: { name: true } },
+      // Muhur fotografi uyusmazligin kaniti; bakan kisi onu gormeli.
+      seals: {
+        select: { id: true, sealNumber: true, bagIndex: true, bagSize: true, photoUrl: true },
+        orderBy: { bagIndex: "asc" as const },
+      },
+    },
+  },
+} as const;
+
 class DisputeService {
+  /** Yonetici listesi (web `/admin/disputes` ve mobil uc ayni sorgu). `status` taninmazsa filtresiz. */
+  listForAdmin(status?: string | null) {
+    const where = DISPUTE_STATUSES.includes(status as DisputeStatus) ? { status: status as DisputeStatus } : {};
+    return prisma.dispute.findMany({ where, orderBy: { createdAt: "desc" }, include: ADMIN_DISPUTE_INCLUDE });
+  }
+
+  getForAdmin(id: string) {
+    return prisma.dispute.findUnique({ where: { id }, include: ADMIN_DISPUTE_INCLUDE });
+  }
+
+  /**
+   * Yonetici durum + not gunceller. Web'deki kural aynen: dort durumdan herhangi
+   * birine gecilebilir, bos not `null`. Misafire bildirim ve iade YOK; web de
+   * yapmiyor, mobil yeni bir yan etki uretmesin.
+   */
+  async updateStatus(
+    actor: DisputeAdminActor,
+    disputeId: string,
+    statusRaw: unknown,
+    adminNoteRaw: unknown,
+    ctx: { ip?: string | null } = {},
+  ): Promise<UpdateDisputeStatusResult> {
+    if (typeof statusRaw !== "string" || !DISPUTE_STATUSES.includes(statusRaw as DisputeStatus)) {
+      return { ok: false, reason: "invalid_status" };
+    }
+    const status = statusRaw as DisputeStatus;
+    const adminNote = typeof adminNoteRaw === "string" ? adminNoteRaw.trim() || null : null;
+
+    const existing = await prisma.dispute.findUnique({ where: { id: disputeId }, select: { status: true } });
+    if (!existing) return { ok: false, reason: "not_found" };
+
+    await prisma.dispute.update({ where: { id: disputeId }, data: { status, adminNote } });
+    writeAuditLog({
+      actorUserId: actor.id,
+      actorRole: actor.role,
+      action: "dispute.update_status",
+      entityType: "Dispute",
+      entityId: disputeId,
+      metadata: { from: existing.status, to: status, hasNote: adminNote !== null },
+      ip: ctx.ip ?? null,
+    });
+    return { ok: true, status, adminNote };
+  }
+
   async create(input: CreateDisputeInput): Promise<CreateDisputeResult> {
     const { bookingId, guestId, reason, description } = input;
 

@@ -5,11 +5,8 @@ import { ChevronLeft } from "lucide-react";
 import { Link } from "@/i18n/routing";
 import { auth } from "@/auth";
 import { redirect } from "next/navigation";
-import prisma from "@/lib/db";
-import { moneyToNumber } from "@/lib/money";
+import { getPlatformSettingsForAdmin } from "@/services/PlatformSettingsService";
 import AdminPlatformSettingsClient from "@/components/admin/AdminPlatformSettingsClient";
-import { DEFAULT_PRICING_RULES } from "@/lib/pricing-rules";
-import { parsePlatformHolidayDates } from "@/lib/booking-holidays";
 
 export default async function AdminPlatformSettingsPage({
   params,
@@ -27,54 +24,17 @@ export default async function AdminPlatformSettingsPage({
   const t = await getTranslations("Admin");
   const tCommon = await getTranslations("Common");
 
-  const row = await prisma.platformSettings.findUnique({
-    where: { id: "default" },
-  });
+  const { values, updatedAt } = await getPlatformSettingsForAdmin();
+  const { platformHolidayDates, minAppVersion, latestAppVersion, ...rest } = values;
+  const base = {
+    ...rest,
+    holidayDatesRaw: platformHolidayDates.join("\n"),
+    minAppVersion: minAppVersion ?? "",
+    latestAppVersion: latestAppVersion ?? "",
+  };
 
-  const base = row
-    ? {
-        maxStayDays: row.maxStayDays,
-        maxBagsPerSlot: row.maxBagsPerSlot,
-        insuranceFeeTry: moneyToNumber(row.insuranceFeeTry),
-        earlyRefundRatio: moneyToNumber(row.earlyRefundRatio),
-        cancelFixedFeeTry: moneyToNumber(row.cancelFixedFeeTry),
-        latePickupFeeTry: moneyToNumber(row.latePickupFeeTry),
-        latePickupGraceMin: row.latePickupGraceMin,
-        checkInGraceMin: row.checkInGraceMin,
-        requireSealsOnCheckIn: row.requireSealsOnCheckIn,
-        defaultShopCapacity: row.defaultShopCapacity,
-        defaultPricePerDay: moneyToNumber(row.defaultPricePerDay),
-        bagMultiplierS: moneyToNumber(row.bagMultiplierS),
-        bagMultiplierM: moneyToNumber(row.bagMultiplierM),
-        bagMultiplierXl: moneyToNumber(row.bagMultiplierXl),
-        holidayDatesRaw: parsePlatformHolidayDates(row.platformHolidayDates).join(
-          "\n",
-        ),
-        minAppVersion: row.minAppVersion ?? "",
-        latestAppVersion: row.latestAppVersion ?? "",
-      }
-    : {
-        maxStayDays: DEFAULT_PRICING_RULES.maxStayDays,
-        maxBagsPerSlot: DEFAULT_PRICING_RULES.maxBagsPerSlot,
-        insuranceFeeTry: DEFAULT_PRICING_RULES.insuranceFeeTry,
-        earlyRefundRatio: DEFAULT_PRICING_RULES.earlyRefundRatio,
-        cancelFixedFeeTry: DEFAULT_PRICING_RULES.cancelFixedFeeTry,
-        latePickupFeeTry: DEFAULT_PRICING_RULES.latePickupFeeTry,
-        latePickupGraceMin: DEFAULT_PRICING_RULES.latePickupGraceMin,
-        checkInGraceMin: DEFAULT_PRICING_RULES.checkInGraceMin,
-        requireSealsOnCheckIn: DEFAULT_PRICING_RULES.requireSealsOnCheckIn,
-        defaultShopCapacity: DEFAULT_PRICING_RULES.defaultShopCapacity,
-        defaultPricePerDay: DEFAULT_PRICING_RULES.defaultPricePerDay,
-        bagMultiplierS: DEFAULT_PRICING_RULES.bagMultipliers.S,
-        bagMultiplierM: DEFAULT_PRICING_RULES.bagMultipliers.M,
-        bagMultiplierXl: DEFAULT_PRICING_RULES.bagMultipliers.XL,
-        holidayDatesRaw: "",
-        minAppVersion: "",
-        latestAppVersion: "",
-      };
-
-  const updatedAtLabel = row?.updatedAt
-    ? formatDateTimeInZone(row.updatedAt, {
+  const updatedAtLabel = updatedAt
+    ? formatDateTimeInZone(updatedAt, {
         locale: locale === "en" ? "en-GB" : "tr-TR",
         timeZone: PLATFORM_TIMEZONE,
         dateStyle: "short",
