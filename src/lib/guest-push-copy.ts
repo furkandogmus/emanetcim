@@ -12,7 +12,8 @@ export type GuestPushEvent =
   | "reminderCheckIn"
   | "reminderCheckOut"
   | "overdue"
-  | "bagRevision";
+  | "bagRevision"
+  | "noShow";
 
 export type GuestPushVars = { shop: string; time?: string; total?: string };
 
@@ -28,6 +29,7 @@ export const GUEST_PUSH_COPY: Record<AppLocale, Copy> = {
     reminderCheckOut: (v) => ({ title: "Alma saatin yaklaşıyor", body: `${v.shop} · ${v.time ?? ""}` }),
     overdue: (v) => ({ title: "Valizin hâlâ dükkanda", body: `Alma saatin geçti. Valizin ${v.shop} noktasında bekliyor.` }),
     bagRevision: (v) => ({ title: "Onayın gerekiyor", body: `${v.shop} valiz sayını düzeltti. Yeni toplam ${v.total ?? ""}.` }),
+    noShow: (v) => ({ title: "Seni göremedik", body: `${v.shop} rezervasyonunu kapattı. Yeni bir rezervasyonla her zaman bekleriz.` }),
   },
   en: {
     approved: (v) => ({ title: "Your booking is confirmed", body: `${v.shop} is expecting you. Your QR code is in the app.` }),
@@ -38,6 +40,7 @@ export const GUEST_PUSH_COPY: Record<AppLocale, Copy> = {
     reminderCheckOut: (v) => ({ title: "Pickup time is coming up", body: `${v.shop} · ${v.time ?? ""}` }),
     overdue: (v) => ({ title: "Your bags are still at the shop", body: `Your pickup time has passed. Your bags are waiting at ${v.shop}.` }),
     bagRevision: (v) => ({ title: "Your approval is needed", body: `${v.shop} corrected your bag count. New total ${v.total ?? ""}.` }),
+    noShow: (v) => ({ title: "We missed you", body: `${v.shop} closed your booking. You are welcome to book again anytime.` }),
   },
   de: {
     approved: (v) => ({ title: "Buchung bestätigt", body: `${v.shop} erwartet dich. Dein QR-Code ist in der App.` }),
@@ -48,6 +51,7 @@ export const GUEST_PUSH_COPY: Record<AppLocale, Copy> = {
     reminderCheckOut: (v) => ({ title: "Abholzeit rückt näher", body: `${v.shop} · ${v.time ?? ""}` }),
     overdue: (v) => ({ title: "Dein Gepäck ist noch im Laden", body: `Deine Abholzeit ist vorbei. Dein Gepäck wartet bei ${v.shop}.` }),
     bagRevision: (v) => ({ title: "Deine Zustimmung ist nötig", body: `${v.shop} hat die Gepäckanzahl korrigiert. Neuer Gesamtbetrag ${v.total ?? ""}.` }),
+    noShow: (v) => ({ title: "Wir haben dich verpasst", body: `${v.shop} hat deine Buchung geschlossen. Du kannst jederzeit neu buchen.` }),
   },
   fr: {
     approved: (v) => ({ title: "Réservation confirmée", body: `${v.shop} vous attend. Votre QR code est dans l'app.` }),
@@ -58,6 +62,7 @@ export const GUEST_PUSH_COPY: Record<AppLocale, Copy> = {
     reminderCheckOut: (v) => ({ title: "L'heure du retrait approche", body: `${v.shop} · ${v.time ?? ""}` }),
     overdue: (v) => ({ title: "Vos bagages sont toujours au commerce", body: `L'heure de retrait est passée. Vos bagages vous attendent chez ${v.shop}.` }),
     bagRevision: (v) => ({ title: "Votre accord est nécessaire", body: `${v.shop} a corrigé le nombre de bagages. Nouveau total ${v.total ?? ""}.` }),
+    noShow: (v) => ({ title: "Nous vous avons manqué", body: `${v.shop} a clôturé votre réservation. Vous pouvez réserver à nouveau à tout moment.` }),
   },
   ja: {
     approved: (v) => ({ title: "予約が確定しました", body: `${v.shop}がお待ちしています。QRコードはアプリにあります。` }),
@@ -68,6 +73,7 @@ export const GUEST_PUSH_COPY: Record<AppLocale, Copy> = {
     reminderCheckOut: (v) => ({ title: "受け取りの時間が近づいています", body: `${v.shop} · ${v.time ?? ""}` }),
     overdue: (v) => ({ title: "お荷物はまだ店舗にあります", body: `受け取り時間を過ぎました。お荷物は${v.shop}でお待ちしています。` }),
     bagRevision: (v) => ({ title: "承認が必要です", body: `${v.shop}が荷物の数を修正しました。新しい合計 ${v.total ?? ""}。` }),
+    noShow: (v) => ({ title: "お会いできませんでした", body: `${v.shop}がご予約を終了しました。またいつでもご予約ください。` }),
   },
   fa: {
     approved: (v) => ({ title: "رزرو شما تأیید شد", body: `${v.shop} منتظر شماست. کد QR در برنامه است.` }),
@@ -78,5 +84,6 @@ export const GUEST_PUSH_COPY: Record<AppLocale, Copy> = {
     reminderCheckOut: (v) => ({ title: "زمان تحویل گرفتن نزدیک است", body: `${v.shop} · ${v.time ?? ""}` }),
     overdue: (v) => ({ title: "چمدان شما هنوز در فروشگاه است", body: `زمان تحویل گذشته است. چمدان شما در ${v.shop} منتظر است.` }),
     bagRevision: (v) => ({ title: "تأیید شما لازم است", body: `${v.shop} تعداد چمدان‌ها را اصلاح کرد. مبلغ جدید ${v.total ?? ""}.` }),
+    noShow: (v) => ({ title: "شما را ندیدیم", body: `${v.shop} رزرو شما را بست. هر زمان خواستید دوباره رزرو کنید.` }),
   },
 };

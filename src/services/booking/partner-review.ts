@@ -237,7 +237,7 @@ export async function forceCancelOpenBookingsForUser(
   let cancelled = 0;
   let failed = 0;
   for (const { id } of open) {
-    const result = await cancelBooking(id, { silent: true });
+    const result = await cancelBooking(id, { silent: true, reason: 'admin_cancel', detail: 'user_removed' });
     if (result.ok) cancelled++;
     else {
       failed++;
