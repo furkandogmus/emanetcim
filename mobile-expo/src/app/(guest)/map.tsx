@@ -1,5 +1,5 @@
 import { memo, useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { Alert, FlatList, PixelRatio, Pressable, StyleSheet, Text, View, useWindowDimensions } from "react-native";
+import { Alert, PixelRatio, Pressable, StyleSheet, Text, View, useWindowDimensions } from "react-native";
 import { Image } from "expo-image";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { Camera, Map, Marker, UserLocation } from "@maplibre/maplibre-react-native";
@@ -8,7 +8,7 @@ import { Redirect, router } from "expo-router";
 import { ArrowLeft, Search } from "lucide-react-native";
 import { useTranslation } from "react-i18next";
 
-import { BottomSheet } from "@/components/BottomSheet";
+import { BottomSheet, SheetFlatList } from "@/components/BottomSheet";
 import { MapSnippet } from "@/components/Illustrations";
 import { ShopCard } from "@/components/ShopCard";
 import { AppText, Button, CenterMessage, IconButton, Loading } from "@/components/ui";
@@ -309,7 +309,7 @@ export default function MapScreen() {
             action={emptyActions}
           />
         ) : (
-          <FlatList
+          <SheetFlatList
             data={shops}
             ListHeaderComponent={bookableCount === 0 ? emptyActions : null}
             keyExtractor={(s) => s.id}
