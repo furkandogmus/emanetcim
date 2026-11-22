@@ -1,6 +1,8 @@
 import prisma from "@/lib/db";
 import { BookingStatus, Role } from "@prisma/client";
 import { writeAuditLog } from "@/lib/audit-log";
+import { NOT_DROPPED_STATUSES } from "@/lib/booking-closure";
+import { closeExpiredBookingsForGuest } from "@/services/booking/closure";
 
 /**
  * Hesap anonimleştirme (KVKK silme hakkı) — iki taşıyıcının ORTAK gövdesi.
@@ -58,10 +60,21 @@ class AccountPrivacyService {
 
     if (role !== Role.GUEST) return { ok: false, reason: "not_guest" };
 
+    /*
+      Suresi dolmus (valizi hic birakilmamis, alma saati gecmis) kayit aktif
+      SAYILMAZ: misafir gelmeyecek, ama eskiden hesabini kapatamiyordu.
+      Engel yoksa silmeden once kapanirlar.
+    */
+    const now = new Date();
     const activeCount = await prisma.booking.count({
-      where: { guestId: userId, status: { in: ACTIVE_BOOKING_STATUSES } },
+      where: {
+        guestId: userId,
+        status: { in: ACTIVE_BOOKING_STATUSES },
+        NOT: { status: { in: [...NOT_DROPPED_STATUSES] }, checkOutTime: { lt: now } },
+      },
     });
     if (activeCount > 0) return { ok: false, reason: "active_bookings" };
+    await closeExpiredBookingsForGuest(userId, now);
 
     const anonEmail = `gdpr_${userId.replace(/-/g, "").slice(0, 20)}@invalid.local`;
 
