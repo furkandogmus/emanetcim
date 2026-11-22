@@ -439,6 +439,7 @@ function PartnerManageActions({ booking }: { booking: BookingDetail }) {
         onNoteChange={setNote}
         noteLabel={t("bookingActions.partner.noteLabel")}
         notePlaceholder={t(reason === "other" ? "bookingActions.partner.noteRequired" : "bookingActions.partner.noteOptional")}
+        noteHint={reason === "other" ? t("bookingActions.partner.noteRequiredHint") : undefined}
         confirmLabel={t("bookingActions.partner.cancelConfirm")}
         canSubmit={body !== null}
         loading={cancel.isPending}
