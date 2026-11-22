@@ -139,7 +139,7 @@ describe("AdminUserService e-posta islemleri", () => {
     m.prisma.user.findUnique.mockResolvedValue({ email: "ada@example.com" });
     await expect(adminUserService.sendPasswordReset("u1", actor, "en")).resolves.toEqual({ ok: true });
     expect(m.requestPasswordReset).toHaveBeenCalledWith("ada@example.com", "en");
-    expect(auditActions()).toEqual(["user.password_reset_sent_by_admin"]);
+    expect(auditActions()).toEqual(["admin.user.password_reset_requested"]);
   });
 
   it.each([[null], ["gdpr_abc@invalid.local"]])("e-postasi olmayan hesap (%s) no_email", async (email) => {
