@@ -8,10 +8,23 @@ import { DEFAULT_NOTIFICATION_LOCALE } from "@/lib/request-locale";
 import {
   nextOverdueGuestReminderSlot,
   overdueGuestReminderSlotOffsetMs,
+  OVERDUE_GUEST_REMINDER_MAX,
+  OVERDUE_GUEST_REMINDER_INTERVAL_HOURS,
 } from "@/lib/overdue-guest-reminder";
 
 /** `BookingEvent.event` degeri; `metadata.slot` kacinci hatirlatma oldugunu tutar. */
 export const OVERDUE_GUEST_REMINDER_EVENT = "OVERDUE_GUEST_REMINDER" satisfies BookingEventType;
+
+/**
+ * Taramanin alt siniri: son slotun vakti + bir aralik (144 + 24 = 168 sa). Bunun
+ * otesindeki rezervasyonun gonderilecek slotu yoktur. Sinir olmasaydi yedi slotunu
+ * bitirmis ve prod'daki eski, kapatilmamis CHECKED_IN kayitlari (`scripts/repair-stale-checkin.sh`)
+ * `checkOutTime asc` siralamasinda ilk 100'u kalici olarak doldurur, yeni gecikmis
+ * misafir hic taranmazdi; yayin aninda aylik kayitlara "valiziniz bekliyor" da giderdi.
+ */
+export const OVERDUE_GUEST_REMINDER_LOOKBACK_MS =
+  overdueGuestReminderSlotOffsetMs(OVERDUE_GUEST_REMINDER_MAX) +
+  OVERDUE_GUEST_REMINDER_INTERVAL_HOURS * 3_600_000;
 
 export type OverdueGuestReminderReport = {
   scanned: number;
@@ -50,7 +63,10 @@ export class OverdueGuestReminderService {
     const bookings = await prisma.booking.findMany({
       where: {
         status: "CHECKED_IN",
-        checkOutTime: { lte: new Date(now.getTime() - overdueGuestReminderSlotOffsetMs(1)) },
+        checkOutTime: {
+          gte: new Date(now.getTime() - OVERDUE_GUEST_REMINDER_LOOKBACK_MS),
+          lte: new Date(now.getTime() - overdueGuestReminderSlotOffsetMs(1)),
+        },
       },
       select: {
         id: true,
