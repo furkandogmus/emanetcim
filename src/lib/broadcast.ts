@@ -58,10 +58,10 @@ export function parseBroadcastContent(
 }
 
 /**
- * Cihazin dili (`MobilePushToken.locale`, uygulama dil kodu yazar) Turkce ya da
- * bilinmiyorsa Turkce; baska bir dilse Ingilizce metin varsa Ingilizce. Almanca/Rusca
- * cihaz da Ingilizce alir: o dillerde metin yok, yabanci ziyaretci Ingilizceyi
- * Turkceden iyi okur. Ingilizce yoksa herkes Turkce alir.
+ * `MobilePushToken.locale` cihazin (isletim sisteminin) dil kodudur, uygulamada secilen
+ * dil degil (`push.ts`, `getLocales()[0].languageCode`). Turkce ya da bilinmiyorsa
+ * Turkce; baska bir dilse ve Ingilizce metin varsa Ingilizce (Almanca/Rusca cihaz da:
+ * o dillerde metin yok). Ingilizce yoksa herkes Turkce alir.
  */
 export function pickBroadcastText(
   c: BroadcastContent,
