@@ -1311,7 +1311,8 @@
     "risky": "Riskant",
     "confirm": {
       "title": "Zur Bestätigung eintippen",
-      "body": "Diese Änderung betrifft Zahlungen, Siegel oder Anmeldung: {{fields}}. Tippe {{phrase}} zur Bestätigung.",
+      "body": "Die folgenden Änderungen betreffen Zahlungen, Siegel, Kapazität oder Anmeldung. Tippe {{phrase}} zur Bestätigung.",
+      "change": "{{field}}: {{from}} → {{to}}",
       "inputLabel": "Bestätigungswort",
       "button": "Bestätigen und speichern",
       "mismatch": "Die Eingabe stimmt nicht überein."
@@ -1451,7 +1452,7 @@
       "on": "Pflicht",
       "off": "Keine Pflicht",
       "holidayHint": "Ein Datum pro Zeile: JJJJ-MM-TT",
-      "versionHint": "x.y.z; leer lassen zum Abschalten",
+      "versionHint": "x.y.z; leer lassen zum Abschalten. Die Mindestversion darf die aktuelle nicht übersteigen.",
       "noChanges": "Keine Änderungen."
     },
     "flags": {
@@ -1477,7 +1478,10 @@
       "invalid_status": "Ungültiger Status.",
       "invalid_data": "Einer der Werte ist ungültig. Prüfe die Felder.",
       "duplicate_code": "Ein Gutschein mit diesem Code existiert bereits.",
-      "confirmation_required": "Eine riskante Änderung braucht eine getippte Bestätigung. Der Bildschirm ist eventuell veraltet; aktualisiere und versuche es erneut."
+      "confirmation_required": "Eine riskante Änderung braucht eine getippte Bestätigung. Der Bildschirm ist eventuell veraltet; aktualisiere und versuche es erneut.",
+      "stale_settings": "Jemand anderes hat die Einstellungen inzwischen gespeichert. Aktualisiere den Bildschirm und nimm deine Änderung erneut vor.",
+      "invalid_version_gate": "Die Mindestversion darf die aktuelle Version nicht übersteigen und braucht eine gesetzte aktuelle Version. Sonst hängen alle im Update-Bildschirm fest.",
+      "note_too_long": "Die Notiz darf höchstens 2000 Zeichen haben."
     }
   }
 }

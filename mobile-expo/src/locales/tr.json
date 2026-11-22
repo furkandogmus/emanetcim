@@ -1311,7 +1311,8 @@
     "risky": "Riskli",
     "confirm": {
       "title": "Yazarak onayla",
-      "body": "Bu değişiklik ödemeyi, mühürü ya da girişi etkiler: {{fields}}. Onaylamak için {{phrase}} yaz.",
+      "body": "Aşağıdaki değişiklikler ödemeyi, mühürü, kapasiteyi ya da girişi etkiler. Onaylamak için {{phrase}} yaz.",
+      "change": "{{field}}: {{from}} → {{to}}",
       "inputLabel": "Onay ifadesi",
       "button": "Onayla ve kaydet",
       "mismatch": "Yazdığın ifade eşleşmiyor."
@@ -1451,7 +1452,7 @@
       "on": "Zorunlu",
       "off": "Zorunlu değil",
       "holidayHint": "Her satıra bir tarih: YYYY-AA-GG",
-      "versionHint": "x.y.z; boş bırakılırsa kapalı",
+      "versionHint": "x.y.z; boş bırakılırsa kapalı. En düşük sürüm, güncel sürümü geçemez.",
       "noChanges": "Değişiklik yok."
     },
     "flags": {
@@ -1477,7 +1478,10 @@
       "invalid_status": "Geçersiz durum.",
       "invalid_data": "Değerlerden biri geçersiz. Alanları kontrol et.",
       "duplicate_code": "Bu kodla bir kupon zaten var.",
-      "confirmation_required": "Riskli bir değişiklik var; yazarak onay gerekiyor. Ekran eskimiş olabilir, yenileyip tekrar dene."
+      "confirmation_required": "Riskli bir değişiklik var; yazarak onay gerekiyor. Ekran eskimiş olabilir, yenileyip tekrar dene.",
+      "stale_settings": "Ayarları bu arada başka biri kaydetti. Ekranı yenile ve değişikliğini yeniden yap.",
+      "invalid_version_gate": "En düşük sürüm, güncel sürümü geçemez; güncel sürüm boşken en düşük sürüm konamaz. Yoksa herkes güncelleme ekranında kalır.",
+      "note_too_long": "Not en fazla 2000 karakter olabilir."
     }
   }
 }

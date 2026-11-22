@@ -1311,7 +1311,8 @@
     "risky": "Risky",
     "confirm": {
       "title": "Type to confirm",
-      "body": "This change affects payments, seals or sign-in: {{fields}}. Type {{phrase}} to confirm.",
+      "body": "The changes below affect payments, seals, capacity or sign-in. Type {{phrase}} to confirm.",
+      "change": "{{field}}: {{from}} → {{to}}",
       "inputLabel": "Confirmation phrase",
       "button": "Confirm and save",
       "mismatch": "The phrase does not match."
@@ -1451,7 +1452,7 @@
       "on": "Required",
       "off": "Not required",
       "holidayHint": "One date per line: YYYY-MM-DD",
-      "versionHint": "x.y.z; leave empty to turn off",
+      "versionHint": "x.y.z; leave empty to turn off. The minimum cannot exceed the latest version.",
       "noChanges": "No changes."
     },
     "flags": {
@@ -1477,7 +1478,10 @@
       "invalid_status": "Invalid status.",
       "invalid_data": "One of the values is invalid. Check the fields.",
       "duplicate_code": "A coupon with this code already exists.",
-      "confirmation_required": "A risky change needs a typed confirmation. The screen may be out of date; refresh and try again."
+      "confirmation_required": "A risky change needs a typed confirmation. The screen may be out of date; refresh and try again.",
+      "stale_settings": "Someone else saved the settings meanwhile. Refresh the screen and make your change again.",
+      "invalid_version_gate": "The minimum version cannot exceed the latest version, and needs a latest version set. Otherwise everyone is stuck on the update screen.",
+      "note_too_long": "The note can be at most 2000 characters."
     }
   }
 }

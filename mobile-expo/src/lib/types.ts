@@ -700,12 +700,21 @@ export type AdminPlatformSettingsValues = {
   latestAppVersion: string | null;
 };
 
-/** `toMobileAdminPlatformSettings`: hangi alanin riskli oldugu ve onay ifadesi sunucudan gelir. */
+/**
+ * `toMobileAdminPlatformSettings`. `riskyFields` yalniz etiket icindir; hangi degisikligin
+ * onay istedigine ve ifadeye sunucu karar verir (428 `confirmation_required`).
+ * `updatedAt` PUT'ta `expectedUpdatedAt` olarak geri gider (409 `stale_settings`).
+ */
 export type AdminPlatformSettings = {
   values: AdminPlatformSettingsValues;
   riskyFields: (keyof AdminPlatformSettingsValues)[];
-  confirmPhrase: string;
   updatedAt: string | null;
+};
+
+/** 428 `confirmation_required` govdesi (ayar): eski -> yeni ve yazilacak ifade. */
+export type SettingsConfirmChallenge = {
+  phrase: string;
+  changes: { field: keyof AdminPlatformSettingsValues; from: unknown; to: unknown }[];
 };
 
 /** `toMobileAdminFeatureFlag`. Riskli bayrakta onay ifadesi bayragin anahtari. */

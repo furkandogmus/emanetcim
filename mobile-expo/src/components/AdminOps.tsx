@@ -54,6 +54,8 @@ export function AdminOpsScreen({ title, query, children }: { title: string; quer
 export function TypedConfirmSheet(props: {
   visible: boolean;
   body: string;
+  /** Degisenlerin eski -> yeni listesi gibi ek icerik. */
+  details?: ReactNode;
   phrase: string;
   loading?: boolean;
   error?: string | null;
@@ -70,6 +72,7 @@ export function TypedConfirmSheet(props: {
 
 function TypedConfirmBody({
   body,
+  details,
   phrase,
   loading,
   error,
@@ -77,6 +80,7 @@ function TypedConfirmBody({
   onClose,
 }: {
   body: string;
+  details?: ReactNode;
   phrase: string;
   loading?: boolean;
   error?: string | null;
@@ -90,6 +94,7 @@ function TypedConfirmBody({
     <View style={{ gap: space.lg }} testID="typed-confirm">
       <AppText variant="heading">{t("adminOps.confirm.title")}</AppText>
       <AppText variant="body">{body}</AppText>
+      {details}
       <Field
         label={t("adminOps.confirm.inputLabel")}
         value={typed}
