@@ -1,7 +1,8 @@
 import { useState } from "react";
-import { Linking, Pressable, ScrollView, StyleSheet, View } from "react-native";
+import { ActivityIndicator, Linking, Pressable, ScrollView, StyleSheet, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { router, useLocalSearchParams } from "expo-router";
+import { useQueryClient } from "@tanstack/react-query";
 import { getDevicePosition, type LocationFailure } from "@/lib/location";
 import { Image } from "expo-image";
 import { ArrowLeft, ChevronRight, LocateFixed, X } from "lucide-react-native";
@@ -14,9 +15,11 @@ import { AppText, Banner, Button, IconButton } from "@/components/ui";
 import { cityImage } from "@/lib/city-images";
 import { RemoteImage } from "@/components/RemoteImage";
 import { resolveImage } from "@/lib/images";
+import { cityPlace, districtPlace, loadCityDistricts } from "@/lib/districts";
 import { useCities } from "@/lib/queries";
 import { totalBags, useSearch } from "@/lib/search";
 import type { Place } from "@/lib/search";
+import type { CityCoverage, DistrictCoverage } from "@/lib/types";
 import { colors, radius, space } from "@/theme/tokens";
 
 const STEPS = 3;
@@ -52,10 +55,27 @@ export default function SearchWizard() {
       : null,
   );
   const cityList = useCities().data ?? [];
+  const queryClient = useQueryClient();
+  /*
+    Sehirden sonra ilce adimi: ilk satir "Merkez" (bugunku sehir secimi), altinda dukkani
+    olan ilceler. Liste bos gelirse ya da uc yoksa (eski sunucu) adim hic acilmaz.
+  */
+  const [districtStep, setDistrictStep] = useState<{ city: CityCoverage; districts: DistrictCoverage[] } | null>(null);
+  const [loadingCity, setLoadingCity] = useState<string | null>(null);
 
   function choosePlace(place: Place) {
+    setDistrictStep(null);
     search.setPlace(place);
     setStep(1);
+  }
+
+  async function chooseCity(city: CityCoverage) {
+    if (loadingCity) return;
+    setLoadingCity(city.name);
+    const districts = await loadCityDistricts(queryClient, city);
+    setLoadingCity(null);
+    if (districts.length > 0) setDistrictStep({ city, districts });
+    else choosePlace(cityPlace(city));
   }
 
   async function useMyLocation() {
@@ -80,7 +100,11 @@ export default function SearchWizard() {
   return (
     <SafeAreaView style={styles.safe} edges={["top", "bottom"]}>
       <View style={styles.topBar}>
-        {(editing ? step === 2 || (step === 0 && !!search.place) : step > 0) ? (
+        {districtStep && step === 0 ? (
+          <IconButton label={t("common.back")} onPress={() => setDistrictStep(null)}>
+            <ArrowLeft size={20} color={colors.ink} />
+          </IconButton>
+        ) : (editing ? step === 2 || (step === 0 && !!search.place) : step > 0) ? (
           <IconButton label={t("common.back")} onPress={() => setStep(editing ? 1 : step - 1)}>
             <ArrowLeft size={20} color={colors.ink} />
           </IconButton>
@@ -102,7 +126,48 @@ export default function SearchWizard() {
         ))}
       </View>
 
-      {step === 0 ? (
+      {step === 0 && districtStep ? (
+        <ScrollView contentContainerStyle={styles.content}>
+          <AppText variant="title">{t("search.districtTitle", { city: districtStep.city.name })}</AppText>
+          <View style={styles.cityList}>
+            <Pressable
+              accessibilityRole="button"
+              onPress={() => choosePlace(cityPlace(districtStep.city))}
+              style={({ pressed }) => [styles.cityRow, pressed && { backgroundColor: colors.surfaceMuted }]}
+            >
+              <View style={{ flex: 1 }}>
+                <AppText variant="bodyMedium">{t("search.cityCenter")}</AppText>
+                <AppText variant="caption" style={{ fontSize: 13 }}>
+                  {t("search.cityCenterHint")}
+                </AppText>
+              </View>
+              <ChevronRight size={18} color={colors.borderStrong} />
+            </Pressable>
+            {districtStep.districts.map((d) => (
+              <Pressable
+                key={d.slug}
+                accessibilityRole="button"
+                onPress={() => choosePlace(districtPlace(d, districtStep.city))}
+                style={({ pressed }) => [
+                  styles.cityRow,
+                  styles.cityDivider,
+                  pressed && { backgroundColor: colors.surfaceMuted },
+                ]}
+              >
+                <View style={{ flex: 1 }}>
+                  <AppText variant="bodyMedium">{d.name}</AppText>
+                  <AppText variant="caption" style={{ fontSize: 13 }}>
+                    {t("home.citySpots", { count: d.shopCount })}
+                  </AppText>
+                </View>
+                <ChevronRight size={18} color={colors.borderStrong} />
+              </Pressable>
+            ))}
+          </View>
+        </ScrollView>
+      ) : null}
+
+      {step === 0 && !districtStep ? (
         <ScrollView contentContainerStyle={styles.content} keyboardShouldPersistTaps="handled">
           <AppText variant="title">{t("search.locationTitle")}</AppText>
           <PlaceSearch onChoose={choosePlace} />
@@ -151,7 +216,8 @@ export default function SearchWizard() {
                     <Pressable
                       key={c.name}
                       accessibilityRole="button"
-                      onPress={() => choosePlace({ label: c.name, latitude: c.latitude, longitude: c.longitude, radiusM: c.radiusM })}
+                      accessibilityState={{ busy: loadingCity === c.name }}
+                      onPress={() => void chooseCity(c)}
                       style={({ pressed }) => [
                         styles.cityRow,
                         i > 0 && styles.cityDivider,
@@ -171,7 +237,11 @@ export default function SearchWizard() {
                           {t("home.citySpots", { count: c.shopCount })}
                         </AppText>
                       </View>
-                      <ChevronRight size={18} color={colors.borderStrong} />
+                      {loadingCity === c.name ? (
+                        <ActivityIndicator color={colors.accent} accessibilityLabel={t("search.districtsLoading")} />
+                      ) : (
+                        <ChevronRight size={18} color={colors.borderStrong} />
+                      )}
                     </Pressable>
                   );
                 })}
