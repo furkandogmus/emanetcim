@@ -100,8 +100,7 @@ const SETTINGS: AdminPlatformSettings = {
     minAppVersion: null,
     latestAppVersion: null,
   },
-  riskyFields: ["insuranceFeeTry", "requireSealsOnCheckIn", "minAppVersion"],
-  confirmPhrase: "ONAYLA",
+  riskyFields: ["insuranceFeeTry", "requireSealsOnCheckIn", "minAppVersion", "latestAppVersion"],
   updatedAt: "2026-11-01T10:00:00.000Z",
 };
 
@@ -160,6 +159,12 @@ describe("goruntuleme oturumunda yazma kapali", () => {
     expect(writes()[0]).toEqual({ path: "/admin/disputes/d1", method: "PATCH", body: { status: "RESOLVED", adminNote: "hasar onaylandi" } });
   });
 
+  it("yonetici notu 2000 karakterle sinirli (sunucu ile ayni)", async () => {
+    await render(<AdminDisputeScreen />, { wrapper });
+    await screen.findByText("Valizin tekerlegi kirik");
+    expect(screen.getByLabelText("Yönetici notu").props.maxLength).toBe(2000);
+  });
+
   it("kupon olusturma formu goruntulemede hic cizilmez", async () => {
     setImpersonationToken("imp");
     await render(<AdminCouponsScreen />, { wrapper });
@@ -176,44 +181,75 @@ describe("goruntuleme oturumunda yazma kapali", () => {
 });
 
 describe("platform ayari: yazarak onay", () => {
+  /**
+   * Sunucu taklidi: riskli degisiklikte dogru ifade yoksa 428 + eski -> yeni + ifade.
+   * Surum degisiyorsa ifade yeni surumun kendisi (sunucu `platformSettingsConfirmPhrase`).
+   */
+  function serverLike(challenge: { phrase: string; changes: { field: string; from: unknown; to: unknown }[] } | null) {
+    mockHandler = async ({ path, method, body }) => {
+      if (path !== "/admin/platform-settings") return {};
+      if (method !== "PUT") return SETTINGS;
+      const b = body as { confirmation?: string };
+      if (challenge && b.confirmation !== challenge.phrase) throw new ApiError(428, "confirmation_required", challenge);
+      return SETTINGS;
+    };
+  }
   async function open() {
     await render(<AdminPlatformSettingsScreen />, { wrapper });
     await screen.findByLabelText("Sigorta ücreti (₺) · Riskli");
   }
+  const puts = () => writes().filter((c) => c.method === "PUT");
 
-  it("riskli alan degisince onay penceresi acilir; ifade birebir yazilmadan gonderilmez", async () => {
+  it("riskli degisiklik: 428 penceresi eski -> yeni gosterir; ifade birebir yazilmadan ikinci istek gitmez", async () => {
+    serverLike({ phrase: "ONAYLA", changes: [{ field: "insuranceFeeTry", from: 0, to: 25 }] });
     await open();
     await fireEvent.changeText(screen.getByLabelText("Sigorta ücreti (₺) · Riskli"), "25");
     await fireEvent.press(screen.getByRole("button", { name: "Kaydet" }));
     const sheet = await screen.findByTestId("typed-confirm");
-    expect(within(sheet).getByText(/Sigorta ücreti/)).toBeTruthy();
+    expect(within(sheet).getByText("Sigorta ücreti (₺): 0 → 25")).toBeTruthy();
+    expect(puts()).toHaveLength(1);
+    expect((puts()[0].body as { confirmation?: string }).confirmation).toBeUndefined();
     const confirm = () => within(sheet).getByRole("button", { name: "Onayla ve kaydet" });
     expect(isDisabled(confirm())).toBe(true);
     await fireEvent.changeText(within(sheet).getByLabelText("Onay ifadesi"), "onayla");
     expect(isDisabled(confirm())).toBe(true);
-    expect(writes()).toEqual([]);
     await fireEvent.changeText(within(sheet).getByLabelText("Onay ifadesi"), "ONAYLA");
-    expect(isDisabled(confirm())).toBe(false);
     await fireEvent.press(confirm());
-    await waitFor(() => expect(writes()).toHaveLength(1));
-    const body = writes()[0].body as { values: Record<string, unknown>; confirmation: string };
+    await waitFor(() => expect(puts()).toHaveLength(2));
+    const body = puts()[1].body as { values: Record<string, unknown>; confirmation: string; expectedUpdatedAt: string };
     expect(body.confirmation).toBe("ONAYLA");
     expect(body.values.insuranceFeeTry).toBe(25);
+    expect(body.expectedUpdatedAt).toBe(SETTINGS.updatedAt);
   });
 
-  it("risksiz alan onaysiz kaydedilir", async () => {
+  it("minimum surum: ifade YENI surumun kendisi, ONAYLA yetmez", async () => {
+    serverLike({ phrase: "0.3.3", changes: [{ field: "minAppVersion", from: null, to: "0.3.3" }] });
+    await open();
+    await fireEvent.changeText(screen.getByLabelText("En düşük uygulama sürümü · Riskli"), "0.3.3");
+    await fireEvent.press(screen.getByRole("button", { name: "Kaydet" }));
+    const sheet = await screen.findByTestId("typed-confirm");
+    expect(within(sheet).getByText("En düşük uygulama sürümü: — → 0.3.3")).toBeTruthy();
+    await fireEvent.changeText(within(sheet).getByLabelText("Onay ifadesi"), "ONAYLA");
+    expect(isDisabled(within(sheet).getByRole("button", { name: "Onayla ve kaydet" }))).toBe(true);
+    await fireEvent.changeText(within(sheet).getByLabelText("Onay ifadesi"), "0.3.3");
+    await fireEvent.press(within(sheet).getByRole("button", { name: "Onayla ve kaydet" }));
+    await waitFor(() => expect(puts()).toHaveLength(2));
+    expect((puts()[1].body as { confirmation: string }).confirmation).toBe("0.3.3");
+  });
+
+  it("risksiz alan onaysiz tek istekte kaydedilir", async () => {
+    serverLike(null);
     await open();
     await fireEvent.changeText(screen.getByLabelText("En uzun emanet (gün)"), "10");
     await fireEvent.press(screen.getByRole("button", { name: "Kaydet" }));
-    await waitFor(() => expect(writes()).toHaveLength(1));
+    await waitFor(() => expect(puts()).toHaveLength(1));
     expect(screen.queryByTestId("typed-confirm")).toBeNull();
-    expect((writes()[0].body as { confirmation?: string }).confirmation).toBeUndefined();
   });
 
-  it("sunucu 428 donerse pencerede cevrilmis hata gorunur", async () => {
+  it("onayla gonderilip yine 428 donerse hata pencerede gorunur", async () => {
     await open();
     mockHandler = async ({ method }) => {
-      if (method === "PUT") throw new ApiError(428, "confirmation_required", { fields: ["minAppVersion"] });
+      if (method === "PUT") throw new ApiError(428, "confirmation_required", { phrase: "ONAYLA", changes: [] });
       return SETTINGS;
     };
     await fireEvent.press(screen.getByText("Zorunlu değil"));
@@ -222,6 +258,21 @@ describe("platform ayari: yazarak onay", () => {
     await fireEvent.changeText(within(sheet).getByLabelText("Onay ifadesi"), "ONAYLA");
     await fireEvent.press(within(sheet).getByRole("button", { name: "Onayla ve kaydet" }));
     expect(await within(sheet).findByText(/yazarak onay gerekiyor/)).toBeTruthy();
+  });
+
+  it.each([
+    ["stale_settings", 409, /başka biri kaydetti/],
+    ["invalid_version_gate", 400, /herkes güncelleme ekranında kalır/],
+  ])("%s ekranda cevrilir", async (code, status, text) => {
+    await open();
+    mockHandler = async ({ method }) => {
+      if (method === "PUT") throw new ApiError(status, code);
+      return SETTINGS;
+    };
+    await fireEvent.changeText(screen.getByLabelText("En uzun emanet (gün)"), "10");
+    await fireEvent.press(screen.getByRole("button", { name: "Kaydet" }));
+    expect(await screen.findByText(text)).toBeTruthy();
+    expect(screen.queryByTestId("typed-confirm")).toBeNull();
   });
 });
 
@@ -267,6 +318,9 @@ describe("hata metinleri", () => {
     "invalid_data",
     "duplicate_code",
     "confirmation_required",
+    "stale_settings",
+    "invalid_version_gate",
+    "note_too_long",
   ])("%s kendi metnine cevrilir (genel metne dusmez)", (code) => {
     const msg = adminOpsErrorMessage(new ApiError(400, code));
     expect(msg).toBe(i18n.t(`adminOps.errors.${code}`));
