@@ -7,21 +7,20 @@ import { useTranslation } from "react-i18next";
 
 import { AppText, Banner, Button, IconButton } from "@/components/ui";
 import { Input } from "@/components/Field";
+import { ResetCodeForm } from "@/components/ResetCodeForm";
 import { api } from "@/lib/api";
+import { PasswordResetSignInError, useAuth } from "@/lib/auth";
 import { errorMessage } from "@/lib/errors";
 import { languageInfo } from "@/lib/languages";
+import { MAX_PASSWORD, MIN_PASSWORD, isValidNewPassword } from "@/lib/password-rules";
 import { colors, space } from "@/theme/tokens";
 
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-// Sunucu politikasi: src/lib/auth-password.ts (MIN/MAX_PASSWORD_LENGTH).
-const MIN_PASSWORD = 8;
-const MAX_PASSWORD = 128;
 
 /*
-  E-postadaki sey 6 haneli bir kod DEGIL, web sayfasina giden bir baglanti:
-  `/{dil}/auth/new-password?token=<uuid>`. Kullanici ya baglantiyi tarayicida
-  acar (orada biter) ya da buraya yapistirir; ikisini de kabul edip token'i
-  ayikliyoruz ki "kodu nereden bulacagim" sorusu dogmasin.
+  E-postada 6 haneli kod ve web sayfasina giden bir baglanti
+  (`/{dil}/auth/new-password?token=<uuid>`) var. Kod bu ekranda girilir; baglanti
+  tarayicida acilir ya da buraya yapistirilir (token ayiklanir).
 */
 function extractResetToken(input: string): string {
   const value = input.trim();
@@ -43,8 +42,28 @@ export default function ResetPasswordScreen() {
   const [repeat, setRepeat] = useState("");
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const { signInWithResetCode } = useAuth();
 
   const close = () => (router.canGoBack() ? router.back() : router.replace("/login"));
+
+  // Sunucu hesap var/yok ayrimini gizlemek icin her zaman { ok: true } doner.
+  // Sunucu tr/en/de bilir; ru e-postasi Ingilizce gider (languageInfo.site).
+  const sendRequest = (value: string) =>
+    api("/auth/password-reset/request", {
+      method: "POST",
+      body: { email: value, locale: languageInfo(i18n.language).site },
+      auth: false,
+    });
+
+  async function submitCode(code: string, newPassword: string) {
+    try {
+      // Basarida Stack.Protected giris ekranlarini kapatip dogru gruba gecirir.
+      await signInWithResetCode(email, code, newPassword);
+    } catch (e) {
+      if (!(e instanceof PasswordResetSignInError)) throw e;
+      setStep("done");
+    }
+  }
 
   async function requestLink() {
     const value = email.trim().toLowerCase();
@@ -55,13 +74,7 @@ export default function ResetPasswordScreen() {
     setBusy(true);
     setError(null);
     try {
-      // Sunucu hesap var/yok ayrimini gizlemek icin her zaman { ok: true } doner.
-      await api("/auth/password-reset/request", {
-        method: "POST",
-        // Sunucu tr/en/de bilir; ru baglantisi Ingilizce gider (languageInfo.site).
-        body: { email: value, locale: languageInfo(i18n.language).site },
-        auth: false,
-      });
+      await sendRequest(value);
       setEmail(value);
       setStep("confirm");
     } catch (e) {
@@ -77,7 +90,7 @@ export default function ResetPasswordScreen() {
       setError(t("reset.linkRequired"));
       return;
     }
-    if (password.trim().length < MIN_PASSWORD || password.length > MAX_PASSWORD) {
+    if (!isValidNewPassword(password)) {
       setError(t("reset.passwordRule", { min: MIN_PASSWORD }));
       return;
     }
@@ -146,8 +159,8 @@ export default function ResetPasswordScreen() {
                 <Banner tone="brand" body={t("reset.linkModeBody")} />
               ) : (
                 <>
-                  <Banner tone="brand" title={t("reset.sentTitle")} body={t("reset.sentBody", { email })} />
-                  <Button title={t("reset.backToSignIn")} onPress={close} />
+                  <Banner tone="brand" title={t("reset.sentTitle")} body={t("reset.codeSentBody", { email })} />
+                  <ResetCodeForm onSubmit={submitCode} onResend={() => sendRequest(email).then(() => undefined)} />
                   <Button
                     variant="secondary"
                     title={t("reset.openMail")}
@@ -218,7 +231,7 @@ export default function ResetPasswordScreen() {
               ) : null}
               <Button
                 variant="ghost"
-                title={t("reset.resendLink")}
+                title={hasLink ? t("reset.requestNew") : t("reset.resendLink")}
                 disabled={busy}
                 onPress={() => {
                   setError(null);
