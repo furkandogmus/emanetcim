@@ -1,47 +1,81 @@
-import { describe, it, expect } from "vitest";
-import { readdirSync, readFileSync, statSync } from "node:fs";
-import { join } from "node:path";
-import { stripComments } from "./helpers/strip-comments";
+import { describe, it, expect, beforeAll } from "vitest";
+import { readdirSync, statSync } from "node:fs";
+import { join, relative } from "node:path";
+import ts from "typescript";
 
 /**
  * `timeZone`SUZ TARİH BİÇİMLENDİRMESİ — TÜM `src` (mandal).
  *
- * NEDEN (2026-11-22, web kalite taraması): `server-timezone-format.test.ts`
- * yalnızca sunucu dosyalarını ve misafir bileşenlerini tarıyordu. Admin ve esnaf
- * panellerinde ~20 çağrı `new Date(iso).toLocaleString(dateLocale, {...})`
- * yazıyordu, `timeZone` yoktu. Bu bileşenler de SSR ile çiziliyor: sunucu
- * (konteyner UTC) "10:00", tarayıcı "13:00" basıyor, React hydration
- * uyuşmazlığı veriyordu. Yurt dışından bakan esnaf ise rezervasyon saatini
- * dükkanın değil KENDİ cihazının saatinde görüyordu.
+ * NEDEN (2026-11-22, web kalite taraması): admin ve esnaf panellerinde ~20
+ * çağrı `new Date(iso).toLocaleString(dateLocale, {...})` yazıyordu, `timeZone`
+ * yoktu. Sunucu (konteyner UTC) ile tarayıcı farklı saat basıyor, hydration
+ * uyuşmazlığı veriyordu; yurt dışındaki esnaf rezervasyon saatini kendi
+ * cihazının saatinde görüyordu. Kolay yol `formatInstant`.
  *
- * Kural: tarih biçimlendiren her çağrı (`toLocaleDateString`,
- * `toLocaleTimeString`, tarih seçenekli `toLocaleString`,
- * `new Intl.DateTimeFormat`) çağrı penceresinde `timeZone` taşır. Kolay yol
- * `formatInstant` (`src/lib/format-datetime.ts`).
- *
- * İSTİSNALAR açıkça sayılıyor, sayı tavanı değil: her biri bir gerekçe taşır
- * ve sayısı yalnızca düşebilir.
+ * TİP DENETLEYİCİSİYLE: metin kalıbı `count.toLocaleString(locale)` (sayı) ile
+ * `d.toLocaleString(locale)` (tarih) arasını ayıramaz; alıcının tipi ayırır.
+ * Yakalanan: `Date` üzerinde `toLocaleString`/`toLocaleDateString`/
+ * `toLocaleTimeString`, ve `Intl.DateTimeFormat(...)` (`new` ile ya da
+ * onsuz). Muaf olmak için `timeZone` AYNI ÇAĞRININ argümanlarında yazmalı;
+ * seçenekler bir değişkense doğrulanamaz ve ihlal sayılır.
  */
 
 /**
- * Dilimsiz biçimlendirmenin DOĞRU olduğu yerler.
+ * Dilimsiz biçimlendirmenin DOĞRU olduğu yerler (sayısı yalnızca düşer).
  *
- * `DateTimePicker`: biçimlendirdiği değer bir AN değil, `datetime-local`
- * DUVAR SAATİ. `parseDatetimeLocal` onu cihaz diliminde kurar, aynı dilimde
- * geri yazmak girilen metni aynen gösterir (sunucuda da, tarayıcıda da
- * "14:00" → "14:00"). Dilim eklemek tam tersine saati kaydırır. Ay başlığı da
- * `react-day-picker`ın yerel gece yarısı tarihinden geliyor.
+ * `DateTimePicker`: biçimlendirdiği değer bir AN değil, cihaz diliminde kurulan
+ * `datetime-local` duvar saati; aynı dilimde geri yazmak metni aynen gösterir.
  */
 const JUSTIFIED: Record<string, number> = {
   "src/components/ui/DateTimePicker.tsx": 2,
 };
 
-/** Pencere: çok satırlı seçenek nesneleri aşağı dağılır. */
-const WINDOW_LINES = 8;
+const DATE_METHODS = new Set(["toLocaleString", "toLocaleDateString", "toLocaleTimeString"]);
 
-/** `toLocaleString` sayılarda da kullanılır; tarih olduğu bu ipuçlarından anlaşılır. */
-const DATE_OPTION_HINT =
-  /\b(dateStyle|timeStyle|weekday|era|year|month|day|hour|minute|second)\s*:/;
+function isIntlDateTimeFormat(expr: ts.Expression): boolean {
+  return (
+    ts.isPropertyAccessExpression(expr) &&
+    expr.name.text === "DateTimeFormat" &&
+    ts.isIdentifier(expr.expression) &&
+    expr.expression.text === "Intl"
+  );
+}
+
+function isDateType(type: ts.Type, checker: ts.TypeChecker): boolean {
+  if (type.isUnion()) return type.types.some((t) => isDateType(t, checker));
+  return checker.typeToString(type) === "Date";
+}
+
+function argsMentionTimeZone(args: ts.NodeArray<ts.Expression> | undefined, sf: ts.SourceFile): boolean {
+  return (args ?? []).some((a) => /\btimeZone\b/.test(a.getText(sf)));
+}
+
+/** Bir kaynak dosyadaki dilimsiz tarih biçimlendirmelerinin satır numaraları. */
+export function findUnzonedDateFormats(sf: ts.SourceFile, checker: ts.TypeChecker): number[] {
+  const hits: number[] = [];
+  const line = (n: ts.Node) => sf.getLineAndCharacterOfPosition(n.getStart(sf)).line + 1;
+
+  const visit = (node: ts.Node) => {
+    if (ts.isNewExpression(node) || ts.isCallExpression(node)) {
+      if (isIntlDateTimeFormat(node.expression) && !argsMentionTimeZone(node.arguments, sf)) {
+        hits.push(line(node));
+      }
+    }
+    if (
+      ts.isCallExpression(node) &&
+      ts.isPropertyAccessExpression(node.expression) &&
+      DATE_METHODS.has(node.expression.name.text)
+    ) {
+      const receiver = checker.getTypeAtLocation(node.expression.expression);
+      if (isDateType(receiver, checker) && !argsMentionTimeZone(node.arguments, sf)) {
+        hits.push(line(node));
+      }
+    }
+    ts.forEachChild(node, visit);
+  };
+  visit(sf);
+  return hits;
+}
 
 function sourceFiles(dir: string, out: string[] = []): string[] {
   for (const name of readdirSync(dir)) {
@@ -56,36 +90,49 @@ function sourceFiles(dir: string, out: string[] = []): string[] {
   return out;
 }
 
-/** Bir kaynak metindeki dilimsiz tarih biçimlendirmelerinin satır numaraları. */
-export function findUnzonedDateFormats(src: string): number[] {
-  const lines = stripComments(src).split("\n");
-  const hits: number[] = [];
-  lines.forEach((line, i) => {
-    const window = lines.slice(i, i + WINDOW_LINES).join("\n");
-    const isDateCall =
-      /\.toLocale(Date|Time)String\s*\(/.test(line) ||
-      /new\s+Intl\.DateTimeFormat\s*\(/.test(line) ||
-      (/\.toLocaleString\s*\(/.test(line) &&
-        (/new Date\([^)]*\)\.toLocaleString/.test(line) ||
-          DATE_OPTION_HINT.test(window.slice(window.indexOf("toLocaleString")))));
-    if (!isDateCall) return;
-    if (/\btimeZone\b/.test(window)) return;
-    hits.push(i + 1);
-  });
-  return hits;
-}
+const COMPILER_OPTIONS: ts.CompilerOptions = {
+  target: ts.ScriptTarget.ES2017,
+  lib: ["lib.dom.d.ts", "lib.esnext.d.ts"],
+  jsx: ts.JsxEmit.ReactJSX,
+  module: ts.ModuleKind.ESNext,
+  moduleResolution: ts.ModuleResolutionKind.Bundler,
+  strict: true,
+  skipLibCheck: true,
+  noEmit: true,
+  esModuleInterop: true,
+  resolveJsonModule: true,
+  baseUrl: process.cwd(),
+  paths: { "@/*": ["./src/*"] },
+};
 
-function scan(): Record<string, number[]> {
-  const out: Record<string, number[]> = {};
-  for (const file of sourceFiles(join(process.cwd(), "src"))) {
-    const hits = findUnzonedDateFormats(readFileSync(file, "utf-8"));
-    if (hits.length) out[file.replace(process.cwd() + "/", "")] = hits;
-  }
-  return out;
+/** Bellekteki tek dosyalık program: kalıp testleri için. */
+function analyzeSnippet(code: string): number[] {
+  const fileName = join(process.cwd(), "__snippet__.ts");
+  const host = ts.createCompilerHost(COMPILER_OPTIONS);
+  const base = { getSourceFile: host.getSourceFile, fileExists: host.fileExists, readFile: host.readFile };
+  host.getSourceFile = (f, lang, ...rest) =>
+    f === fileName ? ts.createSourceFile(f, code, lang, true) : base.getSourceFile(f, lang, ...rest);
+  host.fileExists = (f) => f === fileName || base.fileExists(f);
+  host.readFile = (f) => (f === fileName ? code : base.readFile(f));
+  const program = ts.createProgram([fileName], COMPILER_OPTIONS, host);
+  return findUnzonedDateFormats(program.getSourceFile(fileName)!, program.getTypeChecker());
 }
 
 describe("src altında timeZone'suz tarih biçimlendirmesi yok (mandal)", () => {
-  const found = scan();
+  let found: Record<string, number[]> = {};
+
+  beforeAll(() => {
+    const files = sourceFiles(join(process.cwd(), "src"));
+    const program = ts.createProgram(files, COMPILER_OPTIONS);
+    const checker = program.getTypeChecker();
+    found = {};
+    for (const file of files) {
+      const sf = program.getSourceFile(file);
+      if (!sf) continue;
+      const hits = findUnzonedDateFormats(sf, checker);
+      if (hits.length) found[relative(process.cwd(), file)] = hits;
+    }
+  }, 120_000);
 
   it("istisna listesi dışında ihlal yok", () => {
     const offenders = Object.entries(found)
@@ -97,31 +144,46 @@ describe("src altında timeZone'suz tarih biçimlendirmesi yok (mandal)", () => 
     ).toEqual([]);
   });
 
-  it("istisnalar tavanını aşmıyor (düşerse listeyi de düşürün)", () => {
+  it("istisnalar tam tavanında (düşerse listeyi de düşürün; tarayıcının bozulmadığını da gösterir)", () => {
     for (const [file, ceiling] of Object.entries(JUSTIFIED)) {
-      expect(found[file]?.length ?? 0, file).toBeLessThanOrEqual(ceiling);
+      expect(found[file]?.length ?? 0, file).toBe(ceiling);
     }
   });
 });
 
 describe("findUnzonedDateFormats kalıbı", () => {
-  it("dilimsiz toLocaleString(tarih seçenekli) yakalanır", () => {
-    const src = `const a = new Date(iso).toLocaleString(locale, {\n  day: "2-digit",\n  hour: "2-digit",\n});`;
-    expect(findUnzonedDateFormats(src)).toEqual([1]);
+  it("dilimsiz Date.toLocaleString (seçenekli, seçeneksiz, değişken üzerinde) yakalanır", () => {
+    expect(analyzeSnippet(`const d = new Date(); d.toLocaleString("tr", { hour: "2-digit" });`)).toEqual([1]);
+    expect(analyzeSnippet(`const d = new Date(); d.toLocaleString("tr");`)).toEqual([1]);
+    expect(analyzeSnippet(`function f(d: Date) { return d.toLocaleString(); }`)).toEqual([1]);
   });
 
-  it("dilimsiz toLocaleDateString ve Intl.DateTimeFormat yakalanır", () => {
-    expect(findUnzonedDateFormats(`d.toLocaleDateString("tr-TR")`)).toEqual([1]);
-    expect(findUnzonedDateFormats(`new Intl.DateTimeFormat(l, { month: "long" })`)).toEqual([1]);
+  it("seçenekler değişkense doğrulanamaz: ihlal", () => {
+    expect(
+      analyzeSnippet(`const o: Intl.DateTimeFormatOptions = { timeZone: "UTC" };\nnew Date().toLocaleDateString("tr", o);`),
+    ).toEqual([2]);
   });
 
-  it("timeZone taşıyan çağrı ve sayı biçimlendirmesi geçer", () => {
-    expect(findUnzonedDateFormats(`d.toLocaleDateString("en-CA", { timeZone })`)).toEqual([]);
-    expect(findUnzonedDateFormats(`n.toLocaleString(locale, { maximumFractionDigits: 2 })`)).toEqual([]);
-    expect(findUnzonedDateFormats(`count.toLocaleString(locale)`)).toEqual([]);
+  it("Intl.DateTimeFormat new ile ve onsuz yakalanır", () => {
+    expect(analyzeSnippet(`new Intl.DateTimeFormat("tr", { month: "long" });`)).toEqual([1]);
+    expect(analyzeSnippet(`Intl.DateTimeFormat("tr").format(new Date());`)).toEqual([1]);
+  });
+
+  it("timeZone yalnızca AYNI çağrının içindeyse muaf", () => {
+    expect(analyzeSnippet(`new Date().toLocaleDateString("en-CA", { timeZone: "UTC" });`)).toEqual([]);
+    expect(analyzeSnippet(`const timeZone = "UTC";\nnew Intl.DateTimeFormat("tr", { timeZone });`)).toEqual([]);
+    // Yakındaki satırda geçen `timeZone` artık muafiyet sağlamaz.
+    expect(
+      analyzeSnippet(`const d = new Date();\nconst timeZone = "UTC";\nd.toLocaleTimeString("tr");`),
+    ).toEqual([3]);
+  });
+
+  it("sayı biçimlendirmesi geçer", () => {
+    expect(analyzeSnippet(`const n = 3; n.toLocaleString("tr");`)).toEqual([]);
+    expect(analyzeSnippet(`const n = 3; n.toLocaleString("tr", { maximumFractionDigits: 2 });`)).toEqual([]);
   });
 
   it("yorumdaki örnek ihlal sayılmaz", () => {
-    expect(findUnzonedDateFormats(`// d.toLocaleString("tr-TR", { hour: "2-digit" })`)).toEqual([]);
+    expect(analyzeSnippet(`// new Date().toLocaleString("tr")\nexport {};`)).toEqual([]);
   });
 });
