@@ -7,6 +7,15 @@ const SESSION_COOKIE_NAME = "bp_analytics_sid";
 const SESSION_COOKIE_MAX_AGE_SEC = 365 * 24 * 60 * 60;
 
 /**
+ * Oturum çerezinin metni. `Secure`: çerez düz HTTP'de hiç gitmez (araya giren
+ * ağ okuyamaz). Yerel `http://` geliştirmede eklenmez, yoksa tarayıcı çerezi
+ * yazmaz ve sunucu tarafı olaylar oturuma bağlanmaz.
+ */
+export function analyticsSessionCookie(id: string, secure: boolean): string {
+  return `${SESSION_COOKIE_NAME}=${id}; path=/; max-age=${SESSION_COOKIE_MAX_AGE_SEC}; SameSite=Lax${secure ? "; Secure" : ""}`;
+}
+
+/**
  * İstemcide üretilip localStorage'da saklanan anonim oturum kimliği. Kişisel
  * veri değil — kullanıcıya, e-postaya, IP'ye bağlanmıyor; yalnızca aynı
  * tarayıcının farklı sayfa görüntülemelerini birbirine bağlamaya yarıyor.
@@ -22,7 +31,7 @@ function getOrCreateSessionId(): string {
     if (!existing) {
       window.localStorage.setItem(SESSION_STORAGE_KEY, id);
     }
-    document.cookie = `${SESSION_COOKIE_NAME}=${id}; path=/; max-age=${SESSION_COOKIE_MAX_AGE_SEC}; SameSite=Lax`;
+    document.cookie = analyticsSessionCookie(id, window.location.protocol === "https:");
     return id;
   } catch {
     // localStorage kapalıysa (gizli sekme vb.) oturum boyunca sabit bir tekil
