@@ -65,7 +65,8 @@
     "mapZoomOut": "Zoom out",
     "mapResetBearing": "Reset bearing to north",
     "mapToggleAttribution": "Toggle attribution",
-    "chatOpen": "Live chat"
+    "chatOpen": "Live chat",
+    "fixHighlightedField": "Please fix the highlighted field."
   },
   "SEO": {
     "title": "BagajPark | Leave Your Luggage Safely, Travel Freely",

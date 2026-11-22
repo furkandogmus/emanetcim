@@ -59,7 +59,9 @@ describe("GuestContactForm (checkout misafir iletişimi)", () => {
     expect(email).toHaveAttribute("aria-invalid", "true");
     expect(email).toHaveAccessibleDescription("checkoutGuestContactRequired");
     expect(document.activeElement).toBe(email);
-    expect(screen.getByRole("alert")).toHaveTextContent("checkoutGuestContactRequired");
+    // Metin bir kez (alanın altında); özet kısa yönlendirme, ekran okuyucu iki kez duymasın.
+    expect(screen.getByRole("alert")).toHaveTextContent("fixHighlightedField");
+    expect(screen.getAllByText("checkoutGuestContactRequired")).toHaveLength(1);
   });
 
   it("kısa telefon telefonu işaretler, e-postayı değil", () => {

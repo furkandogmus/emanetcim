@@ -65,7 +65,8 @@
     "mapZoomOut": "縮小",
     "mapResetBearing": "北を上にする",
     "mapToggleAttribution": "出典を表示",
-    "chatOpen": "ライブチャット"
+    "chatOpen": "ライブチャット",
+    "fixHighlightedField": "表示された項目を修正してください。"
   },
   "SEO": {
     "title": "バガジパーク |荷物を安全に預けて、自由に旅行しましょう",

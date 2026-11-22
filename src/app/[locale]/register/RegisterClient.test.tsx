@@ -62,7 +62,9 @@ describe("RegisterClient UI Validation", () => {
 
     // Check for error (Errors.invalidTrPhone)
     // Ozet (role="alert") + alan duzeyi hata: telefon alani gecersiz ve metne bagli.
-    expect(screen.getByRole("alert")).toHaveTextContent("Errors.invalidTrPhone");
+    // Metin alanin altinda TEK kez; ozet yalnizca yonlendiriyor.
+    expect(screen.getByRole("alert")).toHaveTextContent("Common.fixHighlightedField");
+    expect(screen.getAllByText("Errors.invalidTrPhone")).toHaveLength(1);
     expect(screen.getByLabelText("Auth.phonePlaceholder")).toHaveAttribute("aria-invalid", "true");
     expect(screen.getByLabelText("Auth.phonePlaceholder")).toHaveAccessibleDescription("Errors.invalidTrPhone");
     expect(actions.registerPartnerApplicationAction).not.toHaveBeenCalled();
@@ -84,8 +86,10 @@ describe("RegisterClient UI Validation", () => {
 
     await waitFor(() => {
       // translateServerError logic in RegisterClient
-      expect(screen.getByRole("alert")).toHaveTextContent("Errors.emailAlreadyRegistered");
+      expect(screen.getByRole("alert")).toHaveTextContent("Common.fixHighlightedField");
     });
+    expect(screen.getAllByText("Errors.emailAlreadyRegistered")).toHaveLength(1);
+    expect(screen.getByLabelText("Auth.email")).toHaveAccessibleDescription("Errors.emailAlreadyRegistered");
   });
 
   it("should show success state on successful registration", async () => {

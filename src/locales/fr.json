@@ -65,7 +65,8 @@
     "mapZoomOut": "Zoom arrière",
     "mapResetBearing": "Orienter vers le nord",
     "mapToggleAttribution": "Afficher les crédits",
-    "chatOpen": "Chat en direct"
+    "chatOpen": "Chat en direct",
+    "fixHighlightedField": "Veuillez corriger le champ signalé."
   },
   "SEO": {
     "title": "Parc Bagaj | Laissez vos bagages en toute sécurité, voyagez librement",
