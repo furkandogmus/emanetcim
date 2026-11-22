@@ -2,15 +2,31 @@ import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
 import { z } from "zod";
 import { clientIpFromRequest } from "@/lib/client-ip";
-import { requireMobileUser, requireRole } from "@/lib/mobile-auth";
+import { forbidWhileImpersonating, requireMobileUser, requireRole } from "@/lib/mobile-auth";
+import { toMobileAdminUserDetail } from "@/lib/mobile-dto";
 import { adminUserService } from "@/services/AdminUserService";
 
 const PatchSchema = z.object({ isBanned: z.boolean() }).strict();
+
+/** Kullanici detayi: islem bolumu dogrulama/sifre/bekleyen rol durumuna gore acilir. */
+export async function GET(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
+  const auth = await requireMobileUser(req);
+  if ("error" in auth) return auth.error;
+  const forbid = requireRole(auth.user, ["ADMIN"]);
+  if (forbid) return forbid;
+
+  const { id } = await params;
+  const user = await adminUserService.getDetail(id);
+  if (!user) return NextResponse.json({ error: "not_found" }, { status: 404 });
+  return NextResponse.json({ user: toMobileAdminUserDetail(user) });
+}
 
 /** Yasakla / yasagi kaldir; kural (token iptali, denetim kaydi) `AdminUserService.setBanned`ta. */
 export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   const auth = await requireMobileUser(req);
   if ("error" in auth) return auth.error;
+  const blocked = forbidWhileImpersonating(auth.user);
+  if (blocked) return blocked;
   const forbid = requireRole(auth.user, ["ADMIN"]);
   if (forbid) return forbid;
 
