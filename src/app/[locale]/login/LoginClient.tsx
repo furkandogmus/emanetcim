@@ -12,6 +12,7 @@ import { Package, ShieldCheck, Loader2, Store, Shield, Mail, Lock, ChevronDown, 
 import { motion, AnimatePresence } from 'framer-motion';
 import AmbientBackdrop from "@/components/common/AmbientBackdrop";
 import BrandMark from "@/components/common/BrandMark";
+import { useFieldErrors } from "@/lib/hooks/useFieldErrors";
 
 function GoogleIcon({ size = 20 }: { size?: number }) {
   return (
@@ -77,6 +78,16 @@ export default function LoginPage({
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [credError, setCredError] = useState('');
+  /*
+    Kimlik hatasi tek mesaj: ozet (role="alert") ayni zamanda kimlik alaninin
+    hata metni, yani aria-describedby ona baglaniyor ve metin iki kez yazilmiyor.
+  */
+  const { attachForm, setErrors: setFieldErrors, clearError, fieldProps, errorId } =
+    useFieldErrors<'identity'>('login');
+  const failCredentials = (message: string) => {
+    setCredError(message);
+    setFieldErrors({ identity: message });
+  };
   const [oauthActionError, setOauthActionError] = useState<string | null>(null);
 
   const oauthBanner =
@@ -98,6 +109,7 @@ export default function LoginPage({
   const handleCredentials = async (e: React.FormEvent) => {
     e.preventDefault();
     setCredError('');
+    setFieldErrors({});
     setIsLoggingIn('credentials');
     try {
       const res = await signIn('credentials', {
@@ -109,13 +121,13 @@ export default function LoginPage({
       if (res?.error) {
         // `code`, authorize içindeki CredentialsSignin alt sınıfından gelir.
         if (res.error === "EmailVerificationRequired" || res.code === "EmailVerificationRequired") {
-          setCredError(authErrorMessage(t, "EmailVerificationRequired"));
+          failCredentials(authErrorMessage(t, "EmailVerificationRequired"));
         } else if (res.code === "UserBanned") {
-          setCredError(authErrorMessage(t, "UserBanned"));
+          failCredentials(authErrorMessage(t, "UserBanned"));
         } else if (res.code === "tooManyRequests") {
-          setCredError(t("tooManyAttempts"));
+          failCredentials(t("tooManyAttempts"));
         } else {
-          setCredError(t('invalidCredentials'));
+          failCredentials(t('invalidCredentials'));
         }
         setIsLoggingIn(null);
       } else if (res?.ok) {
@@ -140,7 +152,7 @@ export default function LoginPage({
         window.location.href = landing;
       }
     } catch {
-      setCredError(t('invalidCredentials'));
+      failCredentials(t('invalidCredentials'));
       setIsLoggingIn(null);
     }
   };
@@ -150,6 +162,10 @@ export default function LoginPage({
   const renderCredentialsForm = () => (
     <>
       {/* E-posta / Telefon */}
+      <div className="flex flex-col gap-1.5">
+      <label htmlFor="login-identity" className="text-xs font-bold text-gray-600">
+        {t('emailOrPhone')}
+      </label>
       <div className="relative">
         <Mail size={16} className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-300 pointer-events-none" />
         {/*
@@ -162,34 +178,51 @@ export default function LoginPage({
           VE telefonu birlikte sorguluyor. Sekme, olmayan bir ayrımı taklit edip
           çalışan bir yolu kapatıyordu; artık yalnızca görsel bir ipucu.
         */}
+        {/*
+          E-posta VEYA telefon kabul ettigi icin `username` (e-posta degil). Mobil
+          klavye ilk harfi buyutup "duzeltince" e-posta eslesmiyordu.
+        */}
         <input
+          id="login-identity"
+          name="username"
           type="text"
           inputMode="text"
           autoComplete="username"
-          aria-label={t('emailOrPhone')}
-          placeholder={t('emailOrPhone')}
+          autoCapitalize="none"
+          autoCorrect="off"
+          spellCheck={false}
+          {...fieldProps('identity')}
           value={email}
-          onChange={(e) => setEmail(e.target.value)}
+          onChange={(e) => {
+            setEmail(e.target.value);
+            clearError('identity');
+          }}
           required
           disabled={busy}
-          className="w-full h-12 pl-10 pr-4 border-2 border-gray-100 rounded-xl text-sm font-medium text-gray-800 placeholder-gray-300 disabled:opacity-50 transition"
+          className="w-full h-12 pl-10 pr-4 border-2 border-gray-100 rounded-xl text-sm font-medium text-gray-800 placeholder-gray-300 disabled:opacity-50 transition aria-[invalid=true]:border-red-300"
         />
+      </div>
       </div>
 
       {/* Şifre */}
+      <div className="flex flex-col gap-1.5">
+      <label htmlFor="login-password" className="text-xs font-bold text-gray-600">
+        {t('password')}
+      </label>
       <div className="relative">
         <Lock size={16} className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-300 pointer-events-none" />
         <input
+          id="login-password"
+          name="password"
           type="password"
           autoComplete="current-password"
-          aria-label={t('password')}
-          placeholder={t('password')}
           value={password}
           onChange={(e) => setPassword(e.target.value)}
           required
           disabled={busy}
           className="w-full h-12 pl-10 pr-4 border-2 border-gray-100 rounded-xl text-sm font-medium text-gray-800 placeholder-gray-300 disabled:opacity-50 transition"
         />
+      </div>
       </div>
 
       <div className="flex justify-end">
@@ -203,7 +236,7 @@ export default function LoginPage({
 
       {/* Hata */}
       {credError && (
-        <p className="text-xs text-red-500 font-semibold text-center" role="alert">
+        <p id={errorId('identity')} className="text-xs text-red-500 font-semibold text-center" role="alert">
             {credError}
           </p>
       )}
@@ -249,6 +282,7 @@ export default function LoginPage({
             onClick={() => {
               setActiveTab('GUEST');
               setCredError('');
+              clearError('identity');
             }}
             className={` flex-1 py-3 id-eyebrow rounded-xl transition-all cursor-pointer ${
               activeTab === 'GUEST' ? "bg-white text-orange-600 shadow-sm" : "text-gray-400 hover:text-gray-600"
@@ -260,6 +294,7 @@ export default function LoginPage({
             onClick={() => {
               setActiveTab('PARTNER');
               setCredError('');
+              clearError('identity');
               setShowEmailForm(true);
             }}
             className={` flex-1 py-3 id-eyebrow rounded-xl transition-all cursor-pointer ${
@@ -353,6 +388,7 @@ export default function LoginPage({
                     animate={{ opacity: 1, height: 'auto' }}
                     exit={{ opacity: 0, height: 0 }}
                     transition={{ duration: 0.2 }}
+                    ref={attachForm}
                     onSubmit={handleCredentials}
                     className="overflow-hidden w-full flex flex-col gap-3"
                   >
@@ -362,7 +398,7 @@ export default function LoginPage({
               </AnimatePresence>
             </>
           ) : (
-            <form onSubmit={handleCredentials} className="w-full flex flex-col gap-3">
+            <form ref={attachForm} onSubmit={handleCredentials} className="w-full flex flex-col gap-3">
               {renderCredentialsForm()}
             </form>
           )}
