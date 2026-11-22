@@ -154,7 +154,7 @@ export default async function BlogDetailPage({
               alt={post.title}
               fill
               className="object-cover"
-              priority
+              preload
             />
           </div>
         </section>

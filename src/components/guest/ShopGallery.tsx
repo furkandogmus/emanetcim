@@ -83,7 +83,7 @@ export default function ShopGallery({ images, shopName }: Props) {
             alt={`${shopName} ${activeIndex + 1}`}
             fill
             sizes="100vw"
-            priority={activeIndex === 0}
+            preload={activeIndex === 0}
             className="object-cover"
           />
         </button>
