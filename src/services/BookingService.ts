@@ -10,7 +10,7 @@ import {
 } from '@/services/booking/create';
 import { checkIn as checkInImpl, type CheckInOptions } from '@/services/booking/check-in';
 import { checkOut as checkOutImpl } from '@/services/booking/check-out';
-import { cancelBooking as cancelBookingImpl, modifyBooking as modifyBookingImpl } from '@/services/booking/lifecycle';
+import { cancelBooking as cancelBookingImpl, modifyBooking as modifyBookingImpl, type CancelBookingOptions } from '@/services/booking/lifecycle';
 import {
   approveBooking as approveBookingImpl,
   rejectBooking as rejectBookingImpl,
@@ -142,7 +142,7 @@ export interface IBookingService {
   getUserBookings(userId: string, opts?: { page?: number; limit?: number }): Promise<{ items: GuestBookingListItem[]; total: number }>;
   getPartnerBookings(shopId: string, opts?: { page?: number; limit?: number }): Promise<{ items: PartnerBookingListItem[]; total: number }>;
   getBookingDetails(id: string): Promise<BookingWithShopGuestDetails | null>;
-  cancelBooking(bookingId: string, opts?: { actor?: PaymentActor }): Promise<CancelBookingResult>;
+  cancelBooking(bookingId: string, opts?: Pick<CancelBookingOptions, 'actor' | 'reason'>): Promise<CancelBookingResult>;
   approveBooking(bookingId: string, actor: PartnerReviewActor, opts?: { locale?: string }): Promise<PartnerReviewResult>;
   rejectBooking(bookingId: string, actor: PartnerReviewActor, opts?: { locale?: string }): Promise<PartnerReviewResult>;
   markAsPaid(bookingId: string): Promise<void>;
@@ -301,8 +301,11 @@ export class BookingService implements IBookingService {
    * Tek kullanımlı indirim kuponu = “platform kredisi” (check-in’e &lt;1 saat kala nakit iade yok).
    */
 
-  async cancelBooking(bookingId: string, opts?: { actor?: PaymentActor }): Promise<CancelBookingResult> {
-    return cancelBookingImpl(bookingId, { actor: opts?.actor });
+  async cancelBooking(
+    bookingId: string,
+    opts?: Pick<CancelBookingOptions, 'actor' | 'reason'>,
+  ): Promise<CancelBookingResult> {
+    return cancelBookingImpl(bookingId, { actor: opts?.actor, reason: opts?.reason ?? 'guest_cancel' });
   }
 
   /**
