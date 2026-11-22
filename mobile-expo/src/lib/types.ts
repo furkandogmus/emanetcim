@@ -629,3 +629,19 @@ export type AdminAuditEntry = {
 };
 
 export type AdminAuditPage = { entries: AdminAuditEntry[]; nextCursor: string | null; prefixes?: string[] };
+
+// --- Arama: sehrin ilceleri ---
+
+/** `/cities/[slug]/districts`: dukkani olan ilceler (sunucu `toMobileDistrict`). */
+export type DistrictCoverage = {
+  name: string;
+  slug: string;
+  shopCount: number;
+  /** Ilcedeki dukkanlarin ortalamasi. */
+  latitude: number;
+  longitude: number;
+  /** Merkezden ilcenin en uzak dukkanina (m), en az 15 km. */
+  radiusM: number;
+};
+
+// --- /Arama: ilceler ---

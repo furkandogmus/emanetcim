@@ -139,7 +139,11 @@
     "step": "Step {{current}} of {{total}}",
     "dropOffInPast": "That drop-off time has passed. Pick a new time.",
     "locationUnavailable": "We couldn't get your location. Search an address or pick a city from the list.",
-    "changePlace": "Change"
+    "changePlace": "Change",
+    "districtTitle": "Where in {{city}}?",
+    "cityCenter": "City centre",
+    "cityCenterHint": "Whole city",
+    "districtsLoading": "Loading districts…"
   },
   "bags": {
     "s": "Small (S)",
