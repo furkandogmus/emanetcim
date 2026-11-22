@@ -645,3 +645,26 @@ export type DistrictCoverage = {
 };
 
 // --- /Arama: ilceler ---
+
+
+/* ── Admin dukkan icerigi + yorum moderasyonu (kaynak: ../src/lib/mobile-dto.ts) ── */
+
+export type ShopGalleryImage = { id: string; url: string };
+
+/** `GET admin/shops/:id/images` (`toMobileAdminShopPhotos`). */
+export type AdminShopPhotos = { image: string | null; gallery: ShopGalleryImage[] };
+
+export type AdminReviewFilter = "all" | "low" | "hidden";
+
+/** `toMobileAdminReview`: gizlenenler dahil, misafirin tam adi ve dukkanla. */
+export type AdminReview = ShopReview & {
+  guestName: string;
+  shop: { id: string; name: string };
+  hidden: boolean;
+  hiddenAt: string | null;
+  hiddenReason: string | null;
+};
+
+export type AdminReviewsPage = { items: AdminReview[]; total: number; nextCursor: string | null };
+
+export type ReviewModerationAction = "hide" | "unhide" | "delete";

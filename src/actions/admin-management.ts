@@ -471,28 +471,25 @@ export async function updateShopAction(shopId: string, data: AdminShopUpdate) {
 
 /**
  * Yorum sil (Admin için)
+ *
+ * GOVDE `ReviewService.moderate`ta (2026-11-23): silme, ortalamanin yeniden
+ * hesabi ve denetim kaydi mobil admin moderasyonuyla ayni yoldan gecer. Burada
+ * `prisma.review.delete` + `updateShopAverageRating` satir ici yaziliydi ve
+ * denetim kaydi hic dusmuyordu (BUG-10'un ikinci yarisi).
  */
 export async function deleteReviewAction(reviewId: string) {
-  await ensureAdmin();
+  const { user } = await ensureAdmin();
 
-  const review = await prisma.review.delete({
-    where: { id: reviewId },
-    select: { shopId: true },
+  const result = await reviewService.moderate({
+    reviewId,
+    action: "delete",
+    actor: { id: user.id, ip: await getClientIpOrNull() },
   });
+  if (!result.ok) return { success: false as const, error: "Errors.notFound" };
 
-  /*
-    BUG-10: yorum silinince dukkan ortalama puani guncellenmeli.
-
-    GOVDE ARTIK SERVISTE (2026-09-01). Burasi `ReviewService`teki hesabin satir
-    ici bir KOPYASINI tasiyordu -- ayni `aggregate`, ayni `update`. Ayni sayiyi
-    iki yerde hesaplamak, bu kod tabaninin tekrar tekrar duzelttigi sinif:
-    birinin filtresi degistiginde digeri sessizce geride kalir.
-  */
-  await reviewService.updateShopAverageRating(review.shopId);
-
-  revalidatePathAllLocales(`/admin/partners/${review.shopId}/edit`);
+  revalidatePathAllLocales(`/admin/partners/${result.shopId}/edit`);
   revalidatePathAllLocales("/search");
-  return { success: true };
+  return { success: true as const };
 }
 
 /**

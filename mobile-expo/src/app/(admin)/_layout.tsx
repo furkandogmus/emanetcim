@@ -14,6 +14,11 @@ export default function AdminLayout() {
       {/* Kullanici yonetimi: detay + denetim kaydi */}
       <Stack.Screen name="admin/user/[id]" />
       <Stack.Screen name="admin/audit-log" />
+
+      {/* Dukkan icerigi + yorum moderasyonu */}
+      <Stack.Screen name="admin/shop-photos/[id]" />
+      <Stack.Screen name="admin/shop-schedule/[id]" />
+      <Stack.Screen name="admin/reviews" />
     </Stack>
   );
 }

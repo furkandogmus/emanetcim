@@ -1,5 +1,27 @@
+import type { Prisma } from "@prisma/client";
 import prisma from "@/lib/db";
+import { writeAuditLog } from "@/lib/audit-log";
 import { cursorArgs, toPage } from "@/lib/cursor-page";
+import { VISIBLE_REVIEW } from "@/lib/review-visibility";
+
+/** "Dusuk puan" moderasyon filtresi: 1-2 yildiz. */
+export const LOW_RATING_MAX = 2;
+
+export type AdminReviewFilter = "all" | "low" | "hidden";
+
+/** `?filter=` okuma; bilinmeyen deger `all`. */
+export function parseAdminReviewFilter(raw: string | null | undefined): AdminReviewFilter {
+  return raw === "low" || raw === "hidden" ? raw : "all";
+}
+
+export type ModerationActor = { id: string; ip?: string | null };
+
+export type ModerateReviewResult =
+  | { ok: true; shopId: string; rating: number }
+  | { ok: false; reason: "not_found" | "already_hidden" | "not_hidden" | "reason_required" };
+
+/** Gizleme/silme gerekcesinin siniri; denetim kaydinda tasinir. */
+export const MAX_MODERATION_REASON = 300;
 
 /**
  * ReviewService - Misafir yorumlarını ve dükkan puanlarını yönetir.
@@ -95,14 +117,14 @@ export class ReviewService {
    * tabanının tekrar tekrar düzelttiği hata sınıfı -- birinin filtresi
    * değiştiğinde diğeri sessizce geride kalır.
    */
-  async updateShopAverageRating(shopId: string) {
-    const aggregations = await prisma.review.aggregate({
-      where: { shopId },
+  async updateShopAverageRating(shopId: string, db: Prisma.TransactionClient = prisma) {
+    const aggregations = await db.review.aggregate({
+      where: { shopId, ...VISIBLE_REVIEW },
       _avg: { rating: true },
       _count: { id: true }
     });
 
-    await prisma.shop.update({
+    await db.shop.update({
       where: { id: shopId },
       data: {
         rating: aggregations._avg.rating || 0
@@ -115,7 +137,7 @@ export class ReviewService {
    */
   async getShopReviews(shopId: string) {
     return await prisma.review.findMany({
-      where: { shopId },
+      where: { shopId, ...VISIBLE_REVIEW },
       include: {
         guest: {
           select: { name: true, image: true }
@@ -134,14 +156,122 @@ export class ReviewService {
     const take = Math.min(Math.max(1, opts.take ?? 20), 50);
     const [rows, total] = await Promise.all([
       prisma.review.findMany({
-        where: { shopId },
+        where: { shopId, ...VISIBLE_REVIEW },
         include: { guest: { select: { name: true, image: true } } },
         orderBy: [{ createdAt: 'desc' }, { id: 'desc' }],
         ...cursorArgs(opts.cursor ?? null, take),
       }),
-      prisma.review.count({ where: { shopId } }),
+      prisma.review.count({ where: { shopId, ...VISIBLE_REVIEW } }),
     ]);
     return { ...toPage(rows, take), total };
+  }
+
+  /**
+   * Yonetici moderasyon listesi: gizlenenler DAHIL (filtre `hidden` yalnizca
+   * onlari gosterir). `shopId` verilirse o dukkanin yorumlari, verilmezse
+   * platformun son yorumlari.
+   */
+  async listForAdmin(
+    opts: { shopId?: string | null; filter?: AdminReviewFilter; cursor?: string | null; take?: number } = {},
+  ) {
+    const take = Math.min(Math.max(1, opts.take ?? 20), 50);
+    const where: Prisma.ReviewWhereInput = {
+      ...(opts.shopId ? { shopId: opts.shopId } : {}),
+      ...(opts.filter === "low" ? { rating: { lte: LOW_RATING_MAX } } : {}),
+      ...(opts.filter === "hidden" ? { hiddenAt: { not: null } } : {}),
+    };
+    const [rows, total] = await Promise.all([
+      prisma.review.findMany({
+        where,
+        include: {
+          guest: { select: { name: true } },
+          shop: { select: { id: true, name: true } },
+        },
+        orderBy: [{ createdAt: "desc" }, { id: "desc" }],
+        ...cursorArgs(opts.cursor ?? null, take),
+      }),
+      prisma.review.count({ where }),
+    ]);
+    return { ...toPage(rows, take), total };
+  }
+
+  /**
+   * Yonetici moderasyonu -- gizle / geri al / sil. Web (`deleteReviewAction`) ve
+   * mobil admin ucu AYNI govdeden gecer: yazma, ortalamanin yeniden hesabi ve
+   * denetim kaydi burada. Ortalama BEKLENIR (`addReview` ile ayni gerekce):
+   * gizlenen tek yildizli yorum dukkanin puanini asagida tutmaya devam etmesin.
+   *
+   * Gerekce gizlemede zorunlu (geri almayi yapacak kisi nedenini gormeli);
+   * silmede tasiyiciya birakilir, verilirse denetim kaydina girer.
+   */
+  async moderate(params: {
+    reviewId: string;
+    action: "hide" | "unhide" | "delete";
+    reason?: string | null;
+    actor: ModerationActor;
+  }): Promise<ModerateReviewResult> {
+    const reason = params.reason?.trim().slice(0, MAX_MODERATION_REASON) || null;
+    if (params.action === "hide" && !reason) return { ok: false, reason: "reason_required" };
+
+    // Denetim kaydi icin anlik goruntu; yazma kosulu asagida, bu okumaya guvenmez.
+    const review = await prisma.review.findUnique({
+      where: { id: params.reviewId },
+      select: { id: true, shopId: true, rating: true, comment: true, guestId: true },
+    });
+    if (!review) return { ok: false, reason: "not_found" };
+
+    /*
+      KOSULLU YAZMA + AYNI ISLEM (QA, 2026-11-23): once okuyup sonra yazmak iki
+      yoneticinin ayni anda silmesinde P2025 -> 500, ayni anda gizlemesinde iki
+      "basarili" ve iki denetim kaydi uretiyordu. Kosul satir kilidiyle yeniden
+      degerlendirilir; ikinci istek 0 satir gorur ve alan hatasi doner. Ortalama
+      ayni islemde: yazma geri alinirsa puan da eski kalir.
+    */
+    const id = review.id;
+    const written = await prisma.$transaction(async (tx) => {
+      const { count } =
+        params.action === "delete"
+          ? await tx.review.deleteMany({ where: { id } })
+          : params.action === "hide"
+            ? await tx.review.updateMany({
+                where: { id, hiddenAt: null },
+                data: { hiddenAt: new Date(), hiddenReason: reason, hiddenById: params.actor.id },
+              })
+            : await tx.review.updateMany({
+                where: { id, hiddenAt: { not: null } },
+                data: { hiddenAt: null, hiddenReason: null, hiddenById: null },
+              });
+      if (count === 0) return false;
+      await this.updateShopAverageRating(review.shopId, tx);
+      return true;
+    });
+
+    if (!written) {
+      if (params.action === "delete") return { ok: false, reason: "not_found" };
+      // Kosul tutmadi: ya biri az once sildi, ya da durum zaten istenen gibi.
+      const still = await prisma.review.findUnique({ where: { id }, select: { id: true } });
+      if (!still) return { ok: false, reason: "not_found" };
+      return { ok: false, reason: params.action === "hide" ? "already_hidden" : "not_hidden" };
+    }
+
+    writeAuditLog({
+      actorUserId: params.actor.id,
+      actorRole: "ADMIN",
+      action: `admin.review.${params.action}`,
+      entityType: "Review",
+      entityId: review.id,
+      metadata: {
+        shopId: review.shopId,
+        guestId: review.guestId,
+        rating: review.rating,
+        reason,
+        // Silinen yorumun izi yalnizca burada kalir; kisaltilmis metin yeter.
+        ...(params.action === "delete" && review.comment ? { comment: review.comment.slice(0, 200) } : {}),
+      },
+      ip: params.actor.ip ?? null,
+    });
+
+    return { ok: true, shopId: review.shopId, rating: review.rating };
   }
 }
 

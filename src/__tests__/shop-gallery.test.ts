@@ -17,6 +17,8 @@ const storage = vi.hoisted(() => ({
 const validate = vi.hoisted(() => vi.fn());
 
 vi.mock("@/lib/db", () => ({ default: db }));
+const audit = vi.hoisted(() => vi.fn());
+vi.mock("@/lib/audit-log", () => ({ writeAuditLog: audit }));
 vi.mock("@/lib/storage", () => ({
   getStorage: () => storage,
   validateImageBytes: validate,
@@ -81,5 +83,20 @@ describe("ShopGalleryService", () => {
       data: { url: "https://cdn.test/shops/s1/cover.jpg" },
     });
     expect(storage.remove).not.toHaveBeenCalled();
+  });
+
+  it("yonetici baskasinin galerisini duzenler ve her islem denetim kaydi birakir", async () => {
+    db.shop.findUnique.mockResolvedValue({ ownerId: "baska", image: null });
+    const admin = { shopId: "s1", actorId: "admin-1", actorRole: "ADMIN" as const, actorIp: "198.51.100.9" };
+    expect(await new ShopGalleryService().add({ ...admin, bytes })).toMatchObject({ ok: true });
+    db.shopImage.findFirst.mockResolvedValueOnce({ url: "https://cdn.test/shops/s1/g.jpg" });
+    expect(await new ShopGalleryService().remove({ ...admin, imageId: "i9" })).toEqual({ ok: true });
+    expect(audit.mock.calls.map((c) => c[0].action)).toEqual(["admin.shop.photo_add", "admin.shop.photo_remove"]);
+    expect(audit).toHaveBeenCalledWith(expect.objectContaining({ actorUserId: "admin-1", entityId: "s1", ip: "198.51.100.9" }));
+  });
+
+  it("esnafin kendi galerisi denetim kaydi birakmaz", async () => {
+    await new ShopGalleryService().add({ ...actor, bytes });
+    expect(audit).not.toHaveBeenCalled();
   });
 });

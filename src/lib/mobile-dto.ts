@@ -736,6 +736,7 @@ export function toMobileAdminShopDetail(d: AdminShopDetailSource) {
       canViewAs: canViewAs(s.owner),
     },
     bookingCount: s._count.bookings,
+    // Yonetici sayisi gizlenen yorumlari DA sayar (moderasyon listesiyle ayni); misafir sayilari saymaz.
     reviewCount: s._count.reviews,
     bagsInStorage: d.bagsInStorage,
     arrivalsToday: d.arrivalsToday,
@@ -945,5 +946,37 @@ export function toMobileAdminAuditEntry(e: AdminAuditSource) {
     entityId: e.entityId,
     metadata: metadata && metadata.length > AUDIT_METADATA_MAX ? `${metadata.slice(0, AUDIT_METADATA_MAX)}…` : metadata,
     createdAt: e.createdAt.toISOString(),
+  };
+}
+
+
+/* ─────────────────────────────────────────────────────────────────────────
+   ADMIN DUKKAN ICERIGI + YORUM MODERASYONU (2026-11-23)
+   Yonetici esnaf adina fotograf/saat duzenler, yorumlari gizler ya da siler.
+   ───────────────────────────────────────────────────────────────────────── */
+
+/** `admin/shops/:id/images`: kapak + galeri; esnafin `partner/shop` yanitindaki alanlarla ayni bicim. */
+export function toMobileAdminShopPhotos(s: { image: string | null; gallery: Array<{ id: string; url: string }> }) {
+  return { image: s.image, gallery: s.gallery.map(toMobileGalleryImage) };
+}
+
+type AdminReviewSource = ReviewSource & {
+  hiddenAt: Date | null;
+  hiddenReason: string | null;
+  shop: { id: string; name: string };
+};
+
+/**
+ * Moderasyon satiri. Misafir yorumundan farki: yonetici misafirin tam adini,
+ * dukkani ve gizleme durumunu gorur (`toMobileReview` yalnizca ilk adi verir).
+ */
+export function toMobileAdminReview(r: AdminReviewSource) {
+  return {
+    ...toMobileReview(r),
+    guestName: r.guest.name?.trim() ?? "",
+    shop: { id: r.shop.id, name: r.shop.name },
+    hidden: r.hiddenAt !== null,
+    hiddenAt: r.hiddenAt?.toISOString() ?? null,
+    hiddenReason: r.hiddenReason,
   };
 }

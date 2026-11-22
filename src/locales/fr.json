@@ -1008,6 +1008,8 @@
     "fullName": "Nom complet",
     "phone": "Phone",
     "reviews": "Reviews",
+    "reviewHiddenBadge": "Masqué",
+    "reviewHiddenReason": "Masqué pour : {reason}",
     "noReviewsYet": "Aucun avis pour le moment.",
     "messagesTitle": "Inbox",
     "messagesSearchPlaceholder": "Search...",

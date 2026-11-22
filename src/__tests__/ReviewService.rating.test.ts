@@ -57,10 +57,11 @@ describe("dükkan ortalama puanı", () => {
     });
   });
 
-  it("ortalama TÜM yorumlardan hesaplanır — dükkana daraltılarak", async () => {
+  it("ortalama dükkanın GÖRÜNEN yorumlarından hesaplanır — gizlenenler dışarıda", async () => {
+    // 2026-11-23: yonetici gizledigi yorum ortalamayi asagi cekmeye devam etmesin.
     await reviewService.updateShopAverageRating("s1");
     expect(mockPrisma.review.aggregate).toHaveBeenCalledWith(
-      expect.objectContaining({ where: { shopId: "s1" } }),
+      expect.objectContaining({ where: { shopId: "s1", hiddenAt: null } }),
     );
   });
 });

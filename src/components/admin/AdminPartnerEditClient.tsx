@@ -22,7 +22,7 @@ import StarRating from "@/components/common/StarRating";
 import ConfirmDialog from "@/components/common/ConfirmDialog";
 import { formatDecimal } from "@/lib/currency";
 import { bcp47ForUiLocale } from "@/lib/intl-locale";
-import { actionErrorKey } from "@/lib/action-error";
+import { actionErrorKey, returnedErrorKey } from "@/lib/action-error";
 import { formatInstant } from "@/lib/format-datetime";
 
 interface AdminPartnerEditClientProps {
@@ -52,6 +52,9 @@ interface AdminPartnerEditClientProps {
       rating: number;
       comment: string | null;
       createdAt: Date | string;
+      /** Mobil moderasyonla gizlenen yorum: misafire gorunmez, puana sayilmaz. */
+      hiddenAt?: Date | string | null;
+      hiddenReason?: string | null;
       guest: {
         name: string | null;
       };
@@ -109,7 +112,13 @@ export default function AdminPartnerEditClient({ shop, photoSection, scheduleSec
   const confirmDeleteReview = async () => {
     if (!pendingReviewDeleteId) return;
     try {
-      await deleteReviewAction(pendingReviewDeleteId);
+      const res = await deleteReviewAction(pendingReviewDeleteId);
+      if (!res.success) {
+        // Baska bir yonetici (ya da mobil moderasyon) once silmis olabilir.
+        toast.error(tErrors(returnedErrorKey(res.error) ?? "generic"));
+        router.refresh();
+        return;
+      }
       toast.success(t("reviewDeletedSuccess"));
       router.refresh();
     } catch (caughtError: unknown) {
@@ -347,6 +356,14 @@ export default function AdminPartnerEditClient({ shop, photoSection, scheduleSec
                           <div className="flex items-center gap-2">
                              <StarRating rating={review.rating} size={10} />
                              <span className="text-[10px] font-black text-gray-900">{review.guest.name}</span>
+                             {review.hiddenAt ? (
+                               <span
+                                 className="text-[10px] font-black uppercase rounded-full bg-gray-200 text-gray-700 px-2 py-0.5"
+                                 title={review.hiddenReason ? t("reviewHiddenReason", { reason: review.hiddenReason }) : undefined}
+                               >
+                                 {t("reviewHiddenBadge")}
+                               </span>
+                             ) : null}
                           </div>
                           {/*
                             KLAVYE ODAGI DA BUTONU GORUNUR YAPAR.

@@ -13,6 +13,8 @@ const { mockPrisma, mockGenerate } = vi.hoisted(() => ({
 vi.mock("@/lib/db", () => ({ default: mockPrisma }));
 
 vi.mock("@/services/SlotService", () => ({ generateSlotsForShop: mockGenerate }));
+const mockAudit = vi.hoisted(() => vi.fn());
+vi.mock("@/lib/audit-log", () => ({ writeAuditLog: mockAudit }));
 
 import { addClosure, findScheduleConflicts, removeClosure, saveWeeklyHours } from "@/services/ShopScheduleService";
 
@@ -155,5 +157,39 @@ describe("takvim degisince slot uretimi", () => {
   it("gecersiz haftalik saat slot uretmez", async () => {
     await saveWeeklyHours("s1", [], false);
     expect(mockGenerate).not.toHaveBeenCalled();
+  });
+});
+
+describe("yonetici duzenlemesi denetim kaydi birakir", () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+    mockGenerate.mockResolvedValue(0);
+    mockPrisma.shop.findUnique.mockResolvedValue({
+      open247: false, openingTime: "09:00", closingTime: "20:00", timezone: "Europe/Istanbul",
+    });
+    mockPrisma.shopWeeklyHours.findMany.mockResolvedValue([]);
+    mockPrisma.shopClosure.findMany.mockResolvedValue([]);
+    mockPrisma.booking.findMany.mockResolvedValue([]);
+    mockPrisma.shopClosure.create.mockResolvedValue({ id: "c9" });
+    mockPrisma.shopClosure.deleteMany.mockResolvedValue({ count: 1 });
+  });
+  const ADMIN = { id: "admin-1", role: "ADMIN", ip: "198.51.100.2" };
+
+  it("izin ekleme ve kaldirma ADMIN'de kaydedilir, esnafta kaydedilmez", async () => {
+    expect(await addClosure("s1", { startDate: "2026-10-12", endDate: "2026-10-12" }, NOW, ADMIN)).toEqual({ ok: true });
+    await removeClosure("s1", "c9", ADMIN);
+    expect(mockAudit.mock.calls.map((c) => c[0].action)).toEqual(["admin.shop.closure_add", "admin.shop.closure_remove"]);
+    expect(mockAudit).toHaveBeenCalledWith(expect.objectContaining({ actorUserId: "admin-1", entityId: "s1", ip: "198.51.100.2" }));
+
+    mockAudit.mockClear();
+    await addClosure("s1", { startDate: "2026-10-12", endDate: "2026-10-12" }, NOW, { id: "p1", role: "PARTNER" });
+    await removeClosure("s1", "c9", { id: "p1", role: "PARTNER" });
+    expect(mockAudit).not.toHaveBeenCalled();
+  });
+
+  it("olmayan izni kaldirmak kayit birakmaz", async () => {
+    mockPrisma.shopClosure.deleteMany.mockResolvedValue({ count: 0 });
+    await removeClosure("s1", "yok", ADMIN);
+    expect(mockAudit).not.toHaveBeenCalled();
   });
 });

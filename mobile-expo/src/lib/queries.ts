@@ -11,7 +11,7 @@ import { totalBags, type Bags } from "./search";
 import { partnerSearchTerm } from "./booking-search";
 import { useDebouncedValue } from "./use-debounced-value";
 import { BROADCAST_POLL_MS, hasActiveBroadcast } from "./broadcast";
-import type { AdminApplication, AdminStats, BookingDetail, ContactMessage, PartnerEarnings, PartnerSealsResponse, PartnerShop, BookingSummary, NearbyShop, PartnerBookingsResponse, ShopDetail, ShopReviewsPage, PartnerShopSettings, PartnerSchedule, PartnerDashboard, AdminOverview, AdminBookingFilter, AdminBookingCounts, AdminBookingsResponse, AdminBookingDetail, AdminShop, AdminShopDetail, AdminUser, AdminBroadcast, BroadcastAudience, BroadcastPreview, CityCoverage, AppConfig, PartnerCancelRequest, AdminAuditPage, AdminUserDetail } from "./types";
+import type { AdminApplication, AdminStats, BookingDetail, ContactMessage, PartnerEarnings, PartnerSealsResponse, PartnerShop, BookingSummary, NearbyShop, PartnerBookingsResponse, ShopDetail, ShopReviewsPage, PartnerShopSettings, PartnerSchedule, PartnerDashboard, AdminOverview, AdminBookingFilter, AdminBookingCounts, AdminBookingsResponse, AdminBookingDetail, AdminShop, AdminShopDetail, AdminUser, AdminBroadcast, BroadcastAudience, BroadcastPreview, CityCoverage, AppConfig, PartnerCancelRequest, AdminAuditPage, AdminUserDetail, AdminReviewFilter, AdminReviewsPage, AdminShopPhotos, ReviewModerationAction } from "./types";
 
 export const keys = {
   myBookings: ["bookings", "me"] as const,
@@ -502,4 +502,61 @@ export function useAdminAuditLog(prefix: string | null, userId: string | null) {
     getNextPageParam: nextCursorOf,
     placeholderData: (prev) => prev,
   });
+}
+
+
+/* ── Admin dukkan icerigi + yorum moderasyonu ──────────────────────────────
+   Anahtarlar `[...keys.admin, "shop", id]` altinda: dukkan detayi yenilenince
+   fotograf ve saat de yenilenir. Yorumlar ayri kok (`adminReviewsKey`). */
+
+export const adminShopPhotosKey = (id: string) => [...keys.admin, "shop", id, "photos"] as const;
+export const adminShopScheduleKey = (id: string) => [...keys.admin, "shop", id, "schedule"] as const;
+export const adminReviewsKey = [...keys.admin, "reviews"] as const;
+
+export function useAdminShopPhotos(id: string) {
+  return useQuery({
+    queryKey: adminShopPhotosKey(id),
+    queryFn: () => api<AdminShopPhotos>(`/admin/shops/${encodeURIComponent(id)}/images`),
+    enabled: !!id,
+  });
+}
+
+export function useAdminShopSchedule(id: string) {
+  return useQuery({
+    queryKey: adminShopScheduleKey(id),
+    queryFn: () => api<PartnerSchedule>(`/admin/shops/${encodeURIComponent(id)}/schedule`),
+    enabled: !!id,
+  });
+}
+
+/** `shopId` verilirse o dukkanin yorumlari, yoksa platformun son yorumlari. */
+export function useAdminReviews(filter: AdminReviewFilter, shopId?: string | null) {
+  return useInfiniteQuery({
+    queryKey: [...adminReviewsKey, shopId ?? "all", filter],
+    initialPageParam: undefined as string | undefined,
+    queryFn: ({ pageParam }) => {
+      const qs = new URLSearchParams({ filter, ...(pageParam ? { cursor: pageParam } : {}) });
+      const base = shopId ? `/admin/shops/${encodeURIComponent(shopId)}/reviews` : "/admin/reviews";
+      return api<AdminReviewsPage>(`${base}?${qs}`);
+    },
+    getNextPageParam: nextCursorOf,
+  });
+}
+
+export function moderateReviewOptions(qc: InvalidatingClient) {
+  return {
+    mutationFn: ({ id, action, reason }: { id: string; action: ReviewModerationAction; reason?: string }) =>
+      // Bos gerekce `undefined` kalir ve JSON'a girmez (geri almada gonderilmez).
+      api(`/admin/reviews/${encodeURIComponent(id)}/${action}`, { method: "POST", body: { reason: reason || undefined } }),
+    // Hata da yeniler: `already_hidden`/`not_found` cogu zaman baska bir yoneticinin isi.
+    onSettled: () => {
+      void qc.invalidateQueries({ queryKey: adminReviewsKey });
+      void qc.invalidateQueries({ queryKey: [...keys.admin, "shop"] });
+      void qc.invalidateQueries({ queryKey: [...keys.admin, "shops"] });
+    },
+  };
+}
+
+export function useModerateReview() {
+  return useMutation(moderateReviewOptions(useQueryClient()));
 }

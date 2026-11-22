@@ -102,7 +102,6 @@ const CEILINGS: Record<string, number> = {
   notificationLog: 1,
   platformSettings: 1,
   pushSubscription: 2,
-  review: 1,
   session: 1,
   /*
     7 -> 4 -> 3 (2026-09-01): once onay/red govdeleri `ShopService`e, sonra
@@ -122,10 +121,13 @@ const CEILINGS: Record<string, number> = {
   KALDIRILAN GIRDILER (2026-09-01) -- hepsi `AccountPrivacyService`e tasindi ve
   artik servis disindan HIC yazilmiyor: `legalAcceptance`. `account`, `review` ve
   `session` de yalnizca birer yerde kaldi.
+
+  `review` (2026-11-23): son yazma da (`deleteReviewAction`) `ReviewService.moderate`a
+  tasindi; mobil admin moderasyonu ayni govdeden geciyor.
 */
 
 /** Toplam tavan — yeni bir MODELİN sessizce eklenmesini de yakalar. */
-const TOTAL_CEILING = 65;
+const TOTAL_CEILING = 64;
 
 /**
  * Yorumlar ayıklanır: bu dosyaların çoğunda "eskiden burada ham
