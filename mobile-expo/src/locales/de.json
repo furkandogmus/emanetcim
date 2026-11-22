@@ -723,7 +723,8 @@
     "repliedAt": "Beantwortet · {{date}}",
     "approvedNotNotified": "Antrag genehmigt, aber der Partner konnte nicht benachrichtigt werden. Bitte ruf ihn an.",
     "openDisputeWeb": "Streitfall im Web öffnen",
-    "listCapped": "Die ersten {{count}} werden angezeigt; Suche eingrenzen."
+    "listCapped": "Die ersten {{count}} werden angezeigt; Suche eingrenzen.",
+    "broadcast": "Ankündigung senden"
   },
   "scan": {
     "open": "QR scannen",
@@ -1235,6 +1236,61 @@
       "too_early": "Die Wartezeit ist noch nicht vorbei; der Gast kann noch nicht als nicht erschienen markiert werden.",
       "server_error": "Auf dem Server ist ein Fehler aufgetreten; versuche es gleich noch einmal.",
       "http_404": "Diese Aktion ist noch nicht verfügbar; nutze vorerst das Web-Panel."
+    }
+  },
+  "broadcast": {
+    "title": "Ankündigung senden",
+    "operationalOnly": "Nur betriebliche Ankündigungen: Wartung, Ausfälle, Öffnungszeiten oder Regeländerungen. Kampagnen- und Marketingnachrichten werden noch nicht unterstützt; dafür ist die Einwilligung in kommerzielle Nachrichten nötig.",
+    "audienceLabel": "An",
+    "audience": {
+      "PARTNERS": "Partner",
+      "GUESTS": "Gäste",
+      "ALL": "Alle"
+    },
+    "pickAudience": "Wähle zuerst die Empfänger.",
+    "previewLine": "Geht an {{users}} Personen ({{devices}} Geräte)",
+    "previewLoading": "Wird gezählt…",
+    "previewFailed": "Empfängerzahl nicht verfügbar; zum Aktualisieren nach unten ziehen.",
+    "titleTr": "Titel (Türkisch)",
+    "bodyTr": "Text (Türkisch)",
+    "englishToggle": "Englischen Text hinzufügen (optional)",
+    "englishHint": "Telefone mit einer anderen Sprache als Türkisch erhalten den englischen Text. Leer lassen und alle erhalten Türkisch.",
+    "titleEn": "Titel (Englisch)",
+    "bodyEn": "Text (Englisch)",
+    "sendTest": "Test an mich senden",
+    "testSentTitle": "Test gesendet",
+    "testSentBody_one": "An {{count}} deiner Geräte gesendet.",
+    "testSentBody_other": "An {{count}} deiner Geräte gesendet.",
+    "testNoDevices": "Dieses Konto hat kein Gerät mit Benachrichtigungen; kein Test gesendet.",
+    "reason": "Grund",
+    "reasonHint": "Wird im Prüfprotokoll gespeichert; mindestens {{min}} Zeichen.",
+    "send": "Senden",
+    "confirmTitle": "Ankündigung senden?",
+    "confirmBody": "{{audience}} · {{devices}} Geräte. Eine gesendete Benachrichtigung lässt sich nicht zurücknehmen.",
+    "confirmSend": "Ja, senden",
+    "sentTitle": "Ankündigung eingereiht",
+    "sentBody_one": "Wird an {{count}} Gerät gesendet. Den Fortschritt siehst du unten in der Liste.",
+    "sentBody_other": "Wird an {{count}} Geräte gesendet. Den Fortschritt siehst du unten in der Liste.",
+    "newBroadcast": "Neue Ankündigung",
+    "failedTitle": "Senden fehlgeschlagen",
+    "historyTitle": "Letzte Ankündigungen",
+    "historyEmpty": "Noch keine Ankündigungen gesendet.",
+    "counts": "{{sent}} zugestellt · {{failed}} fehlgeschlagen · {{targeted}} Ziel",
+    "status": {
+      "QUEUED": "Wartend",
+      "SENDING": "Wird gesendet",
+      "DONE": "Fertig",
+      "FAILED": "Fehlgeschlagen"
+    },
+    "errors": {
+      "invalid_audience": "Wähle die Empfänger.",
+      "invalid_title": "Der Titel muss 1-60 Zeichen haben (auch der englische, falls vorhanden).",
+      "invalid_body": "Der Text muss 1-180 Zeichen haben (auch der englische, falls vorhanden).",
+      "reason_required": "Der Grund muss mindestens 5 Zeichen haben.",
+      "too_soon_one": "Gerade wurde eine Ankündigung gesendet. Versuche es in {{count}} Minute erneut.",
+      "too_soon_other": "Gerade wurde eine Ankündigung gesendet. Versuche es in {{count}} Minuten erneut.",
+      "forbidden": "Nur Admins dürfen das, und nicht in der Benutzeransicht.",
+      "no_recipients": "In dieser Gruppe empfängt kein Gerät Benachrichtigungen."
     }
   }
 }

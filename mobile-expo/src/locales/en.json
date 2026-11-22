@@ -723,7 +723,8 @@
     "repliedAt": "Replied · {{date}}",
     "approvedNotNotified": "Application approved, but the partner could not be notified. Please call them.",
     "openDisputeWeb": "Open the dispute on the web",
-    "listCapped": "Showing the first {{count}}; narrow your search."
+    "listCapped": "Showing the first {{count}}; narrow your search.",
+    "broadcast": "Send announcement"
   },
   "scan": {
     "open": "Scan QR",
@@ -1235,6 +1236,61 @@
       "too_early": "The waiting time isn't over yet; the guest can't be marked as a no-show.",
       "server_error": "Something went wrong on the server; try again shortly.",
       "http_404": "This action isn't available yet; use the web panel for now."
+    }
+  },
+  "broadcast": {
+    "title": "Send announcement",
+    "operationalOnly": "Operational announcements only: maintenance, outages, opening hours or rule changes. Campaign and marketing messages are not supported yet; they need the user's consent to commercial messages.",
+    "audienceLabel": "To",
+    "audience": {
+      "PARTNERS": "Partners",
+      "GUESTS": "Guests",
+      "ALL": "Everyone"
+    },
+    "pickAudience": "Choose who receives it first.",
+    "previewLine": "Goes to {{users}} people ({{devices}} devices)",
+    "previewLoading": "Counting…",
+    "previewFailed": "Couldn't get the recipient count; pull down to refresh.",
+    "titleTr": "Title (Turkish)",
+    "bodyTr": "Message (Turkish)",
+    "englishToggle": "Add English text (optional)",
+    "englishHint": "Phones set to a language other than Turkish get the English text. Leave it empty and everyone gets Turkish.",
+    "titleEn": "Title (English)",
+    "bodyEn": "Message (English)",
+    "sendTest": "Send a test to me",
+    "testSentTitle": "Test sent",
+    "testSentBody_one": "Sent to {{count}} of your devices.",
+    "testSentBody_other": "Sent to {{count}} of your devices.",
+    "testNoDevices": "This account has no device receiving notifications; no test was sent.",
+    "reason": "Reason",
+    "reasonHint": "Goes into the audit log; at least {{min}} characters.",
+    "send": "Send",
+    "confirmTitle": "Send this announcement?",
+    "confirmBody": "{{audience}} · {{devices}} devices. A sent notification can't be taken back.",
+    "confirmSend": "Yes, send",
+    "sentTitle": "Announcement queued",
+    "sentBody_one": "Sending to {{count}} device. Follow progress in the list below.",
+    "sentBody_other": "Sending to {{count}} devices. Follow progress in the list below.",
+    "newBroadcast": "New announcement",
+    "failedTitle": "Couldn't send",
+    "historyTitle": "Recent announcements",
+    "historyEmpty": "No announcements sent yet.",
+    "counts": "{{sent}} delivered · {{failed}} failed · {{targeted}} targeted",
+    "status": {
+      "QUEUED": "Queued",
+      "SENDING": "Sending",
+      "DONE": "Done",
+      "FAILED": "Failed"
+    },
+    "errors": {
+      "invalid_audience": "Choose who receives it.",
+      "invalid_title": "The title must be 1-60 characters (the English one too, if added).",
+      "invalid_body": "The message must be 1-180 characters (the English one too, if added).",
+      "reason_required": "The reason must be at least 5 characters.",
+      "too_soon_one": "An announcement was just sent. Try again in {{count}} minute.",
+      "too_soon_other": "An announcement was just sent. Try again in {{count}} minutes.",
+      "forbidden": "Only admins can do this, and not while viewing as a user.",
+      "no_recipients": "No device in this audience receives notifications."
     }
   }
 }

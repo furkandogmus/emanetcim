@@ -723,7 +723,8 @@
     "repliedAt": "Cevaplandı · {{date}}",
     "approvedNotNotified": "Başvuru onaylandı ama esnafa bildirim gidemedi; kendisini ara.",
     "openDisputeWeb": "Uyuşmazlığı webde aç",
-    "listCapped": "İlk {{count}} kayıt gösteriliyor; aramayı daralt."
+    "listCapped": "İlk {{count}} kayıt gösteriliyor; aramayı daralt.",
+    "broadcast": "Duyuru gönder"
   },
   "scan": {
     "open": "QR okut",
@@ -1235,6 +1236,61 @@
       "too_early": "Bekleme süresi dolmadı; misafir henüz gelmedi olarak işaretlenemez.",
       "server_error": "Sunucuda bir sorun oluştu; birazdan tekrar dene.",
       "http_404": "Bu işlem henüz kullanılamıyor; şimdilik web panelinden yapabilirsin."
+    }
+  },
+  "broadcast": {
+    "title": "Duyuru gönder",
+    "operationalOnly": "Yalnızca operasyonel duyurular: bakım, kesinti, çalışma saati ya da kural değişikliği. Kampanya ve pazarlama mesajları henüz desteklenmiyor; onlar için kullanıcıdan ticari ileti onayı gerekiyor.",
+    "audienceLabel": "Kime",
+    "audience": {
+      "PARTNERS": "Esnaflar",
+      "GUESTS": "Misafirler",
+      "ALL": "Herkes"
+    },
+    "pickAudience": "Önce kime gideceğini seç.",
+    "previewLine": "{{users}} kişiye ({{devices}} cihaz) gidecek",
+    "previewLoading": "Hesaplanıyor…",
+    "previewFailed": "Alıcı sayısı alınamadı; aşağı çekip yenile.",
+    "titleTr": "Başlık (Türkçe)",
+    "bodyTr": "Metin (Türkçe)",
+    "englishToggle": "İngilizce metin ekle (isteğe bağlı)",
+    "englishHint": "Telefonu Türkçe dışında bir dilde olanlar İngilizceyi alır. Boş bırakırsan herkes Türkçeyi alır.",
+    "titleEn": "Başlık (İngilizce)",
+    "bodyEn": "Metin (İngilizce)",
+    "sendTest": "Kendime test gönder",
+    "testSentTitle": "Test gönderildi",
+    "testSentBody_one": "{{count}} cihazına gönderildi.",
+    "testSentBody_other": "{{count}} cihazına gönderildi.",
+    "testNoDevices": "Bu hesapta bildirim alan cihaz yok; test gönderilmedi.",
+    "reason": "Gerekçe",
+    "reasonHint": "Denetim kaydına girer; en az {{min}} karakter.",
+    "send": "Gönder",
+    "confirmTitle": "Duyuruyu gönder?",
+    "confirmBody": "{{audience}} · {{devices}} cihaz. Gönderilen bildirim geri alınamaz.",
+    "confirmSend": "Evet, gönder",
+    "sentTitle": "Duyuru sıraya alındı",
+    "sentBody_one": "{{count}} cihaza gönderiliyor. İlerlemeyi aşağıdaki listeden izleyebilirsin.",
+    "sentBody_other": "{{count}} cihaza gönderiliyor. İlerlemeyi aşağıdaki listeden izleyebilirsin.",
+    "newBroadcast": "Yeni duyuru",
+    "failedTitle": "Gönderilemedi",
+    "historyTitle": "Son duyurular",
+    "historyEmpty": "Henüz duyuru gönderilmedi.",
+    "counts": "{{sent}} gitti · {{failed}} gitmedi · {{targeted}} hedef",
+    "status": {
+      "QUEUED": "Sırada",
+      "SENDING": "Gönderiliyor",
+      "DONE": "Tamamlandı",
+      "FAILED": "Başarısız"
+    },
+    "errors": {
+      "invalid_audience": "Kime gideceğini seç.",
+      "invalid_title": "Başlık 1-60 karakter olmalı (İngilizce eklediysen onun da).",
+      "invalid_body": "Metin 1-180 karakter olmalı (İngilizce eklediysen onun da).",
+      "reason_required": "Gerekçe en az 5 karakter olmalı.",
+      "too_soon_one": "Az önce bir duyuru gönderildi. {{count}} dakika sonra tekrar dene.",
+      "too_soon_other": "Az önce bir duyuru gönderildi. {{count}} dakika sonra tekrar dene.",
+      "forbidden": "Bu işlem için yönetici olman gerekiyor; kullanıcı olarak görüntülerken yapılamaz.",
+      "no_recipients": "Bu kitlede bildirim alan cihaz yok."
     }
   }
 }
