@@ -1,5 +1,6 @@
 import { describe, it, expect, afterEach } from "vitest";
-import { formatInstant } from "@/lib/format-datetime";
+import { FULL_DATE_TIME, formatInstant } from "@/lib/format-datetime";
+import { bcp47ForUiLocale } from "@/lib/intl-locale";
 
 /**
  * `formatInstant`: an her zaman platform diliminde (İstanbul), etkin dilde.
@@ -43,6 +44,15 @@ describe("formatInstant", () => {
       outputs.add(formatInstant(NEAR_MIDNIGHT, "tr"));
     }
     expect(outputs.size).toBe(1);
+  });
+
+  it("FULL_DATE_TIME seçeneksiz toLocaleString ile aynı metni verir (tam yıl, saniye)", () => {
+    for (const l of ["tr", "en", "de", "fr", "ja", "fa"]) {
+      const legacy = new Date(NEAR_MIDNIGHT).toLocaleString(bcp47ForUiLocale(l), {
+        timeZone: "Europe/Istanbul",
+      });
+      expect(formatInstant(NEAR_MIDNIGHT, l, FULL_DATE_TIME), l).toBe(legacy);
+    }
   });
 
   it("açık dilim verilirse onu kullanır", () => {
