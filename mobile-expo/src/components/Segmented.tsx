@@ -8,7 +8,8 @@ export function Segmented<T extends string>({
   onChange,
 }: {
   options: { value: T; label: string }[];
-  value: T;
+  /** `null`: hicbiri secili degil (secimin bilincli yapilmasi gereken yer, ornegin duyuru kitlesi). */
+  value: T | null;
   onChange: (v: T) => void;
 }) {
   return (
