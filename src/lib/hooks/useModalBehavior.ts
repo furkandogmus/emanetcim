@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useRef } from "react";
+import { isTopModal, modalDialog, popModal, pushModal, resolveNewDialog } from "@/lib/modal-inert";
 
 /**
  * Bir modalın klavye ve odak davranışı — tek yerde.
@@ -14,7 +15,7 @@ import { useEffect, useRef } from "react";
  * Kalıp kod tabanında zaten vardı (`DateTimePicker` Escape'i işliyor); eksik olan
  * onu paylaşılan bir yere almaktı.
  *
- * Beş şey yapar:
+ * Altı şey yapar:
  *  1. **Escape kapatır.** Klavye kullanıcısının çıkış yolu.
  *  2. **Arka plan kaydırması kilitlenir.** Mobilde modal açıkken arkadaki sayfanın
  *     kayması, kullanıcının yerini kaybetmesine yol açar.
@@ -32,6 +33,9 @@ import { useEffect, useRef } from "react";
  *     mantığı olmayanlarda odak, tetikleyen düğmede (artık arka planda, görsel
  *     olarak erişilemez) kalıyordu — Tab'a basana kadar modal açılmamış gibi
  *     davranıyordu.
+ *  6. **Arka plan `inert` olur** (`src/lib/modal-inert.ts`): ekran okuyucunun
+ *     sanal imleci de modaldan çıkamaz. İç içe modallarda Escape/Tab yalnızca
+ *     en üsttekinde çalışır; eskiden Escape ikisini birden kapatıyordu.
  */
 const FOCUSABLE_SELECTOR =
   'a[href], button:not([disabled]), textarea:not([disabled]), input:not([disabled]), select:not([disabled]), [tabindex]:not([tabindex="-1"])';
@@ -94,7 +98,10 @@ function etkinDiyalog(): HTMLElement | null {
         ? (document.activeElement as HTMLElement | null)
         : null;
 
+    const modalId = pushModal(resolveNewDialog() ?? etkinDiyalog());
+
     const onKeyDown = (e: KeyboardEvent) => {
+      if (!isTopModal(modalId)) return;
       if (e.key === "Escape") {
         e.stopPropagation();
         onCloseRef.current();
@@ -102,7 +109,7 @@ function etkinDiyalog(): HTMLElement | null {
       }
       if (e.key !== "Tab") return;
 
-      const dialog = etkinDiyalog();
+      const dialog = modalDialog(modalId) ?? etkinDiyalog();
       if (!dialog) return;
 
       const focusable = dialog.querySelectorAll<HTMLElement>(FOCUSABLE_SELECTOR);
@@ -121,7 +128,7 @@ function etkinDiyalog(): HTMLElement | null {
     };
     document.addEventListener("keydown", onKeyDown);
 
-    const dialogOnOpen = etkinDiyalog();
+    const dialogOnOpen = modalDialog(modalId) ?? etkinDiyalog();
     if (dialogOnOpen && !dialogOnOpen.contains(document.activeElement)) {
       const firstFocusable = dialogOnOpen.querySelector<HTMLElement>(FOCUSABLE_SELECTOR);
       firstFocusable?.focus();
@@ -137,6 +144,8 @@ function etkinDiyalog(): HTMLElement | null {
     return () => {
       document.removeEventListener("keydown", onKeyDown);
       document.body.style.overflow = previousOverflow;
+      // SIRA ONEMLI: `inert` once kalkmali; `inert` icindeki acici odak alamaz.
+      popModal(modalId);
       previouslyFocused.current?.focus?.();
     };
     // `onClose` bilerek burada degil -- yukaridaki `onCloseRef`e bakin.
