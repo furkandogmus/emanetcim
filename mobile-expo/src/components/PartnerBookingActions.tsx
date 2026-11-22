@@ -360,7 +360,7 @@ function PartnerManageActions({ booking }: { booking: BookingDetail }) {
   const body = partnerCancelBody(reason, note);
 
   function submitCancel() {
-    if (!body) return;
+    if (!body || cancel.isPending) return;
     setSheetError(null);
     cancel.mutate(body, {
       onSuccess: () => {
@@ -378,6 +378,7 @@ function PartnerManageActions({ booking }: { booking: BookingDetail }) {
         text: t("bookingActions.partner.noShowConfirm"),
         style: "destructive",
         onPress: () => {
+          if (noShow.isPending) return;
           setError(null);
           noShow.mutate(undefined, {
             onSuccess: () => notify(t("bookingActions.partner.noShowDoneTitle"), t("bookingActions.partner.noShowDoneBody")),

@@ -233,7 +233,7 @@ function AdminActions({ b }: { b: AdminBookingDetail }) {
   const cancel = action === "cancel";
 
   function submit() {
-    if (!action) return;
+    if (!action || mutation.isPending) return;
     setError(null);
     mutation.mutate(
       { action, note },

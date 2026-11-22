@@ -199,10 +199,15 @@ export function BookingDetailView({ id, mode }: { id: string; mode: "guest" | "p
     router.push(`/shop/${b.shopId}`);
   }
 
+  function submitCancel() {
+    if (cancel.isPending) return;
+    cancel.mutate();
+  }
+
   function confirmCancel() {
     Alert.alert(t("bookings.cancelTitle"), t("bookings.cancelBody"), [
       { text: t("common.cancel"), style: "cancel" },
-      { text: t("bookings.cancelConfirm"), style: "destructive", onPress: () => cancel.mutate() },
+      { text: t("bookings.cancelConfirm"), style: "destructive", onPress: submitCancel },
     ]);
   }
 
@@ -213,7 +218,7 @@ export function BookingDetailView({ id, mode }: { id: string; mode: "guest" | "p
   function confirmCloseExpired() {
     Alert.alert(t("bookings.closeExpiredTitle"), t("bookings.closeExpiredBody"), [
       { text: t("common.cancel"), style: "cancel" },
-      { text: t("bookings.closeExpiredConfirm"), style: "destructive", onPress: () => cancel.mutate() },
+      { text: t("bookings.closeExpiredConfirm"), style: "destructive", onPress: submitCancel },
     ]);
   }
 
