@@ -249,6 +249,8 @@ export async function closeExpiredBookingsForGuest(userId: string, now: Date = n
   for (const { id } of rows) {
     const r = await cancelBooking(id, { silent: true, reason: 'expired_no_dropoff' });
     if (r.ok) closed++;
+    // Silme yine devam eder; kapanmayan kayit gece isinde tekrar denenir.
+    else logger.warn({ bookingId: id, userId, code: r.code }, 'account_delete_expired_close_failed');
   }
   return closed;
 }
