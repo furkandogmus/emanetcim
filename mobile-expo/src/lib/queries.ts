@@ -11,7 +11,7 @@ import { totalBags, type Bags } from "./search";
 import { partnerSearchTerm } from "./booking-search";
 import { useDebouncedValue } from "./use-debounced-value";
 import { BROADCAST_POLL_MS, hasActiveBroadcast } from "./broadcast";
-import type { AdminApplication, AdminStats, BookingDetail, ContactMessage, PartnerEarnings, PartnerSealsResponse, PartnerShop, BookingSummary, NearbyShop, PartnerBookingsResponse, ShopDetail, ShopReviewsPage, PartnerShopSettings, PartnerSchedule, PartnerDashboard, AdminOverview, AdminBookingFilter, AdminBookingCounts, AdminBookingsResponse, AdminBookingDetail, AdminShop, AdminShopDetail, AdminUser, AdminBroadcast, BroadcastAudience, BroadcastPreview, CityCoverage, AppConfig, PartnerCancelRequest } from "./types";
+import type { AdminApplication, AdminStats, BookingDetail, ContactMessage, PartnerEarnings, PartnerSealsResponse, PartnerShop, BookingSummary, NearbyShop, PartnerBookingsResponse, ShopDetail, ShopReviewsPage, PartnerShopSettings, PartnerSchedule, PartnerDashboard, AdminOverview, AdminBookingFilter, AdminBookingCounts, AdminBookingsResponse, AdminBookingDetail, AdminShop, AdminShopDetail, AdminUser, AdminBroadcast, BroadcastAudience, BroadcastPreview, CityCoverage, AppConfig, PartnerCancelRequest, AdminAuditPage, AdminUserDetail } from "./types";
 
 export const keys = {
   myBookings: ["bookings", "me"] as const,
@@ -472,4 +472,34 @@ export function usePartnerCancel(id: string) {
 
 export function usePartnerNoShow(id: string) {
   return useMutation(partnerNoShowOptions(useQueryClient(), id));
+}
+
+/* ===================== Admin kullanici yonetimi ===================== */
+
+export const adminUserKey = (id: string) => [...keys.admin, "users", "detail", id] as const;
+
+export function useAdminUser(id: string) {
+  return useQuery({
+    queryKey: adminUserKey(id),
+    queryFn: () => api<{ user: AdminUserDetail }>(`/admin/users/${encodeURIComponent(id)}`).then((r) => r.user),
+    enabled: !!id,
+  });
+}
+
+/** Denetim kaydi: onek ve kullanici degisince anahtar degisir; ilk sayfa onekleri tasir. */
+export function useAdminAuditLog(prefix: string | null, userId: string | null) {
+  return useInfiniteQuery({
+    queryKey: [...keys.admin, "audit-log", prefix ?? "", userId ?? ""],
+    initialPageParam: undefined as string | undefined,
+    queryFn: ({ pageParam }) => {
+      const qs = new URLSearchParams({
+        ...(prefix ? { action: prefix } : {}),
+        ...(userId ? { userId } : {}),
+        ...(pageParam ? { cursor: pageParam } : {}),
+      });
+      return api<AdminAuditPage>(`/admin/audit-log?${qs}`);
+    },
+    getNextPageParam: nextCursorOf,
+    placeholderData: (prev) => prev,
+  });
 }

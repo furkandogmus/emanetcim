@@ -11,6 +11,9 @@ export default function AdminLayout() {
       <Stack.Screen name="admin/booking/[id]" />
       <Stack.Screen name="admin/shop/[id]" />
       <Stack.Screen name="admin/users" />
+      {/* Kullanici yonetimi: detay + denetim kaydi */}
+      <Stack.Screen name="admin/user/[id]" />
+      <Stack.Screen name="admin/audit-log" />
     </Stack>
   );
 }
