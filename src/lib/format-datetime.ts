@@ -60,6 +60,16 @@ export function bookingTimeZone(shop: { timezone?: string | null } | null | unde
 /** `formatInstant` seçenekleri: `timeZone` bilerek DIŞARIDA, ayrı parametre. */
 export type InstantFormatOptions = Omit<Intl.DateTimeFormatOptions, "timeZone">;
 
+/** Seçeneksiz `toLocaleString()` ile aynı alanlar: tam yıl + saniyeli saat. */
+export const FULL_DATE_TIME: InstantFormatOptions = {
+  year: "numeric",
+  month: "numeric",
+  day: "numeric",
+  hour: "numeric",
+  minute: "numeric",
+  second: "numeric",
+};
+
 const DEFAULT_INSTANT_OPTIONS: InstantFormatOptions = {
   dateStyle: "short",
   timeStyle: "short",
