@@ -1,7 +1,7 @@
 import { setRequestLocale } from "next-intl/server";
 import { auth } from "@/auth";
 import { redirect } from "next/navigation";
-import prisma from "@/lib/db";
+import { listCouponsForAdmin } from "@/services/CouponService";
 import { moneyToNumber } from "@/lib/money";
 import AdminCouponsClient from "@/components/admin/AdminCouponsClient";
 
@@ -28,9 +28,7 @@ export default async function AdminCouponsPage({
     redirect(`/${locale}/login`);
   }
 
-  const coupons = await prisma.coupon.findMany({
-    orderBy: [{ isActive: "desc" }, { createdAt: "desc" }],
-  });
+  const coupons = await listCouponsForAdmin();
 
   return (
     <AdminCouponsClient

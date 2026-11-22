@@ -25,3 +25,6 @@ export type DisputeStatus = (typeof DISPUTE_STATUSES)[number];
 
 /** Yeni açılan uyuşmazlığın durumu. */
 export const DISPUTE_INITIAL_STATUS: DisputeStatus = "OPEN";
+
+/** Yonetici notu ust siniri (web formu, web action ve mobil uc ayni sinir). */
+export const DISPUTE_ADMIN_NOTE_MAX = 2000;
