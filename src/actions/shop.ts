@@ -5,6 +5,7 @@ import { revalidatePathAllLocales } from "@/lib/revalidate-locales";
 import { z } from "zod";
 import { requireUser, requirePartner } from "@/lib/action-auth";
 import { shopService } from "@/services/ShopService";
+import { getClientIpOrNull } from "@/lib/client-ip";
 
 const hm = /^\d{1,2}:\d{2}$/;
 
@@ -93,6 +94,8 @@ export async function updateShopImageAction(formData: FormData) {
     shopId,
     actorId: auth.actor.id,
     actorRole: auth.actor.role,
+    // Yonetici esnaf adina yukluyorsa servis denetim kaydina IP ile yazar.
+    actorIp: await getClientIpOrNull(),
     bytes,
   });
 
