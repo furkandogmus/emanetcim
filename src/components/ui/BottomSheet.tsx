@@ -58,7 +58,9 @@ export default function BottomSheet({
    * okuyucuya sayfanın geri kalanı yokmuş gibi yalan söylerdi.
    */
   const isModal = showOverlay;
-  useModalBehavior({ open: open && isModal, onClose });
+  // Kok dis kapsayici: karartma diyalogun kardesi ve arka plan inert yapilirken modalin parcasi kalmali.
+  const rootRef = useRef<HTMLDivElement>(null);
+  useModalBehavior({ open: open && isModal, onClose, ref: rootRef });
 
   const sheetRef = useRef<HTMLDivElement>(null);
   const [currentSnap, setCurrentSnap] = useState(initialSnap);
@@ -173,8 +175,7 @@ export default function BottomSheet({
     <div
       inert={!open}
       aria-hidden={!open}
-      // Karartma diyaloğun kardeşi: arka plan `inert` yapılırken o da modalın parçası sayılmalı (modal-inert.ts).
-      data-modal-root=""
+      ref={rootRef}
       className={`fixed inset-0 z-40 transition-opacity duration-300 ${open ? "opacity-100 pointer-events-auto" : "opacity-0 pointer-events-none"}`}
     >
       {showOverlay && (

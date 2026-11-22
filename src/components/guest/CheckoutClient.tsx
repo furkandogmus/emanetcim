@@ -1,7 +1,7 @@
 "use client";
 
 import type { ClosureRange, WeeklyDay } from "@/lib/shop-schedule";
-import { Fragment, useEffect, useMemo, useState } from "react";
+import { Fragment, useEffect, useMemo, useState, useRef } from "react";
 import { useLocale, useTranslations } from "next-intl";
 import QRCode from "qrcode";
 import {
@@ -137,9 +137,11 @@ export default function CheckoutClient({
    * Modal klavye davranışı: Escape kapatır, arka plan kaydırması kilitlenir,
    * kapanınca odak açan öğeye döner. Bu modal dönüşüm yolunun ortasında.
    */
+  const modalRef = useRef<HTMLDivElement>(null);
   useModalBehavior({
     open: showAuthModal,
     onClose: () => setShowAuthModal(false),
+    ref: modalRef,
   });
 
   const [bagS, setBagS] = useState(0);
@@ -919,7 +921,7 @@ export default function CheckoutClient({
       </footer>
 
       {showAuthModal && (
-        <div className="fixed inset-0 bg-black/40 backdrop-blur-sm z-[100] flex items-center justify-center p-4 animate-fade-in" onClick={() => setShowAuthModal(false)}>
+        <div ref={modalRef} className="fixed inset-0 bg-black/40 backdrop-blur-sm z-[100] flex items-center justify-center p-4 animate-fade-in" onClick={() => setShowAuthModal(false)}>
           <div
             role="dialog"
             aria-modal="true"

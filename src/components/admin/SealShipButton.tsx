@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useState, useTransition } from "react";
+import { useCallback, useState, useTransition, useRef } from "react";
 import { shipSealRequestAction } from "@/actions/seal";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
@@ -26,7 +26,8 @@ export default function SealShipButton({ requestId, requestedQuantity }: { reque
   }
 
   const closeModal = useCallback(() => setOpen(false), []);
-  useModalBehavior({ open, onClose: closeModal });
+  const modalRef = useRef<HTMLDivElement>(null);
+  useModalBehavior({ open, onClose: closeModal, ref: modalRef });
 
   function handleClose() {
     if (pending) return;
@@ -87,7 +88,7 @@ export default function SealShipButton({ requestId, requestedQuantity }: { reque
       </button>
 
       {open && (
-        <div
+        <div ref={modalRef}
           className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4"
           onClick={(e) => {
             if (e.target === e.currentTarget) handleClose();

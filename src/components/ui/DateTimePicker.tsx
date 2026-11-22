@@ -281,7 +281,13 @@ export default function DateTimePicker({
     sayfaya gecebiliyordu; kapaninca odak tetikleyici alana DONMÜYORDU.
     Mobil zaten `BottomSheet` uzerinden bu hook'u kullaniyor.
   */
-  useModalBehavior({ open: open && !isMobile, onClose: () => setOpen(false) });
+  // Acilir takvim modal DEGIL: sayfa inert yapilmaz (yazilan alan ve dis tiklama calismali).
+  useModalBehavior({
+    open: open && !isMobile,
+    onClose: () => setOpen(false),
+    ref: popRef,
+    inertBackground: false,
+  });
 
 
   /**

@@ -131,7 +131,8 @@ export default function QRScanner({ onResult, onClose }: QRScannerProps) {
    * izni reddedilmis bir klavye kullanicisi icin cikissiz bir ekran.
    * Kapat dugmesinin adi da sabit Turkce yazilmisti; urun 14 dil destekliyor.
    */
-  useModalBehavior({ open: true, onClose });
+  const modalRef = useRef<HTMLDivElement>(null);
+  useModalBehavior({ open: true, onClose, ref: modalRef });
 
   const html5Ref = useRef<Html5Qrcode | null>(null);
   const onResultRef = useRef(onResult);
@@ -269,7 +270,7 @@ export default function QRScanner({ onResult, onClose }: QRScannerProps) {
   }, [runStart, stopAndClear]);
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm p-4">
+    <div ref={modalRef} className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm p-4">
       <div
         role="dialog"
         aria-modal="true"

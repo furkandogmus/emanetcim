@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useTransition } from "react";
+import { useState, useTransition, useRef } from "react";
 import { useTranslations } from "next-intl";
 import { toast } from "sonner";
 import { Check, Copy, KeyRound, Loader2, MessageCircle, RefreshCw, X } from "lucide-react";
@@ -42,7 +42,8 @@ export default function AdminSetPasswordDialog({
     onClose();
   };
 
-  useModalBehavior({ open: target !== null, onClose: close });
+  const modalRef = useRef<HTMLDivElement>(null);
+  useModalBehavior({ open: target !== null, onClose: close, ref: modalRef });
 
   if (!target) return null;
 
@@ -79,7 +80,7 @@ export default function AdminSetPasswordDialog({
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4" onClick={close}>
+    <div ref={modalRef} className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4" onClick={close}>
       <div
         role="dialog"
         aria-modal="true"

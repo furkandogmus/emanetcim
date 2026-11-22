@@ -29,7 +29,8 @@ export default function ShopGallery({ images, shopName }: Props) {
    * yani erişilebilir adları yoktu.
    */
   const closeLightbox = useCallback(() => setLightboxOpen(false), []);
-  useModalBehavior({ open: lightboxOpen, onClose: closeLightbox });
+  const modalRef = useRef<HTMLDivElement>(null);
+  useModalBehavior({ open: lightboxOpen, onClose: closeLightbox, ref: modalRef });
 
   const dist = (t: React.TouchEvent) => {
     const dx = t.touches[0].clientX - t.touches[1].clientX;
@@ -142,7 +143,7 @@ export default function ShopGallery({ images, shopName }: Props) {
       )}
 
       {lightboxOpen && (
-        <div
+        <div ref={modalRef}
           role="dialog"
           aria-modal="true"
           aria-label={shopName}

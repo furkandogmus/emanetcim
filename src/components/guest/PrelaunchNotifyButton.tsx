@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useTransition } from "react";
+import { useState, useTransition, useRef } from "react";
 import { useTranslations } from "next-intl";
 import { toast } from "sonner";
 import { useModalBehavior } from "@/lib/hooks/useModalBehavior";
@@ -40,7 +40,8 @@ export default function PrelaunchNotifyButton({
   const [done, setDone] = useState(false);
   const [pending, startTransition] = useTransition();
 
-  useModalBehavior({ open, onClose: () => setOpen(false) });
+  const modalRef = useRef<HTMLDivElement>(null);
+  useModalBehavior({ open, onClose: () => setOpen(false), ref: modalRef });
 
   /**
    * Yapiskan cubuktaki dugme artik MODAL ACMIYOR, sayfadaki talep paneline
@@ -105,7 +106,7 @@ export default function PrelaunchNotifyButton({
       </button>
 
       {open && (
-        <div
+        <div ref={modalRef}
           className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4"
           onClick={(e) => {
             if (e.target === e.currentTarget) setOpen(false);

@@ -1,7 +1,7 @@
 "use client";
 
 import type { ClosureRange, WeeklyDay } from "@/lib/shop-schedule";
-import { useState } from "react";
+import { useState, useRef } from "react";
 import { useLocale, useTranslations } from "next-intl";
 import { X } from "lucide-react";
 import StayDaysPicker from "@/components/guest/StayDaysPicker";
@@ -70,7 +70,8 @@ export default function BookingModifyModal({
   const tCommon = useTranslations("Common");
   const errorText = useActionErrorText();
   // Escape kapatır, arka plan kaydırması kilitlenir, odak geri verilir.
-  useModalBehavior({ open: true, onClose });
+  const modalRef = useRef<HTMLDivElement>(null);
+  useModalBehavior({ open: true, onClose, ref: modalRef });
   const locale = useLocale();
   /**
    * Ödeme metni aktif sağlayıcıya göre seçilir. Bu satır eskiden koşulsuz
@@ -181,7 +182,7 @@ export default function BookingModifyModal({
   };
 
   return (
-    <div
+    <div ref={modalRef}
       className="fixed inset-0 z-[100] flex items-end sm:items-center justify-center p-0 sm:p-4 bg-black/50"
       role="dialog"
       aria-modal="true"
