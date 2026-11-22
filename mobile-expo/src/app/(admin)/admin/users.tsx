@@ -28,7 +28,7 @@ const open = (url: string) => void Linking.openURL(url).catch(() => undefined);
 
 /**
  * Kullanici arama ve yasaklama. Yasak sunucuda token surumunu artirir: kisinin acik
- * oturumlari aninda duser. Rol degisikligi ve silme webde kalir (iki admin onayi istiyor).
+ * oturumlari aninda duser. Rol, sifre, e-posta ve silme islemleri kullanici kartinda (`user/[id]`).
  */
 export default function AdminUsersScreen() {
   const { t } = useTranslation();
@@ -149,6 +149,11 @@ export default function AdminUsersScreen() {
                     />
                   ) : null}
                 </View>
+                <Button
+                  variant="secondary"
+                  title={t("adminUsers.manage")}
+                  onPress={() => router.push(`/admin/user/${encodeURIComponent(u.id)}`)}
+                />
                 {u.bookingCount > 0 ? (
                   <Button
                     variant="secondary"

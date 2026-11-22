@@ -599,3 +599,31 @@ export type AdminBroadcast = {
   finishedAt: string | null;
   createdByName: string;
 };
+
+/* ===================== Admin kullanici yonetimi ===================== */
+
+/** `GET /admin/users/[id]` (sunucu `toMobileAdminUserDetail`). */
+export type AdminUserDetail = AdminUser & {
+  emailVerified: boolean;
+  hasPassword: boolean;
+  /** Ikinci admin onayini bekleyen rol istegi. */
+  pendingRole: Role | null;
+};
+
+/** `POST /admin/users/[id]/role`. */
+export type AdminRoleChangeResponse = { ok: true; status: "applied" | "pending_approval" };
+
+/** `GET /admin/audit-log` satiri (sunucu `toMobileAdminAuditEntry`). */
+export type AdminAuditEntry = {
+  id: string;
+  action: string;
+  actorRole: string;
+  actorUserId: string | null;
+  actorLabel: string | null;
+  entityType: string | null;
+  entityId: string | null;
+  metadata: string | null;
+  createdAt: string;
+};
+
+export type AdminAuditPage = { entries: AdminAuditEntry[]; nextCursor: string | null; prefixes?: string[] };
