@@ -7,9 +7,11 @@
  */
 import { beforeAll, describe, expect, it, jest } from "@jest/globals";
 import { Keyboard } from "react-native";
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { fireEvent, render, screen } from "@testing-library/react-native";
 
 import AdminBookingScreen from "@/app/(admin)/admin/booking/[id]";
+import { BookingDetailView } from "@/components/BookingDetailView";
 import i18n from "@/lib/i18n";
 import type { AdminBookingDetail } from "@/lib/types";
 
@@ -52,10 +54,40 @@ const booking = {
   couponCode: null,
   paymentStatus: null,
 } as unknown as AdminBookingDetail;
+const partnerBooking = {
+  id: "b2",
+  shopId: "s1",
+  shopName: "Dukkan",
+  checkInTime: "2099-01-01T09:00:00Z",
+  checkOutTime: "2099-01-01T15:00:00Z",
+  bagCountS: 1,
+  bagCountM: 0,
+  bagCountXl: 0,
+  totalPrice: 100,
+  status: "APPROVED",
+  qrCodeToken: null,
+  guestName: "Misafir",
+  latitude: null,
+  longitude: null,
+  shopPhone: "",
+  seals: [],
+};
 jest.mock("@/lib/queries", () => ({
   useAdminBooking: () => ({ isLoading: false, data: booking }),
   useAdminBookingAction: () => ({ mutate: mockMutate, isPending: false }),
+  useBooking: () => ({ isLoading: false, isRefetching: false, data: partnerBooking, refetch: jest.fn() }),
+  useOnlinePayments: () => false,
+  isActiveBooking: () => true,
+  usePartnerShop: () => ({ data: undefined }),
+  usePartnerCancel: () => ({ mutate: mockMutate, isPending: false }),
+  usePartnerNoShow: () => ({ mutate: jest.fn(), isPending: false }),
 }));
+jest.mock("@/lib/search", () => ({ useSearch: () => ({}), defaultWindow: () => ({}) }));
+jest.mock("@/lib/offline-tickets", () => ({
+  loadOfflineTicket: async () => null,
+  saveOfflineTicket: async () => undefined,
+}));
+jest.mock("@/components/BagRevisionCard", () => ({ BagRevisionCard: () => null }));
 
 type Node = { type: unknown; props: Record<string, unknown>; parent: Node | null };
 
@@ -88,6 +120,30 @@ describe("neden paneli: klavye acikken onay", () => {
     const note = screen.getByLabelText("Neden");
     await fireEvent(note, "focus");
     await fireEvent.changeText(note, "misafir istedi");
+
+    await pressWithKeyboardOpen(screen.getByRole("button", { name: "İptal et" }) as unknown as Node);
+
+    expect(mockMutate).toHaveBeenCalledTimes(1);
+    expect(order).toEqual(["mutate", "dismiss"]);
+    dismiss.mockRestore();
+  });
+
+  it("esnaf iptalinde (rezervasyon detayi) ilk dokunus islemi calistirir, klavyeyi sonra kapatir", async () => {
+    const order: string[] = [];
+    mockMutate.mockReset();
+    mockMutate.mockImplementation(() => void order.push("mutate"));
+    const dismiss = jest.spyOn(Keyboard, "dismiss").mockImplementation(() => void order.push("dismiss"));
+
+    await render(
+      <QueryClientProvider client={new QueryClient()}>
+        <BookingDetailView id="b2" mode="partner" />
+      </QueryClientProvider>,
+    );
+    await fireEvent.press(screen.getByRole("button", { name: "Rezervasyonu iptal et" }));
+    await fireEvent.press(screen.getAllByRole("radio")[0]);
+    const note = screen.getByLabelText("Açıklama");
+    await fireEvent(note, "focus");
+    await fireEvent.changeText(note, "dukkan kapali");
 
     await pressWithKeyboardOpen(screen.getByRole("button", { name: "İptal et" }) as unknown as Node);
 
