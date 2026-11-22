@@ -10,6 +10,7 @@ import { AppText, Banner, Button, Card, IconButton } from "@/components/ui";
 import { api, ApiError } from "@/lib/api";
 import { errorMessage } from "@/lib/errors";
 import { formatDay } from "@/lib/format";
+import { withShop } from "@/lib/partner-shop";
 import { cellOf, wallInstant } from "@/lib/time";
 import type { PartnerSchedule, ScheduleConflict, ScheduleDay, ShopClosure } from "@/lib/types";
 import { notify } from "@/lib/notify";
@@ -58,11 +59,14 @@ function conflictsOf(e: unknown): ScheduleConflict[] {
 
 /**
  * Gun bazli saatler, 7/24 ve izinler; esnaf ve yonetici ekrani ayni formu kullanir.
- * `path(query)` uc adresini kurar (esnafta `withShop`, yoneticide `admin/shops/:id`).
+ * `basePath` duz metin olarak verilir (esnaf `/partner/shop/schedule` + `shopId`, yonetici
+ * `/admin/shops/:id/schedule`): alan taramasi (`mobile-shop-update-fields.test.ts`) govde
+ * alanlarini bu adreslerin ucunda arar. Fonksiyon yapilirsa tarama bu cagrilari goremez.
  */
 export function ScheduleEditor({
   schedule,
-  path,
+  basePath,
+  shopId = null,
   invalidateKey,
   onOpenBooking,
   hint,
@@ -70,7 +74,9 @@ export function ScheduleEditor({
   readOnly = false,
 }: {
   schedule: PartnerSchedule;
-  path: (query?: string) => string;
+  basePath: string;
+  /** Cok dukkanli esnafin secimi (`withShop`); yonetici yolunda dukkan zaten adreste. */
+  shopId?: string | null;
   invalidateKey: readonly unknown[];
   onOpenBooking: (bookingId: string) => void;
   hint?: string;
@@ -79,6 +85,7 @@ export function ScheduleEditor({
 }) {
   const { t } = useTranslation();
   const queryClient = useQueryClient();
+  const url = (query?: string) => withShop(query ? `${basePath}?${query}` : basePath, shopId);
   const [open247, setOpen247] = useState(schedule.open247);
   const [days, setDays] = useState<ScheduleDay[]>(schedule.days);
   // Saat kaydi ve izin kaydi AYRI geri bildirim tasir: izin formu sayfanin dibinde,
@@ -105,7 +112,7 @@ export function ScheduleEditor({
 
   const saveHours = useMutation({
     mutationFn: (body: { open247: boolean; days: ScheduleDay[] }) =>
-      api(path(), { method: "PUT", body }),
+      api(url(), { method: "PUT", body: { open247: body.open247, days: body.days } }),
     onSuccess: () => {
       onDone();
       notify(t("schedule.saved"));
@@ -113,14 +120,15 @@ export function ScheduleEditor({
     onError: failWith(setHoursFeedback),
   });
 
+  // Bos not `undefined` kalir ve JSON'a girmez; anahtar govdede durur ki alan taramasi gorsun.
   const addClosure = useMutation({
     mutationFn: () =>
-      api(path(), {
+      api(url(), {
         method: "POST",
         body: {
           startDate: cellToIso(range.start),
           endDate: cellToIso(range.end),
-          ...(reason.trim() ? { reason: reason.trim() } : {}),
+          reason: reason.trim() || undefined,
         },
       }),
     onSuccess: () => {
@@ -133,7 +141,7 @@ export function ScheduleEditor({
 
   const removeClosure = useMutation({
     mutationFn: (id: string) =>
-      api(path(`closureId=${encodeURIComponent(id)}`), { method: "DELETE" }),
+      api(url(`closureId=${encodeURIComponent(id)}`), { method: "DELETE" }),
     onSuccess: onDone,
     onError: failWith(setClosureFeedback),
   });

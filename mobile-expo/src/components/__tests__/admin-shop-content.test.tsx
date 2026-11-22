@@ -142,7 +142,7 @@ describe("fotograf izgarasi", () => {
   const props = {
     image: "https://cdn/c.jpg",
     gallery: [{ id: "g1", url: "https://cdn/g1.jpg" }],
-    path: (sub: string) => `/admin/shops/s1${sub}`,
+    basePath: "/admin/shops/s1",
     onChanged: () => Promise.resolve(),
     errorNamespace: "adminShop",
   };
