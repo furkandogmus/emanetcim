@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
+import prisma from "@/lib/db";
 import { clientIpFromRequest } from "@/lib/client-ip";
 import logger from "@/lib/logger";
 import { forbidWhileImpersonating, requireMobileUser, requireRole } from "@/lib/mobile-auth";
@@ -13,18 +14,24 @@ import {
 } from "@/services/ShopScheduleService";
 import { revalidateShopContent } from "../revalidate";
 
+type Ctx = { params: Promise<{ id: string }> };
+
 /*
   Yonetici, esnaf adina calisma saatleri ve izin gunleri. Esnafin
   `partner/shop/schedule` ucu ve web `shop-schedule` action'lari ile AYNI servis
   ve ayni sema: cakisan rezervasyon kurali (409 + liste) yonetici icin de
   gecerli. Esnaf ucu yalnizca PARTNER'a acik kalir; bu uc yalnizca ADMIN'e.
 */
-async function gate(req: NextRequest, mutation: boolean) {
+/** Yetki, sonra dukkan: olmayan dukkana yazma servise hic inmez (izin ekleme FK hatasiyla 500 olurdu). */
+async function gate(req: NextRequest, params: Ctx["params"], mutation: boolean) {
   const auth = await requireMobileUser(req);
   if ("error" in auth) return { error: auth.error } as const;
   const forbid = requireRole(auth.user, ["ADMIN"]) ?? (mutation ? forbidWhileImpersonating(auth.user) : null);
   if (forbid) return { error: forbid } as const;
-  return { actor: { id: auth.user.id, role: auth.user.role, ip: clientIpFromRequest(req) } } as const;
+  const { id } = await params;
+  const shop = await prisma.shop.findUnique({ where: { id }, select: { id: true } });
+  if (!shop) return { error: NextResponse.json({ error: "not_found" }, { status: 404 }) } as const;
+  return { id, actor: { id: auth.user.id, role: auth.user.role, ip: clientIpFromRequest(req) } } as const;
 }
 
 function respond(res: SaveScheduleResult, shopId: string) {
@@ -38,22 +45,22 @@ function respond(res: SaveScheduleResult, shopId: string) {
   return NextResponse.json({ error: "invalid_input" }, { status: 400 });
 }
 
-type Ctx = { params: Promise<{ id: string }> };
 
 export async function GET(req: NextRequest, { params }: Ctx) {
-  const g = await gate(req, false);
+  const g = await gate(req, params, false);
   if ("error" in g) return g.error;
-  const { id } = await params;
+  const { id } = g;
   const view = await getScheduleView(id);
+  // Kapi ile bu okuma arasinda silinmis olabilir.
   if (!view) return NextResponse.json({ error: "not_found" }, { status: 404 });
   return NextResponse.json(view);
 }
 
 /** Haftalik saat + 7/24. */
 export async function PUT(req: NextRequest, { params }: Ctx) {
-  const g = await gate(req, true);
+  const g = await gate(req, params, true);
   if ("error" in g) return g.error;
-  const { id } = await params;
+  const { id } = g;
   try {
     const parsed = weeklyHoursSchema.safeParse(await req.json().catch(() => null));
     if (!parsed.success) return NextResponse.json({ error: "invalid_input" }, { status: 400 });
@@ -66,9 +73,9 @@ export async function PUT(req: NextRequest, { params }: Ctx) {
 
 /** Izin araligi ekler. */
 export async function POST(req: NextRequest, { params }: Ctx) {
-  const g = await gate(req, true);
+  const g = await gate(req, params, true);
   if ("error" in g) return g.error;
-  const { id } = await params;
+  const { id } = g;
   try {
     const parsed = closureInputSchema.safeParse(await req.json().catch(() => null));
     if (!parsed.success) return NextResponse.json({ error: "invalid_input" }, { status: 400 });
@@ -81,9 +88,9 @@ export async function POST(req: NextRequest, { params }: Ctx) {
 
 /** `?closureId=` ile izin araligini kaldirir. */
 export async function DELETE(req: NextRequest, { params }: Ctx) {
-  const g = await gate(req, true);
+  const g = await gate(req, params, true);
   if ("error" in g) return g.error;
-  const { id } = await params;
+  const { id } = g;
   const closureId = req.nextUrl.searchParams.get("closureId");
   if (!closureId) return NextResponse.json({ error: "invalid_input" }, { status: 400 });
   await removeClosure(id, closureId, g.actor);
