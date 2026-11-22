@@ -1008,6 +1008,8 @@
     "fullName": "氏名",
     "phone": "Phone",
     "reviews": "Reviews",
+    "reviewHiddenBadge": "非表示",
+    "reviewHiddenReason": "非表示の理由: {reason}",
     "noReviewsYet": "レビューはまだありません。",
     "messagesTitle": "Inbox",
     "messagesSearchPlaceholder": "Search...",

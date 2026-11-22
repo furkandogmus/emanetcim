@@ -52,6 +52,9 @@ interface AdminPartnerEditClientProps {
       rating: number;
       comment: string | null;
       createdAt: Date | string;
+      /** Mobil moderasyonla gizlenen yorum: misafire gorunmez, puana sayilmaz. */
+      hiddenAt?: Date | string | null;
+      hiddenReason?: string | null;
       guest: {
         name: string | null;
       };
@@ -353,6 +356,14 @@ export default function AdminPartnerEditClient({ shop, photoSection, scheduleSec
                           <div className="flex items-center gap-2">
                              <StarRating rating={review.rating} size={10} />
                              <span className="text-[10px] font-black text-gray-900">{review.guest.name}</span>
+                             {review.hiddenAt ? (
+                               <span
+                                 className="text-[10px] font-black uppercase rounded-full bg-gray-200 text-gray-700 px-2 py-0.5"
+                                 title={review.hiddenReason ? t("reviewHiddenReason", { reason: review.hiddenReason }) : undefined}
+                               >
+                                 {t("reviewHiddenBadge")}
+                               </span>
+                             ) : null}
                           </div>
                           {/*
                             KLAVYE ODAGI DA BUTONU GORUNUR YAPAR.
