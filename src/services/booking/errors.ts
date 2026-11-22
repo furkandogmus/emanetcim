@@ -34,7 +34,9 @@ export type BookingRejectionCode =
   | 'SHOP_PRELAUNCH'
   | 'SHOP_CLOSED_ON_DATE'
   /* Valiz sayisi ya da tutar anlamsiz (sifir, negatif). */
-  | 'INVALID_INPUT';
+  | 'INVALID_INPUT'
+  /* Hesapsiz rezervasyonda gecerli e-posta yok. */
+  | 'GUEST_EMAIL_REQUIRED';
 
 /** Dukkan kapasitesi secilen aralikta yetmiyor. */
 export class BookingCapacityExceededError extends BookingRejectedError {
@@ -102,6 +104,19 @@ export class BookingShopPrelaunchError extends BookingRejectedError {
 export class BookingInputInvalidError extends BookingRejectedError {
   constructor(message = 'Rezervasyon bilgileri geçersiz.') {
     super(message, 'INVALID_INPUT');
+  }
+}
+
+/**
+ * Hesapsiz (guestId = NULL) rezervasyon e-postasiz yaratilamaz.
+ *
+ * Yonetim (iptal, valiz duzeltmesi) e-posta + kodla acilir ve hesaba baglama
+ * dogrulanmis e-postayla yapilir: yalniz telefonlu misafir rezervasyonunu
+ * hicbir yoldan yonetemiyor, sonradan actigi hesaba da baglanamiyordu.
+ */
+export class BookingGuestEmailRequiredError extends BookingRejectedError {
+  constructor(message = 'Hesapsız rezervasyon için geçerli bir e-posta gerekli.') {
+    super(message, 'GUEST_EMAIL_REQUIRED');
   }
 }
 

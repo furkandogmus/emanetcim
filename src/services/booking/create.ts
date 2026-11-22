@@ -4,7 +4,11 @@
  * `BookingService`'ten ayrildi (2026-08-22): 1186 satirlik sinif bes ayri
  * yasam dongusu adimini tasiyordu. Sinif cephe olarak kaldi; davranis ayni.
  */
-import { BookingInputInvalidError, BookingShopClosedError } from '@/services/booking/errors';
+import {
+  BookingGuestEmailRequiredError,
+  BookingInputInvalidError,
+  BookingShopClosedError,
+} from '@/services/booking/errors';
 import { findClosedStayDay, isClosedAtStayTimes } from '@/services/ShopScheduleService';
 import { retryOnWriteConflict } from '@/lib/tx-retry';
 import { Booking, BookingStatus, Prisma } from '@prisma/client';
@@ -67,6 +71,22 @@ function assertBookingInput(data: CreateInitialBookingInput): void {
   }
 }
 
+const GUEST_EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+/**
+ * Hesapsiz rezervasyonun iletisim kapisi: e-posta ZORUNLU, telefon istege bagli.
+ * Adres kucuk harfe indirilir; yonetim bagi ve hesaba baglama onunla eslesir.
+ */
+function normalizeGuestContact(data: CreateInitialBookingInput): CreateInitialBookingInput {
+  if (data.guestId) return data;
+  const email = typeof data.guestEmail === 'string' ? data.guestEmail.trim().toLowerCase() : '';
+  if (!email || email.length > 320 || !GUEST_EMAIL_RE.test(email)) {
+    throw new BookingGuestEmailRequiredError();
+  }
+  const phone = typeof data.guestPhone === 'string' ? data.guestPhone.trim() : '';
+  return { ...data, guestEmail: email, guestPhone: phone || null };
+}
+
 /**
  * Ayni (misafir, Idempotency-Key) icin kayitli rezervasyon. Okuma: tasiyici
  * yanitini yeniden kurmak icin cagirir (kupon hakki almadan ONCE).
@@ -102,8 +122,9 @@ export async function createInitialBooking(data: CreateInitialBookingInput): Pro
   }
 }
 
-async function createInitialBookingOnce(data: CreateInitialBookingInput): Promise<Booking> {
-  assertBookingInput(data);
+async function createInitialBookingOnce(input: CreateInitialBookingInput): Promise<Booking> {
+  assertBookingInput(input);
+  const data = normalizeGuestContact(input);
   if (data.idempotencyKey && data.guestId) {
     const existing = await findBookingByIdempotencyKey(data.guestId, data.idempotencyKey);
     if (existing) throw new BookingIdempotentReplayError(existing);

@@ -59,14 +59,39 @@ export type GuestLookupClaims = { bookingId: string; email: string };
  */
 export async function signGuestLookupToken(
   claims: GuestLookupClaims,
+  /** Varsayilan 1 saat (kod+e-posta sorgusu). E-postadaki yonetim bagi daha uzun yasar. */
+  expiresAt?: Date,
 ): Promise<string> {
   return new SignJWT({ bookingId: claims.bookingId, email: claims.email })
     .setProtectedHeader({ alg: "HS256" })
     .setIssuer(JWT_ISSUER)
     .setAudience(JWT_AUDIENCE.guestLookup)
     .setIssuedAt()
-    .setExpirationTime("1h")
+    .setExpirationTime(expiresAt ?? "1h")
     .sign(guestLookupSecret());
+}
+
+const DAY_MS = 24 * 60 * 60 * 1000;
+
+/**
+ * Onay e-postasindaki "Rezervasyonunu yonet" bagi: AYNI token ailesi, ayni
+ * dogrulama (`authenticateGuestLookup`), tek rezervasyon + e-posta kapsami.
+ * Omur bitis + 1 gun: misafir teslim gunu de bagi acabilmeli; en az 1 saat.
+ */
+export async function signGuestManageLinkToken(params: {
+  bookingId: string;
+  email: string;
+  checkOutTime: Date;
+  now?: Date;
+}): Promise<string> {
+  const now = params.now ?? new Date();
+  const until = new Date(
+    Math.max(params.checkOutTime.getTime() + DAY_MS, now.getTime() + 60 * 60 * 1000),
+  );
+  return signGuestLookupToken(
+    { bookingId: params.bookingId, email: params.email.trim().toLowerCase() },
+    until,
+  );
 }
 
 export type GuestLookupAuth =

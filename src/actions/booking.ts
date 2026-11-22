@@ -69,13 +69,18 @@ export async function createBookingAction(data: CreateBookingInput) {
   const userId = session?.user?.id;
   const isGuest = !userId;
 
-  // Guest checkout validation
-  if (isGuest && !data.guestEmail && !data.guestPhone) {
+  /*
+    Hesapsiz checkout: e-posta ZORUNLU, telefon istege bagli. Asil kapi
+    serviste (`GUEST_EMAIL_REQUIRED`); burasi kupon hakki alinmadan erken donus.
+    `guestContactRequired` kodu korunuyor: istemci onu gorunce iletisim
+    modalini acar (oturumu checkout sirasinda dusen misafir).
+  */
+  if (isGuest && !data.guestEmail?.trim()) {
     return { success: false as const, error: "Errors.guestContactRequired" };
   }
 
   if (isGuest) {
-    if (data.guestEmail && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(data.guestEmail)) {
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(data.guestEmail?.trim() ?? "")) {
       return { success: false as const, error: "Errors.invalidEmail" };
     }
     if (data.guestPhone && data.guestPhone.trim().length < 10) {
@@ -231,11 +236,14 @@ export async function createBookingAction(data: CreateBookingInput) {
     });
 
     // Misafire onay e-postası
-    const recipientEmail = session?.user?.email ?? data.guestEmail;
+    const recipientEmail = session?.user?.email ?? booking.guestEmail ?? data.guestEmail;
     if (recipientEmail) {
       const locale = await getLocale();
       void notificationService
-        .notifyBookingSuccess(recipientEmail, booking.id, totalPrice, locale)
+        .notifyBookingSuccess(recipientEmail, booking.id, totalPrice, locale, {
+          // Hesapsiz misafir icin "Rezervasyonunu yonet" bagi (imzali, tek rezervasyon).
+          guestManage: isGuest ? { checkOutTime: booking.checkOutTime } : undefined,
+        })
         .catch((err) =>
           logger.error({ err, bookingId: booking.id }, "notify_booking_success_failed"),
         );
@@ -328,6 +336,8 @@ const BOOKING_REJECTION_TO_KEY: Record<BookingRejectionCode, string> = {
   SHOP_CLOSED_ON_DATE: "Errors.shopClosedOnDate",
   // Sifir/negatif valiz ya da negatif tutar: istek bozuk.
   INVALID_INPUT: "Errors.invalidData",
+  // Istemci bu anahtarda iletisim modalini acar.
+  GUEST_EMAIL_REQUIRED: "Errors.guestContactRequired",
 };
 
 const CANCEL_ERROR_TO_KEY: Record<CancelBookingErrorCode, string> = {
