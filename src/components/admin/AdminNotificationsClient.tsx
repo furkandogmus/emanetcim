@@ -5,6 +5,7 @@ import { ArrowLeft, Mail, Search, ChevronDown, ChevronUp, AlertTriangle } from "
 import { Link, useRouter } from "@/i18n/routing";
 import { useLocale, useTranslations } from "next-intl";
 import { bcp47ForUiLocale } from "@/lib/intl-locale";
+import { formatInstant } from "@/lib/format-datetime";
 
 type Log = {
   id: string;
@@ -50,7 +51,7 @@ export default function AdminNotificationsClient({
   }
 
   function fmt(iso: string) {
-    return new Date(iso).toLocaleString(dateLocale, {
+    return formatInstant(iso, dateLocale, {
       day: "2-digit",
       month: "short",
       year: "numeric",

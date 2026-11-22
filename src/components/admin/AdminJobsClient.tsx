@@ -6,6 +6,7 @@ import { Link } from "@/i18n/routing";
 import { useLocale, useTranslations } from "next-intl";
 import { bcp47ForUiLocale } from "@/lib/intl-locale";
 import type { JobHealthReport } from "@/services/JobHealthService";
+import { formatInstant } from "@/lib/format-datetime";
 
 type Run = {
   id: string;
@@ -45,7 +46,7 @@ export default function AdminJobsClient({
 
   function fmt(iso: string | null) {
     if (!iso) return "—";
-    return new Date(iso).toLocaleString(dateLocale, {
+    return formatInstant(iso, dateLocale, {
       day: "2-digit",
       month: "short",
       hour: "2-digit",

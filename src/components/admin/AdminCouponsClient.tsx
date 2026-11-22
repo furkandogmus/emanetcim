@@ -10,6 +10,8 @@ import { bcp47ForUiLocale } from "@/lib/intl-locale";
 import Money from "@/components/common/Money";
 import { createCouponAction, setCouponActiveAction } from "@/actions/coupon";
 import { actionErrorKey } from "@/lib/action-error";
+import { formatInstant } from "@/lib/format-datetime";
+import { PLATFORM_TIMEZONE, parseDatetimeLocalInTimeZone } from "@/lib/datetime-local";
 
 type Coupon = {
   id: string;
@@ -50,8 +52,15 @@ export default function AdminCouponsClient({ coupons }: { coupons: Coupon[] }) {
         isPercent,
         minPrice: minPrice.trim() ? Number(minPrice) : null,
         maxUses: maxUses.trim() ? Number(maxUses) : null,
-        // `datetime-local` yerel saat verir; sunucu tarafi UTC bekliyor.
-        expiresAt: expiresAt ? new Date(expiresAt).toISOString() : null,
+        /*
+          `datetime-local` DUVAR SAATI verir, dilimsiz. `new Date(value)` onu
+          TARAYICININ diliminde yorumluyordu: Berlin'den giren bir yonetici
+          "23:59" yazinca kupon Istanbul'da 00:59'da bitiyordu. Platformun
+          bitis saatleri Istanbul saatidir (bkz. `parseDatetimeLocalInTimeZone`).
+        */
+        expiresAt: expiresAt
+          ? (parseDatetimeLocalInTimeZone(expiresAt, PLATFORM_TIMEZONE)?.toISOString() ?? null)
+          : null,
       });
 
       if (!result.success) {
@@ -93,7 +102,7 @@ export default function AdminCouponsClient({ coupons }: { coupons: Coupon[] }) {
 
   function fmtDate(iso: string | null) {
     if (!iso) return t("unlimited");
-    return new Date(iso).toLocaleDateString(dateLocale, {
+    return formatInstant(iso, dateLocale, {
       day: "2-digit",
       month: "short",
       year: "numeric",

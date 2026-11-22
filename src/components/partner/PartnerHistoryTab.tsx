@@ -5,6 +5,7 @@ import { Loader2, Luggage } from "lucide-react";
 import type { PartnerBookingListItem } from "@/services/BookingService";
 import { moneyToNumber } from "@/lib/money";
 import type { computeOverdue } from "@/lib/overdue-display";
+import { formatInstant } from "@/lib/format-datetime";
 
 interface PartnerHistoryTabProps {
   bookings: PartnerBookingListItem[];
@@ -69,9 +70,7 @@ export default function PartnerHistoryTab({
                           t("guestFallback", { id: booking.id.slice(0, 4) })}
                       </h3>
                       <p className="id-eyebrow text-gray-400">
-                        {new Date(booking.checkInTime).toLocaleDateString(
-                          dateLocale
-                        )}
+                        {formatInstant(booking.checkInTime, dateLocale, { year: "numeric", month: "numeric", day: "numeric" })}
                       </p>
                     </div>
                   </div>

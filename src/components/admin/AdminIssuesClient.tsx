@@ -9,6 +9,7 @@ import type {
   TeamIssueUser,
 } from "@/services/TeamIssueService";
 import styles from "./AdminIssuesClient.module.css";
+import { formatInstant } from "@/lib/format-datetime";
 
 type Point = { x: number; y: number };
 type Stroke = { color: string; points: Point[] };
@@ -43,24 +44,13 @@ function parseDate(value?: string | null): Date {
 function formatIssueDate(value?: string | null, includeTime = true): string {
   const date = parseDate(value);
   if (Number.isNaN(date.getTime())) return "";
-  return new Intl.DateTimeFormat(
+  return formatInstant(
+    date,
     "tr-TR",
     includeTime
-      ? {
-          day: "numeric",
-          month: "short",
-          year: "numeric",
-          hour: "2-digit",
-          minute: "2-digit",
-          timeZone: "Europe/Istanbul",
-        }
-      : {
-          day: "numeric",
-          month: "long",
-          year: "numeric",
-          timeZone: "Europe/Istanbul",
-        },
-  ).format(date);
+      ? { day: "numeric", month: "short", year: "numeric", hour: "2-digit", minute: "2-digit" }
+      : { day: "numeric", month: "long", year: "numeric" },
+  );
 }
 
 function paintStrokes(

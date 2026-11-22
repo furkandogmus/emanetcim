@@ -10,6 +10,7 @@ import { toast } from "sonner";
 import { bcp47ForUiLocale } from "@/lib/intl-locale";
 import { adminDisputeErrorKey } from "@/lib/admin-dispute-error-copy";
 import Money from "@/components/common/Money";
+import { formatInstant } from "@/lib/format-datetime";
 
 interface DisputeBooking {
   id: string;
@@ -86,7 +87,7 @@ export default function AdminDisputesClient({ disputes: initial }: { disputes: D
   const [filter, setFilter] = useState<string>("ALL");
 
   function fmtDate(iso: string) {
-    return new Date(iso).toLocaleDateString(dateLocale, {
+    return formatInstant(iso, dateLocale, {
       day: "2-digit",
       month: "short",
       year: "numeric",

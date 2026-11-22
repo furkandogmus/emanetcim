@@ -5,6 +5,7 @@ import { ArrowLeft, ShieldCheck, ChevronDown, ChevronUp, Search } from "lucide-r
 import { Link, useRouter } from "@/i18n/routing";
 import { useLocale, useTranslations } from "next-intl";
 import { bcp47ForUiLocale } from "@/lib/intl-locale";
+import { formatInstant } from "@/lib/format-datetime";
 
 type Entry = {
   id: string;
@@ -49,7 +50,7 @@ export default function AdminAuditLogClient({
   }
 
   function fmt(iso: string) {
-    return new Date(iso).toLocaleString(dateLocale, {
+    return formatInstant(iso, dateLocale, {
       day: "2-digit",
       month: "short",
       year: "numeric",

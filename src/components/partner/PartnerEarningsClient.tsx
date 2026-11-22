@@ -17,6 +17,7 @@ import {
 import dynamic from "next/dynamic";
 import { formatDecimal, formatTryCurrency } from "@/lib/currency";
 import { bcp47ForUiLocale } from "@/lib/intl-locale";
+import { formatInstant } from "@/lib/format-datetime";
 
 interface RecentBooking {
   id: string;
@@ -138,8 +139,13 @@ export default function PartnerEarningsClient({
     n.toLocaleString(bcp47, { minimumFractionDigits: 2, maximumFractionDigits: 2 });
   const fmtMonth = (key: string) => {
     const [year, month] = key.split("-");
-    const d = new Date(Number(year), Number(month) - 1, 1);
-    return d.toLocaleString(bcp47, { month: "long", year: "numeric" });
+    /*
+      Ay anahtari ("2026-08") bir TAKVIM AYI, an degil. Ayin ortasini UTC'de
+      kurup UTC'de bicimlendirmek, sunucu ve tarayici hangi dilimde olursa
+      olsun ayni ayi verir (yerel gece yarisi + yanlis dilim = onceki ay).
+    */
+    const d = new Date(Date.UTC(Number(year), Number(month) - 1, 15));
+    return formatInstant(d, bcp47, { month: "long", year: "numeric" }, "UTC");
   };
 
   const activePeakHours = peakHoursData.filter((h) => h.count > 0);
@@ -369,7 +375,7 @@ export default function PartnerEarningsClient({
               <div className="divide-y divide-gray-50">
                 {recent.map((b) => {
                   const net = Math.round(b.totalPrice * merchantRatio * 100) / 100;
-                  const date = new Date(b.collectedAt).toLocaleDateString(bcp47);
+                  const date = formatInstant(b.collectedAt, bcp47, { year: "numeric", month: "numeric", day: "numeric" });
                   return (
                     <div key={b.id} className="px-4 py-3 flex items-center justify-between">
                       <div>

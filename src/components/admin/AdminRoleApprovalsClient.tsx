@@ -13,6 +13,7 @@ import {
   cancelAdminRoleChangeAction,
 } from "@/actions/admin-management";
 import { actionErrorKey } from "@/lib/action-error";
+import { formatInstant } from "@/lib/format-datetime";
 
 export type RoleApprovalRowVm = {
   id: string;
@@ -164,7 +165,7 @@ export default function AdminRoleApprovalsClient({
                       {row.requestedBy.name || row.requestedBy.email || "—"}
                     </span>
                     {" · "}
-                    {new Date(row.createdAtIso).toLocaleString(dateLocale)}
+                    {formatInstant(row.createdAtIso, dateLocale)}
                   </p>
                 </div>
                 <div className="flex flex-wrap gap-2">
