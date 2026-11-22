@@ -28,7 +28,15 @@ export const OVERDUE_GUEST_REMINDER_LOOKBACK_MS =
 
 export type OverdueGuestReminderReport = {
   scanned: number;
+  /** En az bir kanaldan (push ya da e-posta) gercekten ulasan hatirlatma. */
   sent: number;
+  /** Slot sahiplenildi ama hicbir kanal basarili donmedi (cihaz yok, saglayici reddetti). */
+  undelivered: number;
+  /**
+   * Ne e-postasi ne hesabi (push alicisi) olan rezervasyon: slot SAHIPLENILMEZ, sayilmaz.
+   * Ulasilacak bir kanal olmadan slot yazmak, defterde "bildirildi" yalanini birakirdi.
+   */
+  noChannel: number;
   /** Baska bir calisma ayni slotu once sahiplendi ya da rezervasyon kilit altinda kapandi. */
   lostRace: number;
   limitReached: boolean;
@@ -108,6 +116,8 @@ export class OverdueGuestReminderService {
     }
 
     let sent = 0;
+    let undelivered = 0;
+    let noChannel = 0;
     let lostRace = 0;
     for (const b of bookings) {
       const slot = nextOverdueGuestReminderSlot(
@@ -117,6 +127,10 @@ export class OverdueGuestReminderService {
       if (slot == null) continue;
 
       const email = bookingNotificationEmail(b);
+      if (email == null && b.guestId == null) {
+        noChannel++;
+        continue;
+      }
       const claimed = await this.claimSlot(b.id, slot, { email: email != null, push: b.guestId != null });
       if (!claimed) {
         lostRace++;
@@ -124,7 +138,7 @@ export class OverdueGuestReminderService {
       }
 
       try {
-        await notificationService.sendOverdueGuestReminder({
+        const outcome = await notificationService.sendOverdueGuestReminder({
           bookingId: b.id,
           email,
           hasAccount: b.guestId != null,
@@ -140,14 +154,16 @@ export class OverdueGuestReminderService {
           },
           now,
         });
-        sent++;
+        if (outcome.push || outcome.email) sent++;
+        else undelivered++;
       } catch (err) {
         // Slot sahiplenildi: tekrar denenmez (iki kez gitmesindense bir kez eksik gitsin).
+        undelivered++;
         logger.warn({ err, bookingId: b.id, slot }, "overdue_guest_reminder_send_failed");
       }
     }
 
-    return { scanned: bookings.length, sent, lostRace, limitReached };
+    return { scanned: bookings.length, sent, undelivered, noChannel, lostRace, limitReached };
   }
 
   /**
