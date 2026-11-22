@@ -153,16 +153,16 @@ export async function cancelBooking(
     edilen rezervasyonda kalirsa misafir en ustte Onayla/Reddet karti goruyor ve
     Onayla "artik degistirilemez" diyordu; check-out da ayni alani bosaltir.
   */
+  /*
+    Surum de artirilir: check-in yazimi `bookingRowVersion` ile kosullu; artmazsa
+    iptalden ONCE satiri okumus bir check-in, slotlari bosaltilmis ve iadesi
+    yazilmis CANCELLED kaydi CHECKED_IN'e cevirebiliyordu.
+  */
   const kilit = await prisma.booking.updateMany({
     where: {
       id: bookingId,
       status: { notIn: ['CANCELLED', 'CHECKED_IN', 'CHECKED_OUT'] },
     },
-    /*
-      Surum artirilir: check-in yazimi `bookingRowVersion` ile kosullu; artmazsa
-      iptalden ONCE satiri okumus bir check-in, slotlari bosaltilmis ve iadesi
-      yazilmis CANCELLED kaydi CHECKED_IN'e cevirebiliyordu.
-    */
     data: { status: 'CANCELLED', pendingBagRevision: Prisma.JsonNull, bookingRowVersion: { increment: 1 } },
   });
   if (kilit.count === 0) {
