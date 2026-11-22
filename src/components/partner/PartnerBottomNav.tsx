@@ -1,18 +1,20 @@
 "use client";
 
 import { useTranslations } from "next-intl";
-import { BarChart3, Home, Luggage, Settings } from "lucide-react";
+import { BarChart3, Home, Settings } from "lucide-react";
 
-export type PartnerTab = "PANEL" | "TALEPLER" | "GECMIS" | "AYARLAR";
+/*
+  "Talepler" sekmesi kaldirildi: rezervasyonlar APPROVED dogar, onay/red
+  bekleyen bir kuyruk yok; sekme bos bir listeyi gosteriyordu.
+*/
+export type PartnerTab = "PANEL" | "GECMIS" | "AYARLAR";
 
 interface PartnerBottomNavProps {
   activeTab: PartnerTab;
   onChange: (tab: PartnerTab) => void;
-  /** Onay bekleyen talep sayısı; sıfırdan büyükse kırmızı nokta. */
-  pendingCount: number;
 }
 
-export default function PartnerBottomNav({ activeTab, onChange, pendingCount }: PartnerBottomNavProps) {
+export default function PartnerBottomNav({ activeTab, onChange }: PartnerBottomNavProps) {
   const t = useTranslations("Partner");
   return (
   <nav className="fixed bottom-3 left-1/2 z-20 flex w-[calc(100%-1.5rem)] max-w-md -translate-x-1/2 justify-around gap-2 rounded-3xl border border-gray-100 bg-white/90 px-3 py-2 shadow-[0_20px_50px_rgba(0,0,0,0.1)] backdrop-blur-2xl sm:bottom-8 sm:w-auto sm:gap-8 sm:px-6 sm:py-3">
@@ -25,19 +27,6 @@ export default function PartnerBottomNav({ activeTab, onChange, pendingCount }: 
     >
       <Home size={22} />
       <span className="text-[9px] font-black uppercase tracking-wider">{t("partnerNavPanel")}</span>
-    </button>
-    <button
-      type="button"
-      onClick={() => onChange("TALEPLER")}
-      aria-label={t("incomingRequests")}
-      title={t("incomingRequests")}
-      className={`flex flex-col items-center gap-1 px-3 py-2 rounded-2xl transition-all relative ${activeTab === "TALEPLER" ? "bg-orange-100 text-orange-600" : "text-gray-400 hover:text-gray-600"}`}
-    >
-      <Luggage size={22} />
-      {pendingCount > 0 && (
-        <span className="absolute top-1 right-2 w-3 h-3 bg-red-600 rounded-full border-2 border-white"></span>
-      )}
-      <span className="text-[9px] font-black uppercase tracking-wider">{t("incomingRequests")}</span>
     </button>
     <button
       type="button"
