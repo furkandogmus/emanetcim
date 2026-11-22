@@ -1,4 +1,5 @@
 import { api } from "./api";
+import { isBeforeDropOff, isCancelReason } from "./booking-state";
 import { wallParts } from "./time";
 import type {
   BookingActionResponse,
@@ -24,21 +25,18 @@ export function isAdminNoteValid(note: string): boolean {
   return note.trim().length >= ADMIN_NOTE_MIN;
 }
 
-/** Valiz henuz dukkana birakilmamis durumlar: iptal edilebilir. */
-const BEFORE_DROP_OFF = new Set<BookingStatus>(["PENDING", "WAITING_APPROVAL", "APPROVED", "PAID"]);
-
 export type AdminBookingAction = "cancel" | "forceCheckout";
 
 /** Yonetici detayinda hangi islem sunulur: once iptal, valiz dukkandaysa zorla teslim. */
 export function adminActionFor(status: BookingStatus): AdminBookingAction | null {
-  if (BEFORE_DROP_OFF.has(status)) return "cancel";
+  if (isBeforeDropOff(status)) return "cancel";
   if (status === "CHECKED_IN") return "forceCheckout";
   return null;
 }
 
 /** Esnaf iptali yalnizca teslim almadan once. */
 export function canPartnerCancel(status: BookingStatus): boolean {
-  return BEFORE_DROP_OFF.has(status);
+  return isBeforeDropOff(status);
 }
 
 /** Secicideki sira; "Diger" en sonda ve not ister. */
@@ -76,8 +74,6 @@ export function isSameWallDay(a: Date | string, b: Date | string): boolean {
   return x.year === y.year && x.month === y.month && x.day === y.day;
 }
 
-const CANCEL_REASONS = new Set<string>(["guest_cancel", "partner_cancel", "no_show", "admin_cancel", "expired_no_dropoff"]);
-
 /**
  * Iptal nedeni yalnizca iptal edilmis rezervasyonda okunur. Eski sunucunun eksik alani
  * (`undefined`) ve henuz tanimadigimiz yeni deger `null` olur: ekranda neden yazilmaz.
@@ -85,7 +81,7 @@ const CANCEL_REASONS = new Set<string>(["guest_cancel", "partner_cancel", "no_sh
 export function cancelReasonOf(b: { status: BookingStatus; cancelReason?: string | null }): CancelReason | null {
   if (b.status !== "CANCELLED") return null;
   const r = b.cancelReason;
-  return r && CANCEL_REASONS.has(r) ? (r as CancelReason) : null;
+  return isCancelReason(r) ? r : null;
 }
 
 /**

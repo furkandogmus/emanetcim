@@ -3,6 +3,7 @@ import { StyleSheet, Text, View } from "react-native";
 import { useTranslation } from "react-i18next";
 
 import { cancelReasonKey, cancelReasonOf } from "@/lib/booking-actions";
+import { BEFORE_DROP_OFF } from "@/lib/booking-state";
 import type { BookingStatus } from "@/lib/types";
 import { colors, fonts, radius } from "@/theme/tokens";
 
@@ -15,8 +16,6 @@ const TONES: Record<BookingStatus, { bg: string; fg: string }> = {
   PENDING: { bg: colors.warningSoft, fg: colors.warning },
   WAITING_APPROVAL: { bg: colors.warningSoft, fg: colors.warning },
 };
-
-const NEVER_DROPPED = new Set<BookingStatus>(["APPROVED", "PAID", "PENDING", "WAITING_APPROVAL"]);
 
 /**
  * `checkOutTime` verilirse: valiz hic birakilmadan bitis saati gecmis rezervasyon
@@ -46,7 +45,7 @@ export function StatusBadge({
   const unused =
     typeof expired === "boolean"
       ? expired
-      : !!checkOutTime && NEVER_DROPPED.has(status) && new Date(checkOutTime).getTime() < now;
+      : !!checkOutTime && BEFORE_DROP_OFF.has(status) && new Date(checkOutTime).getTime() < now;
   const tone = unused ? TONES.CHECKED_OUT : (TONES[status] ?? TONES.PENDING);
   const reasonKey = cancelReasonKey(cancelReasonOf({ status, cancelReason }), "short");
   return (
