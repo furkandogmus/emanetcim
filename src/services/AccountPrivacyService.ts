@@ -2,6 +2,7 @@ import prisma from "@/lib/db";
 import { PASSWORD_RESET_IDENTIFIER_PREFIX } from "@/lib/password-reset-token";
 import { BookingStatus, Role } from "@prisma/client";
 import { writeAuditLog } from "@/lib/audit-log";
+import { ANONYMIZED_EMAIL_DOMAIN } from "@/lib/anonymized-account";
 import { NOT_DROPPED_STATUSES } from "@/lib/booking-closure";
 import { closeExpiredBookingsForGuest } from "@/services/booking/closure";
 
@@ -77,7 +78,7 @@ class AccountPrivacyService {
     if (activeCount > 0) return { ok: false, reason: "active_bookings" };
     await closeExpiredBookingsForGuest(userId, now);
 
-    const anonEmail = `gdpr_${userId.replace(/-/g, "").slice(0, 20)}@invalid.local`;
+    const anonEmail = `gdpr_${userId.replace(/-/g, "").slice(0, 20)}${ANONYMIZED_EMAIL_DOMAIN}`;
     // E-postaya bagli (userId'siz) satirlar: sifirlama kodu, sifirlama/dogrulama token'lari.
     const current = await prisma.user.findUnique({ where: { id: userId }, select: { email: true } });
     const email = current?.email?.trim().toLowerCase();
