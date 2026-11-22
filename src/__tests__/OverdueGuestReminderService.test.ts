@@ -96,8 +96,9 @@ const h = vi.hoisted(() => {
       }
     }),
   };
-  const send = vi.fn(async (_p: unknown) => {
+  const send = vi.fn(async (_p: unknown): Promise<{ push: boolean; email: boolean }> => {
     await tick();
+    return { push: true, email: true };
   });
   return { db, prisma, send, statusInsideLock };
 });
@@ -242,6 +243,23 @@ describe("OverdueGuestReminderService", () => {
     const r = await service.run({ now: at(31 * MIN) });
     expect(sentArgs().map((a) => a.bookingId)).toEqual(["fresh"]);
     expect(r.limitReached).toBe(false);
+  });
+
+  it("hicbir kanali olmayan rezervasyon slot harcamaz ve gonderildi sayilmaz", async () => {
+    addBooking({ guestId: null, guest: null, guestEmail: null });
+    const r = await service.run({ now: at(31 * MIN) });
+    expect(h.send).not.toHaveBeenCalled();
+    expect(h.db.events).toHaveLength(0);
+    expect(r).toMatchObject({ sent: 0, noChannel: 1 });
+  });
+
+  it("hicbir kanal basarili donmezse gonderildi sayilmaz, slot yine tekrar gitmez", async () => {
+    addBooking({ guest: { email: null } });
+    h.send.mockResolvedValueOnce({ push: false, email: false });
+    const r = await service.run({ now: at(31 * MIN) });
+    expect(r).toMatchObject({ sent: 0, undelivered: 1 });
+    await service.run({ now: at(46 * MIN) });
+    expect(h.send).toHaveBeenCalledTimes(1);
   });
 
   it("gonderim hatasi slotu yeniden denetmez (iki kez gitmesindense bir kez eksik)", async () => {

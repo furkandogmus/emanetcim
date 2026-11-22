@@ -36,9 +36,6 @@ const base = {
   now: new Date("2026-11-22T10:00:00.000Z"),
 };
 
-/** pushGuest atesle-unut: mikro-gorevlerin bitmesini bekle. */
-const flush = () => new Promise((r) => setTimeout(r, 10));
-
 describe("sendOverdueGuestReminder kanallari", () => {
   let service: NotificationService;
   let sendEmail: ReturnType<typeof vi.spyOn>;
@@ -53,23 +50,29 @@ describe("sendOverdueGuestReminder kanallari", () => {
   });
 
   it("e-postasiz misafire yalnizca push gider, bookingId ile (uygulama rezervasyonu acar)", async () => {
-    await service.sendOverdueGuestReminder({ ...base, email: null });
-    await flush();
+    sendMobilePush.mockResolvedValue(true);
+    const r = await service.sendOverdueGuestReminder({ ...base, email: null });
+    expect(r).toEqual({ push: true, email: false });
     expect(sendEmail).not.toHaveBeenCalled();
     expect(sendMobilePush).toHaveBeenCalledWith("u1", "Your bags are still at the shop", expect.any(String), "b1");
   });
 
   it("push cihazi olmayan misafir yine e-posta alir", async () => {
     // sendMobilePush false = cihaz yok / SKIPPED; e-posta buna bagli degil.
-    await service.sendOverdueGuestReminder({ ...base, email: "guest@example.com" });
-    await flush();
+    const r = await service.sendOverdueGuestReminder({ ...base, email: "guest@example.com" });
+    expect(r).toEqual({ push: false, email: true });
     expect(sendEmail).toHaveBeenCalledTimes(1);
+  });
+
+  it("saglayici e-postayi reddederse sonuc bunu soyler", async () => {
+    sendEmail.mockResolvedValue(false);
+    const r = await service.sendOverdueGuestReminder({ ...base, email: "guest@example.com" });
+    expect(r).toEqual({ push: false, email: false });
   });
 
   it("hesapsiz misafirin e-postasinda push denenir ama guestId yok, e-posta imzali yonetim bagini tasir", async () => {
     mockPrisma.booking.findUnique.mockResolvedValue({ guestId: null, shop: { name: SHOP.name } });
     await service.sendOverdueGuestReminder({ ...base, hasAccount: false, email: "walkin@example.com" });
-    await flush();
     expect(sendMobilePush).not.toHaveBeenCalled();
     const [, , text] = sendEmail.mock.calls[0] as [string, string, string];
     expect(text).toContain("/en/bookings/manage/signed-token");

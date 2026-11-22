@@ -306,15 +306,25 @@ export class NotificationService implements INotificationService {
     locale: string,
     vars: Omit<GuestPushVars, "shop"> = {},
   ): void {
-    void (async () => {
-      const booking = await prisma.booking.findUnique({
-        where: { id: bookingId },
-        select: { guestId: true, shop: { select: { name: true } } },
-      });
-      if (!booking?.guestId) return;
-      const { title, body } = pickLocale(GUEST_PUSH_COPY, locale)[event]({ shop: booking.shop.name, ...vars });
-      await this.sendMobilePush(booking.guestId, title, body, bookingId);
-    })().catch((err) => logger.warn({ err, bookingId, event }, "guest_push_failed"));
+    void this.pushGuestNow(bookingId, event, locale, vars).catch((err) =>
+      logger.warn({ err, bookingId, event }, "guest_push_failed"),
+    );
+  }
+
+  /** `pushGuest`in beklenebilir hali: en az bir cihaza gittiyse `true`. */
+  private async pushGuestNow(
+    bookingId: string,
+    event: GuestPushEvent,
+    locale: string,
+    vars: Omit<GuestPushVars, "shop"> = {},
+  ): Promise<boolean> {
+    const booking = await prisma.booking.findUnique({
+      where: { id: bookingId },
+      select: { guestId: true, shop: { select: { name: true } } },
+    });
+    if (!booking?.guestId) return false;
+    const { title, body } = pickLocale(GUEST_PUSH_COPY, locale)[event]({ shop: booking.shop.name, ...vars });
+    return this.sendMobilePush(booking.guestId, title, body, bookingId);
   }
 
   /**
@@ -1992,7 +2002,7 @@ export class NotificationService implements INotificationService {
    * Takvim ve tekrar kontrolu burada DEGIL, `OverdueGuestReminderService`te: bu yontem
    * cagrildiginda o slot zaten `BookingEvent` olarak sahiplenilmistir. Iki kanal
    * birbirinden bagimsiz: e-postasiz misafire push, cihazsiz misafire e-posta gider.
-   * Ucretten soz edilmez (karar yok, 2026-11-23).
+   * Ucretten soz edilmez (karar yok, 2026-11-23). Donen deger kanal basina gercek sonuc.
    */
   async sendOverdueGuestReminder(params: {
     bookingId: string;
@@ -2011,12 +2021,15 @@ export class NotificationService implements INotificationService {
       timeZone: string;
     };
     now?: Date;
-  }): Promise<void> {
+  }): Promise<{ push: boolean; email: boolean }> {
     const { bookingId, locale, shop } = params;
-    this.pushGuest(bookingId, "overdue", locale);
+    const push = this.pushGuestNow(bookingId, "overdue", locale).catch((err) => {
+      logger.warn({ err, bookingId }, "overdue_guest_push_failed");
+      return false;
+    });
 
     const email = params.email;
-    if (!email || !email.includes("@")) return;
+    if (!email || !email.includes("@")) return { push: await push, email: false };
 
     const domain = getSiteBaseUrl();
     /*
@@ -2143,7 +2156,11 @@ export class NotificationService implements INotificationService {
       footer: "BagajPark",
     });
 
-    await this.sendEmail(email, content.subject, body, bookingId, html);
+    const [pushed, emailed] = await Promise.all([
+      push,
+      this.sendEmail(email, content.subject, body, bookingId, html),
+    ]);
+    return { push: pushed, email: emailed };
   }
 
   /**
