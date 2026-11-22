@@ -234,7 +234,8 @@ describe("kimlik dogrulama uclarinin kapilari", () => {
       alinan yonetici, mobil refresh token'i (30 GUN) ve web oturumu (Auth.js
       varsayilani 30 gun) suresince yonetici kalıyordu.
     */
-    const src = read("src/actions/admin-management.ts");
+    // Rol degisikligi govdesi web + mobil icin `AdminUserService`te (2026-11-23); onay action'da.
+    const src = read("src/actions/admin-management.ts") + read("src/services/AdminUserService.ts");
     const roleWrites = [...src.matchAll(/data:\s*\{[^}]*\brole:[^}]*\}/g)].map((m) => m[0]);
     expect(roleWrites.length).toBeGreaterThan(0);
     const missing = roleWrites.filter((w) => !/tokenVersion/.test(w));
