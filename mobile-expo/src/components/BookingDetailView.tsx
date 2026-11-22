@@ -16,7 +16,7 @@ import { AppText, Banner, Button, CenterMessage, IconButton, Loading } from "@/c
 import { api, ApiError } from "@/lib/api";
 import { errorMessage } from "@/lib/errors";
 import { formatMoney } from "@/lib/format";
-import { isBookingExpired } from "@/lib/booking-state";
+import { BEFORE_DROP_OFF, isBookingExpired } from "@/lib/booking-state";
 import { isActiveBooking, useBooking, useOnlinePayments } from "@/lib/queries";
 import { defaultWindow, useSearch } from "@/lib/search";
 import type { BookingDetail } from "@/lib/types";
@@ -27,9 +27,9 @@ import { colors, radius, space } from "@/theme/tokens";
 import { StaleQueryBanner } from "@/components/StaleQueryBanner";
 
 /** Misafirin iptal edebildigi durumlar: valiz henuz dukkana teslim edilmemis. */
-const CANCELLABLE = new Set(["PENDING", "WAITING_APPROVAL", "APPROVED", "PAID"]);
+const CANCELLABLE = BEFORE_DROP_OFF;
 /** `modifyBooking` (lifecycle.ts) yalnizca CHECKED_IN / CHECKED_OUT / CANCELLED'i reddeder. */
-const MODIFIABLE = CANCELLABLE;
+const MODIFIABLE = BEFORE_DROP_OFF;
 
 /** Koordinat yoksa adresle: koordinatsiz dukkanda yol tarifi hic yoktu. */
 function canNavigate(b: BookingDetail) {
