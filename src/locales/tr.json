@@ -64,7 +64,8 @@
     "mapZoomIn": "Yakınlaştır",
     "mapZoomOut": "Uzaklaştır",
     "mapResetBearing": "Kuzeye döndür",
-    "mapToggleAttribution": "Kaynakları göster"
+    "mapToggleAttribution": "Kaynakları göster",
+    "chatOpen": "Canlı destek"
   },
   "SEO": {
     "title": "BagajPark | Emanetçi, Valiz Saklama ve Bagaj Emaneti",
