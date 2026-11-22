@@ -20,7 +20,8 @@ const m = vi.hoisted(() => ({
 }));
 
 vi.mock("@/lib/db", () => ({ default: m.prisma }));
-vi.mock("@/lib/logger", () => ({ default: { error: vi.fn(), warn: vi.fn(), info: vi.fn() } }));
+const log = vi.hoisted(() => ({ error: vi.fn(), warn: vi.fn(), info: vi.fn() }));
+vi.mock("@/lib/logger", () => ({ default: log }));
 vi.mock("@/lib/audit-log", () => ({ writeAuditLog: m.audit }));
 vi.mock("@/services/booking/lifecycle", () => ({ cancelBooking: m.cancelBooking }));
 vi.mock("@/services/booking/check-out", () => ({ checkOut: m.checkOut }));
@@ -320,5 +321,18 @@ describe("closeExpiredBookingsForGuest (hesap silme)", () => {
     expect(where.guestId).toBe("g1");
     expect(where.checkOutTime.lt).toEqual(now);
     expect(m.cancelBooking).toHaveBeenCalledWith("a", { silent: true, reason: "expired_no_dropoff" });
+  });
+
+  it("kapanmayan her kayit bookingId ve kodla uyari loglar, sayim yalniz basarililari tutar", async () => {
+    m.prisma.booking.findMany.mockResolvedValue([{ id: "a" }, { id: "b" }]);
+    m.cancelBooking
+      .mockResolvedValueOnce({ ok: false, code: "INVALID_STATUS", message: "x" })
+      .mockResolvedValueOnce({ ok: true });
+    expect(await closeExpiredBookingsForGuest("g1")).toBe(1);
+    expect(log.warn).toHaveBeenCalledTimes(1);
+    expect(log.warn).toHaveBeenCalledWith(
+      expect.objectContaining({ bookingId: "a", code: "INVALID_STATUS" }),
+      "account_delete_expired_close_failed",
+    );
   });
 });
