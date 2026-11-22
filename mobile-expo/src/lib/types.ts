@@ -599,3 +599,122 @@ export type AdminBroadcast = {
   finishedAt: string | null;
   createdByName: string;
 };
+
+/* ===================== Yonetim araclari (kaynak: ../src/lib/mobile-dto.ts, toMobileAdmin*) ===================== */
+
+export type AdminDisputeStatus = "OPEN" | "IN_REVIEW" | "RESOLVED" | "CLOSED";
+
+/** `toMobileAdminDispute`: liste satiri ve detay ayni govde. */
+export type AdminDispute = {
+  id: string;
+  bookingId: string;
+  reason: string;
+  description: string;
+  status: AdminDisputeStatus;
+  adminNote: string | null;
+  createdAt: string;
+  updatedAt: string;
+  booking: {
+    id: string;
+    totalPrice: number;
+    checkInTime: string;
+    checkOutTime: string;
+    status: string;
+    guestName: string | null;
+    guestEmail: string | null;
+    shopName: string | null;
+    seals: { id: string; sealNumber: number; bagIndex: number; bagSize: string; photoUrl: string | null }[];
+  };
+};
+
+/** `toMobileAdminCoupon`. */
+export type AdminCoupon = {
+  id: string;
+  code: string;
+  discount: number;
+  isPercent: boolean;
+  minPrice: number | null;
+  maxUses: number | null;
+  usedCount: number;
+  expiresAt: string | null;
+  isActive: boolean;
+  createdAt: string;
+};
+
+/** `toMobileAdminPayments`: salt okunur defter. */
+export type AdminPayments = {
+  status: string;
+  summary: {
+    capturedAmount: number;
+    capturedCount: number;
+    refundedAmount: number;
+    pendingSplitAmount: number;
+    pendingSplitCount: number;
+    failedCount: number;
+  };
+  payments: {
+    id: string;
+    bookingId: string;
+    status: string;
+    provider: string;
+    amount: number;
+    refundedAmount: number;
+    failureReason: string | null;
+    chargebackStatus: string | null;
+    createdAt: string;
+    capturedAt: string | null;
+    guestLabel: string | null;
+    shopName: string;
+    splitStatus: string | null;
+    merchantAmount: number | null;
+    platformCommission: number | null;
+  }[];
+  accounts: {
+    id: string;
+    shopName: string;
+    city: string | null;
+    provider: string;
+    status: string;
+    rejectionReason: string | null;
+    activatedAt: string | null;
+  }[];
+};
+
+export type AdminPlatformSettingsValues = {
+  maxStayDays: number;
+  maxBagsPerSlot: number;
+  insuranceFeeTry: number;
+  earlyRefundRatio: number;
+  cancelFixedFeeTry: number;
+  latePickupFeeTry: number;
+  latePickupGraceMin: number;
+  checkInGraceMin: number;
+  requireSealsOnCheckIn: boolean;
+  defaultShopCapacity: number;
+  defaultPricePerDay: number;
+  bagMultiplierS: number;
+  bagMultiplierM: number;
+  bagMultiplierXl: number;
+  platformHolidayDates: string[];
+  minAppVersion: string | null;
+  latestAppVersion: string | null;
+};
+
+/** `toMobileAdminPlatformSettings`: hangi alanin riskli oldugu ve onay ifadesi sunucudan gelir. */
+export type AdminPlatformSettings = {
+  values: AdminPlatformSettingsValues;
+  riskyFields: (keyof AdminPlatformSettingsValues)[];
+  confirmPhrase: string;
+  updatedAt: string | null;
+};
+
+/** `toMobileAdminFeatureFlag`. Riskli bayrakta onay ifadesi bayragin anahtari. */
+export type AdminFeatureFlag = {
+  key: string;
+  enabled: boolean;
+  rolloutPct: number;
+  allowedUserIds: string[];
+  description: string | null;
+  risky: boolean;
+  updatedAt: string;
+};
