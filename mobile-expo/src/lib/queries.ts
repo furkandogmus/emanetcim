@@ -11,7 +11,7 @@ import { totalBags, type Bags } from "./search";
 import { partnerSearchTerm } from "./booking-search";
 import { useDebouncedValue } from "./use-debounced-value";
 import { BROADCAST_POLL_MS, hasActiveBroadcast } from "./broadcast";
-import type { AdminApplication, AdminStats, BookingDetail, ContactMessage, PartnerEarnings, PartnerSealsResponse, PartnerShop, BookingSummary, NearbyShop, PartnerBookingsResponse, ShopDetail, ShopReviewsPage, PartnerShopSettings, PartnerSchedule, PartnerDashboard, AdminOverview, AdminBookingFilter, AdminBookingCounts, AdminBookingsResponse, AdminBookingDetail, AdminShop, AdminShopDetail, AdminUser, AdminBroadcast, BroadcastAudience, BroadcastPreview, CityCoverage, AppConfig, PartnerCancelRequest } from "./types";
+import type { AdminCoupon, AdminDispute, AdminDisputeStatus, AdminFeatureFlag, AdminPayments, AdminPlatformSettings, AdminApplication, AdminStats, BookingDetail, ContactMessage, PartnerEarnings, PartnerSealsResponse, PartnerShop, BookingSummary, NearbyShop, PartnerBookingsResponse, ShopDetail, ShopReviewsPage, PartnerShopSettings, PartnerSchedule, PartnerDashboard, AdminOverview, AdminBookingFilter, AdminBookingCounts, AdminBookingsResponse, AdminBookingDetail, AdminShop, AdminShopDetail, AdminUser, AdminBroadcast, BroadcastAudience, BroadcastPreview, CityCoverage, AppConfig, PartnerCancelRequest } from "./types";
 
 export const keys = {
   myBookings: ["bookings", "me"] as const,
@@ -472,4 +472,58 @@ export function usePartnerCancel(id: string) {
 
 export function usePartnerNoShow(id: string) {
   return useMutation(partnerNoShowOptions(useQueryClient(), id));
+}
+
+/* ===================== Yonetim araclari (uyusmazlik, kupon, odeme, ayar, bayrak) ===================== */
+
+export const adminOpsKeys = {
+  disputes: [...keys.admin, "disputes"] as const,
+  coupons: [...keys.admin, "coupons"] as const,
+  payments: [...keys.admin, "payments"] as const,
+  settings: [...keys.admin, "platform-settings"] as const,
+  flags: [...keys.admin, "feature-flags"] as const,
+};
+
+/** `status` null = hepsi. */
+export function useAdminDisputes(status: AdminDisputeStatus | null) {
+  return useQuery({
+    queryKey: [...adminOpsKeys.disputes, "list", status ?? "ALL"],
+    queryFn: () =>
+      api<{ items: AdminDispute[] }>(`/admin/disputes${status ? `?status=${status}` : ""}`).then((r) => r.items),
+    placeholderData: (prev) => prev,
+  });
+}
+
+export function useAdminDispute(id: string) {
+  return useQuery({
+    queryKey: [...adminOpsKeys.disputes, "one", id],
+    queryFn: () => api<AdminDispute>(`/admin/disputes/${encodeURIComponent(id)}`),
+    enabled: !!id,
+  });
+}
+
+export function useAdminCoupons() {
+  return useQuery({
+    queryKey: adminOpsKeys.coupons,
+    queryFn: () => api<{ items: AdminCoupon[] }>("/admin/coupons").then((r) => r.items),
+  });
+}
+
+export function useAdminPayments(status: string) {
+  return useQuery({
+    queryKey: [...adminOpsKeys.payments, status],
+    queryFn: () => api<AdminPayments>(`/admin/payments${status !== "ALL" ? `?status=${encodeURIComponent(status)}` : ""}`),
+    placeholderData: (prev) => prev,
+  });
+}
+
+export function useAdminPlatformSettings() {
+  return useQuery({ queryKey: adminOpsKeys.settings, queryFn: () => api<AdminPlatformSettings>("/admin/platform-settings") });
+}
+
+export function useAdminFeatureFlags() {
+  return useQuery({
+    queryKey: adminOpsKeys.flags,
+    queryFn: () => api<{ items: AdminFeatureFlag[] }>("/admin/feature-flags").then((r) => r.items),
+  });
 }
