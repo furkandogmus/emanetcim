@@ -147,6 +147,7 @@ describe("OverdueGuestReminderService", () => {
     h.db.bookings.length = 0;
     h.db.events.length = 0;
     h.statusInsideLock.clear();
+    h.send.mockImplementation(async () => ({ push: true, email: true }));
   });
 
   it("29. dakikada gondermez, 31. dakikada birinci slotu gonderir ve kaydeder", async () => {
@@ -260,6 +261,21 @@ describe("OverdueGuestReminderService", () => {
     expect(r).toMatchObject({ sent: 0, undelivered: 1 });
     await service.run({ now: at(46 * MIN) });
     expect(h.send).toHaveBeenCalledTimes(1);
+  });
+
+  it("rezervasyonlari en fazla 5'li havuzla, ama paralel isler", async () => {
+    for (let i = 0; i < 12; i++) addBooking({ id: `b${i}`, checkOutTime: new Date(CHECKOUT.getTime() - i * MIN) });
+    let inFlight = 0;
+    let peak = 0;
+    h.send.mockImplementation(async () => {
+      peak = Math.max(peak, ++inFlight);
+      await new Promise((r) => setTimeout(r, 5));
+      inFlight--;
+      return { push: true, email: true };
+    });
+    const r = await service.run({ now: at(31 * MIN) });
+    expect(r.sent).toBe(12);
+    expect(peak).toBe(5);
   });
 
   it("gonderim hatasi slotu yeniden denetmez (iki kez gitmesindense bir kez eksik)", async () => {
