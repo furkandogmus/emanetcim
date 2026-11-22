@@ -1201,7 +1201,8 @@
       "noShowBody": "Rezervasyon gelinmedi olarak kapanır ve ayrılan yer boşalır. Bu işlem geri alınamaz.",
       "noShowConfirm": "Evet, kapat",
       "noShowDoneTitle": "Rezervasyon kapatıldı",
-      "noShowDoneBody": "Ayrılan yer boşaltıldı."
+      "noShowDoneBody": "Ayrılan yer boşaltıldı.",
+      "noteRequiredHint": "“Diğer” seçildiğinde açıklama zorunlu."
     },
     "reasons": {
       "guest_request": "Misafir istedi",
