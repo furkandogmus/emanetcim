@@ -90,6 +90,8 @@ export function ReasonSheet({
         placeholder={notePlaceholder}
         multiline
         maxLength={500}
+        // Uzun notta alan buyumeye devam ederse onay dugmesi kucuk ekranda kayboluyordu.
+        inputStyle={{ maxHeight: 140 }}
         editable={!loading}
       />
       {error ? <Banner tone="danger" body={error} /> : null}
