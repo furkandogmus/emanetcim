@@ -57,6 +57,8 @@ describe("sunucu hata kodlari", () => {
     [400, "expired_code", "Kodun süresi dolmuş. Yeni bir kod iste."],
     [429, "too_many_attempts", "Çok fazla hatalı deneme. Yeni bir kod iste."],
     [400, "invalid_password", "Bu şifre kullanılamaz. En az 8 karakter olmalı."],
+    [403, "account_banned", "Bu hesap kullanıma kapatılmış. Yardım için bize ulaş."],
+    [500, "server_error", "Şifren şu an güncellenemedi. Biraz sonra tekrar dene."],
     // Uc henuz yokken (eski sunucu) HTML 404 -> http_404: baglantiya yonlendirir.
     [404, "http_404", "Kodla sıfırlama şu an kullanılamıyor. E-postadaki bağlantıyı kullan."],
   ])("%i %s kendi metnini gosterir", async (status, code, text) => {

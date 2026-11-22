@@ -782,7 +782,9 @@
       "expired_code": "This code has expired. Request a new one.",
       "too_many_attempts": "Too many wrong attempts. Request a new code.",
       "invalid_password": "This password can't be used. It must be at least 8 characters.",
-      "http_404": "Resetting with a code isn't available right now. Use the link in the email."
+      "http_404": "Resetting with a code isn't available right now. Use the link in the email.",
+      "account_banned": "This account has been suspended. Contact us for help.",
+      "server_error": "We couldn't update your password right now. Try again in a moment."
     },
     "openMail": "Open email app",
     "pasteLink": "Continue by pasting the link",

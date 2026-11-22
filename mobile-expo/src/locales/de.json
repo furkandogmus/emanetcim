@@ -782,7 +782,9 @@
       "expired_code": "Der Code ist abgelaufen. Fordere einen neuen an.",
       "too_many_attempts": "Zu viele Fehlversuche. Fordere einen neuen Code an.",
       "invalid_password": "Dieses Passwort geht nicht. Es muss mindestens 8 Zeichen haben.",
-      "http_404": "Das Zurücksetzen per Code ist gerade nicht verfügbar. Verwende den Link in der E-Mail."
+      "http_404": "Das Zurücksetzen per Code ist gerade nicht verfügbar. Verwende den Link in der E-Mail.",
+      "account_banned": "Dieses Konto wurde gesperrt. Kontaktiere uns, wenn du Hilfe brauchst.",
+      "server_error": "Dein Passwort konnte gerade nicht geändert werden. Versuch es gleich noch einmal."
     },
     "openMail": "E-Mail-App öffnen",
     "pasteLink": "Link einfügen und fortfahren",
