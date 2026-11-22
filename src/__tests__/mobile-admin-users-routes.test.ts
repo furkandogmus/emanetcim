@@ -215,6 +215,29 @@ describe("e-posta uclari", () => {
 });
 
 describe("okuma uclari", () => {
+  it("detay: anonimlestirilmis hesap isAnonymized tasir", async () => {
+    const row = {
+      id: "g1",
+      name: null,
+      email: "gdpr_abc@invalid.local",
+      phone: null,
+      role: "GUEST",
+      isBanned: false,
+      isTest: false,
+      createdAt: new Date("2026-01-01"),
+      _count: { bookings: 1, shops: 0 },
+      emailVerified: null,
+      passwordHash: null,
+      adminRoleChangeTargets: null,
+    };
+    svc.getDetail.mockResolvedValue(row);
+    const anon = await (await getUser(req("GET", "/x", adminToken), params("g1"))).json();
+    expect(anon.user.isAnonymized).toBe(true);
+    svc.getDetail.mockResolvedValue({ ...row, email: "ada@example.com" });
+    const live = await (await getUser(req("GET", "/x", adminToken), params("g1"))).json();
+    expect(live.user.isAnonymized).toBe(false);
+  });
+
   it("detay yoksa 404", async () => {
     svc.getDetail.mockResolvedValue(null);
     const res = await getUser(req("GET", "/x", adminToken), params("u1"));

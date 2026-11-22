@@ -72,7 +72,7 @@ export default function AdminUserScreen() {
   });
 
   const u = query.data;
-  const label = u ? u.name || u.email || u.phone : "";
+  const label = !u ? "" : u.isAnonymized ? t("adminUsers.anonymizedLabel") : u.name || u.email || u.phone;
 
   function confirmRole(next: Role) {
     if (!u) return;
@@ -110,12 +110,16 @@ export default function AdminUserScreen() {
         <ScrollView contentContainerStyle={styles.body}>
           <Card style={{ gap: space.xs }}>
             <AppText variant="bodyMedium">{label}</AppText>
-            {u.email ? <AppText variant="caption">{u.email}</AppText> : null}
+            {u.email && !u.isAnonymized ? <AppText variant="caption">{u.email}</AppText> : null}
             {u.phone ? <AppText variant="caption">{u.phone}</AppText> : null}
             <AppText variant="caption">
               {[
                 t(`admin.role.${u.role}`),
-                u.email ? (u.emailVerified ? t("adminUsers.emailVerified") : t("adminUsers.emailUnverified")) : null,
+                u.email && !u.isAnonymized
+                  ? u.emailVerified
+                    ? t("adminUsers.emailVerified")
+                    : t("adminUsers.emailUnverified")
+                  : null,
                 u.hasPassword ? null : t("adminUsers.noPassword"),
                 formatDay(u.createdAt),
               ]
@@ -124,6 +128,7 @@ export default function AdminUserScreen() {
             </AppText>
           </Card>
 
+          {u.isAnonymized ? <Banner tone="warning" body={t("adminUsers.anonymized")} /> : null}
           {u.pendingRole ? (
             <Banner tone="warning" body={t("adminUsers.pendingRole", { role: t(`admin.role.${u.pendingRole}`) })} />
           ) : null}
@@ -138,10 +143,10 @@ export default function AdminUserScreen() {
                 onPress={() => setRoleSheet(true)}
               />
             ) : null}
-            {u.email ? (
+            {u.email && !u.isAnonymized ? (
               <Button variant="secondary" title={t("adminUsers.sendReset")} loading={reset.isPending} onPress={confirmReset} />
             ) : null}
-            {u.email && !u.emailVerified ? (
+            {u.email && !u.emailVerified && !u.isAnonymized ? (
               <Button
                 variant="secondary"
                 title={t("adminUsers.resendVerification")}
@@ -149,7 +154,7 @@ export default function AdminUserScreen() {
                 onPress={() => verify.mutate()}
               />
             ) : null}
-            {u.role !== "ADMIN" ? (
+            {u.role !== "ADMIN" && !u.isAnonymized ? (
               <Button variant="secondary" title={t("adminUsers.setPassword")} onPress={() => setPwSheet(true)} />
             ) : null}
             <Button
@@ -159,7 +164,7 @@ export default function AdminUserScreen() {
             />
             {canErase(u, myId) ? (
               <Button variant="danger" title={t("adminUsers.erase")} onPress={() => setEraseSheet(true)} />
-            ) : u.id !== myId ? (
+            ) : u.id !== myId && !u.isAnonymized ? (
               <AppText variant="caption">{t("adminUsers.eraseNotGuest")}</AppText>
             ) : null}
           </View>

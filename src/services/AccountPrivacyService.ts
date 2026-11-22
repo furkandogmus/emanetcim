@@ -2,7 +2,7 @@ import prisma from "@/lib/db";
 import { PASSWORD_RESET_IDENTIFIER_PREFIX } from "@/lib/password-reset-token";
 import { BookingStatus, Role } from "@prisma/client";
 import { writeAuditLog } from "@/lib/audit-log";
-import { ANONYMIZED_EMAIL_DOMAIN } from "@/lib/anonymized-account";
+import { ANONYMIZED_EMAIL_DOMAIN, isAnonymizedEmail } from "@/lib/anonymized-account";
 import { NOT_DROPPED_STATUSES } from "@/lib/booking-closure";
 import { closeExpiredBookingsForGuest } from "@/services/booking/closure";
 import { normalizeTrGsm10 } from "@/lib/netgsm";
@@ -140,7 +140,7 @@ class AccountPrivacyService {
       select: { id: true, role: true, email: true, phone: true },
     });
     if (!target) return { ok: false, reason: "not_found" };
-    if (target.email?.toLowerCase().endsWith(ANONYMIZED_EMAIL_DOMAIN)) {
+    if (isAnonymizedEmail(target.email)) {
       return { ok: false, reason: "already_anonymized" };
     }
     if (!erasureConfirmMatches(params.confirm, target)) return { ok: false, reason: "confirm_mismatch" };

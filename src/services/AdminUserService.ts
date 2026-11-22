@@ -5,7 +5,7 @@ import { writeAuditLog } from "@/lib/audit-log";
 import { phoneSearchDigits } from "@/lib/admin-phone-search";
 import { cursorArgs, toPage } from "@/lib/cursor-page";
 import { isPrismaUniqueViolation } from "@/lib/prisma-errors";
-import { ANONYMIZED_EMAIL_DOMAIN } from "@/lib/anonymized-account";
+import { isAnonymizedEmail } from "@/lib/anonymized-account";
 import { generateVerificationToken } from "@/lib/tokens";
 import { sendVerificationEmail } from "@/lib/mail";
 import { requestPasswordReset } from "@/services/auth/password-reset";
@@ -26,7 +26,7 @@ export type AdminMailResult =
 /** Anonimlestirilmis hesabin e-postasi (`gdpr_...@invalid.local`) gercek bir adres degil. */
 function usableEmail(email: string | null): string | null {
   const v = email?.trim();
-  if (!v || v.toLowerCase().endsWith(ANONYMIZED_EMAIL_DOMAIN)) return null;
+  if (!v || isAnonymizedEmail(v)) return null;
   return v;
 }
 
