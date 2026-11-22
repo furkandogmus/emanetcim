@@ -23,6 +23,11 @@ export default defineConfig({
   resolve: {
     alias: {
       "@": path.resolve(dir, "./src"),
+      /*
+        Next `server-only`i kendi derleyici takma adiyla cozer (ayri paket
+        kurulu degil); testler sunucu tarafi oldugu icin bos modul yeterli.
+      */
+      "server-only": path.resolve(dir, "node_modules/next/dist/compiled/server-only/empty.js"),
     },
   },
 });
