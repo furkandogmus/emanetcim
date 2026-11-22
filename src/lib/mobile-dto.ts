@@ -1,4 +1,5 @@
 import type { Prisma } from "@prisma/client";
+import { isAnonymizedEmail } from "@/lib/anonymized-account";
 import { moneyToNumber } from "@/lib/money";
 import { computeSplit } from "@/lib/platform-split";
 import { collectedAt } from "@/lib/earning-collection";
@@ -903,6 +904,8 @@ export function toMobileAdminUserDetail(u: AdminUserDetailSource) {
     hasPassword: u.passwordHash != null,
     // Ikinci admin onayini bekleyen rol istegi (web `/admin/role-approvals`).
     pendingRole: u.adminRoleChangeTargets?.requestedRole ?? null,
+    // Silinmis hesap: e-posta `gdpr_...@invalid.local`, e-posta/silme islemleri anlamsiz.
+    isAnonymized: isAnonymizedEmail(u.email),
   };
 }
 

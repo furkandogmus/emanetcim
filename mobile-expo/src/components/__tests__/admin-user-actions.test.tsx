@@ -68,6 +68,7 @@ const GUEST: AdminUserDetail = {
   emailVerified: false,
   hasPassword: true,
   pendingRole: null,
+  isAnonymized: false,
 };
 let user: AdminUserDetail = GUEST;
 
@@ -129,6 +130,7 @@ describe("onay kapilari (saf)", () => {
     expect(canErase(GUEST, "admin-1")).toBe(true);
     expect(canErase(GUEST, "g1")).toBe(false);
     expect(canErase({ ...GUEST, role: "PARTNER" }, "admin-1")).toBe(false);
+    expect(canErase({ ...GUEST, isAnonymized: true }, "admin-1")).toBe(false);
   });
 });
 
@@ -186,6 +188,21 @@ describe("hesap silme", () => {
         { path: "/admin/users/g1/anonymize", body: { confirm: "ada@example.com", reason: "Kullanıcı istedi" } },
       ]),
     );
+  });
+
+  it("anonim hesapta silme, sifirlama, dogrulama ve sifre islemleri yok", async () => {
+    user = { ...GUEST, email: "gdpr_abc@invalid.local", phone: "", name: "", isAnonymized: true };
+    await renderUser();
+    for (const name of [
+      "Hesabı sil",
+      "Şifre sıfırlama e-postası gönder",
+      "Doğrulama e-postasını yeniden gönder",
+      "Şifre belirle",
+    ]) {
+      expect(screen.queryByRole("button", { name })).toBeNull();
+    }
+    expect(screen.getByText(/Bu hesap silinmiş/)).toBeTruthy();
+    expect(screen.queryByText("gdpr_abc@invalid.local")).toBeNull();
   });
 
   it("esnaf hesabinda silme dugmesi yok, nedeni yazar", async () => {

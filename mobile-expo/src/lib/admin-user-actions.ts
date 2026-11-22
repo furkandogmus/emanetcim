@@ -31,7 +31,7 @@ export function canSubmitErasure(
 
 /** Silinebilir mi: kendi silmesiyle ayni kural (yalnizca misafir), kendisi degil. */
 export function canErase(user: AdminUserDetail, myId: string | null): boolean {
-  return user.role === "GUEST" && user.id !== myId && (!!user.email || !!user.phone);
+  return user.role === "GUEST" && user.id !== myId && !user.isAnonymized && (!!user.email || !!user.phone);
 }
 
 const path = (id: string, tail: string) => `/admin/users/${encodeURIComponent(id)}/${tail}`;
