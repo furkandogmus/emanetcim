@@ -127,6 +127,16 @@ export default function SearchClient({
   const [allList, setAllList] = useState<ShopSearchHit[]>(initialAll);
 
   const [checkInLocal, setCheckInLocal] = useState("");
+  /*
+    Birakma takviminde gecmis gunler secilebiliyordu (ana sayfa ve rezervasyon
+    ekrani `minDate` veriyordu, burasi vermiyordu). Ana sayfayla ayni kural:
+    bugunun basi, ilk render'da sabit.
+  */
+  const [minCheckIn] = useState(() => {
+    const d = new Date();
+    d.setHours(0, 0, 0, 0);
+    return d;
+  });
   const [checkOutLocal, setCheckOutLocal] = useState("");
   const [datesReady, setDatesReady] = useState(false);
   const [requestedBags, setRequestedBags] = useState(1);
@@ -719,6 +729,7 @@ export default function SearchClient({
                     markFiltersDirty();
                   }}
                   dateOnly
+                  minDate={minCheckIn}
                   testId="search-checkin"
                   ariaLabel={t("searchCheckIn")}
                   iconSize={14}
