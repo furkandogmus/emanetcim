@@ -11,14 +11,9 @@ import { z } from "zod";
 import { revalidatePathAllLocales } from "@/lib/revalidate-locales";
 import logger from "@/lib/logger";
 import { bookingService } from "@/services/BookingService";
-import { generateVerificationToken } from "@/lib/tokens";
-import { sendVerificationEmail } from "@/lib/mail";
 import { getLocale } from "next-intl/server";
 import { writeAuditLog } from "@/lib/audit-log";
-import {
-  isPrismaForeignKeyViolation,
-  isPrismaUniqueViolation,
-} from "@/lib/prisma-errors";
+import { isPrismaForeignKeyViolation } from "@/lib/prisma-errors";
 import {
   DELETE_USER_BLOCKED_CODE,
   DELETE_USER_HAS_ACTIVE_BOOKING_CODE,
@@ -57,68 +52,6 @@ export async function toggleUserBanAction(userId: string, isBanned: boolean) {
   return { success: true as const };
 }
 
-async function countAdmins(): Promise<number> {
-  return prisma.user.count({ where: { role: Role.ADMIN } });
-}
-
-function involvesAdminRoleTransition(prev: Role, next: Role): boolean {
-  return prev === Role.ADMIN || next === Role.ADMIN;
-}
-
-/** Admin rolünden çıkarma: sistemde en az 2 admin olmalı. */
-async function assertDemotingAdminIsAllowed(
-  targetUserId: string,
-  newRole: Role,
-): Promise<void> {
-  if (newRole === Role.ADMIN) return;
-  const target = await prisma.user.findUnique({
-    where: { id: targetUserId },
-    select: { role: true },
-  });
-  if (!target) throw new Error("not_found");
-  if (target.role !== Role.ADMIN) return;
-  const adminCount = await countAdmins();
-  if (adminCount <= 1) {
-    throw new Error("cannot_demote_sole_admin");
-  }
-}
-
-async function applyUserRoleChange(params: {
-  targetUserId: string;
-  newRole: Role;
-  actorUserId: string | null;
-  ip: string | null;
-  metadataExtra?: Record<string, unknown>;
-}) {
-  /*
-    ROL DEGISIKLIGI TOKEN'LARI IPTAL EDER (2026-08-31'de eklendi).
-
-    Onceden yalnizca `role` yaziliyordu. Rol, hem mobil JWT'nin (`role` istemi)
-    hem de web oturum token'inin ICINDE tasiniyor; ikisi de imzali ve gecerli
-    kaliyordu. Yani yetkisi ALINAN bir yonetici, elindeki token'lar suresi
-    dolana kadar yonetici kalıyordu -- mobil erisim token'i 15 dakika, refresh
-    token'i 30 GUN, web oturumu Auth.js varsayilaniyla 30 gun.
-
-    `tokenVersion` artisi ucunu birden dusurur: `requireMobileUser`,
-    `getMobileSession` ve web `jwt` yeniden dogrulamasi hepsi bu sayiyi
-    karsilastiriyor. Yetki kaybi ANINDA gecerli olur; kullanici yeniden giris
-    yapar ve YENI rolunu alir.
-  */
-  await prisma.user.update({
-    where: { id: params.targetUserId },
-    data: { role: params.newRole, tokenVersion: { increment: 1 } },
-  });
-  writeAuditLog({
-    actorUserId: params.actorUserId,
-    actorRole: "ADMIN",
-    action: "user.role_update",
-    entityType: "User",
-    entityId: params.targetUserId,
-    metadata: { newRole: params.newRole, ...params.metadataExtra },
-    ip: params.ip,
-  });
-}
-
 export type SubmitAdminRoleChangeResult =
   | { ok: true; applied: true }
   | { ok: true; pendingApproval: true }
@@ -142,93 +75,19 @@ export async function submitAdminRoleChangeAction(
   newRole: Role,
 ): Promise<SubmitAdminRoleChangeResult> {
   const session = await ensureAdmin();
-  const actorId = session.user?.id;
-  if (!actorId || actorId === targetUserId) {
-    return { ok: false, error: "unauthorized" };
-  }
-
-  const target = await prisma.user.findUnique({
-    where: { id: targetUserId },
-    select: { id: true, role: true },
+  // Govde `AdminUserService.changeRole`ta (son admin / kendi rolu / ikinci onay); mobil admin de oradan gecer.
+  const result = await adminUserService.changeRole(targetUserId, newRole, {
+    userId: session.user?.id ?? null,
+    ip: await getClientIpOrNull(),
   });
-  if (!target) return { ok: false, error: "not_found" };
-  if (target.role === newRole) return { ok: false, error: "same_role" };
-
-  const ip = await getClientIpOrNull();
-
-  if (!involvesAdminRoleTransition(target.role, newRole)) {
-    await applyUserRoleChange({
-      targetUserId,
-      newRole,
-      actorUserId: actorId,
-      ip,
-    });
-    revalidatePathAllLocales("/admin/users");
-    return { ok: true, applied: true };
+  if (!result.ok) {
+    return { ok: false, error: result.error === "cannot_change_self" ? "unauthorized" : result.error };
   }
-
-  try {
-    await assertDemotingAdminIsAllowed(targetUserId, newRole);
-  } catch (e) {
-    if (e instanceof Error) {
-      if (e.message === "cannot_demote_sole_admin") {
-        return { ok: false, error: "cannot_demote_sole_admin" };
-      }
-      if (e.message === "not_found") {
-        return { ok: false, error: "not_found" };
-      }
-    }
-    throw e;
-  }
-
-  const admins = await countAdmins();
-  if (admins === 1) {
-    await applyUserRoleChange({
-      targetUserId,
-      newRole,
-      actorUserId: actorId,
-      ip,
-      metadataExtra: { instantReason: "sole_admin" },
-    });
-    revalidatePathAllLocales("/admin/users");
-    revalidatePathAllLocales("/admin/role-approvals");
-    revalidatePathAllLocales("/admin");
-    return { ok: true, applied: true };
-  }
-
-  try {
-    await prisma.adminRoleChangeRequest.create({
-      data: {
-        targetUserId,
-        previousRole: target.role,
-        requestedRole: newRole,
-        requestedByUserId: actorId,
-      },
-    });
-  } catch (e) {
-    if (isPrismaUniqueViolation(e)) {
-      return { ok: false, error: "pending_exists" };
-    }
-    throw e;
-  }
-
-  writeAuditLog({
-    actorUserId: actorId,
-    actorRole: "ADMIN",
-    action: "user.role_change_request",
-    entityType: "User",
-    entityId: targetUserId,
-    metadata: {
-      previousRole: target.role,
-      requestedRole: newRole,
-    },
-    ip,
-  });
 
   revalidatePathAllLocales("/admin/users");
   revalidatePathAllLocales("/admin/role-approvals");
   revalidatePathAllLocales("/admin");
-  return { ok: true, pendingApproval: true };
+  return result.status === "applied" ? { ok: true, applied: true } : { ok: true, pendingApproval: true };
 }
 
 export type ApproveAdminRoleChangeResult =
@@ -487,18 +346,15 @@ export async function deleteUserAction(
  * Doğrulama e-postasını tekrar gönder
  */
 export async function resendVerificationEmailAction(email: string) {
-  await ensureAdmin();
+  const session = await ensureAdmin();
 
-  // BUG-08: E-posta formatı doğrulanmadan token üretilebiliyordu
-  const emailParsed = z.string().email().max(320).safeParse(email?.trim());
-  if (!emailParsed.success) {
-    return { success: false as const, error: "invalid_email" };
-  }
-
-  const locale = await getLocale();
-  const verificationToken = await generateVerificationToken(emailParsed.data);
-  await sendVerificationEmail(emailParsed.data, verificationToken.token, locale);
-
+  // Govde `AdminUserService.resendVerificationEmail`ta (bicim, dogrulanmis hesap, denetim kaydi).
+  const result = await adminUserService.resendVerificationEmail(
+    email ?? "",
+    { userId: session.user.id ?? null, ip: await getClientIpOrNull() },
+    await getLocale(),
+  );
+  if (!result.ok) return { success: false as const, error: result.error };
   return { success: true };
 }
 
