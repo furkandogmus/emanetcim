@@ -1290,7 +1290,9 @@
       "too_soon_one": "Gerade wurde eine Ankündigung gesendet. Versuche es in {{count}} Minute erneut.",
       "too_soon_other": "Gerade wurde eine Ankündigung gesendet. Versuche es in {{count}} Minuten erneut.",
       "forbidden": "Nur Admins dürfen das, und nicht in der Benutzeransicht.",
-      "no_recipients": "In dieser Gruppe empfängt kein Gerät Benachrichtigungen."
+      "no_recipients": "In dieser Gruppe empfängt kein Gerät Benachrichtigungen.",
+      "broadcast_in_progress": "Die vorherige Ankündigung wird noch gesendet. Versuche es erneut, wenn sie fertig ist; den Stand siehst du unten in der Liste.",
+      "reason_too_long": "Der Grund darf höchstens 500 Zeichen haben."
     }
   }
 }

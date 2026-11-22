@@ -1290,7 +1290,9 @@
       "too_soon_one": "Az önce bir duyuru gönderildi. {{count}} dakika sonra tekrar dene.",
       "too_soon_other": "Az önce bir duyuru gönderildi. {{count}} dakika sonra tekrar dene.",
       "forbidden": "Bu işlem için yönetici olman gerekiyor; kullanıcı olarak görüntülerken yapılamaz.",
-      "no_recipients": "Bu kitlede bildirim alan cihaz yok."
+      "no_recipients": "Bu kitlede bildirim alan cihaz yok.",
+      "broadcast_in_progress": "Önceki duyuru hâlâ gönderiliyor. Bitince yeniden dene; aşağıdaki listeden izleyebilirsin.",
+      "reason_too_long": "Gerekçe en fazla 500 karakter olabilir."
     }
   }
 }
