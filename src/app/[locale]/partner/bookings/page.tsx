@@ -13,19 +13,24 @@ import {
 } from "@/lib/partner-bookings-filter";
 import PartnerBookingsFilterTabs from "@/components/partner/PartnerBookingsFilterTabs";
 import PartnerBookingActionLinks from "@/components/partner/PartnerBookingActionLinks";
+import PartnerBookingsSearchBox from "@/components/partner/PartnerBookingsSearchBox";
+import {
+  normalizePartnerSearchQuery,
+  partnerBookingSearchWhere,
+} from "@/services/PartnerBookingSearchService";
 
 const PAGE_SIZE = 30;
 
 /**
  * Partner Bookings / History Page - Esnaf Takvimi
- * ?filter=all|action|payment|done&page=1
+ * ?filter=all|action|payment|done&page=1&q=
  */
 export default async function PartnerBookingsPage({
   params,
   searchParams,
 }: {
   params: Promise<{ locale: string }>;
-  searchParams?: Promise<{ filter?: string; page?: string }>;
+  searchParams?: Promise<{ filter?: string; page?: string; q?: string }>;
 }) {
   const { locale } = await params;
   setRequestLocale(locale);
@@ -51,9 +56,16 @@ export default async function PartnerBookingsPage({
    * kümeyi değil.
    */
   const filterStatuses = partnerBookingsFilterStatuses(filter);
+  const q = normalizePartnerSearchQuery(sp.q);
+  // Arama mobil uctaki ayni servis: kod on eki / ad / telefon kuyrugu, yalnizca kendi dukkanlari.
+  const ownShopIds = q
+    ? (await prisma.shop.findMany({ where: { ownerId: userId }, select: { id: true } })).map((s) => s.id)
+    : [];
+  const search = await partnerBookingSearchWhere(ownShopIds, q);
   const where = {
     shop: { ownerId: userId },
     ...(filterStatuses ? { status: { in: filterStatuses } } : {}),
+    ...search,
   };
 
   const [totalCount, dbBookings] = await Promise.all([
@@ -130,9 +142,10 @@ export default async function PartnerBookingsPage({
   const qs = (p: number) => {
     const params = new URLSearchParams();
     if (filter !== "all") params.set("filter", filter);
+    if (q) params.set("q", q);
     if (p > 1) params.set("page", String(p));
-    const q = params.toString();
-    return q ? `?${q}` : "";
+    const query = params.toString();
+    return query ? `?${query}` : "";
   };
 
   return (
@@ -145,7 +158,14 @@ export default async function PartnerBookingsPage({
       </header>
 
       <div className="mx-auto flex w-full max-w-2xl flex-col gap-6 p-6">
-        {totalCount > 0 ? (
+        <PartnerBookingsSearchBox
+          initialQuery={q ?? ""}
+          filter={filter}
+          label={t("partnerBookingsSearchLabel")}
+          placeholder={t("partnerBookingsSearchPlaceholder")}
+          submitLabel={t("partnerBookingsSearchSubmit")}
+        />
+        {totalCount > 0 || q ? (
           <PartnerBookingsFilterTabs
             current={filter}
             labels={filterLabels}
@@ -153,7 +173,7 @@ export default async function PartnerBookingsPage({
           />
         ) : null}
 
-        {totalCount === 0 ? (
+        {totalCount === 0 && !q ? (
           <div className="flex flex-col items-center rounded-3xl border border-gray-100 bg-white p-8 text-center text-gray-500 shadow-sm">
             <Package size={48} className="mb-4 text-gray-200" />
             <h3 className="font-bold text-gray-900">{t("noBookingsYet")}</h3>
