@@ -11,7 +11,7 @@ type Ctx = { params: Promise<{ id: string }> };
 export async function GET(req: NextRequest, { params }: Ctx) {
   const auth = await requireMobileUser(req);
   if ("error" in auth) return auth.error;
-  const forbid = requireRole(auth.user, ["ADMIN"]) ?? forbidWhileImpersonating(auth.user);
+  const forbid = forbidWhileImpersonating(auth.user) ?? requireRole(auth.user, ["ADMIN"]);
   if (forbid) return forbid;
   const { id } = await params;
   const row = await disputeService.getForAdmin(id);
@@ -23,7 +23,7 @@ export async function GET(req: NextRequest, { params }: Ctx) {
 export async function PATCH(req: NextRequest, { params }: Ctx) {
   const auth = await requireMobileUser(req);
   if ("error" in auth) return auth.error;
-  const forbid = requireRole(auth.user, ["ADMIN"]) ?? forbidWhileImpersonating(auth.user);
+  const forbid = forbidWhileImpersonating(auth.user) ?? requireRole(auth.user, ["ADMIN"]);
   if (forbid) return forbid;
   const { id } = await params;
   const { status, adminNote } = await readOpsBody(req);
