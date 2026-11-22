@@ -10,9 +10,12 @@ import { moneyToNumber } from "@/lib/money";
 /** Tek sayfada gosterilen odeme sayisi. */
 export const PAYMENT_PAGE_SIZE = 100;
 
-/** URL'den gelen durum dogrulanmadan Prisma'ya giderse sorgu firlar (500); taninmayan deger filtresiz. */
+/**
+ * URL'den gelen durum dogrulanmadan Prisma'ya giderse sorgu firlar (500); taninmayan
+ * deger filtresiz. `in` DEGIL: `?status=toString` prototip anahtariyla gecip 500 veriyordu.
+ */
 export function parsePaymentStatusFilter(status: string | null | undefined): PaymentStatus | null {
-  return status && status in PaymentStatus ? (status as PaymentStatus) : null;
+  return status && (Object.values(PaymentStatus) as string[]).includes(status) ? (status as PaymentStatus) : null;
 }
 
 export async function getPaymentsLedger(statusRaw: string | null | undefined) {
