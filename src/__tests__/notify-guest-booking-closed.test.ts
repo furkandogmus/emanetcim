@@ -61,7 +61,9 @@ describe("notifyGuestBookingClosed", () => {
     });
     const e = sent();
     expect(e.text).toContain("Reason: Other");
-    expect(e.text).toContain("Su kesildi");
+    // Duz metin esnafin yazdigini aynen tasir: ne etiket silinir ne kacirilir.
+    expect(e.text).toContain("Su kesildi <b>bugun</b>");
+    expect(e.text).not.toContain("&lt;");
     expect(e.html).toContain("Su kesildi &lt;b&gt;bugun&lt;/b&gt;");
     expect(e.html).not.toContain("<b>bugun</b>");
   });
