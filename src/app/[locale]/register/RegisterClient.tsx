@@ -21,6 +21,18 @@ import { Link } from '@/i18n/routing';
 import { useTranslations } from 'next-intl';
 import AmbientBackdrop from "@/components/common/AmbientBackdrop";
 import BrandMark from "@/components/common/BrandMark";
+import FieldError from "@/components/common/FieldError";
+import { useFieldErrors } from "@/lib/hooks/useFieldErrors";
+
+type RegisterField = 'email' | 'phone';
+
+/** Sunucu hata kodunun hangi alana ait olduğu; eşleşmeyen yalnızca özette kalır. */
+const SERVER_ERROR_FIELD: Record<string, RegisterField> = {
+  'Errors.invalidEmail': 'email',
+  'Errors.emailAlreadyRegistered': 'email',
+  'Errors.invalidTrPhone': 'phone',
+  'Errors.phoneAlreadyRegistered': 'phone',
+};
 
 const LocationPicker = dynamic(() => import('@/components/partner/LocationPicker'), { ssr: false });
 
@@ -76,6 +88,14 @@ export default function RegisterPage() {
 
   const [isPending, setIsPending] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const { attachForm, errors: fieldErrors, setErrors: setFieldErrors, clearError, fieldProps, errorId } =
+    useFieldErrors<RegisterField>('register');
+  /** Özeti yazar; kod bir alana aitse o alanı da geçersiz işaretler (odak oraya gider). */
+  const fail = (code: string | undefined, message: string) => {
+    setError(message);
+    const field = code ? SERVER_ERROR_FIELD[code] : undefined;
+    setFieldErrors(field ? { [field]: message } : {});
+  };
   const [success, setSuccess] = useState(false);
 
   const [guestData, setGuestData] = useState({
@@ -112,20 +132,21 @@ export default function RegisterPage() {
     e.preventDefault();
     setIsPending(true);
     setError(null);
+    setFieldErrors({});
 
     try {
       if (activeTab === 'GUEST') {
         const res = await registerGuestAction(guestData);
         if (res.success) setSuccess(true);
-        else setError(translateServerError(res.error));
+        else fail(res.error, translateServerError(res.error));
       } else {
         const strictPhonePattern = /^05\d{2}\s\d{3}\s\d{2}\s\d{2}$/;
         if (!strictPhonePattern.test(partnerData.phone)) {
-          setError(tErrors('invalidTrPhone'));
+          fail('Errors.invalidTrPhone', tErrors('invalidTrPhone'));
           return;
         }
         if (!normalizeTrGsm10(partnerData.phone)) {
-          setError(tErrors('invalidTrPhone'));
+          fail('Errors.invalidTrPhone', tErrors('invalidTrPhone'));
           return;
         }
         if (!shopLocation.city) {
@@ -152,7 +173,7 @@ export default function RegisterPage() {
           referredByCode,
         });
         if (res.success) setSuccess(true);
-        else setError(translateServerError(res.error));
+        else fail(res.error, translateServerError(res.error));
       }
     } catch {
       setError(t('authErrorGeneric'));
@@ -210,7 +231,7 @@ export default function RegisterPage() {
         {/* Tabs */}
         <div className="flex p-1 bg-gray-50 rounded-2xl gap-1 mb-8">
           <button
-            onClick={() => setActiveTab('GUEST')}
+            onClick={() => { setActiveTab('GUEST'); setFieldErrors({}); }}
             className={` flex-1 py-3 id-eyebrow rounded-xl transition-all ${
               activeTab === 'GUEST' ? "bg-white text-orange-600 shadow-sm" : "text-gray-400 hover:text-gray-600"
             }`}
@@ -218,7 +239,7 @@ export default function RegisterPage() {
             {tCommon('demoMisafir')}
           </button>
           <button
-            onClick={() => setActiveTab('PARTNER')}
+            onClick={() => { setActiveTab('PARTNER'); setFieldErrors({}); }}
             className={` flex-1 py-3 id-eyebrow rounded-xl transition-all ${
               activeTab === 'PARTNER' ? "bg-white text-orange-600 shadow-sm" : "text-gray-400 hover:text-gray-600"
             }`}
@@ -227,14 +248,18 @@ export default function RegisterPage() {
           </button>
         </div>
 
-        <form onSubmit={handleSubmit} className="w-full flex flex-col gap-4">
+        <form ref={attachForm} onSubmit={handleSubmit} className="w-full flex flex-col gap-4">
           {/* Ad Soyad */}
-          <div className="relative">
+          <div className="flex flex-col gap-1.5">
+            <label htmlFor="register-name" className="text-xs font-bold text-gray-600">
+              {t('fullName')}
+            </label>
+            <div className="relative">
             <User size={16} className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-300 pointer-events-none" />
             <input
+              id="register-name"
+              name="name"
               type="text"
-              aria-label={t('fullName')}
-              placeholder={t('fullName')}
               required
               autoComplete="name"
               value={activeTab === 'GUEST' ? guestData.name : partnerData.name}
@@ -245,52 +270,78 @@ export default function RegisterPage() {
               className="w-full h-12 pl-10 pr-4 border-2 border-gray-100 rounded-xl text-sm font-medium text-gray-800 transition"
             />
           </div>
+          </div>
 
           {/* E-posta (misafir) / Telefon (esnaf) */}
           {activeTab === 'GUEST' ? (
-            <div className="relative">
-              <Mail size={16} className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-300 pointer-events-none" />
-              <input
-                type="email"
-                aria-label={t('email')}
-                placeholder={t('email')}
-                required
-                autoComplete="email"
-                value={guestData.email}
-                onChange={(e) => setGuestData({ ...guestData, email: e.target.value })}
-                className="w-full h-12 pl-10 pr-4 border-2 border-gray-100 rounded-xl text-sm font-medium text-gray-800 transition"
-              />
+            <div className="flex flex-col gap-1.5">
+              <label htmlFor="register-email" className="text-xs font-bold text-gray-600">
+                {t('email')}
+              </label>
+              <div className="relative">
+                <Mail size={16} className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-300 pointer-events-none" />
+                <input
+                  id="register-email"
+                  name="email"
+                  type="email"
+                  required
+                  autoComplete="email"
+                  autoCapitalize="none"
+                  autoCorrect="off"
+                  spellCheck={false}
+                  {...fieldProps('email')}
+                  value={guestData.email}
+                  onChange={(e) => {
+                    setGuestData({ ...guestData, email: e.target.value });
+                    clearError('email');
+                  }}
+                  className="w-full h-12 pl-10 pr-4 border-2 border-gray-100 rounded-xl text-sm font-medium text-gray-800 transition aria-[invalid=true]:border-red-300"
+                />
+              </div>
+              <FieldError id={errorId('email')} message={fieldErrors.email} />
             </div>
           ) : (
-            <div className="relative">
+            <div className="flex flex-col gap-1.5">
+              <label htmlFor="register-phone" className="text-xs font-bold text-gray-600">
+                {t('phonePlaceholder')}
+              </label>
+              <div className="relative">
               <Phone size={16} className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-300 pointer-events-none" />
               <input
+                id="register-phone"
+                name="tel"
                 type="tel"
-                aria-label={t('phonePlaceholder')}
-                placeholder={t('phonePlaceholder')}
                 required
+                {...fieldProps('phone')}
                 value={partnerData.phone}
-                onChange={(e) =>
+                onChange={(e) => {
                   setPartnerData({
                     ...partnerData,
                     phone: formatTrMobileInput(e.target.value),
-                  })
-                }
+                  });
+                  clearError('phone');
+                }}
                 inputMode="numeric"
                 autoComplete="tel-national"
                 maxLength={14}
-                className="w-full h-12 pl-10 pr-4 border-2 border-gray-100 rounded-xl text-sm font-medium text-gray-800 transition"
+                className="w-full h-12 pl-10 pr-4 border-2 border-gray-100 rounded-xl text-sm font-medium text-gray-800 transition aria-[invalid=true]:border-red-300"
               />
+              </div>
+              <FieldError id={errorId('phone')} message={fieldErrors.phone} />
             </div>
           )}
 
           {/* Şifre */}
-          <div className="relative">
+          <div className="flex flex-col gap-1.5">
+            <label htmlFor="register-password" className="text-xs font-bold text-gray-600">
+              {t('password')}
+            </label>
+            <div className="relative">
             <Lock size={16} className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-300 pointer-events-none" />
             <input
+              id="register-password"
+              name="password"
               type="password"
-              aria-label={t('password')}
-              placeholder={t('password')}
               required
               autoComplete="new-password"
               minLength={MIN_PASSWORD_LENGTH}
@@ -301,6 +352,7 @@ export default function RegisterPage() {
               }
               className="w-full h-12 pl-10 pr-4 border-2 border-gray-100 rounded-xl text-sm font-medium text-gray-800 transition"
             />
+            </div>
           </div>
 
           {/* Esnaf-only alanlar */}
@@ -311,18 +363,23 @@ export default function RegisterPage() {
               className="flex flex-col gap-4 overflow-hidden"
             >
               {/* İşyeri adı */}
-              <div className="relative">
+              <div className="flex flex-col gap-1.5">
+                <label htmlFor="register-shop-name" className="text-xs font-bold text-gray-600">
+                  {t('shopName')}
+                </label>
+                <div className="relative">
                 <Store size={16} className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-300 pointer-events-none" />
                 <input
+                  id="register-shop-name"
+                  name="organization"
                   type="text"
-                  aria-label={t('shopName')}
-                  placeholder={t('shopName')}
                   required
                   autoComplete="organization"
                   value={partnerData.shopName}
                   onChange={(e) => setPartnerData({ ...partnerData, shopName: e.target.value })}
                   className="w-full h-12 pl-10 pr-4 border-2 border-gray-100 rounded-xl text-sm font-medium text-gray-800 transition"
                 />
+                </div>
               </div>
 
               {/* Konum Seçici */}
