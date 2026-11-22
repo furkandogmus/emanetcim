@@ -1,9 +1,9 @@
 /**
  * @vitest-environment jsdom
  */
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { describe, it, expect, afterEach } from "vitest";
-import { render, screen, fireEvent, waitFor } from "@testing-library/react";
+import { render, screen, fireEvent } from "@testing-library/react";
 import { useModalBehavior } from "@/lib/hooks/useModalBehavior";
 
 /**
@@ -14,10 +14,11 @@ import { useModalBehavior } from "@/lib/hooks/useModalBehavior";
  * modal açılmamış gibi davranıyordu.
  */
 function MinimalDialog({ open, onClose }: { open: boolean; onClose: () => void }) {
-  useModalBehavior({ open, onClose });
+  const ref = useRef<HTMLDivElement>(null);
+  useModalBehavior({ open, onClose, ref });
   if (!open) return null;
   return (
-    <div role="dialog" aria-modal="true" aria-label="test">
+    <div ref={ref} role="dialog" aria-modal="true" aria-label="test">
       <button type="button">Birinci</button>
       <button type="button">İkinci</button>
     </div>
@@ -81,35 +82,29 @@ describe("useModalBehavior — açılışta odak", () => {
  * IKI DIYALOG AYNI ANDA DOM'DA: hangisi ETKIN?
  *
  * NEDEN (2026-08-31'de canlida olculdu): hook `[role="dialog"]` sonucunun
- * SONUNCUSUNU aliyordu. Ana sayfada iki `BottomSheet` var (birakis + alis) ve
- * ikisi de kapaliyken bile DOM'da duruyor; kapali olan `inert`. Kullanici
- * BIRINCIYI acinca odak IKINCININ ilk ogesine tasinmaya calisiliyor, o oge
- * `inert` icinde oldugu icin odaklanamiyor ve odak tetikleyicide kaliyor.
- * Ekran okuyucu kullanicisi acisindan "dugmeye bastim, bir sey olmadi".
+ * SONUNCUSUNU aliyordu; ana sayfadaki kapali (`inert`) ikinci `BottomSheet`
+ * secilince odak tetikleyicide kaliyordu. Artik kok `ref` ile veriliyor;
+ * DOM'da sonra gelen kapali diyalog hicbir zaman secilmez.
  */
 describe("useModalBehavior — birden fazla diyalog", () => {
-  it("odagi `inert` OLMAYAN diyaloga tasir", async () => {
-    const kapali = document.createElement("div");
-    kapali.setAttribute("inert", "");
-    kapali.innerHTML = '<div role="dialog"><button>kapali-dugme</button></div>';
-
-    const acik = document.createElement("div");
-    acik.innerHTML = '<div role="dialog"><button>acik-dugme</button></div>';
-
-    // Kapali olan DOM'da SONRA geliyor: eski kod onu secerdi.
-    document.body.append(acik, kapali);
-
+  it("odagi ref'in gosterdigi diyaloga tasir, DOM'da sonra gelen kapali diyaloga degil", () => {
     function Test() {
-      useModalBehavior({ open: true, onClose: () => {} });
-      return null;
+      const ref = useRef<HTMLDivElement>(null);
+      useModalBehavior({ open: true, onClose: () => {}, ref });
+      return (
+        <>
+          <div ref={ref} role="dialog">
+            <button>acik-dugme</button>
+          </div>
+          <div inert>
+            <div role="dialog">
+              <button>kapali-dugme</button>
+            </div>
+          </div>
+        </>
+      );
     }
     render(<Test />);
-
-    await waitFor(() => {
-      expect((document.activeElement as HTMLElement)?.textContent).toBe("acik-dugme");
-    });
-
-    acik.remove();
-    kapali.remove();
+    expect((document.activeElement as HTMLElement)?.textContent).toBe("acik-dugme");
   });
 });

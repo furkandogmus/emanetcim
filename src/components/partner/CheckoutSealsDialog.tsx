@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useRef } from "react";
 import { useTranslations } from "next-intl";
 import { Loader2, X } from "lucide-react";
 import { useModalBehavior } from "@/lib/hooks/useModalBehavior";
@@ -30,7 +30,8 @@ export default function CheckoutSealsDialog({
   onConfirm,
 }: CheckoutSealsDialogProps) {
   const t = useTranslations("Partner");
-  useModalBehavior({ open: true, onClose });
+  const modalRef = useRef<HTMLDivElement>(null);
+  useModalBehavior({ open: true, onClose, ref: modalRef });
   const [confirmed, setConfirmed] = useState<number[]>([]);
 
   const toggleCheckoutSeal = (sealNumber: number) => {
@@ -40,7 +41,7 @@ export default function CheckoutSealsDialog({
   };
 
   return (
-    <div className="fixed inset-0 z-[70] flex items-center justify-center overflow-y-auto bg-black/60 p-4 backdrop-blur-md">
+    <div ref={modalRef} className="fixed inset-0 z-[70] flex items-center justify-center overflow-y-auto bg-black/60 p-4 backdrop-blur-md">
       <div
         role="dialog"
         aria-modal="true"

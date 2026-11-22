@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import { useTranslations } from "next-intl";
 import { AlertTriangle, CheckCircle2, Loader2, Luggage, ShieldCheck, X , Camera } from "lucide-react";
 import { toast } from "sonner";
@@ -72,7 +72,8 @@ export default function CheckInDialog({
 }: CheckInDialogProps) {
   const t = useTranslations("Partner");
   const errorText = useActionErrorText();
-  useModalBehavior({ open: true, onClose });
+  const modalRef = useRef<HTMLDivElement>(null);
+  useModalBehavior({ open: true, onClose, ref: modalRef });
 
   const [sealRows, setSealRows] = useState<SealRow[]>(() =>
     buildSealRows(preview.bagCountS, preview.bagCountM, preview.bagCountXl),
@@ -232,7 +233,7 @@ export default function CheckInDialog({
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-md p-4 text-white animate-in fade-in duration-300 overflow-y-auto">
+    <div ref={modalRef} className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-md p-4 text-white animate-in fade-in duration-300 overflow-y-auto">
       <div
         role="dialog"
         aria-modal="true"

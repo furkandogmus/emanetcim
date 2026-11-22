@@ -49,7 +49,8 @@ export default function ConfirmDialog({
   children,
   confirmDisabled = false,
 }: ConfirmDialogProps) {
-  useModalBehavior({ open, onClose: onCancel });
+  const modalRef = useRef<HTMLDivElement>(null);
+  useModalBehavior({ open, onClose: onCancel, ref: modalRef });
 
   const cancelRef = useRef<HTMLButtonElement>(null);
   useEffect(() => {
@@ -89,7 +90,7 @@ export default function ConfirmDialog({
     !typedConfirmation || typed.trim() === typedConfirmation.phrase.trim();
 
   return (
-    <div
+    <div ref={modalRef}
       className="fixed inset-0 z-[120] flex items-center justify-center bg-black/45 backdrop-blur-sm p-4"
       // Dışarı tıklamak da iptaldir; onaylamak her zaman bilinçli olmalı.
       onClick={onCancel}

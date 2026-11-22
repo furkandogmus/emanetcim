@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useTransition } from "react";
+import { useState, useTransition, useRef } from "react";
 import { useTranslations, useLocale } from "next-intl";
 import { Minus, Plus, X } from "lucide-react";
 import { toast } from "sonner";
@@ -50,7 +50,8 @@ export default function BagRevisionDialog({ bookingId, initial, unitPrice, onClo
   const bcp47 = bcp47ForUiLocale(useLocale());
   const [counts, setCounts] = useState<Counts>(initial);
   const [pending, startTransition] = useTransition();
-  useModalBehavior({ open: true, onClose });
+  const modalRef = useRef<HTMLDivElement>(null);
+  useModalBehavior({ open: true, onClose, ref: modalRef });
 
   const total = counts.bagCountS + counts.bagCountM + counts.bagCountXl;
   const initialTotal = initial.bagCountS + initial.bagCountM + initial.bagCountXl;
@@ -75,7 +76,7 @@ export default function BagRevisionDialog({ bookingId, initial, unitPrice, onClo
   }
 
   return (
-    <div className="fixed inset-0 z-50 flex items-end justify-center bg-black/40 p-0 sm:items-center sm:p-6">
+    <div ref={modalRef} className="fixed inset-0 z-50 flex items-end justify-center bg-black/40 p-0 sm:items-center sm:p-6">
       <div
         role="dialog"
         aria-modal="true"

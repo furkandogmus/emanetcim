@@ -1,7 +1,7 @@
 "use client";
 
 import { useLocale, useTranslations } from "next-intl";
-import { useCallback, useState, useTransition } from "react";
+import { useCallback, useState, useTransition, useRef } from "react";
 import { 
   Store, 
   Search, 
@@ -175,7 +175,8 @@ export default function AdminPartnersClient({ shops: initialShops }: AdminPartne
     setCopied(false);
   }, []);
 
-  useModalBehavior({ open: resetTarget !== null, onClose: closeResetModal });
+  const modalRef = useRef<HTMLDivElement>(null);
+  useModalBehavior({ open: resetTarget !== null, onClose: closeResetModal, ref: modalRef });
 
   const q = search.trim().toLocaleLowerCase("tr");
   const filteredShops = initialShops.filter(
@@ -380,7 +381,7 @@ export default function AdminPartnersClient({ shops: initialShops }: AdminPartne
       {/* Şifre sıfırlama modalı */}
       <AnimatePresence>
         {resetTarget && (
-          <motion.div
+          <motion.div ref={modalRef}
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
