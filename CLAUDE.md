@@ -88,11 +88,12 @@ Tavan sayısını yükselten bir PR, sorunu çözmüyor, saklıyor.
 - Ödeme mimarisi `docs/PAYMENTS.md`, iş kuralları `docs/PLATFORM_SETTINGS.md`,
   cron/sağlık `scripts/README.md`, deploy `docs/DOCKER.md` + `ops/README.md`.
 - CI/CD `docs/CI_CD.md` — tek workflow `.github/workflows/ci.yml`
-  (`verify` → `image` → `deploy`). Deploy doğrulamaya `needs` ile bağlı, yani
-  kırmızı commit üretime çıkamaz. Actions kotası bitince job'lar 0 adımda düşer
+  (`checks` ∥ `e2e` → `verify` toplayıcı; `image` paralel → `deploy`). Deploy
+  doğrulamanın her parçasına `needs` ile bağlı ve `latest`i doğrulanmış imaja o
+  taşır, yani kırmızı commit üretime çıkamaz. Actions kotası bitince job'lar 0 adımda düşer
   ve hiç log bırakmaz; o tabloyu kodda aramayın, belgede yazıyor.
 - Prod: AWS EC2 (2026-08-23'te Hetzner'den taşındı, `infra/aws/CUTOVER.md`).
-  `main` push → `verify` → GHCR imajı → SSM ile deploy. Altyapı kodu `infra/aws`.
+  `main` push → doğrulama ∥ GHCR imajı → `latest` terfisi + SSM ile deploy. Altyapı kodu `infra/aws`.
 
 ## Yapma
 
