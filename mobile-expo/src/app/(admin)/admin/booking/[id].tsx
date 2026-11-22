@@ -7,14 +7,16 @@ import { ArrowLeft, MessageCircle } from "lucide-react-native";
 import { useTranslation } from "react-i18next";
 
 import { BookingTicket } from "@/components/BookingTicket";
+import { ReasonSheet } from "@/components/ReasonSheet";
 import { AppText, Banner, Button, Card, CenterMessage, IconButton, Loading } from "@/components/ui";
+import { ADMIN_NOTE_MIN, BOOKING_ACTIONS_NS, adminActionFor, isAdminNoteValid } from "@/lib/booking-actions";
 import { errorMessage } from "@/lib/errors";
 import { formatDayTime } from "@/lib/format";
 import { SITE_ORIGIN } from "@/lib/images";
 import { languageInfo } from "@/lib/languages";
 import { telUrl, waUrl } from "@/lib/phone";
 import { useViewAs } from "@/lib/use-view-as";
-import { useAdminBooking } from "@/lib/queries";
+import { useAdminBooking, useAdminBookingAction } from "@/lib/queries";
 import type { AdminBookingDetail } from "@/lib/types";
 import { colors, radius, space } from "@/theme/tokens";
 import { StaleQueryBanner } from "@/components/StaleQueryBanner";
@@ -25,7 +27,7 @@ const open = (url: string) => void Linking.openURL(url).catch(() => undefined);
 
 /**
  * Destek hattinda bir rezervasyonun tamami: bilet, kime ve nereye ulasilir, muhurler,
- * odeme ve olay gecmisi. Yalnizca okur; islem (iptal, iade) web panelinde.
+ * odeme ve olay gecmisi. Iptal ve zorla teslim burada; iade ve itiraz web panelinde.
  */
 export default function AdminBookingScreen() {
   const { t, i18n } = useTranslation();
@@ -84,6 +86,8 @@ function Detail({ b, onWeb }: { b: AdminBookingDetail; onWeb: () => void }) {
       ) : null}
 
       <BookingTicket booking={b} showQr={false} title={b.guestName || t("partner.guest")} subtitle={b.shopName} audience="staff" />
+
+      <AdminActions b={b} />
 
       <Block title={t("admin.guest")}>
         <Card style={{ gap: space.md }}>
@@ -211,6 +215,69 @@ function Detail({ b, onWeb }: { b: AdminBookingDetail; onWeb: () => void }) {
 
       <Button variant="ghost" title={t("admin.openInWeb")} onPress={onWeb} />
     </ScrollView>
+  );
+}
+
+/** Iptal (valiz birakilmadan once) ya da zorla teslim (valiz dukkandayken); ikisi de neden ister. */
+function AdminActions({ b }: { b: AdminBookingDetail }) {
+  const { t } = useTranslation();
+  const action = adminActionFor(b.status);
+  const mutation = useAdminBookingAction(b.id);
+  const [open, setOpen] = useState(false);
+  const [note, setNote] = useState("");
+  const [error, setError] = useState<string | null>(null);
+  // Islemden sonra durum degisir ve dugme kaybolur; sonuc bandi ayni yerde kalir.
+  const [done, setDone] = useState<string | null>(null);
+
+  if (!action && !done) return null;
+  const cancel = action === "cancel";
+
+  function submit() {
+    if (!action) return;
+    setError(null);
+    mutation.mutate(
+      { action, note },
+      {
+        onSuccess: () => {
+          setOpen(false);
+          setNote("");
+          setDone(t(cancel ? "bookingActions.admin.cancelledDone" : "bookingActions.admin.forcedDone"));
+        },
+        onError: (e) => setError(errorMessage(e, BOOKING_ACTIONS_NS)),
+      },
+    );
+  }
+
+  return (
+    <Block title={t("bookingActions.admin.title")}>
+      {done ? <Banner tone="success" body={done} /> : null}
+      {action ? (
+        <Button
+          variant="danger"
+          title={t(cancel ? "bookingActions.admin.cancel" : "bookingActions.admin.forceCheckout")}
+          onPress={() => {
+            setError(null);
+            setOpen(true);
+          }}
+        />
+      ) : null}
+      <ReasonSheet
+        visible={open}
+        onClose={() => setOpen(false)}
+        title={t(cancel ? "bookingActions.admin.cancel" : "bookingActions.admin.forceCheckout")}
+        body={t(cancel ? "bookingActions.admin.cancelBody" : "bookingActions.admin.forceCheckoutBody")}
+        note={note}
+        onNoteChange={setNote}
+        noteLabel={t("bookingActions.admin.noteLabel")}
+        notePlaceholder={t("bookingActions.admin.notePlaceholder")}
+        noteHint={t("bookingActions.admin.noteHint", { min: ADMIN_NOTE_MIN })}
+        confirmLabel={t(cancel ? "bookingActions.admin.cancelConfirm" : "bookingActions.admin.forceCheckoutConfirm")}
+        canSubmit={isAdminNoteValid(note)}
+        loading={mutation.isPending}
+        error={error}
+        onConfirm={submit}
+      />
+    </Block>
   );
 }
 
