@@ -152,7 +152,12 @@ export async function cancelBooking(
       id: bookingId,
       status: { notIn: ['CANCELLED', 'CHECKED_IN', 'CHECKED_OUT'] },
     },
-    data: { status: 'CANCELLED', pendingBagRevision: Prisma.JsonNull },
+    /*
+      Surum artirilir: check-in yazimi `bookingRowVersion` ile kosullu; artmazsa
+      iptalden ONCE satiri okumus bir check-in, slotlari bosaltilmis ve iadesi
+      yazilmis CANCELLED kaydi CHECKED_IN'e cevirebiliyordu.
+    */
+    data: { status: 'CANCELLED', pendingBagRevision: Prisma.JsonNull, bookingRowVersion: { increment: 1 } },
   });
   if (kilit.count === 0) {
     return {
