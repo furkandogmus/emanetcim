@@ -72,11 +72,13 @@ export async function signGuestLookupToken(
 }
 
 const DAY_MS = 24 * 60 * 60 * 1000;
+export const MANAGE_LINK_MAX_MS = 7 * DAY_MS;
 
 /**
  * Onay e-postasindaki "Rezervasyonunu yonet" bagi: AYNI token ailesi, ayni
  * dogrulama (`authenticateGuestLookup`), tek rezervasyon + e-posta kapsami.
- * Omur bitis + 1 gun: misafir teslim gunu de bagi acabilmeli; en az 1 saat.
+ * Omur min(bitis + 1 gun, verilis + 7 gun): teslim gunu de acilabilsin ama
+ * uzak tarihli rezervasyonda sizan bir bag aylarca yasamasin. En az 1 saat.
  */
 export async function signGuestManageLinkToken(params: {
   bookingId: string;
@@ -85,9 +87,8 @@ export async function signGuestManageLinkToken(params: {
   now?: Date;
 }): Promise<string> {
   const now = params.now ?? new Date();
-  const until = new Date(
-    Math.max(params.checkOutTime.getTime() + DAY_MS, now.getTime() + 60 * 60 * 1000),
-  );
+  const capped = Math.min(params.checkOutTime.getTime() + DAY_MS, now.getTime() + MANAGE_LINK_MAX_MS);
+  const until = new Date(Math.max(capped, now.getTime() + 60 * 60 * 1000));
   return signGuestLookupToken(
     { bookingId: params.bookingId, email: params.email.trim().toLowerCase() },
     until,
