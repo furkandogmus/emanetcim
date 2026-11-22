@@ -212,8 +212,10 @@ function SetPasswordSheet({
   label: string;
 }) {
   const { t } = useTranslation();
-  const [password, setPassword] = useState(() => generatePassword());
+  // Guvenli kaynak yoksa oneri yok: alan bos acilir, yonetici yazar.
+  const [password, setPassword] = useState(() => generatePassword() ?? "");
   const [saved, setSaved] = useState<string | null>(null);
+  const [canSuggest] = useState(() => generatePassword(1) !== null);
   const save = useMutation({
     mutationFn: (pw: string) => setUserPassword(user.id, pw),
     onSuccess: (_r, pw) => setSaved(pw),
@@ -222,7 +224,7 @@ function SetPasswordSheet({
     if (save.isPending) return;
     setSaved(null);
     save.reset();
-    setPassword(generatePassword());
+    setPassword(generatePassword() ?? "");
     onClose();
   };
 
@@ -274,12 +276,14 @@ function SetPasswordSheet({
               loading={save.isPending}
               onPress={confirm}
             />
-            <Button
-              variant="ghost"
-              title={t("adminUsers.setPasswordRegenerate")}
-              disabled={save.isPending}
-              onPress={() => setPassword(generatePassword())}
-            />
+            {canSuggest ? (
+              <Button
+                variant="ghost"
+                title={t("adminUsers.setPasswordRegenerate")}
+                disabled={save.isPending}
+                onPress={() => setPassword(generatePassword() ?? "")}
+              />
+            ) : null}
           </>
         )}
       </View>

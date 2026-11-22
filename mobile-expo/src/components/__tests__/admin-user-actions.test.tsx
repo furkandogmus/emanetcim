@@ -12,7 +12,7 @@ import { afterEach, beforeAll, beforeEach, describe, expect, it, jest } from "@j
 
 import AdminUserScreen from "@/app/(admin)/admin/user/[id]";
 import AdminAuditLogScreen from "@/app/(admin)/admin/audit-log";
-import { canErase, canSubmitErasure, erasureConfirmMatches } from "@/lib/admin-user-actions";
+import { canErase, canSubmitErasure, erasureConfirmMatches, generatePassword } from "@/lib/admin-user-actions";
 import { ApiError } from "@/lib/api";
 import { errorMessage } from "@/lib/errors";
 import i18n from "@/lib/i18n";
@@ -260,6 +260,45 @@ describe("e-posta ve sifre", () => {
     await renderUser();
     expect(screen.queryByRole("button", { name: "Şifre sıfırlama e-postası gönder" })).toBeNull();
     expect(screen.queryByRole("button", { name: "Doğrulama e-postasını yeniden gönder" })).toBeNull();
+  });
+});
+
+describe("sifre onerisi yalnizca guvenli rastgelelikle", () => {
+  const original = Object.getOwnPropertyDescriptor(globalThis, "crypto");
+  const setCrypto = (value: unknown) => Object.defineProperty(globalThis, "crypto", { value, configurable: true });
+  afterEach(() => {
+    if (original) Object.defineProperty(globalThis, "crypto", original);
+  });
+
+  it("getRandomValues varsa ondan uretir, Math.random'a dokunmaz", () => {
+    const random = jest.spyOn(Math, "random");
+    let n = 0;
+    setCrypto({ getRandomValues: (a: Uint32Array) => a.map(() => n++) });
+    const pw = generatePassword();
+    expect(pw).toHaveLength(10);
+    expect(pw).toMatch(/^[a-km-zA-HJ-NP-Z2-9]+$/);
+    expect(random).not.toHaveBeenCalled();
+    random.mockRestore();
+  });
+
+  it("guvenli kaynak yoksa uretmez", () => {
+    const random = jest.spyOn(Math, "random");
+    setCrypto(undefined);
+    expect(generatePassword()).toBeNull();
+    expect(random).not.toHaveBeenCalled();
+    random.mockRestore();
+  });
+
+  it("kaynak yoksa alan bos acilir, oneri dugmesi yok, sifre yazilmadan kaydedilmez", async () => {
+    setCrypto(undefined);
+    await renderUser();
+    await fireEvent.press(screen.getByRole("button", { name: "Şifre belirle" }));
+    const field = await screen.findByLabelText("Yeni şifre");
+    expect(field.props.value).toBe("");
+    expect(screen.queryByRole("button", { name: "Yeni öner" })).toBeNull();
+    expect(isDisabled("Şifreyi kaydet")).toBe(true);
+    await fireEvent.changeText(field, "Yeni-sifre9");
+    expect(isDisabled("Şifreyi kaydet")).toBe(false);
   });
 });
 
