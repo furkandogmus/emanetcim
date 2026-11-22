@@ -56,14 +56,26 @@ const ALPHABET = "abcdefghjkmnpqrstuvwxyzABCDEFGHJKLMNPQRSTUVWXYZ23456789";
 
 type Crypto = { getRandomValues?: (a: Uint32Array) => Uint32Array };
 
-/** Guvenli kaynak varsa ondan (Hermes'te her surumde yok), yoksa `Math.random`; yonetici duzeltebilir. */
-function randomIndex(n: number): number {
+function secureRandom(): Crypto["getRandomValues"] | null {
   const c = (globalThis as { crypto?: Crypto }).crypto;
-  if (c?.getRandomValues) return c.getRandomValues(new Uint32Array(1))[0] % n;
-  return Math.floor(Math.random() * n);
+  return c?.getRandomValues ? c.getRandomValues.bind(c) : null;
 }
 
-/** Onerilen sifre (alan duzenlenebilir). */
-export function generatePassword(length = 10): string {
-  return Array.from({ length }, () => ALPHABET[randomIndex(ALPHABET.length)]).join("");
+/**
+ * Onerilen sifre; yalnizca guvenli rastgelelik (`crypto.getRandomValues`) ile.
+ * Hermes'te her surumde yok ve yeni yerel modul OTA ile gidemez: kaynak yoksa
+ * `null` doner, yonetici sifreyi kendisi yazar. `Math.random` kullanilmaz.
+ */
+export function generatePassword(length = 10): string | null {
+  const fill = secureRandom();
+  if (!fill) return null;
+  // 2^32 % 56 != 0: sinirin ustundeki degerler atilir, harf dagilimi esit kalir.
+  const limit = Math.floor(0x1_0000_0000 / ALPHABET.length) * ALPHABET.length;
+  let out = "";
+  while (out.length < length) {
+    for (const v of fill(new Uint32Array(length))) {
+      if (v < limit && out.length < length) out += ALPHABET[v % ALPHABET.length];
+    }
+  }
+  return out;
 }
