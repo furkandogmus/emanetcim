@@ -22,6 +22,18 @@ export type CityCoverage = {
   coverImage: string | null;
 };
 
+/** Bir sehrin, en az bir isletilen dukkani olan ilcesi (mobil aramada sehirden sonraki adim). */
+export type DistrictCoverage = {
+  /** En sik yazilan bicim ("Kadıköy"); gruplama yazim bicimine bagli degil. */
+  name: string;
+  /** `citySlug` ile ayni kural ("kadikoy"). */
+  slug: string;
+  shopCount: number;
+  /** Ilcedeki dukkanlarin koordinat ORTALAMASI: arama buradan acilir. */
+  latitude: number;
+  longitude: number;
+};
+
 const TTL_MS = 10 * 60 * 1000;
 const MIN_RADIUS_M = 5_000;
 /** En uzak dukkan haritanin tam kenarinda kalmasin. */
@@ -50,6 +62,7 @@ function medoid(points: Array<[number, number]>): [number, number] {
  */
 export class CityCoverageService {
   private cache: { at: number; value: CityCoverage[] } | null = null;
+  private districtCache: { at: number; value: Map<string, DistrictCoverage[]> } | null = null;
 
   async list(now: number = Date.now()): Promise<CityCoverage[]> {
     if (this.cache && now - this.cache.at < TTL_MS) return this.cache.value;
@@ -99,6 +112,65 @@ export class CityCoverageService {
 
     this.cache = { at: now, value };
     return value;
+  }
+
+  /**
+   * Sehrin ilceleri, Turkce alfabe sirasiyla. `city` sehir listesindeki `slug`
+   * ("istanbul"); bilinmeyen sehirde bos liste doner. Elle tutulan ilce tablosu
+   * YOK: yalnizca isletilen dukkani olan ilceler gelir, son dukkan kapaninca ilce duser.
+   * Butun sehirler tek sorguda gruplanir ve sehir listesiyle ayni sure onbellekte durur.
+   */
+  async districts(city: string, now: number = Date.now()): Promise<DistrictCoverage[]> {
+    if (!this.districtCache || now - this.districtCache.at >= TTL_MS) {
+      this.districtCache = { at: now, value: await this.loadDistricts() };
+    }
+    return this.districtCache.value.get(citySlug(city)) ?? [];
+  }
+
+  private async loadDistricts(): Promise<Map<string, DistrictCoverage[]>> {
+    const shops = await prisma.shop.findMany({
+      where: {
+        ...OPERATING_SHOP_FILTER,
+        city: { not: null },
+        district: { not: null },
+        latitude: { not: null },
+        longitude: { not: null },
+      },
+      select: { city: true, district: true, latitude: true, longitude: true },
+    });
+
+    type Group = { spellings: Map<string, number>; lat: number; lng: number; n: number };
+    const byCity = new Map<string, Map<string, Group>>();
+    for (const s of shops) {
+      const cityKey = citySlug(s.city!.trim());
+      const raw = s.district!.trim();
+      const key = citySlug(raw);
+      if (!cityKey || !key) continue;
+      // Aralik disi koordinat (bkz. `list`) ilce merkezini haritanin disina tasirdi.
+      if (Math.abs(s.latitude!) > 90 || Math.abs(s.longitude!) > 180) continue;
+      const districts = byCity.get(cityKey) ?? new Map<string, Group>();
+      const g = districts.get(key) ?? { spellings: new Map<string, number>(), lat: 0, lng: 0, n: 0 };
+      g.spellings.set(raw, (g.spellings.get(raw) ?? 0) + 1);
+      g.lat += s.latitude!;
+      g.lng += s.longitude!;
+      g.n += 1;
+      districts.set(key, g);
+      byCity.set(cityKey, districts);
+    }
+
+    const collator = new Intl.Collator("tr", { sensitivity: "base" });
+    const out = new Map<string, DistrictCoverage[]>();
+    for (const [cityKey, districts] of byCity) {
+      const list = [...districts.entries()].map(([slug, g]) => ({
+        slug,
+        name: [...g.spellings.entries()].sort((a, b) => b[1] - a[1])[0][0],
+        shopCount: g.n,
+        latitude: g.lat / g.n,
+        longitude: g.lng / g.n,
+      }));
+      out.set(cityKey, list.sort((a, b) => collator.compare(a.name, b.name)));
+    }
+    return out;
   }
 }
 
