@@ -143,6 +143,17 @@ describe("cancelBooking bildirimleri", () => {
     }
   });
 
+  it("esnaf kaynakli nedende islemi yonetici yaptiysa (notifyPartner) esnafa push gider", async () => {
+    for (const reason of ["partner_cancel", "no_show"] as const) {
+      vi.clearAllMocks();
+      m.prisma.booking.updateMany.mockResolvedValue({ count: 1 });
+      m.notifyPartner.mockResolvedValue(undefined);
+      m.notifyGuestClosed.mockResolvedValue(undefined);
+      await cancelBooking("b1", { reason, notifyPartner: true });
+      expect(m.notifyPartner, reason).toHaveBeenCalledWith({ bookingId: "b1", kind: "cancelled" });
+    }
+  });
+
   it("yonetici iptali esnafa push + e-posta gonderir", async () => {
     await cancelBooking("b1", { reason: "admin_cancel", note: "misafir aradi" });
     expect(m.notifyPartner).toHaveBeenCalledWith({ bookingId: "b1", kind: "cancelled" });
