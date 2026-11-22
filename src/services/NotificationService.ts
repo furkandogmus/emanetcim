@@ -1987,101 +1987,163 @@ export class NotificationService implements INotificationService {
   }
 
   /**
-   * GEÇ TESLİM uyarısı -- MİSAFİRE.
+   * Alma saati gecmis, valizi hala dukkanda olan MISAFIRE hatirlatma: push + e-posta.
    *
-   * NEDEN VAR (DEFECT_BACKLOG D1, 2026-09-12): check-out saati geçtiğinde
-   * yalnızca ESNAFA gidiyordu ve metni "misafir ile iletişime geçin" diyordu
-   * -- platform, unutulmuş valiz problemini esnafın omzuna bırakıyordu.
-   * Valizi almaya gelebilecek tek kişi misafirdir.
-   *
-   * Aynı eşik/idempotency deseni (`shouldSendOverdueNotice`) burada da
-   * kullanılıyor ama SAYIMI AYRI: konu öneki farklı
-   * (`OVERDUE_GUEST_NOTICE_SUBJECT_PREFIX`), yoksa esnafa giden ve misafire
-   * giden uyarılar aynı sayaçta karışır.
+   * Takvim ve tekrar kontrolu burada DEGIL, `OverdueGuestReminderService`te: bu yontem
+   * cagrildiginda o slot zaten `BookingEvent` olarak sahiplenilmistir. Iki kanal
+   * birbirinden bagimsiz: e-postasiz misafire push, cihazsiz misafire e-posta gider.
+   * Ucretten soz edilmez (karar yok, 2026-11-23).
    */
-  async sendOverdueGuestNotice(
-    email: string,
-    bookingId: string,
-    params: { shopName: string; checkOutAt: Date; timeZone: string },
-    locale: string,
-  ) {
+  async sendOverdueGuestReminder(params: {
+    bookingId: string;
+    /** `bookingNotificationEmail(booking)`; yoksa yalnizca push. */
+    email: string | null;
+    /** Hesapli misafir bilet sayfasini acar; hesapsiz misafire imzali yonetim bagi gider. */
+    hasAccount: boolean;
+    locale: string;
+    checkOutAt: Date;
+    shop: {
+      name: string;
+      address: string | null;
+      openingTime: string | null;
+      closingTime: string | null;
+      open247: boolean;
+      timeZone: string;
+    };
+    now?: Date;
+  }): Promise<void> {
+    const { bookingId, locale, shop } = params;
     this.pushGuest(bookingId, "overdue", locale);
+
+    const email = params.email;
+    if (!email || !email.includes("@")) return;
+
+    const domain = getSiteBaseUrl();
+    /*
+      Yonetim baginin omru `checkOutTime + 1 gun`le sinirli; alma saati gunler once
+      gectiyse bag e-postayla birlikte 1 saatte olurdu. Hatirlatma anini baz almak
+      bagi bir sonraki hatirlatmaya (24 sa) kadar acik tutar.
+    */
+    const now = params.now ?? new Date();
+    const bookingUrl = params.hasAccount
+      ? `${domain}/${locale}/bookings/${bookingId}`
+      : `${domain}/${locale}/bookings/manage/${await signGuestManageLinkToken({
+          bookingId,
+          email,
+          checkOutTime: params.checkOutAt > now ? params.checkOutAt : now,
+          now,
+        })}`;
+
     const plannedAt = formatDateTimeInZone(params.checkOutAt, {
       locale: bcp47ForUiLocale(locale),
-      timeZone: params.timeZone,
+      timeZone: shop.timeZone,
       dateStyle: "medium",
       timeStyle: "short",
     });
-    const shop = params.shopName;
 
     const content = pickLocale(
       {
         tr: {
-          subject: "BagajPark: Valizinizi almayı unuttunuz mu? 🧳",
-          heading: "Valizinizi almayı unuttunuz mu? 🧳",
-          p1: `__SHOP__ noktasındaki bagajınızın planlanan teslim alma saati geçti. Lütfen en kısa sürede dükkana uğrayıp valizinizi teslim alın.`,
-          row1: "Nokta",
-          row2: "Planlanan alma",
+          subject: "BagajPark: Valiziniz hâlâ dükkanda 🧳",
+          heading: "Valiziniz sizi bekliyor 🧳",
+          p1: `Valiziniz hâlâ __SHOP__ noktasında, güvende. Size uygun bir saatte uğrayıp teslim alabilirsiniz. Dükkanın telefon ve WhatsApp bilgisi rezervasyon sayfanızda.`,
+          rowShop: "Nokta",
+          rowAddress: "Adres",
+          rowHours: "Çalışma saatleri",
+          rowPlanned: "Planlanan alma",
+          open247: "7/24 açık",
+          cta: "Rezervasyonu görüntüle",
         },
         en: {
-          subject: "BagajPark: Did you forget your luggage? 🧳",
-          heading: "Did you forget your luggage? 🧳",
-          p1: `Your luggage at __SHOP__ was due for pick-up. Please visit the shop as soon as possible to collect it.`,
-          row1: "Location",
-          row2: "Planned pick-up",
+          subject: "BagajPark: Your luggage is still at the shop 🧳",
+          heading: "Your luggage is waiting for you 🧳",
+          p1: `Your luggage is still safe at __SHOP__. Drop by whenever it suits you to pick it up. The shop's phone and WhatsApp details are on your booking page.`,
+          rowShop: "Location",
+          rowAddress: "Address",
+          rowHours: "Opening hours",
+          rowPlanned: "Planned pick-up",
+          open247: "Open 24/7",
+          cta: "View booking",
         },
         de: {
-          subject: "BagajPark: Haben Sie Ihr Gepäck vergessen? 🧳",
-          heading: "Haben Sie Ihr Gepäck vergessen? 🧳",
-          p1: `Die geplante Abholzeit für Ihr Gepäck bei __SHOP__ ist verstrichen. Bitte holen Sie es baldmöglichst ab.`,
-          row1: "Standort",
-          row2: "Geplante Abholung",
+          subject: "BagajPark: Ihr Gepäck ist noch im Geschäft 🧳",
+          heading: "Ihr Gepäck wartet auf Sie 🧳",
+          p1: `Ihr Gepäck ist noch sicher bei __SHOP__. Holen Sie es ab, wann es Ihnen passt. Telefon und WhatsApp des Geschäfts finden Sie auf Ihrer Buchungsseite.`,
+          rowShop: "Standort",
+          rowAddress: "Adresse",
+          rowHours: "Öffnungszeiten",
+          rowPlanned: "Geplante Abholung",
+          open247: "Rund um die Uhr geöffnet",
+          cta: "Buchung ansehen",
         },
         fr: {
-          subject: "BagajPark : avez-vous oublié vos bagages ? 🧳",
-          heading: "Avez-vous oublié vos bagages ? 🧳",
-          p1: `L'heure prévue de récupération de vos bagages à __SHOP__ est passée. Merci de passer les récupérer dès que possible.`,
-          row1: "Point",
-          row2: "Récupération prévue",
+          subject: "BagajPark : vos bagages sont toujours au commerce 🧳",
+          heading: "Vos bagages vous attendent 🧳",
+          p1: `Vos bagages sont toujours en sécurité chez __SHOP__. Passez les récupérer quand cela vous convient. Le téléphone et le WhatsApp du commerce figurent sur votre page de réservation.`,
+          rowShop: "Point",
+          rowAddress: "Adresse",
+          rowHours: "Horaires",
+          rowPlanned: "Récupération prévue",
+          open247: "Ouvert 24h/24, 7j/7",
+          cta: "Voir la réservation",
         },
         ja: {
-          subject: "BagajPark: お荷物をお忘れではありませんか？🧳",
-          heading: "お荷物をお忘れではありませんか？🧳",
-          p1: `__SHOP__ でお預けのお荷物の受け取り予定時刻が過ぎています。できるだけ早くお店にお立ち寄りいただき、お受け取りください。`,
-          row1: "場所",
-          row2: "予定受け取り時刻",
+          subject: "BagajPark: お荷物はまだ店舗でお預かりしています 🧳",
+          heading: "お荷物がお待ちしています 🧳",
+          p1: `お荷物は __SHOP__ で安全にお預かりしています。ご都合のよい時間にお受け取りください。店舗の電話番号とWhatsAppはご予約ページに記載されています。`,
+          rowShop: "場所",
+          rowAddress: "住所",
+          rowHours: "営業時間",
+          rowPlanned: "予定受け取り時刻",
+          open247: "24時間営業",
+          cta: "予約を見る",
         },
         fa: {
-          subject: "BagajPark: آیا چمدان خود را فراموش کرده‌اید؟ 🧳",
-          heading: "آیا چمدان خود را فراموش کرده‌اید؟ 🧳",
-          p1: `زمان تحویل گرفتن چمدان شما از __SHOP__ گذشته است. لطفاً هرچه زودتر به فروشگاه مراجعه کرده و چمدان خود را تحویل بگیرید.`,
-          row1: "مکان",
-          row2: "زمان تحویل برنامه‌ریزی‌شده",
+          subject: "BagajPark: چمدان شما هنوز در فروشگاه است 🧳",
+          heading: "چمدان شما منتظر شماست 🧳",
+          p1: `چمدان شما همچنان به‌طور امن در __SHOP__ نگهداری می‌شود. هر زمان که برایتان مناسب است برای تحویل گرفتن آن مراجعه کنید. شماره تلفن و واتس‌اپ فروشگاه در صفحه رزرو شما آمده است.`,
+          rowShop: "مکان",
+          rowAddress: "نشانی",
+          rowHours: "ساعات کاری",
+          rowPlanned: "زمان تحویل برنامه‌ریزی‌شده",
+          open247: "شبانه‌روزی",
+          cta: "مشاهده رزرو",
         },
       },
       locale,
     );
 
-    // Bkz. sendStayReminder yorumu: dükkan adı esnafın kendi yazdığı metin,
-    // düz metin ve HTML gövdesine farklı kaçışla girer.
-    const shopHtml = escapeEmailHtml(shop);
-    const p1Text = content.p1.replace("__SHOP__", shop);
-    const p1Html = content.p1.replace("__SHOP__", shopHtml);
-    const body = `${p1Text}\n\n${content.row1}: ${shop}\n${content.row2}: ${plannedAt}`;
+    const hours = shop.open247
+      ? content.open247
+      : shop.openingTime && shop.closingTime
+        ? `${shop.openingTime} - ${shop.closingTime}`
+        : null;
+
+    // Dukkan adi ve adresi esnafin yazdigi duz metin: HTML govdesine kacirilarak girer.
+    const shopHtml = escapeEmailHtml(shop.name);
+    const rows: { label: string; text: string; html: string }[] = [
+      { label: content.rowShop, text: shop.name, html: shopHtml },
+      ...(shop.address
+        ? [{ label: content.rowAddress, text: shop.address, html: escapeEmailHtml(shop.address) }]
+        : []),
+      ...(hours ? [{ label: content.rowHours, text: hours, html: escapeEmailHtml(hours) }] : []),
+      { label: content.rowPlanned, text: plannedAt, html: plannedAt },
+    ];
+
+    const body =
+      `${content.p1.replace("__SHOP__", shop.name)}\n\n` +
+      rows.map((r) => `${r.label}: ${r.text}`).join("\n") +
+      `\n\n${content.cta}: ${bookingUrl}`;
     const html = renderEmailHtml({
       locale,
       heading: content.heading,
-      paragraphs: [p1Html],
-      rows: [
-        { label: content.row1, value: shopHtml },
-        { label: content.row2, value: plannedAt },
-      ],
+      paragraphs: [content.p1.replace("__SHOP__", shopHtml)],
+      rows: rows.map((r) => ({ label: r.label, value: r.html })),
+      cta: { href: bookingUrl, label: content.cta, variant: "button" },
       footer: "BagajPark",
     });
 
-    if (email.includes("@")) {
-      await this.sendEmail(email, content.subject, body, bookingId, html);
-    }
+    await this.sendEmail(email, content.subject, body, bookingId, html);
   }
 
   /**
