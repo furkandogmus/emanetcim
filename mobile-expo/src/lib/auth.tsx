@@ -28,7 +28,7 @@ import { forgetGoogleAccount, pickGoogleIdToken } from "./google-auth";
 import { forgetPushRegistration, unregisterPush } from "./push";
 import { clearOfflineTickets } from "./offline-tickets";
 import { clearSavedPartnerShop } from "./partner-shop";
-import type { MobileUser, SessionResponse } from "./types";
+import type { MobileUser, ResetCodeSessionResponse, SessionResponse } from "./types";
 
 type AuthState =
   | { status: "loading" }
@@ -46,6 +46,8 @@ type AuthContextValue = {
   /** Kullanici hesap seciciyi kapatirsa `null`. */
   signInWithGoogle: () => Promise<MobileUser | null>;
   signInWithApple: () => Promise<MobileUser | null>;
+  /** E-postadaki 6 haneli kodla yeni sifre belirler ve oturum acar. */
+  signInWithResetCode: (email: string, code: string, newPassword: string) => Promise<MobileUser>;
   signOut: () => Promise<void>;
   /** Profil degisikliginden sonra: PUT /auth/me yalnizca { success } doner. */
   refreshUser: () => Promise<MobileUser>;
@@ -55,6 +57,9 @@ type AuthContextValue = {
   /** Admin oturumuna doner; admin token'lari hic silinmemistir. */
   stopImpersonation: () => Promise<void>;
 };
+
+/** Sifre kodla degisti ama ardindan oturum acilamadi; kullanici yeni sifresiyle girer. */
+export class PasswordResetSignInError extends Error {}
 
 const AuthContext = createContext<AuthContextValue | null>(null);
 
@@ -350,6 +355,35 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     return startSession({ idToken, acceptedLegal: true }, "/auth/google");
   }, [startSession]);
 
+  /*
+    Yanit token ciftidir; `user` gelmezse (sozlesme bunu garanti etmiyor) yeni token'la
+    /auth/me okunur. Sonrasi normal giris: Stack.Protected dogru gruba gecirir.
+  */
+  const signInWithResetCode = useCallback(
+    async (email: string, code: string, newPassword: string) => {
+      const res = await api<ResetCodeSessionResponse>("/auth/password-reset/confirm-code", {
+        method: "POST",
+        body: { email, code, newPassword },
+        auth: false,
+      });
+      await saveTokens(res.accessToken, res.refreshToken);
+      let user = res.user;
+      if (!user) {
+        try {
+          user = await api<MobileUser>("/auth/me");
+        } catch {
+          // Sifre degisti ama oturum acilamadi: yarim oturum birakilmaz, ekran "sifren guncellendi" der.
+          await clearTokens();
+          throw new PasswordResetSignInError();
+        }
+      }
+      void rememberUser(user);
+      update({ status: "signedIn", user });
+      return user;
+    },
+    [update],
+  );
+
   // Ayni oturum govdesi (`auth/apple`); ad alanlari yalnizca ilk giriste dolu gelir.
   const signInWithApple = useCallback(async () => {
     const cred = await pickAppleCredential();
@@ -406,6 +440,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       signInWithPassword,
       signInWithGoogle,
       signInWithApple,
+      signInWithResetCode,
       signOut,
       refreshUser,
       impersonating,
@@ -419,6 +454,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       signInWithPassword,
       signInWithGoogle,
       signInWithApple,
+      signInWithResetCode,
       signOut,
       refreshUser,
       impersonating,
