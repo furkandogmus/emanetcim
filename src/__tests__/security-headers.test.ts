@@ -65,6 +65,8 @@ describe("CSP: zorunlu + yalnızca rapor", () => {
     expect(directives.get("require-trusted-types-for")).toEqual(["'script'"]);
     expect(directives.get("report-uri")).toEqual(["/api/csp-report"]);
     expect(directives.get("report-to")).toEqual(["csp-endpoint"]);
+    // Report-Only'de yok sayilir; yalnizca konsol uyarisi uretirdi.
+    expect(directives.has("frame-ancestors")).toBe(false);
     expect(h.get("Reporting-Endpoints")).toBe('csp-endpoint="/api/csp-report"');
   });
 });

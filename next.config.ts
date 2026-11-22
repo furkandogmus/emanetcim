@@ -85,10 +85,13 @@ const CSP_REPORT_GROUP = "csp-endpoint";
  * nonce'lu zorunlu CSP'den once neyin kirilacagini olcer. Zorunlu politikadan
  * TURETILIR ki host listeleri ayrismasin; zorunlu deger bayt bayt ayni kalir
  * (security-headers testi). `report-to` Chromium'da, `report-uri` digerlerinde.
+ * ~7 gun sonra raporlar incelenip karar verilmeli (bkz. api/csp-report/route.ts).
  */
 function reportOnlyCsp(enforced: string): string {
   const directives = enforced
     .split("; ")
+    // `frame-ancestors` Report-Only'de yok sayilir ve konsola uyari basar; zorunluda zaten var.
+    .filter((d) => !d.startsWith("frame-ancestors "))
     .map((d) =>
       d.startsWith("script-src ")
         ? d.split(" ").filter((t) => t !== "'unsafe-inline'").join(" ")
