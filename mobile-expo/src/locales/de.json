@@ -758,10 +758,9 @@
   "reset": {
     "forgotPassword": "Passwort vergessen",
     "title": "Passwort zurücksetzen",
-    "requestSubtitle": "Gib die E-Mail-Adresse deines Kontos ein und wir senden dir einen Link, um ein neues Passwort festzulegen.",
-    "sendLink": "Link senden",
+    "requestSubtitle": "Gib die E-Mail-Adresse deines Kontos ein; wir schicken dir einen 6-stelligen Code zum Zurücksetzen deines Passworts.",
+    "sendLink": "Code senden",
     "sentTitle": "Prüfe dein Postfach",
-    "sentBody": "Falls zu {{email}} ein Konto existiert, haben wir einen Link zum Zurücksetzen gesendet. Er ist 1 Stunde gültig. Tippe in der E-Mail auf den Link, lege dort dein neues Passwort fest und melde dich dann hier an.",
     "linkLabel": "Link zum Zurücksetzen",
     "linkPlaceholder": "Füge den Link aus der E-Mail ein",
     "linkRequired": "Füge den Link aus der E-Mail ein.",
@@ -770,7 +769,7 @@
     "passwordRule": "Mindestens {{min}} Zeichen.",
     "passwordMismatch": "Die Passwörter stimmen nicht überein.",
     "save": "Passwort aktualisieren",
-    "resendLink": "Neuen Link anfordern",
+    "resendLink": "Andere E-Mail-Adresse verwenden",
     "doneTitle": "Passwort aktualisiert",
     "doneBody": "Du kannst dich jetzt mit deinem neuen Passwort anmelden. Zu deiner Sicherheit wurden deine Sitzungen auf anderen Geräten abgemeldet.",
     "backToSignIn": "Zurück zur Anmeldung",
@@ -778,11 +777,23 @@
       "invalid_data": "Der Link oder das Passwort ist ungültig. Dein Passwort muss mindestens 8 Zeichen lang sein.",
       "invalid_or_expired_token": "Dieser Link ist ungültig oder abgelaufen. Fordere einen neuen an.",
       "user_not_found": "Für diesen Link wurde kein Konto gefunden.",
-      "too_many_requests": "Zu viele Versuche. Bitte versuch es später noch einmal."
+      "too_many_requests": "Zu viele Versuche. Bitte versuch es später noch einmal.",
+      "invalid_code": "Der Code ist falsch. Prüf den 6-stelligen Code in der E-Mail.",
+      "expired_code": "Der Code ist abgelaufen. Fordere einen neuen an.",
+      "too_many_attempts": "Zu viele Fehlversuche. Fordere einen neuen Code an.",
+      "invalid_password": "Dieses Passwort geht nicht. Es muss mindestens 8 Zeichen haben.",
+      "http_404": "Das Zurücksetzen per Code ist gerade nicht verfügbar. Verwende den Link in der E-Mail."
     },
     "openMail": "E-Mail-App öffnen",
     "pasteLink": "Link einfügen und fortfahren",
-    "linkModeBody": "Füge den Link zum Zurücksetzen ein, den wir dir geschickt haben, und lege dein neues Passwort fest."
+    "linkModeBody": "Füge den Link zum Zurücksetzen ein, den wir dir geschickt haben, und lege dein neues Passwort fest.",
+    "codeSentBody": "Falls es ein Konto für {{email}} gibt, haben wir dorthin einen 6-stelligen Code geschickt. Gib den Code und dein neues Passwort unten ein. Der Link in der E-Mail gilt ebenfalls 1 Stunde.",
+    "codeLabel": "6-stelliger Code",
+    "submitCode": "Passwort ändern und anmelden",
+    "resendCode": "Code erneut senden",
+    "resendCodeIn": "Erneut senden ({{seconds}} s)",
+    "codeResent": "Wir haben einen neuen Code geschickt. Verwende den neuesten.",
+    "requestNew": "Code per E-Mail senden"
   },
   "profileEdit": {
     "open": "Profil bearbeiten",
