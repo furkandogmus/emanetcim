@@ -747,7 +747,7 @@
     "openSettings": "Allow in Settings",
     "manualOpen": "Enter code manually",
     "manualTitle": "Find by code or name",
-    "manualPlaceholder": "8-character code or guest name",
+    "manualPlaceholder": "8-character code, guest name or phone",
     "manualSearch": "Search",
     "manualNone": "No matching booking found.",
     "manualMany": "Several matches, pick one.",
