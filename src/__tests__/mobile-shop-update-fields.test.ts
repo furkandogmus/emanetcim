@@ -86,7 +86,15 @@ describe("mobil istemcinin gonderdigi alanlar sunucuda taniniyor", () => {
         const hedef = ucDosyasi(m[1]);
         if (!hedef) continue;
         taranan++;
-        const ucSrc = stripComments(readFileSync(hedef, "utf-8"));
+        /*
+          Govde semasi paylasilan bir `@/lib/*-input` modulundeyse (web action'i
+          ve iki mobil uc ayni semayi kullanir) alanlar orada aranir.
+        */
+        const ham = readFileSync(hedef, "utf-8");
+        const semalar = [...ham.matchAll(/from\s+"@\/lib\/([\w-]+-input)"/g)].map((s) =>
+          readFileSync(join(process.cwd(), "src/lib", `${s[1]}.ts`), "utf-8"),
+        );
+        const ucSrc = stripComments([ham, ...semalar].join("\n"));
         const alanlar = m[2]
           .split(",")
           .map((x) => x.trim())

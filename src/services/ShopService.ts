@@ -1,6 +1,7 @@
 import { Prisma, type Shop } from '@prisma/client';
 import { PENDING_APPLICATION_WHERE } from "@/lib/pending-application";
 import { writeAuditLog } from "@/lib/audit-log";
+import { auditAdminShopEdit } from "@/services/admin-shop-audit";
 import { Role } from '@prisma/client';
 import prisma from '@/lib/db';
 import { resolvePartnerShops } from '@/lib/partner-shop';
@@ -1177,6 +1178,8 @@ export class ShopService implements IShopService {
     shopId: string;
     actorId: string;
     actorRole: Role;
+    /** Yalnizca yonetici duzenlemesinin denetim kaydi icin. */
+    actorIp?: string | null;
     bytes: Uint8Array;
   }): Promise<SetShopImageResult> {
     const { shopId, actorId, actorRole, bytes } = params;
@@ -1222,6 +1225,7 @@ export class ShopService implements IShopService {
         .catch((err: unknown) => logger.warn({ err, shopId, previousKey }, "shop_image_cleanup_failed"));
     }
 
+    auditAdminShopEdit({ id: actorId, role: actorRole, ip: params.actorIp }, shopId, "cover_set");
     return { ok: true, url };
   }
 
