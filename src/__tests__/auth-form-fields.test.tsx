@@ -120,7 +120,9 @@ describe("RegisterClient", () => {
     fireEvent.submit(email.closest("form")!);
     await waitFor(() => expect(email).toHaveAttribute("aria-invalid", "true"));
     expect(email).toHaveAccessibleDescription("emailAlreadyRegistered");
-    expect(screen.getByRole("alert")).toHaveTextContent("emailAlreadyRegistered");
+    // Metin bir kez (alanın altında); özet kısa yönlendirme.
+    expect(screen.getByRole("alert")).toHaveTextContent("fixHighlightedField");
+    expect(screen.getAllByText("emailAlreadyRegistered")).toHaveLength(1);
     expect(document.activeElement).toBe(email);
   });
 });

@@ -90,10 +90,13 @@ export default function RegisterPage() {
   const [error, setError] = useState<string | null>(null);
   const { attachForm, errors: fieldErrors, setErrors: setFieldErrors, clearError, fieldProps, errorId } =
     useFieldErrors<RegisterField>('register');
-  /** Özeti yazar; kod bir alana aitse o alanı da geçersiz işaretler (odak oraya gider). */
+  /**
+   * Kod bir alana aitse metin ALANIN altına yazılır ve özet yalnızca kısa bir
+   * yönlendirme olur; aynı cümle iki kez okunmasın. Değilse metin özette.
+   */
   const fail = (code: string | undefined, message: string) => {
-    setError(message);
     const field = code ? SERVER_ERROR_FIELD[code] : undefined;
+    setError(field ? tCommon('fixHighlightedField') : message);
     setFieldErrors(field ? { [field]: message } : {});
   };
   const [success, setSuccess] = useState(false);

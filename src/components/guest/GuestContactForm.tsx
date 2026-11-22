@@ -37,6 +37,7 @@ export default function GuestContactForm({
   onValid,
 }: Props) {
   const t = useTranslations("Guest");
+  const tCommon = useTranslations("Common");
   const errorText = useActionErrorText();
   const { attachForm, errors, setErrors, clearError, fieldProps, errorId } =
     useFieldErrors<"email" | "phone">("checkout-guest");
@@ -55,7 +56,8 @@ export default function GuestContactForm({
       trimmedPhone && trimmedPhone.length < 10 ? errorText("Errors.invalidPhone") : undefined;
     if (emailError || phoneError) {
       setErrors({ email: emailError, phone: phoneError });
-      onError(emailError ?? phoneError ?? null);
+      // Metin alanın altında; özet yalnızca yönlendirir (iki kez okunmasın).
+      onError(tCommon("fixHighlightedField"));
       return;
     }
     setErrors({});
