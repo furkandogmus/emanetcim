@@ -91,7 +91,12 @@ export default function AdminCouponsClient({ coupons }: { coupons: Coupon[] }) {
       // olmadan hicbir toast gorulmuyordu (2026-09-10'da bulundu,
       // AdminFeatureFlagsClient'taki ayni desenle kapatildi).
       try {
-        await setCouponActiveAction(c.id, !c.isActive);
+        const result = await setCouponActiveAction(c.id, !c.isActive);
+        if (!result.success) {
+          toast.error(tErrors("generic"));
+          router.refresh();
+          return;
+        }
         toast.success(c.isActive ? t("couponsDeactivated") : t("couponsActivated"));
         router.refresh();
       } catch (e) {

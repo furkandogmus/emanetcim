@@ -1,9 +1,7 @@
 import { setRequestLocale } from "next-intl/server";
 import { auth } from "@/auth";
 import { redirect } from "next/navigation";
-import prisma from "@/lib/db";
-import { PaymentStatus } from "@prisma/client";
-import { moneyToNumber } from "@/lib/money";
+import { getPaymentsLedger } from "@/services/AdminPaymentsService";
 import AdminPaymentsClient from "@/components/admin/AdminPaymentsClient";
 
 /**
@@ -25,9 +23,6 @@ import AdminPaymentsClient from "@/components/admin/AdminPaymentsClient";
  * veritabanında duruyordu.
  */
 
-/** Tek sayfada gösterilen ödeme sayısı. */
-const PAYMENT_PAGE_SIZE = 100;
-
 export default async function AdminPaymentsPage({
   params,
   searchParams,
@@ -44,87 +39,15 @@ export default async function AdminPaymentsPage({
   }
 
   const { status = "ALL" } = await searchParams;
-  /*
-    Durum URL'den geliyor: dogrulanmadan Prisma'ya verilen gecersiz bir enum
-    degeri sorguyu firlattirir ve ekran 500 doner. Taninmayan deger filtresiz
-    sayilir.
-  */
-  const where = status in PaymentStatus ? { status: status as PaymentStatus } : {};
-
-  const [payments, totals, refunded, pendingSplits, accounts] = await Promise.all([
-    prisma.paymentLog.findMany({
-      where,
-      orderBy: { createdAt: "desc" },
-      take: PAYMENT_PAGE_SIZE,
-      include: {
-        split: { select: { status: true, merchantAmount: true, platformCommission: true } },
-        booking: {
-          select: {
-            id: true,
-            guestEmail: true,
-            guest: { select: { name: true, email: true } },
-            shop: { select: { name: true } },
-          },
-        },
-      },
-    }),
-    // Yalnizca GERCEKTEN tahsil edilenler ciro sayilir; PENDING bir niyettir.
-    prisma.paymentLog.aggregate({
-      where: { status: { in: ["SUCCESS", "PARTIALLY_REFUNDED"] } },
-      _sum: { amount: true },
-      _count: true,
-    }),
-    prisma.paymentLog.aggregate({ _sum: { refundedAmount: true } }),
-    prisma.paymentSplit.aggregate({
-      where: { status: "PENDING" },
-      _sum: { merchantAmount: true },
-      _count: true,
-    }),
-    prisma.merchantPaymentAccount.findMany({
-      orderBy: { updatedAt: "desc" },
-      include: { shop: { select: { name: true, city: true } } },
-    }),
-  ]);
-
-  const failedCount = await prisma.paymentLog.count({ where: { status: "FAILED" } });
+  // Sorgu ve donusum `getPaymentsLedger`da; mobil yonetici ucu ayni defteri okur.
+  const ledger = await getPaymentsLedger(status);
 
   return (
     <AdminPaymentsClient
       status={status}
-      summary={{
-        capturedAmount: moneyToNumber(totals._sum.amount ?? 0),
-        capturedCount: totals._count,
-        refundedAmount: moneyToNumber(refunded._sum.refundedAmount ?? 0),
-        pendingSplitAmount: moneyToNumber(pendingSplits._sum.merchantAmount ?? 0),
-        pendingSplitCount: pendingSplits._count,
-        failedCount,
-      }}
-      payments={payments.map((p) => ({
-        id: p.id,
-        bookingId: p.bookingId,
-        status: p.status,
-        provider: p.provider,
-        amount: moneyToNumber(p.amount),
-        refundedAmount: moneyToNumber(p.refundedAmount),
-        failureReason: p.failureReason,
-        chargebackStatus: p.chargebackStatus,
-        createdAt: p.createdAt.toISOString(),
-        capturedAt: p.capturedAt?.toISOString() ?? null,
-        guestLabel: p.booking.guest?.name ?? p.booking.guest?.email ?? p.booking.guestEmail,
-        shopName: p.booking.shop.name,
-        splitStatus: p.split?.status ?? null,
-        merchantAmount: p.split ? moneyToNumber(p.split.merchantAmount) : null,
-        platformCommission: p.split ? moneyToNumber(p.split.platformCommission) : null,
-      }))}
-      accounts={accounts.map((a) => ({
-        id: a.id,
-        shopName: a.shop.name,
-        city: a.shop.city,
-        provider: a.provider,
-        status: a.status,
-        rejectionReason: a.rejectionReason,
-        activatedAt: a.activatedAt?.toISOString() ?? null,
-      }))}
+      summary={ledger.summary}
+      payments={ledger.payments}
+      accounts={ledger.accounts}
     />
   );
 }

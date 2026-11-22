@@ -3,7 +3,7 @@ import { Linking, Pressable, RefreshControl, ScrollView, StyleSheet, View } from
 import { SafeAreaView } from "react-native-safe-area-context";
 import { router } from "expo-router";
 import type { Href } from "expo-router";
-import { ChevronRight, ExternalLink, Megaphone, ScrollText, User, Users, MessageSquareText } from "lucide-react-native";
+import { ChevronRight, ExternalLink, Megaphone, ScrollText, User, Users, MessageSquareText, AlertTriangle, Flag, SlidersHorizontal, Ticket, Wallet } from "lucide-react-native";
 import { useTranslation } from "react-i18next";
 
 import { LuggageTag, MapSnippet } from "@/components/Illustrations";
@@ -21,7 +21,16 @@ import { colors, fonts, radius, space } from "@/theme/tokens";
 import { StaleQueryBanner } from "@/components/StaleQueryBanner";
 
 /** Mobilde olmayan yonetim isleri web panelinde; yollar `src/app/[locale]/admin/*` ile ayni. */
-const WEB_SECTIONS = ["seals", "payments", "partners", "platform-settings"] as const;
+const WEB_SECTIONS = ["seals", "partners"] as const;
+
+/** Uygulama ici yonetim araclari; odemeler ve platform ayarlari web listesinden buraya tasindi. */
+const TOOL_SCREENS = [
+  { key: "disputes", href: "/admin/disputes", Icon: AlertTriangle },
+  { key: "coupons", href: "/admin/coupons", Icon: Ticket },
+  { key: "payments", href: "/admin/payments", Icon: Wallet },
+  { key: "settings", href: "/admin/platform-settings", Icon: SlidersHorizontal },
+  { key: "flags", href: "/admin/feature-flags", Icon: Flag },
+] as const;
 
 /** Son 7 gun ile onceki 7 gunun cirosu; karsilastirma her zaman neye gore oldugunu soyler. */
 function weekChange(series: AdminOverview["series"]) {
@@ -151,7 +160,7 @@ function Dashboard({
           />
         </View>
         <LinkGroup>
-          <AttentionRow external label={t("admin.openDisputes")} value={a.openDisputes} onPress={() => openWeb("disputes")} />
+          <AttentionRow label={t("admin.openDisputes")} value={a.openDisputes} onPress={() => router.push("/admin/disputes")} />
           <AttentionRow label={t("admin.overdueBookings")} value={a.overdueBookings} onPress={() => openBookings("overdue")} />
         </LinkGroup>
         <LinkGroup>
@@ -177,6 +186,19 @@ function Dashboard({
             label={t("adminShop.recentReviews")}
             onPress={() => router.push("/admin/reviews")}
           />
+        </LinkGroup>
+      </Section>
+
+      <Section title={t("adminOps.tools.title")}>
+        <LinkGroup>
+          {TOOL_SCREENS.map(({ key, href, Icon }) => (
+            <LinkRow
+              key={key}
+              icon={<Icon size={18} color={colors.inkSecondary} />}
+              label={t(`adminOps.tools.${key}`)}
+              onPress={() => router.push(href)}
+            />
+          ))}
         </LinkGroup>
       </Section>
 
