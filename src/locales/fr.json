@@ -347,7 +347,22 @@
     "outsideHoursConfirm": "Enregistrer quand même",
     "outsideHoursEditHours": "Modifier les horaires",
     "earningsBasisNote": "Dépôts terminés, selon la date de restitution",
-    "pulseCollectedBasis": "Dépôts terminés"
+    "pulseCollectedBasis": "Dépôts terminés",
+    "partnerCancelBooking": "Annuler la réservation",
+    "partnerCancelConfirm": "La réservation sera annulée et le client sera informé du motif. Votre capacité est libérée.",
+    "partnerCancelReasonLabel": "Motif d'annulation",
+    "partnerCancelReason_guest_request": "Demande du client",
+    "partnerCancelReason_shop_closed": "Commerce fermé à cette heure",
+    "partnerCancelReason_capacity": "Plus de place",
+    "partnerCancelReason_other": "Autre",
+    "partnerCancelNoteLabel": "Remarque (facultative)",
+    "partnerCancelNoteRequiredLabel": "Remarque (obligatoire)",
+    "partnerNoShow": "Client absent",
+    "partnerNoShowConfirm": "La réservation sera clôturée pour absence et votre capacité libérée. Le client reçoit un message bienveillant.",
+    "partnerNoShowAvailableAt": "Possible à partir de {time} (60 min après l'heure de dépôt).",
+    "partnerCancelDone": "Réservation annulée.",
+    "partnerNoShowDone": "Réservation clôturée pour absence.",
+    "partnerCloseKeep": "Retour"
   },
   "Guest": {
     "heroTitle": "Déposez vos bagages, explorez librement",
@@ -1315,7 +1330,17 @@
       "noLocation": "Pas de position : absente de la recherche et de la carte",
       "noCityPage": "Sur aucune page ville",
       "noPhoto": "Pas de photo"
-    }
+    },
+    "bookingCloseSectionTitle": "Clôturer la réservation",
+    "bookingCloseCancel": "Annuler",
+    "bookingCloseCancelConfirm": "La réservation sera annulée ; le client et le commerce seront prévenus et tout paiement sera enregistré comme remboursé.",
+    "bookingCloseForceCheckout": "Forcer la remise",
+    "bookingCloseForceCheckoutConfirm": "Les bagages seront marqués comme remis ; aucun frais de retard n'est facturé. Le client et le commerce seront prévenus.",
+    "bookingCloseNoteLabel": "Remarque (obligatoire)",
+    "bookingCloseNoteHint": "Au moins {min} caractères. Enregistrée dans le journal d'audit et envoyée au commerce.",
+    "bookingCloseKeep": "Retour",
+    "bookingCloseCancelDone": "Réservation annulée.",
+    "bookingCloseForceDone": "Réservation clôturée comme remise."
   },
   "Auth": {
     "loginTitle": "Connectez-vous à BagajPark",
@@ -1819,7 +1844,10 @@
     "userNotFound": "Utilisateur introuvable.",
     "userNotGuest": "Ce compte n'est pas un invité ; seuls les comptes invités peuvent devenir partenaires.",
     "passwordTooShort": "Le mot de passe doit contenir au moins 8 caractères.",
-    "cannotBanSelf": "Vous ne pouvez pas bloquer votre propre compte."
+    "cannotBanSelf": "Vous ne pouvez pas bloquer votre propre compte.",
+    "closureNoteRequired": "Veuillez écrire une remarque.",
+    "closureInvalidReason": "Choisissez un motif d'annulation valide.",
+    "noShowTooEarly": "Une absence ne peut être signalée que 60 minutes après l'heure de dépôt."
   },
   "Emails": {
     "verificationSubject": "Vérifiez votre e-mail",

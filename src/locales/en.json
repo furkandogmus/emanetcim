@@ -347,7 +347,22 @@
     "outsideHoursConfirm": "Check in anyway",
     "outsideHoursEditHours": "Edit opening hours",
     "earningsBasisNote": "Completed bookings, by hand-back date",
-    "pulseCollectedBasis": "Completed bookings"
+    "pulseCollectedBasis": "Completed bookings",
+    "partnerCancelBooking": "Cancel booking",
+    "partnerCancelConfirm": "The booking will be cancelled and the guest will be told the reason. Your capacity is released.",
+    "partnerCancelReasonLabel": "Cancellation reason",
+    "partnerCancelReason_guest_request": "Guest asked",
+    "partnerCancelReason_shop_closed": "Shop closed at that time",
+    "partnerCancelReason_capacity": "No space left",
+    "partnerCancelReason_other": "Other",
+    "partnerCancelNoteLabel": "Note (optional)",
+    "partnerCancelNoteRequiredLabel": "Note (required)",
+    "partnerNoShow": "Guest did not show up",
+    "partnerNoShowConfirm": "The booking will be closed as a no-show and your capacity released. The guest gets a gentle notification.",
+    "partnerNoShowAvailableAt": "You can mark this from {time} (60 min after drop-off time).",
+    "partnerCancelDone": "Booking cancelled.",
+    "partnerNoShowDone": "Booking closed as a no-show.",
+    "partnerCloseKeep": "Go back"
   },
   "Guest": {
     "heroTitle": "Drop Your Bags, Explore Freely",
@@ -1315,7 +1330,17 @@
       "noLocation": "No location: not in search or map",
       "noCityPage": "Not on any city page",
       "noPhoto": "No photo"
-    }
+    },
+    "bookingCloseSectionTitle": "Close booking",
+    "bookingCloseCancel": "Cancel",
+    "bookingCloseCancelConfirm": "The booking will be cancelled; the guest and the shop will be notified and any payment will be recorded as refunded.",
+    "bookingCloseForceCheckout": "Force check-out",
+    "bookingCloseForceCheckoutConfirm": "The bags will be marked as handed over; no late fee is charged. The guest and the shop will be notified.",
+    "bookingCloseNoteLabel": "Note (required)",
+    "bookingCloseNoteHint": "At least {min} characters. Saved to the audit log and sent to the shop.",
+    "bookingCloseKeep": "Go back",
+    "bookingCloseCancelDone": "Booking cancelled.",
+    "bookingCloseForceDone": "Booking closed as checked out."
   },
   "Auth": {
     "loginTitle": "Sign in to BagajPark",
@@ -1883,7 +1908,10 @@
     "userNotFound": "User not found.",
     "userNotGuest": "This account is not a guest; only guest accounts can be converted to partners.",
     "passwordTooShort": "Password must be at least 8 characters.",
-    "cannotBanSelf": "You can't ban your own account."
+    "cannotBanSelf": "You can't ban your own account.",
+    "closureNoteRequired": "Please write a note.",
+    "closureInvalidReason": "Choose a valid cancellation reason.",
+    "noShowTooEarly": "A no-show can only be marked 60 minutes after the drop-off time."
   },
   "Emails": {
     "verificationSubject": "Verify Your Email",

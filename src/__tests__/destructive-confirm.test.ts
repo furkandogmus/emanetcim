@@ -30,6 +30,10 @@ const DESTRUCTIVE_ACTIONS = [
   "cancelBookingAction",
   "rejectBookingAction",
   "rejectShopAction",
+  "adminCancelBookingAction",
+  "adminForceCheckOutAction",
+  "partnerCancelBookingAction",
+  "markNoShowAction",
 ];
 
 /**

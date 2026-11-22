@@ -347,7 +347,22 @@
     "outsideHoursConfirm": "با این حال تحویل بگیر",
     "outsideHoursEditHours": "ویرایش ساعات کاری",
     "earningsBasisNote": "امانت‌های تحویل‌داده‌شده، بر اساس تاریخ تحویل",
-    "pulseCollectedBasis": "امانت‌های تحویل‌داده‌شده"
+    "pulseCollectedBasis": "امانت‌های تحویل‌داده‌شده",
+    "partnerCancelBooking": "لغو رزرو",
+    "partnerCancelConfirm": "رزرو لغو می‌شود و دلیل آن به مهمان اطلاع داده می‌شود. ظرفیت شما آزاد می‌شود.",
+    "partnerCancelReasonLabel": "دلیل لغو",
+    "partnerCancelReason_guest_request": "درخواست مهمان",
+    "partnerCancelReason_shop_closed": "فروشگاه در آن ساعت بسته است",
+    "partnerCancelReason_capacity": "جای خالی نیست",
+    "partnerCancelReason_other": "سایر",
+    "partnerCancelNoteLabel": "یادداشت (اختیاری)",
+    "partnerCancelNoteRequiredLabel": "توضیح (الزامی)",
+    "partnerNoShow": "مهمان نیامد",
+    "partnerNoShowConfirm": "رزرو به عنوان عدم حضور بسته و ظرفیت شما آزاد می‌شود. مهمان پیامی محترمانه دریافت می‌کند.",
+    "partnerNoShowAvailableAt": "از {time} قابل ثبت است (۶۰ دقیقه پس از زمان تحویل).",
+    "partnerCancelDone": "رزرو لغو شد.",
+    "partnerNoShowDone": "رزرو به عنوان عدم حضور بسته شد.",
+    "partnerCloseKeep": "بازگشت"
   },
   "Guest": {
     "heroTitle": "چمدان را بسپارید، آزاد بگردید",
@@ -1315,7 +1330,17 @@
       "noLocation": "بدون موقعیت: در جستجو و نقشه نیست",
       "noCityPage": "در هیچ صفحه شهری نیست",
       "noPhoto": "بدون عکس"
-    }
+    },
+    "bookingCloseSectionTitle": "بستن رزرو",
+    "bookingCloseCancel": "لغو",
+    "bookingCloseCancelConfirm": "رزرو لغو می‌شود؛ مهمان و فروشگاه مطلع می‌شوند و هر پرداختی به عنوان بازپرداخت ثبت می‌شود.",
+    "bookingCloseForceCheckout": "تحویل اجباری",
+    "bookingCloseForceCheckoutConfirm": "چمدان تحویل‌شده ثبت می‌شود؛ هزینه تأخیر دریافت نمی‌شود. مهمان و فروشگاه مطلع می‌شوند.",
+    "bookingCloseNoteLabel": "توضیح (الزامی)",
+    "bookingCloseNoteHint": "حداقل {min} نویسه. در گزارش ممیزی ذخیره و برای فروشگاه ارسال می‌شود.",
+    "bookingCloseKeep": "بازگشت",
+    "bookingCloseCancelDone": "رزرو لغو شد.",
+    "bookingCloseForceDone": "رزرو به عنوان تحویل‌شده بسته شد."
   },
   "Auth": {
     "loginTitle": "ورود به BagajPark",
@@ -1819,7 +1844,10 @@
     "userNotFound": "کاربر پیدا نشد.",
     "userNotGuest": "این حساب مهمان نیست؛ فقط حساب‌های مهمان به همکار تبدیل می‌شوند.",
     "passwordTooShort": "رمز عبور باید حداقل ۸ کاراکتر باشد.",
-    "cannotBanSelf": "نمی‌توانید حساب خودتان را مسدود کنید."
+    "cannotBanSelf": "نمی‌توانید حساب خودتان را مسدود کنید.",
+    "closureNoteRequired": "لطفاً توضیحی بنویسید.",
+    "closureInvalidReason": "یک دلیل لغو معتبر انتخاب کنید.",
+    "noShowTooEarly": "عدم حضور فقط ۶۰ دقیقه پس از زمان تحویل قابل ثبت است."
   },
   "Emails": {
     "verificationSubject": "ایمیل خود را تأیید کنید",

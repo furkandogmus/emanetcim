@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState, type ReactNode } from "react";
 import { useModalBehavior } from "@/lib/hooks/useModalBehavior";
 
 type ConfirmDialogProps = {
@@ -20,6 +20,10 @@ type ConfirmDialogProps = {
     phrase: string;
     label: string;
   };
+  /** Mesajla butonlar arasina ek alan (ornegin zorunlu aciklama). */
+  children?: ReactNode;
+  /** Ek alan gecerli degilken onay butonunu kapatir. */
+  confirmDisabled?: boolean;
 };
 
 /**
@@ -42,6 +46,8 @@ export default function ConfirmDialog({
   onConfirm,
   onCancel,
   typedConfirmation,
+  children,
+  confirmDisabled = false,
 }: ConfirmDialogProps) {
   useModalBehavior({ open, onClose: onCancel });
 
@@ -122,6 +128,7 @@ export default function ConfirmDialog({
             />
           </label>
         ) : null}
+        {children}
         <div className="flex gap-3">
           <button
             ref={cancelRef}
@@ -134,7 +141,7 @@ export default function ConfirmDialog({
           <button
             type="button"
             onClick={onConfirm}
-            disabled={!confirmationSatisfied}
+            disabled={!confirmationSatisfied || confirmDisabled}
             className="btn-ui btn-ui-md btn-ui-primary flex-1"
           >
             {confirmLabel}

@@ -21,6 +21,8 @@ import { formatTryCurrency } from "@/lib/currency";
 import { moneyToNumber } from "@/lib/money";
 import PartnerBookingActionLinks from "@/components/partner/PartnerBookingActionLinks";
 import BagRevisionTrigger from "@/components/partner/BagRevisionTrigger";
+import PartnerBookingClosureActions from "@/components/partner/PartnerBookingClosureActions";
+import { noShowAvailableAt } from "@/lib/booking-closure";
 import type { Metadata } from "next";
 
 export async function generateMetadata({
@@ -96,6 +98,9 @@ export default async function PartnerBookingDetailPage({
   const statusLabel = statusKey ? tGuest(statusKey) : booking.status;
   const shortRef = "EMN-" + booking.id.substring(0, 6).toUpperCase();
   const totalBags = booking.bagCountS + booking.bagCountM + booking.bagCountXl;
+  // Valiz birakilmadiysa kapatma eylemleri; "gelmedi" check-in + 60 dk'da acilir.
+  const noShowAt = noShowAvailableAt(booking);
+  const noShowReady = !!noShowAt && new Date() >= noShowAt;
 
   return (
     <div className="bg-gray-50 pb-20">
@@ -272,6 +277,14 @@ export default async function PartnerBookingDetailPage({
         </div>
 
         <PartnerBookingActionLinks status={booking.status} bookingId={booking.id} />
+
+        {noShowAt && (
+          <PartnerBookingClosureActions
+            bookingId={booking.id}
+            noShowReady={noShowReady}
+            noShowAvailableLabel={fmt(noShowAt)}
+          />
+        )}
       </div>
     </div>
   );
