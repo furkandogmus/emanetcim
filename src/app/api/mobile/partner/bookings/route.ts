@@ -5,6 +5,7 @@ import prisma from "@/lib/db";
 import { cursorArgs, parseCursor, toPage } from "@/lib/cursor-page";
 import { toMobilePartnerBookingRow } from "@/lib/mobile-dto";
 import { withCancelReasons } from "@/services/booking/cancel-reason";
+import { partnerBookingSearchWhere } from "@/services/PartnerBookingSearchService";
 
 export async function GET(req: NextRequest) {
   const auth = await requireMobileUser(req);
@@ -25,8 +26,12 @@ export async function GET(req: NextRequest) {
     select: { id: true, name: true },
   });
 
-  const shopIds = shops.map((s) => s.id);
+  // `shopId` yalnizca esnafin KENDI dukkanlari icinde daraltir; baskasininki bos liste verir.
+  const shopIdParam = searchParams.get("shopId")?.trim();
+  const shopIds = shops.map((s) => s.id).filter((id) => !shopIdParam || id === shopIdParam);
   const shopMap = new Map(shops.map((s) => [s.id, s.name]));
+  // `q`: kod on eki / ad / telefon kuyrugu (`PartnerBookingSearchService`, web ile ortak).
+  const search = await partnerBookingSearchWhere(shopIds, searchParams.get("q"));
 
   /*
     AKTIFLER HER ZAMAN, gecmis sayfali (2026-11-18). Liste "en son olusturulan
@@ -38,6 +43,7 @@ export async function GET(req: NextRequest) {
   const recentCutoff = new Date(Date.now() - 24 * 60 * 60 * 1000);
   const activeWhere = {
     shopId: { in: shopIds },
+    ...search,
     OR: [{ status: "CHECKED_IN" as const }, { checkOutTime: { gte: recentCutoff } }],
   };
   const [active, history, total] = await Promise.all([
@@ -51,12 +57,12 @@ export async function GET(req: NextRequest) {
         })
       : Promise.resolve([]),
     prisma.booking.findMany({
-      where: { shopId: { in: shopIds }, status: { not: "CHECKED_IN" }, checkOutTime: { lt: recentCutoff } },
+      where: { shopId: { in: shopIds }, ...search, status: { not: "CHECKED_IN" }, checkOutTime: { lt: recentCutoff } },
       include: { guest: { select: { name: true } } },
       orderBy: [{ checkOutTime: "desc" }, { id: "desc" }],
       ...(cursor ? cursorArgs(cursor, limit) : { skip, take: limit + 1 }),
     }),
-    prisma.booking.count({ where: { shopId: { in: shopIds } } }),
+    prisma.booking.count({ where: { shopId: { in: shopIds }, ...search } }),
   ]);
   const historyPage = toPage(history, limit);
   const allBookings = [...active, ...historyPage.items];
