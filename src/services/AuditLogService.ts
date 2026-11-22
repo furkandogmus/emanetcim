@@ -33,11 +33,25 @@ function whereOf(f: AuditLogFilter): Prisma.AuditLogWhereInput | undefined {
     const needle = { contains: q, mode: "insensitive" as const };
     and.push({ OR: [{ actorUserId: needle }, { entityId: needle }, { ip: needle }] });
   }
-  if (f.userId) and.push({ OR: [{ actorUserId: f.userId }, { entityId: f.userId }] });
+  // `entityType` ile: hedef dali (entityType, entityId) indeksini kullanir, tabloyu taramaz.
+  if (f.userId) and.push({ OR: [{ actorUserId: f.userId }, { entityType: "User", entityId: f.userId }] });
   return and.length ? { AND: and } : undefined;
 }
 
+/** Onek listesi tum tabloyu gruplar; mobil her acilista sormasin. */
+const PREFIX_CACHE_MS = 10 * 60 * 1000;
+
 export class AuditLogService {
+  private prefixCache: { at: number; value: string[] } | null = null;
+
+  /** `filterOptions().actionPrefixes`, surec icinde ~10 dakika onbellekli (yeni onek gec gorunur). */
+  async cachedActionPrefixes(now: number = Date.now()): Promise<string[]> {
+    if (this.prefixCache && now - this.prefixCache.at < PREFIX_CACHE_MS) return this.prefixCache.value;
+    const value = (await this.filterOptions()).actionPrefixes;
+    this.prefixCache = { at: now, value };
+    return value;
+  }
+
   /** Yeniden eskiye sayfa; her satir aktorun adiyla (`actorLabel`) doner. */
   async listPage(filter: AuditLogFilter, opts: { cursor?: string | null; take?: number } = {}) {
     const take = Math.min(Math.max(1, opts.take ?? 50), 200);

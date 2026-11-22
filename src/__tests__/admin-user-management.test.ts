@@ -43,7 +43,7 @@ vi.mock("@/services/booking/closure", () => ({ closeExpiredBookingsForGuest: m.c
 
 import { adminUserService } from "@/services/AdminUserService";
 import { accountPrivacyService, erasureConfirmMatches } from "@/services/AccountPrivacyService";
-import { auditLogService } from "@/services/AuditLogService";
+import { AuditLogService, auditLogService } from "@/services/AuditLogService";
 
 const actor = { userId: "admin-1", ip: "203.0.113.5" };
 const auditActions = () => m.audit.mock.calls.map((c) => c[0].action);
@@ -278,7 +278,7 @@ describe("AuditLogService", () => {
     const { where, take } = m.prisma.auditLog.findMany.mock.calls[0][0];
     expect(where.AND).toEqual([
       { action: { startsWith: "user." } },
-      { OR: [{ actorUserId: "u1" }, { entityId: "u1" }] },
+      { OR: [{ actorUserId: "u1" }, { entityType: "User", entityId: "u1" }] },
     ]);
     expect(take).toBe(31);
     expect(m.prisma.user.findMany).toHaveBeenCalledTimes(1);
@@ -300,6 +300,18 @@ describe("AuditLogService", () => {
         ],
       },
     ]);
+  });
+
+  it("onek listesi ~10 dakika onbellekte, sonra yeniden sorulur", async () => {
+    m.prisma.auditLog.groupBy.mockImplementation(async ({ by }: { by: string[] }) =>
+      by[0] === "action" ? [{ action: "user.delete" }] : [],
+    );
+    const svc = new AuditLogService();
+    expect(await svc.cachedActionPrefixes(0)).toEqual(["user."]);
+    await svc.cachedActionPrefixes(9 * 60 * 1000);
+    expect(m.prisma.auditLog.groupBy).toHaveBeenCalledTimes(2); // tek filterOptions = 2 groupBy
+    await svc.cachedActionPrefixes(11 * 60 * 1000);
+    expect(m.prisma.auditLog.groupBy).toHaveBeenCalledTimes(4);
   });
 
   it("onekler veriden turer", async () => {
