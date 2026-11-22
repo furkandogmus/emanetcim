@@ -318,6 +318,88 @@ export class NotificationService implements INotificationService {
   }
 
   /**
+   * Verilen cihaz token'larina tek bir baslik/govde gonderir; NotificationLog YAZMAZ.
+   * `sendMobilePush` ve yonetici duyurusu (`BroadcastService`) ayni yolu kullanir:
+   * Android FCM, iOS Expo push, olu token temizligi tek yerde kalir.
+   * `skipped`: FCM yapilandirilmamisken gonderilemeyen Android token'lari.
+   * FCM cagrisinin kendisi firlatirsa hata cagirana gecer.
+   */
+  async deliverMobilePush(
+    tokens: string[],
+    title: string,
+    message: string,
+    bookingId?: string,
+    logCtx: Record<string, unknown> = {},
+  ): Promise<{ sent: number; failed: number; skipped: number; staleTokens: string[] }> {
+    const serviceAccountJson = process.env.FIREBASE_SERVICE_ACCOUNT_JSON?.trim();
+    /*
+      iOS cihazlar Expo push token'i kaydeder (ExponentPushToken[...]): iOS'ta yerel
+      token APNs'indir, FCM onu kabul etmez. Expo servisi APNs'e EAS'taki anahtarla
+      iletir; Android FCM'e dogrudan gitmeye devam eder.
+    */
+    const expoTokens = tokens.filter((t) => isExpoPushToken(t));
+    const fcmTokens = tokens.filter((t) => !isExpoPushToken(t));
+    const canFcm = !!serviceAccountJson && fcmTokens.length > 0;
+    let sent = 0;
+    let failed = 0;
+    const staleTokens: string[] = [];
+
+    if (canFcm) {
+      const { initializeApp, getApps, cert } = await import("firebase-admin/app");
+      const { getMessaging } = await import("firebase-admin/messaging");
+
+      if (getApps().length === 0) {
+        initializeApp({ credential: cert(JSON.parse(serviceAccountJson!)) });
+      }
+      const messaging = getMessaging();
+
+      const resp = await messaging.sendEachForMulticast({
+        tokens: fcmTokens,
+        notification: { title, body: message },
+        data: bookingId ? { bookingId } : undefined,
+        /*
+          Uygulamanin olusturdugu YUKSEK onemli "default" kanali (push.ts).
+          kanal verilmezse sistem FCM'in "Miscellaneous" kanalina dusuyor:
+          baslik bandi yok, esnaf yeni rezervasyonu kacirabiliyor.
+        */
+        android: { priority: "high", notification: { channelId: "default" } },
+      });
+      sent += resp.successCount;
+
+      resp.responses.forEach((r, i) => {
+        if (r.success) return;
+        failed += 1;
+        const code = r.error?.code;
+        if (
+          code === "messaging/registration-token-not-registered" ||
+          code === "messaging/invalid-registration-token"
+        ) {
+          staleTokens.push(fcmTokens[i]);
+        }
+        logger.warn({ ...logCtx, err: r.error, token: fcmTokens[i] }, "mobile_push_send_failed");
+      });
+    }
+
+    if (expoTokens.length > 0) {
+      const expo = await sendExpoPush(expoTokens, title, message, bookingId);
+      sent += expo.successCount;
+      failed += expo.failures.length;
+      staleTokens.push(...expo.staleTokens);
+      for (const f of expo.failures) {
+        logger.warn({ ...logCtx, err: f.error, token: f.token }, "mobile_push_send_failed");
+      }
+    }
+
+    if (staleTokens.length > 0) {
+      await prisma.mobilePushToken.deleteMany({
+        where: { token: { in: staleTokens } },
+      });
+    }
+
+    return { sent, failed, skipped: canFcm ? 0 : fcmTokens.length, staleTokens };
+  }
+
+  /**
    * MOBİL push gönderimi (FCM) — `sendPush` ile AYNI desen, farklı kanal.
    *
    * NEDEN VAR (DEFECT_BACKLOG D6, 2026-09-12): `MobilePushToken` token
@@ -347,73 +429,16 @@ export class NotificationService implements INotificationService {
 
     try {
       const tokens = await prisma.mobilePushToken.findMany({ where: { userId } });
-      /*
-        iOS cihazlar Expo push token'i kaydeder (ExponentPushToken[...]): iOS'ta yerel
-        token APNs'indir, FCM onu kabul etmez. Expo servisi APNs'e EAS'taki anahtarla
-        iletir; Android FCM'e dogrudan gitmeye devam eder.
-      */
-      const expoTokens = tokens.filter((t) => isExpoPushToken(t.token)).map((t) => t.token);
-      const fcmTokens = tokens.filter((t) => !isExpoPushToken(t.token)).map((t) => t.token);
-      const canFcm = !!serviceAccountJson && fcmTokens.length > 0;
+      const r = await this.deliverMobilePush(
+        tokens.map((t) => t.token),
+        title,
+        message,
+        bookingId,
+        { userId },
+      );
 
-      if (canFcm || expoTokens.length > 0) {
-        let successCount = 0;
-        const staleTokens: string[] = [];
-
-        if (canFcm) {
-          const { initializeApp, getApps, cert } = await import("firebase-admin/app");
-          const { getMessaging } = await import("firebase-admin/messaging");
-
-          if (getApps().length === 0) {
-            initializeApp({ credential: cert(JSON.parse(serviceAccountJson!)) });
-          }
-          const messaging = getMessaging();
-
-          const resp = await messaging.sendEachForMulticast({
-            tokens: fcmTokens,
-            notification: { title, body: message },
-            data: bookingId ? { bookingId } : undefined,
-            /*
-              Uygulamanin olusturdugu YUKSEK onemli "default" kanali (push.ts).
-              kanal verilmezse sistem FCM'in "Miscellaneous" kanalina dusuyor:
-              baslik bandi yok, esnaf yeni rezervasyonu kacirabiliyor.
-            */
-            android: { priority: "high", notification: { channelId: "default" } },
-          });
-          successCount += resp.successCount;
-
-          resp.responses.forEach((r, i) => {
-            if (r.success) return;
-            const code = r.error?.code;
-            if (
-              code === "messaging/registration-token-not-registered" ||
-              code === "messaging/invalid-registration-token"
-            ) {
-              staleTokens.push(fcmTokens[i]);
-            }
-            logger.warn(
-              { err: r.error, userId, token: fcmTokens[i] },
-              "mobile_push_send_failed",
-            );
-          });
-        }
-
-        if (expoTokens.length > 0) {
-          const expo = await sendExpoPush(expoTokens, title, message, bookingId);
-          successCount += expo.successCount;
-          staleTokens.push(...expo.staleTokens);
-          for (const f of expo.failures) {
-            logger.warn({ err: f.error, userId, token: f.token }, "mobile_push_send_failed");
-          }
-        }
-
-        if (staleTokens.length > 0) {
-          await prisma.mobilePushToken.deleteMany({
-            where: { token: { in: staleTokens } },
-          });
-        }
-
-        const anyOk = successCount > 0;
+      if (r.sent + r.failed > 0) {
+        const anyOk = r.sent > 0;
         await prisma.notificationLog.create({
           data: {
             bookingId,
