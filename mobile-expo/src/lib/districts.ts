@@ -10,19 +10,31 @@ export function cityPlace(c: CityCoverage): Place {
   return { label: c.name, latitude: c.latitude, longitude: c.longitude, radiusM: c.radiusM };
 }
 
-/** "Kadıköy, İstanbul"; yaricap haritanin varsayilani (ilce bir sehir kadar genis degil). */
+/** "Kadıköy, İstanbul"; yaricap ilcenin butun dukkanlarini kapsar (sunucu, en az 15 km). */
 export function districtPlace(d: DistrictCoverage, city: CityCoverage): Place {
-  return { label: `${d.name}, ${city.name}`, latitude: d.latitude, longitude: d.longitude };
+  return { label: `${d.name}, ${city.name}`, latitude: d.latitude, longitude: d.longitude, radiusM: d.radiusM };
 }
+
+/** Yavas agda misafir bu kadar bekler, sonra sehir bugunku gibi secilir. */
+export const DISTRICTS_TIMEOUT_MS = 5_000;
 
 export function cityDistrictsQuery(city: CityCoverage) {
   const slug = city.slug ?? citySlug(city.name);
   return {
     queryKey: ["cities", slug, "districts"] as const,
-    queryFn: () =>
-      api<{ districts: DistrictCoverage[] }>(`/cities/${encodeURIComponent(slug)}/districts`, { auth: false }).then(
-        (r) => r.districts,
-      ),
+    queryFn: ({ signal }: { signal: AbortSignal }) => {
+      const controller = new AbortController();
+      const timer = setTimeout(() => controller.abort(), DISTRICTS_TIMEOUT_MS);
+      signal.addEventListener("abort", () => controller.abort());
+      return api<{ districts: DistrictCoverage[] }>(`/cities/${encodeURIComponent(slug)}/districts`, {
+        auth: false,
+        signal: controller.signal,
+      })
+        .then((r) => r.districts)
+        .finally(() => clearTimeout(timer));
+    },
+    // Tekrar denemek, eski sunucuda (uc yok) misafiri saniyelerce bekletirdi.
+    retry: false,
     staleTime: 10 * 60_000,
   };
 }

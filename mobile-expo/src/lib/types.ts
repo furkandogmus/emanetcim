@@ -610,6 +610,8 @@ export type DistrictCoverage = {
   /** Ilcedeki dukkanlarin ortalamasi. */
   latitude: number;
   longitude: number;
+  /** Merkezden ilcenin en uzak dukkanina (m), en az 15 km. */
+  radiusM: number;
 };
 
 // --- /Arama: ilceler ---
