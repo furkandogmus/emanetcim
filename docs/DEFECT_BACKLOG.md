@@ -63,6 +63,24 @@
 | D2 | **Esnafa uyuşmazlık yüzeyi** — haberdar et + kendi kanıtını göster (kanıt artık toplanıyor ve admin görüyor) | Uyuşmazlık / kanıt |
 | D8 | **Vitrin afişi / QR** — yazdırılabilir tabela | — |
 
+## 2026-11-23 — misafire geç teslim hatırlatması yeniden yazıldı (D1'in devamı)
+
+**Bulgu:** D1'in tekrar kontrolü `NotificationLog.subject` öneki
+(`"BagajPark: Valizinizi almayı unuttunuz"`) ile sayıyordu; bu önek yalnızca TÜRKÇE
+konuyla eşleşiyor. `en/de/fr/ja/fa` misafirde sayaç hep 0 kalıyor, yani valizi
+dükkanda kalan yabancı misafire `booking-reminders` her 15 dakikada bir, süresiz
+e-posta atıyordu. Push yalnızca e-postası olan misafire gidiyordu.
+
+**Karar (ürün sahibi):** +30 dk, +24 sa, sonra en fazla 24 saatte bir, toplam en fazla 7.
+Ücret ve terk edilmiş eşya politikası kapsam dışı; metin ücretten söz etmez.
+
+**Uygulama:** `OverdueGuestReminderService` (takvim `src/lib/overdue-guest-reminder.ts`).
+Her slot göndermeden ÖNCE `BookingEvent` (`OVERDUE_GUEST_REMINDER`, `metadata.slot`)
+olarak rezervasyon başına `pg_advisory_xact_lock` altında sahipleniliyor; kilit içinde
+durum yeniden okunuyor (`CHECKED_IN` değilse gönderilmez). Push ve e-posta birbirinden
+bağımsız. Yeni cron yok: aynı `booking-reminders` işi (`7,22,37,52 * * * *`) çağırıyor.
+Migrasyon yok. Esnaf tarafı değişmedi.
+
 ## 2026-09-12 — sadakat puanı özelliği KOMPLE KALDIRILDI (B7 kapandı)
 
 **Karar** (kullanıcı, doğrudan): B7'deki iki seçenekten ("özellik eklenir ya da
