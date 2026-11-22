@@ -8,6 +8,7 @@ import { useTranslation } from "react-i18next";
 
 import { BagRevisionCard } from "@/components/BagRevisionCard";
 import { BookingTicket } from "@/components/BookingTicket";
+import { ExpiredBookingActions } from "@/components/ExpiredBookingActions";
 import { GuestBagRevisionCard } from "@/components/GuestBagRevisionCard";
 import { GuestDisputeCard } from "@/components/GuestDisputeCard";
 import { GuestReviewCard } from "@/components/GuestReviewCard";
@@ -241,19 +242,8 @@ export function BookingDetailView({ id, mode }: { id: string; mode: "guest" | "p
           <RefreshControl refreshing={query.isRefetching} onRefresh={() => query.refetch()} tintColor={colors.accent} />
         }
       >
-        {expired ? (
-          <View style={{ gap: space.md }}>
-            <Banner tone="warning" title={t("bookings.expiredTitle")} body={t("bookings.expiredBody")} />
-            <Button title={t("bookings.rebook")} onPress={rebook} />
-            {CANCELLABLE.has(b.status) ? (
-              <Button
-                variant="secondary"
-                title={t("bookings.closeExpired")}
-                loading={cancel.isPending}
-                onPress={confirmCloseExpired}
-              />
-            ) : null}
-          </View>
+        {mode === "guest" ? (
+          <ExpiredBookingActions booking={b} onRebook={rebook} onClose={confirmCloseExpired} closing={cancel.isPending} />
         ) : null}
         {/* Onay bekleyen duzeltme bilet ve QR'in USTUNDE: misafirin yapmasi gereken tek is bu. */}
         {mode === "guest" ? <GuestBagRevisionCard booking={b} /> : null}
