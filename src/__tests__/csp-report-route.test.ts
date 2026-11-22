@@ -1,10 +1,11 @@
-import { describe, it, expect, vi, beforeEach } from "vitest";
+import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
 import { NextRequest } from "next/server";
 
-const { warn } = vi.hoisted(() => ({ warn: vi.fn() }));
-vi.mock("@/lib/logger", () => ({ default: { warn, info: vi.fn(), error: vi.fn() } }));
+const { info } = vi.hoisted(() => ({ info: vi.fn() }));
+vi.mock("@/lib/logger", () => ({ default: { info, warn: vi.fn(), error: vi.fn() } }));
 
-import { POST } from "@/app/api/csp-report/route";
+type Post = typeof import("@/app/api/csp-report/route").POST;
+let POST: Post;
 
 let ipSeq = 0;
 function call(body: string, type: string, ip = `198.51.100.${++ipSeq}`) {
@@ -42,20 +43,30 @@ const reportingApi = JSON.stringify([
 ]);
 
 describe("/api/csp-report", () => {
-  beforeEach(() => warn.mockClear());
+  beforeEach(async () => {
+    info.mockClear();
+    // CI, e2e icin `E2E_DISABLE_RATE_LIMIT=true` veriyor; burada gercek sinir sinaniyor.
+    vi.stubEnv("E2E_DISABLE_RATE_LIMIT", "false");
+    // Ornekleme sayaci ve bellek ici hiz siniri modul durumu: her test temiz baslar.
+    vi.resetModules();
+    ({ POST } = await import("@/app/api/csp-report/route"));
+  });
+  afterEach(() => {
+    vi.unstubAllEnvs();
+  });
 
   it("eski report-uri biçimini (application/csp-report) kabul eder ve yalnızca host + direktifi loglar", async () => {
     const res = await call(legacy, "application/csp-report");
     expect(res.status).toBe(204);
-    expect(warn).toHaveBeenCalledTimes(1);
-    const [fields] = warn.mock.calls[0];
+    expect(info).toHaveBeenCalledTimes(1);
+    const [fields] = info.mock.calls[0];
     expect(fields.csp).toEqual({
       directive: "script-src-elem",
       blocked: "evil.example.com",
       disposition: "report",
     });
     // Belge adresi, sorgu dizesi ve script örneği log'a GİRMEZ.
-    const logged = JSON.stringify(warn.mock.calls);
+    const logged = JSON.stringify(info.mock.calls);
     expect(logged).not.toContain("SECRET123");
     expect(logged).not.toContain("token=abc");
     expect(logged).not.toContain("kullanici metni");
@@ -65,13 +76,20 @@ describe("/api/csp-report", () => {
   it("Reporting API biçimini (application/reports+json) kabul eder, csp-violation dışını atlar", async () => {
     const res = await call(reportingApi, "application/reports+json");
     expect(res.status).toBe(204);
-    expect(warn).toHaveBeenCalledTimes(1);
-    expect(warn.mock.calls[0][0].csp).toEqual({
+    expect(info).toHaveBeenCalledTimes(1);
+    expect(info.mock.calls[0][0].csp).toEqual({
       directive: "require-trusted-types-for",
       blocked: "trusted-types-sink",
       disposition: "report",
     });
-    expect(JSON.stringify(warn.mock.calls)).not.toContain("checkout/abc");
+    expect(JSON.stringify(info.mock.calls)).not.toContain("checkout/abc");
+  });
+
+  it("loglamayı örnekler: 20 ihlalden biri, sayaçla", async () => {
+    for (let i = 0; i < 21; i++) await call(legacy, "application/csp-report");
+    expect(info).toHaveBeenCalledTimes(2);
+    expect(info.mock.calls[0][0].seen).toBe(1);
+    expect(info.mock.calls[1][0].seen).toBe(21);
   });
 
   it("alanları kırpar", async () => {
@@ -80,15 +98,15 @@ describe("/api/csp-report", () => {
       JSON.stringify({ "csp-report": { "effective-directive": long, "blocked-uri": "inline" } }),
       "application/csp-report",
     );
-    expect(warn.mock.calls[0][0].csp.directive.length).toBeLessThanOrEqual(128);
-    expect(warn.mock.calls[0][0].csp.blocked).toBe("inline");
+    expect(info.mock.calls[0][0].csp.directive.length).toBeLessThanOrEqual(128);
+    expect(info.mock.calls[0][0].csp.blocked).toBe("inline");
   });
 
   it("büyük gövdeyi reddeder (413) ve loglamaz", async () => {
     const big = JSON.stringify({ "csp-report": { "blocked-uri": "x".repeat(20 * 1024) } });
     const res = await call(big, "application/csp-report");
     expect(res.status).toBe(413);
-    expect(warn).not.toHaveBeenCalled();
+    expect(info).not.toHaveBeenCalled();
   });
 
   it("tanınmayan içerik türünü reddeder (415)", async () => {
