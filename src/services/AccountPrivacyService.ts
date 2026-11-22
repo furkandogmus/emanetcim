@@ -5,6 +5,7 @@ import { writeAuditLog } from "@/lib/audit-log";
 import { ANONYMIZED_EMAIL_DOMAIN } from "@/lib/anonymized-account";
 import { NOT_DROPPED_STATUSES } from "@/lib/booking-closure";
 import { closeExpiredBookingsForGuest } from "@/services/booking/closure";
+import { normalizeTrGsm10 } from "@/lib/netgsm";
 
 /**
  * Hesap anonimleştirme (KVKK silme hakkı) — iki taşıyıcının ORTAK gövdesi.
@@ -39,6 +40,39 @@ export type AnonymizeResult =
   | { ok: true }
   | { ok: false; reason: "not_guest" | "active_bookings" };
 
+export type AdminAnonymizeResult =
+  | { ok: true }
+  | {
+      ok: false;
+      reason:
+        | "not_found"
+        | "cannot_delete_self"
+        | "already_anonymized"
+        | "invalid_reason"
+        | "confirm_mismatch"
+        | "not_guest"
+        | "active_bookings";
+    };
+
+/** Yoneticinin silme gerekcesi: denetim kaydina girer, bos ya da anlamsiz olamaz. */
+export const ADMIN_ERASURE_REASON_MIN = 5;
+export const ADMIN_ERASURE_REASON_MAX = 500;
+
+/**
+ * Yazilan onay metni hesabin e-postasi ya da telefonu mu? E-posta buyuk/kucuk harf
+ * duyarsiz; telefon `0`/`+90`/bosluk farklarini yok sayar (saklanan bicim 10 hane).
+ */
+export function erasureConfirmMatches(
+  typed: string,
+  account: { email: string | null; phone: string | null },
+): boolean {
+  const v = typed.trim();
+  if (!v) return false;
+  if (account.email && v.toLowerCase() === account.email.trim().toLowerCase()) return true;
+  const phone = normalizeTrGsm10(v);
+  return !!phone && !!account.phone && phone === normalizeTrGsm10(account.phone);
+}
+
 class AccountPrivacyService {
   /**
    * Kullanıcının kendi hesabını anonimleştirmesi.
@@ -62,12 +96,78 @@ class AccountPrivacyService {
 
     if (role !== Role.GUEST) return { ok: false, reason: "not_guest" };
 
-    /*
-      Suresi dolmus (valizi hic birakilmamis, alma saati gecmis) kayit aktif
-      SAYILMAZ: misafir gelmeyecek, ama eskiden hesabini kapatamiyordu.
-      Engel yoksa silmeden once kapanirlar.
-    */
     const now = new Date();
+    if (await this.hasBlockingBookings(userId, now)) return { ok: false, reason: "active_bookings" };
+    await this.erase(userId, now);
+
+    writeAuditLog({
+      actorUserId: userId,
+      actorRole: "GUEST",
+      action: auditAction,
+      entityType: "User",
+      entityId: userId,
+      ip,
+    });
+
+    return { ok: true };
+  }
+
+  /**
+   * Yonetici silmesi (mobil admin). Kendi silmesiyle AYNI kurallar ve AYNI
+   * silme listesi: yalnizca MISAFIR hesabi, aktif rezervasyon varken olmaz,
+   * suresi dolmus kayitlar kapanir. Ek olarak:
+   *   - yonetici kendini silemez,
+   *   - onay metni hesabin e-postasi/telefonu olmali (yanlis hesabi silmeye
+   *     karsi; istemcideki kontrol tek basina yetmez),
+   *   - gerekce zorunlu ve denetim kaydina yazilir.
+   */
+  async anonymizeByAdmin(params: {
+    targetUserId: string;
+    actor: { userId: string; ip: string | null };
+    confirm: string;
+    reason: string;
+  }): Promise<AdminAnonymizeResult> {
+    const { targetUserId, actor } = params;
+    if (actor.userId === targetUserId) return { ok: false, reason: "cannot_delete_self" };
+
+    const reason = params.reason.trim();
+    if (reason.length < ADMIN_ERASURE_REASON_MIN || reason.length > ADMIN_ERASURE_REASON_MAX) {
+      return { ok: false, reason: "invalid_reason" };
+    }
+
+    const target = await prisma.user.findUnique({
+      where: { id: targetUserId },
+      select: { id: true, role: true, email: true, phone: true },
+    });
+    if (!target) return { ok: false, reason: "not_found" };
+    if (target.email?.toLowerCase().endsWith(ANONYMIZED_EMAIL_DOMAIN)) {
+      return { ok: false, reason: "already_anonymized" };
+    }
+    if (!erasureConfirmMatches(params.confirm, target)) return { ok: false, reason: "confirm_mismatch" };
+    if (target.role !== Role.GUEST) return { ok: false, reason: "not_guest" };
+
+    const now = new Date();
+    if (await this.hasBlockingBookings(targetUserId, now)) return { ok: false, reason: "active_bookings" };
+    await this.erase(targetUserId, now);
+
+    writeAuditLog({
+      actorUserId: actor.userId,
+      actorRole: "ADMIN",
+      action: "account.anonymize_by_admin",
+      entityType: "User",
+      entityId: targetUserId,
+      metadata: { reason },
+      ip: actor.ip,
+    });
+    return { ok: true };
+  }
+
+  /*
+    Suresi dolmus (valizi hic birakilmamis, alma saati gecmis) kayit aktif
+    SAYILMAZ: misafir gelmeyecek, ama eskiden hesabini kapatamiyordu.
+    Engel yoksa silmeden once kapanirlar (`erase`).
+  */
+  private async hasBlockingBookings(userId: string, now: Date): Promise<boolean> {
     const activeCount = await prisma.booking.count({
       where: {
         guestId: userId,
@@ -75,7 +175,11 @@ class AccountPrivacyService {
         NOT: { status: { in: [...NOT_DROPPED_STATUSES] }, checkOutTime: { lt: now } },
       },
     });
-    if (activeCount > 0) return { ok: false, reason: "active_bookings" };
+    return activeCount > 0;
+  }
+
+  /** Silme govdesi -- kendi silmesi ve yonetici silmesi AYNI listeyi kullanir. */
+  private async erase(userId: string, now: Date): Promise<void> {
     await closeExpiredBookingsForGuest(userId, now);
 
     const anonEmail = `gdpr_${userId.replace(/-/g, "").slice(0, 20)}${ANONYMIZED_EMAIL_DOMAIN}`;
@@ -134,17 +238,6 @@ class AccountPrivacyService {
         },
       }),
     ]);
-
-    writeAuditLog({
-      actorUserId: userId,
-      actorRole: "GUEST",
-      action: auditAction,
-      entityType: "User",
-      entityId: userId,
-      ip,
-    });
-
-    return { ok: true };
   }
 }
 
