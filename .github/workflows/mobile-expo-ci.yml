@@ -38,9 +38,24 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
+        id: node
         with:
           node-version: '22'
-          cache: npm
-          cache-dependency-path: mobile-expo/package-lock.json
-      - run: npm ci
+      # Kurallar ci.yml'deki node_modules onbellegiyle ayni: anahtar package.json +
+      # lockfile + Node surumu; iska olursa `npm ci` kosar ve hemen kaydedilir.
+      - name: node_modules onbellegi
+        id: nm-cache
+        uses: actions/cache/restore@v4
+        with:
+          path: mobile-expo/node_modules
+          key: expo-node-modules-${{ runner.os }}-${{ runner.arch }}-node${{ steps.node.outputs.node-version }}-${{ hashFiles('mobile-expo/package.json', 'mobile-expo/package-lock.json') }}
+      - name: Bagimliliklar
+        if: steps.nm-cache.outputs.cache-hit != 'true'
+        run: npm ci
+      - name: node_modules onbellegini kaydet
+        if: steps.nm-cache.outputs.cache-hit != 'true'
+        uses: actions/cache/save@v4
+        with:
+          path: mobile-expo/node_modules
+          key: ${{ steps.nm-cache.outputs.cache-primary-key }}
       - run: npm run verify
