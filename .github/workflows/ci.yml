@@ -20,10 +20,11 @@ name: CI
 # hicbir log birakmiyor; "test kirildi" gibi degil, "hicbir sey olmadi" gibi
 # gorunur. Bu dosyanin bicimi o faturayi dusurmek icin.
 #
-# UC KURAL:
-#   - Tek `npm ci`, tek `npm run build` (Docker imajininki haric -- o BILEREK
-#     ayri, asagida gerekcesi var).
-#   - Deploy, dogrulamaya BAGLI (`needs`). Kirmizi commit cikamaz.
+# KURALLAR:
+#   - Deploy, dogrulamanin HER parcasina BAGLI (`needs`). Kirmizi commit cikamaz.
+#   - Uretim imaji dogrulamayla PARALEL derlenir ama `latest` etiketini yalnizca
+#     deploy, dogrulama gectikten SONRA verir (asagida `image` ve `deploy`).
+#   - Tek Next build (E2E icin) + imajin kendi build'i -- o BILEREK ayri.
 #   - Ustuste gelen kosular iptal olur.
 # =============================================================================
 
@@ -38,8 +39,8 @@ on:
   # PR'da yol filtresi YOK (2026-09-23): `verify` main'de ZORUNLU kontrol. Yol
   # filtresi yuzunden hic calismayan bir zorunlu kontrol PR'i sonsuza dek
   # "bekliyor"da birakir. Kapsam asagidaki `changes` job'unda olculur;
-  # uygulamaya dokunmayan PR'da `verify` KOSULLA atlanir ve atlanan job
-  # zorunlu kontrolu gecmis sayilir.
+  # uygulamaya dokunmayan PR'da dogrulama job'lari KOSULLA atlanir ve
+  # `verify` toplayicisi yesil doner.
   pull_request:
     branches: [main]
   # Path filtresi yuzunden atlanan bir degisikligi elle dogrulamak icin.
@@ -50,12 +51,12 @@ on:
 # NEDEN: workflow seviyesinde `cancel-in-progress: true` yazmak, yeni bir push
 # geldiginde SUREN BIR DEPLOY'U da yarida keserdi -- S3 yuklemesi bitmis ama
 # SSM komutu beklenirken kesilen bir kosu, sunucuyu yari guncellenmis birakir
-# ve workflow "iptal edildi" der. Pahali olan is `verify`; iptal edilmesi
-# gereken de odur. `deploy` asla kesilmez, ustelik kendi grubunda sirayla
+# ve workflow "iptal edildi" der. Pahali olan is dogrulama (`checks`, `e2e`)
+# ve imaj; iptal edilmesi gereken de onlardir. `deploy` asla kesilmez, ustelik kendi grubunda sirayla
 # calisir (asagiya bakin).
 
 # Varsayilan GITHUB_TOKEN izni en dar haline cekildi (CodeQL
-# `missing-workflow-permissions`, 2026-09-06). `verify` hicbir yere yazmiyor,
+# `missing-workflow-permissions`, 2026-09-06). Dogrulama hicbir yere yazmiyor,
 # yalnizca checkout icin `contents: read` yeterli. `image`/`deploy` kendi
 # ihtiyaclarini (packages: write / id-token: write) zaten job seviyesinde
 # ayrica tanimliyor -- bu varsayilani ELE GECIRMEZ, yalnizca genisletir.
@@ -64,21 +65,8 @@ permissions:
 
 jobs:
   # ---------------------------------------------------------------------------
-  # Her sey TEK job'da: lint, typecheck, migrasyon sapmasi, birim testleri,
-  # build ve E2E.
-  #
-  # NEDEN TEK JOB: bunlar eskiden iki job'di ve ikisi de `npm ci` + `npm run
-  # build` calistiriyordu. Ayri job'lar ayri makinelerdir; `node_modules` ve
-  # `.next` paylasilamaz. Birlestirmek push basina bir checkout, bir `npm ci`,
-  # bir Next build ve bir runner acilisi siliyor.
-  #
-  # Yan faydasi: ucuz kontroller (lint, typecheck) pahali olanlardan ONCE
-  # calisir, yani bir yazim hatasi 10 dakikalik E2E'yi hic baslatmadan yakalanir.
-  # ---------------------------------------------------------------------------
-  # ---------------------------------------------------------------------------
   # PR'in uygulamaya dokunup dokunmadigi. Push/dispatch'te her zaman `true`:
-  # push'un kendi `paths-ignore`'u zaten filtreliyor ve deploy zinciri
-  # (verify -> image -> deploy) oldugu gibi kaliyor.
+  # push'un kendi `paths-ignore`'u zaten filtreliyor.
   # ---------------------------------------------------------------------------
   changes:
     name: Degisiklik kapsami
@@ -106,18 +94,25 @@ jobs:
             echo "app=false" >> "$GITHUB_OUTPUT"
           fi
 
-  verify:
-    name: Dogrula (lint, tip, test, e2e)
+  # ---------------------------------------------------------------------------
+  # Dogrulama IKI paralel job: `checks` (statik kapilar + DB + birim) ve
+  # `e2e` (build + seed + Playwright). Tek job'da sirayla ~6 dk suruyordu;
+  # ikisi ayri makinede, en uzun kol kadar surer. `node_modules` lockfile
+  # hash'iyle onbellekten gelir, iki `npm ci`nin bedeli boylece kalkar.
+  # Next build hala TEK (yalnizca `e2e`de).
+  # ---------------------------------------------------------------------------
+  checks:
+    name: Dogrula / statik + birim
     needs: changes
     if: needs.changes.outputs.app == 'true'
     runs-on: ubuntu-latest
-    timeout-minutes: 30
+    timeout-minutes: 20
     # Ayni dala arka arkaya push atilirsa yalnizca sonuncusu dogrulanir.
-    # Gecersiz kilinmis bir commit'i sonuna kadar test etmek saf dakika kaybi.
     concurrency:
-      group: verify-${{ github.ref }}
+      group: verify-checks-${{ github.ref }}
       cancel-in-progress: true
 
+    # Entegrasyon testleri ve db:verify gercek Postgres/Redis ister.
     services:
       postgres:
         image: postgis/postgis:16-3.4-alpine
@@ -144,13 +139,7 @@ jobs:
       NEXT_PUBLIC_BASE_URL: http://localhost:3000
       REDIS_URL: redis://localhost:6379
       CRON_SECRET: ci-e2e-cron-secret
-      # Testler ayni IP'den onlarca istek uretir; gercek limitler production disinda kapatilir.
       E2E_DISABLE_RATE_LIMIT: "true"
-      # Demo giris dugmeleri production build'de ancak bu bayrakla gorunur (build aninda gomulur).
-      #
-      # DIKKAT: bu bayrak SADECE burada acik. Uretime giden imaj asagida AYRI
-      # bir job'da, bu env olmadan derleniyor -- E2E build'ini uretim imaji
-      # olarak yeniden kullanmamamizin sebebi tam olarak bu.
       NEXT_PUBLIC_ENABLE_AUTH_DEMO: "true"
       CI: "true"
 
@@ -158,12 +147,40 @@ jobs:
       - uses: actions/checkout@v4
 
       - uses: actions/setup-node@v4
+        id: node
         with:
           node-version: "22"
-          cache: npm
+
+      # Anahtar package.json + lockfile + Node surumu: biri degisirse iska olur
+      # ve `npm ci` kosar. package.json anahtarda, cunku `npm ci` ikisinin
+      # uyumsuzlugunu da yakalayan bir kapidir; isabette o kapi atlanmamali.
+      # Isabette `postinstall` (prisma generate) calismaz, elle cagrilir:
+      # sema degisip lockfile degismezse istemci bayat kalirdi.
+      - name: node_modules onbellegi
+        id: nm-cache
+        uses: actions/cache/restore@v4
+        with:
+          path: node_modules
+          key: node-modules-${{ runner.os }}-${{ runner.arch }}-node${{ steps.node.outputs.node-version }}-${{ hashFiles('package.json', 'package-lock.json') }}
 
       - name: Bagimliliklar
-        run: npm ci
+        env:
+          HIT: ${{ steps.nm-cache.outputs.cache-hit }}
+        run: |
+          if [ "$HIT" = "true" ]; then
+            npx prisma generate
+          else
+            npm ci
+          fi
+
+      # Hemen kaydedilir: job sonunda kaydetmek testlerin yazdigi seyleri de
+      # onbellege tasirdi.
+      - name: node_modules onbellegini kaydet
+        if: steps.nm-cache.outputs.cache-hit != 'true'
+        uses: actions/cache/save@v4
+        with:
+          path: node_modules
+          key: ${{ steps.nm-cache.outputs.cache-primary-key }}
 
       - name: Lint
         run: npm run lint
@@ -207,6 +224,85 @@ jobs:
       - name: Birim + entegrasyon testleri
         run: npm run test
 
+  e2e:
+    name: Dogrula / build + E2E
+    needs: changes
+    if: needs.changes.outputs.app == 'true'
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    concurrency:
+      group: verify-e2e-${{ github.ref }}
+      cancel-in-progress: true
+
+    services:
+      postgres:
+        image: postgis/postgis:16-3.4-alpine
+        env:
+          POSTGRES_USER: ci
+          POSTGRES_PASSWORD: ci
+          POSTGRES_DB: ci
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U ci -d ci"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
+      redis:
+        image: redis:7-alpine
+        ports:
+          - 6379:6379
+
+    env:
+      DATABASE_URL: postgresql://ci:ci@localhost:5432/ci?schema=public
+      AUTH_SECRET: ci-e2e-secret-not-for-production-0123456789
+      AUTH_TRUST_HOST: "true"
+      NEXT_PUBLIC_BASE_URL: http://localhost:3000
+      REDIS_URL: redis://localhost:6379
+      CRON_SECRET: ci-e2e-cron-secret
+      # Testler ayni IP'den onlarca istek uretir; gercek limitler production disinda kapatilir.
+      E2E_DISABLE_RATE_LIMIT: "true"
+      # Demo giris dugmeleri production build'de ancak bu bayrakla gorunur (build aninda gomulur).
+      #
+      # DIKKAT: bu bayrak SADECE dogrulama job'larinda acik. Uretime giden imaj
+      # asagida AYRI bir job'da, bu env olmadan derleniyor -- E2E build'ini
+      # uretim imaji olarak yeniden kullanmamamizin sebebi tam olarak bu.
+      NEXT_PUBLIC_ENABLE_AUTH_DEMO: "true"
+      CI: "true"
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        id: node
+        with:
+          node-version: "22"
+
+      # Anahtar ve kurallar `checks` job'undakiyle ayni; ikisi ayni girdiyi paylasir.
+      - name: node_modules onbellegi
+        id: nm-cache
+        uses: actions/cache/restore@v4
+        with:
+          path: node_modules
+          key: node-modules-${{ runner.os }}-${{ runner.arch }}-node${{ steps.node.outputs.node-version }}-${{ hashFiles('package.json', 'package-lock.json') }}
+
+      - name: Bagimliliklar
+        env:
+          HIT: ${{ steps.nm-cache.outputs.cache-hit }}
+        run: |
+          if [ "$HIT" = "true" ]; then
+            npx prisma generate
+          else
+            npm ci
+          fi
+
+      - name: node_modules onbellegini kaydet
+        if: steps.nm-cache.outputs.cache-hit != 'true'
+        uses: actions/cache/save@v4
+        with:
+          path: node_modules
+          key: ${{ steps.nm-cache.outputs.cache-primary-key }}
+
       - name: Build
         run: npm run build
 
@@ -232,6 +328,10 @@ jobs:
             npx playwright install --with-deps chromium
           fi
 
+      # Seed'in tablolari bulmasi icin; sapma kontrolu `checks`te.
+      - name: Prisma migrate (CI DB)
+        run: npx prisma migrate deploy
+
       - name: Seed (E2E verisi)
         run: npx prisma db seed
 
@@ -246,19 +346,59 @@ jobs:
           retention-days: 7
 
   # ---------------------------------------------------------------------------
+  # ZORUNLU KONTROL. Ruleset `main-korumasi` bu job'un ADINI bekliyor; ad
+  # degisirse PR'lar sonsuza dek "bekliyor"da kalir.
+  #
+  # `always()` BILEREK: `!cancelled()` olsaydi iptal edilen kosuda bu job
+  # ATLANIRDI ve GitHub atlanan job'u gecmis sayar -- dogrulanmamis PR
+  # birlestirilebilirdi. Uygulamaya dokunmayan PR'da (app=false) yesil doner,
+  # eski tek-job `verify`in kosulla atlanmasiyla ayni sonuc.
+  # ---------------------------------------------------------------------------
+  verify:
+    name: Dogrula (lint, tip, test, e2e)
+    needs: [changes, checks, e2e]
+    if: always()
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Dogrulama sonuclari
+        env:
+          CHANGES: ${{ needs.changes.result }}
+          APP: ${{ needs.changes.outputs.app }}
+          CHECKS: ${{ needs.checks.result }}
+          E2E: ${{ needs.e2e.result }}
+        run: |
+          echo "changes=$CHANGES app=$APP checks=$CHECKS e2e=$E2E"
+          if [ "$CHANGES" != "success" ]; then
+            echo "::error::Degisiklik kapsami olculemedi ($CHANGES)"; exit 1
+          fi
+          if [ "$APP" != "true" ]; then
+            echo "Uygulamaya dokunmayan degisiklik; dogrulama gerekmiyor."; exit 0
+          fi
+          if [ "$CHECKS" != "success" ] || [ "$E2E" != "success" ]; then
+            echo "::error::Dogrulama gecmedi (checks=$CHECKS, e2e=$E2E)"; exit 1
+          fi
+          echo "Tum dogrulama job'lari gecti."
+
+  # ---------------------------------------------------------------------------
   # Uretim imaji.
   #
-  # NEDEN AYRI BIR BUILD: `verify` job'indaki build, E2E icin
+  # NEDEN AYRI BIR BUILD: `e2e` job'indaki build, E2E icin
   # `NEXT_PUBLIC_ENABLE_AUTH_DEMO=true` ile derlendi -- bayrak derleme aninda
   # gomuluyor. O ciktiyi uretime gondermek, demo giris dugmelerini canliya
   # tasirdi. Imaj bu yuzden kendi build'ini yapar; Docker katman onbellegi
   # (type=gha) tekrar maliyetini dusuk tutar.
   #
   # Yalnizca `main` push'unda. PR'da imaj uretilmez: PR'in isi dogrulamaktir.
+  #
+  # Dogrulamayla PARALEL kosar (`needs` yok), bu yuzden YALNIZCA degismez
+  # `sha-<kisa sha>` etiketini basar, `latest`i DEGIL. Sunucu (compose,
+  # scripts/update.sh) `latest` ceker; dogrulanmamis bir imaj o etikete
+  # ulasirsa siradaki `pull` kirmizi commit'i canliya tasirdi. `latest`i
+  # `deploy`, dogrulama gectikten sonra bu job'un digest'ine tasir.
   # ---------------------------------------------------------------------------
   image:
     name: Imaj (GHCR)
-    needs: verify
     if: github.event_name == 'push' && github.ref == 'refs/heads/main'
     runs-on: ubuntu-latest
     timeout-minutes: 20
@@ -269,6 +409,8 @@ jobs:
     permissions:
       contents: read
       packages: write
+    outputs:
+      digest: ${{ steps.build.outputs.digest }}
 
     env:
       REGISTRY: ghcr.io
@@ -296,7 +438,6 @@ jobs:
         with:
           images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
           tags: |
-            type=raw,value=latest
             type=sha,prefix=sha-
 
       - uses: docker/setup-buildx-action@8d2750c68a42422c14e847fe6c8ac0403b4cbd6f # v3.12.0
@@ -327,13 +468,14 @@ jobs:
 
   # ---------------------------------------------------------------------------
   # Deploy. Eskiden AYRI bir workflow'daydi ve `CI`yi beklemiyordu -- yani
-  # testleri kirmizi bir commit uretime cikabilirdi. Artik `needs: image`,
-  # o da `needs: verify`: zincir kirilirsa deploy hic baslamaz.
+  # testleri kirmizi bir commit uretime cikabilirdi. Artik dogrulamanin her
+  # parcasina ve imaja `needs` ile bagli; `success()` hepsini ister, biri
+  # bile gecmezse deploy (ve `latest` terfisi) hic baslamaz.
   # ---------------------------------------------------------------------------
   deploy:
     name: Deploy (AWS SSM, OIDC — statik key yok)
-    needs: image
-    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    needs: [verify, checks, e2e, image]
+    if: success() && github.event_name == 'push' && github.ref == 'refs/heads/main'
     runs-on: ubuntu-latest
     timeout-minutes: 15
     # ASLA iptal edilmez (`cancel-in-progress` yok) ve tek sirada calisir:
@@ -345,6 +487,8 @@ jobs:
     permissions:
       id-token: write
       contents: read
+      # Yalnizca `latest` terfisi icin (asagida).
+      packages: write
 
     steps:
       - name: Checkout (docker-compose.yml icin)
@@ -390,6 +534,30 @@ jobs:
           # isini birden dusurmustu; bu, onun nginx'teki ikizi.
           aws s3 cp nginx/conf.d/ "s3://${{ vars.AWS_DEPLOY_BUCKET }}/deploy-config/nginx/conf.d/" \
             --recursive --only-show-errors
+
+      # `latest`, dogrulanmis imajin digest'ine burada tasinir: deploy-production
+      # sirasinda oldugu icin terfi sirasi deploy sirasiyla ayni. Yalnizca
+      # manifest yazilir, katman cekilmez.
+      - name: GHCR girisi
+        uses: docker/login-action@c94ce9fb468520275223c153574b00df6fe4bcc9 # v3.7.0
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - uses: docker/setup-buildx-action@8d2750c68a42422c14e847fe6c8ac0403b4cbd6f # v3.12.0
+
+      - name: Dogrulanmis imaji latest yap
+        env:
+          IMAGE: ghcr.io/${{ github.repository }}
+          DIGEST: ${{ needs.image.outputs.digest }}
+        run: |
+          case "$DIGEST" in
+            sha256:*) ;;
+            *) echo "::error::image job'u digest vermedi: '$DIGEST'"; exit 1 ;;
+          esac
+          docker buildx imagetools create --tag "$IMAGE:latest" "$IMAGE@$DIGEST"
+          docker buildx imagetools inspect "$IMAGE:latest"
 
       - name: SSM Run Command ile deploy et
         run: |
