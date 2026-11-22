@@ -10,7 +10,8 @@ import { nextCursorOf } from "./paging";
 import { totalBags, type Bags } from "./search";
 import { partnerSearchTerm } from "./booking-search";
 import { useDebouncedValue } from "./use-debounced-value";
-import type { AdminApplication, AdminStats, BookingDetail, ContactMessage, PartnerEarnings, PartnerSealsResponse, PartnerShop, BookingSummary, NearbyShop, PartnerBookingsResponse, ShopDetail, ShopReviewsPage, PartnerShopSettings, PartnerSchedule, PartnerDashboard, AdminOverview, AdminBookingFilter, AdminBookingCounts, AdminBookingsResponse, AdminBookingDetail, AdminShop, AdminShopDetail, AdminUser, CityCoverage, AppConfig, PartnerCancelRequest } from "./types";
+import { BROADCAST_POLL_MS, hasActiveBroadcast } from "./broadcast";
+import type { AdminApplication, AdminStats, BookingDetail, ContactMessage, PartnerEarnings, PartnerSealsResponse, PartnerShop, BookingSummary, NearbyShop, PartnerBookingsResponse, ShopDetail, ShopReviewsPage, PartnerShopSettings, PartnerSchedule, PartnerDashboard, AdminOverview, AdminBookingFilter, AdminBookingCounts, AdminBookingsResponse, AdminBookingDetail, AdminShop, AdminShopDetail, AdminUser, AdminBroadcast, BroadcastAudience, BroadcastPreview, CityCoverage, AppConfig, PartnerCancelRequest } from "./types";
 
 export const keys = {
   myBookings: ["bookings", "me"] as const,
@@ -399,6 +400,26 @@ export function useAdminUsers(q: string) {
     },
     getNextPageParam: nextCursorOf,
     placeholderData: (prev) => prev,
+  });
+}
+
+export const adminBroadcastsKey = [...keys.admin, "broadcasts"] as const;
+
+/** Secili kitleye kac kisi/cihaz: kitle degisince anahtar degisir, yeniden sorulur. */
+export function useBroadcastPreview(audience: BroadcastAudience | null) {
+  return useQuery({
+    queryKey: [...adminBroadcastsKey, "preview", audience],
+    queryFn: () => api<BroadcastPreview>("/admin/broadcasts/preview", { method: "POST", body: { audience } }),
+    enabled: audience !== null,
+  });
+}
+
+/** Son duyurular; listede QUEUED/SENDING varken birkac saniyede bir yoklanir, yoksa durur. */
+export function useAdminBroadcasts() {
+  return useQuery({
+    queryKey: [...adminBroadcastsKey, "list"],
+    queryFn: () => api<{ items: AdminBroadcast[] }>("/admin/broadcasts?limit=20").then((r) => r.items),
+    refetchInterval: (q) => (hasActiveBroadcast(q.state.data) ? BROADCAST_POLL_MS : false),
   });
 }
 
