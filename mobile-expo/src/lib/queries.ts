@@ -515,10 +515,8 @@ export function useAdminReviews(filter: AdminReviewFilter, shopId?: string | nul
 export function moderateReviewOptions(qc: InvalidatingClient) {
   return {
     mutationFn: ({ id, action, reason }: { id: string; action: ReviewModerationAction; reason?: string }) =>
-      api(`/admin/reviews/${encodeURIComponent(id)}/${action}`, {
-        method: "POST",
-        body: reason ? { reason } : {},
-      }),
+      // Bos gerekce `undefined` kalir ve JSON'a girmez (geri almada gonderilmez).
+      api(`/admin/reviews/${encodeURIComponent(id)}/${action}`, { method: "POST", body: { reason: reason || undefined } }),
     // Hata da yeniler: `already_hidden`/`not_found` cogu zaman baska bir yoneticinin isi.
     onSettled: () => {
       void qc.invalidateQueries({ queryKey: adminReviewsKey });

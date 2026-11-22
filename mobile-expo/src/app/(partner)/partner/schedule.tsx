@@ -7,7 +7,7 @@ import { ScheduleEditor } from "@/components/ScheduleEditor";
 import { StackHeader } from "@/components/StackHeader";
 import { Button, CenterMessage, Loading } from "@/components/ui";
 import { errorMessage } from "@/lib/errors";
-import { usePartnerShopSelection, withShop } from "@/lib/partner-shop";
+import { usePartnerShopSelection } from "@/lib/partner-shop";
 import { partnerScheduleKey, usePartnerSchedule, usePartnerShop } from "@/lib/queries";
 import { colors } from "@/theme/tokens";
 import { StaleQueryBanner } from "@/components/StaleQueryBanner";
@@ -38,7 +38,8 @@ export default function PartnerScheduleScreen() {
       ) : (
         <ScheduleEditor
           schedule={query.data}
-          path={(q) => withShop(`/partner/shop/schedule${q ? `?${q}` : ""}`, shopId)}
+          basePath="/partner/shop/schedule"
+          shopId={shopId}
           invalidateKey={partnerScheduleKey}
           onOpenBooking={(id) => router.push(`/partner/${id}`)}
         />

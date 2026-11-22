@@ -23,7 +23,6 @@ export default function AdminShopPhotosScreen() {
   const readOnly = !canEditAdminContent(impersonating);
   const shop = useAdminShop(id);
   const query = useAdminShopPhotos(id);
-  const base = `/admin/shops/${encodeURIComponent(id)}`;
 
   return (
     <SafeAreaView style={styles.safe} edges={["top"]}>
@@ -43,7 +42,7 @@ export default function AdminShopPhotosScreen() {
           <ShopPhotoGrid
             image={query.data.image}
             gallery={query.data.gallery}
-            path={(sub) => `${base}${sub}`}
+            basePath={`/admin/shops/${encodeURIComponent(id)}`}
             onChanged={() =>
               Promise.all([
                 queryClient.invalidateQueries({ queryKey: adminShopPhotosKey(id) }),

@@ -37,7 +37,8 @@ export function ShopPhotos({ shop, shopId }: { shop: PartnerShop; shopId: string
     <ShopPhotoGrid
       image={shop.image}
       gallery={shop.gallery ?? []}
-      path={(sub) => withShop(`/partner/shop${sub}`, shopId)}
+      basePath="/partner/shop"
+      shopId={shopId}
       onChanged={() => queryClient.invalidateQueries({ queryKey: keys.partnerShop })}
       errorNamespace="partner"
     />
@@ -45,14 +46,16 @@ export function ShopPhotos({ shop, shopId }: { shop: PartnerShop; shopId: string
 }
 
 /**
- * Izgaranin kendisi; esnaf (`/partner/shop/...`) ve yonetici (`/admin/shops/:id/...`)
+ * Izgaranin kendisi; esnaf (`/partner/shop` + `shopId`) ve yonetici (`/admin/shops/:id`)
  * ayni alt yollari kullanir: `/image` kapak, `/images` galeri, `/images/:id[/cover]`.
+ * `basePath` duz metin kalmali: alan taramasi uc adresini oradan okur.
  * `readOnly` yazma dugmelerini gizler (yonetici goruntuleme oturumu).
  */
 export function ShopPhotoGrid({
   image,
   gallery,
-  path,
+  basePath,
+  shopId = null,
   onChanged,
   errorNamespace,
   hint,
@@ -61,7 +64,8 @@ export function ShopPhotoGrid({
 }: {
   image: string | null;
   gallery: ShopGalleryImage[];
-  path: (sub: string) => string;
+  basePath: string;
+  shopId?: string | null;
   onChanged: () => Promise<unknown>;
   errorNamespace: string;
   /** Kapak varken gosterilen aciklama; verilmezse esnafa yazilmis metin. */
@@ -71,6 +75,7 @@ export function ShopPhotoGrid({
 }) {
   const { t } = useTranslation();
   const { width } = useWindowDimensions();
+  const url = (sub: string) => withShop(`${basePath}${sub}`, shopId);
   const [progress, setProgress] = useState<{ done: number; total: number } | null>(null);
   const [selected, setSelected] = useState<Selected | null>(null);
   const [busy, setBusy] = useState(false);
@@ -83,7 +88,7 @@ export function ShopPhotoGrid({
     const file = await prepareShopPhoto(asset);
     const form = new FormData();
     form.append("file", file as unknown as Blob);
-    await api(path(sub), { method: "POST", body: form });
+    await api(url(sub), { method: "POST", body: form });
   }
 
   async function addPhotos() {
@@ -145,7 +150,7 @@ export function ShopPhotoGrid({
       {
         text: t("partner.deletePhoto"),
         style: "destructive",
-        onPress: () => void run(() => api(path(`/images/${encodeURIComponent(id)}`), { method: "DELETE" })),
+        onPress: () => void run(() => api(url(`/images/${encodeURIComponent(id)}`), { method: "DELETE" })),
       },
     ]);
   }
@@ -220,7 +225,7 @@ export function ShopPhotoGrid({
                     loading={busy}
                     onPress={() =>
                       void run(() =>
-                        api(path(`/images/${encodeURIComponent(selected.id)}/cover`), { method: "POST" }),
+                        api(url(`/images/${encodeURIComponent(selected.id)}/cover`), { method: "POST" }),
                       )
                     }
                   />

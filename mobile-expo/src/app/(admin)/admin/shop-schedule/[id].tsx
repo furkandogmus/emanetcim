@@ -21,7 +21,6 @@ export default function AdminShopScheduleScreen() {
   const readOnly = !canEditAdminContent(impersonating);
   const shop = useAdminShop(id);
   const query = useAdminShopSchedule(id);
-  const base = `/admin/shops/${encodeURIComponent(id)}/schedule`;
 
   return (
     <SafeAreaView style={styles.safe} edges={["top", "bottom"]}>
@@ -42,7 +41,7 @@ export default function AdminShopScheduleScreen() {
       ) : (
         <ScheduleEditor
           schedule={query.data}
-          path={(q) => (q ? `${base}?${q}` : base)}
+          basePath={`/admin/shops/${encodeURIComponent(id)}/schedule`}
           invalidateKey={adminShopScheduleKey(id)}
           onOpenBooking={(bookingId) => router.push(`/admin/booking/${bookingId}`)}
           hint={t("adminShop.scheduleHint")}
