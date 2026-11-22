@@ -22,6 +22,7 @@ import {
   confirmSealDeliveryAction,
   recycleReturnedSealsAction,
 } from "@/actions/seal";
+import { formatInstant } from "@/lib/format-datetime";
 
 interface SealRequestRow {
   id: string;
@@ -313,7 +314,7 @@ export default function PartnerSealsClient({
                         )}
                       </div>
                       <p className="text-xs text-gray-400 mt-0.5">
-                        {new Date(req.createdAt).toLocaleDateString(dateLocale)}
+                        {formatInstant(req.createdAt, dateLocale, { year: "numeric", month: "numeric", day: "numeric" })}
                       </p>
                     </div>
                     <StatusBadge status={req.status} t={t} />

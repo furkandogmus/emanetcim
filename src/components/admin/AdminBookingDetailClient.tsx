@@ -18,6 +18,7 @@ import { useLocale, useTranslations } from "next-intl";
 import { bcp47ForUiLocale } from "@/lib/intl-locale";
 import Money from "@/components/common/Money";
 import AdminBookingClosureActions from "@/components/admin/AdminBookingClosureActions";
+import { formatInstant } from "@/lib/format-datetime";
 
 type Seal = {
   id: string;
@@ -140,7 +141,7 @@ export default function AdminBookingDetailClient({
 
   function fmt(iso: string | null) {
     if (!iso) return "—";
-    return new Date(iso).toLocaleString(dateLocale, {
+    return formatInstant(iso, dateLocale, {
       day: "2-digit",
       month: "short",
       year: "numeric",

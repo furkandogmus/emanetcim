@@ -6,6 +6,7 @@ import { Phone, MessageCircle, MapPin, Check } from "lucide-react";
 import { toast } from "sonner";
 import { setPartnerLeadContactedAction } from "@/actions/partner-lead";
 import { returnedErrorKey } from "@/lib/action-error";
+import { formatInstant } from "@/lib/format-datetime";
 
 type Lead = {
   id: string;
@@ -58,7 +59,7 @@ export default function AdminPartnerLeadsClient({ leads, locale }: { leads: Lead
                   <MapPin size={14} className="mt-0.5 shrink-0" /> {l.address}
                 </p>
                 <p className="mt-1 text-xs text-gray-400">
-                  {new Date(l.createdAt).toLocaleString(locale, { dateStyle: "medium", timeStyle: "short" })}
+                  {formatInstant(l.createdAt, locale, { dateStyle: "medium", timeStyle: "short" })}
                 </p>
               </div>
               <div className="flex flex-wrap gap-2">
