@@ -7,8 +7,8 @@ import { notificationService } from "@/services/NotificationService";
 import {
   shouldSendOverdueNotice,
   OVERDUE_NOTICE_SUBJECT_PREFIX,
-  OVERDUE_GUEST_NOTICE_SUBJECT_PREFIX,
 } from "@/lib/overdue-notice";
+import { overdueGuestReminderService } from "@/services/OverdueGuestReminderService";
 import { bookingShortCode } from "@/lib/booking-code";
 import {
   CHECK_IN_REMINDER_SUBJECT_PREFIX,
@@ -123,6 +123,7 @@ const REMINDER_SCAN_LIMIT = 100;
 // - CHECK_IN_SOON: 2 saat içinde check-in yapacak misafirler
 // - CHECK_OUT_SOON: 1 saat içinde check-out yapacak misafirler
 // - CHECK_OUT_OVERDUE: Check-out saati geçmiş aktif booking'ler (partner uyarısı)
+// - OVERDUE_GUEST: aynı booking'lerin misafirine hatırlatma (OverdueGuestReminderService)
 //
 // Periyot TEK KAYNAKTAN gelir: `src/lib/jobs/registry.ts`. Burada bir cron
 // ifadesi YAZMAYIN -- bu satirlar "her 15 dakikada bir" diyordu, registry ise
@@ -325,7 +326,6 @@ export async function GET(req: NextRequest) {
       },
       include: {
         shop: { include: { owner: { select: { email: true, phone: true } } } },
-        guest: { select: { email: true, name: true } },
       },
       /*
         SIRALAMA EKLENDI: `take` siniri asildiginda HANGI kayitlarin dusecegi
@@ -350,15 +350,6 @@ export async function GET(req: NextRequest) {
       overdue.map((b) => b.id),
       OVERDUE_NOTICE_SUBJECT_PREFIX,
     );
-    /*
-      DEFECT_BACKLOG D1: esnaf sayacından AYRI sayaç (bkz. overdue-notice.ts
-      yorumu) -- aksi halde ikisinden biri eksik sayılır.
-    */
-    const overdueGuestSentCounts = await notifiedCounts(
-      overdue.map((b) => b.id),
-      OVERDUE_GUEST_NOTICE_SUBJECT_PREFIX,
-    );
-
     for (const booking of overdue) {
       const overdueHours =
         (now.getTime() - booking.checkOutTime.getTime()) / 3_600_000;
@@ -376,29 +367,15 @@ export async function GET(req: NextRequest) {
           results.overdueNotifications++;
         }
       }
-
-      /*
-        MİSAFİRE de haber ver: unutulmuş valizi almaya gelebilecek tek kişi
-        odur, esnafa "misafir ile iletişime geçin" demek yükü ona bırakıyordu.
-      */
-      const guestEmail = booking.guest?.email ?? booking.guestEmail;
-      if (guestEmail) {
-        const guestAlreadySent = overdueGuestSentCounts.get(booking.id) ?? 0;
-        if (shouldSendOverdueNotice(overdueHours, guestAlreadySent)) {
-          void notificationService.sendOverdueGuestNotice(
-            guestEmail,
-            booking.id,
-            {
-              shopName: booking.shop.name,
-              checkOutAt: booking.checkOutTime,
-              timeZone: bookingTimeZone(booking.shop),
-            },
-            booking.locale ?? DEFAULT_NOTIFICATION_LOCALE,
-          ).catch((e) => logger.warn({ err: e, bookingId: booking.id }, "reminder_overdue_guest_email_failed"));
-          results.overdueGuestNotifications++;
-        }
-      }
     }
+
+    /*
+      4. Ayni gecikmis rezervasyonlarin MISAFIRINE hatirlatma (push + e-posta).
+      Takvim, tekrar korumasi ve durum kontrolu serviste; ayri cron satiri yok,
+      bu isin 15 dakikalik periyoduyla kosar.
+    */
+    const guestReport = await overdueGuestReminderService.run({ now });
+    results.overdueGuestNotifications = guestReport.sent;
 
     logger.info({ results }, "booking_reminders_cron_completed");
     return { ok: true as const, detail: results };
