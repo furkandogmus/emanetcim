@@ -347,7 +347,22 @@
     "outsideHoursConfirm": "それでも受け取る",
     "outsideHoursEditHours": "営業時間を編集",
     "earningsBasisNote": "返却済みの預かり（返却日基準）",
-    "pulseCollectedBasis": "返却済みの預かり"
+    "pulseCollectedBasis": "返却済みの預かり",
+    "partnerCancelBooking": "予約をキャンセル",
+    "partnerCancelConfirm": "予約をキャンセルし、理由をお客様に伝えます。枠が解放されます。",
+    "partnerCancelReasonLabel": "キャンセル理由",
+    "partnerCancelReason_guest_request": "お客様の希望",
+    "partnerCancelReason_shop_closed": "その時間は閉店",
+    "partnerCancelReason_capacity": "空きがない",
+    "partnerCancelReason_other": "その他",
+    "partnerCancelNoteLabel": "メモ（任意）",
+    "partnerCancelNoteRequiredLabel": "メモ（必須）",
+    "partnerNoShow": "お客様が来なかった",
+    "partnerNoShowConfirm": "予約を来店なしとして終了し、枠を解放します。お客様には丁寧な通知が届きます。",
+    "partnerNoShowAvailableAt": "{time}から記録できます（預け入れ時刻の60分後）。",
+    "partnerCancelDone": "予約をキャンセルしました。",
+    "partnerNoShowDone": "予約を来店なしとして終了しました。",
+    "partnerCloseKeep": "戻る"
   },
   "Guest": {
     "heroTitle": "荷物を預けて、身軽に街へ",
@@ -1315,7 +1330,17 @@
       "noLocation": "位置情報なし：検索と地図に出ません",
       "noCityPage": "どの都市ページにもありません",
       "noPhoto": "写真なし"
-    }
+    },
+    "bookingCloseSectionTitle": "予約を終了",
+    "bookingCloseCancel": "キャンセル",
+    "bookingCloseCancelConfirm": "予約をキャンセルします。お客様と店舗に通知され、支払いがあれば返金として記録されます。",
+    "bookingCloseForceCheckout": "強制引き渡し",
+    "bookingCloseForceCheckoutConfirm": "荷物を引き渡し済みにします。延滞料金はかかりません。お客様と店舗に通知されます。",
+    "bookingCloseNoteLabel": "メモ（必須）",
+    "bookingCloseNoteHint": "{min}文字以上。監査ログに保存され、店舗に送信されます。",
+    "bookingCloseKeep": "戻る",
+    "bookingCloseCancelDone": "予約をキャンセルしました。",
+    "bookingCloseForceDone": "予約を引き渡し済みとして終了しました。"
   },
   "Auth": {
     "loginTitle": "バガジパークにサインインする",
@@ -1819,7 +1844,10 @@
     "userNotFound": "ユーザーが見つかりません。",
     "userNotGuest": "このアカウントはゲストではありません。パートナーに変更できるのはゲストアカウントのみです。",
     "passwordTooShort": "パスワードは8文字以上にしてください。",
-    "cannotBanSelf": "自分のアカウントは停止できません。"
+    "cannotBanSelf": "自分のアカウントは停止できません。",
+    "closureNoteRequired": "メモを入力してください。",
+    "closureInvalidReason": "有効なキャンセル理由を選んでください。",
+    "noShowTooEarly": "来店なしは預け入れ時刻の60分後から記録できます。"
   },
   "Emails": {
     "verificationSubject": "メールアドレスを確認してください",
