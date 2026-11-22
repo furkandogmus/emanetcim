@@ -1,6 +1,7 @@
 import { Role } from "@prisma/client";
 import prisma from "@/lib/db";
 import { hashPassword, MAX_PASSWORD_LENGTH, MIN_PASSWORD_LENGTH } from "@/lib/auth-password";
+import { writeAuditLog } from "@/lib/audit-log";
 
 /**
  * Admin'in misafir/esnaf için yeni şifre belirlemesi.
@@ -13,6 +14,9 @@ import { hashPassword, MAX_PASSWORD_LENGTH, MIN_PASSWORD_LENGTH } from "@/lib/au
  * ADMIN hesaplarına uygulanmaz: bir admin'in başka admin'in şifresini
  * değiştirmesi, rol değişikliğindeki ikinci onay kapısını delmek olur.
  * `tokenVersion` artar: eski oturumlar düşer, kullanıcı yeni şifreyle girer.
+ *
+ * Denetim kaydı burada (web action'ı ve mobil admin ucu aynı gövdeyi çağırır).
+ * Şifre kayda YAZILMAZ; yalnızca "kim, kime, ne zaman".
  */
 export type AdminSetPasswordResult =
   | { ok: true; phone: string | null; name: string | null }
@@ -21,6 +25,7 @@ export type AdminSetPasswordResult =
 export async function adminSetUserPassword(
   targetUserId: string,
   rawPassword: string,
+  actor: { userId: string; role: string; ip: string | null },
 ): Promise<AdminSetPasswordResult> {
   const password = typeof rawPassword === "string" ? rawPassword : "";
   if (password.trim().length < MIN_PASSWORD_LENGTH || password.length > MAX_PASSWORD_LENGTH) {
@@ -41,5 +46,14 @@ export async function adminSetUserPassword(
     data: { passwordHash, tokenVersion: { increment: 1 } },
   });
   if (updated.count === 0) return { ok: false, reason: "forbidden_target" };
+  writeAuditLog({
+    actorUserId: actor.userId,
+    actorRole: actor.role,
+    action: "user.password_set_by_admin",
+    entityType: "User",
+    entityId: user.id,
+    metadata: {},
+    ip: actor.ip,
+  });
   return { ok: true, phone: user.phone, name: user.name };
 }

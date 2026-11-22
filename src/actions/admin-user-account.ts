@@ -107,7 +107,12 @@ export async function adminSetUserPasswordAction(
   const parsed = setPasswordSchema.safeParse(raw);
   if (!parsed.success) return { ok: false, error: "Errors.invalidData" };
 
-  const result = await adminSetUserPassword(parsed.data.userId, parsed.data.password);
+  // Denetim kaydi serviste: mobil admin ucu da ayni govdeyi cagirir.
+  const result = await adminSetUserPassword(parsed.data.userId, parsed.data.password, {
+    userId: auth.actor.id,
+    role: auth.actor.role,
+    ip: await getClientIpOrNull(),
+  });
   if (!result.ok) {
     const error = {
       invalid_password: "Errors.passwordTooShort",
@@ -116,16 +121,6 @@ export async function adminSetUserPasswordAction(
     }[result.reason];
     return { ok: false, error };
   }
-
-  writeAuditLog({
-    actorUserId: auth.actor.id,
-    actorRole: auth.actor.role,
-    action: "user.password_set_by_admin",
-    entityType: "User",
-    entityId: parsed.data.userId,
-    metadata: {},
-    ip: await getClientIpOrNull(),
-  });
 
   return { ok: true, phone: result.phone, name: result.name };
 }
