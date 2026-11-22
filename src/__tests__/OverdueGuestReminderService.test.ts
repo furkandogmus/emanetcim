@@ -33,7 +33,7 @@ const h = vi.hoisted(() => {
 
   type Where = {
     status?: string;
-    checkOutTime?: { lte: Date };
+    checkOutTime?: { gte?: Date; lte: Date };
     bookingId?: string | { in: string[] };
     event?: string;
   };
@@ -55,11 +55,17 @@ const h = vi.hoisted(() => {
 
   const prisma = {
     booking: {
-      findMany: vi.fn(async ({ where }: { where: Where }) => {
+      findMany: vi.fn(async ({ where, take }: { where: Where; take: number }) => {
         await tick();
         return db.bookings
-          .filter((b) => b.status === where.status && b.checkOutTime <= where.checkOutTime!.lte)
-          .sort((a, b) => a.checkOutTime.getTime() - b.checkOutTime.getTime());
+          .filter(
+            (b) =>
+              b.status === where.status &&
+              b.checkOutTime <= where.checkOutTime!.lte &&
+              (!where.checkOutTime!.gte || b.checkOutTime >= where.checkOutTime!.gte),
+          )
+          .sort((a, b) => a.checkOutTime.getTime() - b.checkOutTime.getTime())
+          .slice(0, take);
       }),
     },
     bookingEvent: bookingEventApi,
@@ -220,6 +226,22 @@ describe("OverdueGuestReminderService", () => {
       expect.objectContaining({ email: "walkin@example.com", hasAccount: false, locale: "tr" }),
     ]);
     expect(h.db.events[0].metadata).toMatchObject({ email: true, push: false });
+  });
+
+  it("slotlarini bitirmis ve aylik bayat kayitlar ilk 100'u doldurmaz: yeni gecikmis misafir bildirilir", async () => {
+    // 60 rezervasyon yedi slotunu bitirmis (alma saati 7 gun once), 60'i aylardir acik.
+    for (let i = 0; i < 60; i++) {
+      addBooking({ id: `done-${i}`, checkOutTime: new Date(CHECKOUT.getTime() - 170 * HOUR - i * MIN) });
+      for (let s = 1; s <= 7; s++) {
+        h.db.events.push({ bookingId: `done-${i}`, event: "OVERDUE_GUEST_REMINDER", metadata: { slot: s } });
+      }
+      addBooking({ id: `stale-${i}`, checkOutTime: new Date(CHECKOUT.getTime() - 120 * 24 * HOUR - i * MIN) });
+    }
+    addBooking({ id: "fresh", checkOutTime: CHECKOUT });
+
+    const r = await service.run({ now: at(31 * MIN) });
+    expect(sentArgs().map((a) => a.bookingId)).toEqual(["fresh"]);
+    expect(r.limitReached).toBe(false);
   });
 
   it("gonderim hatasi slotu yeniden denetmez (iki kez gitmesindense bir kez eksik)", async () => {
