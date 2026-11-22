@@ -33,7 +33,6 @@ import {
   markNoShow,
   closeExpiredBookings,
   closeExpiredBookingsForGuest,
-  selfCancelReason,
 } from "@/services/booking/closure";
 
 const ADMIN = { id: "admin-1", role: "ADMIN" as const };
@@ -321,12 +320,5 @@ describe("closeExpiredBookingsForGuest (hesap silme)", () => {
     expect(where.guestId).toBe("g1");
     expect(where.checkOutTime.lt).toEqual(now);
     expect(m.cancelBooking).toHaveBeenCalledWith("a", { silent: true, reason: "expired_no_dropoff" });
-  });
-});
-
-describe("selfCancelReason", () => {
-  it("misafirin kendisi guest_cancel, baskasinin kaydini iptal eden admin admin_cancel", () => {
-    expect(selfCancelReason({ guestId: "g1" }, { id: "g1", role: "GUEST" })).toBe("guest_cancel");
-    expect(selfCancelReason({ guestId: "g1" }, { id: "admin-1", role: "ADMIN" })).toBe("admin_cancel");
   });
 });

@@ -71,14 +71,6 @@ function fromCancelFailure(code: string): ClosureErrorCode {
   return code === 'NOT_FOUND' || code === 'INVALID_STATUS' ? code : 'UNKNOWN';
 }
 
-/**
- * Misafirin kendi iptal yolundan (web/mobil "Iptal et") gelen istegin nedeni.
- * Yonetici bu yoldan BASKASININ rezervasyonunu iptal ederse yonetici iptalidir.
- */
-export function selfCancelReason(booking: { guestId: string | null }, actor: { id: string; role: string }): CancelReason {
-  return actor.role === 'ADMIN' && booking.guestId !== actor.id ? 'admin_cancel' : 'guest_cancel';
-}
-
 /** Yonetici iptali: check-in oncesi her durum, aciklama zorunlu. */
 export async function adminCancelBooking(
   bookingId: string,
