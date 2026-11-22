@@ -269,10 +269,11 @@ export class AdminUserService {
     if (!email) return { ok: false, error: "no_email" };
 
     await requestPasswordReset(email, locale);
+    // "requested": gonderim `requestPasswordReset` icinde atesle-unut, kayit ondan once yazilir.
     writeAuditLog({
       actorUserId: actor.userId,
       actorRole: "ADMIN",
-      action: "user.password_reset_sent_by_admin",
+      action: "admin.user.password_reset_requested",
       entityType: "User",
       entityId: userId,
       ip: actor.ip,
