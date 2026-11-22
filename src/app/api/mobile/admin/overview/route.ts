@@ -4,6 +4,7 @@ import { toMobileAdminOverview } from "@/lib/mobile-dto";
 import { requireMobileUser, requireRole } from "@/lib/mobile-auth";
 import { adminOverviewService } from "@/services/AdminOverviewService";
 import { mobileInstallService } from "@/services/MobileInstallService";
+import { withCancelReasons } from "@/services/booking/cancel-reason";
 
 /**
  * Mobil yonetim ana ekrani: bugun, 14 gunluk seri, dikkat isteyenler ve son
@@ -19,5 +20,6 @@ export async function GET(req: NextRequest) {
     adminOverviewService.overview(),
     mobileInstallService.activeCounts(),
   ]);
-  return NextResponse.json(toMobileAdminOverview(overview, appUsers));
+  const recent = await withCancelReasons(overview.recent);
+  return NextResponse.json(toMobileAdminOverview({ ...overview, recent }, appUsers));
 }

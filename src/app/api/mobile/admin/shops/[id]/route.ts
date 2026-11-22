@@ -8,6 +8,14 @@ import { revalidatePathAllLocales } from "@/lib/revalidate-locales";
 import logger from "@/lib/logger";
 import { adminOpsService } from "@/services/AdminOpsService";
 import { shopService } from "@/services/ShopService";
+import { withCancelReasons } from "@/services/booking/cancel-reason";
+
+/** Son rezervasyonlara `cancelReason` eklenmis detay; GET ve PATCH ayni govdeyi doner. */
+async function shopDetailBody(id: string) {
+  const detail = await adminOpsService.shopDetail(id);
+  if (!detail) return null;
+  return toMobileAdminShopDetail({ ...detail, recent: await withCancelReasons(detail.recent) });
+}
 
 async function admin(req: NextRequest) {
   const auth = await requireMobileUser(req);
@@ -21,9 +29,9 @@ export async function GET(req: NextRequest, { params }: { params: Promise<{ id: 
   const a = await admin(req);
   if ("error" in a) return a.error;
   const { id } = await params;
-  const detail = await adminOpsService.shopDetail(id);
-  if (!detail) return NextResponse.json({ error: "not_found" }, { status: 404 });
-  return NextResponse.json(toMobileAdminShopDetail(detail));
+  const body = await shopDetailBody(id);
+  if (!body) return NextResponse.json({ error: "not_found" }, { status: 404 });
+  return NextResponse.json(body);
 }
 
 /** Web duzenleme ekraniyla ayni alanlar; kural `ShopService.adminUpdateShop`ta. */
@@ -65,6 +73,6 @@ export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id
     logger.error({ shopId: id, err }, "revalidate_after_shop_update_failed");
   }
 
-  const detail = await adminOpsService.shopDetail(id);
-  return NextResponse.json(detail ? toMobileAdminShopDetail(detail) : { ok: true });
+  const body = await shopDetailBody(id);
+  return NextResponse.json(body ?? { ok: true });
 }
