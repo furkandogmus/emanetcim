@@ -180,7 +180,9 @@ export default function PartnerBookingsScreen() {
                 ]}
               />
             )}
-            {searching && !server.term ? <AppText variant="caption">{t("partner.searchMinHint")}</AppText> : null}
+            {searching && !server.term && !server.pending ? (
+              <AppText variant="caption">{t("partner.searchMinHint")}</AppText>
+            ) : null}
             {searchFailed ? (
               <Banner
                 tone="danger"
