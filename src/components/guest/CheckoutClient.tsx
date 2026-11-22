@@ -52,6 +52,7 @@ import StayDaysPicker from "@/components/guest/StayDaysPicker";
 import Money from "@/components/common/Money";
 import { foreignDisplayCurrency, formatTryCurrency } from "@/lib/currency";
 import { useModalBehavior } from "@/lib/hooks/useModalBehavior";
+import GuestContactForm from "@/components/guest/GuestContactForm";
 import { useActionErrorText } from "@/lib/use-action-error";
 interface CheckoutClientProps {
   shopId: string;
@@ -652,28 +653,35 @@ export default function CheckoutClient({
             </section>
 
             <section className="flex flex-col gap-2">
-              <label className="text-xs font-black uppercase text-gray-400">
+              {/* aria-label kaldirildi: gorunur etiketten farkli ad veriyordu (WCAG 2.5.3). */}
+              <label htmlFor="checkout-coupon" className="text-xs font-black uppercase text-gray-400">
                 {t("checkoutCouponOptional")}
               </label>
               <input
+                id="checkout-coupon"
                 type="text"
                 value={couponCode}
                 onChange={(e) => setCouponCode(e.target.value)}
-                aria-label={t("checkoutCouponPlaceholder")}
+                autoComplete="off"
+                autoCapitalize="characters"
+                spellCheck={false}
                 placeholder={t("checkoutCouponPlaceholder")}
                 className="w-full bg-gray-50 border border-gray-100 p-4 rounded-2xl text-sm font-semibold uppercase"
               />
             </section>
 
             <section className="flex flex-col gap-2">
-              <label className="text-xs font-black uppercase text-gray-400">
+              <label htmlFor="checkout-referral" className="text-xs font-black uppercase text-gray-400">
                 {t("checkoutReferralOptional")}
               </label>
               <input
+                id="checkout-referral"
                 type="text"
                 value={referralCode}
                 onChange={(e) => setReferralCode(e.target.value)}
-                aria-label={t("checkoutReferralPlaceholder")}
+                autoComplete="off"
+                autoCapitalize="characters"
+                spellCheck={false}
                 placeholder={t("checkoutReferralPlaceholder")}
                 className="w-full bg-gray-50 border border-gray-100 p-4 rounded-2xl text-sm font-semibold uppercase"
               />
@@ -941,101 +949,21 @@ export default function CheckoutClient({
               {t("checkoutGuestContactHint")}
             </p>
 
-            {/* Guest Checkout Fields */}
-            <div className="flex flex-col gap-3 mb-4">
-              <input
-                type="email"
-                inputMode="email"
-                autoComplete="email"
-                required
-                aria-required="true"
-                aria-label={t("checkoutGuestEmailPlaceholder")}
-                placeholder={t("checkoutGuestEmailPlaceholder")}
-                value={guestEmail}
-                onChange={(e) => setGuestEmail(e.target.value)}
-                className="w-full bg-gray-50 border border-gray-100 p-4 rounded-2xl text-[16px] font-medium focus:ring-2 focus:ring-orange-500 outline-none transition-all"
-              />
-              <input
-                type="tel"
-                inputMode="tel"
-                autoComplete="tel"
-                aria-label={t("checkoutGuestPhonePlaceholder")}
-                placeholder={t("checkoutGuestPhonePlaceholder")}
-                value={guestPhone}
-                onChange={(e) => setGuestPhone(e.target.value)}
-                className="w-full bg-gray-50 border border-gray-100 p-4 rounded-2xl text-[16px] font-medium focus:ring-2 focus:ring-orange-500 outline-none transition-all"
-              />
-            </div>
+            <GuestContactForm
+              email={guestEmail}
+              phone={guestPhone}
+              onEmailChange={setGuestEmail}
+              onPhoneChange={setGuestPhone}
+              error={error}
+              onError={setError}
+              isProcessing={isProcessing}
+              onValid={() => {
+                setShowAuthModal(false);
+                void handleBooking(true);
+              }}
+            />
 
-            {/*
-              HATA MODALIN İÇİNDE GÖSTERİLİYOR.
-
-              Eskiden `setError(...)` çağrılıyordu ama hata yalnızca modalın
-              ARKASINDAKİ sayfada render ediliyordu. Misafir iki alanı da boş
-              bırakıp "devam et"e bastığında ekranda hiçbir şey olmuyordu — arayüz
-              donmuş gibi görünüyor ve akış çıkmaza giriyordu.
-            */}
-            {error ? (
-              <p
-                role="alert"
-                className="mb-3 rounded-2xl bg-red-50 px-4 py-3 text-xs font-bold text-red-600"
-              >
-                {error}
-              </p>
-            ) : null}
-
-            <div className="flex flex-col gap-3">
-              <button
-                type="button"
-                /*
-                  ÇİFT GÖNDERİM KORUMASI.
-
-                  Bu buton `isProcessing`'i okumuyordu: misafir iki kez
-                  dokunduğunda İKİ REZERVASYON oluşuyordu. Dönüşüm yolunun tam
-                  ortasında, hem kapasiteyi hem tahsilatı ikiye katlayan bir hata.
-                  Alt taraftaki ana gönder butonunda koruma vardı, burada yoktu.
-                */
-                disabled={isProcessing}
-                onClick={() => {
-                  const email = guestEmail.trim();
-                  const phone = guestPhone.trim();
-                  // E-posta zorunlu: yonetim bagi ve hesaba baglama ona dayanir (sunucu da reddeder).
-                  if (!email) {
-                    setError(t("checkoutGuestContactRequired"));
-                    return;
-                  }
-                  /*
-                    BİÇİM DOĞRULAMASI MODAL AÇIKKEN (2026-09-10). Sunucu
-                    (`createBookingAction`) e-posta biçimini ve telefon
-                    uzunluğunu ayrıca doğruluyor — bunların istemci tarafında
-                    eşdeğeri yoktu. Modal ÖNCE kapanıyor, sunucunun ürettiği
-                    bu hata ARKADAKİ sayfada (footer banner) beliriyordu; ama
-                    onu düzeltecek e-posta/telefon alanları yalnızca kapanmış
-                    modalin içinde var. Aynı kurallar burada, modal kapanmadan
-                    önce çalışıyor ki hata hâlâ görünür alanların yanında kalsın.
-                  */
-                  if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
-                    setError(errorText("Errors.invalidEmail"));
-                    return;
-                  }
-                  if (phone && phone.length < 10) {
-                    setError(errorText("Errors.invalidPhone"));
-                    return;
-                  }
-                  setError(null);
-                  setShowAuthModal(false);
-                  void handleBooking(true);
-                }}
-                /*
-                  `hover:bg-orange-300` KALDIRILDI: aynı butonda
-                  `hover:bg-orange-700` ile ÇAKIŞIYORDU. Sonuncusu kazandığı için
-                  üzerine gelince buton açık turuncuya dönüyor ve beyaz yazı
-                  okunmaz hâle geliyordu.
-                */
-                className="w-full bg-orange-600 hover:bg-orange-700 disabled:opacity-60 disabled:cursor-not-allowed text-white py-4 px-6 rounded-2xl font-bold transition-all shadow-lg shadow-orange-200 text-center block cursor-pointer"
-              >
-                {isProcessing ? t("checkoutProcessing") : t("checkoutGuestContinue")}
-              </button>
+            <div className="flex flex-col gap-3 mt-3">
               <div className="relative my-2">
                 <div className="absolute inset-0 flex items-center">
                   <div className="w-full border-t border-gray-200" />
