@@ -38,6 +38,11 @@ export async function POST(req: NextRequest) {
   }
 
   const body = await req.json().catch(() => null);
+  // E-posta basina da sinir: IP degistiren tahmin tek hesaba yigilamasin. Bilinmeyen e-postada da ayni.
+  const emailKey = typeof body?.email === "string" ? body.email.trim().toLowerCase() : "";
+  if (emailKey && !(await rateLimit(`password_reset_code:email:${emailKey}`, 10, 60 * 60_000))) {
+    return NextResponse.json({ error: "too_many_attempts" }, { status: 429 });
+  }
   const result = await consumePasswordResetCode(body?.email, body?.code, body?.newPassword);
   if (!result.ok) {
     const { status, error } = CODE_TO_HTTP[result.code];

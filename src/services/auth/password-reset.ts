@@ -1,3 +1,4 @@
+import crypto from "crypto";
 import type { Role } from "@prisma/client";
 import prisma from "@/lib/db";
 import {
@@ -15,6 +16,8 @@ import { generatePasswordResetToken } from "@/lib/password-reset-token";
 import {
   PASSWORD_RESET_CODE_MAX_ATTEMPTS,
   PASSWORD_RESET_CODE_TTL_MS,
+  PASSWORD_RESET_CODE_WINDOW_MAX_FAILURES,
+  PASSWORD_RESET_CODE_WINDOW_MS,
   generatePasswordResetCode,
   hashPasswordResetCode,
   isWellFormedResetCode,
@@ -165,31 +168,57 @@ async function applyPasswordReset(
   return { tokenVersion: updated.tokenVersion };
 }
 
+/** Pencereyi tasiyan satir bu kadar sonra silinir: daha erken silmek sayaci sifirlardi. */
+const CODE_ROW_RETENTION_MS = PASSWORD_RESET_CODE_WINDOW_MS;
+/** Istek basina en fazla bu kadar eski satir temizlenir (cron yok, sinirli is). */
+const CLEANUP_BATCH = 100;
+
+async function cleanupStaleResetCodes(now: Date): Promise<void> {
+  const stale = await prisma.passwordResetCode.findMany({
+    where: { expires: { lt: new Date(now.getTime() - CODE_ROW_RETENTION_MS) } },
+    select: { email: true },
+    take: CLEANUP_BATCH,
+  });
+  if (stale.length > 0) {
+    await prisma.passwordResetCode.deleteMany({ where: { email: { in: stale.map((r) => r.email) } } });
+  }
+}
+
 /**
  * Sifirlama ISTEGI -- web action'i ve mobil uc ayni govdeyi cagirir.
  *
- * E-posta hem web bagini hem 6 haneli kodu tasir. Hesap yoksa sessizce
- * doner: cagiran her durumda ayni yaniti verir (hesap taramasi yok).
+ * HESAP TARAMASI YOK: hesabi olmayan e-posta icin de ayni bicimde bir kod
+ * satiri (rastgele hash, kimseye gitmez) yazilir; onay ucu iki durumda da
+ * ayni sirayla invalid_code / too_many_attempts / expired_code verir. Bag
+ * uretimi ve e-posta atesle-unut: yanit suresi hesabin varligini soylemez.
  */
 export async function requestPasswordReset(rawEmail: string, locale: string): Promise<void> {
   const email = normalizeResetEmail(rawEmail);
+  const now = new Date();
   const user = await prisma.user.findUnique({ where: { email }, select: { email: true } });
-  if (!user?.email) return;
+  await cleanupStaleResetCodes(now).catch((err) => logger.error({ err }, "reset_code_cleanup_failed"));
 
-  const row = await generatePasswordResetToken(user.email);
   const code = generatePasswordResetCode();
+  // Sahte satirin hash'i hicbir koddan uretilemez: eslesme imkansiz.
+  const codeHash = user?.email ? hashPasswordResetCode(email, code) : crypto.randomBytes(32).toString("hex");
   const codeRow = {
-    codeHash: hashPasswordResetCode(email, code),
+    codeHash,
     attempts: 0,
-    expires: new Date(Date.now() + PASSWORD_RESET_CODE_TTL_MS),
+    expires: new Date(now.getTime() + PASSWORD_RESET_CODE_TTL_MS),
   };
-  // Yeni istek eski kodu ezer; deneme sayaci da sifirlanir.
+  // Yeni istek eski kodu ve KOD sayacini ezer; 24 saatlik pencere sayaci korunur.
   await prisma.passwordResetCode.upsert({
     where: { email },
-    create: { email, ...codeRow },
+    create: { email, ...codeRow, windowStartedAt: now },
     update: codeRow,
   });
-  await sendPasswordResetEmail(user.email, row.token, locale, code);
+
+  if (!user?.email) return;
+  const to = user.email;
+  void (async () => {
+    const row = await generatePasswordResetToken(to);
+    await sendPasswordResetEmail(to, row.token, locale, code);
+  })().catch((err) => logger.error({ err }, "password_reset_email_dispatch_failed"));
 }
 
 export type PasswordResetCodeErrorCode =
@@ -208,9 +237,10 @@ export type PasswordResetCodeResult =
  * Kodla sifirlama (mobil). Bag yoluyla ayni sonuc: sifre yazilir, oturumlar
  * duser, e-posta dogrulanmis sayilir; cagiran yeni token ciftini uretir.
  *
- * Deneme sayaci KARSILASTIRMADAN ONCE atomik artirilir: es zamanli tahminler
- * sinirin uzerine cikamaz. Besinci yanlis cevap ve sonrasi TOO_MANY_ATTEMPTS;
- * dogru kod da artik kabul edilmez. Hesabi olmayan e-posta INVALID_CODE alir.
+ * Iki sinir, ikisi de KARSILASTIRMADAN ONCE atomik artirilir (es zamanli
+ * tahminler asamaz): kod basina 5, e-posta basina 24 saatte 10. Sinira
+ * ulasan yanlis ve sonrasi TOO_MANY_ATTEMPTS. Yasak kontrolu kod
+ * eslestikten SONRA: kodu bilmeyen hesabin durumunu ogrenemez.
  */
 export async function consumePasswordResetCode(
   rawEmail: unknown,
@@ -228,14 +258,41 @@ export async function consumePasswordResetCode(
   }
 
   try {
+    const now = new Date();
+    // Suresi dolan pencere yeniden baslar (yalnizca eskiyse; atomik).
+    await prisma.passwordResetCode.updateMany({
+      where: { email, windowStartedAt: { lt: new Date(now.getTime() - PASSWORD_RESET_CODE_WINDOW_MS) } },
+      data: { windowStartedAt: now, windowFailures: 0 },
+    });
+
     const row = await prisma.passwordResetCode.findUnique({ where: { email } });
     if (!row) return { ok: false, code: "INVALID_CODE" };
-    if (row.attempts >= PASSWORD_RESET_CODE_MAX_ATTEMPTS) return { ok: false, code: "TOO_MANY_ATTEMPTS" };
-    if (row.expires < new Date()) {
-      await prisma.passwordResetCode
-        .deleteMany({ where: { email } })
-        .catch((err) => logger.error({ err }, "expired_reset_code_cleanup_failed"));
-      return { ok: false, code: "EXPIRED_CODE" };
+    if (
+      row.attempts >= PASSWORD_RESET_CODE_MAX_ATTEMPTS ||
+      row.windowFailures >= PASSWORD_RESET_CODE_WINDOW_MAX_FAILURES
+    ) {
+      return { ok: false, code: "TOO_MANY_ATTEMPTS" };
+    }
+    // Satir silinmez: pencere sayaci onunla yasar (temizlik istek yolunda).
+    if (row.expires < now) return { ok: false, code: "EXPIRED_CODE" };
+
+    const claimed = await prisma.passwordResetCode.updateMany({
+      where: {
+        email,
+        codeHash: row.codeHash,
+        attempts: { lt: PASSWORD_RESET_CODE_MAX_ATTEMPTS },
+        windowFailures: { lt: PASSWORD_RESET_CODE_WINDOW_MAX_FAILURES },
+      },
+      data: { attempts: { increment: 1 }, windowFailures: { increment: 1 } },
+    });
+    // Arada yeni kod istendi ya da es zamanli tahminler siniri doldurdu.
+    if (claimed.count === 0) return { ok: false, code: "TOO_MANY_ATTEMPTS" };
+
+    if (!resetCodeMatches(email, code, row.codeHash)) {
+      const exhausted =
+        row.attempts + 1 >= PASSWORD_RESET_CODE_MAX_ATTEMPTS ||
+        row.windowFailures + 1 >= PASSWORD_RESET_CODE_WINDOW_MAX_FAILURES;
+      return { ok: false, code: exhausted ? "TOO_MANY_ATTEMPTS" : "INVALID_CODE" };
     }
 
     const user = await prisma.user.findUnique({
@@ -245,17 +302,9 @@ export async function consumePasswordResetCode(
     if (!user) return { ok: false, code: "INVALID_CODE" };
     if (user.isBanned) return { ok: false, code: "ACCOUNT_BANNED" };
 
-    const claimed = await prisma.passwordResetCode.updateMany({
-      where: { email, codeHash: row.codeHash, attempts: { lt: PASSWORD_RESET_CODE_MAX_ATTEMPTS } },
-      data: { attempts: { increment: 1 } },
-    });
-    // Arada yeni kod istendi ya da sinir doldu.
-    if (claimed.count === 0) return { ok: false, code: "INVALID_CODE" };
-
-    if (!resetCodeMatches(email, code, row.codeHash)) {
-      const used = row.attempts + 1;
-      return { ok: false, code: used >= PASSWORD_RESET_CODE_MAX_ATTEMPTS ? "TOO_MANY_ATTEMPTS" : "INVALID_CODE" };
-    }
+    // Tek tuketim: ayni dogru kodla gelen ikinci istek satiri bulamaz.
+    const consumed = await prisma.passwordResetCode.deleteMany({ where: { email, codeHash: row.codeHash } });
+    if (consumed.count !== 1) return { ok: false, code: "INVALID_CODE" };
 
     const passwordHash = await hashPassword(password);
     const { tokenVersion } = await applyPasswordReset(
