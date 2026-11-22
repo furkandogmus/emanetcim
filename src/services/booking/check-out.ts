@@ -41,7 +41,7 @@ export async function checkOut(
     actor?: PaymentActor;
     /**
      * Yonetici zorla teslimi: misafir tezgahta degil, gecikme ucreti
-     * KESILMEZ ve aciklama olaya yazilir. Muhur/durum kurallari aynen gecer.
+     * KESILMEZ, erken teslim iadesi YAZILMAZ ve aciklama olaya yazilir. Muhur/durum kurallari aynen gecer.
      */
     forced?: { note: string };
   } = {},
@@ -83,8 +83,9 @@ export async function checkOut(
      */
     const scheduledEnd = new Date(booking.checkOutTime);
     const preview = await previewCheckOutCharges(booking, now, pricingRules);
+    // Zorla teslim teslim anini yansitmaz: ne gecikme ucreti ne erken teslim iadesi.
     const lateFeeTry = opts.forced ? 0 : preview.lateFeeTry;
-    const refundAmount = preview.earlyRefund;
+    const refundAmount = opts.forced ? 0 : preview.earlyRefund;
     if (lateFeeTry > 0) {
       logger.info(
         {
