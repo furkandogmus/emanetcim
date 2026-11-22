@@ -78,6 +78,17 @@ describe("yonetim bagi token'i", () => {
     expect(exp).toBe(Math.floor((checkOutTime.getTime() + 24 * 3600_000) / 1000));
   });
 
+  it("uzak bitiste verilisten en fazla 7 gun yasar", async () => {
+    const now = new Date();
+    const token = await signGuestManageLinkToken({
+      bookingId: "b1",
+      email: "a@b.co",
+      checkOutTime: new Date(now.getTime() + 30 * 24 * 3600_000),
+      now,
+    });
+    expect(decodeJwt(token).exp).toBe(Math.floor((now.getTime() + 7 * 24 * 3600_000) / 1000));
+  });
+
   it("gecmis bitiste bile en az 1 saat yasar", async () => {
     const now = new Date();
     const token = await signGuestManageLinkToken({
