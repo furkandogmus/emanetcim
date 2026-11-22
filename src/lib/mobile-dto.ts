@@ -809,6 +809,22 @@ export function toMobileCity(c: import("@/services/CityCoverageService").CityCov
   };
 }
 
+// --- Arama: sehrin ilceleri (GET /cities/[city]/districts) ---
+
+/** Sehirden sonraki ilce adimi; merkez ilcedeki dukkanlarin ortalamasi. */
+export function toMobileDistrict(d: import("@/services/CityCoverageService").DistrictCoverage) {
+  return {
+    name: d.name,
+    slug: d.slug,
+    shopCount: d.shopCount,
+    latitude: d.latitude,
+    longitude: d.longitude,
+    radiusM: d.radiusM,
+  };
+}
+
+// --- /Arama: ilceler ---
+
 /** Dukkan galerisindeki bir fotograf (esnaf yonetimi icin kimlikli). */
 export function toMobileGalleryImage(i: { id: string; url: string }) {
   return { id: i.id, url: i.url };

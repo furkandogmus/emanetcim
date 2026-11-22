@@ -145,7 +145,11 @@
     "step": "Шаг {{current}} из {{total}}",
     "dropOffInPast": "Время сдачи уже прошло. Выбери другое.",
     "locationUnavailable": "Не удалось определить местоположение. Найди адрес или выбери город из списка.",
-    "changePlace": "Изменить"
+    "changePlace": "Изменить",
+    "districtTitle": "Где в городе {{city}}?",
+    "cityCenter": "Центр",
+    "cityCenterHint": "Весь город",
+    "districtsLoading": "Загружаем районы…"
   },
   "bags": {
     "s": "Маленький (S)",
