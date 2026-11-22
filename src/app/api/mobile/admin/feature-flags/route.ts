@@ -8,7 +8,7 @@ import { featureFlagService } from "@/services/FeatureFlagService";
 export async function GET(req: NextRequest) {
   const auth = await requireMobileUser(req);
   if ("error" in auth) return auth.error;
-  const forbid = requireRole(auth.user, ["ADMIN"]) ?? forbidWhileImpersonating(auth.user);
+  const forbid = forbidWhileImpersonating(auth.user) ?? requireRole(auth.user, ["ADMIN"]);
   if (forbid) return forbid;
   const rows = await featureFlagService.listAll();
   return NextResponse.json({ items: rows.map(toMobileAdminFeatureFlag) });

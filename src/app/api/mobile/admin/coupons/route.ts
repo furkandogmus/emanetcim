@@ -9,7 +9,7 @@ import { adminCreateCoupon, listCouponsForAdmin } from "@/services/CouponService
 export async function GET(req: NextRequest) {
   const auth = await requireMobileUser(req);
   if ("error" in auth) return auth.error;
-  const forbid = requireRole(auth.user, ["ADMIN"]) ?? forbidWhileImpersonating(auth.user);
+  const forbid = forbidWhileImpersonating(auth.user) ?? requireRole(auth.user, ["ADMIN"]);
   if (forbid) return forbid;
   const rows = await listCouponsForAdmin();
   return NextResponse.json({ items: rows.map(toMobileAdminCoupon) });
@@ -19,7 +19,7 @@ export async function GET(req: NextRequest) {
 export async function POST(req: NextRequest) {
   const auth = await requireMobileUser(req);
   if ("error" in auth) return auth.error;
-  const forbid = requireRole(auth.user, ["ADMIN"]) ?? forbidWhileImpersonating(auth.user);
+  const forbid = forbidWhileImpersonating(auth.user) ?? requireRole(auth.user, ["ADMIN"]);
   if (forbid) return forbid;
   const { code, discount, isPercent, minPrice, maxUses, expiresAt } = await readOpsBody(req);
   const result = await adminCreateCoupon(
