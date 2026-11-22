@@ -157,7 +157,8 @@ export async function POST(req: NextRequest) {
         metadata: { source: "mobile_otp", role: "GUEST" },
       });
     }
-    if (isEmail && !user.emailVerified) await markEmailVerifiedByCode(user.id);
+    // Her kodla giriste: dogrulanmis hesapta da hesapsiz rezervasyonlar baglanir.
+    if (isEmail) await markEmailVerifiedByCode(user.id);
   } else if (password) {
     /*
       Kimlik + IP: kimligin telefonu/e-postasini bilen biri baska IP'den hesabi
