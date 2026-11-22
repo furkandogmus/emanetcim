@@ -12,6 +12,10 @@ export async function POST(req: NextRequest) {
   if (forbid) return forbid;
   const body = await readObjectBody(req);
   const r = await sendBroadcastTest(auth.user, body);
-  if (!r.ok) return broadcastError(r.code);
+  if (!r.ok) {
+    return r.code === "too_soon"
+      ? broadcastError(r.code, { retryAfterSeconds: r.retryAfterSeconds })
+      : broadcastError(r.code);
+  }
   return NextResponse.json({ success: true, devices: r.devices });
 }
