@@ -36,7 +36,15 @@ export async function previewCheckOutCharges(
 
 export async function checkOut(
   bookingId: string,
-  opts: { brokenSealNumbers?: number[]; actor?: PaymentActor } = {},
+  opts: {
+    brokenSealNumbers?: number[];
+    actor?: PaymentActor;
+    /**
+     * Yonetici zorla teslimi: misafir tezgahta degil, gecikme ucreti
+     * KESILMEZ ve aciklama olaya yazilir. Muhur/durum kurallari aynen gecer.
+     */
+    forced?: { note: string };
+  } = {},
 ): Promise<PartnerCheckOutResult> {
   const brokenSealNumbers = opts.brokenSealNumbers ?? [];
   const booking = await prisma.booking.findUnique({
@@ -74,7 +82,9 @@ export async function checkOut(
      * Tolerans da sabit 15 dakika değil, ayardan geliyor.
      */
     const scheduledEnd = new Date(booking.checkOutTime);
-    const { lateFeeTry, earlyRefund: refundAmount } = await previewCheckOutCharges(booking, now, pricingRules);
+    const preview = await previewCheckOutCharges(booking, now, pricingRules);
+    const lateFeeTry = opts.forced ? 0 : preview.lateFeeTry;
+    const refundAmount = preview.earlyRefund;
     if (lateFeeTry > 0) {
       logger.info(
         {
@@ -144,6 +154,7 @@ export async function checkOut(
         failedRefundAmount: failedRefundAmount > 0 ? failedRefundAmount : undefined,
         // Teslimde saglam cikmayan muhurler: anlasmazlikta ilk bakilacak kayit.
         brokenSeals: brokenSealNumbers.length > 0 ? brokenSealNumbers : undefined,
+        ...(opts.forced ? { forced: true, note: opts.forced.note } : {}),
       },
     }).catch((err) => logger.error({ err, bookingId }, "booking_event_checked_out_failed"));
 
