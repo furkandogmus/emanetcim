@@ -434,12 +434,15 @@
     "outsideHoursTitle": "The shop looks closed right now. Check in anyway?",
     "outsideHoursBody": "You are outside your saved opening hours. If the shop is open now, you can still take the bags; it will be recorded as an out-of-hours check-in. If your hours are wrong, remember to fix them.",
     "outsideHoursConfirm": "Check in anyway",
-    "searchPlaceholder": "Search guest name or code",
-    "searchNone": "No matching booking. Type the 8-character code.",
+    "searchPlaceholder": "Search guest name, code or phone",
+    "searchNone": "No matching booking. Try the start of the code, the guest's name or the last 4 digits of their phone.",
     "statusWaiting": "Expected",
     "callGuest": "Call guest",
     "whatsappGuest": "Message on WhatsApp",
-    "olderBookings": "Older bookings"
+    "olderBookings": "Older bookings",
+    "searchResults": "Search results",
+    "searchMinHint": "Type at least 2 characters to search all dates.",
+    "searchMore": "More results"
   },
   "profile": {
     "title": "Profile",

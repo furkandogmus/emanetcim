@@ -14,13 +14,19 @@ import { PartnerPulseCard } from "@/components/PartnerPulseCard";
 import { ShopSetupCard } from "@/components/ShopSetupCard";
 import { Segmented } from "@/components/Segmented";
 import { RowSkeleton } from "@/components/RowSkeleton";
-import { AppText, Button, CenterMessage } from "@/components/ui";
+import { AppText, Banner, Button, CenterMessage } from "@/components/ui";
 import { Input } from "@/components/Field";
-import { searchBookings } from "@/lib/booking-search";
+import { refineServerSearch, searchBookings } from "@/lib/booking-search";
 import { useAuth } from "@/lib/auth";
 import { errorMessage } from "@/lib/errors";
 import { flattenPages, mergeUniqueById } from "@/lib/paging";
-import { isActiveBooking, usePartnerBookings, usePartnerDashboard, usePartnerOlderBookings } from "@/lib/queries";
+import {
+  isActiveBooking,
+  usePartnerBookingSearch,
+  usePartnerBookings,
+  usePartnerDashboard,
+  usePartnerOlderBookings,
+} from "@/lib/queries";
 import { wallInstant, wallParts } from "@/lib/time";
 import type { PartnerBooking } from "@/lib/types";
 import { colors, space } from "@/theme/tokens";
@@ -84,14 +90,32 @@ export default function PartnerBookingsScreen() {
   const shopFilter = dash && dash.shops.length > 1 ? dash.shop.id : null;
   const allItems = mergeUniqueById(query.data?.items ?? [], flattenPages(older.data, (p) => p.items));
   const inShop = allItems.filter((b) => !shopFilter || b.shopId === shopFilter);
-  // Arama tum sekmelerde arar: misafir kodunu soyluyor ya da adini hatirliyor, hangi sekmede oldugunu degil.
+  /*
+    Arama sunucuda ve tum tarihlerde: yuklu liste yalnizca aktifler + son 100 gecmisti,
+    gecen ayin misafiri bulunamiyordu. Sunucu yaniti gelene kadar yuklu listedeki
+    eslesmeler gosterilir. Eski sunucu `q`/`shopId`'yi yok sayar; dukkan ve terim
+    suzgeci bu yuzden istemcide de var.
+  */
   const searching = search.trim().length > 0;
-  const items = (searching ? searchBookings(inShop, search) : inShop.filter((b) => bucket(b) === tab))
-    .sort((a, b) =>
-      tab === "past"
-        ? +new Date(b.checkInTime) - +new Date(a.checkInTime)
-        : +new Date(a.checkInTime) - +new Date(b.checkInTime),
-    );
+  const server = usePartnerBookingSearch(search, shopFilter);
+  const serverItems =
+    server.term && !server.pending && server.query.data
+      ? refineServerSearch(
+          flattenPages(server.query.data, (p) => p.items),
+          server.term,
+        ).filter((b) => !shopFilter || b.shopId === shopFilter)
+      : null;
+  const searchLoading = searching && !!server.term && !serverItems && (server.pending || server.query.isFetching);
+  const searchFailed = searching && !!server.term && !serverItems && !server.pending && server.query.isError;
+  const items = searching
+    ? (serverItems ?? searchBookings(inShop, search)).sort((a, b) => +new Date(b.checkInTime) - +new Date(a.checkInTime))
+    : inShop
+        .filter((b) => bucket(b) === tab)
+        .sort((a, b) =>
+          tab === "past"
+            ? +new Date(b.checkInTime) - +new Date(a.checkInTime)
+            : +new Date(a.checkInTime) - +new Date(b.checkInTime),
+        );
 
   return (
     <SafeAreaView style={styles.safe} edges={["top"]}>
@@ -138,15 +162,31 @@ export default function PartnerBookingsScreen() {
               returnKeyType="search"
               maxLength={60}
             />
-            <Segmented
-              value={tab}
-              onChange={setTab}
-              options={[
-                { value: "today", label: t("partner.today") },
-                { value: "upcoming", label: t("partner.upcoming") },
-                { value: "past", label: t("partner.past") },
-              ]}
-            />
+            {searching ? (
+              <View style={styles.searchHeader}>
+                <AppText variant="heading" accessibilityRole="header" style={{ flex: 1 }}>
+                  {t("partner.searchResults")}
+                </AppText>
+                <Button variant="ghost" title={t("common.clear")} onPress={() => setSearch("")} />
+              </View>
+            ) : (
+              <Segmented
+                value={tab}
+                onChange={setTab}
+                options={[
+                  { value: "today", label: t("partner.today") },
+                  { value: "upcoming", label: t("partner.upcoming") },
+                  { value: "past", label: t("partner.past") },
+                ]}
+              />
+            )}
+            {searching && !server.term ? <AppText variant="caption">{t("partner.searchMinHint")}</AppText> : null}
+            {searchFailed ? (
+              <Banner
+                tone="danger"
+                body={errorMessage(server.query.error)}
+              />
+            ) : null}
           </View>
         }
         renderItem={({ item }) => (
@@ -166,7 +206,19 @@ export default function PartnerBookingsScreen() {
           />
         )}
         ListFooterComponent={
-          tab === "past" && !searching && !query.isLoading && !query.isError ? (
+          searching ? (
+            serverItems && server.query.hasNextPage ? (
+              <LoadMoreFooter
+                label={t("partner.searchMore")}
+                hasMore
+                loading={server.query.isFetchingNextPage}
+                failed={server.query.isFetchNextPageError}
+                onPress={() => void server.query.fetchNextPage()}
+              />
+            ) : searchLoading && items.length > 0 ? (
+              <RowSkeleton />
+            ) : null
+          ) : tab === "past" && !searching && !query.isLoading && !query.isError ? (
             <LoadMoreFooter
               label={t("partner.olderBookings")}
               hasMore={olderStart ? !older.data || !!older.hasNextPage : !!query.data?.nextCursor}
@@ -181,7 +233,7 @@ export default function PartnerBookingsScreen() {
           ) : null
         }
         ListEmptyComponent={
-          query.isLoading ? (
+          query.isLoading || (searchLoading && items.length === 0) ? (
             <RowSkeleton />
           ) : isBlockingError(query) ? (
             <CenterMessage
@@ -210,4 +262,5 @@ const styles = StyleSheet.create({
   },
   list: { paddingHorizontal: space.xl, gap: space.md, paddingBottom: space.xxl },
   empty: { minHeight: 220 },
+  searchHeader: { flexDirection: "row", alignItems: "center", gap: space.md },
 });
