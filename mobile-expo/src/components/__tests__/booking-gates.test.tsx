@@ -13,6 +13,10 @@ import { PartnerBookingActions } from "@/components/PartnerBookingActions";
 import i18n from "@/lib/i18n";
 import type { BookingDetail, BookingStatus } from "@/lib/types";
 
+// Dosyanin ilk render'i RN + RNTL modullerini soguk yukler; CI makinesinde
+// varsayilan 5 sn'yi asip kararsiz kiriliyordu (2026-11-22). Assert'ler ayni.
+jest.setTimeout(20_000);
+
 jest.mock("expo-secure-store", () => ({}));
 jest.mock("expo-haptics", () => ({ selectionAsync: () => Promise.resolve() }));
 jest.mock("expo-router", () => ({ useRouter: () => ({ push: jest.fn() }), router: { push: jest.fn() } }));
