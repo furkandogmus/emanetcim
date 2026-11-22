@@ -5,6 +5,7 @@ import { getTranslations } from "next-intl/server";
 import NewPasswordClient from "./NewPasswordClient";
 import { Loader2 } from "lucide-react";
 import { resolvePasswordResetLogin } from "@/lib/password-reset-token";
+import logger from "@/lib/logger";
 
 export async function generateMetadata({
   params,
@@ -38,7 +39,22 @@ export default async function NewPasswordPage({
   setRequestLocale(locale);
   const { token } = await searchParams;
   const accountLogin =
-    typeof token === "string" ? await resolvePasswordResetLogin(token).catch(() => null) : null;
+    typeof token === "string"
+      ? await resolvePasswordResetLogin(token).catch((err: unknown) => {
+          /*
+            Form yine calisir (yalnizca sifre yoneticisi ipucu eksik). Hatanin
+            kendisi loglanmaz: Prisma mesaji sorgu argumanini, yani token'i icerebilir.
+          */
+          logger.warn(
+            {
+              errName: err instanceof Error ? err.name : typeof err,
+              errCode: (err as { code?: unknown } | null)?.code,
+            },
+            "password_reset_login_lookup_failed",
+          );
+          return null;
+        })
+      : null;
   return (
     <Suspense fallback={<NewPasswordFallback />}>
       <NewPasswordClient accountLogin={accountLogin} />
