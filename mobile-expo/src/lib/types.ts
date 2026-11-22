@@ -127,8 +127,8 @@ export type BookingSummary = {
   cancelReason?: CancelReason | (string & {}) | null;
 };
 
-/** `cancelReason` degerleri (sunucu `Booking.cancelReason`). */
-export type CancelReason = "guest_cancel" | "partner_cancel" | "no_show" | "admin_cancel" | "expired_no_dropoff";
+export type { CancelReason } from "./booking-state";
+import type { CancelReason } from "./booking-state";
 
 export type BookingDetail = BookingSummary & {
   qrCodeToken: string | null;
