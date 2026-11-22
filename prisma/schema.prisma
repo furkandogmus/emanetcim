@@ -471,12 +471,18 @@ model Review {
   rating    Int      @default(5)
   comment   String?
   createdAt DateTime @default(now())
+  /// Yonetici moderasyonu: doluysa yorum misafire gosterilmez ve dukkan
+  /// ortalamasina (`Shop.rating`) girmez. Silmeden farki geri alinabilmesi.
+  hiddenAt     DateTime?
+  hiddenReason String?
+  hiddenById   String?
   booking   Booking  @relation(fields: [bookingId], references: [id], onDelete: Cascade)
   guest     User     @relation(fields: [guestId], references: [id], onDelete: Cascade)
   shop      Shop     @relation(fields: [shopId], references: [id], onDelete: Cascade)
 
   @@index([shopId])
   @@index([guestId])
+  @@index([createdAt])
 }
 
 model Coupon {

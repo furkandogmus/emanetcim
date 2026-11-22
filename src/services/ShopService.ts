@@ -2,6 +2,7 @@ import { Prisma, type Shop } from '@prisma/client';
 import { PENDING_APPLICATION_WHERE } from "@/lib/pending-application";
 import { writeAuditLog } from "@/lib/audit-log";
 import { auditAdminShopEdit } from "@/services/admin-shop-audit";
+import { VISIBLE_REVIEW } from "@/lib/review-visibility";
 import { Role } from '@prisma/client';
 import prisma from '@/lib/db';
 import { resolvePartnerShops } from '@/lib/partner-shop';
@@ -766,6 +767,8 @@ export class ShopService implements IShopService {
       where: { id: shopId, ...PUBLIC_SHOP_FILTER },
       include: {
         reviews: {
+          // Yonetici gizledigi yorumlar sayfada ve JSON-LD `reviewCount`ta yok.
+          where: VISIBLE_REVIEW,
           orderBy: { createdAt: 'desc' },
           take: 40,
           include: {
