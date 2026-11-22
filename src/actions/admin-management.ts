@@ -6,7 +6,8 @@ import prisma from "@/lib/db";
 import { shopService, type AdminShopUpdate } from "@/services/ShopService";
 import { reviewService } from "@/services/ReviewService";
 import { adminUserService } from "@/services/AdminUserService";
-import { BookingStatus, Role } from "@prisma/client";
+import { BookingStatus, Prisma, Role } from "@prisma/client";
+import { retryOnWriteConflict } from "@/lib/tx-retry";
 import { z } from "zod";
 import { revalidatePathAllLocales } from "@/lib/revalidate-locales";
 import logger from "@/lib/logger";
@@ -119,7 +120,14 @@ export async function approveAdminRoleChangeAction(
 
   const ip = await getClientIpOrNull();
 
-  const txResult = await prisma.$transaction(async (tx) => {
+  /*
+    SERIALIZABLE + YENIDEN DENEME. Iki admin varken birbirini dusuren iki onay
+    ayni anda calisirsa ikisi de "2 admin var" sayip yaziyordu: sistemde admin
+    kalmiyordu (READ COMMITTED'da ayri satirlara yazim birbirini beklemez).
+    Serializable bu yazma sapmasini P2034 ile reddeder; yeniden denemede sayim
+    1'dir ve ikinci onay `cannot_demote_sole_admin` doner.
+  */
+  const txResult = await retryOnWriteConflict(() => prisma.$transaction(async (tx) => {
     const reqRow = await tx.adminRoleChangeRequest.findUnique({
       where: { id: requestId },
     });
@@ -149,7 +157,7 @@ export async function approveAdminRoleChangeAction(
     });
     await tx.adminRoleChangeRequest.delete({ where: { id: requestId } });
     return { code: "ok" as const, targetId: user.id, newRole: reqRow.requestedRole };
-  });
+  }, { isolationLevel: Prisma.TransactionIsolationLevel.Serializable }), { label: "approveAdminRoleChange" });
 
   if (txResult.code !== "ok") {
     if (
