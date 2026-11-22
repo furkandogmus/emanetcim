@@ -139,7 +139,11 @@
     "step": "Adım {{current}}/{{total}}",
     "dropOffInPast": "Bırakma saati geçmişte kaldı. Yeni bir saat seç.",
     "locationUnavailable": "Konumun alınamadı. Bir adres ara ya da listeden şehir seç.",
-    "changePlace": "Değiştir"
+    "changePlace": "Değiştir",
+    "districtTitle": "{{city}} içinde nerede?",
+    "cityCenter": "Merkez",
+    "cityCenterHint": "Şehrin tamamı",
+    "districtsLoading": "İlçeler yükleniyor…"
   },
   "bags": {
     "s": "Küçük (S)",

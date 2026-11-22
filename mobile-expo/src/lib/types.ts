@@ -599,3 +599,17 @@ export type AdminBroadcast = {
   finishedAt: string | null;
   createdByName: string;
 };
+
+// --- Arama: sehrin ilceleri ---
+
+/** `/cities/[slug]/districts`: dukkani olan ilceler (sunucu `toMobileDistrict`). */
+export type DistrictCoverage = {
+  name: string;
+  slug: string;
+  shopCount: number;
+  /** Ilcedeki dukkanlarin ortalamasi. */
+  latitude: number;
+  longitude: number;
+};
+
+// --- /Arama: ilceler ---
