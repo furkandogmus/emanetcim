@@ -5,6 +5,7 @@ import prisma from "@/lib/db";
 import logger from "@/lib/logger";
 import { buildObjectKey, getStorage, validateImageBytes } from "@/lib/storage";
 import { extractKeyFromUrl } from "@/services/ShopService";
+import { auditAdminShopEdit } from "@/services/admin-shop-audit";
 
 /**
  * Dukkan galerisi: kapak (`Shop.image`) disindaki fotograflar (`ShopImage`).
@@ -16,7 +17,10 @@ import { extractKeyFromUrl } from "@/services/ShopService";
  */
 export const MAX_GALLERY_IMAGES = 8;
 
-type Actor = { shopId: string; actorId: string; actorRole: Role };
+/** `actorIp` yalnizca yonetici duzenlemesinin denetim kaydi icin. */
+type Actor = { shopId: string; actorId: string; actorRole: Role; actorIp?: string | null };
+
+const auditActor = (a: Actor) => ({ id: a.actorId, role: a.actorRole, ip: a.actorIp });
 
 export type GalleryFailure =
   | "not_found"
@@ -79,6 +83,7 @@ export class ShopGalleryService {
       data: { shopId: params.shopId, url, order: (last?.order ?? -1) + 1 },
       select: { id: true, url: true },
     });
+    auditAdminShopEdit(auditActor(params), params.shopId, "photo_add", { imageId: row.id });
     return { ok: true, ...row };
   }
 
@@ -93,6 +98,7 @@ export class ShopGalleryService {
     await prisma.shopImage.delete({ where: { id: params.imageId } });
     // Satir once silinir: nesne silme basarisiz olursa yalnizca yetim nesne kalir.
     removeObject(image.url, { shopId: params.shopId });
+    auditAdminShopEdit(auditActor(params), params.shopId, "photo_remove", { imageId: params.imageId });
     return { ok: true };
   }
 
@@ -115,6 +121,7 @@ export class ShopGalleryService {
         ? prisma.shopImage.update({ where: { id: params.imageId }, data: { url: owner.cover } })
         : prisma.shopImage.delete({ where: { id: params.imageId } }),
     ]);
+    auditAdminShopEdit(auditActor(params), params.shopId, "photo_cover", { imageId: params.imageId });
     return { ok: true };
   }
 }

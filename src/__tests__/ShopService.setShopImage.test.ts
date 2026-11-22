@@ -6,6 +6,8 @@ const { mockPrisma, mockPut, mockRemove } = vi.hoisted(() => ({
   mockPrisma: { shop: { findUnique: vi.fn(), update: vi.fn() } },
 }));
 vi.mock("@/lib/db", () => ({ default: mockPrisma }));
+const { mockAudit } = vi.hoisted(() => ({ mockAudit: vi.fn() }));
+vi.mock("@/lib/audit-log", () => ({ writeAuditLog: mockAudit }));
 vi.mock("@/lib/storage", async (orig) => {
   const actual = await orig<typeof import("@/lib/storage")>();
   return {
@@ -70,8 +72,24 @@ describe("dükkan vitrin fotoğrafı", () => {
 
   it("ADMIN sahiplik kontrolünü atlar", async () => {
     mockPrisma.shop.findUnique.mockResolvedValue({ ownerId: "baskasi", image: null });
-    const res = await shopService.setShopImage({ ...BASE, actorRole: Role.ADMIN });
+    const res = await shopService.setShopImage({ ...BASE, actorId: "admin-1", actorRole: Role.ADMIN, actorIp: "198.51.100.7" });
     expect(res.ok).toBe(true);
+    // Yonetici baskasinin dukkanina dokundu: iz kalmali (2026-11-23).
+    expect(mockAudit).toHaveBeenCalledWith(
+      expect.objectContaining({
+        actorUserId: "admin-1",
+        action: "admin.shop.cover_set",
+        entityType: "Shop",
+        entityId: "s1",
+        ip: "198.51.100.7",
+      }),
+    );
+  });
+
+  it("esnafin kendi fotografi denetim kaydi BIRAKMAZ", async () => {
+    const res = await shopService.setShopImage(BASE);
+    expect(res.ok).toBe(true);
+    expect(mockAudit).not.toHaveBeenCalled();
   });
 
   it("GÖRSEL OLMAYAN dosyayı S3'e yazmadan reddeder", async () => {

@@ -1,34 +1,15 @@
 "use server";
 
-import { z } from "zod";
 import prisma from "@/lib/db";
 import { requireUser } from "@/lib/action-auth";
 import { revalidatePathAllLocales } from "@/lib/revalidate-locales";
+import { getClientIpOrNull } from "@/lib/client-ip";
+import { closureInputSchema, weeklyHoursSchema } from "@/lib/shop-schedule-input";
 import {
   addClosure,
   removeClosure,
   saveWeeklyHours,
 } from "@/services/ShopScheduleService";
-
-const weeklySchema = z.object({
-  open247: z.boolean(),
-  days: z
-    .array(
-      z.object({
-        weekday: z.number().int().min(1).max(7),
-        isClosed: z.boolean(),
-        openingTime: z.string().max(5),
-        closingTime: z.string().max(5),
-      }),
-    )
-    .length(7),
-});
-
-const closureSchema = z.object({
-  startDate: z.string().max(10),
-  endDate: z.string().max(10),
-  reason: z.string().max(200).optional(),
-});
 
 function revalidate() {
   revalidatePathAllLocales("/partner");
@@ -44,10 +25,12 @@ export async function saveWeeklyHoursAction(shopId: string, input: unknown) {
   if (shop.ownerId !== auth.actor.id && auth.actor.role !== "ADMIN") {
     return { success: false as const, error: "Errors.unauthorized" };
   }
-  const parsed = weeklySchema.safeParse(input);
+  const parsed = weeklyHoursSchema.safeParse(input);
   if (!parsed.success) return { success: false as const, error: "Errors.invalidData" };
 
-  const res = await saveWeeklyHours(shopId, parsed.data.days, parsed.data.open247);
+  // Yonetici esnaf adina duzenliyorsa servis denetim kaydi birakir.
+  const actor = { id: auth.actor.id, role: auth.actor.role, ip: await getClientIpOrNull() };
+  const res = await saveWeeklyHours(shopId, parsed.data.days, parsed.data.open247, actor);
   if (!res.ok) {
     return res.code === "CONFLICT"
       ? { success: false as const, error: "Errors.scheduleConflict", conflicts: res.conflicts }
@@ -65,10 +48,11 @@ export async function addClosureAction(shopId: string, input: unknown) {
   if (shop.ownerId !== auth.actor.id && auth.actor.role !== "ADMIN") {
     return { success: false as const, error: "Errors.unauthorized" };
   }
-  const parsed = closureSchema.safeParse(input);
+  const parsed = closureInputSchema.safeParse(input);
   if (!parsed.success) return { success: false as const, error: "Errors.invalidData" };
 
-  const res = await addClosure(shopId, parsed.data);
+  const actor = { id: auth.actor.id, role: auth.actor.role, ip: await getClientIpOrNull() };
+  const res = await addClosure(shopId, parsed.data, undefined, actor);
   if (!res.ok) {
     return res.code === "CONFLICT"
       ? { success: false as const, error: "Errors.scheduleConflict", conflicts: res.conflicts }
@@ -86,7 +70,7 @@ export async function removeClosureAction(shopId: string, closureId: string) {
   if (shop.ownerId !== auth.actor.id && auth.actor.role !== "ADMIN") {
     return { success: false as const, error: "Errors.unauthorized" };
   }
-  await removeClosure(shopId, closureId);
+  await removeClosure(shopId, closureId, { id: auth.actor.id, role: auth.actor.role, ip: await getClientIpOrNull() });
   revalidate();
   return { success: true as const };
 }

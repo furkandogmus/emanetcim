@@ -1,39 +1,16 @@
 import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
-import { z } from "zod";
 import { requireMobileUser, requireRole } from "@/lib/mobile-auth";
 import { shopService } from "@/services/ShopService";
-import prisma from "@/lib/db";
 import logger from "@/lib/logger";
-import { todayInZone } from "@/lib/stay-days";
+import { closureInputSchema, weeklyHoursSchema } from "@/lib/shop-schedule-input";
 import {
   addClosure,
+  getScheduleView,
   removeClosure,
   saveWeeklyHours,
   type SaveScheduleResult,
 } from "@/services/ShopScheduleService";
-
-const ISO_DAYS = [1, 2, 3, 4, 5, 6, 7];
-
-const hoursSchema = z.object({
-  open247: z.boolean(),
-  days: z
-    .array(
-      z.object({
-        weekday: z.number().int().min(1).max(7),
-        isClosed: z.boolean(),
-        openingTime: z.string().max(5),
-        closingTime: z.string().max(5),
-      }),
-    )
-    .length(7),
-});
-
-const closureSchema = z.object({
-  startDate: z.string().max(10),
-  endDate: z.string().max(10),
-  reason: z.string().max(200).optional(),
-});
 
 async function partnerShop(req: NextRequest) {
   const auth = await requireMobileUser(req);
@@ -56,38 +33,9 @@ function respond(res: SaveScheduleResult) {
 export async function GET(req: NextRequest) {
   const gate = await partnerShop(req);
   if ("error" in gate) return gate.error;
-  const { shop } = gate;
-
-  const [rows, closures] = await Promise.all([
-    prisma.shopWeeklyHours.findMany({ where: { shopId: shop.id } }),
-    prisma.shopClosure.findMany({
-      /*
-        "Bugun" dukkanin gunu (Europe/Istanbul), UTC degil (bulgu 146): 00:00-03:00
-        arasinda dun biten izin hala "yaklasan" diye listeleniyordu.
-      */
-      where: { shopId: shop.id, endDate: { gte: todayInZone(shop.timezone || undefined) } },
-      orderBy: { startDate: "asc" },
-    }),
-  ]);
-  const byDay = new Map(rows.map((r) => [r.weekday, r]));
-  return NextResponse.json({
-    open247: shop.open247,
-    days: ISO_DAYS.map((weekday) => {
-      const r = byDay.get(weekday);
-      return {
-        weekday,
-        isClosed: r?.isClosed ?? false,
-        openingTime: r?.openingTime ?? shop.openingTime ?? "09:00",
-        closingTime: r?.closingTime ?? shop.closingTime ?? "20:00",
-      };
-    }),
-    closures: closures.map((c) => ({
-      id: c.id,
-      startDate: c.startDate,
-      endDate: c.endDate,
-      reason: c.reason,
-    })),
-  });
+  const view = await getScheduleView(gate.shop.id);
+  if (!view) return NextResponse.json({ error: "no_shop" }, { status: 404 });
+  return NextResponse.json(view);
 }
 
 /** Haftalık saat + 7/24. */
@@ -95,7 +43,7 @@ export async function PUT(req: NextRequest) {
   const gate = await partnerShop(req);
   if ("error" in gate) return gate.error;
   try {
-    const parsed = hoursSchema.safeParse(await req.json());
+    const parsed = weeklyHoursSchema.safeParse(await req.json());
     if (!parsed.success) return NextResponse.json({ error: "invalid_input" }, { status: 400 });
     return respond(await saveWeeklyHours(gate.shop.id, parsed.data.days, parsed.data.open247));
   } catch (err) {
@@ -109,7 +57,7 @@ export async function POST(req: NextRequest) {
   const gate = await partnerShop(req);
   if ("error" in gate) return gate.error;
   try {
-    const parsed = closureSchema.safeParse(await req.json());
+    const parsed = closureInputSchema.safeParse(await req.json());
     if (!parsed.success) return NextResponse.json({ error: "invalid_input" }, { status: 400 });
     return respond(await addClosure(gate.shop.id, parsed.data));
   } catch (err) {
