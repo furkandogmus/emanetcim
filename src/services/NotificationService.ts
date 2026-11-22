@@ -15,6 +15,7 @@ import {
 } from "@/lib/netgsm";
 import { bookingShortCode } from "@/lib/booking-code";
 import { getSiteBaseUrl } from "@/lib/site-base-url";
+import { bookingNotificationEmail } from "@/services/booking/guest-contact";
 
 /**
  * NEDEN (2026-08-25): `sendEmail` partner check-in/check-out akışlarında
@@ -1003,6 +1004,241 @@ export class NotificationService implements INotificationService {
     });
 
     await this.sendEmail(email, content.subject, content.body, bookingId, html);
+  }
+
+  /**
+   * Kapanan rezervasyon icin misafire push + e-posta, NEDENE gore metin.
+   * `cancelBooking` (silent degilse) cagirir; boylece misafir iptali, esnaf
+   * iptali, yonetici iptali ve "gelmedi" ayni yoldan haber verir. Yonetici
+   * aciklamasi (`note`) misafire GITMEZ: ic not olarak yazilir; esnafin "diger"
+   * aciklamasi ise iptalin sebebi oldugu icin gider.
+   */
+  async notifyGuestBookingClosed(params: {
+    bookingId: string;
+    reason: "guest_cancel" | "partner_cancel" | "no_show" | "admin_cancel" | "expired_no_dropoff";
+    detail?: string | null;
+    note?: string | null;
+    locale: string;
+  }): Promise<void> {
+    const { bookingId, reason, locale } = params;
+    if (reason === "expired_no_dropoff") return;
+    this.pushGuest(bookingId, reason === "no_show" ? "noShow" : "cancelled", locale);
+
+    const b = await prisma.booking.findUnique({
+      where: { id: bookingId },
+      select: { guestEmail: true, guest: { select: { email: true } }, shop: { select: { name: true } } },
+    });
+    const email = b ? bookingNotificationEmail(b) : null;
+    if (!b || !email) return;
+
+    const shop = b.shop.name;
+    const shopHtml = escapeEmailHtml(shop);
+    const shortId = bookingShortCode(bookingId);
+    const searchUrl = `${getSiteBaseUrl()}/${locale}/search`;
+
+    const c = pickLocale({
+      tr: {
+        subject: "BagajPark: Rezervasyonun iptal edildi",
+        heading: "Rezervasyonun iptal edildi",
+        noShowSubject: "BagajPark: Seni göremedik",
+        noShowHeading: "Seni göremedik",
+        guest: `${shopHtml} rezervasyonunu iptal ettin. Bir ödeme yaptıysan iadesi kaydedildi.`,
+        partner: `${shopHtml} rezervasyonunu iptal etti.`,
+        admin: `${shopHtml} rezervasyonun BagajPark destek ekibi tarafından iptal edildi. Bir ödeme yaptıysan iadesi kaydedildi.`,
+        noShow: `Rezervasyon saatinde ${shopHtml} noktasına gelmediğin için rezervasyon kapatıldı. Planların değiştiyse sorun değil; yeni bir rezervasyonla her zaman bekleriz.`,
+        reasonLabel: "Neden",
+        reasons: { guest_request: "Senin isteğin üzerine", shop_closed: "Dükkan o saatte kapalı", capacity: "Dükkanda yer kalmadı", other: "Diğer" },
+        cta: "Başka bir nokta bul",
+        footer: `Rezervasyon Kodu: ${shortId}`,
+      },
+      en: {
+        subject: "BagajPark: Your booking was cancelled",
+        heading: "Your booking was cancelled",
+        noShowSubject: "BagajPark: We missed you",
+        noShowHeading: "We missed you",
+        guest: `You cancelled your booking at ${shopHtml}. If you paid, the refund has been recorded.`,
+        partner: `${shopHtml} cancelled your booking.`,
+        admin: `Your booking at ${shopHtml} was cancelled by the BagajPark support team. If you paid, the refund has been recorded.`,
+        noShow: `Your booking at ${shopHtml} was closed because you did not arrive at the booked time. If your plans changed, no problem; you are welcome to book again anytime.`,
+        reasonLabel: "Reason",
+        reasons: { guest_request: "At your request", shop_closed: "The shop is closed at that time", capacity: "The shop has no space left", other: "Other" },
+        cta: "Find another location",
+        footer: `Booking code: ${shortId}`,
+      },
+      de: {
+        subject: "BagajPark: Deine Buchung wurde storniert",
+        heading: "Deine Buchung wurde storniert",
+        noShowSubject: "BagajPark: Wir haben dich verpasst",
+        noShowHeading: "Wir haben dich verpasst",
+        guest: `Du hast deine Buchung bei ${shopHtml} storniert. Falls du bezahlt hast, wurde die Erstattung erfasst.`,
+        partner: `${shopHtml} hat deine Buchung storniert.`,
+        admin: `Deine Buchung bei ${shopHtml} wurde vom BagajPark-Support storniert. Falls du bezahlt hast, wurde die Erstattung erfasst.`,
+        noShow: `Deine Buchung bei ${shopHtml} wurde geschlossen, weil du zur gebuchten Zeit nicht gekommen bist. Falls sich deine Pläne geändert haben, kein Problem; du kannst jederzeit neu buchen.`,
+        reasonLabel: "Grund",
+        reasons: { guest_request: "Auf deinen Wunsch", shop_closed: "Der Laden ist zu dieser Zeit geschlossen", capacity: "Im Laden ist kein Platz mehr", other: "Sonstiges" },
+        cta: "Anderen Standort finden",
+        footer: `Buchungscode: ${shortId}`,
+      },
+      fr: {
+        subject: "BagajPark : Votre réservation a été annulée",
+        heading: "Votre réservation a été annulée",
+        noShowSubject: "BagajPark : Nous vous avons manqué",
+        noShowHeading: "Nous vous avons manqué",
+        guest: `Vous avez annulé votre réservation chez ${shopHtml}. Si vous avez payé, le remboursement a été enregistré.`,
+        partner: `${shopHtml} a annulé votre réservation.`,
+        admin: `Votre réservation chez ${shopHtml} a été annulée par le support BagajPark. Si vous avez payé, le remboursement a été enregistré.`,
+        noShow: `Votre réservation chez ${shopHtml} a été clôturée car vous n'êtes pas venu à l'heure prévue. Si vos plans ont changé, aucun souci ; vous pouvez réserver à nouveau à tout moment.`,
+        reasonLabel: "Motif",
+        reasons: { guest_request: "À votre demande", shop_closed: "Le commerce est fermé à cette heure", capacity: "Le commerce n'a plus de place", other: "Autre" },
+        cta: "Trouver un autre point",
+        footer: `Code de réservation : ${shortId}`,
+      },
+      ja: {
+        subject: "BagajPark: ご予約がキャンセルされました",
+        heading: "ご予約がキャンセルされました",
+        noShowSubject: "BagajPark: お会いできませんでした",
+        noShowHeading: "お会いできませんでした",
+        guest: `${shopHtml}のご予約をキャンセルしました。お支払い済みの場合、返金が記録されました。`,
+        partner: `${shopHtml}がご予約をキャンセルしました。`,
+        admin: `${shopHtml}のご予約はBagajParkサポートによりキャンセルされました。お支払い済みの場合、返金が記録されました。`,
+        noShow: `ご予約の時間に${shopHtml}へお越しにならなかったため、ご予約を終了しました。予定が変わった場合もご心配なく。またいつでもご予約ください。`,
+        reasonLabel: "理由",
+        reasons: { guest_request: "お客様のご要望により", shop_closed: "その時間は店舗が閉まっています", capacity: "店舗に空きがありません", other: "その他" },
+        cta: "別の店舗を探す",
+        footer: `予約コード: ${shortId}`,
+      },
+      fa: {
+        subject: "BagajPark: رزرو شما لغو شد",
+        heading: "رزرو شما لغو شد",
+        noShowSubject: "BagajPark: شما را ندیدیم",
+        noShowHeading: "شما را ندیدیم",
+        guest: `رزرو خود در ${shopHtml} را لغو کردید. اگر پرداختی انجام داده‌اید، بازپرداخت ثبت شد.`,
+        partner: `${shopHtml} رزرو شما را لغو کرد.`,
+        admin: `رزرو شما در ${shopHtml} توسط پشتیبانی BagajPark لغو شد. اگر پرداختی انجام داده‌اید، بازپرداخت ثبت شد.`,
+        noShow: `چون در زمان رزرو به ${shopHtml} نیامدید، رزرو بسته شد. اگر برنامه‌تان تغییر کرد، اشکالی ندارد؛ هر زمان خواستید دوباره رزرو کنید.`,
+        reasonLabel: "دلیل",
+        reasons: { guest_request: "به درخواست شما", shop_closed: "فروشگاه در آن ساعت بسته است", capacity: "فروشگاه جای خالی ندارد", other: "سایر" },
+        cta: "یافتن مکان دیگر",
+        footer: `کد رزرو: ${shortId}`,
+      },
+    }, locale);
+
+    const paragraphs: string[] = [];
+    if (reason === "no_show") paragraphs.push(c.noShow);
+    else if (reason === "partner_cancel") {
+      paragraphs.push(c.partner);
+      const label = c.reasons[params.detail as keyof typeof c.reasons];
+      if (label) paragraphs.push(`<strong>${c.reasonLabel}:</strong> ${label}`);
+      if (params.detail === "other" && params.note) paragraphs.push(escapeEmailHtml(params.note));
+    } else if (reason === "admin_cancel") paragraphs.push(c.admin);
+    else paragraphs.push(c.guest);
+
+    const subject = reason === "no_show" ? c.noShowSubject : c.subject;
+    const html = renderEmailHtml({
+      locale,
+      tone: "muted",
+      heading: reason === "no_show" ? c.noShowHeading : c.heading,
+      paragraphs,
+      cta: { href: searchUrl, label: c.cta, variant: "link" },
+      footer: c.footer,
+    });
+    // Duz metin govdesi: HTML etiketleri ve kacirilmis karakterler sokulur.
+    const text = paragraphs.join("\n\n").replace(/<[^>]+>/g, "").split(shopHtml).join(shop);
+    await this.sendEmail(email, subject, text, bookingId, html);
+  }
+
+  /**
+   * Yonetici esnafin rezervasyonunu iptal ettiginde ya da zorla teslim
+   * ettiginde dukkan sahibine e-posta (ve zorla teslimde push; iptal push'u
+   * `notifyPartnerBookingChange`ten gider). Yonetici aciklamasi esnafa gider.
+   */
+  async notifyPartnerAdminAction(params: {
+    bookingId: string;
+    kind: "cancelled" | "force_checked_out";
+    note: string;
+  }): Promise<void> {
+    const b = await prisma.booking.findUnique({
+      where: { id: params.bookingId },
+      select: { shop: { select: { name: true, owner: { select: { id: true, email: true } } } } },
+    });
+    const owner = b?.shop.owner;
+    if (!b || !owner) return;
+    const shortId = bookingShortCode(params.bookingId);
+    const noteHtml = escapeEmailHtml(params.note);
+
+    // Esnaf bildirimleri Turkce gider (bkz. `notifyPartnerBookingChange`); diger diller mandal icin.
+    const c = pickLocale({
+      tr: {
+        cancelledTitle: "Rezervasyon yönetici tarafından iptal edildi",
+        checkoutTitle: "Rezervasyon yönetici tarafından teslim edildi",
+        cancelledP: `${shortId} kodlu rezervasyon BagajPark yöneticisi tarafından iptal edildi; kapasiten serbest bırakıldı.`,
+        checkoutP: `${shortId} kodlu rezervasyon BagajPark yöneticisi tarafından teslim edildi olarak kapatıldı. Gecikme ücreti alınmadı.`,
+        noteLabel: "Açıklama",
+        footer: `Rezervasyon Kodu: ${shortId}`,
+      },
+      en: {
+        cancelledTitle: "Booking cancelled by an administrator",
+        checkoutTitle: "Booking checked out by an administrator",
+        cancelledP: `Booking ${shortId} was cancelled by a BagajPark administrator; your capacity has been released.`,
+        checkoutP: `Booking ${shortId} was closed as checked out by a BagajPark administrator. No late fee was charged.`,
+        noteLabel: "Note",
+        footer: `Booking code: ${shortId}`,
+      },
+      de: {
+        cancelledTitle: "Buchung von einem Administrator storniert",
+        checkoutTitle: "Buchung von einem Administrator abgeschlossen",
+        cancelledP: `Die Buchung ${shortId} wurde von einem BagajPark-Administrator storniert; deine Kapazität wurde freigegeben.`,
+        checkoutP: `Die Buchung ${shortId} wurde von einem BagajPark-Administrator als abgeholt abgeschlossen. Es wurde keine Verspätungsgebühr erhoben.`,
+        noteLabel: "Hinweis",
+        footer: `Buchungscode: ${shortId}`,
+      },
+      fr: {
+        cancelledTitle: "Réservation annulée par un administrateur",
+        checkoutTitle: "Réservation clôturée par un administrateur",
+        cancelledP: `La réservation ${shortId} a été annulée par un administrateur BagajPark ; votre capacité a été libérée.`,
+        checkoutP: `La réservation ${shortId} a été clôturée comme récupérée par un administrateur BagajPark. Aucun frais de retard n'a été facturé.`,
+        noteLabel: "Remarque",
+        footer: `Code de réservation : ${shortId}`,
+      },
+      ja: {
+        cancelledTitle: "管理者により予約がキャンセルされました",
+        checkoutTitle: "管理者により予約が引き渡し済みになりました",
+        cancelledP: `予約 ${shortId} はBagajPark管理者によりキャンセルされ、枠が解放されました。`,
+        checkoutP: `予約 ${shortId} はBagajPark管理者により引き渡し済みとして終了しました。延滞料金は請求されていません。`,
+        noteLabel: "メモ",
+        footer: `予約コード: ${shortId}`,
+      },
+      fa: {
+        cancelledTitle: "رزرو توسط مدیر لغو شد",
+        checkoutTitle: "رزرو توسط مدیر تحویل داده شد",
+        cancelledP: `رزرو ${shortId} توسط مدیر BagajPark لغو شد؛ ظرفیت شما آزاد شد.`,
+        checkoutP: `رزرو ${shortId} توسط مدیر BagajPark به عنوان تحویل‌شده بسته شد. هزینه تأخیر دریافت نشد.`,
+        noteLabel: "توضیح",
+        footer: `کد رزرو: ${shortId}`,
+      },
+    }, "tr");
+
+    const title = params.kind === "cancelled" ? c.cancelledTitle : c.checkoutTitle;
+    const p = params.kind === "cancelled" ? c.cancelledP : c.checkoutP;
+
+    if (params.kind === "force_checked_out") {
+      void this.sendPush(owner.id, title, b.shop.name, params.bookingId).catch((e) =>
+        logger.error({ err: e, bookingId: params.bookingId }, "notifyPartnerAdminAction_push_failed"),
+      );
+      void this.sendMobilePush(owner.id, title, b.shop.name, params.bookingId).catch((e) =>
+        logger.error({ err: e, bookingId: params.bookingId }, "notifyPartnerAdminAction_mobile_push_failed"),
+      );
+    }
+
+    if (!owner.email?.includes("@")) return;
+    const html = renderEmailHtml({
+      locale: "tr",
+      tone: "muted",
+      heading: title,
+      paragraphs: [p, `<strong>${c.noteLabel}:</strong> ${noteHtml}`],
+      footer: c.footer,
+    });
+    await this.sendEmail(owner.email, `BagajPark: ${title}`, `${p}\n\n${c.noteLabel}: ${params.note}`, params.bookingId, html);
   }
 
   /**

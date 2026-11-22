@@ -22,6 +22,7 @@ import { bookingTouchesPlatformHoliday } from '@/lib/booking-holidays';
 import { createQrToken } from '@/lib/qr-token';
 import { notificationService } from '@/services/NotificationService';
 import type { ModifyBookingInput } from '@/services/BookingService';
+import type { CancelReason } from '@/lib/booking-closure';
 
 export async function issueCancellationCreditCoupon(amountTry: number): Promise<string> {
   for (let attempt = 0; attempt < 5; attempt++) {
@@ -67,6 +68,20 @@ export async function issueCancellationCreditCoupon(amountTry: number): Promise<
  * Not: iade `PaymentLog`'da işaretlenir; para gerçekten geri gönderilmez —
  * entegre bir sağlayıcı yok (P0-2, docs/PAYMENTS.md).
  */
+/**
+ * `reason`/`note`/`detail` `CANCELLED` olayinin metadata'sina yazilir; mobil
+ * `cancelReason` alani oradan okunur (`cancelReasonFromEvents`).
+ */
+export type CancelBookingOptions = {
+  silent?: boolean;
+  actor?: PaymentActor;
+  reason?: CancelReason;
+  /** Serbest metin aciklama (yonetici iptali, esnafin "diger" nedeni). */
+  note?: string | null;
+  /** Alt neden, ornegin esnafin sectigi `shop_closed`. */
+  detail?: string | null;
+};
+
 export async function cancelBooking(
   bookingId: string,
   /*
@@ -75,7 +90,7 @@ export async function cancelBooking(
     hesap silme de yuzlerce bildirim uretmemeli. Varsayilan (misafir iptali):
     esnaf ve misafir haberdar edilir.
   */
-  opts: { silent?: boolean; actor?: PaymentActor } = {},
+  opts: CancelBookingOptions = {},
 ): Promise<CancelBookingResult> {
   const booking = await prisma.booking.findUnique({
     where: { id: bookingId },
@@ -152,6 +167,12 @@ export async function cancelBooking(
     void couponService.releaseByCode(booking.couponCode).catch(() => undefined);
   }
 
+  /*
+    Kilit alindiktan sonra rezervasyon IPTAL EDILMISTIR. Yan etkilerden biri
+    firlatirsa cagirana basarisizlik donmek yalan olur: istemci "iptal
+    edilemedi" der, tekrar dener ve `invalid_status` alir. Her yan etki kendi
+    hatasini loglar; sonuc her durumda `ok: true`.
+  */
   try {
     // İade defter üzerinden. Ham `updateMany` kaldırıldı: kısmi iadeyi
     // modelleyemiyordu, `refundedAmount` yazmıyordu ve denetim izi bırakmıyordu.
@@ -174,7 +195,11 @@ export async function cancelBooking(
         .cancelIntent({ bookingId, actor: opts.actor })
         .catch((err) => logger.error({ err, bookingId }, "payment_intent_cancel_failed"));
     }
+  } catch (error) {
+    logger.error({ err: error, bookingId }, 'cancel_booking_payment_side_effect_failed');
+  }
 
+  try {
     await prisma.$transaction(async (tx) => {
       /*
         Durum YUKARIDA atomik olarak yazildi; burada tekrar yazmak gereksiz.
@@ -184,36 +209,56 @@ export async function cancelBooking(
         await tx.reservationSlot.deleteMany({ where: { bookingId } });
       }
     });
+  } catch (error) {
+    // Kapasite tutulu kalir; `consistency-check` bu ayrismayi sayar.
+    logger.error({ err: error, bookingId }, 'cancel_booking_slot_release_failed');
+  }
 
-    /*
-      Atesle-unut: iptal/degisiklik yazildi, olay kaydi onu bekletmez. `.catch`
-      sart — yakalanmamis red sureci dusurur (`unhandled-rejection` mandali, tavan 0).
-    */
-    void bookingEventService.record({
-      bookingId,
-      event: "CANCELLED",
-      actorId: opts.actor?.id ?? null,
-      actorRole: opts.actor?.role ?? null,
-      impersonatedBy: opts.actor?.impersonatedBy ?? null,
-      metadata: { previousStatus: booking.status, hadPayment, fullRefund: true },
-    }).catch((err) => logger.error({ err, bookingId }, "booking_event_cancelled_failed"));
+  /*
+    Atesle-unut: iptal/degisiklik yazildi, olay kaydi onu bekletmez. `.catch`
+    sart — yakalanmamis red sureci dusurur (`unhandled-rejection` mandali, tavan 0).
+  */
+  void bookingEventService.record({
+    bookingId,
+    event: "CANCELLED",
+    actorId: opts.actor?.id ?? null,
+    actorRole: opts.actor?.role ?? null,
+    impersonatedBy: opts.actor?.impersonatedBy ?? null,
+    metadata: {
+      previousStatus: booking.status,
+      hadPayment,
+      fullRefund: true,
+      ...(opts.reason ? { reason: opts.reason } : {}),
+      ...(opts.detail ? { detail: opts.detail } : {}),
+      ...(opts.note ? { note: opts.note } : {}),
+    },
+  }).catch((err) => logger.error({ err, bookingId }, "booking_event_cancelled_failed"));
 
-    if (!opts.silent) {
+  if (!opts.silent) {
+    const reason = opts.reason ?? 'guest_cancel';
+    // Iptali esnafin kendisi yaptiysa ona "iptal edildi" demek anlamsiz.
+    if (reason !== 'partner_cancel' && reason !== 'no_show') {
       void notificationService
         .notifyPartnerBookingChange({ bookingId, kind: 'cancelled' })
         .catch((err) => logger.error({ err, bookingId }, 'notify_partner_booking_cancelled_failed'));
-      notificationService.pushGuestOnly(bookingId, 'cancelled', booking.locale ?? 'tr');
     }
-
-    return { ok: true, fullRefund: hadPayment };
-  } catch (error) {
-    logger.error({ err: error, bookingId }, 'BookingService::cancelBooking');
-    return {
-      ok: false,
-      code: 'UNKNOWN',
-      message: 'İptal sırasında beklenmeyen bir hata oluştu.',
-    };
+    if (reason === 'admin_cancel') {
+      void notificationService
+        .notifyPartnerAdminAction({ bookingId, kind: 'cancelled', note: opts.note ?? '' })
+        .catch((err) => logger.error({ err, bookingId }, 'notify_partner_admin_cancel_failed'));
+    }
+    void notificationService
+      .notifyGuestBookingClosed({
+        bookingId,
+        reason,
+        detail: opts.detail ?? null,
+        note: opts.note ?? null,
+        locale: booking.locale ?? 'tr',
+      })
+      .catch((err) => logger.error({ err, bookingId }, 'notify_guest_booking_closed_failed'));
   }
+
+  return { ok: true, fullRefund: hadPayment };
 }
 
 /**
