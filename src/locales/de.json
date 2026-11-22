@@ -65,7 +65,8 @@
     "mapZoomOut": "Verkleinern",
     "mapResetBearing": "Nach Norden ausrichten",
     "mapToggleAttribution": "Quellenangaben anzeigen",
-    "chatOpen": "Live-Chat"
+    "chatOpen": "Live-Chat",
+    "fixHighlightedField": "Bitte korrigieren Sie das markierte Feld."
   },
   "SEO": {
     "title": "BagajPark | Lassen Sie Ihr Gepäck sicher und reisen Sie frei",
