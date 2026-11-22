@@ -722,6 +722,47 @@ model AuditLog {
 ///
 /// Retention: `cleanup` iç işi 90 günden eski kayıtları siler (bkz.
 /// `src/lib/jobs/registry.ts`) — tablo sınırsız büyümesin diye.
+/// Yonetici "Duyuru gonder" (operasyonel push yayini). Kayit gonderim
+/// istegiyle QUEUED acilir; surec ici arka plan isi SENDING -> DONE/FAILED
+/// ilerletir ve sayaclari gunceller. Sunucu yeniden baslarsa satir SENDING'de
+/// kalir; listeleme 30 dakikadan eski asili satirlari FAILED'a ceker.
+/// Pazarlama/kampanya mesaji DEGIL: ticari ileti onayi olmadan gonderilmez.
+model Broadcast {
+  id              String            @id @default(cuid())
+  audience        BroadcastAudience
+  titleTr         String
+  bodyTr          String
+  titleEn         String?
+  bodyEn          String?
+  reason          String
+  /// Gonderen yoneticinin User.id'si. Iliski bilerek yok: kayit hesaptan bagimsiz kalir.
+  createdById     String
+  targetedDevices Int               @default(0)
+  sent            Int               @default(0)
+  failed          Int               @default(0)
+  status          BroadcastStatus   @default(QUEUED)
+  createdAt       DateTime          @default(now())
+  startedAt       DateTime?
+  finishedAt      DateTime?
+  updatedAt       DateTime          @updatedAt
+
+  @@index([createdAt])
+  @@index([status])
+}
+
+enum BroadcastAudience {
+  PARTNERS
+  GUESTS
+  ALL
+}
+
+enum BroadcastStatus {
+  QUEUED
+  SENDING
+  DONE
+  FAILED
+}
+
 model AnalyticsEvent {
   id        String   @id @default(cuid())
   /// Sabit sözlük — `src/lib/analytics-events.ts`. Rastgele metin değil.
