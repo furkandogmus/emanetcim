@@ -10,8 +10,8 @@ const PREFIX_RE = /^[a-z_]{1,40}(\.[a-z_]{0,40}){0,3}$/;
 
 /**
  * Denetim kaydi (salt okuma). `?action=<onek>` `?userId=<id>` `?cursor=`.
- * Sorgu web sayfasiyla ortak: `AuditLogService.listPage`. Ilk sayfa filtre
- * oneklerini de tasir.
+ * Sorgu web sayfasiyla ortak: `AuditLogService.listPage`. Suzulmemis ilk sayfa
+ * filtre oneklerini de tasir.
  */
 export async function GET(req: NextRequest) {
   const auth = await requireMobileUser(req);
@@ -25,13 +25,15 @@ export async function GET(req: NextRequest) {
   const userId = parseCursor(sp.get("userId"));
   const cursor = parseCursor(sp.get("cursor"));
 
-  const [page, options] = await Promise.all([
+  // Onekler yalnizca suzulmemis ilk sayfada: suzulu istekte tum tabloyu gruplamak bosuna.
+  const wantsPrefixes = !cursor && !actionPrefix && !userId;
+  const [page, prefixes] = await Promise.all([
     auditLogService.listPage({ actionPrefix, userId }, { cursor, take: 30 }),
-    cursor ? null : auditLogService.filterOptions(),
+    wantsPrefixes ? auditLogService.cachedActionPrefixes() : null,
   ]);
   return NextResponse.json({
     entries: page.items.map(toMobileAdminAuditEntry),
     nextCursor: page.nextCursor,
-    ...(options ? { prefixes: options.actionPrefixes } : {}),
+    ...(prefixes ? { prefixes } : {}),
   });
 }
