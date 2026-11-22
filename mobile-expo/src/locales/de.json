@@ -320,10 +320,17 @@
     "notFound": "Diese Buchung wurde nicht mehr gefunden.",
     "errors": {
       "invalid_status": "Dein Gepäck wurde dem Laden bereits übergeben oder die Buchung ist schon storniert; sie kann nicht storniert werden.",
-      "not_found": "Diese Buchung wurde nicht gefunden."
+      "not_found": "Diese Buchung wurde nicht gefunden.",
+      "forbidden": "Diese Buchung gehört nicht zu deinem Konto.",
+      "cancel_failed": "Die Buchung konnte gerade nicht storniert werden; versuche es gleich noch einmal.",
+      "server_error": "Auf dem Server ist ein Fehler aufgetreten; versuche es gleich noch einmal."
     },
     "address": "Adresse",
-    "addressHint": "Gedrückt halten zum Kopieren; du kannst sie einem Taxifahrer zeigen."
+    "addressHint": "Gedrückt halten zum Kopieren; du kannst sie einem Taxifahrer zeigen.",
+    "closeExpired": "Buchung schließen",
+    "closeExpiredTitle": "Buchung schließen?",
+    "closeExpiredBody": "Wenn du dein Gepäck nicht abgegeben hast, kannst du diese Buchung schließen. Das kann nicht rückgängig gemacht werden.",
+    "closeExpiredConfirm": "Ja, schließen"
   },
   "status": {
     "PENDING": "Ausstehend",
@@ -1145,5 +1152,72 @@
     "sloganLine1": "Koffer weg,",
     "sloganLine2": "Stadt entdeckt.",
     "skipHint": "Zum Überspringen tippen"
+  },
+  "cancelReason": {
+    "short": {
+      "guest_cancel": "Storniert",
+      "partner_cancel": "Vom Shop storniert",
+      "no_show": "Nicht erschienen",
+      "admin_cancel": "Vom Admin storniert",
+      "expired_no_dropoff": "Abgelaufen"
+    },
+    "long": {
+      "guest_cancel": "Vom Gast storniert",
+      "partner_cancel": "Vom Shop storniert",
+      "no_show": "Als nicht erschienen geschlossen",
+      "admin_cancel": "Von einem Admin storniert",
+      "expired_no_dropoff": "Wegen Ablauf geschlossen"
+    },
+    "guestSelf": "Du hast diese Buchung storniert"
+  },
+  "bookingActions": {
+    "admin": {
+      "title": "Buchungsaktionen",
+      "cancel": "Buchung stornieren",
+      "forceCheckout": "Rückgabe erzwingen",
+      "cancelBody": "Die Buchung wird geschlossen und der reservierte Platz freigegeben. Das kann nicht rückgängig gemacht werden.",
+      "forceCheckoutBody": "Das Gepäck gilt als zurückgegeben und die Buchung wird abgeschlossen. Das kann nicht rückgängig gemacht werden.",
+      "noteLabel": "Grund",
+      "notePlaceholder": "Warum machst du das?",
+      "noteHint": "Mindestens {{min}} Zeichen; wird im Buchungsverlauf gespeichert.",
+      "cancelConfirm": "Stornieren",
+      "forceCheckoutConfirm": "Als zurückgegeben markieren",
+      "cancelledDone": "Buchung storniert.",
+      "forcedDone": "Buchung als zurückgegeben geschlossen."
+    },
+    "partner": {
+      "cancel": "Buchung stornieren",
+      "cancelTitle": "Warum stornierst du?",
+      "cancelBody": "Der Gast wird benachrichtigt und der reservierte Platz freigegeben. Das kann nicht rückgängig gemacht werden.",
+      "noteLabel": "Notiz",
+      "noteRequired": "Kurz, warum",
+      "noteOptional": "Optionale Notiz",
+      "cancelConfirm": "Stornieren",
+      "cancelledTitle": "Buchung storniert",
+      "cancelledBody": "Der Gast wurde benachrichtigt.",
+      "noShow": "Gast nicht erschienen",
+      "noShowAt": "Verfügbar ab {{time}}",
+      "noShowTitle": "Gast nicht erschienen?",
+      "noShowBody": "Die Buchung wird als nicht erschienen geschlossen und der reservierte Platz freigegeben. Das kann nicht rückgängig gemacht werden.",
+      "noShowConfirm": "Ja, schließen",
+      "noShowDoneTitle": "Buchung geschlossen",
+      "noShowDoneBody": "Der reservierte Platz wurde freigegeben."
+    },
+    "reasons": {
+      "guest_request": "Gast hat gefragt",
+      "shop_closed": "Shop geschlossen",
+      "capacity": "Kein Platz",
+      "other": "Sonstiges"
+    },
+    "errors": {
+      "not_found": "Diese Buchung wurde nicht gefunden.",
+      "forbidden": "Du darfst diese Aktion bei dieser Buchung nicht ausführen.",
+      "invalid_status": "Der Status der Buchung hat sich geändert; diese Aktion ist nicht mehr möglich.",
+      "note_required": "Bitte schreibe eine kurze Notiz.",
+      "invalid_reason": "Ungültiger Stornierungsgrund; wähle einen aus der Liste.",
+      "too_early": "Die Wartezeit ist noch nicht vorbei; der Gast kann noch nicht als nicht erschienen markiert werden.",
+      "server_error": "Auf dem Server ist ein Fehler aufgetreten; versuche es gleich noch einmal.",
+      "http_404": "Diese Aktion ist noch nicht verfügbar; nutze vorerst das Web-Panel."
+    }
   }
 }

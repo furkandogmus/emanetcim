@@ -120,7 +120,15 @@ export type BookingSummary = {
   status: BookingStatus;
   /** Suresi dolmus (gelinmemis) rezervasyon; sunucu karar verir. Eski sunucu gondermez. */
   expired?: boolean;
+  /**
+   * Iptal edilmis rezervasyonun nedeni. Eski sunucu gondermez: `undefined` `null` gibi
+   * okunur (`cancelReasonOf`). Bilinmeyen yeni deger de neden yazmadan dusulur.
+   */
+  cancelReason?: CancelReason | (string & {}) | null;
 };
+
+/** `cancelReason` degerleri (sunucu `Booking.cancelReason`). */
+export type CancelReason = "guest_cancel" | "partner_cancel" | "no_show" | "admin_cancel" | "expired_no_dropoff";
 
 export type BookingDetail = BookingSummary & {
   qrCodeToken: string | null;
@@ -142,7 +150,20 @@ export type BookingDetail = BookingSummary & {
   pendingBagRevision?: PendingBagRevision | null;
   /** Yalnizca esnaf/admin ve CHECKED_IN: su an teslim edilirse gecikme ucreti ve erken iade. */
   checkoutPreview?: { lateFeeTry: number; earlyRefund: number } | null;
+  /**
+   * Yalnizca esnaf/admin: "Misafir gelmedi" bu andan (ISO) sonra kullanilabilir; `null`
+   * bu rezervasyonda hic yok demek. Eski sunucu gondermez, `undefined` `null` sayilir.
+   */
+  noShowAvailableAt?: string | null;
 };
+
+/** `partner/bookings/[id]/cancel` neden secenekleri. */
+export type PartnerCancelReason = "guest_request" | "shop_closed" | "capacity" | "other";
+
+export type PartnerCancelRequest = { reason: PartnerCancelReason; note?: string };
+
+/** Yonetim islem uclarinin (iptal, zorla teslim, gelmedi) ortak yaniti. */
+export type BookingActionResponse = { success: true };
 
 export type PendingBagRevision = {
   bagCountS: number;
@@ -444,6 +465,8 @@ export type AdminBookingDetail = AdminBookingRow & {
   disputeStatus: string | null;
   paymentStatus: string | null;
   events: { event: string; actorRole: string | null; createdAt: string }[];
+  /** Esnaf detayindaki alanla ayni anlam; eski sunucu gondermez. */
+  noShowAvailableAt?: string | null;
 };
 
 /** `admin/shops` (`toMobileAdminShop`). */
