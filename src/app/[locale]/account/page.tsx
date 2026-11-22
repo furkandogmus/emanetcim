@@ -2,7 +2,7 @@ import { setRequestLocale, getTranslations } from "next-intl/server";
 import { auth } from "@/auth";
 import { redirect } from "next/navigation";
 import { Link } from "@/i18n/routing";
-import { CalendarDays, ChevronRight, CircleHelp, MapPin, Lock } from "lucide-react";
+import { CalendarDays, ChevronRight, CircleHelp, MapPin, Lock, UserRound } from "lucide-react";
 import ReferralCodeCard from "@/components/account/ReferralCodeCard";
 
 export default async function AccountPage({
@@ -42,6 +42,8 @@ export default async function AccountPage({
     privacy: t("privacy"),
     privacyDesc: t("privacyDesc"),
     profile: t("profile"),
+    editProfile: t("editProfile"),
+    editProfileDesc: t("editProfileDesc"),
     referralTitle: t("referralTitle", { pct: discountPct }),
     referralBody: t("referralBody", { pct: discountPct }),
     referralReveal: t("referralReveal"),
@@ -90,6 +92,17 @@ export default async function AccountPage({
         </section>
 
         <nav className="h-fit divide-y divide-gray-50 rounded-3xl border border-gray-100 bg-white shadow-sm">
+          <Link
+            href="/account/profile"
+            className="flex items-center gap-3 px-5 py-5 hover:bg-gray-50 transition-colors"
+          >
+            <UserRound size={18} className="text-gray-400" />
+            <span>
+              <span className="block text-sm font-bold text-gray-800">{copy.editProfile}</span>
+              <span className="block text-xs text-gray-400">{copy.editProfileDesc}</span>
+            </span>
+            <ChevronRight size={16} className="ml-auto text-gray-300" />
+          </Link>
           <Link
             href="/contact"
             className="flex items-center gap-3 px-5 py-5 hover:bg-gray-50 transition-colors"

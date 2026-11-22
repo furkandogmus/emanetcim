@@ -3,8 +3,7 @@ import type { NextRequest } from "next/server";
 import prisma from "@/lib/db";
 import { forbidWhileImpersonating, requireMobileUser } from "@/lib/mobile-auth";
 import { toMobileUser } from "@/lib/mobile-dto";
-import { partnerProfileService } from "@/services/PartnerProfileService";
-import { isPrismaUniqueViolation } from "@/lib/prisma-errors";
+import { updateOwnProfile } from "@/services/auth/own-profile";
 import logger from "@/lib/logger";
 
 /**
@@ -86,82 +85,31 @@ export async function PUT(req: NextRequest) {
     if (blocked) return blocked;
   }
 
-  const data: Record<string, unknown> = {};
-  let phoneChange: string | null | undefined;
-
-  if (name !== undefined) {
-    if (typeof name !== "string" || !name.trim() || name.trim().length > 100) {
-      return NextResponse.json({ error: "invalid_name" }, { status: 400 });
-    }
-    data.name = name.trim();
-  }
-
+  // Telefon giris kimligi: yonetici goruntuleme oturumunda degistirilemez (ad/fotograf serbest).
   if (phone !== undefined) {
-    // Telefon giris kimligi: yonetici goruntuleme oturumunda degistirilemez (ad/fotograf serbest).
     const blocked = forbidWhileImpersonating(auth.user);
     if (blocked) return blocked;
-    /*
-      TELEFON NORMALIZE EDILMEDEN YAZILIYORDU (2026-08-31'de bulundu).
-
-      Bu uc gelen degeri oldugu gibi `User.phone`a yaziyordu, oysa giris ve OTP
-      yollari numarayi ON HANEYE indirip UC bicimi birden ariyor:
-
-        OR: [{ phone: "5xx…" }, { phone: "+905xx…" }, { phone: "05xx…" }]
-
-      ...ve bunu `findFirst` ile, SIRALAMA OLMADAN yapiyor. Yani ayni numaranin
-      iki farkli bicimi iki AYRI satirda durabiliyordu (`@unique` bunlari farkli
-      dizeler saydigi icin engellemiyor) ve girisin hangi satiri buldugu
-      belirsizdi: gercek sahibi kendi numarasi ve kendi sifresiyle giremeyebilir.
-
-      Kural: telefon yalnizca `normalizeTrGsm10` biciminde saklanir. Bosaltma
-      (`""` / `null`) de acikca desteklenir.
-    */
-    if (phone !== null && typeof phone !== "string") {
-      return NextResponse.json({ error: "invalid_phone" }, { status: 400 });
-    }
-    phoneChange = phone;
   }
 
-  // Yalnizca kaldirma: yeni fotograf multipart dalindan gelir.
-  if (image === null) data.image = null;
-
-  if (Object.keys(data).length === 0 && phoneChange === undefined) {
-    return NextResponse.json({ error: "no_fields" }, { status: 400 });
-  }
-
+  /*
+    Kurallar (ad siniri, telefon normalizasyonu ve giris-kilidi) web profil
+    sayfasiyla ORTAK: `src/services/auth/own-profile.ts`. Telefon yalnizca
+    `normalizeTrGsm10` biciminde saklanir; bosaltma (`""` / `null`) desteklenir.
+  */
   try {
-    /*
-      Yazma ve giris-kilidi korumasi `PartnerProfileService`te (esnaf ucuyla
-      ayni govde). E-postasi/baska girisi olmayan hesabin telefonu silinemez
-      ya da degistirilemez. Hata esleme ile log burada, tek try icinde; telefon
-      ONCE yazilir cunku is kurali redleri (kilit, cakisma) hicbir sey yazmadan
-      doner: ad/fotograf yarim kalmaz.
-    */
-    if (phoneChange !== undefined) {
-      const result = await partnerProfileService.updatePhone(auth.user.id, phoneChange);
-      if (!result.ok) {
-        if (result.reason === "already_registered") {
-          return NextResponse.json({ error: "phone_taken" }, { status: 409 });
-        }
-        if (result.reason === "login_phone_locked") {
-          return NextResponse.json({ error: "phone_locked" }, { status: 409 });
-        }
-        return NextResponse.json({ error: "invalid_phone" }, { status: 400 });
-      }
-    }
-    if (Object.keys(data).length > 0) {
-      await prisma.user.update({ where: { id: auth.user.id }, data });
+    const result = await updateOwnProfile({
+      userId: auth.user.id,
+      name,
+      phone,
+      // Yalnizca kaldirma: yeni fotograf multipart dalindan gelir.
+      removeImage: image === null,
+    });
+    if (!result.ok) {
+      const status = result.reason === "phone_taken" || result.reason === "phone_locked" ? 409 : 400;
+      return NextResponse.json({ error: result.reason }, { status });
     }
     return NextResponse.json({ success: true });
   } catch (err) {
-    /*
-      Numara baskasinda kayitliysa bu bir SUNUCU hatasi degil, cakismadir.
-      Onceki hali her seyi `500 server_error`a cevirdigi icin kullanici
-      "numaram baskasinda" bilgisini hic gormuyordu.
-    */
-    if (isPrismaUniqueViolation(err)) {
-      return NextResponse.json({ error: "phone_taken" }, { status: 409 });
-    }
     logger.error({ err, userId: auth.user.id }, "mobile_profile_update_failed");
     return NextResponse.json({ error: "server_error" }, { status: 500 });
   }
