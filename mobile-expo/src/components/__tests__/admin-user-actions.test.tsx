@@ -108,7 +108,8 @@ beforeEach(() => {
 
 async function renderUser() {
   await render(<AdminUserScreen />, { wrapper });
-  await screen.findByText("İşlemler");
+  // Soguk onbellekte ilk cizim 1 sn'yi asabiliyor (varsayilan findBy suresi).
+  await screen.findByText("İşlemler", undefined, { timeout: 8000 });
 }
 
 describe("onay kapilari (saf)", () => {
@@ -284,21 +285,27 @@ describe("denetim kaydi", () => {
             },
           ],
           nextCursor: null,
-          ...(path.includes("cursor") ? {} : { prefixes: ["user.", "shop."] }),
+          // Sunucu gibi: onekler yalnizca suzulmemis ilk sayfada.
+          ...(/[?&](cursor|action|userId)=/.test(path) ? {} : { prefixes: ["user.", "shop."] }),
         };
       }
       return {};
     };
   });
 
-  it("kullanici filtresi ve secilen onek istege girer", async () => {
+  it("kullanici filtresi istege girer", async () => {
     mockParams = { userId: "g1", name: "Ada" };
     await render(<AdminAuditLogScreen />, { wrapper });
     expect(await screen.findByText("user.role_update")).toBeTruthy();
     expect(mockCalls[0].path).toBe("/admin/audit-log?userId=g1");
     expect(screen.getByText("Yalnızca: Ada")).toBeTruthy();
+  });
 
+  it("secilen onek istege girer, cipler suzulu yanitta kaybolmaz", async () => {
+    mockParams = {};
+    await render(<AdminAuditLogScreen />, { wrapper });
     await fireEvent.press(await screen.findByRole("button", { name: "shop" }));
-    await waitFor(() => expect(mockCalls.at(-1)?.path).toBe("/admin/audit-log?action=shop.&userId=g1"));
+    await waitFor(() => expect(mockCalls.at(-1)?.path).toBe("/admin/audit-log?action=shop."));
+    expect(screen.getByRole("button", { name: "user" })).toBeTruthy();
   });
 });

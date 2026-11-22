@@ -24,7 +24,7 @@ const privacy = vi.hoisted(() => ({ anonymizeByAdmin: vi.fn() }));
 vi.mock("@/services/AccountPrivacyService", () => ({ accountPrivacyService: privacy }));
 const setPw = vi.hoisted(() => ({ adminSetUserPassword: vi.fn() }));
 vi.mock("@/services/auth/admin-set-password", () => setPw);
-const audit = vi.hoisted(() => ({ listPage: vi.fn(), filterOptions: vi.fn() }));
+const audit = vi.hoisted(() => ({ listPage: vi.fn(), cachedActionPrefixes: vi.fn() }));
 vi.mock("@/services/AuditLogService", () => ({ auditLogService: audit }));
 
 import { signAccessToken, signImpersonationToken } from "@/lib/mobile-auth";
@@ -94,7 +94,7 @@ beforeEach(async () => {
   for (const f of Object.values(svc)) f.mockReset().mockResolvedValue({ ok: true });
   privacy.anonymizeByAdmin.mockReset().mockResolvedValue({ ok: true });
   audit.listPage.mockReset();
-  audit.filterOptions.mockReset();
+  audit.cachedActionPrefixes.mockReset();
   setPw.adminSetUserPassword.mockReset().mockResolvedValue({ ok: true, phone: null, name: null });
   adminToken = await signAccessToken("admin-1", "ADMIN", 0);
 });
@@ -221,18 +221,25 @@ describe("okuma uclari", () => {
     expect(res.status).toBe(404);
   });
 
-  it("denetim kaydi: onek ve kullanici filtreye girer, ilk sayfa onekleri tasir", async () => {
+  it("denetim kaydi: suzulmemis ilk sayfa onekleri tasir", async () => {
     audit.listPage.mockResolvedValue({ items: [], nextCursor: null });
-    audit.filterOptions.mockResolvedValue({ actions: [], entityTypes: [], actionPrefixes: ["user."] });
-    const res = await auditLog(req("GET", "/api/mobile/admin/audit-log?action=user.&userId=u1", adminToken));
+    audit.cachedActionPrefixes.mockResolvedValue(["user."]);
+    const res = await auditLog(req("GET", "/api/mobile/admin/audit-log", adminToken));
     expect(await res.json()).toEqual({ entries: [], nextCursor: null, prefixes: ["user."] });
+  });
+
+  it("denetim kaydi: onek ve kullanici filtreye girer, suzulu istek onek sormaz", async () => {
+    audit.listPage.mockResolvedValue({ items: [], nextCursor: null });
+    const res = await auditLog(req("GET", "/api/mobile/admin/audit-log?action=user.&userId=u1", adminToken));
+    expect(await res.json()).toEqual({ entries: [], nextCursor: null });
     expect(audit.listPage).toHaveBeenCalledWith({ actionPrefix: "user.", userId: "u1" }, { cursor: null, take: 30 });
+    expect(audit.cachedActionPrefixes).not.toHaveBeenCalled();
   });
 
   it("denetim kaydi: gecersiz onek yok sayilir, sonraki sayfa onek sormaz", async () => {
     audit.listPage.mockResolvedValue({ items: [], nextCursor: null });
     await auditLog(req("GET", "/api/mobile/admin/audit-log?action=%25'%3B&cursor=c1", adminToken));
     expect(audit.listPage).toHaveBeenCalledWith({ actionPrefix: null, userId: null }, { cursor: "c1", take: 30 });
-    expect(audit.filterOptions).not.toHaveBeenCalled();
+    expect(audit.cachedActionPrefixes).not.toHaveBeenCalled();
   });
 });

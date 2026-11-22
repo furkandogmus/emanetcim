@@ -712,6 +712,9 @@ model AuditLog {
   @@index([actorUserId])
   @@index([entityType, entityId])
   @@index([createdAt])
+  /// Denetim kaydi ekrani: eylem oneki ve aktor filtresi, yeniden eskiye.
+  @@index([action, createdAt])
+  @@index([actorUserId, createdAt])
 }
 
 /// Yonetici "Duyuru gonder" (operasyonel push yayini). Kayit gonderim
