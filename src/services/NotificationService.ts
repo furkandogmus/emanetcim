@@ -1123,15 +1123,23 @@ export class NotificationService implements INotificationService {
       },
     }, locale);
 
+    // HTML ve duz metin ayri kurulur: duz metni HTML'den etiket silerek uretmek
+    // kirilgandi (CodeQL) ve esnaf notunu kacirilmis haliyle (&amp;) gonderiyordu.
     const paragraphs: string[] = [];
-    if (reason === "no_show") paragraphs.push(c.noShow);
+    const textParagraphs: string[] = [];
+    const plain = (s: string) => s.split(shopHtml).join(shop);
+    const add = (html: string, text = plain(html)) => {
+      paragraphs.push(html);
+      textParagraphs.push(text);
+    };
+    if (reason === "no_show") add(c.noShow);
     else if (reason === "partner_cancel") {
-      paragraphs.push(c.partner);
+      add(c.partner);
       const label = c.reasons[params.detail as keyof typeof c.reasons];
-      if (label) paragraphs.push(`<strong>${c.reasonLabel}:</strong> ${label}`);
-      if (params.detail === "other" && params.note) paragraphs.push(escapeEmailHtml(params.note));
-    } else if (reason === "admin_cancel") paragraphs.push(c.admin);
-    else paragraphs.push(c.guest);
+      if (label) add(`<strong>${c.reasonLabel}:</strong> ${label}`, `${c.reasonLabel}: ${label}`);
+      if (params.detail === "other" && params.note) add(escapeEmailHtml(params.note), params.note);
+    } else if (reason === "admin_cancel") add(c.admin);
+    else add(c.guest);
 
     const subject = reason === "no_show" ? c.noShowSubject : c.subject;
     const html = renderEmailHtml({
@@ -1142,8 +1150,7 @@ export class NotificationService implements INotificationService {
       cta: { href: searchUrl, label: c.cta, variant: "link" },
       footer: c.footer,
     });
-    // Duz metin govdesi: HTML etiketleri ve kacirilmis karakterler sokulur.
-    const text = paragraphs.join("\n\n").replace(/<[^>]+>/g, "").split(shopHtml).join(shop);
+    const text = textParagraphs.join("\n\n");
     await this.sendEmail(email, subject, text, bookingId, html);
   }
 
