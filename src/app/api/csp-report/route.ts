@@ -12,6 +12,11 @@ import { getClientIp } from "@/lib/get-ip";
  * sınırı, istek başına en fazla `MAX_REPORTS` rapor. Log'a YALNIZCA direktif ve
  * engellenen adresin HOST'u yazılır: belge adresi ve `script-sample` rezervasyon
  * kodu / token / kullanıcı metni taşıyabilir.
+ *
+ * Hacim: Trusted Types direktifi çok rapor üretir; her `LOG_SAMPLE` ihlalden
+ * biri `info` olarak, o ana kadarki sayaçla loglanır. Report-Only devreye
+ * girdikten ~7 gün sonra (2026-11-30 civarı) loglar gözden geçirilip ya nonce'lu
+ * zorunlu politikaya geçilmeli ya da bu uç ve başlık kaldırılmalı.
  */
 
 const MAX_BODY_BYTES = 16 * 1024;
@@ -19,6 +24,10 @@ const MAX_REPORTS = 10;
 const MAX_FIELD = 128;
 const RATE_MAX = 30;
 const RATE_WINDOW_MS = 60_000;
+const LOG_SAMPLE = 20;
+
+/** Süreç başına görülen ihlal sayısı; örneklemeyle loglanan kayda eklenir. */
+let seen = 0;
 
 const ACCEPTED_TYPES = ["application/csp-report", "application/reports+json", "application/json"];
 
@@ -124,7 +133,10 @@ export async function POST(req: NextRequest) {
     return new NextResponse(null, { status: 400 });
   }
   for (const v of violations) {
-    logger.warn({ csp: v, format: type }, "csp_report_only_violation");
+    seen += 1;
+    if (seen % LOG_SAMPLE === 1) {
+      logger.info({ csp: v, format: type, seen, sample: LOG_SAMPLE }, "csp_report_only_violation");
+    }
   }
   return new NextResponse(null, { status: 204 });
 }
