@@ -1290,7 +1290,9 @@
       "too_soon_one": "An announcement was just sent. Try again in {{count}} minute.",
       "too_soon_other": "An announcement was just sent. Try again in {{count}} minutes.",
       "forbidden": "Only admins can do this, and not while viewing as a user.",
-      "no_recipients": "No device in this audience receives notifications."
+      "no_recipients": "No device in this audience receives notifications.",
+      "broadcast_in_progress": "The previous announcement is still being sent. Try again when it finishes; you can follow it in the list below.",
+      "reason_too_long": "The reason can be at most 500 characters."
     }
   }
 }
