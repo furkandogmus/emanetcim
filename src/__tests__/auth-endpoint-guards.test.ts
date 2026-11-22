@@ -199,9 +199,13 @@ describe("kimlik dogrulama uclarinin kapilari", () => {
       durabilir (`@unique` farkli dizeleri engellemez) ve girisin hangi satiri
       buldugu belirsiz olur.
     */
-    const src = read("src/app/api/mobile/auth/me/route.ts");
-    expect(src).toMatch(/normalizeTrGsm10/);
-    expect(src).toMatch(/invalid_phone/);
+    // Kural 2026-11-22'de web profil sayfasiyla ortak servise tasindi; uc onu cagirmali.
+    const route = read("src/app/api/mobile/auth/me/route.ts");
+    expect(route).toMatch(/updateOwnProfile\(/);
+    const shared = read("src/services/auth/own-profile.ts");
+    expect(shared).toMatch(/partnerProfileService\.updatePhone\(/);
+    expect(shared).toMatch(/invalid_phone/);
+    expect(read("src/services/PartnerProfileService.ts")).toMatch(/normalizeTrGsm10/);
   });
 
   it("rol her iki mobil yardimcida da VERITABANINDAN okunur", () => {
