@@ -1040,3 +1040,13 @@ body {
 
   /* ── Sayfa zemini ── */
 }
+
+/* Tarayicinin kendi dogrulamasi (required, type=email, minlength) alanlari
+   `aria-invalid` olmadan da gecersiz sayar; `:user-invalid` yalnizca kullanici
+   alana dokunduktan sonra eslesir, yani bos formu acilista kirmizi boyamaz.
+   Renk, bilesenlerdeki `aria-[invalid=true]:border-red-300` ile ayni. */
+@layer utilities {
+  :is(input, select, textarea):user-invalid {
+    border-color: var(--color-red-300);
+  }
+}
