@@ -2,6 +2,7 @@ import type { BroadcastAudience, Prisma } from "@prisma/client";
 import prisma from "@/lib/db";
 import logger from "@/lib/logger";
 import { writeAuditLog } from "@/lib/audit-log";
+import { rateLimit } from "@/lib/rate-limit";
 import { ANONYMIZED_EMAIL_DOMAIN } from "@/lib/anonymized-account";
 import {
   BROADCAST_MIN_INTERVAL_MS,
@@ -25,6 +26,9 @@ import { notificationService } from "@/services/NotificationService";
 const BROADCAST_LOCK_KEY = 7_241_001;
 const CHUNK_SIZE = 50;
 const CONCURRENCY = 2;
+/** Test gonderimi gercek sinira sayilmaz ama sinirsiz da degil: yonetici basina dakikada 5. */
+const TEST_LIMIT = 5;
+const TEST_WINDOW_MS = 60_000;
 
 export type BroadcastActor = { id: string; impersonatedBy?: string };
 
@@ -100,11 +104,20 @@ async function deliverToDevices(
   await Promise.all(Array.from({ length: Math.min(CONCURRENCY, jobs.length) }, worker));
 }
 
-/** "Kendime test gonder": yalniz cagiran yoneticinin kendi cihazlari; sinira sayilmaz, kayit acmaz. */
-export async function sendBroadcastTest(actor: BroadcastActor, raw: Record<string, unknown>) {
-  if (actor.impersonatedBy) return { ok: false as const, code: "forbidden" as const };
+export type BroadcastTestResult =
+  | { ok: true; devices: number }
+  | { ok: false; code: "forbidden" | "invalid_title" | "invalid_body" }
+  | { ok: false; code: "too_soon"; retryAfterSeconds: number };
+
+/** "Kendime test gonder": yalniz cagiran yoneticinin kendi cihazlari; 10 dakika sinirina sayilmaz, kayit acmaz. */
+export async function sendBroadcastTest(actor: BroadcastActor, raw: Record<string, unknown>): Promise<BroadcastTestResult> {
+  if (actor.impersonatedBy) return { ok: false, code: "forbidden" };
   const parsed = parseBroadcastContent(raw);
-  if (!parsed.ok) return { ok: false as const, code: parsed.error };
+  if (!parsed.ok) return { ok: false, code: parsed.error };
+  // Pencere kayan oldugu icin kesin kalan sure bilinmez; en kotu durum tum pencere.
+  if (!(await rateLimit(`broadcast_test:${actor.id}`, TEST_LIMIT, TEST_WINDOW_MS))) {
+    return { ok: false, code: "too_soon", retryAfterSeconds: TEST_WINDOW_MS / 1000 };
+  }
   const devices = await prisma.mobilePushToken.findMany({
     where: { userId: actor.id },
     select: { token: true, locale: true },
@@ -118,7 +131,7 @@ export async function sendBroadcastTest(actor: BroadcastActor, raw: Record<strin
     action: "admin.broadcast.test",
     metadata: { devices: devices.length, titleTr: parsed.content.titleTr },
   });
-  return { ok: true as const, devices: devices.length };
+  return { ok: true, devices: devices.length };
 }
 
 export type CreateBroadcastResult =
@@ -131,6 +144,8 @@ export type CreateBroadcastResult =
         | "invalid_title"
         | "invalid_body"
         | "reason_required"
+        | "reason_too_long"
+        | "broadcast_in_progress"
         | "no_recipients";
     }
   | { ok: false; code: "too_soon"; retryAfterSeconds: number };
@@ -152,11 +167,26 @@ export async function createBroadcast(
   if (!parsed.ok) return { ok: false, code: parsed.error };
   const reason = typeof raw.reason === "string" ? raw.reason.trim() : "";
   if (Array.from(reason).length < BROADCAST_REASON_MIN) return { ok: false, code: "reason_required" };
+  if (Array.from(reason).length > BROADCAST_REASON_MAX) return { ok: false, code: "reason_too_long" };
   const content = parsed.content;
   const now = opts.now ?? new Date();
 
   const result = await prisma.$transaction(async (tx): Promise<CreateBroadcastResult> => {
     await tx.$executeRaw`SELECT pg_advisory_xact_lock(${BROADCAST_LOCK_KEY}::bigint)`;
+    /*
+      Teslim kaydi cihaz basina tutulmuyor: yeniden baslatmada yarim kalan gonderim
+      tekrar baslatilirsa ayni cihazlar ikinci kez alir. 10 dakika siniri bunu
+      onlemez (asili satir 30 dakika SENDING gorunur), bu kontrol onler. 30 dakikadir
+      ilerlemeyen satir asili sayilir ve engellemez.
+    */
+    const running = await tx.broadcast.findFirst({
+      where: {
+        status: { in: ["QUEUED", "SENDING"] },
+        updatedAt: { gte: new Date(now.getTime() - BROADCAST_STUCK_MS) },
+      },
+      select: { id: true },
+    });
+    if (running) return { ok: false, code: "broadcast_in_progress" };
     const last = await tx.broadcast.findFirst({ orderBy: { createdAt: "desc" }, select: { createdAt: true } });
     if (last) {
       const waitMs = last.createdAt.getTime() + BROADCAST_MIN_INTERVAL_MS - now.getTime();
@@ -168,7 +198,7 @@ export async function createBroadcast(
       data: {
         audience,
         ...content,
-        reason: reason.slice(0, BROADCAST_REASON_MAX),
+        reason,
         createdById: actor.id,
         targetedDevices: devices,
         status: "QUEUED",
@@ -201,6 +231,7 @@ export async function createBroadcast(
 export async function deliverBroadcast(id: string): Promise<void> {
   const b = await prisma.broadcast.findUnique({ where: { id } });
   if (!b || b.status !== "QUEUED") return;
+  // TODO: tum token'lar tek seferde bellege okunuyor; ~50 bin cihazi gecince imlecle sayfali oku.
   const devices = await prisma.mobilePushToken.findMany({
     where: { user: audienceUserWhere(b.audience) },
     select: { token: true, locale: true },
