@@ -190,7 +190,7 @@ function Dashboard({
                   <AppText variant="bodyMedium" style={{ fontFamily: fonts.bodySemibold, fontVariant: ["tabular-nums"] }}>
                     {formatMoney(b.totalPrice)}
                   </AppText>
-                  <StatusBadge status={b.status} />
+                  <StatusBadge status={b.status} cancelReason={b.cancelReason} />
                 </View>
               </Pressable>
             ))}
