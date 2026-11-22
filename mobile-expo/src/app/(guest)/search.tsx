@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { ActivityIndicator, Linking, Pressable, ScrollView, StyleSheet, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { router, useLocalSearchParams } from "expo-router";
@@ -62,23 +62,36 @@ export default function SearchWizard() {
   */
   const [districtStep, setDistrictStep] = useState<{ city: CityCoverage; districts: DistrictCoverage[] } | null>(null);
   const [loadingCity, setLoadingCity] = useState<string | null>(null);
+  /*
+    Bekleyen ilce isteginin kimligi. Yuklenirken misafir adres ya da konum secebilir,
+    baska sehre dokunabilir: gec gelen yanit o secimi ezmesin, yalnizca son istek gecer.
+  */
+  const pendingCity = useRef(0);
+
+  function cancelPendingCity() {
+    pendingCity.current += 1;
+    setLoadingCity(null);
+  }
 
   function choosePlace(place: Place) {
+    cancelPendingCity();
     setDistrictStep(null);
     search.setPlace(place);
     setStep(1);
   }
 
   async function chooseCity(city: CityCoverage) {
-    if (loadingCity) return;
+    const id = ++pendingCity.current;
     setLoadingCity(city.name);
     const districts = await loadCityDistricts(queryClient, city);
+    if (id !== pendingCity.current) return;
     setLoadingCity(null);
     if (districts.length > 0) setDistrictStep({ city, districts });
     else choosePlace(cityPlace(city));
   }
 
   async function useMyLocation() {
+    cancelPendingCity();
     setLocating(true);
     setLocationError(null);
     const res = await getDevicePosition();
