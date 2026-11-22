@@ -22,7 +22,7 @@ import StarRating from "@/components/common/StarRating";
 import ConfirmDialog from "@/components/common/ConfirmDialog";
 import { formatDecimal } from "@/lib/currency";
 import { bcp47ForUiLocale } from "@/lib/intl-locale";
-import { actionErrorKey } from "@/lib/action-error";
+import { actionErrorKey, returnedErrorKey } from "@/lib/action-error";
 import { formatInstant } from "@/lib/format-datetime";
 
 interface AdminPartnerEditClientProps {
@@ -109,7 +109,13 @@ export default function AdminPartnerEditClient({ shop, photoSection, scheduleSec
   const confirmDeleteReview = async () => {
     if (!pendingReviewDeleteId) return;
     try {
-      await deleteReviewAction(pendingReviewDeleteId);
+      const res = await deleteReviewAction(pendingReviewDeleteId);
+      if (!res.success) {
+        // Baska bir yonetici (ya da mobil moderasyon) once silmis olabilir.
+        toast.error(tErrors(returnedErrorKey(res.error) ?? "generic"));
+        router.refresh();
+        return;
+      }
       toast.success(t("reviewDeletedSuccess"));
       router.refresh();
     } catch (caughtError: unknown) {
