@@ -19,7 +19,12 @@ export type BookingEventType =
    * (`OverdueBookingService`), durum DEĞİŞTİRMEZ — yalnızca iz bırakır.
    * `metadata.tier` eşiği taşır; aynı eşik ikinci kez yazılmaz.
    */
-  | "OVERDUE";
+  | "OVERDUE"
+  /**
+   * Alma saati gecmis valiz icin misafire hatirlatma gonderildi
+   * (`OverdueGuestReminderService`). `metadata.slot` 1..7; ayni slot ikinci kez yazilmaz.
+   */
+  | "OVERDUE_GUEST_REMINDER";
 
 export class BookingEventService {
   async record(params: {
