@@ -187,7 +187,7 @@ export function BookingDetailView({ id, mode }: { id: string; mode: "guest" | "p
   }
 
   const b = query.data;
-  // Gelinmemis, suresi dolmus rezervasyon: QR / degistir / iptal gizlenir, tek is "yeniden rezervasyon".
+  // Gelinmemis, suresi dolmus rezervasyon: QR / degistir gizlenir; "yeniden rezervasyon" ve kapat kalir.
   const expired = mode === "guest" && isBookingExpired(b);
   const showQr = mode === "guest" && !expired && !["CANCELLED", "CHECKED_OUT"].includes(b.status);
 
@@ -203,6 +203,17 @@ export function BookingDetailView({ id, mode }: { id: string; mode: "guest" | "p
     Alert.alert(t("bookings.cancelTitle"), t("bookings.cancelBody"), [
       { text: t("common.cancel"), style: "cancel" },
       { text: t("bookings.cancelConfirm"), style: "destructive", onPress: () => cancel.mutate() },
+    ]);
+  }
+
+  /*
+    Suresi dolan rezervasyon eskiden yalnizca "yeniden rezervasyon" sunuyordu ve
+    listede asili kaliyordu. Ayni iptal ucu kapatir; sunucu valiz birakildiysa reddeder.
+  */
+  function confirmCloseExpired() {
+    Alert.alert(t("bookings.closeExpiredTitle"), t("bookings.closeExpiredBody"), [
+      { text: t("common.cancel"), style: "cancel" },
+      { text: t("bookings.closeExpiredConfirm"), style: "destructive", onPress: () => cancel.mutate() },
     ]);
   }
 
@@ -229,6 +240,14 @@ export function BookingDetailView({ id, mode }: { id: string; mode: "guest" | "p
           <View style={{ gap: space.md }}>
             <Banner tone="warning" title={t("bookings.expiredTitle")} body={t("bookings.expiredBody")} />
             <Button title={t("bookings.rebook")} onPress={rebook} />
+            {CANCELLABLE.has(b.status) ? (
+              <Button
+                variant="secondary"
+                title={t("bookings.closeExpired")}
+                loading={cancel.isPending}
+                onPress={confirmCloseExpired}
+              />
+            ) : null}
           </View>
         ) : null}
         {/* Onay bekleyen duzeltme bilet ve QR'in USTUNDE: misafirin yapmasi gereken tek is bu. */}
