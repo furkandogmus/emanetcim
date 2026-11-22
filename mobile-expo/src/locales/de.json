@@ -747,7 +747,7 @@
     "openSettings": "In den Einstellungen erlauben",
     "manualOpen": "Code manuell eingeben",
     "manualTitle": "Mit Code oder Name finden",
-    "manualPlaceholder": "8-stelliger Code oder Gastname",
+    "manualPlaceholder": "8-stelliger Code, Gastname oder Telefon",
     "manualSearch": "Suchen",
     "manualNone": "Keine passende Buchung gefunden.",
     "manualMany": "Mehrere Treffer, wähle einen aus.",
