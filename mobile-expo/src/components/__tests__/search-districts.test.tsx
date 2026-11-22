@@ -5,7 +5,7 @@
  */
 import { afterEach, beforeAll, beforeEach, describe, expect, it, jest } from "@jest/globals";
 import type { ReactNode } from "react";
-import { Text } from "react-native";
+import { BackHandler, Text } from "react-native";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { act, fireEvent, render, screen, waitFor } from "@testing-library/react-native";
 
@@ -176,6 +176,32 @@ describe("ilce adimi", () => {
     await screen.findByText("İstanbul içinde nerede?");
     const labels = screen.getAllByText(/^(Merkez|Beşiktaş|Kadıköy)$/).map((n) => n.props.children);
     expect(labels).toEqual(["Merkez", "Beşiktaş", "Kadıköy"]);
+  });
+
+  it("ilce satirinin erisilebilirlik etiketi '<Ilce>, <n> nokta'", async () => {
+    await openCity();
+    expect(await screen.findByLabelText("Kadıköy, 3 nokta")).toBeTruthy();
+  });
+
+  it("Android geri tusu ilce adimindan sehir listesine doner", async () => {
+    type Handler = Parameters<typeof BackHandler.addEventListener>[1];
+    const handlers: Handler[] = [];
+    const spy = jest.spyOn(BackHandler, "addEventListener").mockImplementation((_e, h) => {
+      handlers.push(h);
+      return { remove: () => void handlers.splice(handlers.indexOf(h), 1) };
+    });
+    await openCity();
+    await screen.findByText("Merkez");
+    expect(handlers).toHaveLength(1);
+    let handled: boolean | null | undefined;
+    await act(async () => {
+      handled = handlers[0]({} as Parameters<Handler>[0]);
+    });
+    expect(handled).toBe(true);
+    expect(screen.queryByText("Merkez")).toBeNull();
+    expect(screen.getByText("Popüler şehirler")).toBeTruthy();
+    expect(handlers).toHaveLength(0);
+    spy.mockRestore();
   });
 });
 

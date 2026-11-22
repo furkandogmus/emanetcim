@@ -1,5 +1,5 @@
-import { useRef, useState } from "react";
-import { ActivityIndicator, Linking, Pressable, ScrollView, StyleSheet, View } from "react-native";
+import { useEffect, useRef, useState } from "react";
+import { ActivityIndicator, BackHandler, Linking, Pressable, ScrollView, StyleSheet, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { router, useLocalSearchParams } from "expo-router";
 import { useQueryClient } from "@tanstack/react-query";
@@ -90,6 +90,16 @@ export default function SearchWizard() {
     else choosePlace(cityPlace(city));
   }
 
+  // Android geri tusu ilce adimindan sihirbazi kapatmasin, sehir listesine donsun.
+  useEffect(() => {
+    if (!districtStep) return;
+    const sub = BackHandler.addEventListener("hardwareBackPress", () => {
+      setDistrictStep(null);
+      return true;
+    });
+    return () => sub.remove();
+  }, [districtStep]);
+
   async function useMyLocation() {
     cancelPendingCity();
     setLocating(true);
@@ -160,6 +170,7 @@ export default function SearchWizard() {
               <Pressable
                 key={d.slug}
                 accessibilityRole="button"
+                accessibilityLabel={`${d.name}, ${t("home.citySpots", { count: d.shopCount })}`}
                 onPress={() => choosePlace(districtPlace(d, districtStep.city))}
                 style={({ pressed }) => [
                   styles.cityRow,
