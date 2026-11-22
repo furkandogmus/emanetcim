@@ -3,6 +3,8 @@ import type { NextRequest } from "next/server";
 import { requireMobileUser, requireRole } from "@/lib/mobile-auth";
 import prisma from "@/lib/db";
 import { cursorArgs, parseCursor, toPage } from "@/lib/cursor-page";
+import { toMobilePartnerBookingRow } from "@/lib/mobile-dto";
+import { withCancelReasons } from "@/services/booking/cancel-reason";
 
 export async function GET(req: NextRequest) {
   const auth = await requireMobileUser(req);
@@ -59,19 +61,9 @@ export async function GET(req: NextRequest) {
   const historyPage = toPage(history, limit);
   const allBookings = [...active, ...historyPage.items];
 
-  const results = allBookings.map((b) => ({
-    id: b.id,
-    shopId: b.shopId,
-    shopName: shopMap.get(b.shopId) ?? "",
-    checkInTime: b.checkInTime,
-    checkOutTime: b.checkOutTime,
-    bagCountS: b.bagCountS,
-    bagCountM: b.bagCountM,
-    bagCountXl: b.bagCountXl,
-    totalPrice: Number(b.totalPrice),
-    status: b.status,
-    guestName: b.guest?.name ?? "",
-  }));
+  const results = (await withCancelReasons(allBookings)).map((b) =>
+    toMobilePartnerBookingRow(b, shopMap.get(b.shopId) ?? ""),
+  );
 
   // `nextCursor`: gecmiste daha eski kayit var mi. `total` aktifleri de sayar, sayfalamayi suremez.
   return NextResponse.json({ items: results, total, page, limit, nextCursor: historyPage.nextCursor });

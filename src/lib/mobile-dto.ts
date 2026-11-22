@@ -8,6 +8,7 @@ import type { PricingRules } from "@/lib/pricing-rules";
 import { shopVisibilityIssues } from "@/lib/shop-visibility";
 import { storageCitiesListingShop } from "@/lib/storage-cities";
 import { isBagRevisableStatus } from "@/lib/bag-revision-status";
+import { cancelReasonFromEvents, noShowAvailableAt } from "@/lib/booking-closure";
 import { DISPUTE_STATUSES, type DisputeStatus } from "@/lib/dispute-status";
 import type { PartnerDashboardSnapshot } from "@/services/PartnerDashboardService";
 
@@ -57,6 +58,8 @@ type BookingSummarySource = {
   bagCountXl: number;
   totalPrice: unknown;
   status: string;
+  /** `withCancelReasons` ile eklenir; eklenmemisse `null` cikar. */
+  cancelReason?: string | null;
 };
 
 /** Valiz hic birakilmamis durumlar: alma saati gecince rezervasyon bosa dusmustur. */
@@ -86,6 +89,7 @@ export function toMobileBookingSummary(b: BookingSummarySource) {
     status: b.status,
     // Eski uygulama bilinmeyen alani yok sayar; yeni istemci QR/iptal/degistir'i buna gore gizler.
     expired: isBookingExpired(b),
+    cancelReason: b.status === "CANCELLED" ? (b.cancelReason ?? null) : null,
   };
 }
 
@@ -169,6 +173,19 @@ export function toMobileBookingDetail(b: BookingDetailSource, opts: { operator?:
       ? toMobilePendingBagRevision(b.pendingBagRevision)
       : null,
     guestPhone,
+    // Yalniz islemi yapan taraf icin: "Misafir gelmedi" dugmesinin acildigi an.
+    noShowAvailableAt: opts.operator ? (noShowAvailableAt(b)?.toISOString() ?? null) : null,
+  };
+}
+
+/** Esnaf rezervasyon listesi satiri: ozet + misafir adi. */
+export function toMobilePartnerBookingRow(
+  b: Omit<BookingSummarySource, "shop"> & { guest: { name: string | null } | null },
+  shopName: string,
+) {
+  return {
+    ...toMobileBookingSummary({ ...b, shop: { name: shopName } }),
+    guestName: b.guest?.name ?? "",
   };
 }
 
@@ -621,7 +638,7 @@ export function canViewAs(u: { role: string; isBanned: boolean }): boolean {
 }
 
 /** `admin/bookings` satiri: ozet + misafir adi (yoksa e-posta) ve olusturulma ani. */
-export function toMobileAdminBookingRow(b: AdminBookingRowSource) {
+export function toMobileAdminBookingRow(b: AdminBookingRowSource & { cancelReason?: string | null }) {
   return {
     ...toMobileBookingSummary(b),
     guestName: b.guest?.name || b.guest?.email || b.guestEmail || "",
@@ -633,7 +650,8 @@ export function toMobileAdminBookingRow(b: AdminBookingRowSource) {
 export function toMobileAdminBookingDetail({ booking: b, events }: AdminBookingDetailSource) {
   const place = fullAddress(b.shop.address, b.shop.district, b.shop.city);
   return {
-    ...toMobileAdminBookingRow(b),
+    ...toMobileAdminBookingRow({ ...b, cancelReason: b.status === "CANCELLED" ? cancelReasonFromEvents(events) : null }),
+    noShowAvailableAt: noShowAvailableAt(b)?.toISOString() ?? null,
     guest: {
       // Kayitli kullanici degilse (misafir e-postasiyla alinmis) kimlik yok: "bu kullanici olarak gir" cizilmez.
       id: b.guest?.id ?? null,
