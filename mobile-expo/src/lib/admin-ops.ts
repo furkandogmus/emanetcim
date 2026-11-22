@@ -1,6 +1,7 @@
 import { ApiError, isImpersonating } from "./api";
 import { errorMessage } from "./errors";
-import type { AdminDisputeStatus, AdminFeatureFlag, AdminPlatformSettings, AdminPlatformSettingsValues } from "./types";
+import i18n from "./i18n";
+import type { AdminDisputeStatus, AdminFeatureFlag, AdminPlatformSettingsValues, SettingsConfirmChallenge } from "./types";
 
 /**
  * Yonetim araclari (uyusmazlik, kupon, odeme, ayar, bayrak) icin istemci kurallari.
@@ -20,9 +21,26 @@ export function adminOpsErrorMessage(err: unknown): string {
   return errorMessage(err, "adminOps");
 }
 
-/** 428 `confirmation_required`: sunucu baska bir riskli alan gordu (ekran eski veriyle acilmis olabilir). */
-export function isConfirmationRequired(err: unknown): boolean {
-  return err instanceof ApiError && err.code === "confirmation_required";
+/** Sunucu web ile ayni siniri uygular (`DISPUTE_ADMIN_NOTE_MAX`). */
+export const DISPUTE_NOTE_MAX = 2000;
+
+/**
+ * Ayar PUT'unun 428 yaniti -> onay penceresi. Hangi degisikligin riskli oldugu ve ifade
+ * (surum degisiyorsa YENI surumun kendisi) sunucudan gelir; istemci liste tutmaz.
+ */
+export function settingsConfirmChallenge(err: unknown): SettingsConfirmChallenge | null {
+  if (!(err instanceof ApiError) || err.code !== "confirmation_required") return null;
+  const body = err.body as Partial<SettingsConfirmChallenge> | undefined;
+  if (typeof body?.phrase !== "string" || !Array.isArray(body.changes)) return null;
+  return { phrase: body.phrase, changes: body.changes };
+}
+
+/** Onay penceresindeki eski/yeni deger: bos "—", acik/kapali cevrilir, liste virgulle. */
+export function formatSettingValue(v: unknown): string {
+  if (v === null || v === undefined || v === "") return "—";
+  if (typeof v === "boolean") return i18n.t(v ? "adminOps.settings.on" : "adminOps.settings.off");
+  if (Array.isArray(v)) return v.length ? v.join(", ") : "—";
+  return String(v);
 }
 
 /* ---------- kupon ---------- */
@@ -140,16 +158,6 @@ export function draftToValues(d: SettingsDraft): Record<string, unknown> {
     else out[f] = raw.trim() === "" ? NaN : Number(raw.trim().replace(",", "."));
   }
   return out;
-}
-
-/** Kaydedilecek taslakta DEGISEN riskli alanlar; doluysa yazarak onay istenir. */
-export function changedRiskyFields(settings: AdminPlatformSettings, draft: SettingsDraft): (keyof AdminPlatformSettingsValues)[] {
-  const before = settingsToDraft(settings.values);
-  return settings.riskyFields.filter((f) => normalize(before[f]) !== normalize(draft[f]));
-}
-
-function normalize(s: string | undefined) {
-  return (s ?? "").trim().replace(",", ".");
 }
 
 /** Yazilan ifade tam esit olmali (buyuk/kucuk harf dahil): "onayla" kazara yazilmis sayilmaz. */

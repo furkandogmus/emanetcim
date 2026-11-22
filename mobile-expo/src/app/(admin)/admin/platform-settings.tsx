@@ -12,16 +12,17 @@ import {
   SETTINGS_FIELDS,
   adminOpsErrorMessage,
   canMutateAdminOps,
-  changedRiskyFields,
   draftToValues,
+  formatSettingValue,
   isBoolSetting,
+  settingsConfirmChallenge,
   settingsToDraft,
   type SettingsDraft,
 } from "@/lib/admin-ops";
 import { formatDayTime } from "@/lib/format";
 import { notify } from "@/lib/notify";
 import { adminOpsKeys, useAdminPlatformSettings } from "@/lib/queries";
-import type { AdminPlatformSettings } from "@/lib/types";
+import type { AdminPlatformSettings, SettingsConfirmChallenge } from "@/lib/types";
 import { colors, space } from "@/theme/tokens";
 
 export default function AdminPlatformSettingsScreen() {
@@ -38,11 +39,12 @@ function SettingsForm({ settings }: { settings: AdminPlatformSettings }) {
   const { t } = useTranslation();
   const qc = useQueryClient();
   const [draft, setDraft] = useState<SettingsDraft>(() => settingsToDraft(settings.values));
-  const [confirming, setConfirming] = useState(false);
+  // Sunucu riskli degisiklik gordugunde (428) donen eski -> yeni listesi ve ifade.
+  const [challenge, setChallenge] = useState<SettingsConfirmChallenge | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const confirming = challenge !== null;
 
   const canMutate = canMutateAdminOps();
-  const risky = changedRiskyFields(settings, draft);
   const before = settingsToDraft(settings.values);
   const dirty = SETTINGS_FIELDS.some((f) => before[f].trim() !== draft[f].trim());
 
@@ -50,15 +52,25 @@ function SettingsForm({ settings }: { settings: AdminPlatformSettings }) {
     mutationFn: (confirmation: string | undefined) =>
       api<AdminPlatformSettings>("/admin/platform-settings", {
         method: "PUT",
-        body: { values: draftToValues(draft), confirmation },
+        body: { values: draftToValues(draft), confirmation, expectedUpdatedAt: settings.updatedAt },
       }),
     onSuccess: (next) => {
-      setConfirming(false);
+      setChallenge(null);
       setError(null);
       qc.setQueryData(adminOpsKeys.settings, next);
       notify(t("adminOps.saved"));
     },
-    onError: (e) => setError(adminOpsErrorMessage(e)),
+    onError: (e, confirmation) => {
+      const c = settingsConfirmChallenge(e);
+      // Onaysiz ilk deneme 428 alir: pencere acilir. Onayla gonderilip yine 428 ise hata pencerede.
+      if (c && confirmation === undefined) {
+        setError(null);
+        setChallenge(c);
+        return;
+      }
+      if (c) setChallenge(c);
+      setError(adminOpsErrorMessage(e));
+    },
   });
 
   const label = (f: keyof SettingsDraft) => t(`adminOps.settings.fields.${f}`);
@@ -123,19 +135,31 @@ function SettingsForm({ settings }: { settings: AdminPlatformSettings }) {
         loading={save.isPending && !confirming}
         onPress={() => {
           setError(null);
-          if (risky.length > 0) setConfirming(true);
-          else save.mutate(undefined);
+          save.mutate(undefined);
         }}
       />
 
       <TypedConfirmSheet
         visible={confirming}
-        phrase={settings.confirmPhrase}
-        body={t("adminOps.confirm.body", { fields: risky.map(label).join(", "), phrase: settings.confirmPhrase })}
+        phrase={challenge?.phrase ?? ""}
+        body={t("adminOps.confirm.body", { phrase: challenge?.phrase ?? "" })}
+        details={
+          <View style={{ gap: space.xs }} testID="confirm-changes">
+            {challenge?.changes.map((c) => (
+              <AppText key={c.field} variant="bodyMedium">
+                {t("adminOps.confirm.change", {
+                  field: label(c.field),
+                  from: formatSettingValue(c.from),
+                  to: formatSettingValue(c.to),
+                })}
+              </AppText>
+            ))}
+          </View>
+        }
         loading={save.isPending}
         error={confirming ? error : null}
         onClose={() => {
-          setConfirming(false);
+          setChallenge(null);
           setError(null);
         }}
         onConfirm={(typed) => save.mutate(typed)}

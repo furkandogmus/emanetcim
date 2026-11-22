@@ -9,7 +9,7 @@ import { AdminOpsScreen, SectionTitle, opsStyles } from "@/components/AdminOps";
 import { Field } from "@/components/Field";
 import { AppText, Banner, Button, Card, Chip } from "@/components/ui";
 import { api } from "@/lib/api";
-import { DISPUTE_STATUSES, adminOpsErrorMessage, canMutateAdminOps } from "@/lib/admin-ops";
+import { DISPUTE_NOTE_MAX, DISPUTE_STATUSES, adminOpsErrorMessage, canMutateAdminOps } from "@/lib/admin-ops";
 import { formatMoney, formatStayRange } from "@/lib/format";
 import { resolveImage } from "@/lib/images";
 import { notify } from "@/lib/notify";
@@ -128,6 +128,7 @@ function DisputeBody({ dispute: d }: { dispute: AdminDispute }) {
           value={note}
           onChangeText={setNote}
           multiline
+          maxLength={DISPUTE_NOTE_MAX}
           editable={canMutate}
           hint={t("adminOps.disputes.noteHint")}
         />
