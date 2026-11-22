@@ -1014,6 +1014,8 @@
     "fullName": "Full Name",
     "phone": "Phone",
     "reviews": "Reviews",
+    "reviewHiddenBadge": "Hidden",
+    "reviewHiddenReason": "Hidden because: {reason}",
     "noReviewsYet": "No reviews yet.",
     "messagesTitle": "Inbox",
     "messagesSearchPlaceholder": "Search...",
