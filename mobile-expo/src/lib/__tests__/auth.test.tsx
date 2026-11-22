@@ -360,3 +360,72 @@ describe("yonetici goruntulemesi", () => {
     expect(env.ctx().state).toMatchObject({ status: "signedIn", user: { id: "a1" } });
   });
 });
+
+describe("kodla sifre sifirlama (signInWithResetCode)", () => {
+  // Onceki testlerin oturumu ortak SecureStore'da kalmasin: girissiz baslanir.
+  beforeEach(() => {
+    jest.requireMock<{ __store: Map<string, string> }>("expo-secure-store").__store.clear();
+  });
+  const isResetSignInError = (e: unknown) => e instanceof Error && e.constructor.name === "PasswordResetSignInError";
+  const pair = { success: true, accessToken: "a-2", refreshToken: "r-2" };
+  const route = (me: () => unknown) =>
+    fetchMock.mockImplementation(async (url: string) =>
+      url.endsWith("/auth/password-reset/confirm-code") ? json(200, pair) : (me() as never),
+    );
+  const bearerOf = (path: string) => {
+    const call = fetchMock.mock.calls.find(([u]) => u.endsWith(path));
+    return (call?.[1]?.headers as Record<string, string> | undefined)?.Authorization;
+  };
+
+  it("govdeyi gonderir; yanittaki user ile token'lari kaydedip oturum acar", async () => {
+    const env = await mount();
+    fetchMock.mockResolvedValue(json(200, { ...pair, user: partner }) as never);
+    await env.act(() => env.ctx().signInWithResetCode("p@example.test", "123456", "uzunsifre1"));
+    const [url, init] = fetchMock.mock.calls[0];
+    expect(url).toMatch(/\/auth\/password-reset\/confirm-code$/);
+    expect(JSON.parse(String(init?.body))).toEqual({ email: "p@example.test", code: "123456", newPassword: "uzunsifre1" });
+    expect(JSON.parse(env.store.get("bp.session")!)).toMatchObject({ accessToken: "a-2", refreshToken: "r-2" });
+    expect(env.ctx().state).toMatchObject({ status: "signedIn", user: { id: "p1" } });
+    expect(fetchMock.mock.calls.some(([u]) => u.endsWith("/auth/me"))).toBe(false);
+  });
+
+  it("yanitta user yoksa yeni token'la /auth/me okunur", async () => {
+    const env = await mount();
+    route(() => json(200, partner));
+    await env.act(() => env.ctx().signInWithResetCode("p@example.test", "123456", "uzunsifre1"));
+    expect(bearerOf("/auth/me")).toBe("Bearer a-2");
+    expect(env.ctx().state).toMatchObject({ status: "signedIn", user: { id: "p1" } });
+  });
+
+  it("/auth/me basarisizsa token'lar silinir, oturum acik kalmaz, 'sifre guncellendi' hatasi firlar", async () => {
+    const env = await mount();
+    route(() => json(500, { error: "server_error" }));
+    let caught: unknown;
+    await env.act(() => env.ctx().signInWithResetCode("p@example.test", "123456", "uzunsifre1").catch((e) => (caught = e)));
+    expect(isResetSignInError(caught)).toBe(true);
+    expect(env.store.has("bp.session")).toBe(false);
+    expect(env.ctx().state.status).toBe("signedOut");
+  });
+
+  it("token yazimi basarisizsa da ayni hata: kod harcandi, genel hata gosterilmez", async () => {
+    const env = await mount();
+    const ss = jest.requireMock<{ setItemAsync: Mock<(k: string, v: string) => Promise<void>> }>("expo-secure-store");
+    ss.setItemAsync.mockImplementationOnce(async () => {
+      throw new Error("keystore");
+    });
+    fetchMock.mockResolvedValue(json(200, { ...pair, user: partner }) as never);
+    let caught: unknown;
+    await env.act(() => env.ctx().signInWithResetCode("p@example.test", "123456", "uzunsifre1").catch((e) => (caught = e)));
+    expect(isResetSignInError(caught)).toBe(true);
+    expect(env.ctx().state.status).toBe("signedOut");
+  });
+
+  it("sunucu kodu reddederse (invalid_code) hata oldugu gibi gecer, oturum acilmaz", async () => {
+    const env = await mount();
+    fetchMock.mockResolvedValue(json(400, { error: "invalid_code" }) as never);
+    let caught: unknown;
+    await env.act(() => env.ctx().signInWithResetCode("p@example.test", "000000", "uzunsifre1").catch((e) => (caught = e)));
+    expect(caught).toMatchObject({ code: "invalid_code" });
+    expect(env.store.has("bp.session")).toBe(false);
+  });
+});
