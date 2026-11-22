@@ -15,6 +15,8 @@ import prisma from '@/lib/db';
 import { Prisma } from '@prisma/client';
 import logger from '@/lib/logger';
 import { moneyToNumber } from '@/lib/money';
+import { z } from 'zod';
+import { writeAuditLog } from '@/lib/audit-log';
 
 export type ClaimedCoupon = {
   couponId: string;
@@ -317,6 +319,91 @@ export async function createCoupon(input: CouponInput): Promise<CouponCreateResu
  */
 export async function setCouponActive(id: string, isActive: boolean): Promise<void> {
   await prisma.coupon.update({ where: { id }, data: { isActive } });
+}
+
+/*
+  YONETICI KUPON ISLEMLERI — web action'i ve mobil yonetici ucu ayni govdeyi
+  cagirir. Sema ve denetim kaydi once action'daydi; mobil kopya ayrisirdi.
+*/
+export type CouponAdminActor = { id: string; role: string };
+
+export const adminCouponInputSchema = z.object({
+  code: z
+    .string()
+    .trim()
+    .min(3)
+    .max(32)
+    // Bosluk ve noktalama elle yazmayi zorlastirir; misafir yanlis yazar, "calismiyor" der.
+    .regex(/^[A-Za-z0-9_-]+$/),
+  discount: z.number().positive().max(100_000),
+  isPercent: z.boolean(),
+  minPrice: z.number().min(0).max(1_000_000).nullable(),
+  maxUses: z.number().int().min(1).max(1_000_000).nullable(),
+  expiresAt: z.string().datetime().nullable(),
+});
+
+export type AdminCouponCreateResult =
+  | { ok: true; id: string; code: string }
+  | { ok: false; reason: 'invalid_data' | 'duplicate_code' };
+
+export async function adminCreateCoupon(
+  actor: CouponAdminActor,
+  data: unknown,
+  ctx: { ip?: string | null } = {},
+): Promise<AdminCouponCreateResult> {
+  const parsed = adminCouponInputSchema.safeParse(data);
+  if (!parsed.success) return { ok: false, reason: 'invalid_data' };
+  const d = parsed.data;
+  // %100'u asan indirim `applyDiscount`ta 0'a kirpilir: kupon "her sey bedava" olur.
+  if (d.isPercent && d.discount > 100) return { ok: false, reason: 'invalid_data' };
+
+  const result = await createCoupon({
+    code: d.code,
+    discount: d.discount,
+    isPercent: d.isPercent,
+    minPrice: d.minPrice,
+    maxUses: d.maxUses,
+    expiresAt: d.expiresAt ? new Date(d.expiresAt) : null,
+  });
+  if (!result.ok) {
+    return { ok: false, reason: result.reason === 'invalid_input' ? 'invalid_data' : 'duplicate_code' };
+  }
+  writeAuditLog({
+    actorUserId: actor.id,
+    actorRole: actor.role,
+    action: 'coupon.create',
+    entityType: 'Coupon',
+    entityId: result.id,
+    metadata: { code: result.code, discount: d.discount, isPercent: d.isPercent, maxUses: d.maxUses },
+    ip: ctx.ip ?? null,
+  });
+  return result;
+}
+
+export async function adminSetCouponActive(
+  actor: CouponAdminActor,
+  id: string,
+  isActive: unknown,
+  ctx: { ip?: string | null } = {},
+): Promise<{ ok: true } | { ok: false; reason: 'invalid_data' | 'not_found' }> {
+  if (typeof isActive !== 'boolean') return { ok: false, reason: 'invalid_data' };
+  const existing = await prisma.coupon.findUnique({ where: { id }, select: { id: true } });
+  if (!existing) return { ok: false, reason: 'not_found' };
+  await setCouponActive(id, isActive);
+  writeAuditLog({
+    actorUserId: actor.id,
+    actorRole: actor.role,
+    action: isActive ? 'coupon.activate' : 'coupon.deactivate',
+    entityType: 'Coupon',
+    entityId: id,
+    ip: ctx.ip ?? null,
+  });
+  return { ok: true };
+}
+
+/** Yonetici listesi: once aciklar, sonra en yeni. */
+export function listCouponsForAdmin() {
+  return prisma.coupon.findMany({ orderBy: [{ isActive: 'desc' }, { createdAt: 'desc' }] });
 }
 
 export class CouponService {

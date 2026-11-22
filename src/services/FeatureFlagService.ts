@@ -1,5 +1,8 @@
 import { Prisma } from "@prisma/client";
+import { z } from "zod";
 import prisma from "@/lib/db";
+import { writeAuditLog } from "@/lib/audit-log";
+import { featureFlagConfirmPhrase, isRiskyFeatureFlag } from "@/lib/admin-risky-settings";
 
 const TTL_MS = 60_000;
 
@@ -109,3 +112,70 @@ class FeatureFlagService {
 }
 
 export const featureFlagService = new FeatureFlagService();
+
+/* Yonetici bayrak guncellemesi — web action'i ve mobil yonetici ucunun ortak govdesi. */
+export const featureFlagUpdateSchema = z.object({
+  key: z.string().min(2).max(64).regex(/^[a-z0-9_]+$/),
+  enabled: z.boolean(),
+  rolloutPct: z.number().int().min(0).max(100),
+  allowedUserIds: z.array(z.string().uuid()).max(500).default([]),
+  description: z.string().max(500).optional().nullable(),
+});
+
+export type FeatureFlagAdminActor = { id: string; role: string };
+
+export type UpdateFeatureFlagResult =
+  | { ok: true }
+  | { ok: false; reason: "invalid_data" | "not_found" | "confirmation_required" };
+
+/**
+ * `requireConfirmation` (mobil): riskli bayrakta `confirmation` bayragin anahtari
+ * olmali. `onlyExisting` (mobil): ekran yalniz var olan bayragi duzenler; yazim
+ * hatali bir anahtar sessizce yeni bayrak olusturmasin.
+ */
+export async function adminUpdateFeatureFlag(
+  actor: FeatureFlagAdminActor,
+  data: unknown,
+  opts: { ip?: string | null; requireConfirmation?: boolean; confirmation?: unknown; onlyExisting?: boolean } = {},
+): Promise<UpdateFeatureFlagResult> {
+  const parsed = featureFlagUpdateSchema.safeParse(data);
+  if (!parsed.success) return { ok: false, reason: "invalid_data" };
+  const d = parsed.data;
+
+  if (opts.onlyExisting) {
+    const existing = await prisma.featureFlag.findUnique({ where: { key: d.key }, select: { id: true } });
+    if (!existing) return { ok: false, reason: "not_found" };
+  }
+  if (opts.requireConfirmation && isRiskyFeatureFlag(d.key) && opts.confirmation !== featureFlagConfirmPhrase(d.key)) {
+    return { ok: false, reason: "confirmation_required" };
+  }
+
+  const allowJson = d.allowedUserIds.length > 0 ? d.allowedUserIds : Prisma.JsonNull;
+  await prisma.featureFlag.upsert({
+    where: { key: d.key },
+    create: {
+      key: d.key,
+      enabled: d.enabled,
+      rolloutPct: d.rolloutPct,
+      allowedUserIds: allowJson,
+      description: d.description?.trim() || null,
+    },
+    update: {
+      enabled: d.enabled,
+      rolloutPct: d.rolloutPct,
+      allowedUserIds: allowJson,
+      description: d.description === undefined ? undefined : d.description?.trim() || null,
+    },
+  });
+  invalidateFeatureFlagsCache();
+  writeAuditLog({
+    actorUserId: actor.id,
+    actorRole: actor.role,
+    action: "feature_flag.update",
+    entityType: "FeatureFlag",
+    entityId: d.key,
+    metadata: { enabled: d.enabled, rolloutPct: d.rolloutPct, allowlistSize: d.allowedUserIds.length },
+    ip: opts.ip ?? null,
+  });
+  return { ok: true };
+}

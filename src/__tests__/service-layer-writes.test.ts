@@ -91,16 +91,9 @@ const CEILINGS: Record<string, number> = {
   blogPost: 4,
   campaign: 4,
   contactMessage: 8,
-  /*
-    3 -> 1 (2026-09-01): uyusmazlik ACMA govdesi `DisputeService`e tasindi. Mobil
-    kopya yalnizca kaydi olusturuyor, ize ve ADMIN BILDIRIMINE hic dokunmuyordu.
-  */
-  dispute: 1,
-  featureFlag: 1,
   jobRun: 2,
   mobilePushToken: 2,
   notificationLog: 1,
-  platformSettings: 1,
   pushSubscription: 2,
   session: 1,
   /*
@@ -118,6 +111,11 @@ const CEILINGS: Record<string, number> = {
 };
 
 /*
+  KALDIRILAN GIRDILER (2026-11-23): `dispute`, `featureFlag`, `platformSettings`.
+  Yonetici yazmalari mobil yonetim araclari icin servise tasindi (web + mobil ayni govde).
+*/
+
+/*
   KALDIRILAN GIRDILER (2026-09-01) -- hepsi `AccountPrivacyService`e tasindi ve
   artik servis disindan HIC yazilmiyor: `legalAcceptance`. `account`, `review` ve
   `session` de yalnizca birer yerde kaldi.
@@ -127,7 +125,7 @@ const CEILINGS: Record<string, number> = {
 */
 
 /** Toplam tavan — yeni bir MODELİN sessizce eklenmesini de yakalar. */
-const TOTAL_CEILING = 64;
+const TOTAL_CEILING = 61;
 
 /**
  * Yorumlar ayıklanır: bu dosyaların çoğunda "eskiden burada ham

@@ -1,6 +1,6 @@
 "use client";
 
-import { DISPUTE_STATUSES } from "@/lib/dispute-status";
+import { DISPUTE_ADMIN_NOTE_MAX, DISPUTE_STATUSES } from "@/lib/dispute-status";
 import { useState } from "react";
 import { AlertTriangle, ChevronDown, ChevronUp, ArrowLeft, Loader2 } from "lucide-react";
 import { Link } from "@/i18n/routing";
@@ -333,6 +333,7 @@ export default function AdminDisputesClient({ disputes: initial }: { disputes: D
                         value={editNote}
                         onChange={(e) => setEditNote(e.target.value)}
                         rows={3}
+                        maxLength={DISPUTE_ADMIN_NOTE_MAX}
                         placeholder={t("disputesNotePlaceholder")}
                         className="w-full border border-gray-200 rounded-xl px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-gray-900 resize-none"
                       />
