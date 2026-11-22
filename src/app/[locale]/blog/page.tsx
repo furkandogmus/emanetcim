@@ -90,7 +90,7 @@ export default async function BlogListPage({
                         alt={post.title}
                         fill
                         sizes="(min-width: 1024px) 33vw, (min-width: 768px) 50vw, 100vw"
-                        priority={index < 3}
+                        preload={index < 3}
                         className="object-cover group-hover:scale-110 transition-transform duration-700"
                       />
                     ) : (
