@@ -1,4 +1,5 @@
 import prisma from "@/lib/db";
+import { PASSWORD_RESET_IDENTIFIER_PREFIX } from "@/lib/password-reset-token";
 import { BookingStatus, Role } from "@prisma/client";
 import { writeAuditLog } from "@/lib/audit-log";
 import { NOT_DROPPED_STATUSES } from "@/lib/booking-closure";
@@ -77,8 +78,19 @@ class AccountPrivacyService {
     await closeExpiredBookingsForGuest(userId, now);
 
     const anonEmail = `gdpr_${userId.replace(/-/g, "").slice(0, 20)}@invalid.local`;
+    // E-postaya bagli (userId'siz) satirlar: sifirlama kodu, sifirlama/dogrulama token'lari.
+    const current = await prisma.user.findUnique({ where: { id: userId }, select: { email: true } });
+    const email = current?.email?.trim().toLowerCase();
 
     await prisma.$transaction([
+      ...(email
+        ? [
+            prisma.passwordResetCode.deleteMany({ where: { email } }),
+            prisma.verificationToken.deleteMany({
+              where: { identifier: { in: [email, `${PASSWORD_RESET_IDENTIFIER_PREFIX}${email}`] } },
+            }),
+          ]
+        : []),
       prisma.session.deleteMany({ where: { userId } }),
       prisma.account.deleteMany({ where: { userId } }),
       prisma.review.deleteMany({ where: { guestId: userId } }),

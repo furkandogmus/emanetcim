@@ -17,7 +17,9 @@ const m = vi.hoisted(() => {
       pushSubscription: { deleteMany: ok() },
       mobilePushToken: { deleteMany: ok() },
       mobileInstall: { deleteMany: ok() },
-      user: { update: ok() },
+      user: { update: ok(), findUnique: vi.fn().mockResolvedValue({ email: "Ada@Example.com" }) },
+      passwordResetCode: { deleteMany: ok() },
+      verificationToken: { deleteMany: ok() },
       $transaction: vi.fn().mockResolvedValue([]),
     },
     closeExpired: vi.fn(),
@@ -53,5 +55,14 @@ describe("hesap silme ve suresi dolmus rezervasyonlar", () => {
     expect(r).toEqual({ ok: false, reason: "active_bookings" });
     expect(m.closeExpired).not.toHaveBeenCalled();
     expect(m.prisma.$transaction).not.toHaveBeenCalled();
+  });
+
+  it("e-postaya bagli sifirlama kodu ve token satirlari da silinir", async () => {
+    m.prisma.booking.count.mockResolvedValue(0);
+    await accountPrivacyService.anonymizeSelf({ userId: "g1", role: "GUEST", ip: null });
+    expect(m.prisma.passwordResetCode.deleteMany).toHaveBeenCalledWith({ where: { email: "ada@example.com" } });
+    expect(m.prisma.verificationToken.deleteMany).toHaveBeenCalledWith({
+      where: { identifier: { in: ["ada@example.com", "password-reset:ada@example.com"] } },
+    });
   });
 });
