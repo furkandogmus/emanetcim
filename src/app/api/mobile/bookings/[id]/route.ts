@@ -5,6 +5,7 @@ import { bookingService } from "@/services/BookingService";
 import { toMobileBookingDetail } from "@/lib/mobile-dto";
 import { canAccessBooking } from "@/services/booking/access";
 import { previewCheckOutCharges } from "@/services/booking/check-out";
+import { withCancelReason } from "@/services/booking/cancel-reason";
 
 export async function GET(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   const auth = await requireMobileUser(req);
@@ -26,5 +27,5 @@ export async function GET(req: NextRequest, { params }: { params: Promise<{ id: 
   const checkoutPreview =
     operator && b.status === "CHECKED_IN" ? await previewCheckOutCharges(b, new Date()) : null;
   // Misafir telefonu kurali (yalniz esnaf/yonetici + aktif kayit) DTO'da.
-  return NextResponse.json({ ...toMobileBookingDetail(b, { operator }), checkoutPreview });
+  return NextResponse.json({ ...toMobileBookingDetail(await withCancelReason(b), { operator }), checkoutPreview });
 }

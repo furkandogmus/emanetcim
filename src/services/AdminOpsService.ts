@@ -212,7 +212,8 @@ export class AdminOpsService {
       prisma.bookingEvent.findMany({
         where: { bookingId: id },
         orderBy: { createdAt: "asc" },
-        select: { event: true, actorRole: true, createdAt: true },
+        // `metadata` yalniz kapanis nedeni icin okunur; DTO onu istemciye tasimaz.
+        select: { event: true, actorRole: true, metadata: true, createdAt: true },
         take: 50,
       }),
     ]);
