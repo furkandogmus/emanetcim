@@ -1,11 +1,9 @@
 import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
 import { z } from "zod";
-import prisma from "@/lib/db";
 import { rateLimit } from "@/lib/rate-limit";
 import { clientIpFromRequest } from "@/lib/client-ip";
-import { sendPasswordResetEmail } from "@/lib/mail";
-import { generatePasswordResetToken } from "@/lib/password-reset-token";
+import { requestPasswordReset } from "@/services/auth/password-reset";
 import { APP_LOCALES } from "@/i18n/locales";
 import { resolveRequestLocale } from "@/lib/request-locale";
 
@@ -20,7 +18,8 @@ const schema = z.object({
  * { ok: true } so callers cannot enumerate accounts via response timing
  * or status. Real send only happens for accounts with an existing
  * passwordHash. Reset link in the email points at the web flow at
- * /{locale}/auth/new-password?token=...
+ * /{locale}/auth/new-password?token=...; the same email carries a 6-digit
+ * code for /api/mobile/auth/password-reset/confirm-code.
  */
 export async function POST(req: NextRequest) {
   const ip = clientIpFromRequest(req);
@@ -42,17 +41,8 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ ok: true });
   }
 
-  const user = await prisma.user.findUnique({
-    where: { email },
-    select: { id: true, email: true },
-  });
-
-  if (!user?.email) {
-    return NextResponse.json({ ok: true });
-  }
-
-  const row = await generatePasswordResetToken(user.email);
-  await sendPasswordResetEmail(user.email, row.token, locale);
+  // Ayni e-posta 6 haneli kodu da tasir: `password-reset/confirm-code`.
+  await requestPasswordReset(email, locale);
 
   return NextResponse.json({ ok: true });
 }

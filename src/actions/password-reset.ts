@@ -3,13 +3,11 @@
 import { getClientIpOrNull } from "@/lib/client-ip";
 
 import { z } from "zod";
-import prisma from "@/lib/db";
 import { rateLimit } from "@/lib/rate-limit";
-import { sendPasswordResetEmail } from "@/lib/mail";
 import { getLocale } from "next-intl/server";
-import { generatePasswordResetToken } from "@/lib/password-reset-token";
 import {
   consumePasswordResetToken,
+  requestPasswordReset,
   MIN_NEW_PASSWORD_LENGTH,
   MAX_NEW_PASSWORD_LENGTH,
   type PasswordResetErrorCode,
@@ -55,18 +53,8 @@ export async function requestPasswordResetAction(rawEmail: string) {
     return { ok: true as const };
   }
 
-  const user = await prisma.user.findUnique({
-    where: { email },
-    select: { id: true, email: true },
-  });
-
-  if (!user?.email) {
-    return { ok: true as const };
-  }
-
-  const locale = await getLocale();
-  const row = await generatePasswordResetToken(user.email);
-  await sendPasswordResetEmail(user.email, row.token, locale);
+  // Govde (bag + mobil kod + e-posta) serviste; mobil uc ayni fonksiyonu cagirir.
+  await requestPasswordReset(email, await getLocale());
 
   return { ok: true as const };
 }
