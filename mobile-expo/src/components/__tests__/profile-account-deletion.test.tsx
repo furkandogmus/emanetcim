@@ -90,7 +90,7 @@ describe("esnaf hesap silme talebi", () => {
   it("onaydan sonra talep gider ve 30 gun icinde silinecegi soylenir", async () => {
     await render(<ProfileView asTab />, { wrapper });
     const button = await screen.findByRole("button", { name: "Hesabımı sil" });
-    fireEvent.press(button);
+    await fireEvent.press(button);
     expect(alertSpy.mock.calls.at(-1)?.[0]).toBe("Hesabın silinsin mi?");
     await pressAlertButton("Silme talebi gönder");
 
@@ -124,7 +124,7 @@ describe("esnaf hesap silme talebi", () => {
 describe("destek baglantilari", () => {
   it("KVKK aydinlatma metni tarayicida /kvkk acar", async () => {
     await render(<ProfileView asTab />, { wrapper });
-    fireEvent.press(await screen.findByText("KVKK aydınlatma metni"));
+    await fireEvent.press(await screen.findByText("KVKK aydınlatma metni"));
     expect(String(openSpy.mock.calls.at(-1)?.[0])).toMatch(/\/kvkk$/);
   });
 });
