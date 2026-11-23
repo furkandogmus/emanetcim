@@ -71,7 +71,6 @@ vi.mock("@/services/NotificationService", () => ({
   notificationService: {
     notifyBookingSuccess: vi.fn().mockResolvedValue(undefined),
     notifyPartnerAndAdminsForNewPaidBooking: vi.fn().mockResolvedValue(undefined),
-    notifyGuestBookingRequestSms: vi.fn().mockResolvedValue(undefined),
   },
 }));
 vi.mock("@/services/AnalyticsService", () => ({ analyticsService: { track: vi.fn() } }));

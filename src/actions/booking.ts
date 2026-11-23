@@ -48,10 +48,6 @@ export type CreateBookingInput = {
   referralCode?: string;
   /** Sunucu onizlemesinin gosterdigi toplam; verilirse ayrisan tutarla rezervasyon yazilmaz. */
   expectedTotal?: number;
-  /** Guest checkout: accountsız kullanıcılar için e-posta */
-  guestEmail?: string;
-  /** Guest checkout: accountsız kullanıcılar için telefon */
-  guestPhone?: string;
   /** Time-slot based: slot IDs to reserve */
   slotIds?: string[];
 };
@@ -68,31 +64,19 @@ export async function createBookingAction(data: CreateBookingInput) {
     return { success: false as const, error: "Errors.tooManyRequests" };
   }
 
+  /*
+    Yeni rezervasyon yalnizca hesapla (2026-11-23). Kapi kupon/kapasite isinden
+    ONCE; asil kapi serviste (`LOGIN_REQUIRED`). `code` istemcinin giris
+    penceresini acmasi icin sabit.
+  */
   const session = await auth();
   const userId = session?.user?.id;
-  const isGuest = !userId;
-
-  /*
-    Hesapsiz checkout: e-posta ZORUNLU, telefon istege bagli. Asil kapi
-    serviste (`GUEST_EMAIL_REQUIRED`); burasi kupon hakki alinmadan erken donus.
-    `guestContactRequired` kodu korunuyor: istemci onu gorunce iletisim
-    modalini acar (oturumu checkout sirasinda dusen misafir).
-  */
-  if (isGuest && !data.guestEmail?.trim()) {
-    return { success: false as const, error: "Errors.guestContactRequired" };
-  }
-
-  if (isGuest) {
-    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(data.guestEmail?.trim() ?? "")) {
-      return { success: false as const, error: "Errors.invalidEmail" };
-    }
-    if (data.guestPhone && data.guestPhone.trim().length < 10) {
-      return { success: false as const, error: "Errors.invalidPhone" };
-    }
+  if (!userId) {
+    return { success: false as const, error: "Errors.loginRequired", code: "login_required" as const };
   }
 
   // Per-user rate limit (IP spoofing'e karşı ek koruma)
-  if (userId && !(await rateLimit(`booking_create_user:${userId}`, 5, 5 * 60 * 1000))) {
+  if (!(await rateLimit(`booking_create_user:${userId}`, 5, 5 * 60 * 1000))) {
     return { success: false as const, error: "Errors.tooManyRequests" };
   }
 
@@ -164,7 +148,7 @@ export async function createBookingAction(data: CreateBookingInput) {
     couponCode: data.couponCode,
     referralCode: data.referralCode,
     affiliateCode,
-    guest: { userId, guestEmail: data.guestEmail, guestPhone: data.guestPhone },
+    guest: { userId },
   });
   const totalPrice = discounts.totalPrice;
   const appliedCouponId = discounts.couponId;
@@ -192,9 +176,7 @@ export async function createBookingAction(data: CreateBookingInput) {
   let booking: Awaited<ReturnType<typeof bookingService.createInitialBooking>>;
   try {
     booking = await bookingService.createInitialBooking({
-      guestId: userId ?? null,
-      guestEmail: isGuest ? (data.guestEmail ?? null) : null,
-      guestPhone: isGuest ? (data.guestPhone ?? null) : null,
+      guestId: userId,
       shopId: data.shopId,
       totalPrice,
       bagCountS: data.bagCountS,
@@ -222,36 +204,14 @@ export async function createBookingAction(data: CreateBookingInput) {
       initialStatus: BookingStatus.APPROVED,
     });
 
-    // Misafire onay e-postası
-    const recipientEmail = session?.user?.email ?? booking.guestEmail ?? data.guestEmail;
+    // Misafire onay e-postası (hesabin e-postasi; telefonla acilmis hesapta yok)
+    const recipientEmail = session?.user?.email;
     if (recipientEmail) {
       const locale = await getLocale();
       void notificationService
-        .notifyBookingSuccess(recipientEmail, booking.id, totalPrice, locale, {
-          // Hesapsiz misafir icin "Rezervasyonunu yonet" bagi (imzali, tek rezervasyon).
-          guestManage: isGuest ? { checkOutTime: booking.checkOutTime } : undefined,
-        })
+        .notifyBookingSuccess(recipientEmail, booking.id, totalPrice, locale)
         .catch((err) =>
           logger.error({ err, bookingId: booking.id }, "notify_booking_success_failed"),
-        );
-    }
-
-    /*
-      TELEFONLA (E-POSTASIZ) MISAFIRE SMS ONAYI.
-
-      `notifyGuestBookingRequestSms` zaten yaziliydi ama HICBIR YERDEN
-      cagirilmiyordu -- checkout yalnizca e-posta VEYA telefon istiyor
-      (satir 72-74) ve arayuz de bunu vaat ediyor (`checkoutGuestContactHint`),
-      ama telefon-yalniz bir rezervasyonun ekrandaki tek seferlik QR disinda
-      HICBIR kalici kaydi olmuyordu: e-posta gitmiyordu, SMS hic cagirilmiyordu.
-      Sekmeyi kapatan/tarayicisi cokup gecen misafirin elinde rezervasyon
-      kodunu hatirlamaktan baska bir sey kalmiyordu.
-    */
-    if (!recipientEmail && data.guestPhone) {
-      void notificationService
-        .notifyGuestBookingRequestSms(data.guestPhone, booking.id, shop.name)
-        .catch((err) =>
-          logger.error({ err, bookingId: booking.id }, "notify_guest_booking_sms_failed"),
         );
     }
 
@@ -273,7 +233,7 @@ export async function createBookingAction(data: CreateBookingInput) {
     analyticsService.track({
       name: "booking_created",
       sessionId: await resolveServerSessionId(userId),
-      userId: userId ?? null,
+      userId,
       metadata: { shopId: data.shopId, source: "web" },
     });
 
@@ -323,8 +283,8 @@ const BOOKING_REJECTION_TO_KEY: Record<BookingRejectionCode, string> = {
   SHOP_CLOSED_ON_DATE: "Errors.shopClosedOnDate",
   // Sifir/negatif valiz ya da negatif tutar: istek bozuk.
   INVALID_INPUT: "Errors.invalidData",
-  // Istemci bu anahtarda iletisim modalini acar.
-  GUEST_EMAIL_REQUIRED: "Errors.guestContactRequired",
+  // Istemci bu anahtarda secimi koruyarak giris ekranina gonderir.
+  LOGIN_REQUIRED: "Errors.loginRequired",
 };
 
 const CANCEL_ERROR_TO_KEY: Record<CancelBookingErrorCode, string> = {

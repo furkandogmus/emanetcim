@@ -43,8 +43,8 @@ const REJECTION_TO_HTTP: Record<BookingRejectionCode, { status: number; error: s
   SHOP_CLOSED_ON_DATE: { status: 409, error: "shop_closed_on_date" },
   // 400: istegin kendisi bozuk (sifir/negatif valiz, negatif tutar).
   INVALID_INPUT: { status: 400, error: "invalid_data" },
-  // Mobil checkout hep oturumlu (guestId dolu); bu kod buraya dusmez.
-  GUEST_EMAIL_REQUIRED: { status: 400, error: "invalid_data" },
+  // Mobil checkout hep oturumlu (`requireMobileUser`); servis kapisi yine de 401 karsiligini bilir.
+  LOGIN_REQUIRED: { status: 401, error: "login_required" },
 };
 
 const schema = z.object({

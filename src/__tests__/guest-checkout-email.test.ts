@@ -2,8 +2,9 @@ import { describe, it, expect, vi, beforeEach } from "vitest";
 import { decodeJwt } from "jose";
 
 /**
- * Hesapsiz web checkout (kural 1a/1b, 2026-11-22): e-posta zorunlu (SERVISTE),
- * onay e-postasi imzali, tek rezervasyonluk bir yonetim bagi tasir.
+ * Hesapsiz rezervasyonun yonetim bagi (kural 1a/1b, 2026-11-22). Yeni hesapsiz
+ * rezervasyon 2026-11-23'ten beri yaratilmiyor (`booking-login-required.test.ts`);
+ * daha once yaratilanlarin bagi ve e-postasi calismaya devam etmeli.
  */
 const { mockPrisma } = vi.hoisted(() => ({
   mockPrisma: {
@@ -17,53 +18,8 @@ vi.stubEnv("AUTH_SECRET", "test-secret-guest-manage");
 vi.stubEnv("RESEND_API_KEY", "re_test_placeholder");
 vi.stubEnv("NEXT_PUBLIC_BASE_URL", "https://example.test");
 
-const { createInitialBooking } = await import("@/services/booking/create");
 const { signGuestManageLinkToken, authenticateGuestLookup } = await import("@/lib/guest-lookup-token");
 const { NotificationService } = await import("@/services/NotificationService");
-
-const base = {
-  shopId: "s1",
-  guestId: null,
-  totalPrice: 100,
-  bagCountS: 1,
-  bagCountM: 0,
-  bagCountXl: 0,
-  checkInTime: new Date(Date.now() + 3600_000),
-  checkOutTime: new Date(Date.now() + 7200_000),
-};
-
-async function rejection(data: Record<string, unknown>) {
-  try {
-    await createInitialBooking({ ...base, ...data } as never);
-    return null;
-  } catch (e) {
-    return e as { code?: string };
-  }
-}
-
-describe("hesapsiz rezervasyon e-posta kapisi (servis)", () => {
-  it("e-postasiz reddedilir", async () => {
-    expect((await rejection({}))?.code).toBe("GUEST_EMAIL_REQUIRED");
-  });
-
-  it("YALNIZ telefonla reddedilir", async () => {
-    expect((await rejection({ guestPhone: "5551112233" }))?.code).toBe("GUEST_EMAIL_REQUIRED");
-  });
-
-  it("bicimsiz e-posta reddedilir", async () => {
-    expect((await rejection({ guestEmail: "ada@" }))?.code).toBe("GUEST_EMAIL_REQUIRED");
-  });
-
-  it("gecerli e-posta (telefonsuz) bu kapidan gecer", async () => {
-    const e = await rejection({ guestEmail: "Ada@Example.com" });
-    expect(e?.code).not.toBe("GUEST_EMAIL_REQUIRED");
-  });
-
-  it("oturumlu misafirde e-posta istenmez", async () => {
-    const e = await rejection({ guestId: "u1" });
-    expect(e?.code).not.toBe("GUEST_EMAIL_REQUIRED");
-  });
-});
 
 describe("yonetim bagi token'i", () => {
   it("tek rezervasyon + e-posta kapsamli, bitis + 1 gun yasar, ayni dogrulamadan gecer", async () => {
