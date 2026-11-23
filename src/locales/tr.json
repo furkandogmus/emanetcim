@@ -1687,11 +1687,11 @@
   },
   "Privacy": {
     "title": "Gizlilik Politikası",
-    "lastUpdated": "20 Kasım 2026",
+    "lastUpdated": "23 Kasım 2026",
     "commitmentTitle": "Gizlilik Taahhüdümüz",
     "commitmentBody": "BagajPark olarak, kullanıcılarımızın kişisel verilerinin güvenliği bizim için en yüksek önceliktir. Verileriniz, modern şifreleme standartları ve KVKK uyumlu süreçlerle korunmaktadır.",
     "q1": "Hangi Verileri Topluyoruz?",
-    "a1": "Hizmet sunabilmek için ad-soyad, e-posta, telefon numarası ve rezervasyon esnasında konum verilerinizi topluyoruz. Ödeme bilgileriniz doğrudan lisanslı ödeme kuruluşu (hizmet sağlayıcı) tarafından işlenir, sunucularımızda saklanmaz.",
+    "a1": "Hizmet sunabilmek için ad-soyad, e-posta, telefon numarası ve rezervasyon esnasında konum verilerinizi topluyoruz. Ödemeyi bagajınızı bıraktığınız dükkanda, doğrudan esnafa yaparsınız; BagajPark kart bilgisi istemez, işlemez ve saklamaz.",
     "q2": "Verileriniz Nasıl Kullanılıyor?",
     "a2": "Toplanan veriler yalnızca rezervasyon işlemlerinizi gerçekleştirmek, güvenliği sağlamak, dükkan sahipleriyle iletişimi yönetmek ve yasal yükümlülüklerimizi yerine getirmek amacıyla kullanılır. Destek amacıyla yöneticilerimiz hesabınızı sizin adınıza görüntüleyebilir; bu erişimin her biri kayıt altına alınır.",
     "q3": "Çerezler ve Takip Teknolojileri",
@@ -1703,7 +1703,9 @@
     "q6": "Veri Güvenliği Önlemleri",
     "a6": "Tüm veri transferleri SSL/TLS protokolleri ile şifrelenir. Sunucularımız düzenli güvenlik taramalarından geçirilir ve erişim yetkileri sıkı bir şekilde denetlenir.",
     "footerTitle": "Sorularınız ve Veri Haklarınız",
-    "footerBody": "Gizlilik politikamızla ilgili her türlü sorunuz veya KVKK kapsamındaki talepleriniz için bize her zaman ulaşabilirsiniz."
+    "footerBody": "Gizlilik politikamızla ilgili her türlü sorunuz veya KVKK kapsamındaki talepleriniz için bize her zaman ulaşabilirsiniz.",
+    "q7": "Hesabınızı Nasıl Silersiniz?",
+    "a7": "Mobil uygulamada Profil → “Hesabımı sil”e, web sitesinde Hesabım → Veri ve gizlilik sayfasındaki “Hesabı kapat”a dokunun. Misafir hesapları hemen anonimleştirilir. Esnaf ve yönetici hesapları silme talebi gönderir: dükkan hemen yeni rezervasyona kapanır ve devam eden rezervasyonlar ile hakedişler tamamlanınca hesap en geç 30 gün içinde silinir; tamamlandığında e-posta gönderilir. Apple ile giriş yaptıysanız Apple hesabınızdaki BagajPark yetkisi de iptal edilir."
   },
   "FAQ": {
     "title": "S.S.S.",

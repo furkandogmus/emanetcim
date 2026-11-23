@@ -1630,11 +1630,11 @@
   },
   "Privacy": {
     "title": "Datenschutzrichtlinie",
-    "lastUpdated": "20.11.2026",
+    "lastUpdated": "23.11.2026",
     "commitmentTitle": "Datenschutzverpflichtung",
     "commitmentBody": "Ihre Daten werden verschlüsselt.",
     "q1": "Datenerfassung",
-    "a1": "Telefon-, E-Mail- und Standortdaten.",
+    "a1": "Name, Telefon-, E-Mail- und Standortdaten. Sie bezahlen direkt im Geschäft, in dem Sie Ihr Gepäck abgeben; BagajPark fragt keine Kartendaten ab, verarbeitet und speichert sie nicht.",
     "q2": "Verwendung",
     "a2": "Reservierungen und Sicherheit. Zu Supportzwecken können unsere Administratoren Ihr Konto einsehen; jeder solche Zugriff wird protokolliert.",
     "q3": "Kekse",
@@ -1646,7 +1646,9 @@
     "q6": "Sicherheit",
     "a6": "Regelmäßige Tests.",
     "footerTitle": "Für Fragen zum Datenschutz",
-    "footerBody": "Kontaktieren Sie uns bei Fragen zu unserer Datenverarbeitung."
+    "footerBody": "Kontaktieren Sie uns bei Fragen zu unserer Datenverarbeitung.",
+    "q7": "Konto löschen",
+    "a7": "In der App: Profil → „Mein Konto löschen“; auf der Website: Mein Konto → Daten & Datenschutz → „Konto schließen“. Gastkonten werden sofort anonymisiert. Partner- und Admin-Konten senden eine Löschanfrage: Das Geschäft nimmt sofort keine neuen Buchungen mehr an, und sobald laufende Buchungen und Auszahlungen abgeschlossen sind, wird das Konto innerhalb von 30 Tagen gelöscht; Sie erhalten dann eine E-Mail. Bei Anmeldung mit Apple wird auch der Zugriff von BagajPark auf Ihr Apple-Konto widerrufen."
   },
   "FAQ": {
     "title": "FAQ",

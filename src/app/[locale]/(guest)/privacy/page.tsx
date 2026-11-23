@@ -62,7 +62,7 @@ export default async function PrivacyPage({ params }: { params: Promise<{ locale
             </div>
           </div>
 
-          {[1, 2, 3, 4, 5, 6].map((idx) => {
+          {[1, 2, 3, 4, 5, 6, 7].map((idx) => {
             const qKey = `q${idx}`;
             const aKey = `a${idx}`;
             return (

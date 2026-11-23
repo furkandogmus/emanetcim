@@ -1630,11 +1630,11 @@
   },
   "Privacy": {
     "title": "politique de confidentialité",
-    "lastUpdated": "20.11.2026",
+    "lastUpdated": "23/11/2026",
     "commitmentTitle": "Engagement de confidentialité",
     "commitmentBody": "Vos données sont cryptées.",
     "q1": "Collecte de données",
-    "a1": "Données de téléphone, de courrier électronique et de localisation.",
+    "a1": "Nom, données de téléphone, de courrier électronique et de localisation. Vous payez directement au commerce où vous déposez vos bagages ; BagajPark ne demande, ne traite ni ne conserve aucune donnée de carte.",
     "q2": "Usage",
     "a2": "Réservations et sécurité. À des fins d'assistance, nos administrateurs peuvent consulter votre compte ; chaque accès de ce type est journalisé.",
     "q3": "Cookies",
@@ -1646,7 +1646,9 @@
     "q6": "Sécurité",
     "a6": "Tests réguliers.",
     "footerTitle": "Pour les questions de confidentialité",
-    "footerBody": "Contactez-nous pour toute question concernant notre traitement de données."
+    "footerBody": "Contactez-nous pour toute question concernant notre traitement de données.",
+    "q7": "Supprimer votre compte",
+    "a7": "Dans l’application : Profil → « Supprimer mon compte » ; sur le site : Mon compte → Données et confidentialité → « Fermer le compte ». Les comptes clients sont anonymisés immédiatement. Les comptes partenaire et administrateur envoient une demande : le commerce cesse aussitôt de prendre de nouvelles réservations, et une fois les réservations et versements en cours réglés, le compte est supprimé sous 30 jours ; un e-mail vous est envoyé. Si vous vous connectez avec Apple, l’accès de BagajPark à votre compte Apple est également révoqué."
   },
   "FAQ": {
     "title": "F.A.Q.",
