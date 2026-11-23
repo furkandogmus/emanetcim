@@ -350,7 +350,9 @@ export class AdminUserService {
     const row = await prisma.adminRoleChangeRequest.findUnique({ where: { id: requestId } });
     if (!row) return { ok: false, error: "not_found" };
 
-    await prisma.adminRoleChangeRequest.delete({ where: { id: requestId } });
+    // Iki admin ayni anda reddederse ikincisi `delete`te P2025 ile 500 aliyordu.
+    const { count } = await prisma.adminRoleChangeRequest.deleteMany({ where: { id: requestId } });
+    if (count === 0) return { ok: false, error: "not_found" };
 
     writeAuditLog({
       actorUserId: actor.userId,
