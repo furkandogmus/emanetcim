@@ -651,11 +651,6 @@ export class NotificationService implements INotificationService {
     bookingId: string,
     totalPrice: number,
     locale: string = "tr",
-    /**
-     * Hesapsiz rezervasyon: bilet sayfasi oturum ister, misafir onu acamaz.
-     * Ana dugme yerine imzali yonetim bagi gider (`signGuestManageLinkToken`).
-     */
-    opts?: { guestManage?: { checkOutTime: Date } },
   ): Promise<void> {
     /*
       KOK ADRES ORTAK YARDIMCIDAN (2026-08-31). Burasi yedek olarak URETIM alan
@@ -664,14 +659,8 @@ export class NotificationService implements INotificationService {
       gonderiyordu. Ayrica `NEXT_PUBLIC_BASE_URL`i yok sayiyordu.
     */
     const domain = getSiteBaseUrl();
-    const guestManage = opts?.guestManage && emailOrPlaceholder.includes("@");
-    const bookingUrl = guestManage
-      ? `${domain}/${locale}/bookings/manage/${await signGuestManageLinkToken({
-          bookingId,
-          email: emailOrPlaceholder,
-          checkOutTime: opts.guestManage!.checkOutTime,
-        })}`
-      : `${domain}/${locale}/bookings/${bookingId}`;
+    // Yeni rezervasyon hep hesapli (2026-11-23): bilet sayfasi oturumla acilir.
+    const bookingUrl = `${domain}/${locale}/bookings/${bookingId}`;
     const shortId = bookingShortCode(bookingId);
     /* Eskiden ALTI dilin tutari da her gonderimde hesaplaniyordu; besi bosa. */
     const price = formatTryCurrency(Number(totalPrice), bcp47ForUiLocale(locale));
@@ -685,7 +674,6 @@ export class NotificationService implements INotificationService {
         row1: `Rezervasyon Kodu`,
         row2: `Toplam Tutar`,
         cta: `Biletimi Görüntüle`,
-        manageCta: `Rezervasyonunu yönet`,
         appRow: `Uygulamayı indir`,
         appStoreAlt: `App Store’dan İndirin`,
         playAlt: `Google Play’den Alın`,
@@ -699,7 +687,6 @@ export class NotificationService implements INotificationService {
         row1: `Booking code`,
         row2: `Total`,
         cta: `View My Ticket`,
-        manageCta: `Manage your booking`,
         appRow: `Get the app`,
         appStoreAlt: `Download on the App Store`,
         playAlt: `Get it on Google Play`,
@@ -713,7 +700,6 @@ export class NotificationService implements INotificationService {
         row1: `Buchungscode`,
         row2: `Gesamtbetrag`,
         cta: `Mein Ticket ansehen`,
-        manageCta: `Buchung verwalten`,
         appRow: `App herunterladen`,
         appStoreAlt: `Laden im App Store`,
         playAlt: `Jetzt bei Google Play`,
@@ -727,7 +713,6 @@ export class NotificationService implements INotificationService {
         row1: `Code de réservation`,
         row2: `Montant total`,
         cta: `Voir mon billet`,
-        manageCta: `Gérer ma réservation`,
         appRow: `Télécharger l'application`,
         appStoreAlt: `Télécharger dans l'App Store`,
         playAlt: `Disponible sur Google Play`,
@@ -741,7 +726,6 @@ export class NotificationService implements INotificationService {
         row1: `予約コード`,
         row2: `合計金額`,
         cta: `チケットを見る`,
-        manageCta: `予約を管理する`,
         appRow: `アプリをダウンロード`,
         appStoreAlt: `App Storeからダウンロード`,
         playAlt: `Google Play で手に入れよう`,
@@ -755,7 +739,6 @@ export class NotificationService implements INotificationService {
         row1: `کد رزرو`,
         row2: `مبلغ کل`,
         cta: `مشاهده بلیط من`,
-        manageCta: `مدیریت رزرو`,
         appRow: `دریافت اپلیکیشن`,
         appStoreAlt: `دانلود از App Store`,
         playAlt: `دریافت از Google Play`,
@@ -771,7 +754,7 @@ export class NotificationService implements INotificationService {
         { label: content.row1, value: shortId },
         { label: content.row2, value: price },
       ],
-      cta: { href: bookingUrl, label: guestManage ? content.manageCta : content.cta, variant: "button" },
+      cta: { href: bookingUrl, label: content.cta, variant: "button" },
       appBadges: await bookingEmailAppBadges(domain, content),
       footer: content.footer,
     });

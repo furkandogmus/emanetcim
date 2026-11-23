@@ -74,7 +74,7 @@ const OUT = new Date(Date.now() + 9 * 60 * 60 * 1000);
 
 function input(bags: number, slotIds?: string[]) {
   return {
-    // Oturumlu misafir: hesapsiz rezervasyon e-posta ister (`GUEST_EMAIL_REQUIRED`), bu test kapasiteyi olcer.
+    // Oturumlu misafir: yeni rezervasyon hesap ister (`LOGIN_REQUIRED`), bu test kapasiteyi olcer.
     guestId: "guest-1",
     shopId: "shop-1",
     totalPrice: 100,
