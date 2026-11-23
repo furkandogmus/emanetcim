@@ -52,6 +52,10 @@ model User {
   shops                    Shop[]
   /// Bu hesaba bagli araci kaydi (varsa). Hesap silinse de araci kaydi kalir.
   affiliate                Affiliate?
+  accountDeletionRequest   AccountDeletionRequest?
+  reviewReports            ReviewReport[]
+  reviewBlocks             ReviewBlock[]            @relation("ReviewBlocker")
+  reviewBlockedBy          ReviewBlock[]            @relation("ReviewBlocked")
 
   @@index([email])
 }
@@ -494,25 +498,75 @@ model NotificationLog {
 }
 
 model Review {
-  id           String    @id @default(uuid())
-  bookingId    String    @unique
-  guestId      String
-  shopId       String
-  rating       Int       @default(5)
-  comment      String?
-  createdAt    DateTime  @default(now())
+  id              String         @id @default(uuid())
+  bookingId       String         @unique
+  guestId         String
+  shopId          String
+  rating          Int            @default(5)
+  comment         String?
+  createdAt       DateTime       @default(now())
   /// Yonetici moderasyonu: doluysa yorum misafire gosterilmez ve dukkan
   /// ortalamasina (`Shop.rating`) girmez. Silmeden farki geri alinabilmesi.
-  hiddenAt     DateTime?
-  hiddenReason String?
-  hiddenById   String?
-  booking      Booking   @relation(fields: [bookingId], references: [id], onDelete: Cascade)
-  guest        User      @relation(fields: [guestId], references: [id], onDelete: Cascade)
-  shop         Shop      @relation(fields: [shopId], references: [id], onDelete: Cascade)
+  hiddenAt        DateTime?
+  hiddenReason    String?
+  hiddenById      String?
+  /// Yonetici karari bekleyen (cozulmemis) sikayet sayisi. Moderasyon kuyrugu
+  /// bununla siralanir; esige (`REVIEW_AUTO_HIDE_REPORTS`) ulasinca yorum
+  /// otomatik gizlenir. Yonetici gizle/geri al/sil dediginde sifirlanir.
+  openReportCount Int            @default(0)
+  lastReportedAt  DateTime?
+  booking         Booking        @relation(fields: [bookingId], references: [id], onDelete: Cascade)
+  guest           User           @relation(fields: [guestId], references: [id], onDelete: Cascade)
+  shop            Shop           @relation(fields: [shopId], references: [id], onDelete: Cascade)
+  reports         ReviewReport[]
 
   @@index([shopId])
   @@index([guestId])
   @@index([createdAt])
+  @@index([openReportCount, createdAt])
+}
+
+/// Yorum sikayeti (App Review 1.2, 2026-11-23). Kullanici basina yorum basina
+/// tek satir; ayni yorumu ikinci kez bildirmek yeni satir acmaz.
+model ReviewReport {
+  id         String             @id @default(cuid())
+  reviewId   String
+  /// Bildiren hesap.
+  userId     String
+  reason     ReviewReportReason
+  note       String?
+  createdAt  DateTime           @default(now())
+  /// Yonetici yorum hakkinda karar verince dolar.
+  resolvedAt DateTime?
+  review     Review             @relation(fields: [reviewId], references: [id], onDelete: Cascade)
+  user       User               @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([reviewId, userId])
+  @@index([userId, createdAt])
+}
+
+enum ReviewReportReason {
+  SPAM
+  OFFENSIVE
+  HARASSMENT
+  FALSE_INFO
+  PERSONAL_INFO
+  OTHER
+}
+
+/// "Bu kullanicinin yorumlarini gizle" (App Review 1.2): goruntuleyen basina.
+/// Yorum listeleri o goruntuleyen icin `blockedUserId`nin yorumlarini atlar.
+model ReviewBlock {
+  id            String   @id @default(cuid())
+  /// Engelleyen (goruntuleyen) hesap.
+  userId        String
+  blockedUserId String
+  createdAt     DateTime @default(now())
+  user          User     @relation("ReviewBlocker", fields: [userId], references: [id], onDelete: Cascade)
+  blockedUser   User     @relation("ReviewBlocked", fields: [blockedUserId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, blockedUserId])
+  @@index([blockedUserId])
 }
 
 model Coupon {
@@ -970,6 +1024,38 @@ enum Role {
   GUEST
   PARTNER
   ADMIN
+}
+
+/// Esnaf/yonetici hesap silme talebi (App Store 5.1.1(v), 2026-11-23). Misafir
+/// hesabini aninda kapatir; esnaf ve yonetici talep birakir, yonetici aktif
+/// rezervasyon ve bekleyen hakedis kalmadiginda ayni anonimlestirme yoluyla
+/// tamamlar. Kullanici basina tek satir: iptal edilen talep yeniden acilabilir.
+model AccountDeletionRequest {
+  id                 String                @id @default(cuid())
+  userId             String                @unique
+  role               Role
+  status             AccountDeletionStatus @default(PENDING)
+  /// Tamamlandi e-postasinin adresi (anonimlestirme hesabin e-postasini siler).
+  /// E-posta gonderilince bosaltilir.
+  contactEmail       String?
+  contactLocale      String?
+  note               String?
+  /// Talep aninda yeni rezervasyona kapatilan dukkanlar; iptalde geri acilir.
+  deactivatedShopIds String[]              @default([])
+  requestedAt        DateTime              @default(now())
+  /// Taahhut edilen son gun (talep + `ACCOUNT_DELETION_SLA_DAYS`).
+  dueAt              DateTime
+  resolvedAt         DateTime?
+  resolvedById       String?
+  user               User                  @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([status, requestedAt])
+}
+
+enum AccountDeletionStatus {
+  PENDING
+  COMPLETED
+  CANCELLED
 }
 
 enum BookingStatus {

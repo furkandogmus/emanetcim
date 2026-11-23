@@ -31,6 +31,8 @@ const ERASED = new Set([
   "PushSubscription",
   "MobilePushToken",
   "MobileInstall",
+  "ReviewReport",
+  "ReviewBlock",
 ]);
 
 /**
@@ -47,6 +49,9 @@ const KEPT: Record<string, string> = {
   Affiliate:
     "Aracı kaydı ticari bir sözleşme tarafıdır; ödenmemiş komisyon borcu ona bağlı. Hesap bağı kalır, " +
     "iletişim alanlarını gerekirse yönetici temizler (açık soru, PR notu).",
+  AccountDeletionRequest:
+    "Silme talebinin kendisi hesap kapatmanın kaydıdır (kim, ne zaman, kim tamamladı). " +
+    "Tamamlanınca iletişim e-postası gönderildikten sonra boşaltılır; satırda kişisel veri kalmaz.",
   AnalyticsEvent:
     "Ürün analitiği. SİLİNMİYOR — gerekçesi zayıf ve gözden geçirilmeli (DEFECT_BACKLOG 2026-09-01).",
 };
