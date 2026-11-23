@@ -67,28 +67,42 @@ export function detectAppPlatform(userAgent: string | null | undefined): AppPlat
 export function isBotUserAgent(userAgent: string | null | undefined): boolean {
   const ua = userAgent ?? "";
   if (ua.trim() === "") return true;
-  return /bot|crawl|spider|slurp|preview|facebookexternalhit|whatsapp|telegram|curl|wget|python-requests|headless/i.test(
+  // Ciplak `bot` YOK: "CUBOT" marka Android telefonlari da eslesir ve gercek ziyaretci dusurulurdu.
+  return /\bbot\b|bot\/|adsbot|slackbot|duckduckbot|crawl|spider|slurp|preview|facebookexternalhit|whatsapp|telegram|curl|wget|python-requests|headless/i.test(
     ua,
   );
 }
 
-const MAX_SOURCE_LEN = 64;
+/** Bilinen kampanya kaynaklari; disindaki serbest etiketler `other` kovasina duser. */
+const SOURCE_ALLOWLIST = new Set([
+  "instagram",
+  "facebook",
+  "tiktok",
+  "google",
+  "whatsapp",
+  "qr",
+  "airbnb",
+  "direct",
+]);
+const SOURCE_SHAPES = [/^web-[a-z0-9-]{1,24}$/, /^email-[a-z0-9-]{1,24}$/, /^afis-[a-z0-9]{8,40}$/];
 
 /**
- * Kaynak etiketini normallestirir: kucuk harf, `[a-z0-9-_]`, en fazla 64
- * karakter. Serbest metin defterde birikmesin ve kimse bir etikete kisisel
- * veri gommesin (e-posta adresi vb. `@` ve `.` dustugu icin parcalanir).
- * `kaynak` once, yoksa `utm_source`; ikisi de bossa `direct`.
+ * Kaynak etiketini normallestirir. Defter yalnizca BILINEN bicimleri tutar:
+ * `web-*`, `email-*`, `afis-<dukkanId>` ve kisa bir kampanya listesi; gerisi
+ * `other`. Boylece rastgele `?kaynak=` ile tablo sisirilemez ve etikete
+ * kisisel veri gomulemez. `kaynak` once, yoksa `utm_source`; ikisi de bossa `direct`.
  */
 export function normalizeAppLinkSource(kaynak: string | null, utmSource: string | null): string {
   for (const raw of [kaynak, utmSource]) {
     const clean = (raw ?? "")
+      .trim()
       .toLowerCase()
-      .replace(/[^a-z0-9_-]+/g, "-")
+      .replace(/[^a-z0-9-]+/g, "-")
       .replace(/-+/g, "-")
-      .replace(/^-|-$/g, "")
-      .slice(0, MAX_SOURCE_LEN);
-    if (clean) return clean;
+      .replace(/^-|-$/g, "");
+    if (!clean) continue;
+    if (SOURCE_ALLOWLIST.has(clean) || SOURCE_SHAPES.some((re) => re.test(clean))) return clean;
+    return "other";
   }
   return "direct";
 }
