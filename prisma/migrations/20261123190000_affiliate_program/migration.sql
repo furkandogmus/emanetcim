@@ -96,5 +96,5 @@ ALTER TABLE "AffiliateClickDay" ADD CONSTRAINT "AffiliateClickDay_affiliateId_fk
 ALTER TABLE "AffiliateCommission" ADD CONSTRAINT "AffiliateCommission_affiliateId_fkey" FOREIGN KEY ("affiliateId") REFERENCES "Affiliate"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "AffiliateCommission" ADD CONSTRAINT "AffiliateCommission_bookingId_fkey" FOREIGN KEY ("bookingId") REFERENCES "Booking"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+ALTER TABLE "AffiliateCommission" ADD CONSTRAINT "AffiliateCommission_bookingId_fkey" FOREIGN KEY ("bookingId") REFERENCES "Booking"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
 
