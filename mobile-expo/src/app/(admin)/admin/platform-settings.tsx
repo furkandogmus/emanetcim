@@ -94,10 +94,17 @@ function SettingsForm({ settings }: { settings: AdminPlatformSettings }) {
                 {title}
               </AppText>
               <Segmented
-                options={[
-                  { value: "true", label: t("adminOps.settings.on") },
-                  { value: "false", label: t("adminOps.settings.off") },
-                ]}
+                options={
+                  f === "iosAppStoreLive" || f === "androidPlayLive"
+                    ? [
+                        { value: "true", label: t("adminOps.settings.live") },
+                        { value: "false", label: t("adminOps.settings.notLive") },
+                      ]
+                    : [
+                        { value: "true", label: t("adminOps.settings.on") },
+                        { value: "false", label: t("adminOps.settings.off") },
+                      ]
+                }
                 value={draft[f] === "true" ? "true" : "false"}
                 onChange={(v) => canMutate && setDraft((d) => ({ ...d, [f]: v }))}
               />

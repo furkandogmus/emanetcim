@@ -27,7 +27,39 @@ export type PlatformSettingsFormValues = {
   minAppVersion: string;
   /** `x.y.z` semver veya boş (bildirim kapalı) */
   latestAppVersion: string;
+  iosAppStoreLive: boolean;
+  androidPlayLive: boolean;
 };
+
+function StoreToggle({
+  id,
+  label,
+  hint,
+  checked,
+  onChange,
+}: {
+  id: string;
+  label: string;
+  hint: string;
+  checked: boolean;
+  onChange: (v: boolean) => void;
+}) {
+  return (
+    <div className="md:col-span-2 flex items-start gap-4 p-4 bg-gray-50 border border-gray-200 rounded-2xl">
+      <input
+        type="checkbox"
+        id={id}
+        checked={checked}
+        onChange={(e) => onChange(e.target.checked)}
+        className="w-5 h-5 mt-0.5 rounded-lg border-gray-300"
+      />
+      <label htmlFor={id} className="cursor-pointer">
+        <span className="block text-sm font-bold text-gray-900">{label}</span>
+        <span className="block text-xs font-medium text-gray-600 mt-1">{hint}</span>
+      </label>
+    </div>
+  );
+}
 
 function parseHolidayDatesRaw(raw: string): string[] {
   return raw
@@ -131,6 +163,8 @@ export default function AdminPlatformSettingsClient({
         platformHolidayDates,
         minAppVersion: form.minAppVersion,
         latestAppVersion: form.latestAppVersion,
+        iosAppStoreLive: form.iosAppStoreLive,
+        androidPlayLive: form.androidPlayLive,
       });
       if (!res.success) {
         toast.error(t("platformSettingsInvalid"));
@@ -276,6 +310,21 @@ export default function AdminPlatformSettingsClient({
           hint={t("platformSettingsLatestAppVersionHint")}
           value={form.latestAppVersion}
           onChange={(v) => patch({ latestAppVersion: v })}
+        />
+
+        <StoreToggle
+          id="iosAppStoreLive"
+          label={t("platformSettingsIosAppStoreLive")}
+          hint={t("platformSettingsIosAppStoreLiveHint")}
+          checked={form.iosAppStoreLive}
+          onChange={(v) => patch({ iosAppStoreLive: v })}
+        />
+        <StoreToggle
+          id="androidPlayLive"
+          label={t("platformSettingsAndroidPlayLive")}
+          hint={t("platformSettingsAndroidPlayLiveHint")}
+          checked={form.androidPlayLive}
+          onChange={(v) => patch({ androidPlayLive: v })}
         />
       </div>
 

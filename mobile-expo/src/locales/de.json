@@ -1614,13 +1614,17 @@
         "requireSealsOnCheckIn": "Siegel bei Abgabe Pflicht",
         "platformHolidayDates": "Feiertage der Plattform",
         "minAppVersion": "Minimale App-Version",
-        "latestAppVersion": "Aktuelle App-Version"
+        "latestAppVersion": "Aktuelle App-Version",
+        "iosAppStoreLive": "iOS-App ist im App Store live",
+        "androidPlayLive": "Android-App ist bei Google Play öffentlich"
       },
       "on": "Pflicht",
       "off": "Keine Pflicht",
       "holidayHint": "Ein Datum pro Zeile: JJJJ-MM-TT",
       "versionHint": "x.y.z; leer lassen zum Abschalten. Die Mindestversion darf die aktuelle nicht übersteigen.",
-      "noChanges": "Keine Änderungen."
+      "noChanges": "Keine Änderungen.",
+      "live": "Live",
+      "notLive": "Nicht live"
     },
     "flags": {
       "title": "Feature-Flags",
