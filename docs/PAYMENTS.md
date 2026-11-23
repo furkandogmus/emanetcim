@@ -1,6 +1,6 @@
 # Ödeme Mimarisi
 
-## Son durum — 2026-08-22
+## Son durum — 2026-11-23 (mimari karar 2026-08-22)
 
 **Aktif sağlayıcı: `manual` (dükkanda tahsilat).** Online kart tahsilatı yok; misafir
 ödemeyi bagajını bıraktığı dükkanda nakit veya esnafın kendi POS'uyla yapar.
@@ -18,18 +18,20 @@ lansmanda sıfır.
 | `PaymentService` (defterin tek yazıcısı) | ✅ uygulandı | `src/services/PaymentService.ts` |
 | Şema: `PENDING` varsayılanı + denetim alanları | ✅ uygulandı | `prisma/schema.prisma` |
 | Sunucu tarafı metinlerin yeteneğe bağlanması | ✅ uygulandı | `src/lib/payment-copy.ts`, FAQ sayfası |
-| İstemci bileşenlerinde aynı bağlama | ❌ yapılmadı | `BookingModifyModal` vb. hâlâ koşulsuz kartlı metin |
-| Iyzico / PayTR adaptörü | ❌ yapılmadı | şirket kurulumunu bekliyor |
+| İstemci bileşenlerinde aynı bağlama | ✅ uygulandı (P1-19) | `src/components/providers/CommerceProvider.tsx` (sunucuda çözülen bağlam layout'tan geçer) |
+| Iyzico / PayTR adaptörü | ❌ yapılmadı | şirket kurulumunu bekliyor; `REGISTRY`'de yalnızca `manual` var |
+| Gelen ödeme webhook ucu | ❌ yapılmadı | sözleşme `PaymentProvider.verifyWebhook()` hazır, HTTP ucu PSP seçimine bırakıldı (`docs/PRODUCTION_BACKLOG.md` § 15) |
 | Marketplace split (esnaf payının sağlayıcıda ayrılması) | ❌ yapılmadı | `capabilities.supportsSplit` false |
 
 ### Değişmeyen şeyler
 
 - Prod'daki eski `PaymentLog` satırlarına dokunulmadı. `provider='legacy_unverified'`
-  olarak damgalandılar; karşılığı olmayan 3.480 TRY'lik defter ayrı bir soruşturmanın
-  konusu (`docs/DEFECT_BACKLOG.md` → P1-5).
-- `PLATFORM_COMMISSION_RATE` ile hesaplanan esnaf payı mantığı aynı
-  (`src/lib/platform-split.ts`). Şu an tahsilat esnafın elinde olduğu için platform
-  komisyonu **esnaftan tahsil edilecek bir alacaktır**, sağlayıcıda kesilmez.
+  olarak damgalandılar. Karşılığı olmayan 3.480 TRY'lik defterin kaynağı bulundu ve
+  kapatıldı; veri temizliği açık (`docs/DEFECT_BACKLOG.md` → F tablosu, P1-5).
+- Komisyonla hesaplanan esnaf payı mantığı aynı
+  (`src/lib/platform-split.ts`). Platform tahsilat yapmadığı için etkin oran bugün
+  **0**; tahsilat esnafın elindeyken komisyon açılırsa sağlayıcıda kesilmez, esnaftan
+  tahsil edilecek bir alacak olur.
 
 ---
 
@@ -69,6 +71,7 @@ Rezervasyon                PaymentService              PaymentProvider
 |---|---|
 | `PENDING` | Niyet açıldı, para alınmadı. **Varsayılan.** |
 | `AUTHORIZED` | Kart provizyonu alındı, tahsil edilmedi (3DS auth-capture). |
+| `CAPTURING` | Tahsilat hakkı atomik alındı, sağlayıcıya istek gidiyor (2026-09-10; çift tahsilat yarışını kapatan ara durum). |
 | `SUCCESS` | Para tahsil edildi. |
 | `FAILED` | Sağlayıcı reddetti. Rezervasyon **ödenmemiş** sayılır. |
 | `PARTIALLY_REFUNDED` | Bir kısmı iade edildi; `refundedAmount` ne kadarını söyler. |
@@ -111,8 +114,10 @@ bir sonraki okuyan hangisinin doğru olduğunu bilemez.
 
 `PLATFORM_COMMISSION_RATE` yoksa eski kod, yazılı `0.5`'e **sessizce** düşüyordu:
 env bir deploy'da kaybolsa esnaf, kimse fark etmeden parasının yarısını alırdı.
-Oran artık `PlatformSettings.platformCommissionRate` — yönetim arayüzü, önbellek
-ve audit'i hazır. Bozuk/aralık dışı bir oran **0'a** düşer: hatanın zararı
+Oran artık `PlatformSettings.platformCommissionRate` (varsayılan 0.20; 2026-09-01'de
+0.5'ten düşürüldü) — yönetim arayüzü, önbellek ve audit'i hazır. Platform tahsilat
+yapmadığı sürece `effectiveCommissionRate` bunu **0'a** çeker; oran PSP bağlandığı gün
+yürürlüğe girer. Bozuk/aralık dışı bir oran **0'a** düşer: hatanın zararı
 platformda kalır, esnafta değil.
 
 ### Paylaşım hesaplanmaz, yazılır
@@ -144,7 +149,9 @@ her yetenek metodunu zorunlu kılar. **Yeni adaptör yazıldığında o testteki
 
 ## Yeni sağlayıcı ekleme
 
-Çağıran hiçbir kod değişmez. Üç adım:
+Çağıran hiçbir kod değişmez. Üç adım (ödemeyi anında kapatmak için de aynı
+anahtar kullanılır: `PAYMENT_PROVIDER=manual`; eski `payments_enabled` bayrağı ve
+`PAYMENTS_ENABLED` env'i kodda artık yok):
 
 1. `src/lib/payments/<saglayici>.ts` içinde `PaymentProvider` uygula.
 2. `src/lib/payments/index.ts` içindeki `REGISTRY`'ye ekle.
@@ -200,7 +207,8 @@ hedefledi:
 **Denenmedi / bilerek yapılmadı:** prod'daki 12 sahte `SUCCESS` satırı migrasyonla
 düzeltilmedi. Migrasyonun sessizce veri düzeltmesi yapması denetim izini bozardı ve
 bu satırların kaynağı hâlâ bilinmiyor (P1-5: prod'a rezervasyon yazabilen bir yol açık
-olabilir). Önce kaynak bulunmalı.
+olabilir). Önce kaynak bulunmalı. (Kaynak 2026-08-22'de bulunup kapatıldı; temizlik
+hâlâ elle ve bilinçli yapılacak.)
 
 ---
 
@@ -218,5 +226,40 @@ değişmez bir kayıttır. Anlık kopya olmadan admin bir çarpanı değiştirdi
 **Henüz bağlanmamış:** geç teslim alma ücreti (`latePickupFeeTry`) hesaplanıyor ve
 `Booking.lateFeeApplied` alanına yazılıyor, ama tahsilat defterden geçmiyor — ek
 tahsilat kalemi akışı yok. Sağlayıcı `manual` olduğu sürece bu pratikte esnafın
-çıkışta ek ücreti alıp panelden işaretlemesi demek; o ekran da yok.
-Bkz. `docs/DEFECT_BACKLOG.md` → P1-21.
+çıkışta ek ücreti alması demek: rezervasyon detayı teslimde oluşacak gecikme ücretini
+ve erken teslim iadesini esnafa önceden gösterir (`src/services/booking/check-out.ts`),
+ama "tahsil ettim" işaretleme ekranı yok. Prod'da `latePickupFeeTry` varsayılanı 0.
+Bkz. `docs/DEFECT_BACKLOG.md` → B10 (eski P1-21).
+
+---
+
+## İptal, iade ve istisnalar (bugünkü kurallar)
+
+Eski "finansal mutabakat ve istisnalar rehberi"nin yerine; yalnızca kodda karşılığı
+olan kurallar. Oranlar ve tutarlar `docs/PLATFORM_SETTINGS.md`'deki ayarlardan gelir.
+
+| Durum | Kural | Nerede |
+|---|---|---|
+| Misafir iptali | Check-in saatine kadar ücretsiz; ödeme dükkanda olduğu için tahsilat yoktur. Kesinti/kredi kuponu altyapısı (`earlyRefundRatio`, `cancelFixedFeeTry`) hazır | `src/services/booking/lifecycle.ts` |
+| Esnaf reddi / iptali, yönetici iptali, "misafir gelmedi" | Hepsi `cancelBooking` üzerinden: atomik kilit, slot ve kupon iadesi, ödeme defteri tek yerde | `src/services/booking/closure.ts`, `partner-review.ts` |
+| Geç bırakma | Bırakma saatinden +60 dk sonra (esnaf "Misafiri bekle" dediyse bekletme bitince) `no_show` ile otomatik kapanır | `src/services/LateDropoffService.ts`, `late-dropoff-scan` işi |
+| Geç teslim alma | `latePickupGraceMin` toleransından sonra `latePickupFeeTry`; hesaplanır, tahsilat esnafta (yukarıda) | `check-out.ts` |
+| Valiz sayısı farklı geldi | Esnaf valiz revizyonu yapar; tutar ve güvence bedeli yeniden hesaplanır | `src/services/booking/bag-revision.ts` |
+| Hasar / kayıp itirazı | Misafir itiraz açar, yönetici web ya da mobil panelden çözer; kanıt check-in mühür kaydıdır | `src/services/DisputeService.ts` |
+
+Ters ibraz (chargeback) ve hakediş ödemesi akışları yoktur: platform kartla tahsilat
+yapmadığı sürece doğmazlar. PSP bağlandığında bu bölüm sağlayıcının iade/ibraz
+modeliyle birlikte yazılır.
+
+## Finans dışa aktarma
+
+`GET /api/internal/finance-export?days=90` (varsayılan 90 gün) rezervasyon özeti, ödeme
+durumu ve `chargebackStatus` alanlarını CSV olarak döner. Yetki `CRON_SECRET`
+(`Authorization: Bearer` ya da `x-cron-secret`, `src/lib/internal-api-guard.ts`). İş
+`finance-export` adıyla `src/lib/jobs/registry.ts`'te kayıtlı, her gün 02:53'te çalışır
+(`scripts/README.md`).
+
+Eski `FINANCE_LEDGER.md`'deki `POST /api/internal/reconcile-payments` ve
+`PaymentService.reconcileStalePaymentBookings()` kodda artık yok: webhook'lu bir PSP
+olmadığı için "ödendi ama rezervasyon `PENDING`" ara durumu oluşmuyor. PSP bağlanınca
+mutabakat işi kayıt defterine yeni iş olarak eklenir.
