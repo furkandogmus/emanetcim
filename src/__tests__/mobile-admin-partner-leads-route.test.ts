@@ -31,7 +31,8 @@ const convert = (body: unknown) =>
       body: JSON.stringify(body),
     }) as never,
     { params: Promise.resolve({ id: "lead-0000001" }) },
-  );
+  ) as Promise<Response>;
+const list = () => GET(new Request("http://x") as never) as Promise<Response>;
 
 const LEAD = {
   id: "lead-0000001",
@@ -56,14 +57,14 @@ describe("mobil admin esnaf on kaydi uclari", () => {
   it("admin olmayan 403 alir, servis cagrilmaz", async () => {
     auth.requireRole.mockReturnValue(NextResponse.json({ error: "forbidden" }, { status: 403 }));
     expect((await convert({ location: "41, 29" })).status).toBe(403);
-    expect((await GET(new Request("http://x") as never)).status).toBe(403);
+    expect((await list()).status).toBe(403);
     expect(svc.convertToPartner).not.toHaveBeenCalled();
     expect(svc.list).not.toHaveBeenCalled();
   });
 
   it("liste on dolguyu sunucudan tasir", async () => {
     svc.list.mockResolvedValue([LEAD]);
-    const body = await (await GET(new Request("http://x") as never)).json();
+    const body = await (await list()).json();
     expect(body[0]).toMatchObject({
       id: LEAD.id,
       whatsapp: "905321234567",
