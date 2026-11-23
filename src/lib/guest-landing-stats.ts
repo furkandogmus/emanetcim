@@ -33,10 +33,16 @@ export async function getGuestLandingStats(): Promise<GuestLandingStats> {
        * Test dükkanları da sayılmaz (P1-4).
        */
       prisma.shop.count({ where: OPERATING_SHOP_FILTER }),
-      prisma.booking.count({ where: { status: BookingStatus.CHECKED_OUT } }),
+      /*
+        Test dukkanindaki rezervasyon ve yorum kamu istatistigine girmez
+        (2026-11-23): inceleme kum havuzu hesaplari artik test dukkanina
+        rezervasyon yapabiliyor, onlarin "tamamlanan kalis"i ve yorumu ana
+        sayfadaki guven bandini sisirmemeli.
+      */
+      prisma.booking.count({ where: { status: BookingStatus.CHECKED_OUT, shop: { isTest: false } } }),
       prisma.review.aggregate({
         // Gizlenen yorum guven istatistigine de girmez (`Shop.rating` ile ayni kural).
-        where: VISIBLE_REVIEW,
+        where: { ...VISIBLE_REVIEW, shop: { isTest: false } },
         _count: { _all: true },
         _avg: { rating: true },
       }),
