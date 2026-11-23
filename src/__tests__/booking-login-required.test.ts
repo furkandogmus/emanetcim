@@ -151,7 +151,7 @@ describe("web createBookingAction: oturum kapisi", () => {
     );
   });
 
-  it("servis LOGIN_REQUIRED firlatirsa kupon hakki geri verilir ve ayni anahtar doner", async () => {
+  it("servis LOGIN_REQUIRED firlatirsa kupon hakki geri verilir, ayni anahtar ve kod doner", async () => {
     m.auth.mockResolvedValue({ user: { id: "u1", email: null } });
     m.claim.mockResolvedValue({
       totalPrice: 270,
@@ -163,7 +163,7 @@ describe("web createBookingAction: oturum kapisi", () => {
     });
     m.create.mockRejectedValue(new BookingLoginRequiredError());
     const res = await createBookingAction(input);
-    expect(res).toMatchObject({ success: false, error: "Errors.loginRequired" });
+    expect(res).toEqual({ success: false, error: "Errors.loginRequired", code: "login_required" });
     expect(m.release).toHaveBeenCalledWith("c1");
   });
 });

@@ -258,6 +258,8 @@ export async function createBookingAction(data: CreateBookingInput) {
       return {
         success: false as const,
         error: BOOKING_REJECTION_TO_KEY[e.code],
+        // Erken donusle ayni sozlesme: istemci giris penceresini `code`dan acar.
+        ...(e.code === "LOGIN_REQUIRED" ? { code: "login_required" as const } : {}),
       };
     }
     console.error("createBookingAction", e);

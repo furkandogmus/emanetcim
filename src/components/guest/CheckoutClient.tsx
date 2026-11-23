@@ -197,8 +197,19 @@ export default function CheckoutClient({
   const [referralPct, setReferralPct] = useState<number | null>(null);
   const [referralReason, setReferralReason] = useState<string | null>(null);
 
+  /* URL bir secim tasiyorsa (giris donusu, arama baglantisi) eski taslak onu ezmez. */
+  const urlCarriesSelection = [
+    initialCheckIn,
+    initialCheckOut,
+    initialBagS,
+    initialBags,
+    initialBagXl,
+    initialCouponCode,
+  ].some((v) => v !== undefined);
+
   // Restore draft from localStorage on mount
   useEffect(() => {
+    if (urlCarriesSelection) return;
     const saved = localStorage.getItem(`bagajpark_checkout_draft_${shopId}`);
     if (saved) {
       try {
@@ -217,7 +228,7 @@ export default function CheckoutClient({
         console.error("Failed to parse saved checkout draft", e);
       }
     }
-  }, [shopId, hours]);
+  }, [shopId, hours, urlCarriesSelection]);
 
   // Davet linkinden gelen kod (`?ref=`, bkz. `referral-capture.ts`)
   useEffect(() => {
@@ -392,11 +403,11 @@ export default function CheckoutClient({
       setIsSuccess(true);
       // Ana ekrana ekleme davetinin en anlamli ani: QR artik elde.
       markBooked();
-    } else if ("code" in result && result.code === "login_required") {
+    } else if (!result.success && result.code === "login_required") {
       // `isLoggedIn` ilk yuklemedeki oturum; checkout sirasinda dusmus olabilir.
       setShowAuthModal(true);
       setError(null);
-    } else {
+    } else if (!result.success) {
       setError(errorText(result.error, t("checkoutUnexpectedError")));
     }
   };
