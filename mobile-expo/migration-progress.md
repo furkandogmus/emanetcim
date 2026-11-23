@@ -4,8 +4,8 @@
 **nativize-now** maddesini alır, web ile emülatörde yan yana doğrular, işaretler.
 
 **Son durum (2026-11-23):** misafir, esnaf ve yönetici akışlarının tamamı native. Açık
-kalanlar: iOS'ta Google ile giriş; aracı programı (#207) ve esnaf ön kaydını dükkana çevirme
-+ onayda slot üretimi (#208) — ikisi de PR'da, birleşmedi. iOS 0.3.4 (build 4) App
+kalan: iOS'ta Google ile giriş. Aracı programı (#207) ve esnaf ön kaydını dükkana çevirme
++ onayda slot üretimi (#208) birleşti; yönetici rol onayı ve yönetici push'u mobilde. iOS 0.3.4 (build 4) App
 Review'da; Android sürümleri Play kapalı test izine çıkıyor. Sürüm/OTA ayrıntısı `PLAY_YAYIN.md`, iOS `IOS_YAYIN.md`.
 
 İlk envanter: 2026-10-18, `src/app/**/page.tsx` (70 sayfa) ↔ `mobile-expo/src/app` (14 ekran).
@@ -116,7 +116,7 @@ blog, blog/[slug], become-partner, esnaf, esnaf/nasil-calisir
   uygulamadan siler, esnaf/yönetici "silme talebi" web iletişim sayfasını açar
 - Yazdırılabilir QR afişi (`/partner/poster`)
 - Yönetici: mühür envanteri, esnaf listesi, analitik, blog, kampanyalar, sorunlar, işler,
-  bildirimler, esnaf adayları, ön kayıt, rol onayları, durum (pano "Web paneli" bağlantısı)
+  bildirimler, esnaf adayları, durum (pano "Web paneli" bağlantısı)
 
 Bilinçli farklar: uygulama yalnızca açık temada (`userInterfaceStyle: "light"`); ödeme
 dükkanda, mağaza içi satın alma yok. (Eski `docs/web_vs_mobile_comparison.md` 2026-11-23'te
@@ -160,8 +160,12 @@ Hedef: günlük yönetim web paneline girmeden telefondan yürüsün. Kural ayn�
 - [x] Operasyon: itirazlar, kuponlar, ödemeler, platform ayarları, özellik bayrakları (#195)
 - [x] İnceleme (App Review) hesabı anahtarı; test dükkanını yalnızca bu hesaplar görür (#200)
 - [x] Mağaza ayarları: "iOS yayında" / "Android yayında" (#206)
-- [ ] Aracı (affiliate) programı: aracı ekle/onayla, oranlar, ödeme işaretleme (#207, QA düzeltmesinde)
-- [ ] Esnaf ön kaydını tek adımda esnaf hesabı + dükkana çevirme (#208, QA düzeltmesinde)
+- [x] Aracı (affiliate) programı: aracı ekle/onayla, oranlar, ödeme işaretleme (#207)
+- [x] Esnaf ön kaydını tek adımda esnaf hesabı + dükkana çevirme (#208)
+- [x] Rol onayları: ikinci admin bekleyen rol değişikliğini onaylar/reddeder; isteği açan
+  onaylayamaz (`AdminUserService.approveRoleChange` / `cancelRoleChange`, web ile ortak)
+- [x] Yönetici push'u: şikayet, esnaf başvurusu, ön kayıt, aracı başvurusu e-postanın yanında
+  mobil cihazı kayıtlı yöneticilere de gider; dokununca ilgili ekran açılır
 
 ## Misafir ve esnaf akışları (2026-11-22/23)
 
@@ -173,8 +177,10 @@ Hedef: günlük yönetim web paneline girmeden telefondan yürüsün. Kural ayn�
 - [x] Açılış animasyonu durgun logo beklemeden başlar; slogan "Valizini bırak, keyfine bak." (#197)
 - [x] Esnaf için yazdırılabilir QR afişi (web, `partner/poster`) ve `bagajpark.com/app` akıllı
   indirme bağlantısı (#206)
-- [ ] Yeni dükkanın slotları onay anında üretilir (#208). Bugün yalnızca gece işi üretiyor:
-  gündüz onaylanan dükkan ertesi sabaha kadar web aramada görünmez
+- [x] Yeni dükkanın slotları onay anında üretilir (#208); eskiden yalnızca gece işi üretiyordu
+- [x] Metin gerçeğe uyduruldu: mühür kapalı, check-in fotoğraf almıyor. Misafir "teslim alındı"
+  push'u, web SSS/şartlar/güvence/nasıl çalışır "mühür + fotoğraf" demiyor; iOS'ta geçersiz
+  telefon uyarısı Google girişi önermiyor
 
 ## iOS yayını (2026-11-23)
 
