@@ -1282,3 +1282,29 @@ export function toMobileAdminAffiliate(a: {
     },
   };
 }
+
+type AdminRoleChangeRequestSource = {
+  id: string;
+  previousRole: string;
+  requestedRole: string;
+  createdAt: Date;
+  requestedByUserId: string;
+  targetUser: { id: string; name: string | null; email: string | null; role: string };
+  requestedBy: { id: string; name: string | null; email: string | null };
+};
+
+/**
+ * Mobil admin bekleyen rol degisikligi (`AdminUserService.listRoleChangeRequests`).
+ * `isOwnRequest`: istegi bu admin actiysa onaylayamaz (servis kurali); dugme kapali gelir.
+ */
+export function toMobileAdminRoleChangeRequest(r: AdminRoleChangeRequestSource, viewerId: string) {
+  return {
+    id: r.id,
+    previousRole: r.previousRole,
+    requestedRole: r.requestedRole,
+    createdAt: r.createdAt.toISOString(),
+    target: { id: r.targetUser.id, name: r.targetUser.name, email: r.targetUser.email, role: r.targetUser.role },
+    requestedBy: { id: r.requestedBy.id, name: r.requestedBy.name, email: r.requestedBy.email },
+    isOwnRequest: r.requestedByUserId === viewerId,
+  };
+}
