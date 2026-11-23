@@ -1,55 +1,67 @@
 # Üretim sırları — SSM Parameter Store
 
-`docker-compose.env` artık elle düzenlenmez. Tek doğruluk kaynağı **AWS SSM
-Parameter Store**; sunucudaki dosya her deploy'da oradan üretilir.
+`docker-compose.env` elle düzenlenmez. Tek doğruluk kaynağı **AWS SSM Parameter Store**
+(`/bagajpark/env/app/*`, SecureString); sunucudaki dosya her deploy'da oradan üretilir.
 
-## Güncel durum — 2026-08-29
+## Son durum — 2026-11-23
 
 | Parça | Durum |
 |---|---|
-| `scripts/secrets-put.sh` (dosya → Parameter Store) | yazıldı, **henüz koşulmadı** |
-| `scripts/secrets-render.sh` (Parameter Store → dosya) | yazıldı, sahte veriyle denendi, **prod'da koşulmadı** |
-| `scripts/secrets-remote.sh` (laptop → SSM Run Command) | yazıldı, **henüz koşulmadı** |
-| `ops/secrets.manifest` (11 zorunlu anahtar) | yazıldı, **gerçek anahtarlara karşı doğrulanmadı** (Adım 2) |
-| IAM: `read-app-env-ssm-parameters` | Terraform'da, **apply edilmedi** |
-| IAM: `seed-app-env-ssm-parameters` | Terraform'da, `enable_secret_seeding = false` ile **kapalı** |
-| CI deploy'da render adımı | `ci.yml`'de, **`main`'e girmedi** |
-| Parameter Store'daki anahtarlar | **hiçbiri yok — seed yapılmadı** |
+| Parameter Store `/bagajpark/env/app/*` | canlı; 2026-10-25 hesap taşımasında 42 anahtar yeni hesaba kopyalandı (`infra/aws/CUTOVER.md`) |
+| CI deploy'da render adımı | `main`'de (2026-08-29'dan beri): `scripts/secrets-render.sh --prefix ${{ vars.SSM_APP_PARAMETER_PREFIX }} --out /opt/emanetci/docker-compose.env --manifest /opt/emanetci/secrets.manifest` |
+| `ops/secrets.manifest` | 10 zorunlu anahtar; biri SSM'de yoksa render durur ve mevcut dosyaya dokunmaz |
+| IAM `read-app-env-ssm-parameters` | instance rolünde, uygulanmış |
+| IAM `seed-app-env-ssm-parameters` | `enable_secret_seeding = false` ile kapalı (yalnızca toplu seed için açılır) |
+| Sunucudaki dosya | `/opt/emanetci/docker-compose.env`, `ec2-user` okuyabilir (640) — cron işleri `CRON_SECRET`'i buradan okur. `/opt/emanetci/.env` yok |
 
-**Sıralama zorunlu.** CI deploy artık `secrets-render.sh` çağırıyor. Parameter
-Store boşken ya da `vars.SSM_APP_PARAMETER_PREFIX` tanımsızken bu adım deploy'u
-**kasten** durdurur. Yani Adım 1–6 bitmeden bu dal `main`'e **birleştirilmemeli**.
+Neden: sırlar tek EC2'nin diskinde, tek kopya, yedeksiz duruyordu — instance giderse
+`AUTH_SECRET`, `POSTGRES_PASSWORD`, `RESEND_API_KEY` vb. de giderdi.
 
-Neden bu iş yapıldı: sırlar tek EC2'nun diskinde, tek kopya, yedeksiz duruyordu
-— deploy dosyaya dokunmuyor, `backup.sh` onu yedeklemiyor. Instance giderse
-`AUTH_SECRET`, `POSTGRES_PASSWORD`, `RESEND_API_KEY`, `NETGSM_PASSWORD` giderdi.
+**Render prefix altındaki bütün parametreleri yazar**, manifest yalnızca zorunlu olanları
+denetler. Ama bir anahtarın konteynere ulaşması için `docker-compose.yml`'de `web` →
+`environment` altında da adıyla geçmesi gerekir; dosyada olup orada olmayan anahtar
+uygulamaya **sessizce ulaşmaz** (2026-09-23 ve 2026-10-15'te mobil giriş, push ve inceleme
+hesabı anahtarları bu yüzden eksik kaldı). Derleme anında gömülen `NEXT_PUBLIC_*`
+değerleri ise imaj build-arg'ı olarak CI'dan gelir, SSM'den değil.
 
-## Ön koşullar
-
-```bash
-cd <repo kökü>
-export AWS_PROFILE=<aws profiliniz>      # yeni hesap: bagajpark-yeni
-export AWS_REGION=eu-central-1
-export DEPLOY_BUCKET=$(gh variable get AWS_DEPLOY_BUCKET --repo furkandogmus/emanetcim)
-aws sts get-caller-identity --query Account --output text
-```
-
-Beklenen: `772853132412`. Başka bir numara çıkarsa **durun** — yanlış hesaptasınız.
-
-### Gerekli IAM izinleri — bunu önce kontrol edin
-
-Adım 1, 2, 4 ve 6 sunucuda SSM Run Command ile çalışır. `terraform-bagajpark`
-kullanıcısında bu izinler **yok** (2026-08-29'da doğrulandı):
+## Bir sırrı eklemek / değiştirmek (normal akış)
 
 ```bash
-aws ssm send-command --document-name "AWS-RunShellScript" \
-  --targets "Key=tag:Project,Values=bagajpark-aws-test" \
-  --parameters 'commands=["echo ok"]' --query "Command.CommandId" --output text
+export AWS_PROFILE=<prod-profiliniz> AWS_REGION=eu-central-1
+aws sts get-caller-identity --query Account --output text   # canlı hesap: infra/aws/README.md
+
+# 1. Parameter Store'a yaz (değer argv'ye ve shell geçmişine düşmesin diye dosyadan):
+printf '%s' 'yeni-deger' > /tmp/v && chmod 600 /tmp/v
+aws ssm put-parameter --name /bagajpark/env/app/<KEY> \
+  --value "file:///tmp/v" --type SecureString --overwrite
+rm -f /tmp/v
+
+# 2. Yeni anahtarsa: docker-compose.yml → web.environment'a ekle (PR). Zorunluysa
+#    ops/secrets.manifest'e de ekle.
+
+# 3. Deploy'u tetikle (merge) ya da yalnızca render + yeniden başlatma:
+bash scripts/secrets-remote.sh render
 ```
 
-Beklenen: bir komut kimliği. `AccessDeniedException ... ssm:SendCommand`
-alıyorsanız aşağıdaki politikayı kullanıcıya ekleyin (konsoldan, çünkü bu
-kullanıcı kendi IAM kayıtlarını okuyamıyor ve Terraform'da tanımlı değil):
+Örnek: web'de Apple ile giriş için `APPLE_KEY_ID` ve `APPLE_PRIVATE_KEY_B64` SSM'de durur;
+istemci sırrı çalışma anında anahtardan üretilir (`docker-compose.yml`). Sunucuda dosyayı
+elle düzenlemeyin — bir sonraki deploy üzerine yazar.
+
+## `scripts/secrets-remote.sh` — SSH'sız, değer basmadan
+
+Bütün işler sunucuda SSM Run Command ile olur; çıktı yalnızca anahtar adlarıdır (SSM komut
+çıktısı CloudTrail/SSM geçmişinde saklanır, bu yüzden değer basmak seçenek değil).
+
+| Komut | Ne yapar |
+|---|---|
+| `keys` | Sunucudaki `docker-compose.env`'in anahtar adlarını listeler |
+| `diff` | Dosya ile Parameter Store aynı anahtarları mı taşıyor |
+| `render` | Parameter Store'dan dosyayı yeniden üretir (manifest doğrulanır) |
+| `seed-dry` / `seed` | Dosyadaki anahtarları Parameter Store'a yazar — yalnızca toplu taşıma için |
+
+Komut göndermek `ssm:SendCommand` ister; hedef `Project=bagajpark-aws-test` etiketli
+instance'lar (deploy rolündeki kapsamla aynı, `infra/aws/bootstrap/main.tf`). Yerel IAM
+kullanıcınızda yoksa, hesap kimliğini kendi hesabınızla değiştirerek şu politikayı ekleyin:
 
 ```json
 {
@@ -59,10 +71,8 @@ kullanıcı kendi IAM kayıtlarını okuyamıyor ve Terraform'da tanımlı deği
       "Sid": "RunCommandOnProjectInstances",
       "Effect": "Allow",
       "Action": "ssm:SendCommand",
-      "Resource": "arn:aws:ec2:eu-central-1:772853132412:instance/*",
-      "Condition": {
-        "StringEquals": { "ssm:resourceTag/Project": "bagajpark-aws-test" }
-      }
+      "Resource": "arn:aws:ec2:eu-central-1:<account-id>:instance/*",
+      "Condition": { "StringEquals": { "ssm:resourceTag/Project": "bagajpark-aws-test" } }
     },
     {
       "Sid": "RunCommandDocument",
@@ -80,149 +90,22 @@ kullanıcı kendi IAM kayıtlarını okuyamıyor ve Terraform'da tanımlı deği
 }
 ```
 
-Kapsam, deploy rolündeki (`infra/aws/bootstrap/main.tf`) izinle aynı: yalnızca
-`Project=bagajpark-aws-test` etiketli instance'lara komut gönderilebilir.
+## Toplu seed (yalnızca dosyadan Parameter Store'a ilk taşıma)
 
-> Hiçbir adım SSH/SCP kullanmaz ve hiçbir adım ekrana sır **değeri** basmaz.
-> Bütün iş sunucuda SSM Run Command ile olur; çıktı yalnızca anahtar adlarıdır.
-> Sebebi: SSM komut çıktısı CloudTrail/SSM geçmişinde saklanır.
+2026-08-29'da bir kez yapıldı; hesap taşımasında parametreler doğrudan hesaptan hesaba
+kopyalandı, seed gerekmedi. Gerekirse sıra:
 
----
-
-## Adım 1 — Scriptleri sunucuya koy (salt kopyalama)
-
-```bash
-aws s3 cp scripts/secrets-put.sh    "s3://$DEPLOY_BUCKET/deploy-config/secrets-put.sh"
-aws s3 cp scripts/secrets-render.sh "s3://$DEPLOY_BUCKET/deploy-config/secrets-render.sh"
-aws s3 cp ops/secrets.manifest      "s3://$DEPLOY_BUCKET/deploy-config/secrets.manifest"
-```
-
-Sonra sunucuya çektirin:
-
-```bash
-aws ssm send-command \
-  --document-name "AWS-RunShellScript" \
-  --targets "Key=tag:Project,Values=bagajpark-aws-test" \
-  --comment "secrets scriptlerini yerlestir" \
-  --parameters 'commands=[
-    "set -e",
-    "mkdir -p /opt/emanetci/scripts",
-    "aws s3 cp s3://$DEPLOY_BUCKET/deploy-config/secrets-put.sh /opt/emanetci/scripts/secrets-put.sh",
-    "aws s3 cp s3://$DEPLOY_BUCKET/deploy-config/secrets-render.sh /opt/emanetci/scripts/secrets-render.sh",
-    "aws s3 cp s3://$DEPLOY_BUCKET/deploy-config/secrets.manifest /opt/emanetci/secrets.manifest",
-    "chmod +x /opt/emanetci/scripts/secrets-put.sh /opt/emanetci/scripts/secrets-render.sh",
-    "ls -l /opt/emanetci/scripts/secrets-*.sh"
-  ]' --query "Command.CommandId" --output text
-```
-
-Beklenen: iki dosya `-rwxr-xr-x` olarak listelenir.
-
-## Adım 2 — Gerçek anahtarları listele ve manifest'i doğrula
-
-Bu adım **değer basmaz**, yalnızca anahtar adlarını.
-
-```bash
-bash scripts/secrets-remote.sh keys
-```
-
-Çıktıdaki listeyi `ops/secrets.manifest` ile karşılaştırın. Manifest'te olup
-sunucuda **olmayan** bir anahtar varsa, Adım 5'te deploy kilitlenir — o satırı
-manifest'ten çıkarın ya da değeri sunucuda tanımlayın. Bu, prod'a bakmadan
-kestirilemeyeceği için ayrı bir adım.
-
-## Adım 3 — Seed iznini geçici aç
-
-```bash
-cd infra/aws/stack
-terraform workspace select hesap2
-terraform plan  -var="enable_secret_seeding=true"
-terraform apply -var="enable_secret_seeding=true"
-```
-
-Beklenen plan: `aws_iam_role_policy.app_ssm_write_env[0]` **1 to add**, başka
-hiçbir değişiklik yok. Plan'da başka bir kaynak görünüyorsa durun.
-
-## Adım 4 — Sırları Parameter Store'a yaz
-
-Önce kuru koşu — hiçbir şey yazmaz, ne yazılacağını listeler:
-
-```bash
-bash scripts/secrets-remote.sh seed-dry
-```
-
-Beklenen: her anahtar için `INFO [kuru] /bagajpark/env/app/<KEY>` ve sonda
-`KURU KOSU -- hicbir sey yazilmadi`. Boş bırakılmış anahtarlar
-`atlandi (bos deger)` ile geçilir; bu normaldir (SecureString boş değer kabul
-etmez, compose varsayılanı zaten boş).
-
-**İlk mutasyon bu adımda:**
-
-```bash
-bash scripts/secrets-remote.sh seed
-```
-
-Beklenen: her anahtar için `INFO yazildi /bagajpark/env/app/<KEY>`, sonda
-`tamam: N anahtar yazildi`.
-
-Doğrulama (yalnızca adlar):
-
-```bash
-bash scripts/secrets-remote.sh diff
-```
-
-Beklenen: `yalnizca DOSYADA:` altında yalnızca boş değerli anahtarlar,
-`yalnizca PARAMETER STORE da:` altı boş.
-
-## Adım 5 — Seed iznini kapat
-
-```bash
-cd infra/aws/stack
-terraform apply       # enable_secret_seeding varsayilani false
-```
-
-Beklenen: `aws_iam_role_policy.app_ssm_write_env[0]` **1 to destroy**. Bu adım
-atlanırsa kutuyu ele geçiren biri kendi sırlarını kalıcı olarak değiştirebilir.
-
-## Adım 6 — Render'ı prod'da dene
-
-```bash
-bash scripts/secrets-remote.sh render
-```
-
-Beklenen: `manifest dogrulandi` ve
-`/opt/emanetci/docker-compose.env yazildi: N anahtar`.
-
-Bu adım env dosyasını **yeniden üretir**. Çalışan konteynerlere dokunmaz;
-etkisi bir sonraki `docker compose up`'ta görünür. Hata verirse dosya
-**değiştirilmez** (script bunu garanti eder), yani prod bozulmaz.
-
-## Adım 7 — GitHub Actions değişkenini tanımla
-
-```bash
-gh variable set SSM_APP_PARAMETER_PREFIX --body "/bagajpark/env/app" \
-  --repo furkandogmus/emanetcim
-gh variable list --repo furkandogmus/emanetcim
-```
-
-Bu değişken tanımsızsa deploy'daki render adımı `--prefix` boş kalır ve
-`assert_not_empty` ile durur.
-
-## Adım 8 — Dalı birleştir
-
-Ancak 1–7 yeşilse. İlk deploy'da SSM çıktısında
-`manifest dogrulandi` + `docker-compose.env yazildi` satırlarını görün.
-
----
+1. `infra/aws/stack`: `terraform apply -var="enable_secret_seeding=true"` — plan yalnızca
+   `aws_iam_role_policy.app_ssm_write_env[0]` **1 to add** göstermeli.
+2. `bash scripts/secrets-remote.sh seed-dry`, sonra `seed`, sonra `diff`.
+3. `terraform apply` (varsayılan `false`) — izin **1 to destroy**. Bu adım atlanırsa
+   kutuyu ele geçiren biri kendi sırlarını kalıcı olarak değiştirebilir.
+4. `bash scripts/secrets-remote.sh render`.
 
 ## Geri alma
 
-**Deploy render'da patlarsa:** sunucudaki `docker-compose.env` değişmemiştir,
-çalışan konteynerler etkilenmez. Eksik anahtarı yazın ve deploy'u yeniden
-tetikleyin.
-
-**Render yanlış dosya ürettiyse** (manifest çok dar/geniş): `ci.yml`'deki
-render satırını çıkarıp `main`'e push edin; deploy eski davranışına döner
-(dosyaya dokunmaz). Sonra sakin sakin düzeltin.
+**Deploy render'da patlarsa:** sunucudaki `docker-compose.env` değişmemiştir, çalışan
+konteynerler etkilenmez. Eksik anahtarı yazın ve deploy'u yeniden tetikleyin.
 
 **Bir sır bozulduysa:** Parameter Store sürüm tutar.
 
@@ -231,20 +114,5 @@ aws ssm get-parameter-history --name /bagajpark/env/app/<KEY> \
   --query 'Parameters[].[Version,LastModifiedDate]' --output table
 ```
 
-Değeri basmadan sürümleri görürsünüz; geri almak için o sürümü okuyup
-yeniden yazın (seed iznini geçici açarak, Adım 3/5).
-
-## Bir sırrı değiştirmek (bundan sonraki normal akış)
-
-```bash
-# 1. Parameter Store'da guncelle (deger argv'ye dusmesin diye dosyadan):
-printf '%s' 'yeni-deger' > /tmp/v && chmod 600 /tmp/v
-aws ssm put-parameter --name /bagajpark/env/app/<KEY> \
-  --value "file:///tmp/v" --type SecureString --overwrite
-rm -f /tmp/v
-
-# 2. Deploy'u tetikle (main'e push) ya da yalnizca render + restart:
-bash scripts/secrets-remote.sh render
-```
-
-Sunucuda dosyayı elle düzenlemeyin — bir sonraki deploy üzerine yazar.
+Değeri basmadan sürümleri görürsünüz; geri almak için o sürümü okuyup yukarıdaki akışla
+yeniden yazın.
