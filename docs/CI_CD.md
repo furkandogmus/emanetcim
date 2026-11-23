@@ -51,7 +51,7 @@ push/PR → main                     ci.yml
 image 228 sn + deploy 74 sn ≈ 11 dk. Paralel kurguda kritik yol en uzun doğrulama
 kolu (`e2e`) + deploy; imaj onun arkasında saklanır.
 
-`mobile-expo-ci.yml` ayrı kalır (yol filtreli, zorunlu değil), `release.yml` yalnızca
+`mobile-expo-ci.yml` (`Expo dogrulama (tip, lint, test)`) ayrı kalır (yol filtreli, zorunlu değil), `release.yml` yalnızca
 sürüm etiketinde çalışır. Flutter'ın `mobile-ci.yml`'i uygulamayla birlikte 2026-10-18'de
 kaldırıldı.
 
@@ -117,7 +117,9 @@ Actions'ta macOS koşucusu açılırsa bu çarpanı hesaba katın.
 
 ## Kota bittiğinde ne yapılır
 
-Kod tarafında yapılacak bir şey yoktur; belirti kodla ilgili değildir.
+Repo bugün **public** (2026-11-23'te doğrulandı): public repolarda standart GitHub koşucuları
+ücretsizdir, yukarıdaki kota tablosu private dönemine aittir. Repo yeniden private olursa
+aşağıdaki tablo geri gelir. Kod tarafında yapılacak bir şey yoktur; belirti kodla ilgili değildir.
 
 1. **Settings → Billing → Plans and usage → Actions** — kalan dakikaya bakın.
 2. Kota dolduysa: ayın 1'ini bekleyin, harcama limitini yükseltin ya da repoyu
