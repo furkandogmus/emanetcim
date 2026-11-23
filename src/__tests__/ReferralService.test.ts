@@ -74,14 +74,10 @@ describe("ReferralService", () => {
     });
   });
 
-  it("hesapsiz misafirde ilk rezervasyon e-postayla sayilir", async () => {
-    await referralService.resolveDiscount("ABCD2345", { guestEmail: "Ali@Ornek.com" }, 100);
-    expect(mockPrisma.booking.count).toHaveBeenCalledWith({
-      where: {
-        guestEmail: { equals: "ali@ornek.com", mode: "insensitive" },
-        status: { not: "CANCELLED" },
-      },
-    });
+  it("oturumsuz onizleme e-postayla gecmis rezervasyon sorgulamaz (kimliksiz kahin yok)", async () => {
+    const res = await referralService.check("ABCD2345", { guestEmail: "Ali@Ornek.com" } as never);
+    expect(res).toMatchObject({ ok: true });
+    expect(mockPrisma.booking.count).not.toHaveBeenCalled();
   });
 
   it("misafir taninmiyorsa rezervasyonda indirim uygulanmaz", async () => {

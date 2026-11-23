@@ -43,8 +43,12 @@ export function getReferralDiscountPct(): number {
   return Math.min(50, Math.max(0, raw));
 }
 
-/** Misafirin kimligi: hesapli ise `userId`, hesapsiz web odemesinde e-posta. */
-export type ReferralGuest = { userId?: string | null; guestEmail?: string | null };
+/**
+ * Misafirin kimligi: yalnizca hesap (2026-11-23). E-posta dali kaldirildi:
+ * kimliksiz cagrilabilen onizleme "bu e-postanin rezervasyonu var mi"
+ * sorusuna cevap veriyordu.
+ */
+export type ReferralGuest = { userId?: string | null };
 
 export type ReferralRejection =
   | "invalid_code"
@@ -60,25 +64,15 @@ export type ReferralDiscount = { code: string; discountAmount: number; totalPric
 /** Iptal edilmemis bir rezervasyonu varsa "ilk rezervasyon" degildir. */
 async function hasPriorBooking(guest: ReferralGuest): Promise<boolean | null> {
   const notCancelled = { status: { not: BookingStatus.CANCELLED } };
-  if (guest.userId) {
-    return (await prisma.booking.count({ where: { guestId: guest.userId, ...notCancelled } })) > 0;
-  }
-  const email = guest.guestEmail?.trim().toLowerCase();
-  if (email) {
-    return (
-      (await prisma.booking.count({
-        where: { guestEmail: { equals: email, mode: "insensitive" }, ...notCancelled },
-      })) > 0
-    );
-  }
-  return null;
+  if (!guest.userId) return null;
+  return (await prisma.booking.count({ where: { guestId: guest.userId, ...notCancelled } })) > 0;
 }
 
 export class ReferralService {
   /**
    * Kod bu misafire indirim verir mi? Onizleme ve rezervasyon ayni cevabi
-   * buradan alir. Misafir henuz bilinmiyorsa (hesapsiz, e-posta girilmemis)
-   * ilk-rezervasyon kontrolu atlanir; rezervasyon aninda tekrar sorulur.
+   * buradan alir. Oturum yoksa ilk-rezervasyon kontrolu atlanir;
+   * rezervasyon (oturumlu) aninda tekrar sorulur.
    */
   async check(rawCode: string, guest: ReferralGuest): Promise<ReferralCheck> {
     const code = normalizeReferralCode(rawCode);
@@ -108,7 +102,7 @@ export class ReferralService {
     subtotal: number,
   ): Promise<ReferralDiscount | null> {
     if (!rawCode?.trim()) return null;
-    if (!guest.userId && !guest.guestEmail?.trim()) return null;
+    if (!guest.userId) return null;
     const check = await this.check(rawCode, guest);
     if (!check.ok || check.discountPct <= 0) return null;
     return { code: check.code, ...applyReferralDiscount(subtotal, check.discountPct) };

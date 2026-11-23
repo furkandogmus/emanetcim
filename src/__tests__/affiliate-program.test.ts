@@ -160,13 +160,13 @@ describe("atif cozumleme", () => {
     m.prisma.affiliate.findUnique.mockResolvedValue(affiliateRow({ contactPhone: "+90 532 000 00 00" }));
     m.prisma.user.findUnique.mockResolvedValueOnce({ email: "baska@example.test", phone: "05320000000" });
     expect(await affiliateService.resolve("AHMET-EV", { userId: "ikinci-hesap" })).toEqual({ ok: false, reason: "own_code" });
-    expect(await affiliateService.resolve("AHMET-EV", { guestPhone: "0532 000 00 00" })).toEqual({ ok: false, reason: "own_code" });
     expect((await affiliateService.resolve("AHMET-EV", { userId: "ikinci-hesap" })).ok).toBe(true);
   });
 
-  it("hesapsiz odemede aracinin kendi e-postasi atif almaz", async () => {
+  it("girisli misafir: hesabin e-postasi aracinin iletisim ya da hesap e-postasiysa atif yok", async () => {
     for (const email of ["HOST@example.test", "host-account@example.test"]) {
-      expect(await affiliateService.resolve("AHMET-EV", { guestEmail: email })).toEqual({ ok: false, reason: "own_code" });
+      m.prisma.user.findUnique.mockResolvedValueOnce({ email, phone: null });
+      expect(await affiliateService.resolve("AHMET-EV", { userId: "ikinci-hesap" })).toEqual({ ok: false, reason: "own_code" });
     }
   });
 });

@@ -92,7 +92,6 @@ const previewSchema = z.object({
   checkOutTime: z.date(),
   couponCode: z.string().trim().max(64).optional(),
   referralCode: z.string().trim().max(32).optional(),
-  guestEmail: z.string().trim().max(320).optional(),
 });
 
 /**
@@ -127,7 +126,7 @@ export async function previewAffiliateCheckoutAction(input: unknown) {
     couponCode: d.couponCode || undefined,
     referralCode: d.couponCode ? undefined : d.referralCode || undefined,
     affiliateCode: code,
-    guest: { userId: session?.user?.id, guestEmail: d.guestEmail },
+    guest: { userId: session?.user?.id },
   });
   if (!q.affiliate || (q.affiliate.status !== "applied" && q.affiliate.status !== "attributed")) return null;
   return {

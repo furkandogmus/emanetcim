@@ -119,8 +119,8 @@ async function gatherCandidates(input: {
   // Kupon gecerliyse davet kodu aday olmaz; sorgu da atlanir.
   if (!coupon && input.referralCode) {
     const r = await referralService.check(input.referralCode, guest);
-    // Rezervasyon aninda misafir taninmiyorsa (hesapsiz, e-postasiz) indirim yok -- `resolveDiscount` ile ayni.
-    const known = !!guest.userId || !!guest.guestEmail?.trim();
+    // Oturumsuz misafire indirim yok -- `resolveDiscount` ile ayni.
+    const known = !!guest.userId;
     if (r.ok && r.discountPct > 0 && known) {
       const a = applyReferralDiscount(subtotal, r.discountPct);
       referral = { code: r.code, amount: a.discountAmount, total: a.totalPrice };

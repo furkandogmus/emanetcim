@@ -32,7 +32,6 @@ export async function getOrCreateReferralCodeAction(): Promise<
  */
 export async function validateReferralCodeAction(
   code: string,
-  guestEmail?: string,
 ): Promise<{ valid: boolean; discountPct: number; reason?: ReferralRejection }> {
   if (typeof code !== "string" || !code.trim() || code.length > 32) {
     return { valid: false, discountPct: 0 };
@@ -54,10 +53,7 @@ export async function validateReferralCodeAction(
   }
 
   const session = await auth();
-  const check = await referralService.check(code, {
-    userId: session?.user?.id,
-    guestEmail,
-  });
+  const check = await referralService.check(code, { userId: session?.user?.id });
   if (!check.ok) return { valid: false, discountPct: 0, reason: check.reason };
   return { valid: true, discountPct: check.discountPct };
 }
