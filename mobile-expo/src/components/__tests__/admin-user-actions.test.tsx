@@ -62,6 +62,7 @@ const GUEST: AdminUserDetail = {
   role: "GUEST",
   isBanned: false,
   isTest: false,
+  reviewSandbox: false,
   bookingCount: 0,
   shopCount: 0,
   createdAt: "2026-01-01T00:00:00.000Z",
@@ -134,30 +135,30 @@ describe("onay kapilari (saf)", () => {
   });
 });
 
-describe("inceleme kum havuzu (test hesabi)", () => {
-  const sw = () => screen.getByLabelText("Test hesabı");
+describe("inceleme (App Review) hesabi", () => {
+  const sw = () => screen.getByLabelText("İnceleme (App Review) hesabı");
 
-  it("acmak onay ister; onaydan sonra PATCH { isTest: true } gider", async () => {
+  it("acmak onay ister; onaydan sonra PATCH { reviewSandbox: true } gider", async () => {
     await renderUser();
     await act(async () => fireEvent(sw(), "valueChange", true));
     expect(mutations()).toEqual([]);
-    await pressAlertButton("Test hesabı yap");
-    await waitFor(() => expect(mutations()).toEqual([{ path: "/admin/users/g1", body: { isTest: true } }]));
+    await pressAlertButton("İnceleme hesabı yap");
+    await waitFor(() => expect(mutations()).toEqual([{ path: "/admin/users/g1", body: { reviewSandbox: true } }]));
   });
 
   it("kapatmak onaysiz gider", async () => {
-    user = { ...GUEST, isTest: true };
+    user = { ...GUEST, reviewSandbox: true };
     await renderUser();
     await act(async () => fireEvent(sw(), "valueChange", false));
-    await waitFor(() => expect(mutations()).toEqual([{ path: "/admin/users/g1", body: { isTest: false } }]));
+    await waitFor(() => expect(mutations()).toEqual([{ path: "/admin/users/g1", body: { reviewSandbox: false } }]));
     // Gorulen tek pencere sonuc bildirimi; onay penceresi acilmadi.
-    expect(alertSpy.mock.calls.map((c) => c[0])).toEqual(["Hesap artık gerçek kullanıcı."]);
+    expect(alertSpy.mock.calls.map((c) => c[0])).toEqual(["Hesap artık inceleme hesabı değil."]);
   });
 
   it("yonetici hesabinda anahtar yok", async () => {
     user = { ...GUEST, role: "ADMIN" };
     await renderUser();
-    expect(screen.queryByLabelText("Test hesabı")).toBeNull();
+    expect(screen.queryByLabelText("İnceleme (App Review) hesabı")).toBeNull();
   });
 });
 

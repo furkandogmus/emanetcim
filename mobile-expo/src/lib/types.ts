@@ -554,6 +554,8 @@ export type AdminUser = {
   role: Role;
   isBanned: boolean;
   isTest: boolean;
+  /** Inceleme (App Review) hesabi: test dukkanlarini gorur ve rezerve eder. */
+  reviewSandbox: boolean;
   bookingCount: number;
   shopCount: number;
   createdAt: string;
