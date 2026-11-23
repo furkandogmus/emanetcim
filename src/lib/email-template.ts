@@ -62,7 +62,7 @@ export const EMAIL_TONES = {
     4.5 esigini gecmiyor. Bu ton hem baslikta hem ana eylem dugmesinde
     kullaniliyor, yani en cok okunan iki yerde. green-700 ayni anlami tasiyor
     ve 5.02:1 veriyor. Marka turuncusu DEGISTIRILMEDI -- o bir kimlik karari
-    ve `docs/UX_AUDIT.md` #17'de kullaniciya birakildi.
+    ve `docs/archive/2026-11-23-denetim-gecmisi/UX_AUDIT_2026-08-31.md` #17'de kullaniciya birakildi.
   */
   success: "#15803d",
   alert: "#dc2626",
