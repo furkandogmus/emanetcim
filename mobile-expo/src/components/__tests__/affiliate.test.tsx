@@ -93,10 +93,15 @@ beforeEach(() => {
 });
 afterEach(() => qc.clear());
 
-describe("derin baglanti ?ref=", () => {
-  it("dukkan baglantisindaki kod saklanir, buyuk harfe cevrilir", async () => {
-    expect(appPathFromLink("https://bagajpark.com/tr/shop/abc?ref=ahmet-ev")).toBe("/shop/abc");
+describe("derin baglanti ?aff=", () => {
+  it("dukkan baglantisindaki araci kodu saklanir, buyuk harfe cevrilir", async () => {
+    expect(appPathFromLink("https://bagajpark.com/tr/shop/abc?aff=ahmet-ev")).toBe("/shop/abc");
     expect(await loadPendingReferral()).toBe("AHMET-EV");
+  });
+
+  it("?ref= kullanici davet kodudur: araci alanina tasinmaz", async () => {
+    expect(appPathFromLink("https://bagajpark.com/tr/shop/abc?ref=ABCD2345")).toBe("/shop/abc");
+    expect(await loadPendingReferral()).toBeNull();
   });
 
   it("gecersiz bicim yok sayilir; 30 gun sonra kod dusar", async () => {

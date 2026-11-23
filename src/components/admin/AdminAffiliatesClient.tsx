@@ -20,7 +20,7 @@ type Affiliate = ReturnType<typeof toMobileAdminAffiliate>;
 
 const TYPES = ["airbnb_host", "hotel", "guide", "agency", "other"] as const;
 const STATUSES = ["pending", "active", "paused"] as const;
-const ERROR_KEYS = new Set(["invalid_data", "invalid_code", "duplicate_code", "not_found", "user_not_found", "user_already_linked"]);
+const ERROR_KEYS = new Set(["invalid_data", "invalid_code", "duplicate_code", "code_reserved", "not_found", "user_not_found", "user_already_linked"]);
 
 type Form = {
   displayName: string;

@@ -256,7 +256,7 @@ export type CheckoutRequest = {
   bagCountXl: number;
   couponCode?: string;
   referralCode?: string;
-  /** Araci "Referans kodu" (`?ref=` derin baglantisi ya da elle). Atfi sunucu dogrular. */
+  /** Araci "Referans kodu" (`?aff=` derin baglantisi ya da elle). Atfi sunucu dogrular. */
   affiliateCode?: string;
   /** Ekranda gosterilen toplam: sunucu farkli hesaplarsa 409 `price_changed` doner. */
   expectedTotal?: number;

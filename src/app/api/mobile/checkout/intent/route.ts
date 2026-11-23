@@ -67,7 +67,7 @@ const schema = z.object({
   couponCode: z.string().trim().min(1).max(64).optional(),
   /** Davet kodu (2026-09-23). Kural `ReferralService`te; web ile ayni cagri. */
   referralCode: z.string().trim().min(1).max(32).optional(),
-  /** Araci kodu (2026-11-23): odeme ekranindaki "Referans kodu" ya da `?ref=` derin baglantisi. */
+  /** Araci kodu (2026-11-23): odeme ekranindaki "Referans kodu" ya da `?aff=` derin baglantisi. */
   affiliateCode: z.string().trim().min(1).max(40).optional(),
   /*
     Ekranda gosterilen toplam (`checkout/quote`). Sunucunun hesapladigi tutar

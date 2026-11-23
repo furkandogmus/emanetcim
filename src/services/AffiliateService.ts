@@ -183,11 +183,13 @@ export class AffiliateService {
    * `/r/<kod>` tiklamasi: kod ACTIVE ise gunluk sayaci bir artirir ve kodu
    * dondurur (cerez yazilsin diye). Kisi bilgisi tutulmaz.
    */
-  async recordClick(rawCode: unknown, now = new Date()): Promise<string | null> {
+  async recordClick(rawCode: unknown, now = new Date(), opts: { count?: boolean } = {}): Promise<string | null> {
     const code = normalizeAffiliateCode(rawCode);
     if (!code) return null;
     const affiliate = await prisma.affiliate.findUnique({ where: { code }, select: { id: true, status: true } });
     if (!affiliate || affiliate.status !== AffiliateStatus.ACTIVE) return null;
+    // Hiz siniri asildiysa tiklama sayilmaz ama atif cerezi yine yazilir.
+    if (opts.count === false) return code;
     const day = new Date(`${istanbulDay(now)}T00:00:00.000Z`);
     try {
       await prisma.affiliateClickDay.upsert({
@@ -343,7 +345,8 @@ export class AffiliateService {
       const existing = await prisma.affiliate.findUnique({ where: { userId: ctx.userId }, select: { id: true } });
       if (existing) return { ok: false, reason: "already_applied" };
     }
-    const created = await createWithUniqueCode(suggestAffiliateCode(d.displayName), (code) => ({
+    // Basvuru kodu RASTGELE: okunur kod (`AHMET-EV`) onayda verilir, bekleyen basvuru kimsenin adini kapmaz.
+    const created = await createWithUniqueCode(applicationCode(), (code) => ({
       code,
       displayName: d.displayName,
       type: TYPE_TO_DB[d.type],
@@ -400,6 +403,24 @@ function isUniqueViolation(e: unknown): boolean {
   return e instanceof Prisma.PrismaClientKnownRequestError && e.code === "P2002";
 }
 
+const APPLICATION_PREFIX = "BASVURU-";
+function applicationCode(): string {
+  return `${APPLICATION_PREFIX}${generateCode(8)}`;
+}
+export function isApplicationCode(code: string): boolean {
+  return code.startsWith(APPLICATION_PREFIX);
+}
+
+/** Onayda verilecek okunur kod: alinmissa (araci ya da davet kodu) `-XXXX` eki. */
+async function freeReadableCode(base: string, selfId: string): Promise<string> {
+  for (let attempt = 0; attempt < 6; attempt++) {
+    const code = attempt === 0 ? base : `${base.slice(0, 27)}-${generateCode(4)}`;
+    const taken = await prisma.affiliate.findUnique({ where: { code }, select: { id: true } });
+    if ((!taken || taken.id === selfId) && !(await codeReservedByReferral(code))) return code;
+  }
+  return `${base.slice(0, 20)}-${generateCode(8)}`;
+}
+
 /** Kod cakisirsa `KOD-XXXX` ile yeniden dener (rastgele ek davet kodu uretecinden). */
 async function createWithUniqueCode(
   base: string,
@@ -451,7 +472,22 @@ const adminInputSchema = z.object({
 });
 
 export type AffiliateAdminActor = { id: string; role: Role };
-export type AffiliateAdminError = "invalid_data" | "invalid_code" | "duplicate_code" | "not_found" | "user_not_found" | "user_already_linked";
+export type AffiliateAdminError =
+  | "invalid_data"
+  | "invalid_code"
+  | "duplicate_code"
+  | "code_reserved"
+  | "not_found"
+  | "user_not_found"
+  | "user_already_linked";
+
+/**
+ * Araci kodu bir kullanici davet koduyla ayni olamaz: misafir ikisini ayni
+ * "kod" alanina yazabilir ve hangisinin uygulanacagi belirsizlesir.
+ */
+async function codeReservedByReferral(code: string): Promise<boolean> {
+  return (await prisma.user.findUnique({ where: { referralCode: code }, select: { id: true } })) !== null;
+}
 
 async function resolveLinkedUser(email: string | undefined, selfId?: string): Promise<{ userId: string | null } | { error: AffiliateAdminError }> {
   if (!email) return { userId: null };
@@ -476,6 +512,7 @@ export async function adminCreateAffiliate(
   if (d.code) {
     code = normalizeAffiliateCode(d.code);
     if (!code) return { ok: false, reason: "invalid_code" };
+    if (await codeReservedByReferral(code)) return { ok: false, reason: "code_reserved" };
   }
   const linked = await resolveLinkedUser(d.linkedUserEmail);
   if ("error" in linked) return { ok: false, reason: linked.error };
@@ -535,11 +572,16 @@ export async function adminUpdateAffiliate(
   const d = parsed.data;
   const existing = await prisma.affiliate.findUnique({ where: { id } });
   if (!existing) return { ok: false, reason: "not_found" };
-  const code = d.code ? normalizeAffiliateCode(d.code) : existing.code;
+  let code = d.code ? normalizeAffiliateCode(d.code) : existing.code;
   if (!code) return { ok: false, reason: "invalid_code" };
+  const status = d.status.toUpperCase() as AffiliateStatus;
+  // Basvuru rastgele kodla gelir; onayda okunur kod (addan) verilir, admin baska yazmadiysa.
+  if (status === AffiliateStatus.ACTIVE && isApplicationCode(code)) {
+    code = await freeReadableCode(suggestAffiliateCode(d.displayName), id);
+  }
+  if (code !== existing.code && (await codeReservedByReferral(code))) return { ok: false, reason: "code_reserved" };
   const linked = await resolveLinkedUser(d.linkedUserEmail, id);
   if ("error" in linked) return { ok: false, reason: linked.error };
-  const status = d.status.toUpperCase() as AffiliateStatus;
   try {
     await prisma.affiliate.update({
       where: { id },

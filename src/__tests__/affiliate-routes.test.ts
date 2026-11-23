@@ -15,7 +15,9 @@ const m = vi.hoisted(() => ({
   update: vi.fn(),
   payout: vi.fn(),
   csv: vi.fn(),
+  rateLimit: vi.fn(),
 }));
+vi.mock("@/lib/rate-limit", () => ({ rateLimit: m.rateLimit }));
 
 vi.mock("@/auth", () => ({ auth: m.auth }));
 vi.mock("@/lib/logger", () => ({ default: { error: vi.fn(), warn: vi.fn(), info: vi.fn() } }));
@@ -57,6 +59,7 @@ const click = (code: string, query = "", locale = "tr") =>
 
 beforeEach(() => {
   vi.clearAllMocks();
+  m.rateLimit.mockResolvedValue(true);
   m.recordClick.mockImplementation(async (c: string) => (c.toUpperCase() === "AHMET-EV" || c.toUpperCase() === "OTEL-X" ? c.toUpperCase() : null));
 });
 
@@ -64,7 +67,8 @@ describe("/r/<kod>", () => {
   it("aktif kod: 30 gunluk HttpOnly, SameSite=Lax cerez ve ana sayfaya 302", async () => {
     const r = await click("ahmet-ev");
     expect(r.status).toBe(302);
-    expect(r.headers.get("location")).toBe("/tr");
+    // `aff=` (davet kodunun `ref=`'inden ayri): uygulama baglantisi kodu tasir.
+    expect(r.headers.get("location")).toBe("/tr?aff=AHMET-EV");
     const cookie = r.headers.get("set-cookie") ?? "";
     expect(cookie).toMatch(/^bp_aff=AHMET-EV/);
     expect(cookie).toMatch(/HttpOnly/i);
@@ -86,8 +90,17 @@ describe("/r/<kod>", () => {
   });
 
   it("?to= site ici yol: dil oneki korunur ya da eklenir", async () => {
-    expect((await click("ahmet-ev", "?to=/en/search?city=istanbul")).headers.get("location")).toBe("/en/search?city=istanbul");
-    expect((await click("ahmet-ev", "?to=/shop/abc", "de")).headers.get("location")).toBe("/de/shop/abc");
+    expect((await click("ahmet-ev", "?to=/en/search?city=istanbul")).headers.get("location")).toBe("/en/search?city=istanbul&aff=AHMET-EV");
+    expect((await click("ahmet-ev", "?to=/tr/shop/abc", "de")).headers.get("location")).toBe("/tr/shop/abc?aff=AHMET-EV");
+    expect((await click("ahmet-ev", "?to=/shop/abc", "de")).headers.get("location")).toBe("/de/shop/abc?aff=AHMET-EV");
+  });
+
+  it("IP siniri asildiysa tiklama sayilmaz ama misafir yonlenir ve cerez yazilir", async () => {
+    m.rateLimit.mockResolvedValue(false);
+    const r = await click("ahmet-ev");
+    expect(m.recordClick).toHaveBeenCalledWith("ahmet-ev", expect.any(Date), { count: false });
+    expect(r.status).toBe(302);
+    expect(r.headers.get("set-cookie")).toMatch(/^bp_aff=AHMET-EV/);
   });
 
   it.each([
