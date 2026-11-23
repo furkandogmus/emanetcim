@@ -168,11 +168,11 @@ export type MobileActor = {
   /** Bir yonetici bu kullanici olarak goruntuluyorsa o yoneticinin id'si. */
   impersonatedBy?: string;
   /**
-   * Inceleme kum havuzu hesabi (`User.isTest`): test dukkanlarini da gorur ve
+   * Inceleme (App Review) hesabi (`User.reviewSandbox`): test dukkanlarini da gorur ve
    * rezervasyon yapabilir. Eksikse gercek kullanici sayilir; kural
    * `public-shop-filter.ts` -> `ShopViewer`.
    */
-  isTest?: boolean;
+  reviewSandbox?: boolean;
 };
 
 /** Yonetici goruntuleme oturumunda kapali uclar (hesap silme, push kaydi, cikis iptali). */
@@ -199,7 +199,7 @@ type ActorRow = {
   email: string | null;
   isBanned: boolean;
   tokenVersion: number;
-  isTest: boolean;
+  reviewSandbox: boolean;
 };
 
 export async function requireMobileUser(req: Request) {
@@ -224,7 +224,7 @@ export async function requireMobileUser(req: Request) {
   try {
     user = await prisma.user.findUnique({
       where: { id: claims.sub },
-      select: { id: true, role: true, email: true, isBanned: true, tokenVersion: true, isTest: true },
+      select: { id: true, role: true, email: true, isBanned: true, tokenVersion: true, reviewSandbox: true },
     });
     if (user && claims.imp) {
       admin = await prisma.user.findUnique({
@@ -238,7 +238,7 @@ export async function requireMobileUser(req: Request) {
   }
 
   if (!user || user.isBanned || user.tokenVersion !== (claims.tv ?? 0)) return { error: unauthorized() } as const;
-  const actor: MobileActor = { id: user.id, role: user.role, email: user.email, isTest: user.isTest };
+  const actor: MobileActor = { id: user.id, role: user.role, email: user.email, reviewSandbox: user.reviewSandbox };
   if (claims.imp) {
     // Oturum suresince ADMIN'e yukseltilen hedef de goruntulenemez.
     if (user.role === "ADMIN") return { error: unauthorized() } as const;
@@ -260,22 +260,32 @@ export async function requireMobileUser(req: Request) {
   return { user: actor } as const;
 }
 
+/** Bearer geldi ama reddedildi: istemci token'i yenileyip istegi BIR KEZ tekrarlar. */
+export const AUTH_STALE_HEADER = "X-Auth-Stale";
+
 /**
  * KIMLIKSIZ uclar (arama, dukkan detayi, yorumlar) icin istege bagli izleyici.
  *
- * Token yoksa, gecersizse ya da suresi dolmussa ANONIM (`null`) doner; 401
- * DONMEZ. Bu uclar oturumsuz da calisiyor ve istemci 401'de oturumu kapatip
- * giris ekranina atiyor: suresi dolmus bir token yuzunden arama ekrani
- * oturumu dusurmemeli. Anonim = gercek kullanici, yani hata yonu guvenli:
- * en kotu ihtimalle test kullanicisi bir an test dukkanlarini gormez.
- *
+ * Token yoksa, gecersizse ya da suresi dolmussa izleyici ANONIM (`null`); 401
+ * DONMEZ, cunku istemci 401'de oturumu kapatiyor. Bearer reddedildiyse `stale`
+ * doner ve uc yanita `X-Auth-Stale: 1` koyar: yoksa suresi dolmus token'li
+ * inceleme hesabi sessizce anonime duser ve gercek dukkana rezervasyon acar.
  * Dogrulama `requireMobileUser` ile AYNI (yasak, tokenVersion, goruntuleme).
  */
-export async function resolveMobileShopViewer(req: Request): Promise<{ isTest: boolean } | null> {
-  if (!req.headers.get("authorization")?.startsWith("Bearer ")) return null;
+export async function resolveMobileShopViewer(
+  req: Request,
+): Promise<{ viewer: { reviewSandbox: boolean } | null; stale: boolean }> {
+  if (!req.headers.get("authorization")?.startsWith("Bearer ")) return { viewer: null, stale: false };
   const auth = await requireMobileUser(req);
-  if ("error" in auth) return null;
-  return { isTest: auth.user.isTest === true };
+  // 503 (veritabani) bayat token degil: tekrar denemek yardim etmez.
+  if ("error" in auth) return { viewer: null, stale: auth.error?.status === 401 };
+  return { viewer: { reviewSandbox: auth.user.reviewSandbox === true }, stale: false };
+}
+
+/** `resolveMobileShopViewer` `stale` dediyse yanita isaret koyar. */
+export function markAuthStale<T extends Response>(res: T, stale: boolean): T {
+  if (stale) res.headers.set(AUTH_STALE_HEADER, "1");
+  return res;
 }
 
 export function requireRole(user: { role: Role }, roles: Role[]) {

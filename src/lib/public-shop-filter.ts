@@ -62,7 +62,7 @@ export const OPERATING_SHOP_SQL_CONDITION =
  * NEDEN VAR: Apple App Review demo hesapla rezervasyon akışını baştan sona
  * deniyor. Test dükkanları (`isTest`) herkesten gizli olduğu için inceleyici
  * GERÇEK bir esnafa rezervasyon açıyor ve gerçek esnafa bildirim gidiyordu.
- * Kural: `User.isTest` olan kullanıcı test dükkanlarını EK OLARAK görür ve
+ * Kural: `User.reviewSandbox` olan kullanıcı test dükkanlarını EK OLARAK görür ve
  * onlara rezervasyon yapabilir. Anonim istek ve gerçek kullanıcı için
  * davranış birebir eskisi: aşağıdaki yardımcılar onlara sabitlerin KENDİSİNİ
  * döndürür.
@@ -72,11 +72,14 @@ export const OPERATING_SHOP_SQL_CONDITION =
  * ana sayfa istatistiği) BİLEREK izleyiciye duyarsız kalır; paylaşılan
  * önbelleğe test dükkanı karışmasın.
  */
-export type ShopViewer = { isTest?: boolean | null } | null | undefined;
+export type ShopViewer = { reviewSandbox?: boolean | null } | null | undefined;
 
-/** Yalnızca açıkça `isTest: true` olan izleyici kum havuzunu görür; eksik alan = gerçek kullanıcı. */
+/**
+ * Yalnızca açıkça `reviewSandbox: true` olan izleyici kum havuzunu görür; eksik alan = gerçek
+ * kullanıcı. `User.isTest` BİLEREK kullanılmaz: o elle verilen bir etiket, davranışı değiştirmez.
+ */
 export function isSandboxViewer(viewer: ShopViewer): boolean {
-  return viewer?.isTest === true;
+  return viewer?.reviewSandbox === true;
 }
 
 /** Kum havuzu dükkanı: test kaydı ama pasif değil (pasif test dükkanı test kullanıcısından da gizli). */

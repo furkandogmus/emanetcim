@@ -235,9 +235,13 @@ describe("kimlik dogrulama uclarinin kapilari", () => {
       varsayilani 30 gun) suresince yonetici kalıyordu.
     */
     // Rol degisikligi govdesi web + mobil icin `AdminUserService`te (2026-11-23); onay action'da.
-    const src = read("src/actions/admin-management.ts") + read("src/services/AdminUserService.ts");
+    // Iki yol da ortak govdeyi yazar: `roleChangeData` (src/lib/role-change-data.ts).
+    const src =
+      read("src/actions/admin-management.ts") + read("src/services/AdminUserService.ts") + read("src/lib/role-change-data.ts");
+    expect(src.match(/data:\s*roleChangeData\(/g)?.length).toBe(2);
+    expect(read("src/lib/role-change-data.ts")).toMatch(/role:\s*newRole,\s*tokenVersion:\s*\{\s*increment:\s*1\s*\}/);
+    // Govdeyi elle yazan yeni bir rol yazimi da tokenVersion tasimali.
     const roleWrites = [...src.matchAll(/data:\s*\{[^}]*\brole:[^}]*\}/g)].map((m) => m[0]);
-    expect(roleWrites.length).toBeGreaterThan(0);
     const missing = roleWrites.filter((w) => !/tokenVersion/.test(w));
     expect(
       missing,
