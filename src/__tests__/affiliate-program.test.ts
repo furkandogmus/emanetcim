@@ -402,7 +402,8 @@ describe("komisyon yalnizca tamamlanan rezervasyonda", () => {
     };
     walk(root);
     expect(writers.sort()).toEqual(["services/AffiliateService.ts", "services/booking/check-out.ts"]);
-  });
+    // Tum src taraniyor; yuk altinda varsayilan 5 sn yetmeyebilir.
+  }, 30_000);
 });
 
 describe("yonetim: oran/durum denetimi, odeme, CSV", () => {
@@ -542,5 +543,16 @@ describe("Araci ol basvurusu", () => {
 
   it("iletisim bilgisi olmadan kabul edilmez", async () => {
     expect(await affiliateService.submitApplication({ displayName: "Ornek", type: "guide" })).toEqual({ ok: false, reason: "invalid_data" });
+  });
+});
+
+describe("komisyon gecmisi silme zincirinde kaybolmaz", () => {
+  it("AffiliateCommission -> Booking ve -> Affiliate iliskileri RESTRICT", () => {
+    const schema = fs.readFileSync(path.join(process.cwd(), "prisma/schema.prisma"), "utf8");
+    const model = /model AffiliateCommission \{([\s\S]*?)\n\}/.exec(schema)![1];
+    // Kullanici silme Booking'i (guest onDelete: Cascade) goturur; Restrict o zinciri durdurur,
+    // admin silme yolu FK ihlalini `DELETE_USER_BLOCKED` olarak doner.
+    expect(model).toMatch(/booking\s+Booking\s+@relation\([^)]*onDelete: Restrict\)/);
+    expect(model).toMatch(/affiliate\s+Affiliate\s+@relation\([^)]*onDelete: Restrict\)/);
   });
 });

@@ -1387,6 +1387,8 @@ model AffiliateClickDay {
 /// Iptal / gelmedi / suresi dolan rezervasyonda satir hic olusmaz.
 /// Tutar = `baseAmount` x `rate` / 100, 2 haneye yuvarlanir; ikisi de o anki
 /// rezervasyon kaydindan (anlik oran kopyasi) gelir.
+/// Iki iliski de RESTRICT: kullanici/rezervasyon/araci silme zinciri odenmis
+/// komisyon gecmisini goturmesin; defteri olan hesap silinmez, anonimlestirilir.
 model AffiliateCommission {
   id              String                    @id @default(cuid())
   affiliateId     String
@@ -1403,7 +1405,7 @@ model AffiliateCommission {
   payoutReference String?
   createdAt       DateTime                  @default(now())
   affiliate       Affiliate                 @relation(fields: [affiliateId], references: [id], onDelete: Restrict)
-  booking         Booking                   @relation(fields: [bookingId], references: [id], onDelete: Cascade)
+  booking         Booking                   @relation(fields: [bookingId], references: [id], onDelete: Restrict)
 
   @@index([affiliateId, status])
   @@index([status, earnedAt])
