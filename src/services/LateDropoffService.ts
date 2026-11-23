@@ -46,7 +46,7 @@ export type LateDropoffReport = {
   lostRace: number;
   closeScanned: number;
   closed: number;
-  /** Kapanis cok eski (ilk yayin birikimi) ya da odemesiz niyet: bildirimsiz. */
+  /** Misafir hic uyarilmadi, kapanis cok eski ya da odemesiz niyet: bildirimsiz. */
   closedSilently: number;
   /** Kosullu kilit eslesmedi (arada check-in / bekletme) ya da iptal reddedildi. */
   closeSkipped: number;
@@ -257,6 +257,22 @@ export class LateDropoffService {
     });
   }
 
+  /** Bu birakma saati icin misafire hatirlatma sahiplenilmis rezervasyonlar. */
+  private async warnedGuests(rows: ReadonlyArray<{ id: string; checkInTime: Date }>): Promise<Set<string>> {
+    if (rows.length === 0) return new Set();
+    const events = await prisma.bookingEvent.findMany({
+      where: { bookingId: { in: rows.map((r) => r.id) }, event: LATE_DROPOFF_REMINDER_EVENT },
+      select: { bookingId: true, metadata: true },
+    });
+    const iso = new Map(rows.map((r) => [r.id, r.checkInTime.toISOString()]));
+    const out = new Set<string>();
+    for (const e of events) {
+      const guest = (e.metadata as { guest?: unknown } | null)?.guest === true;
+      if (guest && stageOf(e.metadata, iso.get(e.bookingId) ?? "") != null) out.add(e.bookingId);
+    }
+    return out;
+  }
+
   private async closeDue(
     now: Date,
     report: LateDropoffReport,
@@ -294,6 +310,7 @@ export class LateDropoffService {
       });
       attempted.push(...rows.map((r) => r.id));
       report.closeScanned += rows.length;
+      const warned = await this.warnedGuests(rows);
 
       await runWithConcurrency(rows, LATE_DROPOFF_CONCURRENCY, async (b) => {
         if (overBudget()) {
@@ -301,10 +318,18 @@ export class LateDropoffService {
           return;
         }
         const closeAt = lateCloseAt(b) ?? closeCutoff;
-        const silent = isSilentBacklog(closeAt, now) || !isLateActionableStatus(b.status);
+        const actionable = isLateActionableStatus(b.status);
+        /*
+          "Kapandi" yalnizca uyarilmis misafire (hatirlatma aldi ya da esnaf bekletti):
+          ilk yayinda / kesinti sonrasi hic hatirlatma gormemis misafire kapanis haberi
+          gitmez. Cok eski kapanis da (kesinti uzun surduyse) sessiz kalir.
+        */
+        const silent =
+          !actionable || isSilentBacklog(closeAt, now) || (!warned.has(b.id) && b.lateHoldUntil == null);
         const r = await cancelBooking(b.id, {
           silent: true,
-          reason: "no_show",
+          // Odemesiz niyet hic teslim edilemezdi: "gelinmedi" degil "suresi doldu".
+          reason: actionable ? "no_show" : "expired_no_dropoff",
           guard,
           eventMetadata: { auto: true, ...(silent ? { notified: false } : {}) },
         });
