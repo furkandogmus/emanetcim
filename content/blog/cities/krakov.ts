@@ -53,7 +53,7 @@ export const entry: CityBlogEntry = {
 
 <p>BagajPark bavulu gara değil semte götürüyor: mahalledeki kafe, otel ve dükkanlarla anlaşıp emanet noktasına çeviriyoruz. Krakov'da Kraków Główny ve Rynek Główny çevresinde noktalar için hazırlık yapıyoruz — yani günübirlik servise binmeden önce bırakabileceğiniz yerler.</p>
 
-<p>İşleyiş şöyle: rezervasyonu telefondan yapıyorsunuz, bavulu bırakırken esnaf üzerine numaralı bir plastik mühür takıp fotoğraflıyor. Mühür kırılmadan çanta açılmıyor; siz alırken numarayı karşılaştırıyorsunuz. Ücret bavul başına ve günlük — tur geç dönerse sayaç işlemiyor.</p>
+<p>İşleyiş şöyle: rezervasyonu telefondan yapıyorsunuz, bavulu bırakırken esnaf rezervasyonun QR kodunu okutup teslim alıyor. Bırakma ve alma saatleri ile valiz sayısı rezervasyon kaydına yazılıyor; alırken QR kodunu yeniden gösteriyorsunuz. Ücret bavul başına ve günlük — tur geç dönerse sayaç işlemiyor.</p>
 
 <p>Krakov noktalarımız henüz açık değil. Aramada görüyorsanız sebebi bu: hangi semtte gerçekten talep olduğunu ölçüyoruz ve esnafla önce orada anlaşıyoruz. Açılınca haber almak isterseniz nokta sayfasından e-postanızı bırakın.</p>
       `.trim(),
@@ -102,7 +102,7 @@ export const entry: CityBlogEntry = {
 
 <p>BagajPark moves storage out of the station and into the neighbourhood: we partner with local cafes, hotels and shops and turn them into drop-off points. In Krakow we are preparing points around Kraków Główny and the Rynek — somewhere to leave the bag before the day-trip shuttle.</p>
 
-<p>It works like this. You book from your phone. When you hand the bag over, the shopkeeper fits a numbered plastic seal to it and photographs it. It cannot be opened without breaking the seal, and you check the number when you collect. Pricing is per bag and per day, so a tour that runs late costs you nothing.</p>
+<p>It works like this. You book from your phone. When you hand the bag over, the shopkeeper scans your booking QR code and checks it in. The drop-off and pickup times and the bag count go into the booking record, and you show the QR code again when you collect. Pricing is per bag and per day, so a tour that runs late costs you nothing.</p>
 
 <p>Our Krakow points are not open yet. That is why you may see them in search: we are measuring which areas the demand is really in, and that is where we sign up shopkeepers first. Leave your email on a point's page to hear when it opens.</p>
       `.trim(),

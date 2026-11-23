@@ -47,7 +47,7 @@ export const entry: CityBlogEntry = {
 
 <p>BagajPark bavulu terminale değil semte götürüyor: mahalledeki kafe, otel ve dükkanlarla anlaşıp emanet noktasına çeviriyoruz. San Sebastián'da Parte Vieja için nokta hazırlıyoruz — yani pintxo turuna başlamadan önce bırakabileceğiniz bir yer.</p>
 
-<p>İşleyiş şöyle: rezervasyonu telefondan yapıyorsunuz, bavulu bırakırken esnaf üzerine numaralı bir plastik mühür takıp fotoğraflıyor. Mühür kırılmadan çanta açılmıyor; siz alırken numarayı karşılaştırıyorsunuz. Ücret bavul başına ve günlük — barlarda bir saat fazla kalmanız bir şeye mal olmuyor.</p>
+<p>İşleyiş şöyle: rezervasyonu telefondan yapıyorsunuz, bavulu bırakırken esnaf rezervasyonun QR kodunu okutup teslim alıyor. Bırakma ve alma saatleri ile valiz sayısı rezervasyon kaydına yazılıyor; alırken QR kodunu yeniden gösteriyorsunuz. Ücret bavul başına ve günlük — barlarda bir saat fazla kalmanız bir şeye mal olmuyor.</p>
 
 <p>San Sebastián noktamız henüz açık değil. Aramada görüyorsanız sebebi bu: talebi ölçüyoruz ve esnafla önce en çok denenen noktada anlaşıyoruz. Açılınca haber almak isterseniz nokta sayfasından e-postanızı bırakın.</p>
       `.trim(),
@@ -96,7 +96,7 @@ export const entry: CityBlogEntry = {
 
 <p>BagajPark moves storage out of the terminal and into the neighbourhood: we partner with local cafes, hotels and shops and turn them into drop-off points. In San Sebastian we are preparing a point in the Parte Vieja — somewhere to leave the bag before the crawl starts.</p>
 
-<p>It works like this. You book from your phone. When you hand the bag over, the shopkeeper fits a numbered plastic seal to it and photographs it. It cannot be opened without breaking the seal, and you check the number when you collect. Pricing is per bag and per day, so an extra hour in the bars costs you nothing.</p>
+<p>It works like this. You book from your phone. When you hand the bag over, the shopkeeper scans your booking QR code and checks it in. The drop-off and pickup times and the bag count go into the booking record, and you show the QR code again when you collect. Pricing is per bag and per day, so an extra hour in the bars costs you nothing.</p>
 
 <p>Our San Sebastian point is not open yet. That is why you may see it in search: we are measuring the demand and signing up shopkeepers where people actually try to leave bags. Leave your email on the point's page to hear when it opens.</p>
       `.trim(),

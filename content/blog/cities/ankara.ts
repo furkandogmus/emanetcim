@@ -49,7 +49,7 @@ export const entry: CityBlogEntry = {
 
 <p>BagajPark, bavulu terminale değil semte götürüyor: mahalledeki kafe, otel ve dükkanlarla anlaşıp onları emanet noktasına çeviriyoruz. Ankara'da şu an Ulus, Kızılay, Anıtkabir (Tandoğan), Ankara Gar, Kavaklıdere ve AŞTİ çevresinde noktalar açmak için hazırlık yapıyoruz.</p>
 
-<p>Sistem şöyle işliyor: rezervasyonu telefondan yapıyorsunuz, bavulu bırakırken esnaf üzerine numaralı bir plastik mühür takıyor ve fotoğraflıyor. Mühür kırılmadan çanta açılmıyor; siz aldığınızda numarayı karşılaştırıyorsunuz. Ücret bavul başına ve saatlik değil günlük hesaplanıyor, yani "yarım saat geciktim" telaşı olmuyor.</p>
+<p>Sistem şöyle işliyor: rezervasyonu telefondan yapıyorsunuz, bavulu bırakırken esnaf rezervasyonun QR kodunu okutup teslim alıyor. Bırakma ve alma saatleri ile valiz sayısı rezervasyon kaydına yazılıyor; aldığınızda QR kodunu yeniden gösteriyorsunuz. Ücret bavul başına ve saatlik değil günlük hesaplanıyor, yani "yarım saat geciktim" telaşı olmuyor.</p>
 
 <p>Ankara'daki noktalarımız henüz açılmadı. Arama sonuçlarında görüyorsanız sebebi bu: talebin nerede olduğunu ölçüyoruz. Hangi semtte kaç kişi bavul bırakmaya çalıştıysa esnafla önce orada anlaşıyoruz. Açılınca haber almak isterseniz nokta sayfasından e-postanızı bırakabilirsiniz — açıldığı gün ilk mesaj size gider.</p>
       `.trim(),
@@ -100,7 +100,7 @@ export const entry: CityBlogEntry = {
 
 <p>BagajPark moves storage out of the terminal and into the neighbourhood: we partner with cafes, hotels and shops and turn them into drop-off points. In Ankara we are preparing points around Ulus, Kizilay, Anitkabir (Tandogan), the railway station, Kavaklidere and AŞTİ.</p>
 
-<p>It works like this. You book from your phone. When you hand the bag over, the shopkeeper fits a numbered plastic seal to it and photographs it. The bag cannot be opened without breaking that seal, and you check the number when you collect. Pricing is per bag and per day rather than per hour, so being half an hour late costs you nothing.</p>
+<p>It works like this. You book from your phone. When you hand the bag over, the shopkeeper scans your booking QR code and checks it in. The drop-off and pickup times and the bag count go into the booking record, and you show the QR code again when you collect. Pricing is per bag and per day rather than per hour, so being half an hour late costs you nothing.</p>
 
 <p>Our Ankara points are not open yet. That is why you may see them in search results: we are measuring where the demand actually is. Whichever district people try to leave bags in is the district where we sign up shopkeepers first. If you want to know when it opens, leave your email on the point's page — you will hear on the day.</p>
       `.trim(),

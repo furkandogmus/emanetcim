@@ -51,7 +51,7 @@ export const entry: CityBlogEntry = {
 
 <p>BagajPark bavulu terminale değil semte götürüyor: mahalledeki kafe, otel ve dükkanlarla anlaşıp emanet noktasına çeviriyoruz. İzmir'de Konak, Alsancak, Kordon, Kemeraltı ve Basmane Garı çevresinde noktalar için hazırlık yapıyoruz — yani hem çarşıya girmeden hem trene binmeden önce bırakabileceğiniz yerler.</p>
 
-<p>İşleyiş basit: rezervasyonu telefondan yapıyorsunuz, bavulu bırakırken esnaf üzerine numaralı bir plastik mühür takıp fotoğraflıyor. Mühür kırılmadan çanta açılmıyor, siz alırken numarayı karşılaştırıyorsunuz. Ücret bavul başına ve günlük; saat başı sayaç işlemiyor.</p>
+<p>İşleyiş basit: rezervasyonu telefondan yapıyorsunuz, bavulu bırakırken esnaf rezervasyonun QR kodunu okutup teslim alıyor. Bırakma ve alma saatleri ile valiz sayısı rezervasyon kaydına yazılıyor; alırken QR kodunu yeniden gösteriyorsunuz. Ücret bavul başına ve günlük; saat başı sayaç işlemiyor.</p>
 
 <p>İzmir noktaları henüz açık değil. Aramada görünüyorlarsa sebebi bu: hangi semtte gerçekten talep olduğunu ölçüyoruz ve esnafla önce orada anlaşıyoruz. Açılınca haber almak isterseniz nokta sayfasından e-postanızı bırakın; ilk mesaj size gelir.</p>
       `.trim(),
@@ -104,7 +104,7 @@ export const entry: CityBlogEntry = {
 
 <p>BagajPark moves storage out of the terminal and into the neighbourhood: we partner with local cafes, hotels and shops and turn them into drop-off points. In Izmir we are preparing points around Konak, Alsancak, the Kordon, Kemeralti and Basmane station — places you can use before going into the bazaar and before boarding a train.</p>
 
-<p>It is straightforward. You book from your phone. When you hand the bag over, the shopkeeper fits a numbered plastic seal to it and photographs it. The bag cannot be opened without breaking the seal, and you check the number when you collect it. Pricing is per bag and per day, not per hour.</p>
+<p>It is straightforward. You book from your phone. When you hand the bag over, the shopkeeper scans your booking QR code and checks it in. The drop-off and pickup times and the bag count go into the booking record, and you show the QR code again when you collect. Pricing is per bag and per day, not per hour.</p>
 
 <p>The Izmir points are not open yet. That is why you may see them in search: we are measuring where the demand really is, and we sign up shopkeepers there first. Leave your email on a point's page if you want to know when it opens.</p>
       `.trim(),
