@@ -105,8 +105,8 @@ export function applyAffiliateGuestDiscount(
   };
 }
 
-/** Misafirin kimligi: hesapli ise `userId`, hesapsiz web odemesinde e-posta. */
-export type AffiliateGuest = { userId?: string | null; guestEmail?: string | null; guestPhone?: string | null };
+/** Misafirin kimligi: yalnizca hesap; e-posta/telefon hesaptan okunur. */
+export type AffiliateGuest = { userId?: string | null };
 
 /** Telefon karsilastirma anahtari: son 10 rakam (`0532...` ile `+90532...` ayni). */
 function phoneKey(raw: string | null | undefined): string | null {
@@ -162,10 +162,10 @@ export class AffiliateService {
     const account = guest.userId
       ? await prisma.user.findUnique({ where: { id: guest.userId }, select: { email: true, phone: true } })
       : null;
-    const emails = [guest.guestEmail, account?.email].map((e) => e?.trim().toLowerCase()).filter(Boolean);
+    const emails = [account?.email].map((e) => e?.trim().toLowerCase()).filter(Boolean);
     const ownEmails = [affiliate.contactEmail, affiliate.user?.email].map((e) => e?.trim().toLowerCase()).filter(Boolean);
     if (emails.some((e) => ownEmails.includes(e))) return { ok: false, reason: "own_code" };
-    const phones = [guest.guestPhone, account?.phone].map(phoneKey).filter(Boolean);
+    const phones = [account?.phone].map(phoneKey).filter(Boolean);
     const ownPhone = phoneKey(affiliate.contactPhone);
     if (ownPhone && phones.includes(ownPhone)) return { ok: false, reason: "own_code" };
     return {
