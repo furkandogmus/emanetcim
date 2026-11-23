@@ -1367,7 +1367,19 @@
     "appLinkStatsPlatform": "Plateforme",
     "appLinkStatsOutcome": "Résultat",
     "appLinkStatsCount": "Nombre",
-    "appLinkStatsRest": "Autres groupes"
+    "appLinkStatsRest": "Autres groupes",
+    "partnerLeadsConvert": "Convertir en compte partenaire",
+    "partnerLeadsConverted": "Converti en partenaire",
+    "partnerLeadConvertTitle": "Convertir la pré-inscription en compte partenaire",
+    "partnerLeadConvertIntro": "Les informations proviennent de la pré-inscription ; vérifiez-les et complétez ce qui manque. Saisissez l'emplacement depuis le lien Google Maps envoyé par le partenaire. Le compte est créé sans mot de passe ; envoyez le lien affiché au partenaire.",
+    "partnerLeadConvertActivate": "Publier la boutique maintenant",
+    "partnerLeadConvertActivateHint": "Si la case n'est pas cochée, la boutique rejoint la liste des demandes et n'apparaît pas dans la recherche avant votre approbation.",
+    "partnerLeadConvertSubmit": "Créer le compte partenaire",
+    "partnerLeadConvertActivated": "La boutique est en ligne ; les créneaux de réservation sont en préparation.",
+    "partnerLeadConvertActivationFailed": "Le compte a été créé mais la boutique n'a pas pu être publiée. Approuvez-la depuis la liste des demandes.",
+    "partnerLeadConvertAlready": "Cette pré-inscription a déjà été convertie",
+    "partnerLeadConvertBack": "Retour aux pré-inscriptions",
+    "partnerLeadMapsSearch": "Rechercher l'adresse sur Google Maps"
   },
   "Auth": {
     "loginTitle": "Connectez-vous à BagajPark",

@@ -2,7 +2,7 @@
 
 import { z } from "zod";
 import { getLocale } from "next-intl/server";
-import { getClientIp } from "@/lib/client-ip";
+import { getClientIp, getClientIpOrNull } from "@/lib/client-ip";
 import { rateLimit } from "@/lib/rate-limit";
 import { requireAdmin } from "@/lib/action-auth";
 import { revalidatePathAllLocales } from "@/lib/revalidate-locales";
@@ -89,4 +89,69 @@ export async function setPartnerLeadContactedAction(input: unknown) {
   }
   revalidatePathAllLocales("/admin/partner-leads");
   return { success: true as const };
+}
+
+const convertSchema = z.object({
+  leadId: z.string().min(10).max(64),
+  ownerName: z.string().trim().max(120),
+  phone: z.string().trim().max(20),
+  email: z.string().trim().max(200).optional(),
+  shopName: z.string().trim().max(200),
+  shopAddress: z.string().trim().max(500),
+  city: z.string().trim().max(100).optional(),
+  district: z.string().trim().max(100).optional(),
+  location: z.string().trim().max(2000),
+  activate: z.boolean().optional(),
+});
+
+const CONVERT_ERRORS = {
+  not_found: "Errors.notFound",
+  invalid_data: "Errors.invalidData",
+  invalid_email: "Errors.invalidEmail",
+  location_required: "Errors.shopLocationRequired",
+  invalid_tr_phone: "Errors.invalidTrPhone",
+  phone_already_registered: "Errors.phoneAlreadyRegistered",
+  email_already_registered: "Errors.emailAlreadyRegistered",
+} as const;
+
+export type ConvertPartnerLeadActionResult =
+  | {
+      ok: true;
+      alreadyConverted: boolean;
+      shopId: string | null;
+      resetUrl: string | null;
+      activated: boolean;
+      activationFailed: boolean;
+    }
+  | { ok: false; error: string };
+
+/** Admin: on kaydi esnaf hesabi + dukkana cevirir. Govde `PartnerLeadService.convertToPartner`. */
+export async function convertPartnerLeadAction(raw: unknown): Promise<ConvertPartnerLeadActionResult> {
+  const auth = await requireAdmin();
+  if (!auth.ok) return { ok: false, error: auth.error };
+
+  const parsed = convertSchema.safeParse(raw);
+  if (!parsed.success) return { ok: false, error: "Errors.invalidData" };
+
+  try {
+    const result = await partnerLeadService.convertToPartner({
+      ...parsed.data,
+      actor: { userId: auth.actor.id, ip: await getClientIpOrNull() },
+    });
+    if (!result.ok) return { ok: false, error: CONVERT_ERRORS[result.reason] };
+    revalidatePathAllLocales("/admin/partner-leads");
+    revalidatePathAllLocales("/admin/partners");
+    revalidatePathAllLocales("/admin/applications");
+    return {
+      ok: true,
+      alreadyConverted: result.alreadyConverted,
+      shopId: result.shopId,
+      resetUrl: result.resetUrl,
+      activated: result.activated,
+      activationFailed: Boolean(result.activationError),
+    };
+  } catch (err) {
+    logger.error({ err }, "partner_lead_convert_failed");
+    return { ok: false, error: "Errors.generic" };
+  }
 }

@@ -45,7 +45,9 @@ export default async function AdminPartnerLeadsPage({
             phone: l.phone,
             shopName: l.shopName,
             address: l.address,
-            contacted: l.status === "CONTACTED",
+            contacted: l.status === "CONTACTED" || l.convertedAt != null,
+            converted: l.convertedAt != null,
+            convertedShopId: l.convertedShopId,
             createdAt: l.createdAt.toISOString(),
           }))}
         />

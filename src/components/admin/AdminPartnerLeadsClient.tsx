@@ -2,7 +2,8 @@
 
 import { useState, useTransition } from "react";
 import { useTranslations } from "next-intl";
-import { Phone, MessageCircle, MapPin, Check } from "lucide-react";
+import { Phone, MessageCircle, MapPin, Check, Store, UserPlus } from "lucide-react";
+import { Link } from "@/i18n/routing";
 import { toast } from "sonner";
 import { setPartnerLeadContactedAction } from "@/actions/partner-lead";
 import { returnedErrorKey } from "@/lib/action-error";
@@ -15,6 +16,8 @@ type Lead = {
   shopName: string | null;
   address: string;
   contacted: boolean;
+  converted: boolean;
+  convertedShopId: string | null;
   createdAt: string;
 };
 
@@ -75,14 +78,31 @@ export default function AdminPartnerLeadsClient({ leads, locale }: { leads: Lead
                 >
                   <MessageCircle size={14} />
                 </a>
-                <button
-                  type="button"
-                  disabled={pending}
-                  onClick={() => toggle(l.id, !l.contacted)}
-                  className={`btn-ui btn-ui-sm ${l.contacted ? "btn-ui-ghost" : "btn-ui-primary"}`}
-                >
-                  <Check size={14} /> {l.contacted ? t("partnerLeadsUndo") : t("partnerLeadsMarkContacted")}
-                </button>
+                {l.converted ? (
+                  l.convertedShopId ? (
+                    <Link href={`/admin/partners/${l.convertedShopId}/edit`} className="btn-ui btn-ui-sm btn-ui-secondary">
+                      <Store size={14} /> {t("partnerLeadsConverted")}
+                    </Link>
+                  ) : (
+                    <span className="btn-ui btn-ui-sm btn-ui-ghost">
+                      <Check size={14} /> {t("partnerLeadsConverted")}
+                    </span>
+                  )
+                ) : (
+                  <>
+                    <button
+                      type="button"
+                      disabled={pending}
+                      onClick={() => toggle(l.id, !l.contacted)}
+                      className={`btn-ui btn-ui-sm ${l.contacted ? "btn-ui-ghost" : "btn-ui-primary"}`}
+                    >
+                      <Check size={14} /> {l.contacted ? t("partnerLeadsUndo") : t("partnerLeadsMarkContacted")}
+                    </button>
+                    <Link href={`/admin/partners/new?fromLead=${l.id}`} className="btn-ui btn-ui-sm btn-ui-secondary">
+                      <UserPlus size={14} /> {t("partnerLeadsConvert")}
+                    </Link>
+                  </>
+                )}
               </div>
             </div>
           </li>

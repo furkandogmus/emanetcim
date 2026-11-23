@@ -1367,7 +1367,19 @@
     "appLinkStatsPlatform": "プラットフォーム",
     "appLinkStatsOutcome": "結果",
     "appLinkStatsCount": "件数",
-    "appLinkStatsRest": "その他のグループ"
+    "appLinkStatsRest": "その他のグループ",
+    "partnerLeadsConvert": "パートナーアカウントに変換",
+    "partnerLeadsConverted": "パートナーに変換済み",
+    "partnerLeadConvertTitle": "事前登録をパートナーアカウントに変換",
+    "partnerLeadConvertIntro": "情報は事前登録から取り込まれています。確認して不足分を入力してください。位置はパートナーが送った Google マップのリンクから入力します。アカウントはパスワードなしで作成されるため、表示されたリンクをパートナーに送ってください。",
+    "partnerLeadConvertActivate": "今すぐ店舗を公開する",
+    "partnerLeadConvertActivateHint": "チェックしない場合、店舗は申請一覧に入り、承認するまで検索に表示されません。",
+    "partnerLeadConvertSubmit": "パートナーアカウントを作成",
+    "partnerLeadConvertActivated": "店舗は公開されました。予約枠を準備しています。",
+    "partnerLeadConvertActivationFailed": "アカウントは作成されましたが、店舗を公開できませんでした。申請一覧から承認してください。",
+    "partnerLeadConvertAlready": "この事前登録はすでに変換されています",
+    "partnerLeadConvertBack": "事前登録一覧に戻る",
+    "partnerLeadMapsSearch": "住所を Google マップで検索"
   },
   "Auth": {
     "loginTitle": "バガジパークにサインインする",
