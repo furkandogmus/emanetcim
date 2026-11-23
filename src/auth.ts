@@ -34,14 +34,16 @@ const adminEmailSet = new Set(
 );
 
 /*
-  Adapter Apple refresh token'ini duz metin yaziyordu. Satira bos yazilir;
+  Adapter Apple token'larini duz metin yaziyordu. Satira bos yazilir;
   sifreli hali `events.signIn` -> `AppleTokenService` koyar (iptal icin gerekli).
 */
 const baseAdapter = PrismaAdapter(prisma);
 const appleSafeAdapter: typeof baseAdapter = {
   ...baseAdapter,
   linkAccount: (account) =>
-    baseAdapter.linkAccount!(account.provider === "apple" ? { ...account, refresh_token: undefined } : account),
+    baseAdapter.linkAccount!(account.provider === "apple"
+        ? { ...account, refresh_token: undefined, access_token: undefined, id_token: undefined }
+        : account),
 };
 
 export const { handlers, auth, signIn, signOut } = NextAuth({

@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { loadSealKey } from "@/lib/sealed-secret";
 import { isDistributedRateLimitRequired } from "@/lib/rate-limit";
 
 const serverSchema = z.object({
@@ -60,6 +61,25 @@ export function getServerEnv(): ServerEnv {
   }
   cached = parsed.success ? parsed.data : (process.env as unknown as ServerEnv);
   return cached;
+}
+
+/**
+ * Uyari, hata degil: anahtar yokken uygulama calisir ama Apple refresh token'i
+ * saklanmaz ve hesap silmede Apple yetkisi iptal edilemez (App Store 5.1.1(v)).
+ */
+export function optionalSecretWarnings(env: NodeJS.ProcessEnv = process.env): string[] {
+  const warnings: string[] = [];
+  const appleConfigured =
+    !!env.APPLE_BUNDLE_ID?.trim() ||
+    !!(env.APPLE_ID?.trim() && (env.APPLE_SECRET?.trim() || env.APPLE_PRIVATE_KEY_B64?.trim()));
+  if (appleConfigured && !env.APPLE_TOKEN_ENCRYPTION_KEY?.trim()) {
+    warnings.push(
+      "APPLE_TOKEN_ENCRYPTION_KEY is not set: Apple refresh tokens are not stored and cannot be revoked on account deletion",
+    );
+  } else if (env.APPLE_TOKEN_ENCRYPTION_KEY?.trim() && !loadSealKey(env.APPLE_TOKEN_ENCRYPTION_KEY)) {
+    warnings.push("APPLE_TOKEN_ENCRYPTION_KEY must be 32 bytes, base64 (openssl rand -base64 32); it is ignored");
+  }
+  return warnings;
 }
 
 export function requireProdSecrets(): void {

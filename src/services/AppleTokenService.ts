@@ -25,7 +25,7 @@ const APPLE_TOKEN_URL = "https://appleid.apple.com/auth/token";
 const APPLE_REVOKE_URL = "https://appleid.apple.com/auth/revoke";
 const APPLE_TIMEOUT_MS = 8_000;
 
-type StoredToken = { c: string; r: string };
+export type StoredToken = { c: string; r: string };
 
 export type AppleStoreResult = "stored" | "no_key" | "no_secret" | "exchange_failed";
 
@@ -95,35 +95,42 @@ class AppleTokenService {
     const payload: StoredToken = { c: params.clientId, r: params.refreshToken };
     await prisma.account.updateMany({
       where: { provider: "apple", providerAccountId: params.providerAccountId },
-      data: { refresh_token: sealSecret(JSON.stringify(payload), key) },
+      // Kimlik/erisim token'lari hic gerekmiyor; satirda duz metin kalmasinlar.
+      data: { refresh_token: sealSecret(JSON.stringify(payload), key), access_token: null, id_token: null },
     });
     return "stored";
   }
 
   /**
-   * Kullanicinin Apple yetkilerini iptal eder. Dondurulen sayi: iptal edilen
-   * token. Hesap satirlari bundan SONRA silinir (`erase`).
+   * Kullanicinin Apple yetkilerini iptal eder. Dondurulen sayi: iptal edilen token.
+   * Silme bir islem icinde yapiliyorsa once `collectForUser` (satirlar silinmeden),
+   * islem basariyla bitince `revokeTokens` cagrilir.
    */
   async revokeForUser(userId: string): Promise<number> {
+    return this.revokeTokens(userId, await this.collectForUser(userId));
+  }
+
+  /** Iptal edilecek token'lari okur; hata durumunda bos liste (silme durmaz). */
+  async collectForUser(userId: string): Promise<StoredToken[]> {
     try {
       const rows = await prisma.account.findMany({
         where: { userId, provider: "apple" },
         select: { refresh_token: true },
       });
-      let revoked = 0;
-      for (const row of rows) {
-        const token = this.readStored(row.refresh_token);
-        if (!token) continue;
-        if (await this.revoke(token)) revoked += 1;
-      }
-      if (rows.length > 0 && revoked < rows.length) {
-        logger.warn({ userId, accounts: rows.length, revoked }, "apple_revoke_incomplete");
-      }
-      return revoked;
+      return rows.map((r) => this.readStored(r.refresh_token)).filter((t): t is StoredToken => t !== null);
     } catch (err) {
-      logger.warn({ err, userId }, "apple_revoke_failed");
-      return 0;
+      logger.warn({ err, userId }, "apple_revoke_collect_failed");
+      return [];
     }
+  }
+
+  async revokeTokens(userId: string, tokens: StoredToken[]): Promise<number> {
+    let revoked = 0;
+    for (const token of tokens) {
+      if (await this.revoke(token)) revoked += 1;
+    }
+    if (revoked < tokens.length) logger.warn({ userId, tokens: tokens.length, revoked }, "apple_revoke_incomplete");
+    return revoked;
   }
 
   /*
