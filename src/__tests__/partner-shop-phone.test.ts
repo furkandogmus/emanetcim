@@ -48,8 +48,8 @@ describe("partner/shop yaniti", () => {
  * okuyor, sunucu hic gondermiyor" sinifini yakalar. Kupon (ayni gun) ve
  * telefon, ikisi de bu sinifti.
  *
- * Istemci Expo: okunan alanlar `mobile-expo/src/lib/types.ts`te (kaynagi
- * `mobile-dto.ts`). Flutter'daki `res.data['...']` taramasinin yerine
+ * Istemci Expo: okunan alanlar `mobile-expo/src/lib/types/` klasorunde (kaynagi
+ * `src/lib/mobile-dto/`). Flutter'daki `res.data['...']` taramasinin yerine
  * gecti (2026-10-18). Ham Prisma kaydi donen uclar (ornegin admin mesajlari)
  * ve servis tipleri icin sema ve `src/services` de sunucu sayilir.
  */
@@ -61,7 +61,7 @@ describe("mobil istemcinin okudugu alanlar sunucuda geciyor", () => {
   }
 
   it("Expo yanit tiplerindeki alanlarin hepsi sunucu kodunda var", () => {
-    const tipler = stripComments(oku("mobile-expo/src/lib/types.ts"));
+    const tipler = stripComments(oku("mobile-expo/src/lib/types"));
     const alanlar = new Set([...tipler.matchAll(/^\s+([a-zA-Z][a-zA-Z0-9]*)\??:/gm)].map((m) => m[1]));
     expect(alanlar.size, "taranacak alan bulunamadi").toBeGreaterThan(50);
 
