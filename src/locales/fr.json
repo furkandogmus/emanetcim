@@ -368,7 +368,14 @@
     "partnerBookingsSearchLabel": "Rechercher des réservations",
     "partnerBookingsSearchPlaceholder": "Code, nom du client ou 4 derniers chiffres du téléphone",
     "partnerBookingsSearchSubmit": "Rechercher",
-    "partnerBookingsSearchTruncated": "{total} résultats ; les {count} plus récents sont affichés. Affinez votre recherche."
+    "partnerBookingsSearchTruncated": "{total} résultats ; les {count} plus récents sont affichés. Affinez votre recherche.",
+    "partnerLateTitle": "Le client est en retard",
+    "partnerLateCloseAt": "Clôture automatique : {time}",
+    "partnerLateHoldActive": "Vous attendez le client. Jusqu’à : {time}",
+    "partnerLateHint": "Si vous avez reçu les bagages, enregistrez-les. Si le client vous a appelé, vous pouvez attendre.",
+    "partnerLateHold": "Attendre le client (+30 min)",
+    "partnerLateHoldDone": "La réservation reste ouverte 30 minutes de plus.",
+    "partnerLateHoldLimitReached": "Heure de retrait atteinte ; impossible d’attendre davantage."
   },
   "Guest": {
     "heroTitle": "Déposez vos bagages, explorez librement",
@@ -1858,7 +1865,8 @@
     "noShowTooEarly": "Une absence ne peut être signalée que 60 minutes après l'heure de dépôt.",
     "invalidName": "Le nom doit contenir 1 à 100 caractères.",
     "currentPasswordRequired": "Saisissez votre mot de passe actuel.",
-    "invalidCurrentPassword": "Le mot de passe actuel est incorrect."
+    "invalidCurrentPassword": "Le mot de passe actuel est incorrect.",
+    "lateHoldLimit": "Heure de retrait atteinte ; la réservation ne peut plus être prolongée."
   },
   "Emails": {
     "verificationSubject": "Vérifiez votre e-mail",

@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import type { ClosureErrorCode, ClosureResult } from "@/services/booking/closure";
 
-/** Mobil sozlesme: servis kodu -> `{ error }` + HTTP durumu. Dort kapanis ucu ortak kullanir. */
+/** Mobil sozlesme: servis kodu -> `{ error }` + HTTP durumu. Kapanis ve bekletme uclari ortak kullanir. */
 const CLOSURE_HTTP: Record<ClosureErrorCode, { error: string; status: number }> = {
   NOT_FOUND: { error: "not_found", status: 404 },
   FORBIDDEN: { error: "forbidden", status: 403 },
@@ -9,6 +9,7 @@ const CLOSURE_HTTP: Record<ClosureErrorCode, { error: string; status: number }> 
   NOTE_REQUIRED: { error: "note_required", status: 400 },
   INVALID_REASON: { error: "invalid_reason", status: 400 },
   TOO_EARLY: { error: "too_early", status: 400 },
+  HOLD_LIMIT: { error: "hold_limit", status: 400 },
   UNKNOWN: { error: "server_error", status: 500 },
 };
 

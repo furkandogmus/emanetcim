@@ -368,7 +368,14 @@
     "partnerBookingsSearchLabel": "予約を検索",
     "partnerBookingsSearchPlaceholder": "予約コード、ゲスト名、または電話番号の下4桁",
     "partnerBookingsSearchSubmit": "検索",
-    "partnerBookingsSearchTruncated": "{total}件一致。最新の{count}件を表示しています。検索を絞り込んでください。"
+    "partnerBookingsSearchTruncated": "{total}件一致。最新の{count}件を表示しています。検索を絞り込んでください。",
+    "partnerLateTitle": "お客様が遅れています",
+    "partnerLateCloseAt": "自動終了: {time}",
+    "partnerLateHoldActive": "お客様をお待ちしています。期限: {time}",
+    "partnerLateHint": "荷物を受け取った場合はチェックインしてください。お客様から連絡があれば待つことができます。",
+    "partnerLateHold": "お客様を待つ (+30分)",
+    "partnerLateHoldDone": "予約はさらに30分間保持されます。",
+    "partnerLateHoldLimitReached": "受け取り時刻に達したため、これ以上待てません。"
   },
   "Guest": {
     "heroTitle": "荷物を預けて、身軽に街へ",
@@ -1858,7 +1865,8 @@
     "noShowTooEarly": "来店なしは預け入れ時刻の60分後から記録できます。",
     "invalidName": "名前は1～100文字で入力してください。",
     "currentPasswordRequired": "現在のパスワードを入力してください。",
-    "invalidCurrentPassword": "現在のパスワードが正しくありません。"
+    "invalidCurrentPassword": "現在のパスワードが正しくありません。",
+    "lateHoldLimit": "受け取り時刻に達したため、これ以上予約を保持できません。"
   },
   "Emails": {
     "verificationSubject": "メールアドレスを確認してください",

@@ -368,7 +368,14 @@
     "partnerBookingsSearchLabel": "Search bookings",
     "partnerBookingsSearchPlaceholder": "Code, guest name or last 4 digits of phone",
     "partnerBookingsSearchSubmit": "Search",
-    "partnerBookingsSearchTruncated": "{total} matches; showing the latest {count}. Narrow your search."
+    "partnerBookingsSearchTruncated": "{total} matches; showing the latest {count}. Narrow your search.",
+    "partnerLateTitle": "Guest is late",
+    "partnerLateCloseAt": "Closes automatically: {time}",
+    "partnerLateHoldActive": "You are waiting for the guest. Until: {time}",
+    "partnerLateHint": "If you received the bags, check them in. If the guest called you, you can wait.",
+    "partnerLateHold": "Wait for guest (+30 min)",
+    "partnerLateHoldDone": "The booking stays open for 30 more minutes.",
+    "partnerLateHoldLimitReached": "Pick-up time reached; you cannot wait any longer."
   },
   "Guest": {
     "heroTitle": "Drop Your Bags, Explore Freely",
@@ -1922,7 +1929,8 @@
     "noShowTooEarly": "A no-show can only be marked 60 minutes after the drop-off time.",
     "invalidName": "Name must be 1-100 characters.",
     "currentPasswordRequired": "Enter your current password.",
-    "invalidCurrentPassword": "Current password is incorrect."
+    "invalidCurrentPassword": "Current password is incorrect.",
+    "lateHoldLimit": "Pick-up time reached; the booking cannot be held any longer."
   },
   "Emails": {
     "verificationSubject": "Verify Your Email",
