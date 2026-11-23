@@ -1,10 +1,16 @@
 # Rakip Analizi (BagajPark / Emanetçi) — 2026-09-11
 
+> **Son durum (2026-11-23):** rakip gözlemleri (Bölüm 1–2) 2026-09-10/11 taramasıdır,
+> yeniden taranmadı. BagajPark tarafı koda karşı yeniden doğrulandı: saatlik/slot
+> seçimi 2026-09-23'te kaldırıldı (`a325f823`, rezervasyon artık gün bazlı), sadakat
+> puanı 2026-09-12'de kaldırıldı. Bölüm 3'teki ilgili maddeler ve Bölüm 4'ün durum
+> sütunu buna göre güncellendi.
+
 > Bu doküman **tamamen yeniden yazıldı**. Önceki iki rakip analizi dokümanı
 > (21 Ağustos tarihli `rakip_analizi.md` ve `rakip_analizi_radical_storage.md`)
 > `docs/archive/2026-09-11-rakip-ve-parity/` altında arşivlendi — bazı iddiaları
 > artık **yanlış**: örneğin "saatlik tarife yok" ve "WhatsApp entegrasyonu yok"
-> denilen iki madde, koda bakıldığında ikisi de **zaten mevcut** çıktı (bkz.
+> denilen iki madde, koda bakıldığında ikisi de o tarihte **zaten mevcut** çıktı (saatlik tarife 2026-09-23'te bilinçli olarak kaldırıldı) (bkz.
 > aşağıda "BagajPark'ın Zaten Sahip Olduğu, Az Bilinen Güçlü Yönler"). Bu sürüm
 > 6 küresel rakibin canlı sitesi/uygulama mağazası sayfaları taranarak ve her
 > BagajPark karşılaştırması **koddan doğrulanarak** hazırlandı; hiçbir iddia
@@ -57,27 +63,28 @@ bugün çalışan ama yeterince görünür kılınmayan avantajlar.
    Vertoe ve LuggageHero'da checkout'ta gizli/ek ücret şikâyetleri belgelendi —
    Vertoe bu yüzden de kapandı. BagajPark bu güven kırılmasını yapısal olarak yaşamıyor
    (kart bilgisi hiç istenmiyor).
-2. **Saat/slot bazlı VE günlük rezervasyonun ikisi birden, aktif.**
-   (`src/lib/bag-pricing.ts: computeHourlyLineTotal`, `src/components/guest/SlotAvailabilityGrid.tsx`).
-   Stasher'da saatlik hiç yok; Bounce ve Radical Storage saatliği bilinçli olarak
-   geri planda tutuyor; bu esnekliği ikisini birden sunan Vertoe artık kapalı.
-   **Ama:** bu seçenek arama sonucu kartında ve dükkan detayında hiç görünmüyor,
-   yalnızca checkout'ta nötr bir "Depolama süresi" başlığı altında ortaya çıkıyor.
+2. ~~**Saat/slot bazlı VE günlük rezervasyonun ikisi birden.**~~ — **Artık geçerli
+   değil (2026-09-23, `a325f823`):** fiyat zaten günlüktü (`ceil(süre/24 sa) ×
+   günlük fiyat`), saatlik ızgara misafire gereksiz bir saat kararı aldırıyordu.
+   Misafir yalnızca bırakış ve alış **gününü** seçer; pencere dükkanın saatlerinden
+   türetilir. Bounce ve Radical Storage'ın "saatlik değil, günlük fiyat" mesajıyla
+   aynı konum.
 3. **TL fiyatlandırma + tam Türkçe arayüz.** Bounce, Radical Storage ve
    LuggageHero'nun üçü de İstanbul'da bile Türkçe sunmuyor, çoğu EUR/USD gösteriyor.
-4. **6 dil desteği (tr/en/de/fr/fa/ja).** İncelenen hiçbir rakibin dil listesinde
+4. **Web'de 6 dil (tr/en/de/fr/fa/ja); mobil uygulamada 4 dil (tr/en/de/ru).** İncelenen hiçbir rakibin dil listesinde
    Farsça veya Japonca yok — bu niş pazarda gerçek bir farklılaştırıcı.
 5. **Fiziksel mühür + isteğe bağlı kanıt fotoğrafı.** Rakiplerin çoğunda (Nannybag
    "tag and seal", LuggageHero tamper-proof etiket) sadece fiziksel mühür var;
    BagajPark ayrıca isteğe bağlı fotoğraf kanıtı katmanı sunuyor — ama bu fotoğraf
-   şu an misafire hiçbir zaman gösterilmiyor (bkz. Bölüm 4, #P3).
+   misafire hiçbir zaman gösterilmiyor ve yalnızca web check-in'inde çekiliyor
+   (bkz. `docs/DEFECT_BACKLOG.md` B3).
 6. **WhatsApp ile doğrudan misafir-esnaf iletişimi.** İncelenen hiçbir rakipte bu
    şekilde doğrudan bir WhatsApp hattı yok (hepsi kendi in-app chat/destek sistemini
    kullanıyor). **Ama:** kapsam kısıtlı — yalnızca `BookingDetailActions.tsx` (misafir)
    ve esnafın tekil rezervasyon detay sayfasında var; genel destek/iletişim akışında yok.
-7. **Kupon + referans indirimi + sadakat puanının bir arada var olması.** Rakiplerde
-   üçünün birlikte sunulduğu bir örnek görülmedi (Bounce'ta yalnızca anlık rezervasyon
-   kredisi var).
+7. **Kupon + davet (referans) indirimi bir arada.** Davet kodu web ve mobil ödemede
+   uygulanıyor. (Sadakat puanı 2026-09-12'de kaldırıldı; bkz. arşivdeki
+   `DEFECT_BACKLOG` B7.)
 8. **6 dilde tutarlılığı otomatik yakalayan bir mandal testi** (`coverage-amount-consistency.test.ts`).
    Nannybag'de bizzat gözlemlenen App Store (€1.000) vs web (€10.000) tutarsızlığı
    sınıfındaki hataları BagajPark önceden engelliyor.
@@ -92,24 +99,23 @@ bugün çalışan ama yeterince görünür kılınmayan avantajlar.
 orta = yeni UI bileşeni veya çok dosyalı değişiklik (bir-iki gün); büyük = yeni
 özellik/backend değişikliği gerektirir (ayrı bir çalışma turu).
 
-| # | Öncelik | Platform | Başlık | Efor | Durum (2026-09-11) |
+| # | Öncelik | Platform | Başlık | Efor | Durum (2026-11-23) |
 |---|---|---|---|---|---|
-| 1 | P0 | web+mobil | Saat/slot bazlı rezervasyon var ama pazarlanmıyor | küçük | Planlandı — bu oturumda uygulanacak |
-| 2 | P0 | web+mobil | "Dükkanda öde, sürpriz ücret yok" avantajı hiç mesajlaşmıyor | küçük | Planlandı — bu oturumda uygulanacak |
-| 3 | P0 | web | Anasayfada güven rakamları/rozetleri yoğunlaştırılmamış | küçük | Planlandı — bu oturumda uygulanacak |
+| 1 | P0 | web+mobil | Saat/slot bazlı rezervasyon var ama pazarlanmıyor | küçük | ❌ Geçersiz — saatlik seçim 2026-09-23'te kaldırıldı (`a325f823`); ürün gün bazlı |
+| 2 | P0 | web+mobil | "Dükkanda öde, sürpriz ücret yok" avantajı hiç mesajlaşmıyor | küçük | ✅ Yapıldı — ana sayfa güven bandı ve checkout başarı ekranı (`c527dc8d`) |
+| 3 | P0 | web | Anasayfada güven rakamları/rozetleri yoğunlaştırılmamış | küçük | ✅ Yapıldı — hero altı güven bandı (`c527dc8d`) |
 | 4 | P1 | web+mobil | WhatsApp desteği yalnızca tekil rezervasyon detayında, genel destek kanalı değil | orta | Backlog — genel iletişim/SSS sayfasına taşınmalı |
-| 5 | P1 | web+mobil | Esnaf/lokasyon bazlı puan-yorum sistemi yok | büyük | Backlog — ayrı çalışma turu gerektirir |
-| 6 | P1 | web+mobil | Mevcut rezervasyonu düzenleme (çanta ekle/saat değiştir) akışının bulunabilirliği belirsiz | orta | Backlog — mevcut `BookingModifyModal` bulunabilirliği artırılmalı |
-| 7 | P1 | web+mobil | QR kod tabanlı check-in katmanı yok | orta | Backlog — mühüre ek dijital katman, ayrı çalışma turu |
-| 8 | P2 | web+mobil | Sadakat puanı harcanamıyor | büyük | Bilinen ürün kararı bekliyor (bkz. `docs/DEFECT_BACKLOG.md` B7) |
+| 5 | P1 | web+mobil | Esnaf/lokasyon bazlı puan-yorum sistemi yok | büyük | ✅ Var — dükkan başına puan ve yorumlar web ve mobilde; yönetici yorum moderasyonu mobilde de (#194) |
+| 6 | P1 | web+mobil | Mevcut rezervasyonu düzenleme (çanta ekle/tarih değiştir) akışının bulunabilirliği belirsiz | orta | Kısmen — web `BookingModifyModal`, mobilde rezervasyon detayından "değiştir" ekranı; bulunabilirlik ölçülmedi |
+| 7 | P1 | web+mobil | QR kod tabanlı check-in katmanı yok | orta | ✅ Var — misafir bileti QR (internetsiz de açılır), esnaf uygulamada okutur |
+| 8 | P2 | web+mobil | Sadakat puanı harcanamıyor | büyük | ❌ Kapandı — özellik 2026-09-12'de kaldırıldı |
 | 9 | P2 | web+mobil | Büyük/özel eşya kabul politikası net iletilmiyor | küçük | Backlog |
 | 10 | P2 | web | İptal politikası rezervasyon akışında tek cümleyle vurgulanmıyor | küçük | ❌ Geçersiz — doğrulandı: `CheckoutWhatIsIncluded.tsx` zaten "Teslimden 60 dakika öncesine kadar tam iade" diyor, checkout'ta görünür |
 | 11 | P2 | web | 10.000 TL güvence tutarı döviz bazında rakiplere kıyasla düşük algılanabilir | orta | Ürün/fiyatlandırma kararı — bu depoda karar verilemez |
 | 12 | P3 | web | Sigorta ile güvence farkını anlatan içerik/SSS maddesi yok | küçük | Backlog |
 | 13 | P3 | mobil | Esnaf paneli ayrı bir mobil uygulama olarak konumlandırılmıyor (ASO) | küçük | Backlog — mimari değişikliği gerektirmez, yalnızca metadata |
 
-Mobil tarafın kendi (çok daha büyük) boşluk listesi için bkz. **`docs/web_vs_mobile_comparison.md`**
-(bu doküman da bugün tamamen yeniden yazıldı).
+Web ile mobil arasındaki güncel farklar: **`docs/web_vs_mobile_comparison.md`**.
 
 ## 5. Yöntem
 
