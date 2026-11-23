@@ -32,11 +32,11 @@ function turkishSections(companyLegalName: string, paymentMode: PaymentCopyMode)
         "2.2. Hizmet Kapsamı: BagajPark, aşağıdaki hizmetleri sağlayan aracı bir platformdur:",
         [
           "Kullanıcıların depolama noktalarını görüntülemesini ve online rezervasyon oluşturmasını sağlar.",
-          "Eşyaların teslimi sırasında, müdahale edilemez nitelikteki BagajPark Güvenlik Mühürleri ile bagajların emniyete alınması sürecini yönetir.",
+          "Eşyaların teslimi sırasında, rezervasyonun QR kodu okutularak bagajın teslim kaydının (bırakma ve alma saatleri, valiz sayısı) tutulması sürecini yönetir.",
           "Hizmet bedelinin güvenli tahsilatını ve İş Ortağı ile mahsuplaşma süreçlerini yürütür.",
           "Rezervasyon süresince ortaya çıkabilecek aksaklıklarda müşteri desteği sağlar.",
         ],
-        "2.3. Sorumluluk Sınırları: Platform, eşyaları bizzat muhafaza eden taraf değil, muhafaza eden ile alanı birleştiren teknolojik altyapıdır. Eşyaların fiziksel güvenliğinden (sözleşmede belirtilen limitler dahilinde) mühürleme kurallarına uyulması şartıyla İş Ortağı ve Platformun bu şartlar kapsamındaki güvencesi sorumludur. Emanet kabul edilmeyen eşyaların (yanıcı, yasa dışı vb.) depolanması kesinlikle yasaktır.",
+        "2.3. Sorumluluk Sınırları: Platform, eşyaları bizzat muhafaza eden taraf değil, muhafaza eden ile alanı birleştiren teknolojik altyapıdır. Eşyaların fiziksel güvenliğinden (sözleşmede belirtilen limitler dahilinde) teslim kaydı kurallarına uyulması şartıyla İş Ortağı ve Platformun bu şartlar kapsamındaki güvencesi sorumludur. Emanet kabul edilmeyen eşyaların (yanıcı, yasa dışı vb.) depolanması kesinlikle yasaktır.",
       ],
     },
     {
@@ -53,7 +53,7 @@ function turkishSections(companyLegalName: string, paymentMode: PaymentCopyMode)
       paragraphs: [
         "4.1. Bagaj İçeriğine İlişkin Sorumluluk: Kullanıcı, teslim ettiği bagajın içeriğinin T.C. yasalarına uygun olduğunu kabul eder. Yasa dışı içeriklerden doğacak sorumluluk Kullanıcı'ya aittir. Yanıcı, patlayıcı, bozulabilir gıda veya kötü koku yayan nesnelerin teslimi yasaktır.",
         "4.2. Değerli Eşya Kısıtlaması: Nakit para, mücevher, pasaport, antika ve benzeri yüksek maddi/manevi değere sahip eşyaların bagaj içerisinde bırakılması yasaktır. Bu tür eşyaların kaybından BagajPark veya İş Ortağı sorumlu tutulamaz.",
-        "4.3. Teslimat ve Mühürleme Süreci: Kullanıcı, bagajını İş Ortağına teslim ederken BagajPark Güvenlik Mührü'nün usulüne uygun takıldığını kontrol etmekle yükümlüdür. Mühürsüz veya hatalı mühürlenmiş bagajlar için sunulan güvence kapsamı geçersizdir.",
+        "4.3. Teslimat ve Teslim Kaydı Süreci: Kullanıcı, bagajını İş Ortağına teslim ederken rezervasyonun QR kodunun okutulduğunu ve teslimin kayda alındığını kontrol etmekle yükümlüdür. QR ile teslim alınmamış veya teslim kaydı olmayan bagajlar için sunulan güvence kapsamı geçersizdir.",
         paymentMode === "online"
           ? "4.4. Zamanında Teslim Alma ve Gecikme: Kullanıcı, İş Ortağının çalışma saatlerine uymak zorundadır. Rezervasyon süresi aşıldığında, ek saat/gün bedeli Kullanıcı'nın kayıtlı ödeme yönteminden otomatik olarak tahsil edilir."
           : "4.4. Zamanında Teslim Alma ve Gecikme: Kullanıcı, İş Ortağının çalışma saatlerine uymak zorundadır. Rezervasyon süresi aşıldığında, ek saat/gün bedeli bagaj teslim alınırken İş Ortağının noktasında ödenir.",
@@ -71,7 +71,7 @@ function turkishSections(companyLegalName: string, paymentMode: PaymentCopyMode)
       title: "5. PLATFORMA (BAGAJPARK) TANINAN YETKİ VE HAKLAR",
       paragraphs: [
         "5.1. Denetim ve Güvenlik Yetkisi: Şirket veya İş Ortağı, makul bir şüphe durumunda veya kamu güvenliği gerektirdiğinde içeriği kontrol etme veya resmi makamlara bildirme yetkisine sahiptir. Şüpheli bagajları gerekçe göstermeksizin reddetme hakkı saklıdır.",
-        "5.2. Operasyonel ve Teknik Müdahale: Güvenlik için gerekli görüldüğünde ek mühürleme standartları getirme yetkisine sahiptir. Teknik arıza veya bakım durumunda hizmeti geçici durdurabilir.",
+        "5.2. Operasyonel ve Teknik Müdahale: Güvenlik için gerekli görüldüğünde ek teslim ve kayıt standartları getirme yetkisine sahiptir. Teknik arıza veya bakım durumunda hizmeti geçici durdurabilir.",
         paymentMode === "online"
           ? "5.3. Fiyatlandırma ve Ödeme Yetkisi: Şirket fiyatları ve komisyonları güncelleme hakkına sahiptir. Süre aşımı durumunda otomatik tahsilat yetkisine sahiptir."
           : "5.3. Fiyatlandırma ve Ödeme Yetkisi: Şirket fiyatları ve komisyonları güncelleme hakkına sahiptir. Süre aşımı bedeli 4.4. maddede düzenlenen şekilde ödenir.",
@@ -113,8 +113,8 @@ function turkishSections(companyLegalName: string, paymentMode: PaymentCopyMode)
     {
       title: "9. ÜRÜN TESLİM ALMA VE TESLİM ETME PROSEDÜRÜ",
       paragraphs: [
-        "9.1. Bagajın Teslim Edilmesi: Kullanıcı dijital QR kodunu göstermeli ve İş Ortağı mühürleme işlemini gerçekleştirmelidir. Mühür seri numarasının sisteme işlendiği kontrol edilmelidir. Durum tespiti için bagaj fotoğrafları çekilebilir.",
-        "9.2. Bagajın Teslim Alınması: Kullanıcı \"Teslim Alma Kodunu\" okutmak zorundadır. Bagaj teslim alınırken mührün açılmadığı kontrol edilmelidir; mühür söküldükten sonra yapılacak ihbarlar kabul edilmez.",
+        "9.1. Bagajın Teslim Edilmesi: Kullanıcı dijital QR kodunu göstermeli ve İş Ortağı QR kodu okutarak bagajı teslim almalıdır. Teslimin ve valiz sayısının sisteme işlendiği kontrol edilmelidir. Durum tespiti için bagaj fotoğrafları çekilebilir.",
+        "9.2. Bagajın Teslim Alınması: Kullanıcı \"Teslim Alma Kodunu\" okutmak zorundadır. Bagaj teslim alınırken bagajın durumu kontrol edilmelidir; teslim alma kayda geçtikten sonra yapılacak ihbarlar kabul edilmez.",
         "9.3. Üçüncü Şahıslar: Bagajın başkası tarafından alınması için uygulama üzerinden yetkilendirme yapılmalıdır. Kodun paylaşılması sonucu doğacak risklerden Kullanıcı sorumludur.",
         "9.4. Unutulan Eşyalar: Rezervasyon bitiminden itibaren 24 saat içinde alınmayan eşyalar için bildirim gönderilir. 15 gün içinde alınmayan eşyalar üzerinde depolama yükümlülüğü sona erer ve Şirket merkezine transfer edilebilir.",
       ],
@@ -123,7 +123,7 @@ function turkishSections(companyLegalName: string, paymentMode: PaymentCopyMode)
       title: "10. İPTAL VE ÜCRET İADESİ KOŞULLARI",
       paragraphs: [
         "10.1. Rezervasyon İptali: Kullanıcı, check-in (teslim) saatine kadar rezervasyonunu istediği an ücretsiz iptal edebilir; ödenen tutarın tamamı iade edilir. Herhangi bir kesinti veya ceza uygulanmaz.",
-        "10.2. Hizmet Kusuru: İş Ortağının kapalı olması veya mühür bulunmaması gibi durumlarda bildirim yapılması şartıyla tam iade yapılır.",
+        "10.2. Hizmet Kusuru: İş Ortağının kapalı olması gibi durumlarda bildirim yapılması şartıyla tam iade yapılır.",
         paymentMode === "online"
           ? "10.3. İade Yöntemi: İadeler yalnızca ödeme yapılan karta 5-10 iş günü içinde yansıtılır."
           : "10.3. İade Yöntemi: Ödeme dükkanda tahsil edildiğinden, hizmet verilmeden iptal edilen rezervasyonlarda herhangi bir tahsilat yapılmaz; tahsil edilmiş bir bedelin iadesi ödemenin yapıldığı İş Ortağı noktasında gerçekleştirilir.",
@@ -182,11 +182,11 @@ function englishSections(companyLegalName: string, paymentMode: PaymentCopyMode)
         "2.2. Scope of the service: BagajPark is an intermediary platform that:",
         [
           "lets Users view storage points and make bookings online;",
-          "manages the securing of luggage at drop-off with tamper-evident BagajPark Security Seals;",
+          "manages the hand-over record at drop-off: the booking QR code is scanned and the drop-off and pickup times and bag count are recorded;",
           "handles the secure collection of the service fee and settlement with the Partner;",
           "provides customer support for any problem that arises during a booking.",
         ],
-        "2.3. Limits of responsibility: the Platform does not store belongings itself; it is the technology that connects the party storing them with the space. Provided the sealing rules are followed, the Partner and the Platform's guarantee under these terms are responsible for the physical safety of the belongings, within the limits stated in these terms. Storing items that are not accepted (flammable, illegal, etc.) is strictly prohibited.",
+        "2.3. Limits of responsibility: the Platform does not store belongings itself; it is the technology that connects the party storing them with the space. Provided the hand-over record rules are followed, the Partner and the Platform's guarantee under these terms are responsible for the physical safety of the belongings, within the limits stated in these terms. Storing items that are not accepted (flammable, illegal, etc.) is strictly prohibited.",
       ],
     },
     {
@@ -203,7 +203,7 @@ function englishSections(companyLegalName: string, paymentMode: PaymentCopyMode)
       paragraphs: [
         "4.1. Contents of the luggage: the User accepts that the contents of the luggage they hand over comply with the laws of the Republic of Türkiye. The User is responsible for any illegal contents. Flammable or explosive items, perishable food and items that give off strong odours may not be handed over.",
         "4.2. Valuables: cash, jewellery, passports, antiques and other items of high material or sentimental value must not be left in luggage. Neither BagajPark nor the Partner can be held responsible for the loss of such items.",
-        "4.3. Drop-off and sealing: when handing luggage to the Partner, the User must check that the BagajPark Security Seal has been attached correctly. The guarantee does not apply to luggage that is unsealed or incorrectly sealed.",
+        "4.3. Drop-off and hand-over record: when handing luggage to the Partner, the User must check that the booking QR code has been scanned and the drop-off has been recorded. The guarantee does not apply to luggage that was not checked in with the QR code or has no hand-over record.",
         paymentMode === "online"
           ? "4.4. Timely pick-up and delays: the User must respect the Partner's opening hours. If the booking period is exceeded, the fee for the extra hours or days is charged automatically to the User's registered payment method."
           : "4.4. Timely pick-up and delays: the User must respect the Partner's opening hours. If the booking period is exceeded, the fee for the extra hours or days is paid at the Partner's location when the luggage is collected.",
@@ -216,7 +216,7 @@ function englishSections(companyLegalName: string, paymentMode: PaymentCopyMode)
       title: "5. RIGHTS OF THE PLATFORM (BAGAJPARK)",
       paragraphs: [
         "5.1. Inspection and security: where there is reasonable suspicion, or where public safety requires it, the Company or the Partner may inspect the contents or notify the authorities. The right to refuse suspicious luggage without giving a reason is reserved.",
-        "5.2. Operational and technical measures: the Company may introduce additional sealing standards where needed for security, and may suspend the service temporarily for technical faults or maintenance.",
+        "5.2. Operational and technical measures: the Company may introduce additional hand-over and record-keeping standards where needed for security, and may suspend the service temporarily for technical faults or maintenance.",
         paymentMode === "online"
           ? "5.3. Pricing and payment: the Company may update prices and commissions, and may charge automatically when a booking period is exceeded."
           : "5.3. Pricing and payment: the Company may update prices and commissions. Any overstay fee is paid as set out in clause 4.4.",
@@ -258,8 +258,8 @@ function englishSections(companyLegalName: string, paymentMode: PaymentCopyMode)
     {
       title: "9. DROP-OFF AND PICK-UP PROCEDURE",
       paragraphs: [
-        "9.1. Dropping off luggage: the User must show their digital QR code and the Partner must carry out the sealing. The User should check that the seal serial number has been recorded in the system. Photos of the luggage may be taken to record its condition.",
-        '9.2. Picking up luggage: the User must have their "Pick-up Code" scanned. When collecting the luggage, the User must check that the seal has not been opened; claims made after the seal has been removed are not accepted.',
+        "9.1. Dropping off luggage: the User must show their digital QR code and the Partner must check the luggage in by scanning it. The User should check that the drop-off and the bag count have been recorded in the system. Photos of the luggage may be taken to record its condition.",
+        '9.2. Picking up luggage: the User must have their "Pick-up Code" scanned. When collecting the luggage, the User must check its condition; claims made after the pickup has been recorded are not accepted.',
         "9.3. Third parties: for someone else to collect the luggage, they must be authorised through the app. The User is responsible for any risk arising from sharing the code.",
         "9.4. Forgotten belongings: a notification is sent for belongings not collected within 24 hours of the end of the booking. For belongings not collected within 15 days, the storage obligation ends and they may be transferred to the Company's head office.",
       ],
@@ -268,7 +268,7 @@ function englishSections(companyLegalName: string, paymentMode: PaymentCopyMode)
       title: "10. CANCELLATION AND REFUNDS",
       paragraphs: [
         "10.1. Cancelling a booking: the User may cancel a booking free of charge at any time up to the check-in (drop-off) time; the full amount paid is refunded. No deduction or penalty applies.",
-        "10.2. Service failure: if the Partner is closed or no seal is available, a full refund is given provided the problem is reported.",
+        "10.2. Service failure: if the Partner is closed, a full refund is given provided the problem is reported.",
         paymentMode === "online"
           ? "10.3. Refund method: refunds are made only to the card used for payment, within 5 to 10 business days."
           : "10.3. Refund method: because payment is collected at the shop, nothing is charged for a booking cancelled before the service is provided; any amount already collected is refunded at the Partner's point where it was paid.",
