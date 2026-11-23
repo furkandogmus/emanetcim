@@ -163,6 +163,13 @@ export type BookingDetail = BookingSummary & {
    * bu rezervasyonda hic yok demek. Eski sunucu gondermez, `undefined` `null` sayilir.
    */
   noShowAvailableAt?: string | null;
+  /**
+   * Gec birakma: valiz birakilmadiysa rezervasyonun otomatik kapanacagi an (ISO);
+   * uygulanmiyorsa `null`. Istemci ancak birakma saati gectiyse gosterir. Eski sunucu gondermez.
+   */
+  lateCloseAt?: string | null;
+  /** Esnafin "Misafiri bekle" ile verdigi son an (ISO); yoksa `null`. */
+  lateHoldUntil?: string | null;
 };
 
 /** `partner/bookings/[id]/cancel` neden secenekleri. */

@@ -1,7 +1,7 @@
 import { useInfiniteQuery, useMutation, useQuery, useQueryClient, type QueryClient } from "@tanstack/react-query";
 
 import { api, ApiError, isImpersonating } from "./api";
-import { adminCancelBooking, adminForceCheckout, partnerCancelBooking, partnerNoShow, type AdminBookingAction } from "./booking-actions";
+import { adminCancelBooking, adminForceCheckout, partnerCancelBooking, partnerLateHold, partnerNoShow, type AdminBookingAction } from "./booking-actions";
 import { isBookingExpired } from "./booking-state";
 import { deleteOfflineTicket, saveOfflineTicket } from "./offline-tickets";
 import { useAuth } from "./auth";
@@ -460,6 +460,14 @@ export function partnerCancelOptions(qc: InvalidatingClient, id: string) {
 
 export function partnerNoShowOptions(qc: InvalidatingClient, id: string) {
   return { mutationFn: () => partnerNoShow(id), onSettled: () => refreshAfterPartnerAction(qc) };
+}
+
+export function partnerLateHoldOptions(qc: InvalidatingClient, id: string) {
+  return { mutationFn: () => partnerLateHold(id), onSettled: () => refreshAfterPartnerAction(qc) };
+}
+
+export function usePartnerLateHold(id: string) {
+  return useMutation(partnerLateHoldOptions(useQueryClient(), id));
 }
 
 export function useAdminBookingAction(id: string) {

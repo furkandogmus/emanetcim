@@ -30,6 +30,7 @@ jest.mock("@/lib/queries", () => ({
   usePartnerShop: () => ({ data: undefined }),
   usePartnerCancel: () => idle(),
   usePartnerNoShow: () => idle(),
+  usePartnerLateHold: () => idle(),
   useAdminBookingAction: () => idle(),
 }));
 
@@ -145,5 +146,37 @@ describe("misafir: suresi dolan rezervasyonu kapat", () => {
   it("iptal edilemeyen durumda (valiz dukkanda) gorunmez", async () => {
     await renderExpired("CHECKED_IN", true);
     expect(screen.queryByRole("button", { name: "Rezervasyonu kapat" })).toBeNull();
+  });
+});
+
+describe("esnaf: gec birakma (Misafiri bekle)", () => {
+  beforeEach(() => {
+    jest.useFakeTimers({ now: Date.parse("2026-11-22T09:20:00Z") });
+  });
+  afterEach(() => {
+    jest.useRealTimers();
+  });
+
+  it("lateCloseAt yoksa (eski sunucu) gorunmez", async () => {
+    await render(withClient(<PartnerBookingActions booking={booking()} />));
+    expect(screen.queryByRole("button", { name: "Misafiri bekle (+30 dk)" })).toBeNull();
+  });
+
+  it("birakma saati gectiyse kapanis saatini ve bekle dugmesini gosterir", async () => {
+    await render(withClient(<PartnerBookingActions booking={booking({ lateCloseAt: "2026-11-22T10:00:00Z" })} />));
+    expect(screen.getByText(/Otomatik kapanış: 13:00/)).toBeTruthy();
+    expect(screen.getByRole("button", { name: "Misafiri bekle (+30 dk)" })).toBeEnabled();
+  });
+
+  it("kapanis alma saatine dayandiysa dugme kapali ve nedenini yazar", async () => {
+    await render(
+      withClient(
+        <PartnerBookingActions
+          booking={booking({ lateCloseAt: "2026-11-22T15:00:00Z", lateHoldUntil: "2026-11-22T15:00:00Z" })}
+        />,
+      ),
+    );
+    expect(screen.getByRole("button", { name: "Misafiri bekle (+30 dk)" })).toBeDisabled();
+    expect(screen.getByText("Alma saatine ulaşıldı, daha fazla beklenemez.")).toBeTruthy();
   });
 });

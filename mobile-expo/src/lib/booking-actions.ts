@@ -67,6 +67,30 @@ export function noShowState(availableAt: string | null | undefined, now: number 
   return at.getTime() <= now ? { kind: "ready" } : { kind: "waiting", at };
 }
 
+export type LateDropoffState =
+  | { kind: "hidden" }
+  /** Birakma saati gecti, valiz yok. `holdUntil` bekletme suruyorsa bittigi an. */
+  | { kind: "late"; closeAt: Date; holdUntil: Date | null; canHold: boolean };
+
+/**
+ * Gec birakma bilgisi (sunucu `lateCloseAt`). "Misafiri bekle" yalnizca teslim
+ * alinabilir durumda ve kapanis alma saatine dayanmadiysa sunulur; sunucu ayni
+ * kurali uygular (`hold_limit`).
+ */
+export function lateDropoffState(
+  b: { status: BookingStatus; checkInTime: string; checkOutTime: string; lateCloseAt?: string | null; lateHoldUntil?: string | null },
+  now: number = Date.now(),
+): LateDropoffState {
+  if (!b.lateCloseAt) return { kind: "hidden" };
+  const closeAt = new Date(b.lateCloseAt);
+  if (Number.isNaN(closeAt.getTime()) || now < new Date(b.checkInTime).getTime()) return { kind: "hidden" };
+  const hold = b.lateHoldUntil ? new Date(b.lateHoldUntil) : null;
+  const holdUntil = hold && hold.getTime() > now ? hold : null;
+  const actionable = b.status === "APPROVED" || b.status === "PAID";
+  const canHold = actionable && closeAt.getTime() < new Date(b.checkOutTime).getTime();
+  return { kind: "late", closeAt, holdUntil, canHold };
+}
+
 /** Bekleme yazisinda saat yeter mi, gun de mi gerekir (Istanbul duvar saatiyle). */
 export function isSameWallDay(a: Date | string, b: Date | string): boolean {
   const x = wallParts(a);
@@ -113,6 +137,10 @@ export function adminForceCheckout(id: string, note: string) {
 
 export function partnerCancelBooking(id: string, body: PartnerCancelRequest) {
   return api<BookingActionResponse>(`/partner/bookings/${enc(id)}/cancel`, { method: "POST", body });
+}
+
+export function partnerLateHold(id: string) {
+  return api<BookingActionResponse>(`/partner/bookings/${enc(id)}/hold`, { method: "POST", body: {} });
 }
 
 export function partnerNoShow(id: string) {
