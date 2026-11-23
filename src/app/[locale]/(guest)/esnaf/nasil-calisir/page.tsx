@@ -5,9 +5,7 @@ import {
   ArrowRight,
   Bell,
   CalendarCheck,
-  Camera,
   CheckCircle2,
-  ClipboardList,
   Lock,
   QrCode,
   Settings,
@@ -74,7 +72,6 @@ function MockButton({ children, variant = "primary" }: { children: ReactNode; va
 }
 
 const SAMPLE_GUEST = "Emma L.";
-const SAMPLE_SEALS = ["004218", "004219"];
 
 export default async function PartnerHowItWorksPage({
   params,
@@ -130,15 +127,12 @@ export default async function PartnerHowItWorksPage({
       mock: (
         <>
           <MockCard>
-            <p className="text-[11px] font-bold uppercase tracking-wider text-gray-400">{t("mockSealNumbers")}</p>
-            {SAMPLE_SEALS.map((s) => (
-              <div key={s} className="mt-1.5 rounded-lg border border-gray-200 bg-gray-50 px-2.5 py-1.5 font-mono text-sm font-bold">
-                #{s}
+            <p className="text-[11px] font-bold uppercase tracking-wider text-gray-400">{t("mockDropoffRecord")}</p>
+            {[t("mockBags", { count: 2 }), t("mockDropoffAt", { time: "09:30" })].map((row) => (
+              <div key={row} className="mt-1.5 rounded-lg border border-gray-200 bg-gray-50 px-2.5 py-1.5 text-sm font-bold">
+                {row}
               </div>
             ))}
-            <div className="mt-2 flex items-center gap-1.5 text-xs font-bold text-gray-500">
-              <Camera size={14} /> {t("mockAddPhoto")}
-            </div>
           </MockCard>
           <div className="flex">
             <MockButton>{t("mockCheckIn")}</MockButton>
@@ -153,10 +147,10 @@ export default async function PartnerHowItWorksPage({
       mock: (
         <>
           <MockCard tone="green">
-            <p className="text-[11px] font-bold uppercase tracking-wider text-emerald-700">{t("mockSealCheck")}</p>
-            {SAMPLE_SEALS.map((s) => (
-              <div key={s} className="mt-1.5 flex items-center justify-between font-mono text-sm font-bold text-gray-900">
-                #{s} <CheckCircle2 size={16} className="text-emerald-600" />
+            <p className="text-[11px] font-bold uppercase tracking-wider text-emerald-700">{t("mockPickupRecord")}</p>
+            {[t("mockBags", { count: 2 }), t("mockPickupAt", { time: "18:00" })].map((row) => (
+              <div key={row} className="mt-1.5 flex items-center justify-between text-sm font-bold text-gray-900">
+                {row} <CheckCircle2 size={16} className="text-emerald-600" />
               </div>
             ))}
           </MockCard>
@@ -196,7 +190,6 @@ export default async function PartnerHowItWorksPage({
 
   const panel = [
     { Icon: CalendarCheck, title: t("panelBookingsTitle"), body: t("panelBookingsBody") },
-    { Icon: ClipboardList, title: t("panelSealsTitle"), body: t("panelSealsBody") },
     { Icon: TrendingUp, title: t("panelEarningsTitle"), body: t("panelEarningsBody") },
     { Icon: Settings, title: t("panelSettingsTitle"), body: t("panelSettingsBody") },
   ];
