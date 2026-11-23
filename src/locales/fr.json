@@ -1893,7 +1893,8 @@
     "currentPasswordRequired": "Saisissez votre mot de passe actuel.",
     "invalidCurrentPassword": "Le mot de passe actuel est incorrect.",
     "lateHoldLimit": "Heure de retrait atteinte ; la réservation ne peut plus être prolongée.",
-    "affiliateAlreadyApplied": "Ce compte a déjà une demande d'apporteur d'affaires."
+    "affiliateAlreadyApplied": "Ce compte a déjà une demande d'apporteur d'affaires.",
+    "priceChanged": "Le prix a changé (une remise ne s'applique plus). Vérifiez le nouveau total et confirmez à nouveau."
   },
   "Emails": {
     "verificationSubject": "Vérifiez votre e-mail",

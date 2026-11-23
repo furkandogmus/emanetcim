@@ -46,6 +46,8 @@ export type CreateBookingInput = {
   checkOutTime: Date;
   couponCode?: string;
   referralCode?: string;
+  /** Sunucu onizlemesinin gosterdigi toplam; verilirse ayrisan tutarla rezervasyon yazilmaz. */
+  expectedTotal?: number;
   /** Guest checkout: accountsız kullanıcılar için e-posta */
   guestEmail?: string;
   /** Guest checkout: accountsız kullanıcılar için telefon */
@@ -166,6 +168,16 @@ export async function createBookingAction(data: CreateBookingInput) {
   });
   const totalPrice = discounts.totalPrice;
   const appliedCouponId = discounts.couponId;
+
+  /*
+    Ekran toplami sunucudan geldiyse (araci cerezi, `previewAffiliateCheckoutAction`)
+    ve hesaplanan tutar farkliysa YAZILMAZ -- mobilin 409 `price_changed` kurali.
+    Misafir gordugunden farkli bir tutara onay vermis olmasin.
+  */
+  if (data.expectedTotal !== undefined && Math.abs(data.expectedTotal - totalPrice) > 0.005) {
+    if (appliedCouponId) await couponService.release(appliedCouponId);
+    return { success: false as const, error: "Errors.priceChanged" };
+  }
 
   // Sıfır valizle rezervasyon oluşturulamaz
   const totalBags = authTotals.bagCountS + authTotals.bagCountM + authTotals.bagCountXl;

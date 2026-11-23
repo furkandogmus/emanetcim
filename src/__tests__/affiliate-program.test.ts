@@ -237,6 +237,28 @@ describe("tek indirim kurali", () => {
     });
   });
 
+  it.each([
+    // [ad, kupon tutari | null, davet tutari | null, araci %, beklenen toplam]
+    ["kupon 10 + davet + araci 15", 10, 5, 15, 85],
+    ["kupon gecersiz + davet 20 + araci 15", null, 20, 15, 80],
+    ["kupon 20 + araci 15", 20, null, 15, 80],
+    ["yalniz davet 5", null, 5, 0, 95],
+  ] as const)("onizleme ile rezervasyon AYNI toplami verir: %s", async (_n, couponAmt, refAmt, affPct, expected) => {
+    m.prisma.affiliate.findUnique.mockResolvedValue(affiliateRow({ guestDiscountRate: D(affPct) }));
+    m.coupon.preview.mockResolvedValue(
+      couponAmt == null ? { ok: false, reason: "invalid" } : { ok: true, code: "YAZ", discountAmount: couponAmt, totalPrice: 100 - couponAmt },
+    );
+    m.coupon.claim.mockResolvedValue(
+      couponAmt == null ? { ok: false } : { ok: true, claimed: { couponId: "c1", code: "YAZ", discountAmount: couponAmt, totalPrice: 100 - couponAmt } },
+    );
+    m.referral.check.mockResolvedValue(refAmt == null ? { ok: false, reason: "invalid_code" } : { ok: true, code: "DAVET", discountPct: refAmt });
+    const input = { subtotal: 100, couponCode: "YAZ", referralCode: "DAVET", affiliateCode: affPct ? "AHMET-EV" : null, guest: { userId: "g" } };
+    const q = await checkoutDiscountService.preview(input);
+    const r = await checkoutDiscountService.claim(input);
+    expect(q.total).toBe(expected);
+    expect(r.totalPrice).toBe(expected);
+  });
+
   it("araci indirimi yoksa (oran 0) eski kural aynen: kupon claim edilir", async () => {
     m.coupon.claim.mockResolvedValue({ ok: true, claimed: { couponId: "c1", code: "YAZ10", discountAmount: 10, totalPrice: 90 } });
     const r = await checkoutDiscountService.claim({ subtotal: 100, couponCode: "YAZ10", affiliateCode: "AHMET-EV", guest: { userId: "g" } });

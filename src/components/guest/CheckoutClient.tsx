@@ -355,6 +355,7 @@ export default function CheckoutClient({
       bagCountXl: bagXl,
       unitPrice: pricePerDay,
       totalPrice: grandTotal,
+      ...(serverPriced ? { expectedTotal: serverPriced.total } : {}),
       insuranceFee,
       checkInTime: checkInDate,
       checkOutTime: checkOutDate,

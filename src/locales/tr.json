@@ -1957,7 +1957,8 @@
     "currentPasswordRequired": "Mevcut şifrenizi girin.",
     "invalidCurrentPassword": "Mevcut şifre hatalı.",
     "lateHoldLimit": "Alma saatine ulaşıldı; rezervasyon daha fazla bekletilemez.",
-    "affiliateAlreadyApplied": "Bu hesapla zaten bir aracı başvurusu var."
+    "affiliateAlreadyApplied": "Bu hesapla zaten bir aracı başvurusu var.",
+    "priceChanged": "Tutar değişti (indirim artık geçerli değil). Güncel toplamı kontrol edip tekrar onaylayın."
   },
   "Emails": {
     "verificationSubject": "E-postanızı Doğrulayın",

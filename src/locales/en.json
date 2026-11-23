@@ -1957,7 +1957,8 @@
     "currentPasswordRequired": "Enter your current password.",
     "invalidCurrentPassword": "Current password is incorrect.",
     "lateHoldLimit": "Pick-up time reached; the booking cannot be held any longer.",
-    "affiliateAlreadyApplied": "This account already has a partner-referrer application."
+    "affiliateAlreadyApplied": "This account already has a partner-referrer application.",
+    "priceChanged": "The price changed (a discount no longer applies). Check the updated total and confirm again."
   },
   "Emails": {
     "verificationSubject": "Verify Your Email",
