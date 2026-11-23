@@ -80,13 +80,15 @@ export const JOB_REGISTRY: readonly JobDefinition[] = [
     script: "scripts/overdue-scan.sh",
   },
   {
-    name: "close-expired-bookings",
-    what: "Valizi hiç bırakılmamış ve alma saatinin üzerinden 6 saat geçmiş rezervasyonları iptal (expired_no_dropoff) olarak kapatır.",
+    name: "late-dropoff-scan",
+    what: "Valizini bırakma saatinde bırakmamış misafire +15/+30/+45 dk'da hatırlatma (+45'te esnafa da) gönderir, +60 dk'da (ya da esnafın bekletmesi bitince) rezervasyonu kapatır.",
     ifItStops:
-      "Gelmeyen misafirin rezervasyonu sonsuza dek açık kalır: slot kapasitesi ve kupon hakkı tutulu kalır, misafir hesabını silemez, esnaf listesi şişer.",
+      "Gelmeyen misafirin rezervasyonu açık kalır: slot kapasitesi ve kupon hakkı tutulur, başka misafir o yeri alamaz, misafir hesabını silemez, esnaf listesi şişer.",
     method: "POST",
-    cron: "43 1 * * *",
-    maxStaleHours: 48,
+    // 5 dakikada bir (hatırlatma pencereleri 15 dk). Adımlı ifade :00 ve :30'a da
+    // düşerdi (`booking-reminders` notu); liste aynı periyodu tepe dakikalara girmeden verir.
+    cron: "2,7,12,17,22,27,32,37,42,47,52,57 * * * *",
+    maxStaleHours: 1,
     enforced: true,
   },
   {

@@ -1,6 +1,7 @@
 /**
  * Rezervasyonu KAPATAN islemler: yonetici iptali, zorla teslim, esnaf iptali,
- * "misafir gelmedi", gece suresi dolma isi ve hesap silmede suresi dolanlar.
+ * "misafir gelmedi" ve hesap silmede suresi dolanlar. Gec birakmada otomatik
+ * kapanis `LateDropoffService`te.
  *
  * Her iptal `cancelBooking` uzerinden gecer (atomik kilit, slot, kupon, iade
  * defteri tek yerde); zorla teslim `checkOut` uzerinden. Bu modul yalnizca
@@ -13,7 +14,6 @@ import logger from '@/lib/logger';
 import { writeAuditLog } from '@/lib/audit-log';
 import {
   ADMIN_NOTE_MIN_LENGTH,
-  EXPIRED_CLOSE_GRACE_HOURS,
   NOT_DROPPED_STATUSES,
   isNotDroppedStatus,
   isPartnerCancelReason,
@@ -194,55 +194,10 @@ export async function markNoShow(
   return result.ok ? { ok: true } : { ok: false, code: fromCancelFailure(result.code) };
 }
 
-export type ExpiredCloseSummary = { scanned: number; closed: number; failed: number };
-
-/**
- * Gece isi: valizi hic birakilmamis ve alma saatinin uzerinden
- * `EXPIRED_CLOSE_GRACE_HOURS` gecmis rezervasyonlari kapatir. Sessiz: misafir
- * zaten gelmedi, esnaf da beklemiyor. Tekrar calistirmak zararsiz; kapanan
- * kayit sorgudan duser, basarisiz olan ayni kosuda bir daha denenmez.
- */
-export async function closeExpiredBookings(
-  opts: { now?: Date; batchSize?: number; maxBatches?: number } = {},
-): Promise<ExpiredCloseSummary> {
-  const now = opts.now ?? new Date();
-  const batchSize = opts.batchSize ?? 100;
-  const maxBatches = opts.maxBatches ?? 20;
-  const cutoff = new Date(now.getTime() - EXPIRED_CLOSE_GRACE_HOURS * 60 * 60 * 1000);
-  const attempted: string[] = [];
-  const summary: ExpiredCloseSummary = { scanned: 0, closed: 0, failed: 0 };
-
-  for (let batch = 0; batch < maxBatches; batch++) {
-    const rows = await prisma.booking.findMany({
-      where: {
-        status: { in: [...NOT_DROPPED_STATUSES] },
-        checkOutTime: { lt: cutoff },
-        checkedInAt: null,
-        ...(attempted.length > 0 ? { id: { notIn: [...attempted] } } : {}),
-      },
-      select: { id: true },
-      orderBy: { checkOutTime: 'asc' },
-      take: batchSize,
-    });
-    for (const { id } of rows) {
-      attempted.push(id);
-      summary.scanned++;
-      const r = await cancelBooking(id, { silent: true, reason: 'expired_no_dropoff' });
-      if (r.ok) summary.closed++;
-      else {
-        summary.failed++;
-        logger.warn({ bookingId: id, code: r.code }, 'expired_booking_close_failed');
-      }
-    }
-    if (rows.length < batchSize) break;
-  }
-  return summary;
-}
-
 /**
  * Hesap silmede: misafirin suresi dolmus (birakilmamis, alma saati gecmis)
- * rezervasyonlari silmeyi ENGELLEMEZ, kapanir. Gece isinin payi yoktur: silme
- * aninda alma saati gecmis olmasi yeter.
+ * rezervasyonlari silmeyi ENGELLEMEZ, kapanir. Silme aninda alma saati gecmis
+ * olmasi yeter.
  */
 export async function closeExpiredBookingsForGuest(userId: string, now: Date = new Date()): Promise<number> {
   const rows = await prisma.booking.findMany({
@@ -258,7 +213,7 @@ export async function closeExpiredBookingsForGuest(userId: string, now: Date = n
   for (const { id } of rows) {
     const r = await cancelBooking(id, { silent: true, reason: 'expired_no_dropoff' });
     if (r.ok) closed++;
-    // Silme yine devam eder; kapanmayan kayit gece isinde tekrar denenir.
+    // Silme yine devam eder; kapanmayan kayit `late-dropoff-scan`de kapanir.
     else logger.warn({ bookingId: id, userId, code: r.code }, 'account_delete_expired_close_failed');
   }
   return closed;
