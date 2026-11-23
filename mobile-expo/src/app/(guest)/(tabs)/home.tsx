@@ -183,7 +183,7 @@ export default function HomeScreen() {
                         accessibilityLabel={`${c.name}, ${t("home.citySpots", { count: c.shopCount })}`}
                         onPress={() => {
                           search.setPlace({ label: c.name, latitude: c.latitude, longitude: c.longitude, radiusM: c.radiusM });
-                          router.push({ pathname: "/search", params: { from: "city" } });
+                          router.push({ pathname: "/search", params: { from: "city", city: c.slug ?? c.name } });
                         }}
                         style={({ pressed }) => [styles.cityCard, pressed && { transform: [{ scale: 0.98 }] }]}
                       >
