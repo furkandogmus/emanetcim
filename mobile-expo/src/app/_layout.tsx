@@ -26,7 +26,7 @@ import { AuthProvider, useAuth } from "@/lib/auth";
 import { openFromNotification, registerForPush } from "@/lib/push";
 import { ForcedUpdateScreen, OtaReadyBanner, useUpdateRequired } from "@/components/AppUpdate";
 import { ImpersonationFrame } from "@/components/ImpersonationBanner";
-import { BrandIntro } from "@/components/BrandIntro";
+import { BrandIntro, introHoldsSplash } from "@/components/BrandIntro";
 import { SearchProvider } from "@/lib/search";
 import { colors } from "@/theme/tokens";
 
@@ -68,7 +68,8 @@ function RootNavigator() {
   const updateRequired = useUpdateRequired();
 
   useEffect(() => {
-    if (state.status !== "loading") void SplashScreen.hideAsync().catch(() => undefined);
+    // Acilis animasyonu oynayacaksa yerel ekrani o kaldirir (baslarken); bkz. BrandIntro.
+    if (state.status !== "loading" && !introHoldsSplash()) void SplashScreen.hideAsync().catch(() => undefined);
   }, [state.status]);
 
   // Tekil kullanici sayaci: gunde bir; giris yapilinca hesap cihaza baglansin diye bir kez daha.

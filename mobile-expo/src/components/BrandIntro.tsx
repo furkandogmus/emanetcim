@@ -18,15 +18,17 @@ import Animated, {
 import Svg, { Circle, Path, Rect } from "react-native-svg";
 import { useTranslation } from "react-i18next";
 
+import { hideSplash, nativeSplashIsBlank } from "@/lib/splash";
 import { colors, fonts } from "@/theme/tokens";
 
 /*
-  Acilis slogani: "valizini birak, yola bak".
+  Acilis slogani: "valizini birak, keyfine bak".
 
   Yerel acilis ekrani yalnizca gorsel tasir ve degistirmek yeni ikili ister; bu katman
-  JS'te oldugu icin OTA ile gider.
+  JS'te oldugu icin OTA ile gider. 0.3.4'ten itibaren yerel ekran bos (yalnizca zemin) ve
+  isaret burada duserek gelir; eski ikililerde yerel ekranda logo var.
 
-  Ilk kare yerel ekranla piksel piksel ayni olmali, yoksa gecis sicrar. Yerel gorsel
+  Eski ikililerde ilk kare yerel ekranla piksel piksel ayni olmali, yoksa gecis sicrar. Yerel gorsel
   (assets/splash-icon.png) `scripts/generate-brand-assets.mjs` ile 512'lik tuvalin
   ortasina, yuksekligin %90'i kadar cizilir ve 160 genislikte gosterilir. Burada ayni
   SVG (public/brand/logo-mark.svg) ayni olcekle cizilir; boylece valiz, pin ve
@@ -44,6 +46,22 @@ import { colors, fonts } from "@/theme/tokens";
   coker (bir kez yasandi).
 */
 let playedThisLaunch = false;
+/*
+  Yerel acilis ekranini animasyon kaldirir, tam baslarken: arada durgun bir JS karesi
+  kalirsa logo "donmus" gorunur (2026-11-23, telefonda). Baslamadan sokulurse de kaldirir;
+  yoksa ekran sonsuza dek acilis ekraninda kalir.
+*/
+let introStarted = false;
+export function introHoldsSplash(): boolean {
+  return !introStarted;
+}
+function releaseSplash() {
+  introStarted = true;
+  hideSplash();
+}
+// Bos yerel ekranda (0.3.4+) isaret once yukaridan duser; eski ikililerde logodan baslar.
+const FROM_BLANK = nativeSplashIsBlank();
+const ENTER_MS = FROM_BLANK ? 320 : 0;
 
 // Isaretin geometrisi: viewBox "30 20 420 520"; tuvalde yukseklik 0.9 * 160 = 144.
 const BOX = 160;
@@ -83,6 +101,7 @@ export function BrandIntro() {
   const [visible, setVisible] = useState(() => !playedThisLaunch);
   const closing = useRef(false);
 
+  const enter = useSharedValue(FROM_BLANK ? 0 : 1);
   const hopY = useSharedValue(0);
   const squash = useSharedValue(1);
   const shadow = useSharedValue(0);
@@ -105,69 +124,77 @@ export function BrandIntro() {
 
   function play() {
     if (reduceMotion) {
+      enter.value = withTiming(1, { duration: 220 });
       lift.value = 1;
       word.value = withTiming(1, { duration: 220 });
       line1.value = withTiming(1, { duration: 220 });
       line2.value = withTiming(1, { duration: 220 });
       road.value = 1;
     } else {
+      const d = ENTER_MS;
+      enter.value = withTiming(1, { duration: ENTER_MS || 1, easing: Easing.out(Easing.back(1.4)) });
       // Hazirlik cokmesi, sicrama, inis ezilmesi ve yaylanarak toparlanma.
-      squash.value = withSequence(
+      squash.value = withDelay(d, withSequence(
         withTiming(0.92, { duration: 140, easing: EASE_OUT }),
         withTiming(1.05, { duration: 200, easing: Easing.out(Easing.quad) }),
         withTiming(1, { duration: 180, easing: Easing.in(Easing.quad) }),
         withTiming(0.88, { duration: 70, easing: Easing.out(Easing.quad) }),
         withSpring(1, { damping: 7, stiffness: 260, mass: 0.7 }),
-      );
+      ));
       hopY.value = withDelay(
-        140,
+        140 + d,
         withSequence(
           withTiming(-22, { duration: 200, easing: Easing.out(Easing.quad) }),
           withTiming(0, { duration: 180, easing: Easing.in(Easing.quad) }),
         ),
       );
-      shadow.value = withSequence(
+      shadow.value = withDelay(d, withSequence(
         withTiming(1, { duration: 140 }),
         withDelay(620, withTiming(0, { duration: 320 })),
-      );
-      ring.value = withDelay(LAND_AT, withTiming(1, { duration: 820, easing: EASE_OUT }));
+      ));
+      ring.value = withDelay(LAND_AT + d, withTiming(1, { duration: 820, easing: EASE_OUT }));
       core.value = withDelay(
-        LAND_AT,
+        LAND_AT + d,
         withSequence(
           withTiming(1.45, { duration: 110, easing: EASE_OUT }),
           withSpring(1, { damping: 6, stiffness: 220 }),
         ),
       );
-      lift.value = withDelay(720, withTiming(1, { duration: 560, easing: EASE_OUT }));
-      word.value = withDelay(860, withTiming(1, { duration: 620, easing: Easing.linear }));
-      line1.value = withDelay(1180, withTiming(1, { duration: 440, easing: EASE_OUT }));
-      line2.value = withDelay(1330, withTiming(1, { duration: 440, easing: EASE_OUT }));
-      road.value = withDelay(1480, withTiming(1, { duration: 520, easing: Easing.inOut(Easing.cubic) }));
+      lift.value = withDelay(720 + d, withTiming(1, { duration: 560, easing: EASE_OUT }));
+      word.value = withDelay(860 + d, withTiming(1, { duration: 620, easing: Easing.linear }));
+      line1.value = withDelay(1180 + d, withTiming(1, { duration: 440, easing: EASE_OUT }));
+      line2.value = withDelay(1330 + d, withTiming(1, { duration: 440, easing: EASE_OUT }));
+      road.value = withDelay(1480 + d, withTiming(1, { duration: 520, easing: Easing.inOut(Easing.cubic) }));
       march.value = withDelay(
-        1480,
+        1480 + d,
         withRepeat(withTiming(1, { duration: 480, easing: Easing.linear }), -1, false),
       );
     }
   }
 
   useEffect(() => {
-    if (!visible) return;
+    if (!visible) {
+      releaseSplash();
+      return;
+    }
     playedThisLaunch = true;
     let timer: ReturnType<typeof setTimeout> | undefined;
     let started = false;
 
-    // Ilk kare yerel acilis ekraniyla ayni, durgun: alttaki ekranlarin ilk kurulumu
+    // Ilk kare yerel acilis ekraniyla ayni (ya da bos) ve yerel ekran o sirada hala ustte: alttaki ekranlarin ilk kurulumu
     // bitmeden baslarsa UI ipligi kurulumla yarisir ve animasyon takilir (2026-11-23,
     // emulatorde 99. yuzdelik 200 ms). Kurulum bitince ya da en gec 450 ms sonra baslar.
     const start = () => {
       if (started) return;
       started = true;
+      releaseSplash();
       play();
-      timer = setTimeout(close, reduceMotion ? CLOSE_AT_REDUCED : CLOSE_AT);
+      timer = setTimeout(close, (reduceMotion ? CLOSE_AT_REDUCED : CLOSE_AT) + ENTER_MS);
     };
     const task = InteractionManager.runAfterInteractions(() => requestAnimationFrame(start));
     const fallback = setTimeout(start, 450);
     return () => {
+      if (!started) releaseSplash();
       task.cancel();
       clearTimeout(fallback);
       if (timer) clearTimeout(timer);
@@ -185,10 +212,11 @@ export function BrandIntro() {
   }));
   // Hacim korunur: dikeyde ezilirken yataya yayilir.
   const markStyle = useAnimatedStyle(() => ({
+    opacity: enter.value,
     transform: [
-      { translateY: hopY.value },
-      { scaleX: 1 + (1 - squash.value) * 0.6 },
-      { scaleY: squash.value },
+      { translateY: hopY.value - 40 * (1 - enter.value) },
+      { scaleX: (1 + (1 - squash.value) * 0.6) * (0.7 + 0.3 * enter.value) },
+      { scaleY: squash.value * (0.7 + 0.3 * enter.value) },
     ],
   }));
   const shadowStyle = useAnimatedStyle(() => ({
