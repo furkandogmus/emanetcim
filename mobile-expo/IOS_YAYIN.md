@@ -24,8 +24,8 @@ cd mobile-expo && npx eas-cli@latest build -p ios --profile production
 npx eas-cli@latest submit -p ios --profile production --latest
 ```
 
-`eas.json` → `submit.production.ios` yalnızca `appleTeamId` taşır; `ascAppId` yazılı değil, bu
-yüzden `submit` uygulamayı App Store Connect'te Apple ID ile arar.
+`eas.json` → `submit.production.ios` `appleTeamId` ve `ascAppId` (`6838203193`) taşır; `submit`
+uygulamayı App Store Connect'te aramaz, doğrudan o kayda yükler.
 
 Yalnızca JS/görsel değişikliği derleme istemez; OTA ile gider (`PLAY_YAYIN.md` § Hızlı yayın —
 iki platform aynı kanalı ve runtime'ı kullanır).
