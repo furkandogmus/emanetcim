@@ -368,7 +368,14 @@
     "partnerBookingsSearchLabel": "Buchungen suchen",
     "partnerBookingsSearchPlaceholder": "Code, Gastname oder letzte 4 Ziffern der Telefonnummer",
     "partnerBookingsSearchSubmit": "Suchen",
-    "partnerBookingsSearchTruncated": "{total} Treffer; die neuesten {count} werden angezeigt. Grenzen Sie die Suche ein."
+    "partnerBookingsSearchTruncated": "{total} Treffer; die neuesten {count} werden angezeigt. Grenzen Sie die Suche ein.",
+    "partnerLateTitle": "Gast verspätet sich",
+    "partnerLateCloseAt": "Schließt automatisch: {time}",
+    "partnerLateHoldActive": "Du wartest auf den Gast. Bis: {time}",
+    "partnerLateHint": "Wenn du das Gepäck erhalten hast, checke es ein. Hat der Gast angerufen, kannst du warten.",
+    "partnerLateHold": "Auf Gast warten (+30 Min.)",
+    "partnerLateHoldDone": "Die Buchung bleibt 30 Minuten länger offen.",
+    "partnerLateHoldLimitReached": "Abholzeit erreicht; länger warten ist nicht möglich."
   },
   "Guest": {
     "heroTitle": "Gepäck abgeben, die Stadt frei erkunden",
@@ -1858,7 +1865,8 @@
     "noShowTooEarly": "Ein Nichterscheinen kann erst 60 Minuten nach der Abgabezeit markiert werden.",
     "invalidName": "Der Name muss 1-100 Zeichen lang sein.",
     "currentPasswordRequired": "Geben Sie Ihr aktuelles Passwort ein.",
-    "invalidCurrentPassword": "Das aktuelle Passwort ist falsch."
+    "invalidCurrentPassword": "Das aktuelle Passwort ist falsch.",
+    "lateHoldLimit": "Abholzeit erreicht; die Buchung kann nicht länger gehalten werden."
   },
   "Emails": {
     "verificationSubject": "Bestätigen Sie Ihre E-Mail",
