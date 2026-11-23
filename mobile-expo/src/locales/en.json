@@ -1769,6 +1769,9 @@
     "rejectBody": "The role change request for {{name}} is deleted; their role stays {{from}}.",
     "approved": "Role change applied.",
     "rejected": "Request rejected.",
+    "withdraw": "Withdraw request",
+    "withdrawTitle": "Withdraw this request?",
+    "withdrawn": "Request withdrawn.",
     "errors": {
       "cannot_self_approve": "You can't approve a request you opened.",
       "stale": "The user's role changed in the meantime; the request was removed.",

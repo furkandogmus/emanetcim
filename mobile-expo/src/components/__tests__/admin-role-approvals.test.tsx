@@ -105,12 +105,20 @@ describe("rol onaylari ekrani", () => {
     await waitFor(() => expect(posts()).toEqual(["/admin/role-approvals/r1/reject"]));
   });
 
-  it("kendi istegin onaylanamaz", async () => {
+  it("kendi istegin onaylanamaz, geri cekilebilir", async () => {
     rows = [MINE];
     await renderScreen();
     expect(screen.getByText("Bu isteği sen açtın; başka bir yönetici onaylamalı.")).toBeTruthy();
     const approve = screen.getByRole("button", { name: "Onayla" });
     expect(approve.props.accessibilityState?.disabled).toBe(true);
+    // Kendi isteginde red yerine "geri cek" yazar; ayni uca gider.
+    expect(screen.queryByRole("button", { name: "Reddet" })).toBeNull();
+    fireEvent.press(screen.getByRole("button", { name: "Talebi geri çek" }));
+    await screen.findByText("Talep geri çekilsin mi?");
+    const buttons = screen.getAllByRole("button", { name: "Talebi geri çek" });
+    await act(async () => fireEvent.press(buttons[buttons.length - 1]));
+    await waitFor(() => expect(posts()).toEqual(["/admin/role-approvals/r2/reject"]));
+    expect(alertSpy).toHaveBeenCalledWith("Talep geri çekildi.", undefined, expect.anything());
   });
 
   it("istek sunucuda kalktiysa kod cevrilir ve liste yeniden sorulur", async () => {

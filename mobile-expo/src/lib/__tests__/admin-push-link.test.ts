@@ -17,7 +17,7 @@ const response = (data: Record<string, unknown>) =>
 
 describe("adminPathFromPush", () => {
   it("maps each admin screen", () => {
-    expect(adminPathFromPush({ adminScreen: "dispute", disputeId: "d1" })).toBe("/admin/dispute/d1");
+    expect(adminPathFromPush({ adminScreen: "dispute", disputeId: "3f2b8c1e-9a4d-4e2f-8b1a-0c9d7e6f5a41" })).toBe("/admin/dispute/3f2b8c1e-9a4d-4e2f-8b1a-0c9d7e6f5a41");
     expect(adminPathFromPush({ adminScreen: "dispute" })).toBe("/admin/disputes");
     expect(adminPathFromPush({ adminScreen: "applications" })).toBe("/admin/applications");
     expect(adminPathFromPush({ adminScreen: "partnerLeads" })).toBe("/admin/partner-leads");
@@ -27,6 +27,8 @@ describe("adminPathFromPush", () => {
   it("ignores unknown values", () => {
     expect(adminPathFromPush({ adminScreen: "/admin/../evil" })).toBeNull();
     expect(adminPathFromPush(undefined)).toBeNull();
+    // Gecersiz kimlik yol parcasina girmez; liste acilir.
+    expect(adminPathFromPush({ adminScreen: "dispute", disputeId: "../../partner/x" })).toBe("/admin/disputes");
   });
 });
 
@@ -36,8 +38,8 @@ describe("openFromNotification for admins", () => {
   });
 
   it("opens the dispute for an admin", () => {
-    openFromNotification(response({ adminScreen: "dispute", disputeId: "d1" }), "ADMIN");
-    expect(router.push).toHaveBeenCalledWith("/admin/dispute/d1");
+    openFromNotification(response({ adminScreen: "dispute", disputeId: "3f2b8c1e-9a4d-4e2f-8b1a-0c9d7e6f5a41" }), "ADMIN");
+    expect(router.push).toHaveBeenCalledWith("/admin/dispute/3f2b8c1e-9a4d-4e2f-8b1a-0c9d7e6f5a41");
   });
 
   it("does not route a guest to an admin screen", () => {
