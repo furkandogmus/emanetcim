@@ -18,6 +18,8 @@ import { bookingShortCode } from "@/lib/booking-code";
 import { getSiteBaseUrl } from "@/lib/site-base-url";
 import { signGuestManageLinkToken } from "@/lib/guest-lookup-token";
 import { bookingNotificationEmail } from "@/services/booking/guest-contact";
+import { APP_STORE_BADGE, GOOGLE_PLAY_BADGE, appLinkHref, getAppStoreFlags } from "@/lib/app-stores";
+import type { EmailAppBadges } from "@/lib/email-template";
 
 /**
  * NEDEN (2026-08-25): `sendEmail` partner check-in/check-out akışlarında
@@ -42,6 +44,28 @@ const EMAIL_SEND_TIMEOUT_MS = 8000;
  */
 function pickLocale<T>(byLocale: Record<string, T>, locale: string): T {
   return byLocale[locale] ?? byLocale.tr;
+}
+
+/**
+ * Onay e-postasindaki "Uygulamayi indir" satiri: yalnizca yayindaki magazalar,
+ * hicbiri yayinda degilse satir hic cizilmez. Baglar `/app`e gider ki tiklama
+ * `email-onay` kaynagiyla sayilsin.
+ */
+async function bookingEmailAppBadges(
+  domain: string,
+  copy: { appRow: string; appStoreAlt: string; playAlt: string },
+): Promise<EmailAppBadges | undefined> {
+  const flags = await getAppStoreFlags();
+  const href = appLinkHref("email-onay", domain);
+  const root = domain.replace(/\/$/, "");
+  const badges: EmailAppBadges["badges"] = [];
+  if (flags.iosAppStoreLive) {
+    badges.push({ href, src: `${root}${APP_STORE_BADGE.png}`, alt: copy.appStoreAlt, width: 151, height: 40 });
+  }
+  if (flags.androidPlayLive) {
+    badges.push({ href, src: `${root}${GOOGLE_PLAY_BADGE.png}`, alt: copy.playAlt, width: 150, height: 58 });
+  }
+  return badges.length > 0 ? { label: copy.appRow, badges } : undefined;
 }
 
 /**
@@ -613,6 +637,9 @@ export class NotificationService implements INotificationService {
         row2: `Toplam Tutar`,
         cta: `Biletimi Görüntüle`,
         manageCta: `Rezervasyonunu yönet`,
+        appRow: `Uygulamayı indir`,
+        appStoreAlt: `App Store’dan İndirin`,
+        playAlt: `Google Play’den Alın`,
         footer: `BagajPark — Güvenli Bagaj Emaneti`,
       },
       en: {
@@ -624,6 +651,9 @@ export class NotificationService implements INotificationService {
         row2: `Total`,
         cta: `View My Ticket`,
         manageCta: `Manage your booking`,
+        appRow: `Get the app`,
+        appStoreAlt: `Download on the App Store`,
+        playAlt: `Get it on Google Play`,
         footer: `BagajPark — Secure Luggage Storage`,
       },
       de: {
@@ -635,6 +665,9 @@ export class NotificationService implements INotificationService {
         row2: `Gesamtbetrag`,
         cta: `Mein Ticket ansehen`,
         manageCta: `Buchung verwalten`,
+        appRow: `App herunterladen`,
+        appStoreAlt: `Laden im App Store`,
+        playAlt: `Jetzt bei Google Play`,
         footer: `BagajPark — Sichere Gepäckaufbewahrung`,
       },
       fr: {
@@ -646,6 +679,9 @@ export class NotificationService implements INotificationService {
         row2: `Montant total`,
         cta: `Voir mon billet`,
         manageCta: `Gérer ma réservation`,
+        appRow: `Télécharger l'application`,
+        appStoreAlt: `Télécharger dans l'App Store`,
+        playAlt: `Disponible sur Google Play`,
         footer: `BagajPark — Consigne à bagages sécurisée`,
       },
       ja: {
@@ -657,6 +693,9 @@ export class NotificationService implements INotificationService {
         row2: `合計金額`,
         cta: `チケットを見る`,
         manageCta: `予約を管理する`,
+        appRow: `アプリをダウンロード`,
+        appStoreAlt: `App Storeからダウンロード`,
+        playAlt: `Google Play で手に入れよう`,
         footer: `BagajPark — 安全な荷物預かりサービス`,
       },
       fa: {
@@ -668,6 +707,9 @@ export class NotificationService implements INotificationService {
         row2: `مبلغ کل`,
         cta: `مشاهده بلیط من`,
         manageCta: `مدیریت رزرو`,
+        appRow: `دریافت اپلیکیشن`,
+        appStoreAlt: `دانلود از App Store`,
+        playAlt: `دریافت از Google Play`,
         footer: `BagajPark — نگهداری امن چمدان`,
       },
     }, locale);
@@ -681,6 +723,7 @@ export class NotificationService implements INotificationService {
         { label: content.row2, value: price },
       ],
       cta: { href: bookingUrl, label: guestManage ? content.manageCta : content.cta, variant: "button" },
+      appBadges: await bookingEmailAppBadges(domain, content),
       footer: content.footer,
     });
 

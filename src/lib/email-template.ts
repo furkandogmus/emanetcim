@@ -108,8 +108,31 @@ export type EmailContent = {
   /** Etiket/deger tablosu (referans no, tutar...). Bos verilirse cizilmez. */
   rows?: EmailRow[];
   cta?: EmailCta;
+  /** Magaza rozetleri satiri (yalnizca yayindaki magazalar). Bos/verilmezse cizilmez. */
+  appBadges?: EmailAppBadges;
   footer: string;
 };
+
+export type EmailAppBadges = {
+  label: string;
+  /** `src` MUTLAK PNG adresi olmali: Gmail SVG ve goreli adres gostermez. */
+  badges: { href: string; src: string; alt: string; width: number; height: number }[];
+};
+
+function renderAppBadges(row: EmailAppBadges): string {
+  const imgs = row.badges
+    .map(
+      (b) =>
+        `<a href="${b.href}" style="display:inline-block;margin:4px 8px 4px 0;vertical-align:middle">` +
+        `<img src="${b.src}" alt="${b.alt}" width="${b.width}" height="${b.height}" style="display:block;border:0">` +
+        `</a>`,
+    )
+    .join("");
+  return (
+    `<div style="margin:16px 0;padding-top:16px;border-top:1px solid #e5e7eb">` +
+    `<p style="margin:0 0 8px;font-weight:bold">${row.label}</p>${imgs}</div>`
+  );
+}
 
 function renderRows(rows: EmailRow[], accent: string): string {
   const cells = rows
@@ -195,6 +218,7 @@ export function renderEmailHtml(content: EmailContent): string {
     ...content.paragraphs.map((p) => `<p>${p}</p>`),
     content.rows?.length ? renderRows(content.rows, accent) : "",
     content.cta ? renderCta(content.cta, accent) : "",
+    content.appBadges?.badges.length ? renderAppBadges(content.appBadges) : "",
     `<p style="font-size:13px;color:${EMAIL_MUTED_COLOR};margin-top:24px">${content.footer}</p>`,
   ];
 
