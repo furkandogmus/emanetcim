@@ -36,7 +36,7 @@ model User {
   referralCode             String?                  @unique
   /// Bu esnabı davet eden esnafın User.id'si (varsa). İlişki bilerek yok —
   /// davet eden hesap silinse de bu kayıt kalmalı. Ödül mekanizması henüz
-  /// otomatik değil (bkz. docs/archive/2026-11-23-denetim-gecmisi/KOD_TARAMA_2026-08-23.md) — bilinçli iş kararı
+  /// otomatik değil (bkz. 2026-08-23 kod taramasi (docs/KOD_TARAMA_2026-08-23.md, git gecmisinde)) — bilinçli iş kararı
   /// bekliyor; şimdilik yalnızca atıf kaydediliyor.
   referredByPartnerId      String?
   accounts                 Account[]

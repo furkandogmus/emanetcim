@@ -84,7 +84,7 @@ Tavan sayısını yükselten bir PR, sorunu çözmüyor, saklıyor.
 ## Nerede ne var
 
 - Kanıtlı hata kuyruğu: `docs/DEFECT_BACKLOG.md` (tek iş listesi; `PRODUCTION_BACKLOG`
-  stratejik dilek listesi ve yol haritasıdır). Eski tarihli denetimler `docs/archive/`.
+  stratejik dilek listesi ve yol haritasıdır). Eski tarihli denetimler git geçmişinde.
 - Ürün ve iş kuralları `docs/URUN_VE_IS_KURALLARI.md`, sayısal kurallar
   `docs/PLATFORM_SETTINGS.md`, ödeme `docs/PAYMENTS.md`, cron/sağlık `scripts/README.md`,
   deploy ve sunucu `ops/README.md`, yerel Docker `docs/DOCKER.md`.

@@ -22,7 +22,7 @@ export default async function AccountPage({
    * `actions/booking.ts` ve `actions/referral.ts`'nin indirimi uyguladığı TEK
    * kaynak — `NEXT_PUBLIC_REFERRAL_DISCOUNT_PCT` diye ayrı bir istemci-tarafı
    * env var kullanılmıyor artık: ikisi senkron kalmayabiliyordu (bkz.
-   * docs/archive/2026-11-23-denetim-gecmisi/KOD_TARAMA_2026-08-23.md, BULGU 15).
+   * 2026-08-23 kod taramasi (docs/KOD_TARAMA_2026-08-23.md, git gecmisinde), BULGU 15).
    */
   const discountPct = String(
     Math.min(50, Math.max(0, Number(process.env.REFERRAL_DISCOUNT_PCT ?? "5"))),

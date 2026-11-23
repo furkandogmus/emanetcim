@@ -5,8 +5,8 @@ Bu dizin canlı `bagajpark.com`'u tarif eder: tek EC2 (`c7i-flex.large`, eu-cent
 (2026-10-25'ten beri). Taşıma kaydı ve bir sonraki taşımanın kontrol listesi:
 [`CUTOVER.md`](./CUTOVER.md). Sunucu işletimi (deploy, yedek, sırlar): [`ops/README.md`](../../ops/README.md).
 
-Ortamın ilk kuruluş kaydı (paralel AWS ortamı, Hetzner'den kesim):
-`openspec/changes/archive/2026-11-23-aws-paralel-ortam/`.
+Ortamın ilk kuruluş kaydı (paralel AWS ortamı, Hetzner'den kesim) `aws-paralel-ortam`
+openspec önerisiydi; 2026-11-23'te silindi, git geçmişinde.
 
 ## İsimler yalan söylüyor — bilerek değiştirilmedi
 

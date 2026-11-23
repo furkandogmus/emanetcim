@@ -63,7 +63,7 @@ Projeyle ilgili çalışırken bakılması gereken ana klasörler ve kritik dosy
 *   [DEFECT_BACKLOG.md](docs/DEFECT_BACKLOG.md): kanıtlı açık hatalar (tek iş listesi); [PRODUCTION_BACKLOG.md](docs/PRODUCTION_BACKLOG.md): stratejik liste ve yol haritası.
 *   [rakip_analizi.md](docs/rakip_analizi.md): rakiplerle özellik karşılaştırması; [web_vs_mobile_comparison.md](docs/web_vs_mobile_comparison.md): web ↔ Expo eşliği.
 *   Operasyon: [ops/README.md](ops/README.md), [scripts/README.md](scripts/README.md), [infra/aws/README.md](infra/aws/README.md), [docs/CI_CD.md](docs/CI_CD.md).
-*   Tarihli eski denetimler ve anlık görüntüler `docs/archive/` altında; güncel durum için kullanılmaz.
+*   Eski tarihli denetimler ve anlık görüntüler repoda tutulmaz; git geçmişindedir.
 
 ---
 
@@ -106,8 +106,8 @@ Projeyi geliştiren AI asistanları (Cursor, Claude Code, Cline, Windsurf, Antig
 *   **/opsx:apply**: Oluşturulan görev listesini sırayla uygular ve geliştirir.
 *   **/opsx:archive**: Geliştirme tamamlandıktan sonra yapılan değişiklikleri arşivler ve genel sistem spesifikasyonlarını günceller.
 
-Biten öneriler `openspec/changes/archive/<tarih>-<ad>/` altına taşınır (2026-11-23'te 12 öneri
-taşındı; açık kalan `mobil-harita-fiyat-pini`). `openspec/specs/` henüz boş: arşivlenen
-önerilerin spec'leri ana spec'e işlenmedi.
+Biten öneriler repoda tutulmaz: 2026-11-23'te tamamlanan 12 öneri silindi (git geçmişinde).
+Açık kalan tek öneri `mobil-harita-fiyat-pini`. `openspec/specs/` boş; güncel davranışın
+kaynağı kod ve `docs/`.
 
 Tüm OpenSpec dosyaları `openspec/` dizini altında tutulur ve Git üzerinden takip edilir.
