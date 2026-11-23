@@ -1,6 +1,16 @@
 # Üretim / prod-ready backlog
 
-Bu liste **tamamlanmış işleri değil**, üretime yaklaşırken ve sonrasında sıraya alınabilecek **geniş kapsamlı** bir kontrol listesidir. Maddeler öncelik sırasına göre değil; ürün ve ekip ihtiyacına göre seçilip küçük PR’lara bölünmelidir.
+Bu liste **stratejik dilek listesidir**: üretime yaklaşırken ve sonrasında sıraya
+alınabilecek geniş kapsamlı maddeler. Kanıtlı hatalar burada değil,
+`docs/DEFECT_BACKLOG.md`'de. Eski `V2_ROADMAP.md` ve `STRATEGIC_INTEGRATIONS.md`
+2026-11-23'te en alttaki "Ürün yol haritası" bölümüne katıldı.
+
+## Son durum — 2026-11-23
+
+- İşaretler koda karşı yeniden doğrulandı; `[x]` kodda var, `[~]` kısmen, `[ ]` yok.
+- Sürüyor (birleşmedi): ortaklık programı (PR #207), anlık dükkan slotları ve esnaf
+  adayı dönüşümü (PR #208).
+- En büyük açık kalem online ödeme: PSP adaptörü + webhook ucu (§ 15, `docs/PAYMENTS.md`).
 
 ---
 
@@ -10,12 +20,12 @@ Bu liste **tamamlanmış işleri değil**, üretime yaklaşırken ve sonrasında
   (`ops/SECRETS.md`); deploy env dosyasını her seferinde oradan üretir. Postgres
   parolası döndürüldü. Git history sızıntı taraması yapıldı ve `docker_logs_500.txt`
   geçmişten çıkarıldı. Kalan: rotasyonun **takvime** bağlanması (şu an elle).
-- [ ] **CSP / güvenlik başlıkları:** Nginx ve Next.js için tutarlı `Content-Security-Policy`, `HSTS`, `X-Frame-Options`, `Referrer-Policy`; raporlama endpoint’i.
-- [ ] **Rate limiting:** Dağıtımlı limit (Redis/Upstash); kritik aksiyonlar (ödeme, giriş, şifre sıfırlama) için ayrı kotalar.
+- [x] **CSP / güvenlik başlıkları:** `next.config.ts`'te HSTS, `X-Frame-Options`, `Referrer-Policy`, COOP ve CSP; sıkı CSP `Report-Only` + `/api/csp-report` (2026-11-23). Kalan: Report-Only'den zorunluya geçiş.
+- [x] **Rate limiting:** Redis'li dağıtık limit (`src/lib/rate-limit.ts`, `REQUIRE_DISTRIBUTED_RATE_LIMIT` varsayılan açık); girişte kimlik ve IP için iki ayrı kova.
 - [ ] **Auth hardening:** Session fixation, CSRF (form POST’lar), OAuth callback doğrulama, brute-force / account lockout politikası.
 - [ ] **KVKK / GDPR:** Veri envanteri, saklama süreleri, silme/taşıma talepleri, DPA şablonları, alt işlemci listesi.
-- [ ] **Denetim izi:** Admin ve finans işlemleri için immutable audit log (kim, ne, ne zaman, önceki değer).
-- [ ] **Supply chain:** Bağımlılık güncellemeleri (Dependabot/Renovate), imzalı commit’ler, SBOM (Software Bill of Materials) çıktısı.
+- [x] **Denetim izi:** `AuditLog` (`AuditLogService`); web `/admin/audit-log` ve mobil "Denetim kaydı". Rol değişikliği dört göz onaylı.
+- [~] **Supply chain:** CI'da bağımlılık denetimi (`npm run audit`). Kalan: Dependabot/Renovate, imzalı commit, SBOM.
 - [ ] **Şifreleme:** Veritabanı ve yedeklerde “at rest” şifreleme; transit TLS zorunluluğu; anahtar rotasyonu runbook’u.
 - [ ] **Sınır güvenliği:** WAF / bot koruması; DDoS için CDN veya sağlayıcı katmanı; coğrafi kısıtlama ihtiyacı değerlendirmesi.
 
@@ -40,11 +50,11 @@ Bu liste **tamamlanmış işleri değil**, üretime yaklaşırken ve sonrasında
 ## 3. Veri, migrasyon ve bütünlük
 
 - [ ] **Migration disiplini:** Geri alınamayan migration’lar için runbook; büyük tablo değişikliklerinde online migration stratejisi.
-- [ ] **Yedekleme ve geri yükleme:** Postgres PITR veya günlük snapshot; geri yükleme tatbikatı (en az yılda bir).
-- [ ] **Seed vs prod:** Seed verilerinin prod’a sızmasını engelleyen guard’lar; anonimleştirilmiş staging dump.
+- [~] **Yedekleme ve geri yükleme:** 6 saatte bir S3'e `pg_dump` (`scripts/backup-s3.sh`); geri yükleme `ops/README.md`. Kalan: PITR ve takvimli tatbikat.
+- [~] **Seed vs prod:** `seed-guard` seed'i prod'a karşı çalıştırmaz. Kalan: anonim staging dump.
 - [ ] **Soft delete / arşiv:** Kritik varlıklar için silme politikası; GDPR ile uyumlu kalıcı silme job’ı.
 - [ ] **Okuma ölçeklemesi:** Read replica (rapor/analitik); bağlantı havuzu limitleri ve `statement_timeout`.
-- [ ] **Veri kalitesi:** Benzersizlik kısıtları; periyodik tutarlılık kontrolleri (orphan kayıt, negatif bakiye uyarısı).
+- [x] **Veri kalitesi:** günlük `consistency-check` işi, mühür envanteri denetimi (`SealIntegrityService`), süre aşımı taraması (`overdue-scan`).
 
 ---
 
@@ -60,7 +70,7 @@ Bu liste **tamamlanmış işleri değil**, üretime yaklaşırken ve sonrasında
 
 ## 5. Gözlemlenebilirlik ve SRE
 
-- [ ] **Structured logging:** İstek ID’si, kullanıcı/oturum korelasyonu; PII maskeleme.
+- [~] **Structured logging:** `docs/OBSERVABILITY.md`. Kalan: uçtan uca PII maskeleme denetimi.
 - [ ] **Metrikler:** HTTP latency, hata oranı, kuyruk derinliği, ödeme başarı oranı, DB bağlantı havuzu.
 - [ ] **Alerting:** SLO tanımları; uyarı gürültüsü azaltma; on-call runbook’ları.
 - [ ] **Distributed tracing:** OpenTelemetry ile uçtan uca iz (en azından kritik akışlar).
@@ -75,9 +85,9 @@ Bu liste **tamamlanmış işleri değil**, üretime yaklaşırken ve sonrasında
 - [ ] **DB sorguları:** N+1 taraması; yavaş sorgu log’u; gerekli indeksler ve `EXPLAIN` kontrolleri.
 - [ ] **Önbellek:** Okuma ağırlıklı listeler için Redis/cache; invalidation stratejisi.
 - [ ] **Next.js:** Image optimization, bundle analizi, dinamik import; edge uygunluğu değerlendirmesi.
-- [ ] **Load test:** Beklenen eşzamanlı kullanıcı için senaryo; bottleneck raporu.
+- [~] **Load test:** `tests/stress/` (k6, Artillery) ve `scripts/load-test.k6.js`. Kalan: düzenli koşum ve rapor.
 - [ ] **CDN:** Statik varlıklar ve uygunsa HTML için edge; cache invalidation politikası.
-- [ ] **Dosya depolama:** Görseller için obje depolama (S3 uyumlu); imzalı URL; virüs taraması (yüklenen dosya varsa).
+- [~] **Dosya depolama:** dükkan görselleri S3'te (`src/lib/storage/`), tip doğrulamalı. Kalan: virüs taraması.
 
 ---
 
@@ -85,7 +95,7 @@ Bu liste **tamamlanmış işleri değil**, üretime yaklaşırken ve sonrasında
 
 - [ ] **Mobil ve PWA:** Service worker stratejisi; offline davranışı; güncelleme bildirimi.
 - [ ] **a11y:** Klavye navigasyonu, kontrast, ekran okuyucu etiketleri; kritik formlarda hata duyurusu.
-- [ ] **Hata sayfaları:** 4xx/5xx için tutarlı mesaj ve geri dönüş yolları; destek iletişimi.
+- [x] **Hata sayfaları:** `[locale]/error.tsx`, `not-found.tsx`; ham hata metni mandalı (`raw-error-copy`).
 - [ ] **Çoklu dil:** Eksik anahtar tespiti; tarih/sayı yerelleştirmesi; RTL ihtiyacı değerlendirmesi.
 - [ ] **Form ve doğrulama:** Telefon/ülke kodu, adres; hata mesajları erişilebilir ve tutarlı.
 - [ ] **Karanlık mod / tema:** Tasarım token’ları ile tutarlı tema (ürün kararına bağlı).
@@ -94,11 +104,11 @@ Bu liste **tamamlanmış işleri değil**, üretime yaklaşırken ve sonrasında
 
 ## 8. Admin, operasyon ve destek
 
-- [ ] **Platform ayarları:** Tüm iş kurallarının UI’dan yönetimi; değişiklik geçmişi ve geri alma.
-- [ ] **Destek araçları:** Kullanıcı/rezervasyon arama; not ekleme; güvenli “impersonation” (varsa) denetimi.
+- [~] **Platform ayarları:** web + mobil yönetimi, her değişiklik `AuditLog`'da (`docs/PLATFORM_SETTINGS.md`). Kalan: tek tıkla geri alma.
+- [~] **Destek araçları:** yönetici kullanıcı ve rezervasyon araması, mesajlar, itirazlar (web + mobil). Impersonation yok.
 - [ ] **Bakım modu:** Kontrollü read-only veya kapalı sayfa; health check ile koordinasyon.
-- [ ] **Yetkilendirme matrisi:** Rol bazlı erişim (RBAC); ayrıcalık yükseltme (break-glass) prosedürü.
-- [ ] **Operasyonel bayraklar:** Özellik aç/kapa (kill switch) acil durumda ödeme veya kayıt kapatmak için.
+- [x] **Yetkilendirme matrisi:** `GUEST`/`PARTNER`/`ADMIN`, kapı `src/lib/action-auth.ts`; yönetici yükseltmesi dört göz onaylı, son yönetici düşürülemez.
+- [x] **Operasyonel bayraklar:** `FeatureFlag` (yüzde ve izin listesiyle, web + mobil yönetim); ödeme anahtarı `PAYMENT_PROVIDER`.
 
 ---
 
@@ -113,7 +123,7 @@ Bu liste **tamamlanmış işleri değil**, üretime yaklaşırken ve sonrasında
 
 ## 10. CI/CD ve sürüm
 
-- [ ] **Kalite kapıları:** Lint, typecheck, test, build zorunlu; coverage eşiği (hedef netleştirme).
+- [~] **Kalite kapıları:** typecheck, lint, test, e2e, build CI'da zorunlu ve deploy'a bağlı (`docs/CI_CD.md`). Kalan: coverage eşiği.
 - [ ] **Güvenlik taraması:** `npm audit`, SAST (CodeQL veya eşdeğeri), bağımlılık güncelleme politikası.
 - [ ] **Ortam promosyonu:** staging → prod checklist; migration sırası; feature flag stratejisi.
 - [ ] **Rollback:** Deploy geri alma prosedürü; veritabanı geri sarma sınırları dokümante.
@@ -127,7 +137,7 @@ Bu liste **tamamlanmış işleri değil**, üretime yaklaşırken ve sonrasında
 - [ ] **Docker / orchestration:** Kaynak limitleri; healthcheck’ler; sıfır kesinti deploy (blue-green veya rolling).
 - [ ] **Gizli ve yapılandırma:** Ortam bazlı config; secrets as env / mounted files.
 - [ ] **Ağ:** Private DB; firewall kuralları; VPN veya bastion erişimi.
-- [ ] **Sertifikalar ve DNS:** TLS yenileme; DNSSEC ihtiyacı; e-posta için SPF/DKIM/DMARC kayıtları.
+- [~] **Sertifikalar ve DNS:** TLS `scripts/tls-put.sh`; `bagajpark.com` kökünde SPF. Kalan: DMARC politikası, DNSSEC değerlendirmesi.
 - [ ] **Kapasite planlama:** Disk doluluk uyarısı; log rotasyonu; büyük tablo büyüme projeksiyonu.
 
 ---
@@ -145,17 +155,17 @@ Bu liste **tamamlanmış işleri değil**, üretime yaklaşırken ve sonrasında
 
 - [ ] **Statik sayfalar:** KVKK, sözleşme, iletişim bilgileri; güncelleme tarihi ve sürüm.
 - [ ] **E-posta şablonları:** İptal, ödeme onayı, hatırlatma; spam ve DMARC/SPF/DKIM.
-- [ ] **Sözleşme sürümleri:** Kullanıcının hangi metni kabul ettiğinin kaydı; değişiklikte yeniden onay akışı.
+- [~] **Sözleşme sürümleri:** kabul kaydı `LegalAcceptance`'ta. Kalan: metin değişince yeniden onay akışı.
 - [ ] **Erişilebilirlik beyanı:** WCAG hedef seviyesi ve bilinen sınırlamalar (kamuya açık sayfa).
 
 ---
 
 ## 14. Alan modeli ve iş kuralları (domain)
 
-- [ ] **Zaman dilimi:** Tüm tarih/saatlerin tek kaynak TZ ile saklanması; yaz saati geçişleri; “gün başı” tanımı.
-- [ ] **Tatil ve çalışma saatleri:** Kapalı günlerde rezervasyon kuralı; işletme saatleri ile çakışma.
+- [x] **Zaman dilimi:** UTC saklama, gösterim platform/dükkan diliminde; `timeZone` mandal testi (2026-11-22).
+- [x] **Tatil ve çalışma saatleri:** `platformHolidayDates`, `ShopWeeklyHours`, `ShopClosure`; check-in toleransı `checkInGraceMin`.
 - [ ] **Fiyatlandırma kenar durumları:** Minimum/maksimum konaklama; dinamik fiyat (varsa) kuralları ve geriye dönük uyumluluk.
-- [ ] **Çakışan rezervasyonlar:** Eşzamanlı taleplerde kilitleme veya optimistic concurrency stratejisi.
+- [x] **Çakışan rezervasyonlar:** slot kapasite kilidi (`ReservationSlot`), iptal/check-in yarışında koşullu yazım ve `bookingRowVersion`.
 - [ ] **İptal pencereleri:** Kesinti oranının zamanına göre değişimi; istisna politikası (force majeure).
 
 ---
@@ -190,8 +200,8 @@ Bu liste **tamamlanmış işleri değil**, üretime yaklaşırken ve sonrasında
 
 ## 17. Bildirimler ve iletişim kanalları
 
-- [ ] **Kanal stratejisi:** E-posta, SMS, push (PWA); her biri için opt-in/opt-out ve yasal metin.
-- [ ] **E-posta operasyonu:** Bounce ve şikayet yönetimi; baskı listesi; gönderim hızı limiti.
+- [~] **Kanal stratejisi:** e-posta, web push ve mobil push açık; SMS kapalı (`docs/URUN_VE_IS_KURALLARI.md` § Bildirimler). Kalan: kanal başına opt-out.
+- [ ] **E-posta operasyonu:** Bounce ve şikayet yönetimi; baskı listesi; gönderim hızı limiti. (`/api/webhooks/resend` yalnızca gelen postayı işler.)
 - [ ] **Şablon sürümü:** A/B veya çok dil; hata durumunda fallback metin.
 - [ ] **Transactional vs pazarlama:** Ayrı izin ve farklı gönderim politikası (KVKK/GDPR).
 
@@ -199,7 +209,7 @@ Bu liste **tamamlanmış işleri değil**, üretime yaklaşırken ve sonrasında
 
 ## 18. Maliyet, kapasite ve optimizasyon
 
-- [ ] **Bulut maliyet görünürlüğü:** Etiketleme (ortam, servis); aylık bütçe uyarısı.
+- [~] **Bulut maliyet görünürlüğü:** AWS bütçe alarmı kodda (`infra/aws/bootstrap/budget.tf`), `scripts/aws-cost-report.sh`. Kalan: etiketleme düzeni.
 - [ ] **Veritabanı maliyeti:** Büyük sorguları ve indeks boyutunu izleme; soğuk veri arşivleme (ihtiyaç halinde).
 - [ ] **Build ve CI süresi:** Cache stratejisi; gereksiz job’ları ayırma; maliyet/latency trade-off.
 
@@ -258,4 +268,36 @@ Bu liste **tamamlanmış işleri değil**, üretime yaklaşırken ve sonrasında
 2. Tamamlanan maddeleri işaretleyin veya alt başlık altında “Done / tarih” notu düşün.
 3. Ürün önceliği değişince bu dosyayı güncelleyin; “hepsi şart” değildir.
 
-İlgili mevcut dokümanlar: [Finans / ledger](FINANCE_LEDGER.md), [Gözlemlenebilirlik](OBSERVABILITY.md), [Platform ayarları](PLATFORM_SETTINGS.md), [Dal modeli](BRANCHING.md), [Prompt / AI geliştirme](PROMPT_GOVERNANCE.md).
+İlgili mevcut dokümanlar: [Ödeme ve finans](PAYMENTS.md), [Gözlemlenebilirlik](OBSERVABILITY.md), [Platform ayarları](PLATFORM_SETTINGS.md), [Dal modeli](GIT_COMMIT_GUIDE.md), [Prompt / AI geliştirme](PROMPT_GOVERNANCE.md).
+
+---
+
+## 25. Ürün yol haritası (eski V2_ROADMAP + STRATEGIC_INTEGRATIONS)
+
+Durumlar 2026-11-23'te koda göre işaretlendi.
+
+**Yapılanlar**
+
+- [x] `FeatureFlag` modeli ve yönetimi (web `/admin/feature-flags`, mobil).
+- [x] `BookingEvent` (yalnız eklenen olay günlüğü).
+- [x] Hatırlatmalar: `booking-reminders`, valizi kalan misafire hatırlatma, geç bırakma taraması (`scripts/README.md`).
+- [x] Esnaf paneli: kazanç özeti, sunucu tarafı rezervasyon araması, QR afişi; mobil esnaf panosu.
+- [x] Erişilebilirlik: modal ve form etiket mandalları, alan düzeyi hatalar, `inert` arka plan.
+- [x] Davet indirimi (`ReferralService`), kupon ve kampanya ekranları.
+- [x] Yasal kabul izi (`LegalAcceptance`).
+- [x] Native uygulama: Expo (`mobile-expo/`), push, derin bağlantılar (`/app`, AASA, assetlinks).
+
+**Sürenler**
+
+- [ ] Ortaklık (affiliate) programı: kampanya kodları ve komisyon raporu — PR #207, birleşmedi.
+- [ ] Anlık dükkan slotları ve esnaf adayı dönüşümü — PR #208, birleşmedi.
+
+**Açık fikirler**
+
+- [ ] Güvenilirlik rozetleri (doğrulanmış dükkan, yanıt süresi; `response-times` işi veriyi hesaplıyor).
+- [ ] Bildirim tercih merkezi, esnaf "sessiz saat"i.
+- [ ] Toplu fiyat / kapasite düzenleme, esnaf içi yardım.
+- [ ] Performans bütçesi (LCP/INP) CI'da.
+- [ ] Çok para birimi gösterimi.
+- [ ] OTA / otel kanalı: ortak API anahtarı, imzalı giden webhook (`booking.created`, `booking.checked_out`), IP allowlist.
+- [ ] Sigorta ortağı: harici poliçe referansı (`Booking.externalPolicyRef`, migrasyon gerekir).
