@@ -41,6 +41,8 @@ export default function CheckoutScreen() {
   const [affiliateCode, setAffiliateCode] = useState<string | null>(null);
   const [affOpen, setAffOpen] = useState(false);
   const [affInput, setAffInput] = useState("");
+  // Misafirin uyguladigi indirim kodu: referans kodu degisince onunla YENIDEN sorulur, dusurulmez.
+  const [activeCode, setActiveCode] = useState<string | null>(null);
   useEffect(() => {
     let alive = true;
     void loadPendingReferral().then((code) => {
@@ -170,29 +172,40 @@ export default function CheckoutScreen() {
   const affiliateAccepted = !!affiliateCode && (affiliate?.status === "applied" || affiliate?.status === "attributed");
   const shownDiscount = priced?.discount ?? null;
 
+  function quoteCode(code: string, aff: string | null) {
+    setCodeError(null);
+    setQuotedFor(JSON.stringify([booking, aff]));
+    quoteMutation.mutate({ ...booking, code, ...(aff ? { affiliateCode: aff } : {}) });
+  }
+
   function applyCode() {
     const code = codeInput.trim();
     if (!code) return;
-    setCodeError(null);
-    setQuotedFor(quoteKey);
-    quoteMutation.mutate({ ...booking, code, ...(affiliateCode ? { affiliateCode } : {}) });
+    setActiveCode(code);
+    quoteCode(code, affiliateCode);
+  }
+
+  function changeAffiliate(next: string | null) {
+    setAffiliateCode(next);
+    if (activeCode) quoteCode(activeCode, next);
   }
 
   function applyAffiliate() {
     const code = normalizeReferralCode(affInput);
     if (!code) return;
-    setAffiliateCode(code);
+    changeAffiliate(code);
     setAffOpen(false);
   }
 
   function removeAffiliate() {
-    setAffiliateCode(null);
+    changeAffiliate(null);
     setAffInput("");
     clearPendingReferral();
   }
 
   function removeCode() {
     setQuote(null);
+    setActiveCode(null);
     setCodeInput("");
     setCodeError(null);
   }
@@ -396,13 +409,23 @@ export default function CheckoutScreen() {
                   {!affiliate
                     ? hoursQuote.isFetching
                       ? t("checkout.affiliate.checking")
-                      : t("checkout.affiliate.invalid")
+                      : hoursQuote.isError
+                        ? // Ag hatasi kodun gecersiz oldugu anlamina gelmez.
+                          errorMessage(hoursQuote.error, "checkout")
+                        : t("checkout.affiliate.invalid")
                     : affiliate.status === "applied"
                       ? t("checkout.affiliate.applied", { pct: affiliate.ratePct })
                       : affiliate.status === "attributed"
                         ? t("checkout.affiliate.attributed")
                         : t(`checkout.affiliate.${affiliate.status}`)}
                 </AppText>
+                {!affiliate && hoursQuote.isError && !hoursQuote.isFetching ? (
+                  <Pressable accessibilityRole="button" onPress={() => void hoursQuote.refetch()} hitSlop={8}>
+                    <AppText variant="caption" style={{ color: colors.accent }}>
+                      {t("common.retry")}
+                    </AppText>
+                  </Pressable>
+                ) : null}
               </View>
               <Pressable
                 accessibilityRole="button"
