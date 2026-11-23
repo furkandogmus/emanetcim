@@ -1,6 +1,12 @@
 import prisma from "@/lib/db";
 import logger from "@/lib/logger";
+import { parseCoordinates } from "@/lib/coordinates";
+import { isDisposableEmail } from "@/lib/disposable-emails";
+import { normalizeTrGsm10 } from "@/lib/netgsm";
+import { createPartnerResetLink } from "@/lib/partner-reset-link";
 import { notificationService } from "@/services/NotificationService";
+import { partnerOnboardingService, type OnboardingTxHook } from "@/services/PartnerOnboardingService";
+import { shopService } from "@/services/ShopService";
 
 /**
  * Turkiye telefonu: 10 hane, 2-5 ile baslar (sabit hat 2xx/3xx/4xx, GSM 5xx).
@@ -76,13 +82,241 @@ export class PartnerLeadService {
   }
 
   async setContacted(id: string, contacted: boolean) {
-    await prisma.partnerLead.update({
-      where: { id },
+    // Cevrilmis kayit "aranacak"a geri dusmesin: CONVERTED durumu kalicidir.
+    await prisma.partnerLead.updateMany({
+      where: { id, convertedAt: null },
       data: contacted
         ? { status: "CONTACTED", contactedAt: new Date() }
         : { status: "NEW", contactedAt: null },
     });
   }
+
+  /**
+   * On kaydi esnaf hesabi + dukkana TEK ADIMDA cevirir.
+   *
+   * NEDEN: admin ayni ad/telefon/adresi esnaf ekleme formuna yeniden yaziyordu.
+   * Kurallar `PartnerOnboardingService`ten gelir (telefon normalizasyonu,
+   * misafir telefonunu devralma, tekillik hatalari); burada yalnizca on kayit
+   * eklenir:
+   *   - Konum admin'den gelir, adresten turetilmez (`parseCoordinates` notu:
+   *     adres geocode'u bir dukkani ~800 m yanlis yere koymustu).
+   *   - E-posta bir MISAFIR hesabina aitse o hesap esnafa cevrilir (girisi
+   *     korunur); esnaf/yonetici hesabina aitse acik hata.
+   *   - Idempotent: kayit transaction icinde kosullu isaretlenir; ikinci ya da
+   *     es zamanli cagri yeni hesap acmaz, ilk sonucu doner.
+   *   - Dukkan onaysiz acilir (createPartnerWithShop varsayilani). `activate`
+   *     ile normal onay yolundan (`approveApplication`: bildirim, denetim, slot)
+   *     gecirilir; onay duserse hesap yine acik kalir ve sonuc bunu soyler.
+   */
+  async convertToPartner(input: LeadConversionInput): Promise<LeadConversionResult> {
+    const lead = await prisma.partnerLead.findUnique({ where: { id: input.leadId } });
+    if (!lead) return { ok: false, reason: "not_found" };
+    if (lead.convertedAt) return existingConversion(lead);
+
+    const draft = leadConversionDraft(lead);
+    const ownerName = (input.ownerName ?? draft.ownerName).trim();
+    const shopName = (input.shopName ?? draft.shopName).trim();
+    const shopAddress = (input.shopAddress ?? draft.shopAddress).trim();
+    const email = input.email?.trim().toLowerCase() || null;
+    if (ownerName.length < 2 || ownerName.length > 120) return { ok: false, reason: "invalid_data" };
+    if (shopName.length < 2 || shopName.length > 200) return { ok: false, reason: "invalid_data" };
+    if (shopAddress.length < 5 || shopAddress.length > 500) return { ok: false, reason: "invalid_data" };
+    if (email && (!EMAIL_RE.test(email) || isDisposableEmail(email))) return { ok: false, reason: "invalid_email" };
+    const coords = parseCoordinates(input.location);
+    if (!coords) return { ok: false, reason: "location_required" };
+    const phone = normalizeTrGsm10(input.phone ?? draft.phone);
+    if (!phone) return { ok: false, reason: "invalid_tr_phone" };
+
+    const shop = {
+      shopName,
+      shopAddress,
+      city: input.city?.trim() || null,
+      district: input.district?.trim() || null,
+      ...coords,
+      actor: { id: input.actor.userId, role: "ADMIN" },
+    };
+
+    const markConverted: OnboardingTxHook = async (tx, created) => {
+      const now = new Date();
+      const marked = await tx.partnerLead.updateMany({
+        where: { id: lead.id, convertedAt: null },
+        data: {
+          status: "CONVERTED",
+          convertedAt: now,
+          convertedById: input.actor.userId,
+          convertedUserId: created.userId,
+          convertedShopId: created.shopId,
+        },
+      });
+      if (marked.count === 0) throw new LeadAlreadyConvertedError();
+      await tx.auditLog.create({
+        data: {
+          actorUserId: input.actor.userId,
+          actorRole: "ADMIN",
+          action: "partner.lead_converted",
+          entityType: "PartnerLead",
+          entityId: lead.id,
+          ip: input.actor.ip,
+          metadata: { userId: created.userId, shopId: created.shopId, phone, activate: !!input.activate },
+        },
+      });
+    };
+
+    const emailOwner = email
+      ? await prisma.user.findUnique({ where: { email }, select: { id: true, role: true } })
+      : null;
+
+    let created: { userId: string; shopId: string; needsResetLink: boolean };
+    try {
+      if (emailOwner && emailOwner.role === "GUEST") {
+        const r = await partnerOnboardingService.convertGuestToPartner(
+          { userId: emailOwner.id, phone, ...shop },
+          { inTx: markConverted },
+        );
+        if (!r.ok) return this.failure(lead.id, r.reason === "not_guest" ? "email_already_registered" : r.reason);
+        created = { userId: emailOwner.id, shopId: r.shopId, needsResetLink: !r.hasPassword };
+      } else {
+        const r = await partnerOnboardingService.createPartnerWithShop(
+          { ownerName, phone, email, ...shop },
+          { inTx: markConverted },
+        );
+        if (!r.ok) return this.failure(lead.id, r.reason);
+        created = { userId: r.userId, shopId: r.shopId, needsResetLink: true };
+      }
+    } catch (e) {
+      if (e instanceof LeadAlreadyConvertedError) return this.failure(lead.id, "phone_already_registered");
+      throw e;
+    }
+
+    const resetUrl = created.needsResetLink ? (await createPartnerResetLink(phone)).resetUrl : null;
+
+    let activated = false;
+    let activationError: LeadActivationError | undefined;
+    if (input.activate) {
+      const approval = await shopService.approveApplication(created.shopId, {
+        userId: input.actor.userId,
+        ip: input.actor.ip,
+      });
+      activated = approval.ok;
+      if (!approval.ok) {
+        activationError = approval.reason;
+        logger.warn({ leadId: lead.id, shopId: created.shopId, reason: approval.reason }, "lead_convert_activation_failed");
+      }
+    }
+
+    return {
+      ok: true,
+      alreadyConverted: false,
+      userId: created.userId,
+      shopId: created.shopId,
+      phone,
+      resetUrl,
+      activated,
+      ...(activationError ? { activationError } : {}),
+    };
+  }
+
+  /** Yarista (iki admin ayni anda) kaybeden tarafa ilk cevirmenin sonucu doner. */
+  private async failure(leadId: string, reason: LeadConversionFailure): Promise<LeadConversionResult> {
+    const now = await prisma.partnerLead.findUnique({ where: { id: leadId } });
+    if (now?.convertedAt) return existingConversion(now);
+    return { ok: false, reason };
+  }
 }
+
+class LeadAlreadyConvertedError extends Error {
+  constructor() {
+    super("lead_already_converted");
+  }
+}
+
+const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+type LeadRow = {
+  fullName: string;
+  phone: string;
+  shopName: string | null;
+  address: string;
+  convertedUserId?: string | null;
+  convertedShopId?: string | null;
+};
+
+function existingConversion(lead: LeadRow): LeadConversionResult {
+  return {
+    ok: true,
+    alreadyConverted: true,
+    userId: lead.convertedUserId ?? null,
+    shopId: lead.convertedShopId ?? null,
+    phone: lead.phone,
+    resetUrl: null,
+    activated: false,
+  };
+}
+
+/** Cevirme formunun on dolgusu: on kayittaki alanlar, gerisi bos. */
+export function leadConversionDraft(lead: LeadRow): LeadConversionDraft {
+  return {
+    ownerName: lead.fullName,
+    // Sabit hat on kayitta gecerli, esnaf hesabinda degil: admin GSM yazar.
+    phone: normalizeTrGsm10(lead.phone) ? `0${lead.phone}` : "",
+    email: "",
+    shopName: lead.shopName ?? "",
+    shopAddress: lead.address,
+    city: "",
+    district: "",
+    location: "",
+  };
+}
+
+export type LeadConversionDraft = {
+  ownerName: string;
+  phone: string;
+  email: string;
+  shopName: string;
+  shopAddress: string;
+  city: string;
+  district: string;
+  location: string;
+};
+
+export type LeadConversionInput = {
+  leadId: string;
+  ownerName?: string;
+  phone?: string;
+  email?: string | null;
+  shopName?: string;
+  shopAddress?: string;
+  city?: string | null;
+  district?: string | null;
+  /** Google Maps linki ya da `enlem, boylam` (`parseCoordinates`). Zorunlu. */
+  location: string;
+  activate?: boolean;
+  actor: { userId: string; ip: string | null };
+};
+
+export type LeadConversionFailure =
+  | "not_found"
+  | "invalid_data"
+  | "invalid_email"
+  | "location_required"
+  | "invalid_tr_phone"
+  | "phone_already_registered"
+  | "email_already_registered";
+
+export type LeadActivationError = "missing_coordinates" | "not_found";
+
+export type LeadConversionResult =
+  | {
+      ok: true;
+      alreadyConverted: boolean;
+      userId: string | null;
+      shopId: string | null;
+      phone: string;
+      /** Sifresiz acilan hesap icin esnafa iletilecek sifre belirleme bagi. */
+      resetUrl: string | null;
+      activated: boolean;
+      activationError?: LeadActivationError;
+    }
+  | { ok: false; reason: LeadConversionFailure };
 
 export const partnerLeadService = new PartnerLeadService();

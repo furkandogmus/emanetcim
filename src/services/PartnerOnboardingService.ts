@@ -83,8 +83,21 @@ export type CreatePartnerResult =
       reason: "invalid_tr_phone" | "phone_already_registered" | "email_already_registered";
     };
 
+/**
+ * Hesap + dukkan yazildiktan sonra AYNI transaction'da calisir. On kaydi esnafa
+ * cevirme (`PartnerLeadService.convertToPartner`) kaydi burada isaretler: biri
+ * duserse ikisi de geri alinir. Firlatilan hata cagirana aynen ulasir.
+ */
+export type OnboardingTxHook = (
+  tx: Prisma.TransactionClient,
+  created: { userId: string; shopId: string },
+) => Promise<void>;
+
 class PartnerOnboardingService {
-  async createPartnerWithShop(input: CreatePartnerInput): Promise<CreatePartnerResult> {
+  async createPartnerWithShop(
+    input: CreatePartnerInput,
+    opts: { inTx?: OnboardingTxHook } = {},
+  ): Promise<CreatePartnerResult> {
     const phone = normalizeTrGsm10(input.phone);
     if (!phone) return { ok: false, reason: "invalid_tr_phone" };
 
@@ -129,6 +142,7 @@ class PartnerOnboardingService {
           },
           select: { id: true },
         });
+        await opts.inTx?.(tx, { userId: user.id, shopId: shop.id });
         return { userId: user.id, shopId: shop.id };
       });
       return { ok: true, userId, shopId, phone };
@@ -148,7 +162,10 @@ class PartnerOnboardingService {
    * istenmez. Rol JWT'nin içinde taşındığı için `tokenVersion` artar, kullanıcı
    * bir sonraki girişte esnaf olarak açılır.
    */
-  async convertGuestToPartner(input: ConvertGuestInput): Promise<ConvertGuestResult> {
+  async convertGuestToPartner(
+    input: ConvertGuestInput,
+    opts: { inTx?: OnboardingTxHook } = {},
+  ): Promise<ConvertGuestResult> {
     const phone = normalizeTrGsm10(input.phone);
     if (!phone) return { ok: false, reason: "invalid_tr_phone" };
 
@@ -187,6 +204,7 @@ class PartnerOnboardingService {
           },
           select: { id: true },
         });
+        await opts.inTx?.(tx, { userId: user.id, shopId: shop.id });
         return shop.id;
       });
       return { ok: true, shopId, phone, hasPassword: !!user.passwordHash };
