@@ -6,7 +6,7 @@
 **Son durum (2026-11-23):** misafir, esnaf ve yönetici akışlarının tamamı native. Açık
 kalanlar: iOS'ta Google ile giriş; aracı programı (#207) ve esnaf ön kaydını dükkana çevirme
 + onayda slot üretimi (#208) — ikisi de PR'da, birleşmedi. iOS 0.3.4 (build 4) App
-Review'da, Android Play'de. Sürüm/OTA ayrıntısı `PLAY_YAYIN.md`, iOS `IOS_YAYIN.md`.
+Review'da; Android sürümleri Play kapalı test izine çıkıyor. Sürüm/OTA ayrıntısı `PLAY_YAYIN.md`, iOS `IOS_YAYIN.md`.
 
 İlk envanter: 2026-10-18, `src/app/**/page.tsx` (70 sayfa) ↔ `mobile-expo/src/app` (14 ekran).
 
