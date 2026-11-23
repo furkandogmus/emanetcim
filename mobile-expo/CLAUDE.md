@@ -31,7 +31,10 @@ API adresi derleme anında: `EXPO_PUBLIC_API_BASE_URL` (varsayılan emülatör i
 - **Ekrandaki her metin** `src/locales/{tr,en,de,ru}.json`'a girer, hepsine birden
   (`npm run check:locales` paritesi). Ham sunucu
   hata metni basılmaz: `errorMessage(err, "<namespace>")` kodu çevirir.
-- **Yanıt tipleri** `src/lib/types.ts` — kaynağı `../src/lib/mobile-dto.ts`. Orada alan
+- **Yanıt tipleri** `src/lib/types/` (alan başına dosya, adlar `../src/lib/mobile-dto/` ile aynı),
+  sorgu kancaları `src/lib/queries/`; ikisi de `index.ts` ile `@/lib/types` / `@/lib/queries`
+  yolundan ithal edilir. Yönetici özetindeki araç bağlantıları `src/lib/admin-tools/` kaydında;
+  ekrana elle satır eklenmez. Kaynakta alan
   değişirse burası da değişir.
 - **Fiyat istemcide hesaplanmaz.** Ödeme ekranı `checkout/quote`, değiştirme ekranı
   `bookings/[id]/modify?preview=1` yanıtını gösterir (satırlar, sigorta, toplam).
