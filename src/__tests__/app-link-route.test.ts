@@ -17,7 +17,10 @@ vi.mock("@/services/AppLinkService", async (orig) => ({
   recordAppLinkHit: mockRecord,
 }));
 vi.mock("@/lib/internal-api-guard", () => ({ isRateLimited: mockLimited }));
-vi.mock("@/lib/db", () => ({ default: { appLinkHit: { create: mockCreate } } }));
+const { mockGroupBy, mockDeleteMany } = vi.hoisted(() => ({ mockGroupBy: vi.fn(), mockDeleteMany: vi.fn() }));
+vi.mock("@/lib/db", () => ({
+  default: { appLinkHit: { create: mockCreate, groupBy: mockGroupBy, deleteMany: mockDeleteMany } },
+}));
 
 import { GET } from "@/app/app/route";
 
@@ -37,11 +40,11 @@ beforeEach(() => {
 describe("GET /app", () => {
   it("bayraklar kapali: iPhone bile acilis sayfasina (yonlendirme yok), kaynak kaydedilir", async () => {
     mockFlags.mockResolvedValue({ iosAppStoreLive: false, androidPlayLive: false });
-    const res = await GET(req("?kaynak=afis-s1", IPHONE));
+    const res = await GET(req("?kaynak=afis-shop00000001", IPHONE));
     expect(res.status).toBe(302);
-    expect(res.headers.get("location")).toBe("https://bagajpark.com/tr/app?kaynak=afis-s1");
+    expect(res.headers.get("location")).toBe("https://bagajpark.com/tr/app?kaynak=afis-shop00000001");
     expect(res.headers.get("cache-control")).toContain("no-store");
-    expect(mockRecord).toHaveBeenCalledWith({ source: "afis-s1", platform: "ios", outcome: "landing" });
+    expect(mockRecord).toHaveBeenCalledWith({ source: "afis-shop00000001", platform: "ios", outcome: "landing" });
   });
 
   it("iOS yayinda: iPhone App Store'a", async () => {
@@ -98,5 +101,32 @@ describe("recordAppLinkHit", () => {
     mockCreate.mockResolvedValue({});
     await real({ source: "x", platform: "other", outcome: "landing" });
     expect(mockCreate).toHaveBeenLastCalledWith({ data: { source: "x", platform: "other", outcome: "landing" } });
+  });
+});
+
+describe("isabet ozeti ve saklama", () => {
+  it("en buyuk 50 grup, kalani tek toplam", async () => {
+    const { getAppLinkStats } = await import("@/services/AppLinkService");
+    mockGroupBy.mockResolvedValue(
+      Array.from({ length: 60 }, (_, i) => ({
+        source: `afis-shop${String(i).padStart(4, "0")}`,
+        platform: "ios",
+        outcome: "landing",
+        _count: { _all: 100 - i },
+      })),
+    );
+    const { rows, restCount } = await getAppLinkStats(30);
+    expect(rows).toHaveLength(50);
+    expect(rows[0].count).toBe(100);
+    // 51..60. gruplar: 50+49+...+41
+    expect(restCount).toBe(455);
+  });
+
+  it("90 gunden eskiyi siler", async () => {
+    const { purgeOldAppLinkHits } = await import("@/services/AppLinkService");
+    mockDeleteMany.mockResolvedValue({ count: 7 });
+    const now = new Date("2026-11-23T00:00:00Z");
+    expect(await purgeOldAppLinkHits(now)).toBe(7);
+    expect(mockDeleteMany).toHaveBeenCalledWith({ where: { createdAt: { lt: new Date("2026-08-25T00:00:00Z") } } });
   });
 });

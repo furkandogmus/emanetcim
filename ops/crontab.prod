@@ -53,8 +53,8 @@
 # Calismazsa: Kapasite defteri, mühür sayısı ve tahsil edilen tutar gibi ayrışmalar hiçbir ekranda görünmez; ilk belirtileri tezgâhta ortaya çıkar.
 41 5 * * * /opt/emanetci/scripts/call-internal-job.sh --job consistency-check --method GET >> /opt/emanetci/logs/bagajpark-consistency-check.log 2>&1
 
-# Süresi geçmiş doğrulama token'larını, oturumları ve 90 günden eski analitik olaylarını siler.
-# Calismazsa: Tablolar sınırsız büyür — süresi geçmiş token'lar gereğinden uzun yaşar, AnalyticsEvent hiç küçülmez.
+# Süresi geçmiş doğrulama token'larını, oturumları, 90 günden eski analitik olaylarını ve /app isabetlerini siler.
+# Calismazsa: Tablolar sınırsız büyür — süresi geçmiş token'lar gereğinden uzun yaşar, AnalyticsEvent ve AppLinkHit hiç küçülmez.
 23 3 * * * /opt/emanetci/scripts/call-internal-job.sh --job cleanup --method POST >> /opt/emanetci/logs/bagajpark-cleanup.log 2>&1
 
 # Dükkanların mühür ihtiyacını öngörür ve azalanları bildirir.

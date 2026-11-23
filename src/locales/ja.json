@@ -1366,7 +1366,8 @@
     "appLinkStatsSource": "流入元",
     "appLinkStatsPlatform": "プラットフォーム",
     "appLinkStatsOutcome": "結果",
-    "appLinkStatsCount": "件数"
+    "appLinkStatsCount": "件数",
+    "appLinkStatsRest": "その他のグループ"
   },
   "Auth": {
     "loginTitle": "バガジパークにサインインする",

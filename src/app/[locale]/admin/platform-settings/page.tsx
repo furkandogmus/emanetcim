@@ -25,7 +25,7 @@ export default async function AdminPlatformSettingsPage({
   const t = await getTranslations("Admin");
   const tCommon = await getTranslations("Common");
 
-  const [{ values, updatedAt }, appLinkStats] = await Promise.all([
+  const [{ values, updatedAt }, { rows: appLinkStats, restCount: appLinkRest }] = await Promise.all([
     getPlatformSettingsForAdmin(),
     getAppLinkStats(30),
   ]);
@@ -95,6 +95,14 @@ export default async function AdminPlatformSettingsPage({
                     <td className="py-2 text-right font-bold">{r.count}</td>
                   </tr>
                 ))}
+                {appLinkRest > 0 ? (
+                  <tr className="border-t border-gray-100 text-gray-500">
+                    <td className="py-2 pr-4" colSpan={3}>
+                      {t("appLinkStatsRest")}
+                    </td>
+                    <td className="py-2 text-right font-bold">{appLinkRest}</td>
+                  </tr>
+                ) : null}
               </tbody>
             </table>
           )}
