@@ -12,13 +12,17 @@
 |---|---|---|---|---|
 | `generate-slots` | `17 4 * * *` | `generate-slots.sh` | POST | ✅ |
 | `overdue-scan` | `47 4 * * *` | `overdue-scan.sh` | POST | ✅ |
-| `close-expired-bookings` | `43 1 * * *` | — | POST | ✅ |
+| `late-dropoff-scan` | `2,7,…,57 * * * *` (5 dk) | — | POST | ✅ |
 | `booking-reminders` | `7 9 * * *` | — | GET | ✅ |
 | `cleanup` | `23 3 * * *` | — | POST | ✅ |
 | `seal-forecast` | `37 6 * * 1` | — | POST | ✅ |
 | `classify-inbox` | `13 5 * * *` | — | POST | ✅ |
 | `response-times` | `29 3 * * *` | — | POST | ✅ |
 | `finance-export` | `53 2 * * *` | — | GET | ✅ |
+
+> **`late-dropoff-scan` (2026-11-23) sunucuda kurulmalı**: eski `close-expired-bookings`
+> satırı hiç kurulmamıştı; yeni satır `ops/crontab.prod`'da. Kurulana kadar
+> `/api/health/jobs` bu işi gecikmiş gösterir.
 
 > Bu tablonun kaynağı **`src/lib/jobs/registry.ts`**'tir. Elle güncellemeyin —
 > `./scripts/emit-crontab.sh` çalıştırıp güncel hâli görün. Kayıt defterinin

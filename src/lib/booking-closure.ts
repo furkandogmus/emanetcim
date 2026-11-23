@@ -31,9 +31,6 @@ export function isPartnerCancelReason(v: unknown): v is PartnerCancelReason {
 /** Misafir gelmedi ancak check-in saatinden bu kadar sonra isaretlenebilir. */
 export const NO_SHOW_GRACE_MINUTES = 60;
 
-/** Gece isi: alma saatinden bu kadar saat sonra hala birakilmamis kayit kapanir. */
-export const EXPIRED_CLOSE_GRACE_HOURS = 6;
-
 /** Yonetici iptali / zorla teslim aciklamasinin en kisa boyu. */
 export const ADMIN_NOTE_MIN_LENGTH = 5;
 
