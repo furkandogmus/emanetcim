@@ -1769,6 +1769,9 @@
     "rejectBody": "Die Anfrage für {{name}} wird gelöscht; die Rolle bleibt {{from}}.",
     "approved": "Rollenänderung übernommen.",
     "rejected": "Anfrage abgelehnt.",
+    "withdraw": "Anfrage zurückziehen",
+    "withdrawTitle": "Anfrage zurückziehen?",
+    "withdrawn": "Anfrage zurückgezogen.",
     "errors": {
       "cannot_self_approve": "Du kannst deine eigene Anfrage nicht freigeben.",
       "stale": "Die Rolle wurde inzwischen geändert; die Anfrage wurde entfernt.",

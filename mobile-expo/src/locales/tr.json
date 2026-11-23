@@ -1769,6 +1769,9 @@
     "rejectBody": "{{name}} için rol değişikliği isteği silinir; rolü {{from}} olarak kalır.",
     "approved": "Rol değişikliği uygulandı.",
     "rejected": "İstek reddedildi.",
+    "withdraw": "Talebi geri çek",
+    "withdrawTitle": "Talep geri çekilsin mi?",
+    "withdrawn": "Talep geri çekildi.",
     "errors": {
       "cannot_self_approve": "Kendi açtığın isteği onaylayamazsın.",
       "stale": "Kullanıcının rolü bu arada değişmiş; istek kaldırıldı.",

@@ -102,12 +102,15 @@ export function openFromNotification(response: Notifications.NotificationRespons
  * Yonetici bildirimi (`../src/lib/admin-push-copy.ts` `AdminPushData`) -> ekran. Sunucu serbest
  * yol gondermez; tanimadigimiz deger hicbir yere gitmez.
  */
+const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+
 export function adminPathFromPush(
   data: Record<string, unknown> | undefined,
 ): "/admin/disputes" | `/admin/dispute/${string}` | "/admin/applications" | "/admin/partner-leads" | "/admin/affiliates" | null {
   switch (data?.adminScreen) {
     case "dispute":
-      return typeof data.disputeId === "string" && data.disputeId
+      // Yol parcasi push verisinden geliyor: yalnizca uuid kabul edilir (`Dispute.id`).
+      return typeof data.disputeId === "string" && UUID.test(data.disputeId)
         ? `/admin/dispute/${data.disputeId}`
         : "/admin/disputes";
     case "applications":

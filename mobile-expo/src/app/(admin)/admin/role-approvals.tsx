@@ -41,10 +41,16 @@ export default function AdminRoleApprovalsScreen() {
   const decide = useMutation({
     mutationFn: ({ request, action }: Decision) =>
       api<{ ok: true }>(`/admin/role-approvals/${request.id}/${action}`, { method: "POST" }),
-    onSuccess: (_res, { action }) => {
+    onSuccess: (_res, { request, action }) => {
       setDecision(null);
       refresh();
-      notify(action === "approve" ? t("roleApprovals.approved") : t("roleApprovals.rejected"));
+      notify(
+        action === "approve"
+          ? t("roleApprovals.approved")
+          : request.isOwnRequest
+            ? t("roleApprovals.withdrawn")
+            : t("roleApprovals.rejected"),
+      );
     },
     onError: (err) => {
       if (err instanceof ApiError && GONE.has(err.code)) {
@@ -116,7 +122,8 @@ export default function AdminRoleApprovalsScreen() {
                 <Button
                   style={{ flex: 1 }}
                   variant="secondary"
-                  title={t("roleApprovals.reject")}
+                  // Kendi istegini "reddetmek" yerine geri cekiyorsun; sunucuda ayni islem (iptal).
+                  title={item.isOwnRequest ? t("roleApprovals.withdraw") : t("roleApprovals.reject")}
                   onPress={() => open(item, "reject")}
                 />
               </View>
@@ -129,7 +136,11 @@ export default function AdminRoleApprovalsScreen() {
         {d && vars ? (
           <View style={{ gap: space.lg }} testID="role-decision-confirm">
             <AppText variant="heading" accessibilityRole="header">
-              {d.action === "approve" ? t("roleApprovals.approveTitle") : t("roleApprovals.rejectTitle")}
+              {d.action === "approve"
+                ? t("roleApprovals.approveTitle")
+                : d.request.isOwnRequest
+                  ? t("roleApprovals.withdrawTitle")
+                  : t("roleApprovals.rejectTitle")}
             </AppText>
             <AppText variant="body">
               {d.action === "approve" ? t("roleApprovals.approveBody", vars) : t("roleApprovals.rejectBody", vars)}
@@ -137,7 +148,13 @@ export default function AdminRoleApprovalsScreen() {
             {decide.isError ? <Banner tone="danger" body={errorMessage(decide.error, "roleApprovals")} /> : null}
             <Button
               variant={d.action === "approve" ? "primary" : "danger"}
-              title={d.action === "approve" ? t("roleApprovals.approve") : t("roleApprovals.reject")}
+              title={
+                d.action === "approve"
+                  ? t("roleApprovals.approve")
+                  : d.request.isOwnRequest
+                    ? t("roleApprovals.withdraw")
+                    : t("roleApprovals.reject")
+              }
               loading={decide.isPending}
               onPress={() => decide.mutate(d)}
             />
