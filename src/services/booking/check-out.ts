@@ -138,8 +138,15 @@ export async function checkOut(
       if (updateResult.count === 0) {
         throw new Error("Concurrency conflict: Rezervasyon başka bir işlem tarafından güncellendi.");
       }
-      // Araci komisyonu YALNIZCA burada dogar: tamamlanan rezervasyon (birakildi + teslim alindi).
-      await affiliateService.recordCommissionWithinTx(tx, booking, now);
+      /*
+        Araci komisyonu YALNIZCA burada dogar: tamamlanan rezervasyon (birakildi +
+        teslim alindi), taban = toplam - erken teslim iadesi. Yonetici zorla teslimi
+        (`forced`) komisyon YAZMAZ: misafir tezgahta degil, teslimin gerceklestigi
+        kanitlanmadi (urun karari 2026-11-23).
+      */
+      if (!opts.forced) {
+        await affiliateService.recordCommissionWithinTx(tx, booking, now, { refundAmount });
+      }
     });
 
     /*
