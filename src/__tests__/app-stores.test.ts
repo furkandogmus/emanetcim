@@ -45,6 +45,15 @@ describe("platform tespiti", () => {
     expect(isBotUserAgent("WhatsApp/2.23")).toBe(true);
     expect(isBotUserAgent("")).toBe(true);
     expect(isBotUserAgent(IPHONE)).toBe(false);
+    expect(isBotUserAgent("Mozilla/5.0 (compatible; bingbot/2.0)")).toBe(true);
+    expect(isBotUserAgent("AdsBot-Google (+http://www.google.com/adsbot.html)")).toBe(true);
+  });
+
+  it("CUBOT marka telefon bot sayilmaz", () => {
+    expect(
+      isBotUserAgent("Mozilla/5.0 (Linux; Android 10; CUBOT_X30) AppleWebKit/537.36 Chrome/131.0 Mobile Safari/537.36"),
+    ).toBe(false);
+    expect(detectAppPlatform("Mozilla/5.0 (Linux; Android 10; CUBOT KINGKONG 7) Chrome/131.0 Mobile")).toBe("android");
   });
 });
 
@@ -55,9 +64,13 @@ describe("kaynak etiketi", () => {
     expect(normalizeAppLinkSource("", "  ")).toBe("direct");
   });
 
-  it("serbest metni temizler ve kisaltir (kisisel veri gomulemez)", () => {
-    expect(normalizeAppLinkSource("ali@example.com", null)).toBe("ali-example-com");
-    expect(normalizeAppLinkSource("x".repeat(200), null)).toHaveLength(64);
+  it("yalnizca bilinen bicimler; gerisi other", () => {
+    expect(normalizeAppLinkSource("email-onay", null)).toBe("email-onay");
+    expect(normalizeAppLinkSource("afis-cm3x8k2p40000abcd1234", null)).toBe("afis-cm3x8k2p40000abcd1234");
+    expect(normalizeAppLinkSource("ali@example.com", null)).toBe("other");
+    expect(normalizeAppLinkSource("random-campaign", null)).toBe("other");
+    expect(normalizeAppLinkSource("web-" + "x".repeat(200), null)).toBe("other");
+    expect(normalizeAppLinkSource("afis-x", null)).toBe("other");
   });
 });
 
