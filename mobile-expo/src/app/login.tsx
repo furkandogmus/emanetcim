@@ -164,7 +164,13 @@ export default function LoginScreen() {
   async function passwordSignIn() {
     const id = mode === "phone" ? parsePhone(phone) : parseIdentity(email);
     if (!id || (mode === "email" && !("email" in id))) {
-      setError(mode === "phone" ? t("auth.invalidPhone") : t("auth.invalidEmail"));
+      // Google girişi yalnızca Android'de var (`googleSignInAvailable`); iOS'ta onu önermek
+      // kullanıcıyı olmayan bir düğmeye yollar.
+      setError(
+        mode === "phone"
+          ? t(googleSignInAvailable ? "auth.invalidPhoneWithGoogle" : "auth.invalidPhone")
+          : t("auth.invalidEmail"),
+      );
       return;
     }
     setBusy(true);
