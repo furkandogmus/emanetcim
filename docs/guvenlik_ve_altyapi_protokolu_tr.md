@@ -1,45 +1,75 @@
-# Emanetçi: Güvenlik ve Altyapı Protokolü (Security & Infrastructure)
+# BagajPark: Güvenlik ve Altyapı Protokolü
 
-Bu doküman, platformun teknik güvenliğini, veri gizliliğini ve Cloudflare tabanlı altyapı stratejisini detaylandırır. "Sıfır Güven" (Zero Trust) prensibiyle tasarlanmıştır.
-
----
-
-## 🛡️ 1. Yazılım ve Veri Güvenliği
-
-### 1.1. Kimlik Doğrulama ve Yetkilendirme (Auth & RBAC)
-- **NextAuth.js / Auth.js:** Endüstri standardı olan kütüphaneler ile güvenli oturum yönetimi.
-- **RBAC (Role Based Access Control):** Veritabanı seviyesinde `Misafir`, `Esnaf` ve `Admin` yetkileri kesin çizgilerle ayrılmıştır. Bir esnaf, başka bir esnafın verisine veya misafir listesine asla erişemez.
-- **SSO Güvenliği:** Google ve Apple üzerinden yapılan girişlerde hassas şifreler sistemimizde tutulmaz, sadece yetki jetonları (tokens) kullanılır.
-
-### 1.2. QR Kod ve İşlem Güvenliği
-- **Signed JWT QR:** QR kodlar sadece düz metin değil, sunucu tarafında imzalanmış (signed) ve süreli (TTL) jetonlardır. Ekran görüntüsü alınsa bile kısa süre içinde geçerliliğini yitirir.
-- **Mühür Fotoğrafı Kanıtı:** Her işlemde esnafın mühürlü fotoğraf yüklemesi zorunludur. Bu, uyuşmazlık durumunda "inkar edilemezlik" (non-repudiation) sağlar.
-
-### 1.3. API Güvenliği
-- **Rate Limiting:** Aynı IP üzerinden gelebilecek bot saldırılarını veya brute-force denemelerini engellemek için API isteklerine limit uygulanır.
-- **Input Validation:** Zod veya Joi gibi kütüphanelerle tüm girdi verileri (input) temizlenir (sanitization), SQL Injection ve XSS saldırıları Prisma ve Next.js'in doğal korumasıyla engellenir.
+Platformun kimlik doğrulama, işlem güvenliği ve altyapı katmanlarının özeti. Ayrıntılı ve
+güncel kaynaklar: sırlar `ops/SECRETS.md`, sunucu `ops/README.md`, altyapı
+`infra/aws/README.md`, CI/CD `docs/CI_CD.md`. (Son doğrulama: 2026-11-23.)
 
 ---
 
-## ☁️ 2. Altyapı ve Cloudflare Stratejisi
+## 1. Yazılım ve veri güvenliği
 
-### 2.1. Neden Cloudflare Ücretsiz Plan?
-İlk aşamada Cloudflare'in ücretsiz (Free) katmanı projemiz için fazlasıyla yeterlidir:
-- **DDoS Koruması:** Standart katmanda bile dünyanın en güçlü DDoS korumasına sahip oluruz.
-- **SSL/TLS Şifreleme:** Ücretsiz otomatik SSL sertifikası ile tüm trafik `https://` üzerinden şifreli akar.
-- **Global CDN:** Müşteriler (turistler) farklı ülkelerden gelse bile statik içerikler onlara en yakın sunucudan hızlıca servis edilir.
-- **WAF (Web Application Firewall):** Temel güvenlik kuralları ile bot trafiği filtrelenir.
+### 1.1. Kimlik doğrulama ve yetkilendirme
+- **Web:** Auth.js v5 (`src/auth.config.ts`, `src/proxy.ts`) — e-posta/şifre, Google ve
+  Apple ile giriş. Apple'da istemci sırrı sabit tutulmaz, sunucuda anahtardan
+  (`APPLE_KEY_ID`, `APPLE_PRIVATE_KEY_B64`, SSM'de) çalışma anında üretilir.
+- **Mobil:** ayrı jose JWT (`src/lib/mobile-auth.ts`); iOS'ta Apple ile giriş. Web ve mobil
+  oturumları karışmaz.
+- **Roller:** misafir, esnaf (partner), admin. Kapılar `src/lib/action-auth.ts`
+  (`requireAdmin` / `requirePartner`) ve mobil uçlarda `requireMobileUser`; action içinde
+  elle rol kontrolü yazılmaz (`action-auth` mandal testi). Esnaf yalnızca kendi dükkanının
+  kayıtlarını görür.
+- Sosyal girişte parola tutulmaz; yalnızca sağlayıcının jetonları kullanılır.
 
-### 2.2. Sunucu ve Veritabanı Barındırma
-- **Self-Hosted / VPS:** Kendi kiralayacağınız sunucuda Docker veya PM2 ile uygulamayı koşturabilirsiniz.
-- **Hassas Veri Saklama:** API anahtarları (`.env` dosyası) asla GitHub/Git platformlarına yüklenmez, sadece sunucu üzerinde saklanır.
+### 1.2. QR kod ve işlem güvenliği
+- **İmzalı QR:** rezervasyon QR'ı HS256 ile imzalı bir JWT'dir (`src/lib/qr-token.ts`).
+  Süresi check-out + 24 saat, en az 48 saattir; ekran görüntüsü o süre boyunca geçerli
+  kalır, yani QR tek başına kimlik kanıtı değil, rezervasyon referansıdır.
+- **Mühür ve fotoğraf kanıtı:** teslimde valize numaralı plastik mühür atanır
+  (`SealService.applyCheckInWithinTx`). Mühürlü valizin fotoğrafı istenir ama **zorunlu
+  değildir** — kamerası çalışmayan esnafın valizi hiç teslim alamaması kanıt eksikliğinden
+  daha kötü olduğu için. Fotoğraf adresi sunucuda üretilir; istemcinin gönderdiği adres
+  kabul edilmez.
+
+### 1.3. API güvenliği
+- **Rate limit:** Redis tabanlı uygulama limitleri (`src/lib/rate-limit.ts`; giriş,
+  rezervasyon, iletişim) ve nginx'te bölge limitleri (`nginx/conf.d/01-hardening.conf`).
+- **Girdi doğrulama:** Zod şemaları (ör. mühür gövdesi `src/lib/seal-payload.ts`, web ve
+  mobil aynı şema). SQL, Prisma'nın parametreli sorgularıyla kurulur.
+- **Güvenlik başlıkları** (`next.config.ts`): HSTS, `X-Frame-Options: DENY`,
+  `Cross-Origin-Opener-Policy: same-origin`, uygulanan bir CSP ve onun daha sıkı bir
+  **Report-Only** sürümü; ihlaller `/api/csp-report`'a örneklemeyle loglanır.
 
 ---
 
-## 🚨 3. Güvenlik Denetim Listesi (Checklist)
-- [ ] Production moduna geçerken `NODE_ENV=production` set edilmeli.
-- [ ] Cloudflare üzerinde "Always Use HTTPS" aktif edilmeli.
-- [ ] Veritabanı yedekleri günlük olarak şifreli şekilde alınmalı.
+## 2. Altyapı
+
+### 2.1. Cloudflare
+`bagajpark.com` Cloudflare arkasında (proxied): TLS, CDN, DDoS koruması ve WAF. Origin
+sertifikası Cloudflare Origin Certificate'tir. EC2 güvenlik grubu 80/443'ü **yalnızca
+Cloudflare aralıklarına** açar; origin IP'si repoya yazılmaz (`infra/aws/stack/main.tf`).
+
+### 2.2. Sunucu ve veritabanı
+- Tek AWS EC2 (eu-central-1) üzerinde Docker Compose: `web`, `postgres`, `redis`, `nginx`.
+  Postgres dışarı açık değildir (`127.0.0.1:5433`).
+- SSH varsayılan olmayan portta, yalnızca tanımlı bir CIDR'a açık; fail2ban kurulu.
+- Deploy GitHub OIDC + SSM Run Command ile yapılır; CI'da ya da sunucuda statik AWS anahtarı
+  yoktur.
+
+### 2.3. Sırlar
+Üretim sırları **AWS SSM Parameter Store**'da (SecureString). Sunucudaki
+`docker-compose.env` her deploy'da oradan üretilir; elle düzenlenmez, git'e girmez. Sır
+değerleri hiçbir komut çıktısına basılmaz (`ops/SECRETS.md`).
+
+### 2.4. Yedek
+Postgres 6 saatte bir `pg_dump` ile yedeklenir ve S3'e (sunucu dışına) kopyalanır
+(`ops/README.md` § Yedek ve geri yükleme).
 
 ---
-*Teknik Operasyonlar ve Güvenlik Birimi - Emanetçi.*
+
+## 3. Açık maddeler
+
+- [ ] Dış izleyici (`/api/health/live`, `/api/health/jobs`) — henüz kurulu değil
+  (`docs/OBSERVABILITY.md`).
+- [ ] CSP Report-Only ihlalleri değerlendirilip sıkı politika uygulamaya alınmalı.
+- [ ] Yedeklerin geri yüklenebildiği düzenli olarak sınanmalı (son tam geri yükleme
+  2026-10-25 hesap taşımasında).
