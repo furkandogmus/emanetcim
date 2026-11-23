@@ -24,6 +24,7 @@ import { config } from "@/lib/config";
 import { resolveCommerceContext } from "@/lib/commerce-context";
 import { CommerceProvider } from "@/components/providers/CommerceProvider";
 import { serializeJsonLd } from "@/lib/json-ld-script";
+import { getAppStoreFlags, smartAppBannerMetadata } from "@/lib/app-stores";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -156,6 +157,8 @@ export async function generateMetadata({ params }: { params: Promise<{ locale: s
     formatDetection: {
       telephone: false,
     },
+    // Safari akilli bandi; bayrak degisince `PlatformSettingsService` layout'u yeniden dogrular.
+    ...smartAppBannerMetadata(await getAppStoreFlags()),
   };
 }
 

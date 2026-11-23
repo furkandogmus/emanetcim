@@ -1,4 +1,5 @@
 import { cache } from "react";
+import { getAppStoreFlags, smartAppBannerMetadata } from "@/lib/app-stores";
 import { setRequestLocale } from "next-intl/server";
 import { getTranslations } from "next-intl/server";
 import { shopService } from "@/services/ShopService";
@@ -87,6 +88,8 @@ export async function generateMetadata({
     */
     ...(shop.isPrelaunch ? { robots: { index: false, follow: true } } : {}),
     alternates: { canonical, languages },
+    // Akilli bant uygulamada ayni dukkani acsin.
+    ...smartAppBannerMetadata(await getAppStoreFlags(), canonical),
     ...socialMetadata({
       url: canonical,
       title,
