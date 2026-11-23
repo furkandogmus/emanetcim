@@ -375,7 +375,8 @@
     "partnerLateHint": "If you received the bags, check them in. If the guest called you, you can wait.",
     "partnerLateHold": "Wait for guest (+30 min)",
     "partnerLateHoldDone": "The booking stays open for 30 more minutes.",
-    "partnerLateHoldLimitReached": "Pick-up time reached; you cannot wait any longer."
+    "partnerLateHoldLimitReached": "Pick-up time reached; you cannot wait any longer.",
+    "posterNav": "QR poster"
   },
   "Guest": {
     "heroTitle": "Drop Your Bags, Explore Freely",
@@ -1355,7 +1356,17 @@
     "bookingCloseNoteHint": "At least {min} characters. Saved to the audit log and sent to the shop.",
     "bookingCloseKeep": "Go back",
     "bookingCloseCancelDone": "Booking cancelled.",
-    "bookingCloseForceDone": "Booking closed as checked out."
+    "bookingCloseForceDone": "Booking closed as checked out.",
+    "platformSettingsIosAppStoreLive": "iOS app is live on the App Store",
+    "platformSettingsIosAppStoreLiveHint": "When on: Safari smart banner, App Store badge on the site and in the confirmation email, /app sends iPhones to the store.",
+    "platformSettingsAndroidPlayLive": "Android app is public on Google Play",
+    "platformSettingsAndroidPlayLiveHint": "Do not turn on during closed testing. When on: Google Play badge, /app sends Android phones to the store.",
+    "appLinkStatsTitle": "App link (/app), last 30 days",
+    "appLinkStatsEmpty": "No hits yet.",
+    "appLinkStatsSource": "Source",
+    "appLinkStatsPlatform": "Platform",
+    "appLinkStatsOutcome": "Outcome",
+    "appLinkStatsCount": "Count"
   },
   "Auth": {
     "loginTitle": "Sign in to BagajPark",
@@ -2635,5 +2646,29 @@
     "passwordMismatch": "The new passwords do not match.",
     "passwordSet": "Password set.",
     "passwordChanged": "Password changed. Please sign in again for your security."
+  },
+  "AppDownload": {
+    "metaTitle": "Download the BagajPark app",
+    "title": "BagajPark in your pocket",
+    "lead": "Get the app to find storage spots nearby and keep your booking and QR ticket with you.",
+    "comingSoon": "Our mobile app is coming to the stores soon. Until then, you can do everything on our website.",
+    "websiteCta": "Continue on the website",
+    "qrAlt": "QR code for bagajpark.com/app",
+    "qrCaption": "Scan with your phone: bagajpark.com/app",
+    "appStoreAlt": "Download on the App Store",
+    "googlePlayAlt": "Get it on Google Play",
+    "footerTitle": "Get the app"
+  },
+  "AppPoster": {
+    "metaTitle": "Shop poster",
+    "slogan": "Drop your bags, enjoy the day.",
+    "lead": "This shop is a BagajPark luggage storage point.",
+    "step1": "Scan the QR code and get the app.",
+    "step2": "Pick your time and book.",
+    "step3": "Leave your bag here, sealed and safe.",
+    "scan": "Scan, download, book",
+    "print": "Print",
+    "printHint": "Print on A4 paper without margins.",
+    "noShop": "You need a shop before you can print a poster."
   }
 }

@@ -375,7 +375,8 @@
     "partnerLateHint": "اگر چمدان را تحویل گرفتید، ثبت تحویل کنید. اگر مهمان تماس گرفت، می‌توانید منتظر بمانید.",
     "partnerLateHold": "منتظر مهمان بمان (+۳۰ دقیقه)",
     "partnerLateHoldDone": "رزرو ۳۰ دقیقه دیگر باز می‌ماند.",
-    "partnerLateHoldLimitReached": "به زمان تحویل گرفتن رسیدید؛ بیش از این نمی‌توان منتظر ماند."
+    "partnerLateHoldLimitReached": "به زمان تحویل گرفتن رسیدید؛ بیش از این نمی‌توان منتظر ماند.",
+    "posterNav": "پوستر QR"
   },
   "Guest": {
     "heroTitle": "چمدان را بسپارید، آزاد بگردید",
@@ -1355,7 +1356,17 @@
     "bookingCloseNoteHint": "حداقل {min} نویسه. در گزارش ممیزی ذخیره و برای فروشگاه ارسال می‌شود.",
     "bookingCloseKeep": "بازگشت",
     "bookingCloseCancelDone": "رزرو لغو شد.",
-    "bookingCloseForceDone": "رزرو به عنوان تحویل‌شده بسته شد."
+    "bookingCloseForceDone": "رزرو به عنوان تحویل‌شده بسته شد.",
+    "platformSettingsIosAppStoreLive": "اپلیکیشن iOS در App Store منتشر شده است",
+    "platformSettingsIosAppStoreLiveHint": "روشن: بنر هوشمند Safari، نشان App Store در سایت و ایمیل تأیید، /app آیفون‌ها را به فروشگاه می‌برد.",
+    "platformSettingsAndroidPlayLive": "اپلیکیشن Android در Google Play عمومی است",
+    "platformSettingsAndroidPlayLiveHint": "در دوره تست بسته روشن نکنید. روشن: نشان Google Play، /app دستگاه‌های Android را به فروشگاه می‌برد.",
+    "appLinkStatsTitle": "پیوند اپلیکیشن (/app)، ۳۰ روز اخیر",
+    "appLinkStatsEmpty": "هنوز بازدیدی ثبت نشده.",
+    "appLinkStatsSource": "منبع",
+    "appLinkStatsPlatform": "پلتفرم",
+    "appLinkStatsOutcome": "نتیجه",
+    "appLinkStatsCount": "تعداد"
   },
   "Auth": {
     "loginTitle": "ورود به BagajPark",
@@ -2477,5 +2488,29 @@
     "passwordMismatch": "رمزهای عبور جدید یکسان نیستند.",
     "passwordSet": "رمز عبور تعیین شد.",
     "passwordChanged": "رمز عبور تغییر کرد. برای امنیت، دوباره وارد شوید."
+  },
+  "AppDownload": {
+    "metaTitle": "دانلود اپلیکیشن BagajPark",
+    "title": "BagajPark در جیب شما",
+    "lead": "اپلیکیشن را دریافت کنید تا امانت‌داری‌های نزدیک را پیدا کنید و رزرو و بلیط QR همیشه همراهتان باشد.",
+    "comingSoon": "اپلیکیشن ما به‌زودی در فروشگاه‌ها منتشر می‌شود. تا آن زمان همه کارها را در وب‌سایت انجام دهید.",
+    "websiteCta": "ادامه در وب‌سایت",
+    "qrAlt": "کد QR برای bagajpark.com/app",
+    "qrCaption": "با گوشی اسکن کنید: bagajpark.com/app",
+    "appStoreAlt": "دانلود از App Store",
+    "googlePlayAlt": "دریافت از Google Play",
+    "footerTitle": "دریافت اپلیکیشن"
+  },
+  "AppPoster": {
+    "metaTitle": "پوستر فروشگاه",
+    "slogan": "چمدانت را بسپار، از روزت لذت ببر.",
+    "lead": "این فروشگاه یک نقطه امانت BagajPark است.",
+    "step1": "کد QR را اسکن کنید و اپلیکیشن را دریافت کنید.",
+    "step2": "زمان را انتخاب و رزرو کنید.",
+    "step3": "چمدان را اینجا بگذارید، پلمب‌شده و امن.",
+    "scan": "اسکن، دانلود، رزرو",
+    "print": "چاپ",
+    "printHint": "روی کاغذ A4 بدون حاشیه چاپ کنید.",
+    "noShop": "برای چاپ پوستر ابتدا به یک فروشگاه نیاز دارید."
   }
 }

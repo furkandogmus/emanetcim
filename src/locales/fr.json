@@ -375,7 +375,8 @@
     "partnerLateHint": "Si vous avez reçu les bagages, enregistrez-les. Si le client vous a appelé, vous pouvez attendre.",
     "partnerLateHold": "Attendre le client (+30 min)",
     "partnerLateHoldDone": "La réservation reste ouverte 30 minutes de plus.",
-    "partnerLateHoldLimitReached": "Heure de retrait atteinte ; impossible d’attendre davantage."
+    "partnerLateHoldLimitReached": "Heure de retrait atteinte ; impossible d’attendre davantage.",
+    "posterNav": "Affiche QR"
   },
   "Guest": {
     "heroTitle": "Déposez vos bagages, explorez librement",
@@ -1355,7 +1356,17 @@
     "bookingCloseNoteHint": "Au moins {min} caractères. Enregistrée dans le journal d'audit et envoyée au commerce.",
     "bookingCloseKeep": "Retour",
     "bookingCloseCancelDone": "Réservation annulée.",
-    "bookingCloseForceDone": "Réservation clôturée comme remise."
+    "bookingCloseForceDone": "Réservation clôturée comme remise.",
+    "platformSettingsIosAppStoreLive": "L'app iOS est en ligne sur l'App Store",
+    "platformSettingsIosAppStoreLiveHint": "Activé : bannière Safari, badge App Store sur le site et dans l'e-mail de confirmation, /app envoie les iPhone vers le store.",
+    "platformSettingsAndroidPlayLive": "L'app Android est publique sur Google Play",
+    "platformSettingsAndroidPlayLiveHint": "Ne pas activer pendant le test fermé. Activé : badge Google Play, /app envoie les appareils Android vers le store.",
+    "appLinkStatsTitle": "Lien d'application (/app), 30 derniers jours",
+    "appLinkStatsEmpty": "Aucune visite pour l'instant.",
+    "appLinkStatsSource": "Source",
+    "appLinkStatsPlatform": "Plateforme",
+    "appLinkStatsOutcome": "Résultat",
+    "appLinkStatsCount": "Nombre"
   },
   "Auth": {
     "loginTitle": "Connectez-vous à BagajPark",
@@ -2477,5 +2488,29 @@
     "passwordMismatch": "Les nouveaux mots de passe ne correspondent pas.",
     "passwordSet": "Mot de passe défini.",
     "passwordChanged": "Mot de passe modifié. Veuillez vous reconnecter pour votre sécurité."
+  },
+  "AppDownload": {
+    "metaTitle": "Télécharger l'application BagajPark",
+    "title": "BagajPark dans votre poche",
+    "lead": "Téléchargez l'application pour trouver une consigne à proximité et garder votre réservation et votre billet QR sur vous.",
+    "comingSoon": "Notre application arrive bientôt sur les stores. En attendant, tout est possible sur notre site.",
+    "websiteCta": "Continuer sur le site",
+    "qrAlt": "QR code vers bagajpark.com/app",
+    "qrCaption": "Scannez avec votre téléphone : bagajpark.com/app",
+    "appStoreAlt": "Télécharger dans l'App Store",
+    "googlePlayAlt": "Disponible sur Google Play",
+    "footerTitle": "Télécharger l'application"
+  },
+  "AppPoster": {
+    "metaTitle": "Affiche boutique",
+    "slogan": "Déposez vos bagages, profitez de la journée.",
+    "lead": "Cette boutique est un point de consigne BagajPark.",
+    "step1": "Scannez le QR code et téléchargez l'application.",
+    "step2": "Choisissez l'heure et réservez.",
+    "step3": "Laissez votre bagage ici, scellé et en sécurité.",
+    "scan": "Scanner, télécharger, réserver",
+    "print": "Imprimer",
+    "printHint": "Imprimez en A4 sans marges.",
+    "noShop": "Il vous faut d'abord une boutique pour imprimer une affiche."
   }
 }
