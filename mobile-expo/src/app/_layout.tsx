@@ -69,8 +69,10 @@ function RootNavigator() {
 
   useEffect(() => {
     // Acilis animasyonu oynayacaksa yerel ekrani o kaldirir (baslarken); bkz. BrandIntro.
-    if (state.status !== "loading" && !introHoldsSplash()) void SplashScreen.hideAsync().catch(() => undefined);
-  }, [state.status]);
+    // Zorunlu guncelleme ekraninda animasyon hic kurulmaz; yerel ekran burada kalkmali.
+    const ready = updateRequired || (state.status !== "loading" && !introHoldsSplash());
+    if (ready) void SplashScreen.hideAsync().catch(() => undefined);
+  }, [state.status, updateRequired]);
 
   // Tekil kullanici sayaci: gunde bir; giris yapilinca hesap cihaza baglansin diye bir kez daha.
   const userId = state.status === "signedIn" ? state.user.id : null;
@@ -190,6 +192,8 @@ export default function RootLayout() {
 export function ErrorBoundary({ error, retry }: ErrorBoundaryProps) {
   useEffect(() => {
     console.error(error);
+    // Acilis sirasinda cokerse yerel ekran hata ekraninin ustunde kalmasin.
+    void SplashScreen.hideAsync().catch(() => undefined);
   }, [error]);
   return (
     <View style={boundaryStyles.wrap}>
