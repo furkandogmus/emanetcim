@@ -1,4 +1,9 @@
-# Observability (log sözlüğü ve metrikler)
+# Observability (log sözlüğü, sağlık uçları, metrikler)
+
+> Son durum (2026-11-23): yapılandırılmış log + üç sağlık ucu var; **dış izleyici hâlâ
+> kurulu değil.** Bedeli ölçüldü: 2026-10-25 → 2026-11-23 arası cron işlerinin çoğu hiç
+> çalışmadı ve `/api/health/jobs` bunu 503 ile gösterdiği hâlde kimse görmedi
+> (`scripts/README.md` § Son durum). Kalan iş bir izleyici hesabı açmak (aşağıda).
 
 ## Yapılandırılmış log alanları
 
@@ -10,14 +15,18 @@ Sunucu tarafında [`src/lib/logger.ts`](../src/lib/logger.ts) (Pino) kullanılı
 | `conversationId` / `paymentConversationId` | Ödeme konuşma / merchant ref |
 | `requestId` | HTTP `x-request-id` (edge/proxy ile) |
 | `err` | Hata nesnesi (Pino `err` serializer) |
-| `service` | Sabit: `emanetci` (logger `base`) |
+| `service` | `OBSERVABILITY_SERVICE_NAME` ya da varsayılan `bagajpark` (logger `base`) |
 | `env`, `version` | Ortam ve sürüm (deploy) |
 
 ### Örnek mesaj anahtarları
 
-- `finance_reconcile_pending_to_paid` — reconciliation satırı düzeltildi
-- `reconcile_payments_complete` — toplu reconcile job özeti
 - `request_error` — [`instrumentation.ts`](../instrumentation.ts) `onRequestError`
+- `<iş>_failed` — iç iş uçlarının hata satırı (`generate_slots_failed`,
+  `late_dropoff_scan_failed`, `booking_reminders_cron_failed` …)
+- `csp_report_only_violation` — `/api/csp-report`; CSP Report-Only ihlalleri, örneklemeli
+
+`requestId`, `src/proxy.ts`'te gelen `x-request-id`'den ya da yeni bir UUID'den kurulur.
+Ödeme mutabakat cron'u (`reconcile_payments_*` anahtarları) 2026-08-22'de kasten kapatıldı; uç kodda yok.
 
 ## Global hata yüzeyi
 
@@ -47,7 +56,7 @@ sürekli kırmızı yanan bir kontrol, hiç olmayandan daha kötüdür.
 
 ### İzlemeyi bağlamak
 
-Alarmı kuracak servis bir hesap gerektirdiği için **henüz açılmadı**; yapılandırma
+Alarmı kuracak servis bir hesap gerektirdiği için **henüz açılmadı** (2026-11-23); yapılandırma
 tarafı (aşağıdaki rate limit) hazır. Servis seçimi: **UptimeRobot** ücretsiz
 kademesi ikisi için de yeter ve dışarıya bağımlılık yaratmaz. Domain Cloudflare'de
 olduğu için oradaki Health Checks de bir seçenektir — hangi planda olduğuna bağlı,
@@ -137,8 +146,11 @@ yaşanan hatanın aynısı bir kademe yukarıda hâlâ mümkün.
 
 | Metrik | Kaynak |
 |--------|--------|
-| `payment_init_total` / `payment_init_errors` | `PaymentService.initializeMarketplacePayment` |
-| `reconcile_fixed_bookings` | `reconcileStalePaymentBookings` |
+| `payment_intent_total` / `payment_capture_errors` | `PaymentService.openIntent` / `markCaptured` |
+| `payment_refund_total` | `PaymentService.refund` |
 | `notification_send_errors` | `NotificationService` |
+| `job_failures` | iç iş uçları (`<iş>_failed` log satırları) |
 
-Finansal ledger davranışı: [FINANCE_LEDGER.md](./FINANCE_LEDGER.md).
+Hiçbiri henüz tanımlı değil; bugün tek kaynak loglar (`docker compose logs web`).
+
+Finansal ledger davranışı: [PAYMENTS.md](./PAYMENTS.md).
