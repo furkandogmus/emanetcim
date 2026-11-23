@@ -201,10 +201,12 @@ export class AffiliateService {
       totalPrice: DecimalValue;
     },
     earnedAt: Date,
+    opts: { refundAmount?: DecimalValue } = {},
   ): Promise<void> {
     if (!booking.affiliateId || booking.affiliateCommissionRate == null) return;
     const rate = new Decimal(booking.affiliateCommissionRate);
-    const base = new Decimal(booking.totalPrice);
+    // Erken teslim iadesi misafire geri verilen paradir: komisyon tabanindan duser.
+    const base = Decimal.max(0, new Decimal(booking.totalPrice).minus(new Decimal(opts.refundAmount ?? 0)));
     await tx.affiliateCommission.createMany({
       data: [
         {

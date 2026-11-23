@@ -33,6 +33,7 @@ const m = vi.hoisted(() => {
     referral: { resolveDiscount: vi.fn(), check: vi.fn() },
     notify: vi.fn(),
     audit: vi.fn(),
+    refund: { value: 0 },
   };
 });
 
@@ -66,7 +67,7 @@ vi.mock("@/lib/platform-settings", () => ({
 vi.mock("@/lib/qr-token", () => ({ createQrToken: vi.fn(async () => "qr") }));
 vi.mock("@/services/BookingEventService", () => ({ bookingEventService: { record: vi.fn().mockResolvedValue(undefined) } }));
 vi.mock("@/services/SealService", () => ({ sealService: { applyCheckOutReturnSealsWithinTx: vi.fn() } }));
-vi.mock("@/services/PricingService", () => ({ pricingService: { calculateEarlyRefund: () => 0 } }));
+vi.mock("@/services/PricingService", () => ({ pricingService: { calculateEarlyRefund: () => m.refund.value } }));
 
 import {
   adminCreateAffiliate,
@@ -298,6 +299,29 @@ describe("komisyon yalnizca tamamlanan rezervasyonda", () => {
 
   beforeEach(() => {
     m.tx.booking.updateMany.mockResolvedValue({ count: 1 });
+    m.refund.value = 0;
+  });
+
+  it("erken teslim iadesi komisyon tabanindan duser (taban 0'in altina inmez)", async () => {
+    m.prisma.booking.findUnique.mockResolvedValue(checkedIn);
+    m.refund.value = 49.9;
+    await checkOut("b1");
+    const row = m.tx.affiliateCommission.createMany.mock.calls[0][0].data[0];
+    expect(row.baseAmount.toFixed(2)).toBe("200.00");
+    expect(row.amount.toFixed(2)).toBe("20.00");
+    vi.clearAllMocks();
+    m.tx.booking.updateMany.mockResolvedValue({ count: 1 });
+    m.refund.value = 999;
+    await checkOut("b1");
+    const zero = m.tx.affiliateCommission.createMany.mock.calls[0][0].data[0];
+    expect(zero.baseAmount.toFixed(2)).toBe("0.00");
+    expect(zero.amount.toFixed(2)).toBe("0.00");
+  });
+
+  it("yonetici zorla teslimi komisyon YAZMAZ (urun karari)", async () => {
+    m.prisma.booking.findUnique.mockResolvedValue(checkedIn);
+    expect(await checkOut("b1", { forced: { note: "misafir dukkana geldi" } })).toMatchObject({ ok: true });
+    expect(m.tx.affiliateCommission.createMany).not.toHaveBeenCalled();
   });
 
   it("check-out: tutar = odenen toplam x KOPYA oran, 2 hane", async () => {
