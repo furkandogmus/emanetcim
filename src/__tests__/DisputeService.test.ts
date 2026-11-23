@@ -47,7 +47,7 @@ describe("uyuşmazlık açma", () => {
     */
     const res = await disputeService.create(INPUT);
     expect(res).toEqual({ ok: true, id: "d1" });
-    expect(mockNotifyAdmins).toHaveBeenCalledWith({ bookingId: "b1", reason: "THEFT" });
+    expect(mockNotifyAdmins).toHaveBeenCalledWith({ bookingId: "b1", reason: "THEFT", disputeId: "d1" });
     expect(mockRecord).toHaveBeenCalledWith(
       expect.objectContaining({ bookingId: "b1", event: "DISPUTED", actorRole: "GUEST" }),
     );
