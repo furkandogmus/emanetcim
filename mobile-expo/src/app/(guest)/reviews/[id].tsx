@@ -38,7 +38,7 @@ export default function ShopReviewsScreen() {
           ListEmptyComponent={<AppText variant="caption">{t("shop.noReviews")}</AppText>}
           renderItem={({ item }) => (
             <View style={styles.card}>
-              <ReviewItem review={item} />
+              <ReviewItem review={item} shopId={id} />
             </View>
           )}
           ListFooterComponent={

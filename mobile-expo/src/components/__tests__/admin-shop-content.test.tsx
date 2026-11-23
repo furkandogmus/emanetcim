@@ -66,6 +66,9 @@ const REVIEW = {
   hidden: false,
   hiddenAt: null,
   hiddenReason: null,
+  autoHidden: false,
+  openReportCount: 2,
+  reports: [{ reason: "OFFENSIVE", note: "hakaret" }],
 };
 
 let qc: QueryClient;
@@ -128,6 +131,14 @@ describe("yorum moderasyonu ekrani", () => {
     expect(screen.queryByRole("button", { name: "Gizle" })).toBeNull();
     expect(screen.queryByRole("button", { name: "Sil" })).toBeNull();
     expect(screen.getByText(i18n.t("adminShop.readOnly"))).toBeTruthy();
+  });
+
+  it("kuyruk bildirilenlerle acilir; bildirim sayisi ve nedeni satirda gorunur (App Review 1.2)", async () => {
+    await render(<AdminReviewsScreen />, { wrapper });
+    await screen.findByText("Berbat");
+    expect(mockCalls.some((c) => c.path === "/admin/reviews?filter=reported")).toBe(true);
+    expect(screen.getByText("2 bildirim")).toBeTruthy();
+    expect(screen.getByText("Küfür veya hakaret: hakaret")).toBeTruthy();
   });
 
   it("filtre degisince sunucuya filtreyle sorulur", async () => {

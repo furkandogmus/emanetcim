@@ -1895,7 +1895,14 @@
     "accountDeletionNotPending": "Die Anfrage ist nicht mehr offen.",
     "accountDeletionSelf": "Sie können Ihre eigene Anfrage nicht abschließen.",
     "accountDeletionPendingPayouts": "Es gibt offene Auszahlungen; sie müssen zuerst bezahlt werden.",
-    "accountDeletionReason": "Die Begründung braucht mindestens 5 Zeichen."
+    "accountDeletionReason": "Die Begründung braucht mindestens 5 Zeichen.",
+    "reviewInappropriate": "Ihre Bewertung enthält unangemessene Ausdrücke; bitte bearbeiten und erneut senden.",
+    "reviewReportOwn": "Sie können Ihre eigene Bewertung nicht melden.",
+    "reviewReportDuplicate": "Sie haben diese Bewertung bereits gemeldet.",
+    "reviewReportRateLimited": "Zu viele Meldungen; versuchen Sie es später erneut.",
+    "reviewAlreadyHidden": "Die Bewertung ist bereits ausgeblendet.",
+    "reviewNotHidden": "Die Bewertung ist nicht ausgeblendet.",
+    "reviewReasonRequired": "Geben Sie zum Ausblenden einen Grund an."
   },
   "Emails": {
     "verificationSubject": "Bestätigen Sie Ihre E-Mail",
@@ -1912,7 +1919,26 @@
     "subtitle": "Bewerten Sie Ihre Erfahrung mit 1–5 Sternen, um anderen Reisenden zu helfen.",
     "submit": "BEWERTUNG SENDEN",
     "success": "Ihre Bewertung wurde gespeichert.",
-    "error": "Ihre Bewertung konnte nicht gespeichert werden."
+    "error": "Ihre Bewertung konnte nicht gespeichert werden.",
+    "report": "Melden",
+    "reportSignIn": "Zum Melden anmelden",
+    "reportTitle": "Bewertung melden",
+    "reportBody": "Unser Team prüft sie. Eine mehrfach gemeldete Bewertung wird bis zur Prüfung ausgeblendet.",
+    "reportSend": "Melden",
+    "reportReasonLabel": "Grund",
+    "reportNoteLabel": "Einzelheiten (optional)",
+    "reportThanks": "Danke, Ihre Meldung ist bei unserem Team.",
+    "blockAuthor": "Bewertungen dieser Person ausblenden",
+    "blockTitle": "Bewertungen dieser Person ausblenden?",
+    "blockBody": "Sie sehen die Bewertungen dieser Person nicht mehr. Andere Gäste sehen sie weiterhin.",
+    "blockConfirm": "Ausblenden",
+    "blockDone": "Die Bewertungen dieser Person sind ausgeblendet.",
+    "reportReason_SPAM": "Spam oder Werbung",
+    "reportReason_OFFENSIVE": "Beleidigung oder Schimpfwörter",
+    "reportReason_HARASSMENT": "Belästigung oder Hassrede",
+    "reportReason_FALSE_INFO": "Falsch oder irreführend",
+    "reportReason_PERSONAL_INFO": "Teilt persönliche Daten",
+    "reportReason_OTHER": "Sonstiges"
   },
   "CityStorage": {
     "istanbul": {
@@ -2673,5 +2699,34 @@
     "cancelBody": "Geschlossene Geschäfte werden wieder geöffnet. Die Begründung wird protokolliert.",
     "cancelled": "Anfrage abgebrochen.",
     "reasonLabel": "Begründung (mindestens 5 Zeichen)"
+  },
+  "AdminReviews": {
+    "back": "Zurück zum Dashboard",
+    "title": "Bewertungsmoderation",
+    "intro": "Gemeldete Bewertungen stehen oben. Melden drei verschiedene Nutzer eine Bewertung, wird sie bis zu Ihrer Entscheidung automatisch ausgeblendet.",
+    "empty": "Keine Bewertungen in diesem Filter.",
+    "total": "{count} Bewertungen",
+    "filter_reported": "Gemeldet",
+    "filter_all": "Alle",
+    "filter_low": "Niedrige Wertung",
+    "filter_hidden": "Ausgeblendet",
+    "reportCount": "{count} Meldungen",
+    "autoHidden": "Automatisch ausgeblendet",
+    "hidden": "Ausgeblendet",
+    "noComment": "Kein Text",
+    "hiddenBecause": "Grund: {reason}",
+    "hide": "Ausblenden",
+    "unhide": "Wiederherstellen",
+    "delete": "Löschen",
+    "reasonLabel": "Grund",
+    "confirmTitle_hide": "Bewertung ausblenden?",
+    "confirmBody_hide": "Gäste sehen sie nicht und sie zählt nicht zum Durchschnitt. Meldungen werden geschlossen.",
+    "done_hide": "Bewertung ausgeblendet.",
+    "confirmTitle_unhide": "Bewertung wieder anzeigen?",
+    "confirmBody_unhide": "Die Bewertung ist wieder sichtbar und Meldungen werden geschlossen.",
+    "done_unhide": "Bewertung wieder sichtbar.",
+    "confirmTitle_delete": "Bewertung löschen?",
+    "confirmBody_delete": "Die Bewertung wird endgültig gelöscht.",
+    "done_delete": "Bewertung gelöscht."
   }
 }

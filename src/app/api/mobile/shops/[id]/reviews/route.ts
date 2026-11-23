@@ -17,7 +17,7 @@ export async function GET(req: Request, { params }: { params: Promise<{ id: stri
   return markAuthStale(await reviews(req, (await params).id, viewer), stale);
 }
 
-async function reviews(req: Request, id: string, viewer: ShopViewer) {
+async function reviews(req: Request, id: string, viewer: (ShopViewer & { id?: string }) | null) {
   /*
     `shops/[id]/route.ts` ile AYNI FILTRE: dukkan once genel goruculukten
     gecmeli, yoksa test/pasif bir dukkanin yorumlari kimligi bilen herkese
@@ -31,10 +31,12 @@ async function reviews(req: Request, id: string, viewer: ShopViewer) {
     const page = await reviewService.listShopReviews(id, {
       cursor: parseCursor(sp.get("cursor")),
       take: parseLimit(sp.get("limit"), 20, 50),
+      // "Bu kullanicinin yorumlarini gizle": engellenen yazarlar bu goruntuleyene gelmez.
+      viewerId: viewer?.id ?? null,
     });
     return NextResponse.json({ items: page.items.map(toMobileReview), total: page.total, nextCursor: page.nextCursor });
   }
 
-  const reviews = await reviewService.getShopReviews(id);
+  const reviews = await reviewService.getShopReviews(id, viewer?.id ?? null);
   return NextResponse.json(reviews.map(toMobileReview));
 }

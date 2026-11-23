@@ -1895,7 +1895,14 @@
     "accountDeletionNotPending": "La demande n’est plus en attente.",
     "accountDeletionSelf": "Vous ne pouvez pas finaliser votre propre demande.",
     "accountDeletionPendingPayouts": "Des versements sont en attente ; ils doivent d’abord être payés.",
-    "accountDeletionReason": "Le motif doit comporter au moins 5 caractères."
+    "accountDeletionReason": "Le motif doit comporter au moins 5 caractères.",
+    "reviewInappropriate": "Votre avis contient des propos inappropriés ; modifiez-le puis renvoyez-le.",
+    "reviewReportOwn": "Vous ne pouvez pas signaler votre propre avis.",
+    "reviewReportDuplicate": "Vous avez déjà signalé cet avis.",
+    "reviewReportRateLimited": "Trop de signalements ; réessayez un peu plus tard.",
+    "reviewAlreadyHidden": "L’avis est déjà masqué.",
+    "reviewNotHidden": "L’avis n’est pas masqué.",
+    "reviewReasonRequired": "Indiquez un motif pour le masquer."
   },
   "Emails": {
     "verificationSubject": "Vérifiez votre e-mail",
@@ -1912,7 +1919,26 @@
     "subtitle": "Notez votre expérience de 1 à 5 étoiles pour aider les autres voyageurs.",
     "submit": "ENVOYER L'AVIS",
     "success": "Votre avis a été enregistré.",
-    "error": "Impossible d'enregistrer votre avis."
+    "error": "Impossible d'enregistrer votre avis.",
+    "report": "Signaler",
+    "reportSignIn": "Connectez-vous pour signaler",
+    "reportTitle": "Signaler l’avis",
+    "reportBody": "Notre équipe l’examine. Un avis signalé par plusieurs personnes est masqué jusqu’à la fin de l’examen.",
+    "reportSend": "Signaler",
+    "reportReasonLabel": "Motif",
+    "reportNoteLabel": "Détails (facultatif)",
+    "reportThanks": "Merci, votre signalement a été transmis à notre équipe.",
+    "blockAuthor": "Masquer les avis de cet utilisateur",
+    "blockTitle": "Masquer les avis de cet utilisateur ?",
+    "blockBody": "Vous ne verrez plus les avis de cette personne. Les autres clients les voient toujours.",
+    "blockConfirm": "Masquer",
+    "blockDone": "Les avis de cet utilisateur sont masqués.",
+    "reportReason_SPAM": "Spam ou publicité",
+    "reportReason_OFFENSIVE": "Grossièretés ou insultes",
+    "reportReason_HARASSMENT": "Harcèlement ou discours haineux",
+    "reportReason_FALSE_INFO": "Faux ou trompeur",
+    "reportReason_PERSONAL_INFO": "Partage des données personnelles",
+    "reportReason_OTHER": "Autre"
   },
   "CityStorage": {
     "istanbul": {
@@ -2673,5 +2699,34 @@
     "cancelBody": "Les commerces fermés sont rouverts. Le motif est consigné dans le journal d’audit.",
     "cancelled": "Demande annulée.",
     "reasonLabel": "Motif (au moins 5 caractères)"
+  },
+  "AdminReviews": {
+    "back": "Retour au tableau de bord",
+    "title": "Modération des avis",
+    "intro": "Les avis signalés apparaissent en premier. Quand trois utilisateurs différents signalent un avis, il est masqué automatiquement jusqu’à votre décision.",
+    "empty": "Aucun avis dans ce filtre.",
+    "total": "{count} avis",
+    "filter_reported": "Signalés",
+    "filter_all": "Tous",
+    "filter_low": "Note basse",
+    "filter_hidden": "Masqués",
+    "reportCount": "{count} signalements",
+    "autoHidden": "Masqué automatiquement",
+    "hidden": "Masqué",
+    "noComment": "Pas de commentaire",
+    "hiddenBecause": "Motif : {reason}",
+    "hide": "Masquer",
+    "unhide": "Rétablir",
+    "delete": "Supprimer",
+    "reasonLabel": "Motif",
+    "confirmTitle_hide": "Masquer cet avis ?",
+    "confirmBody_hide": "Les clients ne le voient plus et il sort de la moyenne. Les signalements sont clos.",
+    "done_hide": "Avis masqué.",
+    "confirmTitle_unhide": "Afficher à nouveau cet avis ?",
+    "confirmBody_unhide": "L’avis redevient visible et les signalements sont clos.",
+    "done_unhide": "Avis de nouveau visible.",
+    "confirmTitle_delete": "Supprimer cet avis ?",
+    "confirmBody_delete": "L’avis est supprimé définitivement.",
+    "done_delete": "Avis supprimé."
   }
 }

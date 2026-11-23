@@ -966,8 +966,33 @@
       "booking_not_completed": "Du kannst bewerten, nachdem du dein Gepäck abgeholt hast.",
       "duplicate_review": "Du hast diese Buchung bereits bewertet.",
       "not_found": "Buchung nicht gefunden.",
-      "forbidden": "Du kannst diese Buchung nicht bewerten."
-    }
+      "forbidden": "Du kannst diese Buchung nicht bewerten.",
+      "own_review": "Du kannst deine eigene Bewertung nicht melden.",
+      "duplicate": "Du hast diese Bewertung bereits gemeldet.",
+      "rate_limited": "Zu viele Meldungen; versuch es später noch einmal.",
+      "inappropriate_content": "Deine Bewertung enthält unangemessene Ausdrücke; bitte bearbeite sie und sende sie erneut."
+    },
+    "report": "Melden",
+    "blockAuthor": "Bewertungen dieser Person ausblenden",
+    "blockTitle": "Bewertungen dieser Person ausblenden?",
+    "blockBody": "Du siehst die Bewertungen dieser Person nicht mehr. Andere Gäste sehen sie weiterhin.",
+    "blockConfirm": "Ausblenden",
+    "blockDone": "Die Bewertungen dieser Person sind ausgeblendet.",
+    "actionFailed": "Nicht abgeschlossen",
+    "reportTitle": "Bewertung melden",
+    "reportBody": "Unser Team prüft sie. Eine mehrfach gemeldete Bewertung wird bis zur Prüfung ausgeblendet.",
+    "reportReason": {
+      "SPAM": "Spam oder Werbung",
+      "OFFENSIVE": "Beleidigung oder Schimpfwörter",
+      "HARASSMENT": "Belästigung oder Hassrede",
+      "FALSE_INFO": "Falsch oder irreführend",
+      "PERSONAL_INFO": "Teilt persönliche Daten",
+      "OTHER": "Sonstiges"
+    },
+    "reportNoteLabel": "Details (optional)",
+    "reportNotePlaceholder": "Warum meldest du sie?",
+    "reportSend": "Melden",
+    "reportThanks": "Danke, deine Meldung ist bei unserem Team."
   },
   "dispute": {
     "open": "Problem melden",
@@ -1522,7 +1547,10 @@
       "not_hidden": "Diese Bewertung ist bereits sichtbar; die Liste wurde aktualisiert.",
       "invalid_action": "Ungültige Aktion.",
       "invalid_data": "Der eingegebene Wert ist ungültig."
-    }
+    },
+    "filterReported": "Gemeldet",
+    "reportCount": "{{count}} Meldungen",
+    "autoHiddenTag": "Automatisch ausgeblendet"
   },
   "adminOps": {
     "tools": {

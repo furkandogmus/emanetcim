@@ -1895,7 +1895,14 @@
     "accountDeletionNotPending": "このリクエストはすでに保留中ではありません。",
     "accountDeletionSelf": "自分のリクエストは完了できません。",
     "accountDeletionPendingPayouts": "未払いの精算があります。先に支払う必要があります。",
-    "accountDeletionReason": "理由は5文字以上で入力してください。"
+    "accountDeletionReason": "理由は5文字以上で入力してください。",
+    "reviewInappropriate": "レビューに不適切な表現が含まれています。修正して再送信してください。",
+    "reviewReportOwn": "自分のレビューは報告できません。",
+    "reviewReportDuplicate": "このレビューはすでに報告済みです。",
+    "reviewReportRateLimited": "報告が多すぎます。しばらくしてからお試しください。",
+    "reviewAlreadyHidden": "このレビューはすでに非表示です。",
+    "reviewNotHidden": "このレビューは非表示ではありません。",
+    "reviewReasonRequired": "非表示にする理由を入力してください。"
   },
   "Emails": {
     "verificationSubject": "メールアドレスを確認してください",
@@ -1912,7 +1919,26 @@
     "subtitle": "1〜5つ星で体験を評価し、他の旅行者の参考にしてください。",
     "submit": "レビューを送信",
     "success": "レビューを保存しました。",
-    "error": "レビューを保存できませんでした。"
+    "error": "レビューを保存できませんでした。",
+    "report": "報告",
+    "reportSignIn": "報告するにはログイン",
+    "reportTitle": "レビューを報告",
+    "reportBody": "運営チームが確認します。複数の報告を受けたレビューは確認が終わるまで非表示になります。",
+    "reportSend": "報告する",
+    "reportReasonLabel": "理由",
+    "reportNoteLabel": "詳細(任意)",
+    "reportThanks": "ご報告ありがとうございます。運営チームに届きました。",
+    "blockAuthor": "このユーザーのレビューを非表示",
+    "blockTitle": "このユーザーのレビューを非表示にしますか?",
+    "blockBody": "この人のレビューは表示されなくなります。他のお客様には引き続き表示されます。",
+    "blockConfirm": "非表示にする",
+    "blockDone": "このユーザーのレビューを非表示にしました。",
+    "reportReason_SPAM": "スパム・宣伝",
+    "reportReason_OFFENSIVE": "暴言・侮辱",
+    "reportReason_HARASSMENT": "嫌がらせ・ヘイト",
+    "reportReason_FALSE_INFO": "虚偽・誤解を招く内容",
+    "reportReason_PERSONAL_INFO": "個人情報を含む",
+    "reportReason_OTHER": "その他"
   },
   "CityStorage": {
     "istanbul": {
@@ -2673,5 +2699,34 @@
     "cancelBody": "停止した店舗は再開されます。理由は監査ログに記録されます。",
     "cancelled": "リクエストを取り消しました。",
     "reasonLabel": "理由(5文字以上)"
+  },
+  "AdminReviews": {
+    "back": "ダッシュボードに戻る",
+    "title": "レビューの管理",
+    "intro": "報告されたレビューが先頭に表示されます。異なる3人のユーザーが報告すると、判断するまで自動で非表示になります。",
+    "empty": "このフィルターにレビューはありません。",
+    "total": "{count} 件のレビュー",
+    "filter_reported": "報告あり",
+    "filter_all": "すべて",
+    "filter_low": "低評価",
+    "filter_hidden": "非表示",
+    "reportCount": "報告 {count} 件",
+    "autoHidden": "自動で非表示",
+    "hidden": "非表示",
+    "noComment": "コメントなし",
+    "hiddenBecause": "理由: {reason}",
+    "hide": "非表示にする",
+    "unhide": "元に戻す",
+    "delete": "削除",
+    "reasonLabel": "理由",
+    "confirmTitle_hide": "このレビューを非表示にしますか?",
+    "confirmBody_hide": "お客様に表示されず、平均評価にも含まれません。報告は解決済みになります。",
+    "done_hide": "レビューを非表示にしました。",
+    "confirmTitle_unhide": "このレビューを再表示しますか?",
+    "confirmBody_unhide": "レビューが再表示され、報告は解決済みになります。",
+    "done_unhide": "レビューを再表示しました。",
+    "confirmTitle_delete": "このレビューを削除しますか?",
+    "confirmBody_delete": "レビューは完全に削除されます。",
+    "done_delete": "レビューを削除しました。"
   }
 }

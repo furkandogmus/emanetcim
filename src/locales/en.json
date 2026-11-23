@@ -1970,7 +1970,14 @@
     "accountDeletionNotPending": "The request is no longer pending.",
     "accountDeletionSelf": "You cannot complete your own request.",
     "accountDeletionPendingPayouts": "There are pending payouts; they must be paid first.",
-    "accountDeletionReason": "The reason must be at least 5 characters."
+    "accountDeletionReason": "The reason must be at least 5 characters.",
+    "reviewInappropriate": "Your review contains inappropriate language; please edit it and send again.",
+    "reviewReportOwn": "You cannot report your own review.",
+    "reviewReportDuplicate": "You already reported this review.",
+    "reviewReportRateLimited": "Too many reports; try again a bit later.",
+    "reviewAlreadyHidden": "The review is already hidden.",
+    "reviewNotHidden": "The review is not hidden.",
+    "reviewReasonRequired": "Enter a reason to hide it."
   },
   "Emails": {
     "verificationSubject": "Verify Your Email",
@@ -1987,7 +1994,26 @@
     "subtitle": "Rate your experience from 1–5 stars to help other travelers.",
     "submit": "SUBMIT REVIEW",
     "success": "Your review was saved.",
-    "error": "Could not save your review."
+    "error": "Could not save your review.",
+    "report": "Report",
+    "reportSignIn": "Sign in to report",
+    "reportTitle": "Report review",
+    "reportBody": "Our team reviews it. A review reported by several people is hidden until the review is done.",
+    "reportSend": "Report",
+    "reportReasonLabel": "Reason",
+    "reportNoteLabel": "Details (optional)",
+    "reportThanks": "Thanks, your report reached our team.",
+    "blockAuthor": "Hide this user’s reviews",
+    "blockTitle": "Hide this user’s reviews?",
+    "blockBody": "You will no longer see this person’s reviews. Other guests still see them.",
+    "blockConfirm": "Hide",
+    "blockDone": "This user’s reviews are hidden.",
+    "reportReason_SPAM": "Spam or advertising",
+    "reportReason_OFFENSIVE": "Profanity or insults",
+    "reportReason_HARASSMENT": "Harassment or hate speech",
+    "reportReason_FALSE_INFO": "False or misleading",
+    "reportReason_PERSONAL_INFO": "Shares personal information",
+    "reportReason_OTHER": "Other"
   },
   "CityStorage": {
     "istanbul": {
@@ -2831,5 +2857,34 @@
     "cancelBody": "Closed shops are reopened. The reason goes into the audit log.",
     "cancelled": "Request cancelled.",
     "reasonLabel": "Reason (at least 5 characters)"
+  },
+  "AdminReviews": {
+    "back": "Back to dashboard",
+    "title": "Review moderation",
+    "intro": "Reported reviews come first. When three different users report a review it is hidden automatically until you decide.",
+    "empty": "No reviews in this filter.",
+    "total": "{count} reviews",
+    "filter_reported": "Reported",
+    "filter_all": "All",
+    "filter_low": "Low rating",
+    "filter_hidden": "Hidden",
+    "reportCount": "{count} reports",
+    "autoHidden": "Auto-hidden",
+    "hidden": "Hidden",
+    "noComment": "No comment",
+    "hiddenBecause": "Reason: {reason}",
+    "hide": "Hide",
+    "unhide": "Restore",
+    "delete": "Delete",
+    "reasonLabel": "Reason",
+    "confirmTitle_hide": "Hide this review?",
+    "confirmBody_hide": "Guests will not see it and it leaves the average. Reports are closed.",
+    "done_hide": "Review hidden.",
+    "confirmTitle_unhide": "Show this review again?",
+    "confirmBody_unhide": "The review becomes visible again and reports are closed.",
+    "done_unhide": "Review visible again.",
+    "confirmTitle_delete": "Delete this review?",
+    "confirmBody_delete": "The review is deleted permanently.",
+    "done_delete": "Review deleted."
   }
 }

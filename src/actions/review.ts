@@ -47,6 +47,9 @@ export async function addReviewAction(data: {
     return { success: true, review };
   } catch (error: unknown) {
     const err = error as { code?: string };
+    if (error instanceof Error && error.message === "REVIEW_INAPPROPRIATE") {
+      return { success: false, error: "Errors.reviewInappropriate" };
+    }
     console.error("addReviewAction Error:", error);
     if (err.code === "P2002") {
       return { success: false, error: "Errors.duplicateReview" };

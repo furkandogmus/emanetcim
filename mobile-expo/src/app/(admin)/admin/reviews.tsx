@@ -34,7 +34,8 @@ export default function AdminReviewsScreen() {
   const { shop, name } = useLocalSearchParams<{ shop?: string; name?: string }>();
   const { impersonating } = useAuth();
   const canEdit = canEditAdminContent(impersonating);
-  const [filter, setFilter] = useState<AdminReviewFilter>("all");
+  // Bildirilenler kuyrugu once (App Review 1.2); dukkan ekranindan gelince tum yorumlar.
+  const [filter, setFilter] = useState<AdminReviewFilter>(shop ? "all" : "reported");
   const query = useAdminReviews(filter, shop ?? null);
   const items = flattenPages(query.data, (p) => p.items);
   const total = query.data?.pages[0]?.total;
@@ -79,6 +80,7 @@ export default function AdminReviewsScreen() {
       <View style={styles.filters}>
         <Segmented
           options={[
+            { value: "reported", label: t("adminShop.filterReported") },
             { value: "all", label: t("adminShop.filterAll") },
             { value: "low", label: t("adminShop.filterLow") },
             { value: "hidden", label: t("adminShop.filterHidden") },
@@ -175,10 +177,17 @@ function ReviewRow({
         <AppText variant="caption" style={{ flex: 1 }} numberOfLines={1}>
           {r.guestName || t("partner.guest")} · {formatDay(r.createdAt)}
         </AppText>
+        {r.openReportCount > 0 ? (
+          <View style={[styles.tag, { backgroundColor: colors.dangerSoft }]}>
+            <AppText variant="label" style={{ fontSize: 11 }}>
+              {t("adminShop.reportCount", { count: r.openReportCount })}
+            </AppText>
+          </View>
+        ) : null}
         {r.hidden ? (
           <View style={styles.tag}>
             <AppText variant="label" style={{ fontSize: 11 }}>
-              {t("adminShop.hiddenTag")}
+              {t(r.autoHidden ? "adminShop.autoHiddenTag" : "adminShop.hiddenTag")}
             </AppText>
           </View>
         ) : null}
@@ -196,6 +205,12 @@ function ReviewRow({
       {r.hidden && r.hiddenReason ? (
         <AppText variant="caption">{t("adminShop.hiddenBecause", { reason: r.hiddenReason })}</AppText>
       ) : null}
+      {r.reports.map((rep, i) => (
+        <AppText key={i} variant="caption" style={{ color: colors.danger }}>
+          {t(`review.reportReason.${rep.reason}`)}
+          {rep.note ? `: ${rep.note}` : ""}
+        </AppText>
+      ))}
       {canEdit ? (
         <View style={styles.actions}>
           <Button

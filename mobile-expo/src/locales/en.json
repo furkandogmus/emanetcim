@@ -966,8 +966,33 @@
       "booking_not_completed": "You can review after picking up your bags.",
       "duplicate_review": "You've already reviewed this booking.",
       "not_found": "Booking not found.",
-      "forbidden": "You can't review this booking."
-    }
+      "forbidden": "You can't review this booking.",
+      "own_review": "You cannot report your own review.",
+      "duplicate": "You already reported this review.",
+      "rate_limited": "Too many reports; try again a bit later.",
+      "inappropriate_content": "Your review contains inappropriate language; please edit it and send again."
+    },
+    "report": "Report",
+    "blockAuthor": "Hide this user’s reviews",
+    "blockTitle": "Hide this user’s reviews?",
+    "blockBody": "You will no longer see this person’s reviews. Other guests still see them.",
+    "blockConfirm": "Hide",
+    "blockDone": "This user’s reviews are hidden.",
+    "actionFailed": "Could not complete",
+    "reportTitle": "Report review",
+    "reportBody": "Our team reviews it. A review reported by several people is hidden until the review is done.",
+    "reportReason": {
+      "SPAM": "Spam or advertising",
+      "OFFENSIVE": "Profanity or insults",
+      "HARASSMENT": "Harassment or hate speech",
+      "FALSE_INFO": "False or misleading",
+      "PERSONAL_INFO": "Shares personal information",
+      "OTHER": "Other"
+    },
+    "reportNoteLabel": "Details (optional)",
+    "reportNotePlaceholder": "Why are you reporting it?",
+    "reportSend": "Report",
+    "reportThanks": "Thanks, your report reached our team."
   },
   "dispute": {
     "open": "Report a problem",
@@ -1522,7 +1547,10 @@
       "not_hidden": "This review is already visible; the list was refreshed.",
       "invalid_action": "Invalid action.",
       "invalid_data": "The value entered is invalid."
-    }
+    },
+    "filterReported": "Reported",
+    "reportCount": "{{count}} reports",
+    "autoHiddenTag": "Auto-hidden"
   },
   "adminOps": {
     "tools": {

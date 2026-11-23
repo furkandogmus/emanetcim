@@ -227,8 +227,8 @@ describe("resolveMobileShopViewer", () => {
   });
 
   it("bayrak `reviewSandbox`tan; `User.isTest` etiketi kum havuzu acmaz", async () => {
-    expect(await resolveMobileShopViewer(get("/x", "real"))).toEqual({ viewer: { reviewSandbox: false }, stale: false });
-    expect(await resolveMobileShopViewer(get("/x", "test"))).toEqual({ viewer: { reviewSandbox: true }, stale: false });
+    expect(await resolveMobileShopViewer(get("/x", "real"))).toEqual({ viewer: { id: expect.any(String), reviewSandbox: false }, stale: false });
+    expect(await resolveMobileShopViewer(get("/x", "test"))).toEqual({ viewer: { id: expect.any(String), reviewSandbox: true }, stale: false });
   });
 
   it("uclar bayat token'da `X-Auth-Stale: 1` koyar, gecerli/olmayan token'da koymaz", async () => {

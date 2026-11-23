@@ -1,5 +1,6 @@
 "use client";
 
+import ReviewActions from "@/components/guest/ReviewActions";
 import ShopHoursList from "@/components/guest/ShopHoursList";
 import { hoursForDate, type ClosureRange, type ShopSchedule, type WeeklyDay } from "@/lib/shop-schedule";
 import { todayInZone } from "@/lib/stay-days";
@@ -97,17 +98,23 @@ interface ShopDetailClientProps {
   pricingRules: PricingRules;
   /** Talep testi noktasi icin "kac kisi istiyor"; isletilen dukkanda 0 ve kullanilmaz. */
   prelaunchWantCount: number;
+  /** Yorum bildir/gizle oturum ister; oturumsuzda giris baglantisi cizilir. */
+  signedIn?: boolean;
 }
 
 export default function ShopDetailClient({
   shop,
   pricingRules,
   prelaunchWantCount,
+  signedIn = false,
 }: ShopDetailClientProps) {
   const router = useRouter();
   const t = useTranslations("Guest");
   const tCommon = useTranslations("Common");
   const tSchedule = useTranslations("Partner.schedule");
+  const [hiddenReviewIds, setHiddenReviewIds] = useState<ReadonlySet<string>>(new Set());
+  const hideReview = (id: string) => setHiddenReviewIds((prev) => new Set(prev).add(id));
+  const reviews = shop.reviews.filter((r) => !hiddenReviewIds.has(r.id));
   /**
    * Sigorta gerçekten var mı? Zaten elimizde olan `pricingRules`'tan türüyor —
    * ayrı bir sorgu veya bağlam gerekmiyor (P1-20).
@@ -373,7 +380,7 @@ export default function ShopDetailClient({
                 Simdi yalnizca gosterilecek fazladan yorum varken cikiyor
                 ve masaustu surumunun zaten yaptigi gibi tumunu acar.
               */}
-              {shop.reviews.length > 1 ? (
+              {reviews.length > 1 ? (
                 <button
                   type="button"
                   onClick={() => setShowAllReviews((v) => !v)}
@@ -383,11 +390,11 @@ export default function ShopDetailClient({
                 </button>
               ) : null}
             </div>
-            {shop.reviews.length === 0 ? (
+            {reviews.length === 0 ? (
               <p className="rounded-3xl bg-white p-4 text-sm text-gray-500">{t("shopDetailNoReviews")}</p>
             ) : (
               <div className="flex flex-col gap-3">
-                {(showAllReviews ? shop.reviews : shop.reviews.slice(0, 1)).map((r) => (
+                {(showAllReviews ? reviews : reviews.slice(0, 1)).map((r) => (
                   <div key={r.id} className="rounded-3xl border border-gray-100 bg-white p-4">
                     <div className="flex items-center justify-between gap-2">
                       <p className="font-black text-gray-900">{r.authorLabel || t("guestDefaultName")}</p>
@@ -399,6 +406,7 @@ export default function ShopDetailClient({
                     {r.comment ? (
                       <p className="mt-2 text-sm leading-relaxed text-gray-600">{r.comment}</p>
                     ) : null}
+                    <ReviewActions reviewId={r.id} signedIn={signedIn} onHidden={hideReview} />
                   </div>
                 ))}
               </div>
@@ -664,15 +672,15 @@ export default function ShopDetailClient({
 
         <section className="bg-white rounded-3xl p-5 shadow-sm border border-gray-100">
           <h2 className="id-eyebrow text-gray-400 mb-4">
-            {t("shopDetailReviews")} ({shop.reviews.length})
+            {t("shopDetailReviews")} ({reviews.length})
           </h2>
-          {shop.reviews.length === 0 ? (
+          {reviews.length === 0 ? (
             <p className="text-sm text-gray-500 font-medium">
               {t("shopDetailNoReviews")}
             </p>
           ) : (
             <ul className="flex flex-col gap-4">
-              {shop.reviews.map((r) => (
+              {reviews.map((r) => (
                 <li
                   key={r.id}
                   className="border-b border-gray-50 last:border-0 pb-4 last:pb-0"
@@ -694,6 +702,7 @@ export default function ShopDetailClient({
                   <p className="text-[10px] text-gray-400 mt-2 font-medium">
                     {formatDateInZone(r.createdAt, { locale: dateLocale, timeZone: PLATFORM_TIMEZONE, dateStyle: "medium" })}
                   </p>
+                  <ReviewActions reviewId={r.id} signedIn={signedIn} onHidden={hideReview} />
                 </li>
               ))}
             </ul>
