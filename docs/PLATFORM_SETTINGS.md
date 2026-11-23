@@ -31,5 +31,12 @@ Esnaf QR afişi (`/partner/poster`) bayraktan bağımsız çalışır: QR `/app?
 gösterir, mağaza kapalıyken açılış sayfasına düşer. `/app` isabetleri (kaynak, platform,
 sonuç; IP ve UA tutulmaz) `AppLinkHit` tablosunda, son 30 gün özeti ayar sayfasının altında.
 
-Bayrak değişince kök layout yeniden doğrulanır (`revalidatePath`). Bayrak okuması 60 sn
-önbellekli; altbilgi bayrağı istemcide `/api/app-stores`ten okur.
+Bayrak değişince kök layout yeniden doğrulanır (`revalidatePath`); build veritabanısız
+olduğu için statik sayfalar ayrıca 5 dakikalık ISR ile (`[locale]/layout.tsx`) gerçek bayrağa
+döner. Bayrak okuması 60 sn önbellekli; altbilgi bayrağı istemcide `/api/app-stores`ten okur.
+
+Kaynak etiketi yalnızca `web-*`, `email-*`, `afis-<shopId>` ve kısa bir kampanya listesi
+(instagram, facebook, tiktok, google, whatsapp, qr, airbnb) olabilir; gerisi `other`.
+İsabetler 90 gün tutulur (`cleanup` işi siler). Sayımlar üst sınırdır: e-posta
+sağlayıcılarının bağlantı tarayıcıları (Outlook Safe Links vb.) bazen tarayıcı UA'sıyla
+gelir ve bot sayılmaz, bu yüzden `email-onay` gerçek tıklamadan biraz yüksek okunabilir.

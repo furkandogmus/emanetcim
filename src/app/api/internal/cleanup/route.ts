@@ -3,6 +3,7 @@ import prisma from "@/lib/db";
 import { withJobRun } from "@/lib/jobs/run-ledger";
 import logger from "@/lib/logger";
 import { authorizeCron } from "@/lib/internal-api-guard";
+import { purgeOldAppLinkHits } from "@/services/AppLinkService";
 
 // Yerel `authorize()` kopyası kaldırıldı (2026-08-22): sır karşılaştırmasını `===`
 // ile yapıyordu, yani sabit zamanlı değildi ve dört uçtaki kopyalardan biriydi.
@@ -47,12 +48,15 @@ async function runCleanup(req: NextRequest): Promise<NextResponse> {
           where: { createdAt: { lt: analyticsRetentionCutoff } },
         }),
       ]);
+    // `/app` isabet defteri de 90 gunle sinirli (AppLinkService).
+    const deletedAppLinkHits = await purgeOldAppLinkHits(now);
 
     logger.info(
       {
         deletedTokens: deletedTokens.count,
         deletedSessions: deletedSessions.count,
         deletedAnalyticsEvents: deletedAnalyticsEvents.count,
+        deletedAppLinkHits,
       },
       "database_cleanup_success"
     );
@@ -63,6 +67,7 @@ async function runCleanup(req: NextRequest): Promise<NextResponse> {
         deletedTokens: deletedTokens.count,
         deletedSessions: deletedSessions.count,
         deletedAnalyticsEvents: deletedAnalyticsEvents.count,
+        deletedAppLinkHits,
       },
     };
   });
