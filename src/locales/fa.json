@@ -368,7 +368,14 @@
     "partnerBookingsSearchLabel": "جستجوی رزروها",
     "partnerBookingsSearchPlaceholder": "کد، نام مهمان یا ۴ رقم آخر تلفن",
     "partnerBookingsSearchSubmit": "جستجو",
-    "partnerBookingsSearchTruncated": "{total} نتیجه؛ {count} مورد جدیدتر نمایش داده می‌شود. جستجو را محدودتر کنید."
+    "partnerBookingsSearchTruncated": "{total} نتیجه؛ {count} مورد جدیدتر نمایش داده می‌شود. جستجو را محدودتر کنید.",
+    "partnerLateTitle": "مهمان تأخیر دارد",
+    "partnerLateCloseAt": "بسته شدن خودکار: {time}",
+    "partnerLateHoldActive": "منتظر مهمان هستید. تا: {time}",
+    "partnerLateHint": "اگر چمدان را تحویل گرفتید، ثبت تحویل کنید. اگر مهمان تماس گرفت، می‌توانید منتظر بمانید.",
+    "partnerLateHold": "منتظر مهمان بمان (+۳۰ دقیقه)",
+    "partnerLateHoldDone": "رزرو ۳۰ دقیقه دیگر باز می‌ماند.",
+    "partnerLateHoldLimitReached": "به زمان تحویل گرفتن رسیدید؛ بیش از این نمی‌توان منتظر ماند."
   },
   "Guest": {
     "heroTitle": "چمدان را بسپارید، آزاد بگردید",
@@ -1858,7 +1865,8 @@
     "noShowTooEarly": "عدم حضور فقط ۶۰ دقیقه پس از زمان تحویل قابل ثبت است.",
     "invalidName": "نام باید ۱ تا ۱۰۰ نویسه باشد.",
     "currentPasswordRequired": "رمز عبور فعلی خود را وارد کنید.",
-    "invalidCurrentPassword": "رمز عبور فعلی نادرست است."
+    "invalidCurrentPassword": "رمز عبور فعلی نادرست است.",
+    "lateHoldLimit": "به زمان تحویل گرفتن رسیدید؛ رزرو بیش از این نگه داشته نمی‌شود."
   },
   "Emails": {
     "verificationSubject": "ایمیل خود را تأیید کنید",

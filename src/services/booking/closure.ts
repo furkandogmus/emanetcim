@@ -36,6 +36,8 @@ export type ClosureErrorCode =
   | 'NOTE_REQUIRED'
   | 'INVALID_REASON'
   | 'TOO_EARLY'
+  /** "Misafiri bekle" alma saatine dayandi, daha fazla uzatilamaz. */
+  | 'HOLD_LIMIT'
   | 'UNKNOWN';
 
 export type ClosureResult = { ok: true } | { ok: false; code: ClosureErrorCode };

@@ -368,7 +368,14 @@
     "partnerBookingsSearchLabel": "Rezervasyon ara",
     "partnerBookingsSearchPlaceholder": "Kod, misafir adı ya da telefonun son 4 hanesi",
     "partnerBookingsSearchSubmit": "Ara",
-    "partnerBookingsSearchTruncated": "{total} eşleşme var; en yeni {count} tanesi gösteriliyor. Aramayı daraltın."
+    "partnerBookingsSearchTruncated": "{total} eşleşme var; en yeni {count} tanesi gösteriliyor. Aramayı daraltın.",
+    "partnerLateTitle": "Misafir gecikti",
+    "partnerLateCloseAt": "Otomatik kapanış: {time}",
+    "partnerLateHoldActive": "Misafiri bekliyorsun. Son saat: {time}",
+    "partnerLateHint": "Valizi aldıysan teslim al. Misafir seni aradıysa bekleyebilirsin.",
+    "partnerLateHold": "Misafiri bekle (+30 dk)",
+    "partnerLateHoldDone": "Rezervasyon 30 dakika daha açık kalacak.",
+    "partnerLateHoldLimitReached": "Alma saatine ulaşıldı, daha fazla beklenemez."
   },
   "Guest": {
     "heroTitle": "Valizini Güvenle Bırak, Özgürce Gez",
@@ -1922,7 +1929,8 @@
     "noShowTooEarly": "Misafir gelmedi, ancak bırakma saatinden 60 dakika sonra işaretlenebilir.",
     "invalidName": "Ad 1-100 karakter olmalı.",
     "currentPasswordRequired": "Mevcut şifrenizi girin.",
-    "invalidCurrentPassword": "Mevcut şifre hatalı."
+    "invalidCurrentPassword": "Mevcut şifre hatalı.",
+    "lateHoldLimit": "Alma saatine ulaşıldı; rezervasyon daha fazla bekletilemez."
   },
   "Emails": {
     "verificationSubject": "E-postanızı Doğrulayın",

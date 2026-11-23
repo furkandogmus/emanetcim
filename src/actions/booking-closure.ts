@@ -11,6 +11,7 @@ import {
   type ClosureErrorCode,
   type ClosureResult,
 } from "@/services/booking/closure";
+import { holdLateBooking } from "@/services/booking/late-hold";
 
 /**
  * Rezervasyon kapatma action'lari. Govde `src/services/booking/closure.ts`te;
@@ -25,6 +26,7 @@ const CLOSURE_ERROR_TO_KEY: Record<ClosureErrorCode, string> = {
   NOTE_REQUIRED: "Errors.closureNoteRequired",
   INVALID_REASON: "Errors.closureInvalidReason",
   TOO_EARLY: "Errors.noShowTooEarly",
+  HOLD_LIMIT: "Errors.lateHoldLimit",
   UNKNOWN: "Errors.generic",
 };
 
@@ -62,5 +64,13 @@ export async function markNoShowAction(bookingId: string) {
   const auth = await requirePartner();
   if (!auth.ok) return { success: false as const, error: auth.error };
   const result = await markNoShow(bookingId, auth.actor);
+  return toActionResult(result, bookingId);
+}
+
+/** "Misafiri bekle" (gec birakma). Govde `src/services/booking/late-hold.ts`. */
+export async function holdLateBookingAction(bookingId: string) {
+  const auth = await requirePartner();
+  if (!auth.ok) return { success: false as const, error: auth.error };
+  const result = await holdLateBooking(bookingId, auth.actor);
   return toActionResult(result, bookingId);
 }

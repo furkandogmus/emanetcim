@@ -23,6 +23,8 @@ import PartnerBookingActionLinks from "@/components/partner/PartnerBookingAction
 import BagRevisionTrigger from "@/components/partner/BagRevisionTrigger";
 import PartnerBookingClosureActions from "@/components/partner/PartnerBookingClosureActions";
 import { noShowAvailableAt } from "@/lib/booking-closure";
+import { decideLateHold, isLateActionableStatus, lateCloseAt } from "@/lib/late-dropoff";
+import PartnerLateHoldAction from "@/components/partner/PartnerLateHoldAction";
 import type { Metadata } from "next";
 
 export async function generateMetadata({
@@ -101,6 +103,11 @@ export default async function PartnerBookingDetailPage({
   // Valiz birakilmadiysa kapatma eylemleri; "gelmedi" check-in + 60 dk'da acilir.
   const noShowAt = noShowAvailableAt(booking);
   const noShowReady = !!noShowAt && new Date() >= noShowAt;
+  // Gec birakma: birakma saati gectiyse otomatik kapanis ve "Misafiri bekle".
+  const now = new Date();
+  const closeAt = lateCloseAt(booking);
+  const late = !!closeAt && isLateActionableStatus(booking.status) && now >= booking.checkInTime;
+  const holdActive = !!booking.lateHoldUntil && booking.lateHoldUntil > now;
 
   return (
     <div className="bg-gray-50 pb-20">
@@ -277,6 +284,15 @@ export default async function PartnerBookingDetailPage({
         </div>
 
         <PartnerBookingActionLinks status={booking.status} bookingId={booking.id} />
+
+        {late && closeAt && (
+          <PartnerLateHoldAction
+            bookingId={booking.id}
+            closeAtLabel={fmt(closeAt)}
+            holdUntilLabel={holdActive && booking.lateHoldUntil ? fmt(booking.lateHoldUntil) : null}
+            canHold={decideLateHold(booking, now).ok}
+          />
+        )}
 
         {noShowAt && (
           <PartnerBookingClosureActions
