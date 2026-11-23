@@ -43,7 +43,7 @@ async function runCleanup(req: NextRequest): Promise<NextResponse> {
           where: { expires: { lt: now } },
         }),
         // AnalyticsEvent sınırsız büyümesin diye 90 günden eskisi silinir —
-        // bkz. docs/KOD_TARAMA_2026-08-23.md, kullanıcı analitiği bölümü.
+        // bkz. docs/archive/2026-11-23-denetim-gecmisi/KOD_TARAMA_2026-08-23.md, kullanıcı analitiği bölümü.
         prisma.analyticsEvent.deleteMany({
           where: { createdAt: { lt: analyticsRetentionCutoff } },
         }),
