@@ -16,7 +16,7 @@ import { api } from "@/lib/api";
 import { errorMessage } from "@/lib/errors";
 import { formatDay, formatDayTime } from "@/lib/format";
 import { SITE_ORIGIN } from "@/lib/images";
-import { telUrl, waUrl } from "@/lib/phone";
+import { telUrl, waUrl, formatPhone } from "@/lib/phone";
 import { useViewAs } from "@/lib/use-view-as";
 import { languageInfo } from "@/lib/languages";
 import { notify } from "@/lib/notify";
@@ -294,7 +294,7 @@ function Detail({ shop: s }: { shop: AdminShopDetail }) {
             <View style={{ gap: 2 }}>
               <AppText variant="bodyMedium">{s.owner.name || "—"}</AppText>
               {s.owner.email ? <AppText variant="caption">{s.owner.email}</AppText> : null}
-              {s.owner.phone ? <AppText variant="caption">{s.owner.phone}</AppText> : null}
+              {s.owner.phone ? <AppText variant="caption">{formatPhone(s.owner.phone)}</AppText> : null}
             </View>
             <View style={styles.actions}>
               {s.owner.phone ? (

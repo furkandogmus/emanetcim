@@ -13,7 +13,7 @@ import { errorMessage } from "@/lib/errors";
 import { formatDayTime } from "@/lib/format";
 import { SITE_ORIGIN } from "@/lib/images";
 import { languageInfo } from "@/lib/languages";
-import { telUrl, waUrl } from "@/lib/phone";
+import { telUrl, waUrl, formatPhone } from "@/lib/phone";
 import { useViewAs } from "@/lib/use-view-as";
 import { useAdminBooking } from "@/lib/queries";
 import type { AdminBookingDetail } from "@/lib/types";
@@ -94,7 +94,7 @@ function Detail({ b, onWeb }: { b: AdminBookingDetail; onWeb: () => void }) {
           <View style={{ gap: 2 }}>
             <AppText variant="bodyMedium">{b.guest.name || t("partner.guest")}</AppText>
             {b.guest.email ? <AppText variant="caption">{b.guest.email}</AppText> : null}
-            {b.guest.phone ? <AppText variant="caption">{b.guest.phone}</AppText> : null}
+            {b.guest.phone ? <AppText variant="caption">{formatPhone(b.guest.phone)}</AppText> : null}
           </View>
           <View style={styles.actions}>
             {b.guest.phone ? (
@@ -134,7 +134,7 @@ function Detail({ b, onWeb }: { b: AdminBookingDetail; onWeb: () => void }) {
             {b.shop.ownerName ? (
               <AppText variant="caption">
                 {b.shop.ownerName}
-                {b.shop.phone ? ` · ${b.shop.phone}` : ""}
+                {b.shop.phone ? ` · ${formatPhone(b.shop.phone)}` : ""}
               </AppText>
             ) : null}
           </View>
