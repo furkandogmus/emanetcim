@@ -16,6 +16,8 @@ const m = vi.hoisted(() => {
       legalAcceptance: { deleteMany: ok() },
       pushSubscription: { deleteMany: ok() },
       mobilePushToken: { deleteMany: ok() },
+      reviewReport: { deleteMany: ok() },
+      reviewBlock: { deleteMany: ok() },
       mobileInstall: { deleteMany: ok() },
       user: { update: ok(), findUnique: vi.fn().mockResolvedValue({ email: "Ada@Example.com" }) },
       passwordResetCode: { deleteMany: ok() },
@@ -23,10 +25,12 @@ const m = vi.hoisted(() => {
       $transaction: vi.fn().mockResolvedValue([]),
     },
     closeExpired: vi.fn(),
+    revoke: vi.fn().mockResolvedValue(0),
   };
 });
 
 vi.mock("@/lib/db", () => ({ default: m.prisma }));
+vi.mock("@/services/AppleTokenService", () => ({ appleTokenService: { revokeForUser: m.revoke } }));
 vi.mock("@/lib/audit-log", () => ({ writeAuditLog: vi.fn() }));
 vi.mock("@/services/booking/closure", () => ({ closeExpiredBookingsForGuest: m.closeExpired }));
 
@@ -47,6 +51,13 @@ describe("hesap silme ve suresi dolmus rezervasyonlar", () => {
     expect(where.NOT.checkOutTime.lt).toBeInstanceOf(Date);
     expect(m.closeExpired).toHaveBeenCalledWith("g1", expect.any(Date));
     expect(m.prisma.$transaction).toHaveBeenCalled();
+  });
+
+  it("Apple yetkisi hesap satirlari silinmeden once iptal edilir (5.1.1(v))", async () => {
+    m.prisma.booking.count.mockResolvedValue(0);
+    await accountPrivacyService.anonymizeSelf({ userId: "g1", role: "GUEST", ip: null });
+    expect(m.revoke).toHaveBeenCalledWith("g1");
+    expect(m.revoke.mock.invocationCallOrder[0]).toBeLessThan(m.prisma.$transaction.mock.invocationCallOrder[0]);
   });
 
   it("gercekten aktif rezervasyon varsa hicbir sey kapatilmaz", async () => {

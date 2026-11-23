@@ -14,11 +14,14 @@ import { resolveServerSessionId } from "@/lib/analytics-server";
 import logger from "@/lib/logger";
 import { toMobileUser } from "@/lib/mobile-dto";
 import { recordMobileLegalAcceptance } from "@/services/auth/legal-acceptance";
+import { appleTokenService } from "@/services/AppleTokenService";
 
 const APPLE_JWKS = createRemoteJWKSet(new URL("https://appleid.apple.com/auth/keys"));
 
 const schema = z.object({
   identityToken: z.string(),
+  // Hesap silinince Apple yetkisini iptal edebilmek icin (5.1.1(v)); eski surumler gondermez.
+  authorizationCode: z.string().max(4096).optional(),
   givenName: z.string().optional(),
   familyName: z.string().optional(),
   acceptedLegal: z.boolean().optional(),
@@ -142,6 +145,13 @@ export async function POST(req: NextRequest) {
     // Yalnizca Apple'in dogruladigi ve BU hesabin olan e-posta: baglama icin kanit.
     if (email && user.email?.toLowerCase() === email) {
       await markEmailVerifiedByProvider(user.id);
+    }
+
+    const code = parsed.data.authorizationCode;
+    if (code) {
+      void appleTokenService
+        .exchangeAndStore({ providerAccountId: appleSub, authorizationCode: code, clientId: audience })
+        .catch((err) => logger.warn({ err }, "apple_token_store_failed"));
     }
 
     const access = await signAccessToken(user.id, user.role, user.tokenVersion);

@@ -34,6 +34,7 @@ adresleri `http://localhost:3000/api/auth/callback/google` ve
 | `APPLE_KEY_ID`, `APPLE_PRIVATE_KEY_B64` | Sign in with Apple anahtarı ve base64 `.p8` içeriği (SSM) |
 | `APPLE_TEAM_ID` | Varsayılan `524ZQ83Q42`; AASA da kullanır |
 | `APPLE_BUNDLE_ID` | Mobil token audience'ı, varsayılan `com.bagajpark` |
+| `APPLE_TOKEN_ENCRYPTION_KEY` | Apple refresh token'ını şifreleyen 32 bayt anahtar (`openssl rand -base64 32`, SSM). Boşsa token saklanmaz ve hesap silmede Apple yetkisi iptal edilemez (`AppleTokenService`) |
 | `APPLE_SECRET` | Eski kurulum, doluysa önceliklidir; boş bırak |
 
 İstemci sırrı en fazla 6 ay geçerli bir ES256 JWT'dir; elle üretilirse 6 ayda sessizce biter.

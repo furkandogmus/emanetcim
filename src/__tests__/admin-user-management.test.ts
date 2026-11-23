@@ -22,6 +22,8 @@ const m = vi.hoisted(() => {
       legalAcceptance: { deleteMany: ok() },
       pushSubscription: { deleteMany: ok() },
       mobilePushToken: { deleteMany: ok() },
+      reviewReport: { deleteMany: ok() },
+      reviewBlock: { deleteMany: ok() },
       mobileInstall: { deleteMany: ok() },
       passwordResetCode: { deleteMany: ok() },
       verificationToken: { deleteMany: ok() },
@@ -35,6 +37,7 @@ const m = vi.hoisted(() => {
 });
 
 vi.mock("@/lib/db", () => ({ default: m.prisma }));
+vi.mock("@/services/AppleTokenService", () => ({ appleTokenService: { revokeForUser: vi.fn().mockResolvedValue(0) } }));
 vi.mock("@/lib/audit-log", () => ({ writeAuditLog: m.audit }));
 vi.mock("@/services/auth/password-reset", () => ({ requestPasswordReset: m.requestPasswordReset }));
 vi.mock("@/lib/mail", () => ({ sendVerificationEmail: m.sendVerificationEmail }));

@@ -13,8 +13,14 @@ const b64url = (buf: Buffer) => buf.toString("base64url");
 export function buildAppleClientSecret(
   env: NodeJS.ProcessEnv = process.env,
   nowS: number = Math.floor(Date.now() / 1000),
+  /**
+   * Sirrin `sub`u. Varsayilan web Services ID (`APPLE_ID`). Uygulamadan gelen
+   * `authorizationCode` paket kimligine (`APPLE_BUNDLE_ID`) verilir; onun token
+   * degisimi ve iptali o kimlikle imzalanmis sir ister.
+   */
+  clientIdOverride?: string,
 ): string | null {
-  const clientId = env.APPLE_ID?.trim();
+  const clientId = (clientIdOverride ?? env.APPLE_ID)?.trim();
   const keyId = env.APPLE_KEY_ID?.trim();
   const teamId = env.APPLE_TEAM_ID?.trim();
   const keyB64 = env.APPLE_PRIVATE_KEY_B64?.trim();
@@ -52,6 +58,25 @@ export function appleClientSecret(): string | null {
     cachedSecret = { value: buildAppleClientSecret(process.env, nowS), atS: nowS };
   }
   return cachedSecret.value;
+}
+
+const cachedByClient = new Map<string, { value: string | null; atS: number }>();
+
+/**
+ * Belirli bir Apple istemcisi (web Services ID ya da uygulama paket kimligi) icin
+ * istemci sirri. Token degisimi ve iptali, token'i alan istemcinin kimligiyle yapilir.
+ * `APPLE_SECRET` elle verilmisse yalnizca web istemcisi (`APPLE_ID`) icin gecerlidir.
+ */
+export function appleClientSecretFor(clientId: string): string | null {
+  if (clientId === process.env.APPLE_ID?.trim()) return appleClientSecret();
+  const nowS = Math.floor(Date.now() / 1000);
+  const hit = cachedByClient.get(clientId);
+  if (!hit || nowS - hit.atS > 30 * 24 * 60 * 60) {
+    const value = buildAppleClientSecret(process.env, nowS, clientId);
+    cachedByClient.set(clientId, { value, atS: nowS });
+    return value;
+  }
+  return hit.value;
 }
 
 /**
