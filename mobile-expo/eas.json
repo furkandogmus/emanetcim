@@ -57,7 +57,8 @@
         "serviceAccountKeyPath": "./play-service-account.json"
       },
       "ios": {
-        "appleTeamId": "524ZQ83Q42"
+        "appleTeamId": "524ZQ83Q42",
+        "ascAppId": "6838203193"
       }
     },
     "closed": {
