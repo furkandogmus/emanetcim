@@ -1,6 +1,9 @@
 /** Tarayıcının URL ayrıştırıcısı bu karakterleri URL'den ATAR (WHATWG). */
 const URL_STRIPPED_CHARS = /[\t\n\r]/g;
 
+/** Bundan uzun donus adresi gercek bir secim degil; sorgu dizesini sisirmesin. */
+export const MAX_AUTH_CALLBACK_URL_LENGTH = 2048;
+
 /**
  * NextAuth `callbackUrl` — iç bind (0.0.0.0:3000), localhost vb. tam URL’leri
  * yalnızca path + query’ye indirger; open redirect riskini azaltır.
@@ -22,7 +25,7 @@ const URL_STRIPPED_CHARS = /[\t\n\r]/g;
  * soruyoruz.
  */
 export function sanitizeAuthCallbackUrl(raw: string | null | undefined): string {
-  if (raw == null || raw === "") return "/";
+  if (raw == null || raw === "" || raw.length > MAX_AUTH_CALLBACK_URL_LENGTH) return "/";
   const trimmed = raw
     .trim()
     .replace(URL_STRIPPED_CHARS, "")
@@ -69,4 +72,13 @@ function assertSameOrigin(candidate: string): string {
   } catch {
     return "/";
   }
+}
+
+/**
+ * `/login` ya da `/register` baglantisina suzulmus `callbackUrl` ekler; hedef
+ * yoksa ("/") parametresiz yol doner.
+ */
+export function withAuthCallback(path: "/login" | "/register", raw: string | null | undefined): string {
+  const safe = sanitizeAuthCallbackUrl(raw);
+  return safe === "/" ? path : `${path}?callbackUrl=${encodeURIComponent(safe)}`;
 }

@@ -4,7 +4,7 @@
  * sekmede acilabilir ve `localStorage` taslagi orada yoktur. Araci cerezi
  * (`bp_aff`, HttpOnly, `path=/`) giristen etkilenmez; burada tasinmaz.
  */
-import { sanitizeAuthCallbackUrl } from "@/lib/auth-callback-url";
+import { sanitizeAuthCallbackUrl, withAuthCallback } from "@/lib/auth-callback-url";
 import { dateOnlyFromParam } from "@/lib/stay-days";
 
 export type CheckoutSelection = {
@@ -68,8 +68,7 @@ export function buildCheckoutReturnPath(
  * yonlendiren bir `callbackUrl` uretilmez.
  */
 export function checkoutAuthHref(page: "login" | "register", returnPath: string): string {
-  const safe = sanitizeAuthCallbackUrl(returnPath);
-  return safe === "/" ? `/${page}` : `/${page}?callbackUrl=${encodeURIComponent(safe)}`;
+  return withAuthCallback(`/${page}`, returnPath);
 }
 
 /** Checkout sayfasinin arama parametrelerinden dogrulanmis secim. */

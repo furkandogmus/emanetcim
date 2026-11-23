@@ -5,7 +5,7 @@ import { signIn, getSession } from 'next-auth/react';
 import { Link } from '@/i18n/routing';
 import { useSearchParams } from 'next/navigation';
 import { useMemo, useState, useEffect } from 'react';
-import { sanitizeAuthCallbackUrl } from '@/lib/auth-callback-url';
+import { sanitizeAuthCallbackUrl, withAuthCallback } from '@/lib/auth-callback-url';
 import { authErrorMessage } from '@/lib/auth-error-message';
 import { resolveLoginLanding } from '@/lib/auth-landing';
 import { Package, ShieldCheck, Loader2, Store, Shield, Mail, Lock, ChevronDown } from 'lucide-react';
@@ -489,9 +489,7 @@ export default function LoginPage({
               href={
                 activeTab === 'PARTNER'
                   ? "/register?role=partner"
-                  : callbackUrl !== '/'
-                    ? `/register?callbackUrl=${encodeURIComponent(callbackUrl)}`
-                    : "/register"
+                  : withAuthCallback("/register", callbackUrl)
               } 
               className="text-orange-600 font-bold hover:underline"
             >
