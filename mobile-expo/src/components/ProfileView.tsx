@@ -1,5 +1,6 @@
 import { Children, useEffect, useState } from "react";
 import type { ReactNode } from "react";
+import { formatPhone } from "@/lib/phone";
 import { Alert, AppState, Linking, Pressable, ScrollView, StyleSheet, View } from "react-native";
 import * as Notifications from "expo-notifications";
 import { SafeAreaView } from "react-native-safe-area-context";
@@ -104,7 +105,7 @@ export function ProfileView({ asTab = false, embedded = false }: { asTab?: boole
             </AppText>
           ) : null}
           {user.phone ? (
-            <AppText variant="caption">{user.phone}</AppText>
+            <AppText variant="caption">{formatPhone(user.phone)}</AppText>
           ) : (
             <AppText variant="caption" style={{ color: colors.accent }}>
               {t("profile.addPhone")}

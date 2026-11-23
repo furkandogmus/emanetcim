@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { useTranslations } from "next-intl";
 import { buildDirectionsUrl } from "@/lib/directions-url";
+import { formatPhoneForDisplay, phoneDialHref } from "@/lib/phone-format";
 import { waMeUrl } from "@/lib/whatsapp";
 import { XCircle, Calendar as CalendarIcon, Phone, ExternalLink, MessageCircle } from "lucide-react";
 import { cancelBookingAction } from "@/actions/booking";
@@ -134,11 +135,11 @@ export default function BookingDetailActions({
 
       {shopPhone && (
         <a
-          href={`tel:${shopPhone}`}
+          href={phoneDialHref(shopPhone)}
           className="flex w-full items-center justify-center gap-2 py-3.5 rounded-2xl border border-gray-200 bg-white text-gray-700 text-xs id-eyebrow hover:bg-gray-50 transition-colors"
         >
           <Phone size={16} />
-          {shopPhone}
+          {formatPhoneForDisplay(shopPhone)}
         </a>
       )}
 

@@ -45,7 +45,8 @@ describe("sendLateDropoffNotice", () => {
     const [, title, body] = sendMobilePush.mock.calls[0];
     expect(title).toBe("Your drop-off time has passed");
     expect(body).toContain("2:00");
-    expect(body).toContain("+90 555 000 0000");
+    // 10 haneli saklanan numara 0 ile gosterilir.
+    expect(body).toContain("0555 000 00 00");
   });
 
   it("push ulasmadiysa e-posta yedegi; dukkan adi HTML'e kacirilir", async () => {

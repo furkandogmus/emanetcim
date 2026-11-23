@@ -34,7 +34,25 @@ export function whatsappNumber(phone: string | null | undefined): string | null 
  * yalnizca baglanti kurulur. Cevrilemeyen numarada WhatsApp dugmesi hic cizilmez.
  */
 export function telUrl(phone: string, whatsapp?: string | null): string {
-  return whatsapp ? `tel:+${whatsapp}` : `tel:${phone}`;
+  return whatsapp ? `tel:+${whatsapp}` : dialUrl(phone);
+}
+
+/*
+  Numaralar 10 hane saklanir (5XXXXXXXXX): oldugu gibi `tel:`e verilince 0'siz aranir ve
+  Turkiye'de baglanmaz; ekranda da "553 555..." gorunuyordu (2026-11-23).
+*/
+
+/** Arama baglantisi: TR cep numarasi ulke koduyla, digeri yalnizca rakam ve "+". */
+export function dialUrl(phone: string | null | undefined): string {
+  const tr = normalizeTrGsm10(phone ?? "");
+  return tr ? `tel:+90${tr}` : `tel:${(phone ?? "").replace(/[^\d+]/g, "")}`;
+}
+
+/** Gosterim: TR cep numarasi "0553 555 12 34"; tanimadigimiz bicim oldugu gibi kalir. */
+export function formatPhone(phone: string | null | undefined): string {
+  const raw = (phone ?? "").trim();
+  const d = normalizeTrGsm10(raw);
+  return d ? `0${d.slice(0, 3)} ${d.slice(3, 6)} ${d.slice(6, 8)} ${d.slice(8)}` : raw;
 }
 
 export function waUrl(whatsapp: string): string {

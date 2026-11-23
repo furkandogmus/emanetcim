@@ -29,7 +29,7 @@ import i18n from "@/lib/i18n";
 import { formatDay } from "@/lib/format";
 import { notify } from "@/lib/notify";
 import { MIN_PASSWORD, isValidNewPassword } from "@/lib/password-rules";
-import { waUrl } from "@/lib/phone";
+import { waUrl, formatPhone } from "@/lib/phone";
 import { keys, useAdminUser } from "@/lib/queries";
 import type { AdminUserDetail, Role } from "@/lib/types";
 import { colors, space } from "@/theme/tokens";
@@ -111,7 +111,7 @@ export default function AdminUserScreen() {
           <Card style={{ gap: space.xs }}>
             <AppText variant="bodyMedium">{label}</AppText>
             {u.email && !u.isAnonymized ? <AppText variant="caption">{u.email}</AppText> : null}
-            {u.phone ? <AppText variant="caption">{u.phone}</AppText> : null}
+            {u.phone ? <AppText variant="caption">{formatPhone(u.phone)}</AppText> : null}
             <AppText variant="caption">
               {[
                 t(`admin.role.${u.role}`),

@@ -10,6 +10,7 @@ import {
   MessageCircle,
 } from "lucide-react";
 import { Link } from "@/i18n/routing";
+import { formatPhoneForDisplay, phoneDialHref } from "@/lib/phone-format";
 import { requirePartnerPage } from "@/lib/page-auth";
 import { waMeUrl } from "@/lib/whatsapp";
 import prisma from "@/lib/db";
@@ -161,11 +162,11 @@ export default async function PartnerBookingDetailPage({
             {booking.guest?.phone ? (
               <div className="flex flex-wrap items-center gap-x-4 gap-y-2">
                 <a
-                  href={`tel:${booking.guest.phone}`}
+                  href={phoneDialHref(booking.guest.phone)}
                   className="flex items-center gap-2 hover:text-orange-600"
                 >
                   <Phone size={16} className="text-gray-400" />
-                  {booking.guest.phone}
+                  {formatPhoneForDisplay(booking.guest.phone)}
                 </a>
                 {/*
                   WHATSAPP. Turkiye'de esnafin birincil kanali WhatsApp ve
