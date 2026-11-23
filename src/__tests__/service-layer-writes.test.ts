@@ -85,7 +85,6 @@ const SERVICE_ONLY_MODELS = [
  */
 const CEILINGS: Record<string, number> = {
   account: 1,
-  adminRoleChangeRequest: 5,
   analyticsEvent: 1,
   blockedIp: 1,
   blogPost: 4,

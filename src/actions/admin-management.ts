@@ -6,9 +6,7 @@ import prisma from "@/lib/db";
 import { shopService, type AdminShopUpdate } from "@/services/ShopService";
 import { reviewService } from "@/services/ReviewService";
 import { adminUserService } from "@/services/AdminUserService";
-import { roleChangeData } from "@/lib/role-change-data";
-import { BookingStatus, Prisma, Role } from "@prisma/client";
-import { retryOnWriteConflict } from "@/lib/tx-retry";
+import { BookingStatus, Role } from "@prisma/client";
 import { z } from "zod";
 import { revalidatePathAllLocales } from "@/lib/revalidate-locales";
 import logger from "@/lib/logger";
@@ -108,89 +106,17 @@ export async function approveAdminRoleChangeAction(
   requestId: string,
 ): Promise<ApproveAdminRoleChangeResult> {
   const session = await ensureAdmin();
-  const actorId = session.user?.id;
-  if (!actorId) return { ok: false, error: "unauthorized" };
-
-  const existing = await prisma.adminRoleChangeRequest.findUnique({
-    where: { id: requestId },
+  // Govde `AdminUserService.approveRoleChange`ta (kendi istegini onaylayamaz, son admin); mobil admin de oradan gecer.
+  const result = await adminUserService.approveRoleChange(requestId, {
+    userId: session.user?.id ?? null,
+    ip: await getClientIpOrNull(),
   });
-  if (!existing) return { ok: false, error: "not_found" };
-  if (existing.requestedByUserId === actorId) {
-    return { ok: false, error: "cannot_self_approve" };
+  if (result.ok || result.error === "stale" || result.error === "not_found" || result.error === "cannot_demote_sole_admin") {
+    revalidatePathAllLocales("/admin/users");
+    revalidatePathAllLocales("/admin/role-approvals");
+    revalidatePathAllLocales("/admin");
   }
-
-  const ip = await getClientIpOrNull();
-
-  /*
-    SERIALIZABLE + YENIDEN DENEME. Iki admin varken birbirini dusuren iki onay
-    ayni anda calisirsa ikisi de "2 admin var" sayip yaziyordu: sistemde admin
-    kalmiyordu (READ COMMITTED'da ayri satirlara yazim birbirini beklemez).
-    Serializable bu yazma sapmasini P2034 ile reddeder; yeniden denemede sayim
-    1'dir ve ikinci onay `cannot_demote_sole_admin` doner.
-  */
-  const txResult = await retryOnWriteConflict(() => prisma.$transaction(async (tx) => {
-    const reqRow = await tx.adminRoleChangeRequest.findUnique({
-      where: { id: requestId },
-    });
-    if (!reqRow) return { code: "not_found" as const };
-
-    const user = await tx.user.findUnique({
-      where: { id: reqRow.targetUserId },
-      select: { id: true, role: true },
-    });
-    if (!user || user.role !== reqRow.previousRole) {
-      await tx.adminRoleChangeRequest.delete({ where: { id: requestId } });
-      return { code: "stale" as const };
-    }
-
-    if (reqRow.requestedRole !== Role.ADMIN && user.role === Role.ADMIN) {
-      const adminCount = await tx.user.count({ where: { role: Role.ADMIN } });
-      if (adminCount <= 1) {
-        await tx.adminRoleChangeRequest.delete({ where: { id: requestId } });
-        return { code: "cannot_demote_sole_admin" as const };
-      }
-    }
-
-    // Rol degisikligi token'lari iptal eder -- gerekcesi `applyUserRoleChange`te.
-    await tx.user.update({
-      where: { id: user.id },
-      data: roleChangeData(reqRow.requestedRole),
-    });
-    await tx.adminRoleChangeRequest.delete({ where: { id: requestId } });
-    return { code: "ok" as const, targetId: user.id, newRole: reqRow.requestedRole };
-  }, { isolationLevel: Prisma.TransactionIsolationLevel.Serializable }), { label: "approveAdminRoleChange" });
-
-  if (txResult.code !== "ok") {
-    if (
-      txResult.code === "stale" ||
-      txResult.code === "not_found" ||
-      txResult.code === "cannot_demote_sole_admin"
-    ) {
-      revalidatePathAllLocales("/admin/role-approvals");
-      revalidatePathAllLocales("/admin/users");
-      revalidatePathAllLocales("/admin");
-    }
-    return { ok: false, error: txResult.code };
-  }
-
-  writeAuditLog({
-    actorUserId: actorId,
-    actorRole: "ADMIN",
-    action: "user.role_update_approved",
-    entityType: "User",
-    entityId: txResult.targetId,
-    metadata: {
-      newRole: txResult.newRole,
-      approvedRequestId: requestId,
-      proposedBy: existing.requestedByUserId,
-    },
-    ip,
-  });
-
-  revalidatePathAllLocales("/admin/users");
-  revalidatePathAllLocales("/admin/role-approvals");
-  revalidatePathAllLocales("/admin");
-  return { ok: true };
+  return result;
 }
 
 export type CancelAdminRoleChangeResult =
@@ -201,30 +127,11 @@ export async function cancelAdminRoleChangeAction(
   requestId: string,
 ): Promise<CancelAdminRoleChangeResult> {
   const session = await ensureAdmin();
-  const actorId = session.user?.id;
-  if (!actorId) return { ok: false, error: "unauthorized" };
-
-  const row = await prisma.adminRoleChangeRequest.findUnique({
-    where: { id: requestId },
-  });
-  if (!row) return { ok: false, error: "not_found" };
-
-  await prisma.adminRoleChangeRequest.delete({ where: { id: requestId } });
-
-  writeAuditLog({
-    actorUserId: actorId,
-    actorRole: "ADMIN",
-    action: "user.role_change_request_cancel",
-    entityType: "AdminRoleChangeRequest",
-    entityId: requestId,
-    metadata: {
-      targetUserId: row.targetUserId,
-      previousRole: row.previousRole,
-      requestedRole: row.requestedRole,
-      originallyRequestedBy: row.requestedByUserId,
-    },
+  const result = await adminUserService.cancelRoleChange(requestId, {
+    userId: session.user?.id ?? null,
     ip: await getClientIpOrNull(),
   });
+  if (!result.ok) return result;
 
   revalidatePathAllLocales("/admin/role-approvals");
   revalidatePathAllLocales("/admin/users");

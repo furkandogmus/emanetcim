@@ -1,4 +1,4 @@
-import { Role, type Prisma } from "@prisma/client";
+import { Prisma, Role } from "@prisma/client";
 import { z } from "zod";
 import prisma from "@/lib/db";
 import { writeAuditLog } from "@/lib/audit-log";
@@ -10,6 +10,7 @@ import { generateVerificationToken } from "@/lib/tokens";
 import { sendVerificationEmail } from "@/lib/mail";
 import { requestPasswordReset } from "@/services/auth/password-reset";
 import { roleChangeData } from "@/lib/role-change-data";
+import { retryOnWriteConflict } from "@/lib/tx-retry";
 
 export type AdminActor = { userId: string | null; ip: string | null };
 
@@ -19,6 +20,12 @@ export type ChangeRoleResult =
       ok: false;
       error: "not_found" | "cannot_change_self" | "same_role" | "pending_exists" | "cannot_demote_sole_admin";
     };
+
+export type ApproveRoleChangeResult =
+  | { ok: true }
+  | { ok: false; error: "not_found" | "cannot_self_approve" | "stale" | "cannot_demote_sole_admin" | "unauthorized" };
+
+export type CancelRoleChangeResult = { ok: true } | { ok: false; error: "not_found" | "unauthorized" };
 
 export type AdminMailResult =
   | { ok: true }
@@ -260,6 +267,106 @@ export class AdminUserService {
       ip: actor.ip,
     });
     return { ok: true, status: "pending_approval" };
+  }
+
+  /** Bekleyen rol degisikligi istekleri (web `/admin/role-approvals` ile ayni liste, eskiden ilk). */
+  async listRoleChangeRequests() {
+    return prisma.adminRoleChangeRequest.findMany({
+      orderBy: { createdAt: "asc" },
+      include: {
+        targetUser: { select: { id: true, name: true, email: true, role: true } },
+        requestedBy: { select: { id: true, name: true, email: true } },
+      },
+    });
+  }
+
+  /*
+    IKINCI ADMIN ONAYI -- govde 2026-11-23'te `approveAdminRoleChangeAction`tan tasindi;
+    mobil admin ucu da buradan gecer. Istegi acan admin kendi istegini onaylayamaz.
+  */
+  async approveRoleChange(requestId: string, actor: AdminActor): Promise<ApproveRoleChangeResult> {
+    const actorId = actor.userId;
+    if (!actorId) return { ok: false, error: "unauthorized" };
+
+    const existing = await prisma.adminRoleChangeRequest.findUnique({ where: { id: requestId } });
+    if (!existing) return { ok: false, error: "not_found" };
+    if (existing.requestedByUserId === actorId) return { ok: false, error: "cannot_self_approve" };
+
+    /*
+      SERIALIZABLE + YENIDEN DENEME. Iki admin varken birbirini dusuren iki onay
+      ayni anda calisirsa ikisi de "2 admin var" sayip yaziyordu: sistemde admin
+      kalmiyordu. Serializable bu yazma sapmasini P2034 ile reddeder; yeniden
+      denemede sayim 1'dir ve ikinci onay `cannot_demote_sole_admin` doner.
+    */
+    const txResult = await retryOnWriteConflict(() => prisma.$transaction(async (tx) => {
+      const reqRow = await tx.adminRoleChangeRequest.findUnique({ where: { id: requestId } });
+      if (!reqRow) return { code: "not_found" as const };
+
+      const user = await tx.user.findUnique({
+        where: { id: reqRow.targetUserId },
+        select: { id: true, role: true },
+      });
+      if (!user || user.role !== reqRow.previousRole) {
+        await tx.adminRoleChangeRequest.delete({ where: { id: requestId } });
+        return { code: "stale" as const };
+      }
+
+      if (reqRow.requestedRole !== Role.ADMIN && user.role === Role.ADMIN) {
+        const adminCount = await tx.user.count({ where: { role: Role.ADMIN } });
+        if (adminCount <= 1) {
+          await tx.adminRoleChangeRequest.delete({ where: { id: requestId } });
+          return { code: "cannot_demote_sole_admin" as const };
+        }
+      }
+
+      // Rol degisikligi token'lari iptal eder -- gerekcesi `applyRoleChange`te.
+      await tx.user.update({ where: { id: user.id }, data: roleChangeData(reqRow.requestedRole) });
+      await tx.adminRoleChangeRequest.delete({ where: { id: requestId } });
+      return { code: "ok" as const, targetId: user.id, newRole: reqRow.requestedRole };
+    }, { isolationLevel: Prisma.TransactionIsolationLevel.Serializable }), { label: "approveAdminRoleChange" });
+
+    if (txResult.code !== "ok") return { ok: false, error: txResult.code };
+
+    writeAuditLog({
+      actorUserId: actorId,
+      actorRole: "ADMIN",
+      action: "user.role_update_approved",
+      entityType: "User",
+      entityId: txResult.targetId,
+      metadata: {
+        newRole: txResult.newRole,
+        approvedRequestId: requestId,
+        proposedBy: existing.requestedByUserId,
+      },
+      ip: actor.ip,
+    });
+    return { ok: true };
+  }
+
+  /** Istegi geri ceker / reddeder (web "Iptal" ile ayni): rol degismez, istek silinir. */
+  async cancelRoleChange(requestId: string, actor: AdminActor): Promise<CancelRoleChangeResult> {
+    if (!actor.userId) return { ok: false, error: "unauthorized" };
+
+    const row = await prisma.adminRoleChangeRequest.findUnique({ where: { id: requestId } });
+    if (!row) return { ok: false, error: "not_found" };
+
+    await prisma.adminRoleChangeRequest.delete({ where: { id: requestId } });
+
+    writeAuditLog({
+      actorUserId: actor.userId,
+      actorRole: "ADMIN",
+      action: "user.role_change_request_cancel",
+      entityType: "AdminRoleChangeRequest",
+      entityId: requestId,
+      metadata: {
+        targetUserId: row.targetUserId,
+        previousRole: row.previousRole,
+        requestedRole: row.requestedRole,
+        originallyRequestedBy: row.requestedByUserId,
+      },
+      ip: actor.ip,
+    });
+    return { ok: true };
   }
 
   /*
