@@ -375,7 +375,8 @@
     "partnerLateHint": "荷物を受け取った場合はチェックインしてください。お客様から連絡があれば待つことができます。",
     "partnerLateHold": "お客様を待つ (+30分)",
     "partnerLateHoldDone": "予約はさらに30分間保持されます。",
-    "partnerLateHoldLimitReached": "受け取り時刻に達したため、これ以上待てません。"
+    "partnerLateHoldLimitReached": "受け取り時刻に達したため、これ以上待てません。",
+    "posterNav": "QR ポスター"
   },
   "Guest": {
     "heroTitle": "荷物を預けて、身軽に街へ",
@@ -1355,7 +1356,17 @@
     "bookingCloseNoteHint": "{min}文字以上。監査ログに保存され、店舗に送信されます。",
     "bookingCloseKeep": "戻る",
     "bookingCloseCancelDone": "予約をキャンセルしました。",
-    "bookingCloseForceDone": "予約を引き渡し済みとして終了しました。"
+    "bookingCloseForceDone": "予約を引き渡し済みとして終了しました。",
+    "platformSettingsIosAppStoreLive": "iOS アプリが App Store で公開中",
+    "platformSettingsIosAppStoreLiveHint": "オン: Safari スマートバナー、サイトと確認メールの App Store バッジ、/app が iPhone をストアへ転送。",
+    "platformSettingsAndroidPlayLive": "Android アプリが Google Play で一般公開中",
+    "platformSettingsAndroidPlayLiveHint": "クローズドテスト中はオンにしないでください。オン: Google Play バッジ、/app が Android をストアへ転送。",
+    "appLinkStatsTitle": "アプリリンク (/app)、過去 30 日",
+    "appLinkStatsEmpty": "まだ記録がありません。",
+    "appLinkStatsSource": "流入元",
+    "appLinkStatsPlatform": "プラットフォーム",
+    "appLinkStatsOutcome": "結果",
+    "appLinkStatsCount": "件数"
   },
   "Auth": {
     "loginTitle": "バガジパークにサインインする",
@@ -2477,5 +2488,29 @@
     "passwordMismatch": "新しいパスワードが一致しません。",
     "passwordSet": "パスワードを設定しました。",
     "passwordChanged": "パスワードを変更しました。安全のため、もう一度ログインしてください。"
+  },
+  "AppDownload": {
+    "metaTitle": "BagajPark アプリをダウンロード",
+    "title": "BagajPark をポケットに",
+    "lead": "アプリで近くの荷物預かり所を探し、予約と QR チケットをいつでも持ち歩けます。",
+    "comingSoon": "モバイルアプリはまもなく公開予定です。それまではウェブサイトですべてご利用いただけます。",
+    "websiteCta": "ウェブサイトで続ける",
+    "qrAlt": "bagajpark.com/app への QR コード",
+    "qrCaption": "スマートフォンで読み取り: bagajpark.com/app",
+    "appStoreAlt": "App Storeからダウンロード",
+    "googlePlayAlt": "Google Play で手に入れよう",
+    "footerTitle": "アプリをダウンロード"
+  },
+  "AppPoster": {
+    "metaTitle": "店舗ポスター",
+    "slogan": "荷物を預けて、身軽に楽しもう。",
+    "lead": "このお店は BagajPark の荷物預かり所です。",
+    "step1": "QR コードを読み取ってアプリを入手。",
+    "step2": "時間を選んで予約。",
+    "step3": "荷物をここに預けるだけ。封印付きで安心。",
+    "scan": "読み取り・ダウンロード・予約",
+    "print": "印刷",
+    "printHint": "A4 用紙に余白なしで印刷してください。",
+    "noShop": "ポスターを印刷するには店舗が必要です。"
   }
 }

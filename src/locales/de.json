@@ -375,7 +375,8 @@
     "partnerLateHint": "Wenn du das Gepäck erhalten hast, checke es ein. Hat der Gast angerufen, kannst du warten.",
     "partnerLateHold": "Auf Gast warten (+30 Min.)",
     "partnerLateHoldDone": "Die Buchung bleibt 30 Minuten länger offen.",
-    "partnerLateHoldLimitReached": "Abholzeit erreicht; länger warten ist nicht möglich."
+    "partnerLateHoldLimitReached": "Abholzeit erreicht; länger warten ist nicht möglich.",
+    "posterNav": "QR-Plakat"
   },
   "Guest": {
     "heroTitle": "Gepäck abgeben, die Stadt frei erkunden",
@@ -1355,7 +1356,17 @@
     "bookingCloseNoteHint": "Mindestens {min} Zeichen. Wird im Prüfprotokoll gespeichert und an den Laden gesendet.",
     "bookingCloseKeep": "Zurück",
     "bookingCloseCancelDone": "Buchung storniert.",
-    "bookingCloseForceDone": "Buchung als abgeholt geschlossen."
+    "bookingCloseForceDone": "Buchung als abgeholt geschlossen.",
+    "platformSettingsIosAppStoreLive": "iOS-App ist im App Store live",
+    "platformSettingsIosAppStoreLiveHint": "Wenn an: Safari-Smart-Banner, App-Store-Badge auf der Website und in der Bestätigungsmail, /app leitet iPhones in den Store.",
+    "platformSettingsAndroidPlayLive": "Android-App ist bei Google Play öffentlich",
+    "platformSettingsAndroidPlayLiveHint": "Während des geschlossenen Tests nicht einschalten. Wenn an: Google-Play-Badge, /app leitet Android-Geräte in den Store.",
+    "appLinkStatsTitle": "App-Link (/app), letzte 30 Tage",
+    "appLinkStatsEmpty": "Noch keine Aufrufe.",
+    "appLinkStatsSource": "Quelle",
+    "appLinkStatsPlatform": "Plattform",
+    "appLinkStatsOutcome": "Ergebnis",
+    "appLinkStatsCount": "Anzahl"
   },
   "Auth": {
     "loginTitle": "Melden Sie sich bei BagajPark an",
@@ -2477,5 +2488,29 @@
     "passwordMismatch": "Die neuen Passwörter stimmen nicht überein.",
     "passwordSet": "Passwort festgelegt.",
     "passwordChanged": "Passwort geändert. Bitte melden Sie sich zu Ihrer Sicherheit erneut an."
+  },
+  "AppDownload": {
+    "metaTitle": "BagajPark-App herunterladen",
+    "title": "BagajPark in deiner Tasche",
+    "lead": "Hol dir die App, finde Gepäckaufbewahrung in der Nähe und hab Buchung und QR-Ticket immer dabei.",
+    "comingSoon": "Unsere App ist bald in den Stores. Bis dahin kannst du alles auf unserer Website erledigen.",
+    "websiteCta": "Weiter auf der Website",
+    "qrAlt": "QR-Code für bagajpark.com/app",
+    "qrCaption": "Mit dem Handy scannen: bagajpark.com/app",
+    "appStoreAlt": "Laden im App Store",
+    "googlePlayAlt": "Jetzt bei Google Play",
+    "footerTitle": "App herunterladen"
+  },
+  "AppPoster": {
+    "metaTitle": "Shop-Plakat",
+    "slogan": "Koffer abgeben, Tag genießen.",
+    "lead": "Dieser Laden ist eine BagajPark-Gepäckaufbewahrung.",
+    "step1": "QR-Code scannen und App laden.",
+    "step2": "Zeit wählen und buchen.",
+    "step3": "Gepäck hier abgeben, versiegelt und sicher.",
+    "scan": "Scannen, laden, buchen",
+    "print": "Drucken",
+    "printHint": "Auf A4 ohne Ränder drucken.",
+    "noShop": "Für ein Plakat brauchen Sie zuerst einen Laden."
   }
 }

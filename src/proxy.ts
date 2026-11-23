@@ -54,7 +54,10 @@ const authProxy = auth((req) => {
     pathname.startsWith('/monitoring') ||
     pathname === '/favicon.ico' ||
     pathname === '/sitemap.xml' ||
-    pathname === '/robots.txt'
+    pathname === '/robots.txt' ||
+    // Akilli indirme bagi (`src/app/app/route.ts`): dil oneki eklenirse
+    // basili QR'lar `/tr/app`e duser ve magaza yonlendirmesi hic calismaz.
+    pathname === '/app'
   ) {
     return NextResponse.next();
   }

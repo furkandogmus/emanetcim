@@ -375,7 +375,8 @@
     "partnerLateHint": "Valizi aldıysan teslim al. Misafir seni aradıysa bekleyebilirsin.",
     "partnerLateHold": "Misafiri bekle (+30 dk)",
     "partnerLateHoldDone": "Rezervasyon 30 dakika daha açık kalacak.",
-    "partnerLateHoldLimitReached": "Alma saatine ulaşıldı, daha fazla beklenemez."
+    "partnerLateHoldLimitReached": "Alma saatine ulaşıldı, daha fazla beklenemez.",
+    "posterNav": "QR afişi"
   },
   "Guest": {
     "heroTitle": "Valizini Güvenle Bırak, Özgürce Gez",
@@ -1355,7 +1356,17 @@
     "bookingCloseNoteHint": "En az {min} karakter. Denetim kaydına ve esnafa giden bildirime yazılır.",
     "bookingCloseKeep": "Vazgeç",
     "bookingCloseCancelDone": "Rezervasyon iptal edildi.",
-    "bookingCloseForceDone": "Rezervasyon teslim edildi olarak kapatıldı."
+    "bookingCloseForceDone": "Rezervasyon teslim edildi olarak kapatıldı.",
+    "platformSettingsIosAppStoreLive": "iOS uygulaması App Store'da yayında",
+    "platformSettingsIosAppStoreLiveHint": "Açınca: Safari akıllı bandı, sitede ve onay e-postasında App Store rozeti, /app iPhone'ları mağazaya yönlendirir.",
+    "platformSettingsAndroidPlayLive": "Android uygulaması Google Play'de herkese açık",
+    "platformSettingsAndroidPlayLiveHint": "Kapalı testteyken açmayın. Açınca: Google Play rozeti ve /app Android'leri mağazaya yönlendirir.",
+    "appLinkStatsTitle": "Uygulama bağlantısı (/app), son 30 gün",
+    "appLinkStatsEmpty": "Henüz kayıt yok.",
+    "appLinkStatsSource": "Kaynak",
+    "appLinkStatsPlatform": "Platform",
+    "appLinkStatsOutcome": "Sonuç",
+    "appLinkStatsCount": "Adet"
   },
   "Auth": {
     "loginTitle": "BagajPark'a Giriş Yap",
@@ -2622,5 +2633,29 @@
     "passwordMismatch": "Yeni şifreler eşleşmiyor.",
     "passwordSet": "Şifre belirlendi.",
     "passwordChanged": "Şifre değişti. Güvenliğin için yeniden giriş yapman gerekiyor."
+  },
+  "AppDownload": {
+    "metaTitle": "BagajPark uygulamasını indir",
+    "title": "BagajPark cebinde",
+    "lead": "Uygulamayı indir; yakındaki emanet noktalarını bul, rezervasyonunu ve QR biletini her an yanında taşı.",
+    "comingSoon": "Mobil uygulamamız çok yakında mağazalarda. O zamana kadar her şeyi web sitemizden yapabilirsin.",
+    "websiteCta": "Web sitesinden devam et",
+    "qrAlt": "bagajpark.com/app bağlantısının QR kodu",
+    "qrCaption": "Telefonunla okut: bagajpark.com/app",
+    "appStoreAlt": "App Store’dan İndirin",
+    "googlePlayAlt": "Google Play’den Alın",
+    "footerTitle": "Uygulamayı indir"
+  },
+  "AppPoster": {
+    "metaTitle": "Dükkan afişi",
+    "slogan": "Valizini bırak, keyfine bak.",
+    "lead": "Bu dükkan bir BagajPark emanet noktasıdır.",
+    "step1": "QR kodu okut, uygulamayı indir.",
+    "step2": "Saatini seç, rezervasyonunu yap.",
+    "step3": "Valizini buraya bırak, mühürlü ve güvende.",
+    "scan": "Okut, indir, rezervasyon yap",
+    "print": "Yazdır",
+    "printHint": "A4 kâğıda, kenar boşluğu olmadan yazdırın.",
+    "noShop": "Afiş için önce bir dükkanınız olmalı."
   }
 }
