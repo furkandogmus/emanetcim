@@ -2558,6 +2558,99 @@ export class NotificationService implements INotificationService {
       await this.sendEmail(email, content.subject, body, bookingId, html);
     }
   }
+
+  /** Esnaf/yonetici hesap silme talebi (`AccountPrivacyService.requestDeletion`): e-posta + push. */
+  async notifyAdminsForDeletionRequest(params: {
+    name: string | null;
+    role: string;
+    dueAt: Date;
+  }): Promise<void> {
+    const { name, role, dueAt } = params;
+    this.pushAdmins("accountDeletion", { name: name?.trim() || undefined }, { adminScreen: "accountDeletions" });
+    const adminEmails = (process.env.ADMIN_EMAILS ?? "")
+      .split(",")
+      .map((e) => e.trim().toLowerCase())
+      .filter(Boolean);
+    const due = dueAt.toISOString().slice(0, 10);
+    const label = name?.trim() || "—";
+    const subject = `[Admin] BagajPark: Hesap silme talebi (${label})`;
+    const body = `Hesap silme talebi.\n\nAd: ${label}\nRol: ${role}\nSon gün: ${due}\n\nYönetim → Hesap silme talepleri.`;
+    const html = renderEmailHtml({
+      locale: "tr",
+      tone: "alert",
+      heading: "Hesap silme talebi",
+      paragraphs: ["Aktif rezervasyon ve bekleyen hakediş kalmadığında Yönetim → Hesap silme talepleri ekranından tamamlayın."],
+      rows: [
+        { label: "Ad", value: escapeEmailHtml(label) },
+        { label: "Rol", value: escapeEmailHtml(role) },
+        { label: "Son gün", value: due, emphasized: true },
+      ],
+      footer: "BagajPark — Yönetim Masası",
+    });
+    for (const adminEmail of adminEmails) {
+      if (adminEmail.includes("@")) {
+        void this.sendEmail(adminEmail, subject, body, undefined, html).catch((e) => {
+          logger.error({ err: e, adminEmail }, "notifyAdminsForDeletionRequest_email_failed");
+        });
+      }
+    }
+  }
+
+  /** Hesap silme tamamlandi: talep anindaki adrese, talep dilinde. */
+  async sendAccountDeletionCompleted(email: string, locale: string = "tr"): Promise<void> {
+    if (!email.includes("@")) return;
+    const content = pickLocale({
+      tr: {
+        subject: "BagajPark: Hesabın silindi",
+        heading: "Hesabın silindi",
+        p1: "Hesap silme talebin tamamlandı. Adın, e-postan, telefonun ve fotoğrafın kaldırıldı; bu hesapla bir daha giriş yapılamaz.",
+        p2: "Geçmiş rezervasyon kayıtları yasal saklama süresi boyunca kimliğinle ilişkilendirilmeden tutulur.",
+        footer: "BagajPark",
+      },
+      en: {
+        subject: "BagajPark: Your account has been deleted",
+        heading: "Your account has been deleted",
+        p1: "Your account deletion request is complete. Your name, email, phone number and photo were removed, and this account can no longer sign in.",
+        p2: "Past booking records are kept without your identity for the legally required retention period.",
+        footer: "BagajPark",
+      },
+      de: {
+        subject: "BagajPark: Ihr Konto wurde gelöscht",
+        heading: "Ihr Konto wurde gelöscht",
+        p1: "Ihre Anfrage zur Kontolöschung ist abgeschlossen. Name, E-Mail, Telefonnummer und Foto wurden entfernt; mit diesem Konto ist keine Anmeldung mehr möglich.",
+        p2: "Frühere Buchungsdaten werden ohne Bezug zu Ihrer Person für die gesetzliche Aufbewahrungsfrist gespeichert.",
+        footer: "BagajPark",
+      },
+      fr: {
+        subject: "BagajPark : votre compte a été supprimé",
+        heading: "Votre compte a été supprimé",
+        p1: "Votre demande de suppression de compte est terminée. Votre nom, e-mail, numéro de téléphone et photo ont été supprimés ; ce compte ne peut plus se connecter.",
+        p2: "Les anciennes réservations sont conservées sans votre identité pendant la durée légale de conservation.",
+        footer: "BagajPark",
+      },
+      ja: {
+        subject: "BagajPark: アカウントを削除しました",
+        heading: "アカウントを削除しました",
+        p1: "アカウント削除のリクエストが完了しました。お名前、メールアドレス、電話番号、写真は削除され、このアカウントではログインできなくなりました。",
+        p2: "過去の予約記録は、法定保存期間のあいだ個人を特定しない形で保管されます。",
+        footer: "BagajPark",
+      },
+      fa: {
+        subject: "BagajPark: حساب شما حذف شد",
+        heading: "حساب شما حذف شد",
+        p1: "درخواست حذف حساب شما انجام شد. نام، ایمیل، شماره تلفن و عکس شما حذف شد و دیگر نمی‌توان با این حساب وارد شد.",
+        p2: "سوابق رزروهای گذشته بدون هویت شما در مدت نگهداری قانونی حفظ می‌شود.",
+        footer: "BagajPark",
+      },
+    }, locale);
+    const html = renderEmailHtml({
+      locale,
+      heading: content.heading,
+      paragraphs: [content.p1, content.p2],
+      footer: content.footer,
+    });
+    await this.sendEmail(email, content.subject, `${content.p1}\n\n${content.p2}`, undefined, html);
+  }
 }
 
 export const notificationService = new NotificationService();

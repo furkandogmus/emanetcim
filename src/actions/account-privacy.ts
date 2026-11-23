@@ -44,3 +44,39 @@ export async function anonymizeGuestAccountAction(): Promise<
   revalidatePathAllLocales("/");
   return { success: true };
 }
+
+export type DeletionRequestActionResult =
+  | { success: true; dueAtIso: string; slaDays: number; alreadyPending: boolean }
+  | { success: false; error: string };
+
+/**
+ * Esnaf/yonetici hesap silme talebi (App Store 5.1.1(v)). Govde mobil
+ * `account/deletion-request` ile ayni: `AccountPrivacyService.requestDeletion`.
+ */
+export async function requestAccountDeletionAction(input?: {
+  note?: string;
+  locale?: string;
+}): Promise<DeletionRequestActionResult> {
+  const auth = await requireUser();
+  if (!auth.ok) return { success: false, error: auth.error };
+  const result = await accountPrivacyService.requestDeletion({
+    userId: auth.actor.id,
+    role: auth.actor.role,
+    ip: await getClientIpOrNull(),
+    note: typeof input?.note === "string" ? input.note : null,
+    locale: typeof input?.locale === "string" ? input.locale : null,
+  });
+  if (!result.ok) {
+    return {
+      success: false,
+      error: result.reason === "last_admin" ? "Errors.accountDeletionLastAdmin" : "Errors.unauthorized",
+    };
+  }
+  revalidatePathAllLocales("/account/privacy");
+  return {
+    success: true,
+    dueAtIso: result.dueAt.toISOString(),
+    slaDays: result.slaDays,
+    alreadyPending: result.alreadyPending,
+  };
+}

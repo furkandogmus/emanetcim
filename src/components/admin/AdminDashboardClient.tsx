@@ -26,6 +26,7 @@ import {
   Ticket,
   Handshake,
   PhoneCall,
+  UserX,
 } from "lucide-react";
 import dynamic from "next/dynamic";
 import { motion } from "framer-motion";
@@ -328,6 +329,20 @@ export default function AdminDashboardClient({
               >
                 <Mail size={18} className="opacity-40" />
                 {t("notificationsTitle")}
+              </Link>
+              <Link
+                href="/admin/account-deletions"
+                className="w-full min-h-[3rem] px-5 bg-white/10 rounded-2xl text-xs id-eyebrow hover:bg-white/20 transition-all text-left flex items-center gap-3"
+              >
+                <UserX size={18} className="opacity-40" />
+                {t("accountDeletionsNav")}
+              </Link>
+              <Link
+                href="/admin/reviews"
+                className="w-full min-h-[3rem] px-5 bg-white/10 rounded-2xl text-xs id-eyebrow hover:bg-white/20 transition-all text-left flex items-center gap-3"
+              >
+                <Flag size={18} className="opacity-40" />
+                {t("reviewModerationNav")}
               </Link>
               <Link
                 href="/admin/audit-log"

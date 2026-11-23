@@ -1375,7 +1375,9 @@
     "partnerLeadConvertAlready": "Diese Vorregistrierung wurde bereits umgewandelt",
     "partnerLeadConvertBack": "Zurück zu den Vorregistrierungen",
     "partnerLeadMapsSearch": "Adresse in Google Maps suchen",
-    "affiliatesTitle": "Vermittler"
+    "affiliatesTitle": "Vermittler",
+    "accountDeletionsNav": "Löschanfragen",
+    "reviewModerationNav": "Bewertungsmoderation"
   },
   "Auth": {
     "loginTitle": "Melden Sie sich bei BagajPark an",
@@ -1886,7 +1888,12 @@
     "invalidCurrentPassword": "Das aktuelle Passwort ist falsch.",
     "lateHoldLimit": "Abholzeit erreicht; die Buchung kann nicht länger gehalten werden.",
     "affiliateAlreadyApplied": "Für dieses Konto gibt es bereits eine Vermittler-Bewerbung.",
-    "priceChanged": "Der Preis hat sich geändert (ein Rabatt gilt nicht mehr). Prüfen Sie den neuen Gesamtbetrag und bestätigen Sie erneut."
+    "priceChanged": "Der Preis hat sich geändert (ein Rabatt gilt nicht mehr). Prüfen Sie den neuen Gesamtbetrag und bestätigen Sie erneut.",
+    "accountDeletionLastAdmin": "Sie sind der einzige Admin; fügen Sie zuerst einen weiteren Admin hinzu.",
+    "accountDeletionNotPending": "Die Anfrage ist nicht mehr offen.",
+    "accountDeletionSelf": "Sie können Ihre eigene Anfrage nicht abschließen.",
+    "accountDeletionPendingPayouts": "Es gibt offene Auszahlungen; sie müssen zuerst bezahlt werden.",
+    "accountDeletionReason": "Die Begründung braucht mindestens 5 Zeichen."
   },
   "Emails": {
     "verificationSubject": "Bestätigen Sie Ihre E-Mail",
@@ -2178,10 +2185,21 @@
       "authRequired": "Bitte anmelden.",
       "guestContactRequired": "Bitte E-Mail oder Telefonnummer eingeben.",
       "unauthorized": "Dazu sind Sie nicht berechtigt.",
-      "generic": "Etwas ist schiefgelaufen."
+      "generic": "Etwas ist schiefgelaufen.",
+      "lastAdmin": "Sie sind der einzige Admin; fügen Sie zuerst einen weiteren Admin hinzu."
     },
     "deleteTypeConfirmLabel": "Geben Sie zur Bestätigung unten {phrase} ein:",
-    "deleteTypeConfirmPhrase": "KONTO LÖSCHEN"
+    "deleteTypeConfirmPhrase": "KONTO LÖSCHEN",
+    "requestTitle": "Mein Konto löschen",
+    "requestDesc": "Partner- und Admin-Konten senden eine Löschanfrage. Bevor Sie sie senden:",
+    "requestConsequenceShops": "Ihr Geschäft nimmt sofort keine neuen Buchungen mehr an; laufende Buchungen können Sie weiter abwickeln.",
+    "requestConsequenceTimeline": "Sobald keine aktiven Buchungen oder offenen Auszahlungen mehr bestehen, wird Ihr Konto innerhalb von 30 Tagen gelöscht und Sie erhalten eine E-Mail.",
+    "requestButton": "Löschanfrage senden",
+    "requestConfirmTitle": "Löschanfrage senden?",
+    "requestConfirmBody": "Ihr Geschäft nimmt keine neuen Buchungen mehr an und Ihre Anfrage geht an unser Team.",
+    "requestConfirmYes": "Ja, Anfrage senden",
+    "requestReceivedBody": "Anfrage erhalten; Ihr Konto wird innerhalb von {days} Tagen gelöscht, danach erhalten Sie eine E-Mail.",
+    "requestPendingBody": "Ihre Löschanfrage ist eingegangen. Ihr Konto wird spätestens am {date} gelöscht."
   },
   "WebPush": {
     "title": "Push-Benachrichtigungen",
@@ -2363,7 +2381,7 @@
     "webStep1": "Melde dich auf bagajpark.com in deinem Konto an.",
     "webStep2": "Wähle auf der Seite „Daten und Datenschutz“ die Option „Konto schließen“.",
     "webLink": "Zu „Daten und Datenschutz“",
-    "partnerNote": "Partner-Konten (Geschäfte) beantragen die Schließung über die Kontaktseite.",
+    "partnerNote": "Partner- und Admin-Konten senden eine Löschanfrage in der App (Profil → „Mein Konto löschen“) oder auf der Seite Daten & Datenschutz; das Konto wird innerhalb von 30 Tagen gelöscht und Sie erhalten eine E-Mail. Fragen:",
     "contactLink": "Kontakt",
     "deletedTitle": "Was gelöscht wird",
     "deletedBody": "Name, E-Mail-Adresse, Telefonnummer und Foto werden entfernt; Bewertungen und Benachrichtigungsabos werden gelöscht. Mit dem Konto ist keine Anmeldung mehr möglich.",
@@ -2630,5 +2648,28 @@
       "active": "Aktiv",
       "paused": "Pausiert"
     }
+  },
+  "AdminAccountDeletions": {
+    "back": "Zurück zum Dashboard",
+    "title": "Löschanfragen",
+    "intro": "Anfragen von Partnern und Admins. Abschließen, wenn keine aktiven Buchungen oder offenen Auszahlungen mehr bestehen; das Konto wird anonymisiert und der Nutzer erhält eine E-Mail.",
+    "empty": "Keine offenen Anfragen.",
+    "role_GUEST": "Gast",
+    "role_PARTNER": "Partner",
+    "role_ADMIN": "Admin",
+    "status_PENDING": "Offen",
+    "status_COMPLETED": "Abgeschlossen",
+    "status_CANCELLED": "Abgebrochen",
+    "dates": "Angefragt {requested} · fällig {due}",
+    "blockers": "Nicht möglich: {bookings} aktive Buchungen, {payouts} offene Auszahlungen.",
+    "complete": "Abschließen",
+    "completeTitle": "Dieses Konto löschen?",
+    "completeBody": "Das Konto wird anonymisiert. Das kann nicht rückgängig gemacht werden.",
+    "completed": "Konto gelöscht.",
+    "cancel": "Anfrage abbrechen",
+    "cancelTitle": "Anfrage abbrechen?",
+    "cancelBody": "Geschlossene Geschäfte werden wieder geöffnet. Die Begründung wird protokolliert.",
+    "cancelled": "Anfrage abgebrochen.",
+    "reasonLabel": "Begründung (mindestens 5 Zeichen)"
   }
 }

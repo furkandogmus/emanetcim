@@ -17,6 +17,9 @@ import { ReferralCard } from "@/components/ReferralCard";
 import { AppText, Button, IconButton } from "@/components/ui";
 import { api, ApiError } from "@/lib/api";
 import { useAuth } from "@/lib/auth";
+import { errorMessage } from "@/lib/errors";
+import { formatDay } from "@/lib/format";
+import { useMyDeletionRequest, useRequestAccountDeletion } from "@/lib/queries";
 import { setAppLanguage } from "@/lib/i18n";
 import { SITE_ORIGIN } from "@/lib/images";
 import { notify } from "@/lib/notify";
@@ -52,16 +55,19 @@ export function ProfileView({ asTab = false, embedded = false }: { asTab?: boole
   const [deleting, setDeleting] = useState(false);
   const notifOn = useNotificationPermission();
   const [langOpen, setLangOpen] = useState(false);
+  const signedInRole = state.status === "signedIn" ? state.user.role : null;
+  const deletionQuery = useMyDeletionRequest(signedInRole !== null && signedInRole !== "GUEST" && !impersonating);
+  const requestDeletion = useRequestAccountDeletion();
   if (state.status !== "signedIn") return null;
   const { user } = state;
   const isGuest = user.role === "GUEST";
+  const deletionDue = deletionQuery.data?.status === "PENDING" ? deletionQuery.data.dueAt : null;
   const openSite = (path: string) => void Linking.openURL(sitePage(path, i18n.language)).catch(() => undefined);
 
   /*
-    Google Play: hesap olusturan uygulama, hesap silmeyi UYGULAMA ICINDEN
-    sunmak zorunda. Sunucu hesabi silmez, anonimlestirir (KVKK;
-    `AccountPrivacyService.anonymizeSelf`). Esnaf ve yonetici kendini
-    silemez (403) -- onlar icin silme talebi iletisim sayfasindan baslar.
+    Google Play ve App Store 5.1.1(v): hesap silme UYGULAMA ICINDEN. Misafir
+    aninda anonimlestirir (`anonymizeSelf`); esnaf/yonetici talep birakir,
+    yonetici aktif rezervasyon ve hakedis bitince tamamlar (`requestDeletion`).
   */
   function confirmDelete() {
     Alert.alert(t("profile.deleteTitle"), t("profile.deleteBody"), [
@@ -83,6 +89,25 @@ export function ProfileView({ asTab = false, embedded = false }: { asTab?: boole
       );
       setDeleting(false);
     }
+  }
+
+  function confirmDeletionRequest() {
+    Alert.alert(t("profile.requestTitle"), t("profile.requestBody", { days: deletionQuery.data?.slaDays ?? 30 }), [
+      { text: t("common.cancel"), style: "cancel" },
+      {
+        text: t("profile.requestConfirm"),
+        style: "destructive",
+        onPress: () =>
+          requestDeletion.mutate(
+            { locale: i18n.language },
+            {
+              onSuccess: (r) =>
+                notify(t("profile.requestReceivedTitle"), t("profile.requestReceivedBody", { days: r.slaDays })),
+              onError: (e) => notify(t("profile.deleteFailedTitle"), errorMessage(e, "profile")),
+            },
+          ),
+      },
+    ]);
   }
 
   const sections = (
@@ -135,6 +160,7 @@ export function ProfileView({ asTab = false, embedded = false }: { asTab?: boole
         <SettingsRow label={t("profile.contact")} external onPress={() => openSite("contact")} />
         <SettingsRow label={t("profile.terms")} external onPress={() => openSite("terms")} />
         <SettingsRow label={t("profile.privacy")} external onPress={() => openSite("privacy")} />
+        <SettingsRow label={t("profile.kvkk")} external onPress={() => openSite("kvkk")} />
       </Section>
 
       <View style={{ gap: space.sm, marginTop: space.sm }}>
@@ -162,8 +188,19 @@ export function ProfileView({ asTab = false, embedded = false }: { asTab?: boole
           loading={deleting}
           onPress={confirmDelete}
         />
+      ) : deletionDue ? (
+        <AppText variant="caption" style={{ textAlign: "center", color: colors.danger }} accessibilityRole="text">
+          {t("profile.requestPending", { date: formatDay(deletionDue) })}
+        </AppText>
       ) : (
-        <Button variant="ghost" title={t("profile.deleteRequest")} onPress={() => openSite("contact")} />
+        <Button
+          variant="ghost"
+          textColor={colors.danger}
+          title={t("profile.deleteAccount")}
+          loading={requestDeletion.isPending}
+          disabled={deletionQuery.isLoading}
+          onPress={confirmDeletionRequest}
+        />
       )}
       <AppText variant="caption" style={{ textAlign: "center", fontSize: 12 }}>
         {t("profile.version", { version: Constants.expoConfig?.version ?? "" })}

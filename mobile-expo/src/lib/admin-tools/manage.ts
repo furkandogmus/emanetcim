@@ -1,4 +1,4 @@
-import { Megaphone, MessageSquareText, ScrollText, Store, UserCheck, Users } from "lucide-react-native";
+import { Megaphone, MessageSquareText, ScrollText, Store, UserCheck, Users, UserX } from "lucide-react-native";
 
 import type { AdminToolLink } from "./types";
 
@@ -13,4 +13,5 @@ export const ADMIN_MANAGE_LINKS: readonly AdminToolLink[] = [
   { key: "broadcast", href: "/admin/broadcast", Icon: Megaphone, labelKey: "admin.broadcast" },
   { key: "auditLog", href: "/admin/audit-log", Icon: ScrollText, labelKey: "adminUsers.auditLog" },
   { key: "reviews", href: "/admin/reviews", Icon: MessageSquareText, labelKey: "adminShop.recentReviews" },
+  { key: "accountDeletions", href: "/admin/account-deletions", Icon: UserX, labelKey: "accountDeletions.title" },
 ];

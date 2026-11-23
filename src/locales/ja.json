@@ -1375,7 +1375,9 @@
     "partnerLeadConvertAlready": "この事前登録はすでに変換されています",
     "partnerLeadConvertBack": "事前登録一覧に戻る",
     "partnerLeadMapsSearch": "住所を Google マップで検索",
-    "affiliatesTitle": "紹介パートナー"
+    "affiliatesTitle": "紹介パートナー",
+    "accountDeletionsNav": "アカウント削除リクエスト",
+    "reviewModerationNav": "レビューの管理"
   },
   "Auth": {
     "loginTitle": "バガジパークにサインインする",
@@ -1886,7 +1888,12 @@
     "invalidCurrentPassword": "現在のパスワードが正しくありません。",
     "lateHoldLimit": "受け取り時刻に達したため、これ以上予約を保持できません。",
     "affiliateAlreadyApplied": "このアカウントには既に紹介パートナーの申請があります。",
-    "priceChanged": "料金が変わりました（割引が適用されなくなりました）。最新の合計を確認して、もう一度確定してください。"
+    "priceChanged": "料金が変わりました（割引が適用されなくなりました）。最新の合計を確認して、もう一度確定してください。",
+    "accountDeletionLastAdmin": "管理者はあなただけです。先に別の管理者を追加してください。",
+    "accountDeletionNotPending": "このリクエストはすでに保留中ではありません。",
+    "accountDeletionSelf": "自分のリクエストは完了できません。",
+    "accountDeletionPendingPayouts": "未払いの精算があります。先に支払う必要があります。",
+    "accountDeletionReason": "理由は5文字以上で入力してください。"
   },
   "Emails": {
     "verificationSubject": "メールアドレスを確認してください",
@@ -2178,10 +2185,21 @@
       "authRequired": "サインインしてください。",
       "guestContactRequired": "メールアドレスまたは電話番号を入力してください。",
       "unauthorized": "この操作は許可されていません。",
-      "generic": "エラーが発生しました。"
+      "generic": "エラーが発生しました。",
+      "lastAdmin": "管理者はあなただけです。先に別の管理者を追加してください。"
     },
     "deleteTypeConfirmLabel": "確認のため、下に {phrase} と入力してください:",
-    "deleteTypeConfirmPhrase": "アカウントを削除"
+    "deleteTypeConfirmPhrase": "アカウントを削除",
+    "requestTitle": "アカウントを削除",
+    "requestDesc": "パートナーと管理者のアカウントは削除リクエストを送信します。送信前にご確認ください:",
+    "requestConsequenceShops": "店舗はすぐに新規予約の受付を停止します。進行中の予約の受け渡しは続けられます。",
+    "requestConsequenceTimeline": "有効な予約と未払いの精算がなくなり次第、30日以内にアカウントが削除され、メールでお知らせします。",
+    "requestButton": "削除リクエストを送信",
+    "requestConfirmTitle": "削除リクエストを送信しますか?",
+    "requestConfirmBody": "店舗は新規予約の受付を停止し、リクエストは運営チームに送られます。",
+    "requestConfirmYes": "送信する",
+    "requestReceivedBody": "リクエストを受け付けました。{days}日以内にアカウントが削除され、完了時にメールが届きます。",
+    "requestPendingBody": "削除リクエストを受け付けました。{date}までにアカウントが削除されます。"
   },
   "WebPush": {
     "title": "プッシュ通知",
@@ -2363,7 +2381,7 @@
     "webStep1": "bagajpark.com でアカウントにログインします。",
     "webStep2": "「データとプライバシー」ページで「アカウントを閉鎖」を選びます。",
     "webLink": "「データとプライバシー」へ",
-    "partnerNote": "パートナー（店舗）アカウントは、お問い合わせページから閉鎖を依頼してください。",
+    "partnerNote": "パートナーと管理者のアカウントは、アプリ(プロフィール → 「アカウントを削除」)またはデータとプライバシーのページから削除リクエストを送信します。30日以内に削除され、メールでお知らせします。お問い合わせ:",
     "contactLink": "お問い合わせ",
     "deletedTitle": "削除されるデータ",
     "deletedBody": "氏名、メールアドレス、電話番号、写真が削除され、レビューと通知の購読も削除されます。このアカウントでは今後ログインできません。",
@@ -2630,5 +2648,28 @@
       "active": "有効",
       "paused": "停止中"
     }
+  },
+  "AdminAccountDeletions": {
+    "back": "ダッシュボードに戻る",
+    "title": "アカウント削除リクエスト",
+    "intro": "パートナーと管理者からのリクエスト。有効な予約と未払いの精算がなくなったら完了してください。アカウントは匿名化され、ユーザーにメールが送られます。",
+    "empty": "保留中のリクエストはありません。",
+    "role_GUEST": "ゲスト",
+    "role_PARTNER": "パートナー",
+    "role_ADMIN": "管理者",
+    "status_PENDING": "保留中",
+    "status_COMPLETED": "完了",
+    "status_CANCELLED": "取り消し",
+    "dates": "申請 {requested} · 期限 {due}",
+    "blockers": "完了できません: 有効な予約 {bookings} 件、未払いの精算 {payouts} 件。",
+    "complete": "完了する",
+    "completeTitle": "このアカウントを削除しますか?",
+    "completeBody": "アカウントは匿名化され、元に戻せません。",
+    "completed": "アカウントを削除しました。",
+    "cancel": "リクエストを取り消す",
+    "cancelTitle": "このリクエストを取り消しますか?",
+    "cancelBody": "停止した店舗は再開されます。理由は監査ログに記録されます。",
+    "cancelled": "リクエストを取り消しました。",
+    "reasonLabel": "理由(5文字以上)"
   }
 }

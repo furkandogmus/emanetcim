@@ -20,3 +20,4 @@ export * from "./admin-broadcast";
 export * from "./booking-mutations";
 export * from "./admin-reviews";
 export * from "./admin-ops";
+export * from "./account-deletion";

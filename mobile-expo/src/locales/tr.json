@@ -89,7 +89,10 @@
     "resendIn": "Tekrar gönder ({{seconds}} sn)",
     "sessionExpiredTitle": "Oturumun sona erdi. Tekrar giriş yap.",
     "sessionExpiredBody": "Rezervasyonlarını görmek için tekrar giriş yapabilirsin.",
-    "sessionExpiredBodyStaff": "Dükkan paneline dönmek için tekrar giriş yap. Bekleyen işlemin kaydedilmedi; girişten sonra yeniden dene."
+    "sessionExpiredBodyStaff": "Dükkan paneline dönmek için tekrar giriş yap. Bekleyen işlemin kaydedilmedi; girişten sonra yeniden dene.",
+    "legalKvkkPrefix": " Kişisel verilerinin nasıl işlendiği: ",
+    "legalKvkk": "KVKK Aydınlatma Metni",
+    "legalKvkkSuffix": "."
   },
   "home": {
     "heroTitle": "Valizini bırak.\nŞehrin tadını çıkar.",
@@ -482,7 +485,6 @@
     "deleteConfirm": "Evet, hesabımı sil",
     "deleteFailedTitle": "Hesap silinemedi",
     "deleteActiveBookings": "Devam eden rezervasyonların var. Önce onları iptal et ya da tamamlanmalarını bekle.",
-    "deleteRequest": "Hesap kapatma talebi gönder",
     "sections": {
       "account": "Hesap",
       "support": "Destek"
@@ -495,7 +497,18 @@
     "faq": "Sıkça sorulan sorular",
     "contact": "Bize ulaş",
     "terms": "Kullanım koşulları",
-    "addPhone": "Telefon numarası ekle"
+    "addPhone": "Telefon numarası ekle",
+    "kvkk": "KVKK aydınlatma metni",
+    "requestTitle": "Hesabın silinsin mi?",
+    "requestBody": "Talebin yöneticiye iletilir ve dükkanın hemen yeni rezervasyona kapanır. Devam eden rezervasyonlar ve hakedişler tamamlanınca hesabın en geç {{days}} gün içinde silinir; tamamlanınca e-posta gelir.",
+    "requestConfirm": "Silme talebi gönder",
+    "requestReceivedTitle": "Talebin alındı",
+    "requestReceivedBody": "Talebin alındı; {{days}} gün içinde hesabın silinir, tamamlanınca e-posta gelir.",
+    "requestPending": "Silme talebin alındı. Hesabın en geç {{date}} tarihinde silinir; tamamlanınca e-posta gelir.",
+    "errors": {
+      "last_admin": "Tek yönetici sensin; önce başka bir yönetici ekle.",
+      "guest_use_delete": "Hesabını doğrudan silebilirsin."
+    }
   },
   "admin": {
     "title": "Yönetim",
@@ -1777,6 +1790,35 @@
       "stale": "Kullanıcının rolü bu arada değişmiş; istek kaldırıldı.",
       "cannot_demote_sole_admin": "Sistemdeki son yönetici rolünden çıkarılamaz; istek kaldırıldı.",
       "not_found": "İstek bulunamadı; başka bir yönetici işlemiş olabilir."
+    }
+  },
+  "accountDeletions": {
+    "title": "Hesap silme talepleri",
+    "intro": "Esnaf ve yönetici talepleri. Aktif rezervasyon ve bekleyen hakediş kalmayınca tamamla; hesap anonimleştirilir ve kullanıcıya e-posta gider.",
+    "empty": "Bekleyen talep yok.",
+    "complete": "Tamamla",
+    "completeTitle": "Hesap silinsin mi?",
+    "completeBody": "Hesap anonimleştirilir ve bu işlem geri alınamaz.",
+    "completed": "Hesap silindi.",
+    "failed": "İşlem tamamlanamadı",
+    "cancel": "Talebi iptal et",
+    "cancelTitle": "Talep iptal edilsin mi?",
+    "cancelBody": "Kapatılan dükkanlar yeniden açılır. Gerekçe denetim kaydına girer.",
+    "cancelled": "Talep iptal edildi.",
+    "dates": "Talep {{requested}} · son gün {{due}}",
+    "blockers": "Tamamlanamaz: {{bookings}} aktif rezervasyon, {{payouts}} bekleyen hakediş.",
+    "status": {
+      "PENDING": "Bekliyor",
+      "COMPLETED": "Tamamlandı",
+      "CANCELLED": "İptal edildi"
+    },
+    "errors": {
+      "active_bookings": "Aktif rezervasyon var; önce tamamlanmalı.",
+      "pending_payouts": "Bekleyen hakediş var; önce ödenmeli.",
+      "not_pending": "Talep artık beklemede değil.",
+      "cannot_delete_self": "Kendi hesabının talebini tamamlayamazsın.",
+      "invalid_reason": "Gerekçe en az 5 karakter olmalı.",
+      "not_found": "Talep bulunamadı."
     }
   }
 }
