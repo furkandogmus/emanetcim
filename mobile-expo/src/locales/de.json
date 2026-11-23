@@ -663,7 +663,7 @@
       },
       "isTest": {
         "title": "{{name}} als Testeintrag markieren?",
-        "body": "Der Eintrag verschwindet aus allem, was Gäste sehen, und aus den Statistiken. Das Partnerpanel funktioniert weiter.",
+        "body": "Der Eintrag verschwindet aus allem, was Gäste sehen, und aus den Statistiken; nur Testkonten können ihn sehen und buchen. Das Partnerpanel funktioniert weiter.",
         "cta": "Als Test markieren"
       }
     },
@@ -679,7 +679,7 @@
     "flagHint": {
       "isActive": "In der Suche sichtbar, nimmt Buchungen an",
       "isVerified": "Gäste sehen ein Vertrauensabzeichen",
-      "isTest": "Überall verborgen, wo Gäste suchen"
+      "isTest": "Für Gäste verborgen; nur Testkonten sehen ihn"
     },
     "listedOn": "Stadtseiten: {{cities}}",
     "today": "Heute",
@@ -1359,6 +1359,13 @@
     "anonymized": "Dieses Konto ist gelöscht (anonymisiert). E-Mail-, Passwort- und Löschaktionen sind deaktiviert.",
     "eraseConfirmPlaceholder": "E-Mail oder Telefonnummer eingeben",
     "anonymizedLabel": "Gelöschtes Konto",
+    "testAccount": "Testkonto",
+    "testAccountHint": "Sieht Test-Shops und kann sie buchen (für die App-Store-Prüfung)",
+    "testAccountConfirmTitle": "{{name}} zum Testkonto machen?",
+    "testAccountConfirmBody": "Dieses Konto sieht Test-Shops in der Suche und kann sie buchen. Echte Shops bleiben wie bisher sichtbar.",
+    "testAccountConfirm": "Zum Testkonto machen",
+    "testAccountOnDone": "Das Konto ist jetzt ein Testkonto.",
+    "testAccountOffDone": "Das Konto ist wieder ein normales Konto.",
     "errors": {
       "forbidden": "Für diese Aktion sind Admin-Rechte nötig.",
       "not_allowed_while_impersonating": "Das geht nicht, während du als Nutzer ansiehst.",
@@ -1379,7 +1386,8 @@
       "invalid_reason": "Der Grund muss mindestens 5 Zeichen haben.",
       "confirm_mismatch": "Die Eingabe ist nicht die E-Mail oder Telefonnummer dieses Kontos.",
       "not_guest": "Nur Gastkonten können gelöscht werden.",
-      "active_bookings": "Das Konto hat eine aktive Buchung; es kann gelöscht werden, wenn sie abgeschlossen oder storniert ist."
+      "active_bookings": "Das Konto hat eine aktive Buchung; es kann gelöscht werden, wenn sie abgeschlossen oder storniert ist.",
+      "cannot_flag_admin": "Ein Admin-Konto kann kein Testkonto werden."
     },
     "audit": {
       "title": "Prüfprotokoll",

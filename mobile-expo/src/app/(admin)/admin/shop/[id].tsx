@@ -1,6 +1,6 @@
 import { useState } from "react";
 import type { ReactNode } from "react";
-import { Alert, KeyboardAvoidingView, Linking, Platform, Pressable, ScrollView, StyleSheet, Switch, View } from "react-native";
+import { Alert, KeyboardAvoidingView, Linking, Platform, Pressable, ScrollView, StyleSheet, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { router, useLocalSearchParams } from "expo-router";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
@@ -11,6 +11,7 @@ import { Field } from "@/components/Field";
 import { LinkGroup, LinkRow } from "@/components/LinkRow";
 import { StackHeader } from "@/components/StackHeader";
 import { StatusBadge } from "@/components/StatusBadge";
+import { ToggleRow } from "@/components/ToggleRow";
 import { AppText, Banner, Button, Card, CenterMessage, IconButton, Loading } from "@/components/ui";
 import { api } from "@/lib/api";
 import { errorMessage } from "@/lib/errors";
@@ -360,41 +361,6 @@ function Detail({ shop: s }: { shop: AdminShopDetail }) {
   );
 }
 
-function ToggleRow({
-  label,
-  hint,
-  value,
-  disabled,
-  onChange,
-  last,
-}: {
-  label: string;
-  hint: string;
-  value: boolean;
-  disabled?: boolean;
-  onChange: (v: boolean) => void;
-  last?: boolean;
-}) {
-  return (
-    <View style={[styles.toggle, !last && styles.toggleDivider]}>
-      <View style={{ flex: 1, gap: 2 }}>
-        <AppText variant="bodyMedium">{label}</AppText>
-        <AppText variant="caption" style={{ fontSize: 13 }}>
-          {hint}
-        </AppText>
-      </View>
-      <Switch
-        accessibilityLabel={label}
-        value={value}
-        disabled={disabled}
-        onValueChange={onChange}
-        trackColor={{ true: colors.accent, false: colors.borderStrong }}
-        thumbColor={colors.white}
-      />
-    </View>
-  );
-}
-
 function Block({ title, children }: { title: string; children: ReactNode }) {
   return (
     <View style={{ gap: space.sm }}>
@@ -421,8 +387,6 @@ const styles = StyleSheet.create({
   safe: { flex: 1, backgroundColor: colors.bg },
   content: { padding: space.xl, paddingBottom: space.xxl, gap: space.xl },
   titleLine: { flexDirection: "row", alignItems: "center", gap: 4 },
-  toggle: { flexDirection: "row", alignItems: "center", gap: space.md, paddingVertical: space.md },
-  toggleDivider: { borderBottomWidth: 1, borderBottomColor: colors.border },
   facts: { flexDirection: "row", gap: space.sm },
   fact: {
     flex: 1,
