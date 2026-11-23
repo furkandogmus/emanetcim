@@ -103,8 +103,8 @@ export default function SearchWizard() {
     if (!cityFromHome || openedFromHome.current || cityList.length === 0) return;
     openedFromHome.current = true;
     const city = cityList.find((c) => (c.slug ?? c.name) === cityFromHome);
+    // Listede yoksa (kart eski veriyle) sehir listesi acik kalir; misafir oradan secer.
     if (city) void chooseCity(city);
-    else setStep(1);
     // chooseCity her render'da yeniden tanimlaniyor; yalnizca liste gelince bir kez calisir.
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [cityFromHome, cityList.length]);
