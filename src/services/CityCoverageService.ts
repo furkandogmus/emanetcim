@@ -106,7 +106,7 @@ export class CityCoverageService {
         const farthestKm = Math.max(...g.points.map(([la, lo]) => distanceKm(latitude, longitude, la, lo)));
         return {
           slug,
-          name: [...g.spellings.entries()].sort((a, b) => b[1] - a[1])[0][0],
+          name: capitalizeDistrict([...g.spellings.entries()].sort((a, b) => b[1] - a[1])[0][0]),
           shopCount: g.n,
           latitude,
           longitude,
@@ -181,7 +181,7 @@ export class CityCoverageService {
         const farthestKm = Math.max(...g.points.map(([la, lo]) => distanceKm(latitude, longitude, la, lo)));
         return {
           slug,
-          name: [...g.spellings.entries()].sort((a, b) => b[1] - a[1])[0][0],
+          name: capitalizeDistrict([...g.spellings.entries()].sort((a, b) => b[1] - a[1])[0][0]),
           shopCount: g.n,
           latitude,
           longitude,
@@ -192,6 +192,15 @@ export class CityCoverageService {
     }
     return out;
   }
+}
+
+/**
+ * Sehir ve ilce adi esnafin yazdigi serbest metin; "yenimahalle" gibi kucuk harfle
+ * girilmisse listede oyle gorunuyordu (2026-11-23). Her kelimenin ilk harfi Turkce
+ * kurala gore buyur (i -> İ), gerisine dokunulmaz: "Beyoğlu", "ÇANKAYA" aynen kalir.
+ */
+export function capitalizeDistrict(name: string): string {
+  return name.replace(/(^|[\s\-/(])(\p{Ll})/gu, (_m, sep: string, ch: string) => sep + ch.toLocaleUpperCase("tr"));
 }
 
 export const cityCoverageService = new CityCoverageService();
