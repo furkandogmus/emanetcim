@@ -7,6 +7,7 @@ import { STORAGE_CITIES } from "@/lib/storage-cities";
 import { useSession } from "next-auth/react";
 import { usePathname } from "@/i18n/routing";
 import BrandMark from "@/components/common/BrandMark";
+import FooterStoreBadges from "@/components/app-promo/FooterStoreBadges";
 
 /**
  * Uygulama yüzeyleri: giriş/kayıt, panel, arama, ödeme, rezervasyon, hesap.
@@ -174,6 +175,7 @@ export default function Footer() {
                 />
               </a>
             </div>
+            <FooterStoreBadges />
           </div>
 
           <div>

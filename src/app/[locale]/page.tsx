@@ -23,6 +23,8 @@ import { isInsuranceEnabled } from "@/lib/commerce-context";
 import AmbientBackdrop from "@/components/common/AmbientBackdrop";
 import { socialMetadata } from "@/lib/social-metadata";
 import { serializeJsonLd } from "@/lib/json-ld-script";
+import StoreBadges from "@/components/app-promo/StoreBadges";
+import { getAppStoreFlags } from "@/lib/app-stores";
 
 export const revalidate = 120;
 
@@ -100,10 +102,12 @@ export default async function GuestPage({ params }: { params: Promise<{ locale: 
   };
   const tCity = await getTranslations("CityStorage");
   const tHome = await getTranslations("Home");
-  const [stats, testimonials, pricingRules] = await Promise.all([
+  const tApp = await getTranslations("AppDownload");
+  const [stats, testimonials, pricingRules, storeFlags] = await Promise.all([
     getGuestLandingStats(),
     getHomeTestimonials(14),
     getPricingRulesForStaticRender(),
+    getAppStoreFlags(),
   ]);
   const insuranceEnabled = isInsuranceEnabled(pricingRules);
   // Arama kutusunun varsayilanlari burada, SUNUCUDA uretilir. Istemcide
@@ -557,6 +561,14 @@ export default async function GuestPage({ params }: { params: Promise<{ locale: 
                 (bkz. globals.css --color-gray-400 yorumu) — bu kart için
                 `text-gray-300` kullanılıyor (kimlik nötrü, koyu zeminde ~11:1). */}
             <p className="text-gray-300 text-sm mt-1">{t('appBannerBody')}</p>
+            {/* Yalnizca yayindaki magazalar; ikisi de kapaliyken hicbir sey cizilmez. */}
+            <StoreBadges
+              flags={storeFlags}
+              iosHref="/app?kaynak=web-home"
+              androidHref="/app?kaynak=web-home"
+              labels={{ appStore: tApp("appStoreAlt"), googlePlay: tApp("googlePlayAlt") }}
+              className="mt-4 justify-center md:justify-start"
+            />
           </div>
           {/* `orange-500` beyaz metinle 3.1:1 veriyordu (WCAG AA eşiği 4.5:1,
               Lighthouse 2026-09-05) — `orange-600`'a çekildi (4.7:1). */}
