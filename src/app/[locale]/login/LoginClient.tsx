@@ -8,11 +8,23 @@ import { useMemo, useState, useEffect } from 'react';
 import { sanitizeAuthCallbackUrl } from '@/lib/auth-callback-url';
 import { authErrorMessage } from '@/lib/auth-error-message';
 import { resolveLoginLanding } from '@/lib/auth-landing';
-import { Package, ShieldCheck, Loader2, Store, Shield, Mail, Lock, ChevronDown, Apple } from 'lucide-react';
+import { Package, ShieldCheck, Loader2, Store, Shield, Mail, Lock, ChevronDown } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import AmbientBackdrop from "@/components/common/AmbientBackdrop";
 import BrandMark from "@/components/common/BrandMark";
 import { useFieldErrors } from "@/lib/hooks/useFieldErrors";
+
+/*
+  Apple'in orijinal (isirilmis) logosu: Sign in with Apple yonergeleri dugmede bu logoyu
+  ister. lucide'nin `Apple` ikonu genel bir elma cizimi, logo degil.
+*/
+function AppleLogo({ size = 20, className }: { size?: number; className?: string }) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="currentColor" aria-hidden="true" className={className}>
+      <path d="M12.152 6.896c-.948 0-2.415-1.078-3.96-1.04-2.04.027-3.91 1.183-4.961 3.014-2.117 3.675-.546 9.103 1.519 12.09 1.013 1.454 2.208 3.09 3.792 3.039 1.52-.065 2.09-.987 3.935-.987 1.831 0 2.35.987 3.96.948 1.637-.026 2.676-1.48 3.676-2.948 1.156-1.688 1.636-3.325 1.662-3.415-.039-.013-3.182-1.221-3.22-4.857-.026-3.04 2.48-4.494 2.597-4.559-1.429-2.09-3.623-2.324-4.39-2.376-2-.156-3.675 1.09-4.61 1.09zM15.53 3.83c.843-1.012 1.4-2.427 1.245-3.83-1.207.052-2.662.805-3.532 1.818-.78.896-1.454 2.338-1.273 3.714 1.338.104 2.715-.688 3.559-1.701" />
+    </svg>
+  );
+}
 
 function GoogleIcon({ size = 20 }: { size?: number }) {
   return (
@@ -338,14 +350,14 @@ export default function LoginPage({
                   {isLoggingIn === 'apple' ? (
                     <Loader2 size={20} className="animate-spin text-white" />
                   ) : (
-                    <Apple size={20} className="text-white shrink-0" fill="currentColor" />
+                    <AppleLogo size={20} className="text-white shrink-0" />
                   )}
                   <span className="font-bold text-white">{t('continueWithApple')}</span>
                 </button>
               ) : (
                 <div className="relative">
                   <div className="w-full h-14 bg-gray-100 rounded-2xl flex items-center justify-center gap-3 cursor-not-allowed opacity-50 select-none">
-                    <Apple size={20} className="text-gray-400" fill="currentColor" />
+                    <AppleLogo size={20} className="text-gray-400" />
                     <span className="font-bold text-gray-400">{t('continueWithApple')}</span>
                   </div>
                   <span className="absolute -top-2 -right-2 bg-orange-500 text-white id-eyebrow px-2 py-0.5 rounded-full shadow">
