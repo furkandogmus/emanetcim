@@ -774,7 +774,8 @@
     "stayPickupHours": "Abholung {date}: {open}–{close}.",
     "stayDayClosed": "Am {date} ist der Shop geschlossen; bitte einen anderen Tag wählen.",
     "shopClosedOn": "Geschlossen: {range}",
-    "searchSubmit": "Suchen"
+    "searchSubmit": "Suchen",
+    "checkoutAffiliateLine": "Empfehlungsrabatt ({pct} %)"
   },
   "Admin": {
     "dashboardTitle": "BagajPark Verwaltungszentrale",
@@ -1379,7 +1380,8 @@
     "partnerLeadConvertActivationFailed": "Das Konto wurde eröffnet, aber das Geschäft konnte nicht veröffentlicht werden. Geben Sie es in der Antragsliste frei.",
     "partnerLeadConvertAlready": "Diese Vorregistrierung wurde bereits umgewandelt",
     "partnerLeadConvertBack": "Zurück zu den Vorregistrierungen",
-    "partnerLeadMapsSearch": "Adresse in Google Maps suchen"
+    "partnerLeadMapsSearch": "Adresse in Google Maps suchen",
+    "affiliatesTitle": "Vermittler"
   },
   "Auth": {
     "loginTitle": "Melden Sie sich bei BagajPark an",
@@ -1890,7 +1892,8 @@
     "invalidName": "Der Name muss 1-100 Zeichen lang sein.",
     "currentPasswordRequired": "Geben Sie Ihr aktuelles Passwort ein.",
     "invalidCurrentPassword": "Das aktuelle Passwort ist falsch.",
-    "lateHoldLimit": "Abholzeit erreicht; die Buchung kann nicht länger gehalten werden."
+    "lateHoldLimit": "Abholzeit erreicht; die Buchung kann nicht länger gehalten werden.",
+    "affiliateAlreadyApplied": "Für dieses Konto gibt es bereits eine Vermittler-Bewerbung."
   },
   "Emails": {
     "verificationSubject": "Bestätigen Sie Ihre E-Mail",
@@ -2525,5 +2528,114 @@
     "print": "Drucken",
     "printHint": "Auf A4 ohne Ränder drucken.",
     "noShop": "Für ein Plakat brauchen Sie zuerst einen Laden."
+  },
+  "Affiliate": {
+    "applyMetaTitle": "Vermittler werden — BagajPark",
+    "applyTitle": "Gäste empfehlen, Provision verdienen",
+    "applyIntro": "Als Airbnb-Gastgeber, Hotel, Reiseleiter oder Agentur geben Sie Ihren Gästen Ihren persönlichen BagajPark-Link. Für jeden Gast, der sein Gepäck abgibt und wieder abholt, erhalten Sie eine Provision.",
+    "applyPoint1": "Persönlicher Link und QR-Code: per Nachricht, auf der Willkommenskarte oder an der Rezeption teilen.",
+    "applyPoint2": "Provision nur für abgeschlossene Buchungen; Stornierungen und Nichterscheinen zählen nicht.",
+    "applyPoint3": "Auszahlung monatlich; im Dashboard sehen Sie Klicks, Buchungen und Einnahmen.",
+    "fieldName": "Name / Firmenname",
+    "fieldType": "Welche Art Vermittler sind Sie?",
+    "fieldEmail": "E-Mail",
+    "fieldPhone": "Telefon",
+    "fieldContactHint": "Mindestens E-Mail oder Telefon angeben.",
+    "fieldShare": "Wie teilen Sie den Link?",
+    "fieldSharePlaceholder": "Z. B. in Airbnb-Nachrichten, auf der Infokarte in der Wohnung",
+    "applySubmit": "Bewerbung senden",
+    "applySuccessTitle": "Bewerbung eingegangen",
+    "applySuccessBody": "Nach Prüfung und Freigabe funktioniert Ihr Link; wir melden uns.",
+    "panelTitle": "Vermittler-Dashboard",
+    "panelNavDesc": "Ihr Link, QR-Code und Einnahmen",
+    "panelNone": "Mit diesem Konto ist kein Vermittlerkonto verknüpft. Wenn Sie uns Gäste schicken, können Sie sich bewerben.",
+    "panelApply": "Als Vermittler bewerben",
+    "panelQrAlt": "QR-Code Ihres Vermittler-Links",
+    "panelLink": "Ihr persönlicher Link",
+    "panelRates": "Provision {commission} % · Gastrabatt {discount} %",
+    "panelInactive": "Ihr Konto ist noch nicht aktiv; der Link funktioniert nach der Freigabe.",
+    "panelShareTip": "Geben Sie den Link per Nachricht oder Infokarte weiter. Keine externen Links in den Airbnb-Inseratstext.",
+    "statClicks": "Klicks",
+    "statBookings": "Buchungen",
+    "statCompleted": "Abgeschlossen",
+    "statEarned": "Verdient",
+    "statUnpaid": "Offen",
+    "panelBookings": "Buchungen",
+    "panelNoBookings": "Noch keine Buchungen über Ihren Link.",
+    "panelCommissionPaid": "Provision {amount} ₺ (ausgezahlt)",
+    "panelCommissionUnpaid": "Provision {amount} ₺ (offen)",
+    "panelCancelled": "storniert — keine Provision",
+    "panelPending": "Provision nach Abschluss",
+    "types": {
+      "airbnb_host": "Airbnb-/Ferienwohnungs-Gastgeber",
+      "hotel": "Hotel / Pension",
+      "guide": "Reiseleiter",
+      "agency": "Reisebüro",
+      "other": "Sonstiges"
+    }
+  },
+  "AdminAffiliates": {
+    "back": "Zurück zum Dashboard",
+    "title": "Vermittler",
+    "intro": "Gastgeber, Hotels und Reiseleiter, die uns Gäste schicken. Provision entsteht nur bei abgeschlossenen Buchungen; Auszahlung manuell.",
+    "payoutTitle": "Monatliche Auszahlung",
+    "payoutMonth": "Monat",
+    "payoutAffiliate": "Vermittler",
+    "payoutAll": "Alle",
+    "payoutReference": "Zahlungsreferenz (Überweisungsnr.)",
+    "payoutSubmit": "Als bezahlt markieren",
+    "payoutDone": "{count} Provisionen als bezahlt markiert ({total} ₺).",
+    "csv": "Offene Provisionen als CSV",
+    "createTitle": "Neuer Vermittler",
+    "createSubmit": "Vermittler anlegen",
+    "created": "Vermittler angelegt.",
+    "saved": "Gespeichert.",
+    "approved": "Vermittler freigegeben.",
+    "approve": "Freigeben",
+    "edit": "Bearbeiten",
+    "save": "Speichern",
+    "empty": "Noch keine Vermittler.",
+    "rates": "Provision {commission} % · Rabatt {discount} %",
+    "stats": {
+      "clicks": "Klicks",
+      "bookings": "Buchungen",
+      "completed": "Abgeschlossen",
+      "earned": "Verdient",
+      "unpaid": "Offen",
+      "paid": "Bezahlt"
+    },
+    "fields": {
+      "displayName": "Name",
+      "code": "Code",
+      "codePlaceholder": "Leer = aus dem Namen erzeugt",
+      "type": "Art",
+      "contactEmail": "Kontakt-E-Mail",
+      "contactPhone": "Kontakttelefon",
+      "linkedUserEmail": "E-Mail des verknüpften Kontos",
+      "commissionRate": "Provision (%)",
+      "guestDiscountRate": "Gastrabatt (%)",
+      "status": "Status",
+      "notes": "Notiz (nur Admins)"
+    },
+    "errors": {
+      "invalid_data": "Felder prüfen (Sätze 0–50 %).",
+      "invalid_code": "Code: 3–32 Zeichen, Buchstaben, Ziffern und einzelne Bindestriche.",
+      "duplicate_code": "Dieser Code gehört einem anderen Vermittler.",
+      "not_found": "Vermittler nicht gefunden.",
+      "user_not_found": "Kein Konto mit dieser E-Mail.",
+      "user_already_linked": "Dieses Konto ist mit einem anderen Vermittler verknüpft."
+    },
+    "types": {
+      "airbnb_host": "Airbnb-/Ferienwohnungs-Gastgeber",
+      "hotel": "Hotel / Pension",
+      "guide": "Reiseleiter",
+      "agency": "Reisebüro",
+      "other": "Sonstiges"
+    },
+    "statuses": {
+      "pending": "Wartet auf Freigabe",
+      "active": "Aktiv",
+      "paused": "Pausiert"
+    }
   }
 }

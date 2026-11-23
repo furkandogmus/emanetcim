@@ -774,7 +774,8 @@
     "stayPickupHours": "Retrait {date} : {open}–{close}.",
     "stayDayClosed": "Le point est fermé le {date} ; choisissez un autre jour.",
     "shopClosedOn": "Fermé : {range}",
-    "searchSubmit": "Rechercher"
+    "searchSubmit": "Rechercher",
+    "checkoutAffiliateLine": "Remise de parrainage ({pct} %)"
   },
   "Admin": {
     "dashboardTitle": "Centre d'administration BagajPark",
@@ -1379,7 +1380,8 @@
     "partnerLeadConvertActivationFailed": "Le compte a été créé mais la boutique n'a pas pu être publiée. Approuvez-la depuis la liste des demandes.",
     "partnerLeadConvertAlready": "Cette pré-inscription a déjà été convertie",
     "partnerLeadConvertBack": "Retour aux pré-inscriptions",
-    "partnerLeadMapsSearch": "Rechercher l'adresse sur Google Maps"
+    "partnerLeadMapsSearch": "Rechercher l'adresse sur Google Maps",
+    "affiliatesTitle": "Apporteurs"
   },
   "Auth": {
     "loginTitle": "Connectez-vous à BagajPark",
@@ -1890,7 +1892,8 @@
     "invalidName": "Le nom doit contenir 1 à 100 caractères.",
     "currentPasswordRequired": "Saisissez votre mot de passe actuel.",
     "invalidCurrentPassword": "Le mot de passe actuel est incorrect.",
-    "lateHoldLimit": "Heure de retrait atteinte ; la réservation ne peut plus être prolongée."
+    "lateHoldLimit": "Heure de retrait atteinte ; la réservation ne peut plus être prolongée.",
+    "affiliateAlreadyApplied": "Ce compte a déjà une demande d'apporteur d'affaires."
   },
   "Emails": {
     "verificationSubject": "Vérifiez votre e-mail",
@@ -2525,5 +2528,114 @@
     "print": "Imprimer",
     "printHint": "Imprimez en A4 sans marges.",
     "noShop": "Il vous faut d'abord une boutique pour imprimer une affiche."
+  },
+  "Affiliate": {
+    "applyMetaTitle": "Devenir apporteur — BagajPark",
+    "applyTitle": "Envoyez-nous vos clients, gagnez une commission",
+    "applyIntro": "Hôte Airbnb, hôtel, guide ou agence : donnez à vos clients votre lien BagajPark personnel. Vous touchez une commission pour chaque client qui dépose et récupère ses bagages.",
+    "applyPoint1": "Un lien et un QR code personnels : à partager par message, sur une carte d'accueil ou à la réception.",
+    "applyPoint2": "Commission uniquement sur les réservations terminées ; annulations et absences ne comptent pas.",
+    "applyPoint3": "Paiement mensuel ; votre tableau de bord affiche clics, réservations et gains.",
+    "fieldName": "Nom / nom de l'établissement",
+    "fieldType": "Quel type d'apporteur êtes-vous ?",
+    "fieldEmail": "E-mail",
+    "fieldPhone": "Téléphone",
+    "fieldContactHint": "Indiquez au moins un e-mail ou un téléphone.",
+    "fieldShare": "Comment partagerez-vous le lien ?",
+    "fieldSharePlaceholder": "Ex. : dans les messages Airbnb, sur la fiche d'information du logement",
+    "applySubmit": "Envoyer la demande",
+    "applySuccessTitle": "Demande reçue",
+    "applySuccessBody": "Votre lien fonctionnera après examen et validation ; nous vous contacterons.",
+    "panelTitle": "Espace apporteur",
+    "panelNavDesc": "Votre lien, QR code et gains",
+    "panelNone": "Aucun compte apporteur n'est lié à ce compte. Si vous nous envoyez des clients, vous pouvez postuler.",
+    "panelApply": "Postuler comme apporteur",
+    "panelQrAlt": "QR code de votre lien apporteur",
+    "panelLink": "Votre lien personnel",
+    "panelRates": "Commission {commission} % · remise client {discount} %",
+    "panelInactive": "Votre compte n'est pas encore actif ; le lien fonctionnera après validation.",
+    "panelShareTip": "Donnez le lien par message ou sur une fiche d'information. Pas de lien externe dans le texte de l'annonce Airbnb.",
+    "statClicks": "Clics",
+    "statBookings": "Réservations",
+    "statCompleted": "Terminées",
+    "statEarned": "Gagné",
+    "statUnpaid": "À payer",
+    "panelBookings": "Réservations",
+    "panelNoBookings": "Aucune réservation via votre lien pour l'instant.",
+    "panelCommissionPaid": "commission {amount} ₺ (payée)",
+    "panelCommissionUnpaid": "commission {amount} ₺ (à payer)",
+    "panelCancelled": "annulée — pas de commission",
+    "panelPending": "commission une fois terminée",
+    "types": {
+      "airbnb_host": "Hôte Airbnb / location courte",
+      "hotel": "Hôtel / maison d'hôtes",
+      "guide": "Guide touristique",
+      "agency": "Agence de voyages",
+      "other": "Autre"
+    }
+  },
+  "AdminAffiliates": {
+    "back": "Retour au tableau de bord",
+    "title": "Apporteurs",
+    "intro": "Hôtes, hôtels et guides qui nous envoient des clients. La commission n'est due que sur les réservations terminées ; paiement manuel.",
+    "payoutTitle": "Paiement mensuel",
+    "payoutMonth": "Mois",
+    "payoutAffiliate": "Apporteur",
+    "payoutAll": "Tous",
+    "payoutReference": "Référence de paiement (n° de virement)",
+    "payoutSubmit": "Marquer comme payé",
+    "payoutDone": "{count} commissions marquées payées ({total} ₺).",
+    "csv": "CSV des commissions impayées",
+    "createTitle": "Nouvel apporteur",
+    "createSubmit": "Ajouter l'apporteur",
+    "created": "Apporteur ajouté.",
+    "saved": "Enregistré.",
+    "approved": "Apporteur validé.",
+    "approve": "Valider",
+    "edit": "Modifier",
+    "save": "Enregistrer",
+    "empty": "Aucun apporteur pour l'instant.",
+    "rates": "commission {commission} % · remise {discount} %",
+    "stats": {
+      "clicks": "Clics",
+      "bookings": "Réservations",
+      "completed": "Terminées",
+      "earned": "Gagné",
+      "unpaid": "À payer",
+      "paid": "Payé"
+    },
+    "fields": {
+      "displayName": "Nom",
+      "code": "Code",
+      "codePlaceholder": "Généré à partir du nom si vide",
+      "type": "Type",
+      "contactEmail": "E-mail de contact",
+      "contactPhone": "Téléphone de contact",
+      "linkedUserEmail": "E-mail du compte lié",
+      "commissionRate": "Commission (%)",
+      "guestDiscountRate": "Remise client (%)",
+      "status": "Statut",
+      "notes": "Note (admins uniquement)"
+    },
+    "errors": {
+      "invalid_data": "Vérifiez les champs (taux de 0 à 50 %).",
+      "invalid_code": "Code : 3 à 32 caractères, lettres, chiffres et tirets simples.",
+      "duplicate_code": "Ce code est déjà utilisé par un autre apporteur.",
+      "not_found": "Apporteur introuvable.",
+      "user_not_found": "Aucun compte avec cet e-mail.",
+      "user_already_linked": "Ce compte est lié à un autre apporteur."
+    },
+    "types": {
+      "airbnb_host": "Hôte Airbnb / location courte",
+      "hotel": "Hôtel / maison d'hôtes",
+      "guide": "Guide touristique",
+      "agency": "Agence de voyages",
+      "other": "Autre"
+    },
+    "statuses": {
+      "pending": "En attente de validation",
+      "active": "Actif",
+      "paused": "En pause"
+    }
   }
 }

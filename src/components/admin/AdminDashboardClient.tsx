@@ -24,6 +24,7 @@ import {
   Clock,
   Mail,
   Ticket,
+  Handshake,
   PhoneCall,
 } from "lucide-react";
 import dynamic from "next/dynamic";
@@ -306,6 +307,13 @@ export default function AdminDashboardClient({
               >
                 <Ticket size={18} className="opacity-40" />
                 {t("couponsTitle")}
+              </Link>
+              <Link
+                href="/admin/affiliates"
+                className="w-full min-h-[3rem] px-5 bg-white/10 rounded-2xl text-xs id-eyebrow hover:bg-white/20 transition-all text-left flex items-center gap-3"
+              >
+                <Handshake size={18} className="opacity-40" />
+                {t("affiliatesTitle")}
               </Link>
               <Link
                 href="/admin/jobs"

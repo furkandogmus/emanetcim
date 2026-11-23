@@ -774,7 +774,8 @@
     "stayPickupHours": "Alış {date}: {open}–{close} arası.",
     "stayDayClosed": "{date} günü dükkan kapalı; başka bir gün seçin.",
     "shopClosedOn": "İzinli: {range}",
-    "searchSubmit": "Ara"
+    "searchSubmit": "Ara",
+    "checkoutAffiliateLine": "Referans indirimi (%{pct})"
   },
   "Admin": {
     "dashboardTitle": "BagajPark Yönetim Masası",
@@ -1379,7 +1380,8 @@
     "partnerLeadConvertActivationFailed": "Hesap açıldı ama dükkan yayına alınamadı. Başvurular listesinden onaylayın.",
     "partnerLeadConvertAlready": "Bu ön kayıt daha önce esnaf hesabına çevrildi",
     "partnerLeadConvertBack": "Ön kayıtlara dön",
-    "partnerLeadMapsSearch": "Adresi Google Maps'te ara"
+    "partnerLeadMapsSearch": "Adresi Google Maps'te ara",
+    "affiliatesTitle": "Aracılar"
   },
   "Auth": {
     "loginTitle": "BagajPark'a Giriş Yap",
@@ -1954,7 +1956,8 @@
     "invalidName": "Ad 1-100 karakter olmalı.",
     "currentPasswordRequired": "Mevcut şifrenizi girin.",
     "invalidCurrentPassword": "Mevcut şifre hatalı.",
-    "lateHoldLimit": "Alma saatine ulaşıldı; rezervasyon daha fazla bekletilemez."
+    "lateHoldLimit": "Alma saatine ulaşıldı; rezervasyon daha fazla bekletilemez.",
+    "affiliateAlreadyApplied": "Bu hesapla zaten bir aracı başvurusu var."
   },
   "Emails": {
     "verificationSubject": "E-postanızı Doğrulayın",
@@ -2670,5 +2673,114 @@
     "print": "Yazdır",
     "printHint": "A4 kâğıda, kenar boşluğu olmadan yazdırın.",
     "noShop": "Afiş için önce bir dükkanınız olmalı."
+  },
+  "Affiliate": {
+    "applyMetaTitle": "Aracı ol — BagajPark",
+    "applyTitle": "Misafirlerinizi gönderin, komisyon kazanın",
+    "applyIntro": "Airbnb ev sahibi, otel, rehber ya da acenteyseniz misafirlerinize kişisel BagajPark linkinizi verin. Valizini bırakıp teslim alan her misafirden komisyon kazanırsınız.",
+    "applyPoint1": "Kişisel link ve QR kodu: mesajda, karşılama kartında ya da resepsiyonda paylaşın.",
+    "applyPoint2": "Komisyon yalnızca tamamlanan rezervasyonlardan; iptal ve gelmeyen misafir sayılmaz.",
+    "applyPoint3": "Ödemeler ayda bir yapılır; panelinizden tıklama, rezervasyon ve kazancı izlersiniz.",
+    "fieldName": "Ad / işletme adı",
+    "fieldType": "Ne tür bir aracısınız?",
+    "fieldEmail": "E-posta",
+    "fieldPhone": "Telefon",
+    "fieldContactHint": "E-posta ya da telefondan en az biri gerekli.",
+    "fieldShare": "Linki nasıl paylaşacaksınız?",
+    "fieldSharePlaceholder": "Örn: Airbnb mesajlarında, dairedeki bilgi kartında",
+    "applySubmit": "Başvuruyu gönder",
+    "applySuccessTitle": "Başvurunuz alındı",
+    "applySuccessBody": "İnceleyip onayladığımızda linkiniz çalışmaya başlar; size ulaşacağız.",
+    "panelTitle": "Aracı paneli",
+    "panelNavDesc": "Linkin, QR kodun ve kazancın",
+    "panelNone": "Bu hesaba bağlı bir aracı kaydı yok. Misafir gönderiyorsanız başvurabilirsiniz.",
+    "panelApply": "Aracı olarak başvur",
+    "panelQrAlt": "Aracı linkinin QR kodu",
+    "panelLink": "Kişisel linkin",
+    "panelRates": "Komisyon %{commission} · misafir indirimi %{discount}",
+    "panelInactive": "Kaydın henüz aktif değil; onaylanınca link çalışır.",
+    "panelShareTip": "Linki misafire mesajla ya da bilgi kartıyla verin. Airbnb ilan metnine dış link koymayın.",
+    "statClicks": "Tıklama",
+    "statBookings": "Rezervasyon",
+    "statCompleted": "Tamamlanan",
+    "statEarned": "Kazanılan",
+    "statUnpaid": "Ödenecek",
+    "panelBookings": "Rezervasyonlar",
+    "panelNoBookings": "Henüz linkinden gelen rezervasyon yok.",
+    "panelCommissionPaid": "komisyon {amount} ₺ (ödendi)",
+    "panelCommissionUnpaid": "komisyon {amount} ₺ (ödenecek)",
+    "panelCancelled": "iptal — komisyon yok",
+    "panelPending": "tamamlanınca komisyon",
+    "types": {
+      "airbnb_host": "Airbnb / kısa dönem ev sahibi",
+      "hotel": "Otel / pansiyon",
+      "guide": "Tur rehberi",
+      "agency": "Seyahat acentesi",
+      "other": "Diğer"
+    }
+  },
+  "AdminAffiliates": {
+    "back": "Panele dön",
+    "title": "Aracılar",
+    "intro": "Misafir gönderen ev sahibi, otel ve rehberler. Komisyon yalnızca tamamlanan rezervasyondan doğar; ödeme elle yapılır.",
+    "payoutTitle": "Aylık ödeme",
+    "payoutMonth": "Ay",
+    "payoutAffiliate": "Aracı",
+    "payoutAll": "Tümü",
+    "payoutReference": "Ödeme referansı (havale no.)",
+    "payoutSubmit": "Ödendi işaretle",
+    "payoutDone": "{count} komisyon ödendi işaretlendi ({total} ₺).",
+    "csv": "Ödenmemiş komisyonlar CSV",
+    "createTitle": "Yeni aracı",
+    "createSubmit": "Aracı ekle",
+    "created": "Aracı eklendi.",
+    "saved": "Kaydedildi.",
+    "approved": "Aracı onaylandı.",
+    "approve": "Onayla",
+    "edit": "Düzenle",
+    "save": "Kaydet",
+    "empty": "Henüz aracı yok.",
+    "rates": "komisyon %{commission} · indirim %{discount}",
+    "stats": {
+      "clicks": "Tıklama",
+      "bookings": "Rezervasyon",
+      "completed": "Tamamlanan",
+      "earned": "Kazanılan",
+      "unpaid": "Ödenecek",
+      "paid": "Ödenen"
+    },
+    "fields": {
+      "displayName": "Ad",
+      "code": "Kod",
+      "codePlaceholder": "Boşsa addan üretilir",
+      "type": "Tür",
+      "contactEmail": "İletişim e-postası",
+      "contactPhone": "İletişim telefonu",
+      "linkedUserEmail": "Bağlı hesap e-postası",
+      "commissionRate": "Komisyon (%)",
+      "guestDiscountRate": "Misafir indirimi (%)",
+      "status": "Durum",
+      "notes": "Not (yalnızca yönetici)"
+    },
+    "errors": {
+      "invalid_data": "Alanları kontrol edin (oranlar %0–50).",
+      "invalid_code": "Kod 3–32 karakter: harf, rakam ve tek tire.",
+      "duplicate_code": "Bu kod başka bir aracıda.",
+      "not_found": "Aracı bulunamadı.",
+      "user_not_found": "Bu e-postayla hesap yok.",
+      "user_already_linked": "Bu hesap başka bir aracıya bağlı."
+    },
+    "types": {
+      "airbnb_host": "Airbnb / kısa dönem ev sahibi",
+      "hotel": "Otel / pansiyon",
+      "guide": "Tur rehberi",
+      "agency": "Seyahat acentesi",
+      "other": "Diğer"
+    },
+    "statuses": {
+      "pending": "Onay bekliyor",
+      "active": "Aktif",
+      "paused": "Durduruldu"
+    }
   }
 }

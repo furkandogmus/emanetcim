@@ -774,7 +774,8 @@
     "stayPickupHours": "Pick-up {date}: {open}–{close}.",
     "stayDayClosed": "The shop is closed on {date}; please choose another day.",
     "shopClosedOn": "Closed: {range}",
-    "searchSubmit": "Search"
+    "searchSubmit": "Search",
+    "checkoutAffiliateLine": "Referral discount ({pct}%)"
   },
   "Admin": {
     "dashboardTitle": "BagajPark Admin Center",
@@ -1379,7 +1380,8 @@
     "partnerLeadConvertActivationFailed": "The account was opened but the shop could not be published. Approve it from the applications list.",
     "partnerLeadConvertAlready": "This pre-registration was already converted",
     "partnerLeadConvertBack": "Back to pre-registrations",
-    "partnerLeadMapsSearch": "Search the address on Google Maps"
+    "partnerLeadMapsSearch": "Search the address on Google Maps",
+    "affiliatesTitle": "Referrers"
   },
   "Auth": {
     "loginTitle": "Sign in to BagajPark",
@@ -1954,7 +1956,8 @@
     "invalidName": "Name must be 1-100 characters.",
     "currentPasswordRequired": "Enter your current password.",
     "invalidCurrentPassword": "Current password is incorrect.",
-    "lateHoldLimit": "Pick-up time reached; the booking cannot be held any longer."
+    "lateHoldLimit": "Pick-up time reached; the booking cannot be held any longer.",
+    "affiliateAlreadyApplied": "This account already has a partner-referrer application."
   },
   "Emails": {
     "verificationSubject": "Verify Your Email",
@@ -2683,5 +2686,114 @@
     "print": "Print",
     "printHint": "Print on A4 paper without margins.",
     "noShop": "You need a shop before you can print a poster."
+  },
+  "Affiliate": {
+    "applyMetaTitle": "Become a referrer — BagajPark",
+    "applyTitle": "Send us your guests, earn a commission",
+    "applyIntro": "If you are an Airbnb host, hotel, guide or agency, give your guests your personal BagajPark link. You earn a commission on every guest who drops off and collects their luggage.",
+    "applyPoint1": "A personal link and QR code: share it in messages, on a welcome card or at reception.",
+    "applyPoint2": "Commission only on completed bookings; cancellations and no-shows do not count.",
+    "applyPoint3": "Payouts are monthly; your dashboard shows clicks, bookings and earnings.",
+    "fieldName": "Name / business name",
+    "fieldType": "What kind of referrer are you?",
+    "fieldEmail": "Email",
+    "fieldPhone": "Phone",
+    "fieldContactHint": "Email or phone, at least one is required.",
+    "fieldShare": "How will you share the link?",
+    "fieldSharePlaceholder": "E.g. in Airbnb messages, on the info card in the flat",
+    "applySubmit": "Send application",
+    "applySuccessTitle": "Application received",
+    "applySuccessBody": "Your link starts working once we review and approve it; we will get in touch.",
+    "panelTitle": "Referrer dashboard",
+    "panelNavDesc": "Your link, QR code and earnings",
+    "panelNone": "No referrer record is linked to this account. If you send us guests, you can apply.",
+    "panelApply": "Apply as a referrer",
+    "panelQrAlt": "QR code of your referrer link",
+    "panelLink": "Your personal link",
+    "panelRates": "Commission {commission}% · guest discount {discount}%",
+    "panelInactive": "Your record is not active yet; the link works once approved.",
+    "panelShareTip": "Give the link to guests in a message or on an info card. Do not put external links in an Airbnb listing.",
+    "statClicks": "Clicks",
+    "statBookings": "Bookings",
+    "statCompleted": "Completed",
+    "statEarned": "Earned",
+    "statUnpaid": "To be paid",
+    "panelBookings": "Bookings",
+    "panelNoBookings": "No bookings through your link yet.",
+    "panelCommissionPaid": "commission ₺{amount} (paid)",
+    "panelCommissionUnpaid": "commission ₺{amount} (to be paid)",
+    "panelCancelled": "cancelled — no commission",
+    "panelPending": "commission on completion",
+    "types": {
+      "airbnb_host": "Airbnb / short-let host",
+      "hotel": "Hotel / guesthouse",
+      "guide": "Tour guide",
+      "agency": "Travel agency",
+      "other": "Other"
+    }
+  },
+  "AdminAffiliates": {
+    "back": "Back to dashboard",
+    "title": "Referrers",
+    "intro": "Hosts, hotels and guides who send us guests. Commission accrues only on completed bookings; payouts are manual.",
+    "payoutTitle": "Monthly payout",
+    "payoutMonth": "Month",
+    "payoutAffiliate": "Referrer",
+    "payoutAll": "All",
+    "payoutReference": "Payment reference (transfer no.)",
+    "payoutSubmit": "Mark as paid",
+    "payoutDone": "{count} commissions marked as paid (₺{total}).",
+    "csv": "Unpaid commissions CSV",
+    "createTitle": "New referrer",
+    "createSubmit": "Add referrer",
+    "created": "Referrer added.",
+    "saved": "Saved.",
+    "approved": "Referrer approved.",
+    "approve": "Approve",
+    "edit": "Edit",
+    "save": "Save",
+    "empty": "No referrers yet.",
+    "rates": "commission {commission}% · discount {discount}%",
+    "stats": {
+      "clicks": "Clicks",
+      "bookings": "Bookings",
+      "completed": "Completed",
+      "earned": "Earned",
+      "unpaid": "To be paid",
+      "paid": "Paid"
+    },
+    "fields": {
+      "displayName": "Name",
+      "code": "Code",
+      "codePlaceholder": "Generated from the name if empty",
+      "type": "Type",
+      "contactEmail": "Contact email",
+      "contactPhone": "Contact phone",
+      "linkedUserEmail": "Linked account email",
+      "commissionRate": "Commission (%)",
+      "guestDiscountRate": "Guest discount (%)",
+      "status": "Status",
+      "notes": "Note (admins only)"
+    },
+    "errors": {
+      "invalid_data": "Check the fields (rates 0–50%).",
+      "invalid_code": "Code: 3–32 characters, letters, digits and single hyphens.",
+      "duplicate_code": "Another referrer uses this code.",
+      "not_found": "Referrer not found.",
+      "user_not_found": "No account with this email.",
+      "user_already_linked": "This account is linked to another referrer."
+    },
+    "types": {
+      "airbnb_host": "Airbnb / short-let host",
+      "hotel": "Hotel / guesthouse",
+      "guide": "Tour guide",
+      "agency": "Travel agency",
+      "other": "Other"
+    },
+    "statuses": {
+      "pending": "Pending approval",
+      "active": "Active",
+      "paused": "Paused"
+    }
   }
 }
