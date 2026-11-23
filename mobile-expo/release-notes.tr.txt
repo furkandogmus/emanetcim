@@ -1,1 +1,1 @@
-Esnaf QR okutmak için kamera izni verebiliyor. Esnaf telefon numarası ve şifresiyle giriş yapabiliyor. Yeni uygulama ikonu. Esnaf valizi teslim alırken mühür numarası sorulmuyor. Listede ve haritada orta boy valizin günlük fiyatı yazıyor. Konum alınamazsa arama ekranı takılı kalmıyor. Taşan ve kesilen yazılar düzeltildi.
+Açılış daha akıcı: logo beklemeden doğrudan animasyonla başlıyor. Yeni slogan: "Valizini bırak, keyfine bak." Bırakma saatine gecikmede bilgilendirme. Yönetici için yeni yönetim ekranları ve aramada ilçe seçimi.
