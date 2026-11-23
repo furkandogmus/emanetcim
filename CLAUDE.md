@@ -84,16 +84,18 @@ Tavan sayısını yükselten bir PR, sorunu çözmüyor, saklıyor.
 ## Nerede ne var
 
 - Kanıtlı hata kuyruğu: `docs/DEFECT_BACKLOG.md` (tek iş listesi; `PRODUCTION_BACKLOG`
-  stratejik dilek listesidir).
-- Ödeme mimarisi `docs/PAYMENTS.md`, iş kuralları `docs/PLATFORM_SETTINGS.md`,
-  cron/sağlık `scripts/README.md`, deploy `docs/DOCKER.md` + `ops/README.md`.
+  stratejik dilek listesi ve yol haritasıdır). Eski tarihli denetimler `docs/archive/`.
+- Ürün ve iş kuralları `docs/URUN_VE_IS_KURALLARI.md`, sayısal kurallar
+  `docs/PLATFORM_SETTINGS.md`, ödeme `docs/PAYMENTS.md`, cron/sağlık `scripts/README.md`,
+  deploy ve sunucu `ops/README.md`, yerel Docker `docs/DOCKER.md`.
 - CI/CD `docs/CI_CD.md` — tek workflow `.github/workflows/ci.yml`
   (`checks` ∥ `e2e` → `verify` toplayıcı; `image` paralel → `deploy`). Deploy
   doğrulamanın her parçasına `needs` ile bağlı ve `latest`i doğrulanmış imaja o
   taşır, yani kırmızı commit üretime çıkamaz. Actions kotası bitince job'lar 0 adımda düşer
-  ve hiç log bırakmaz; o tabloyu kodda aramayın, belgede yazıyor.
+  ve hiç log bırakmaz (repo özelken; artık herkese açık); o tabloyu kodda aramayın, belgede yazıyor.
 - Prod: AWS EC2 (2026-08-23'te Hetzner'den taşındı, `infra/aws/CUTOVER.md`).
   `main` push → doğrulama ∥ GHCR imajı → `latest` terfisi + SSM ile deploy. Altyapı kodu `infra/aws`.
+  Sunucudaki sır dosyası `/opt/emanetci/docker-compose.env` (SSM'den üretilir); `.env` yoktur.
 
 ## Yapma
 
@@ -107,8 +109,9 @@ Tavan sayısını yükselten bir PR, sorunu çözmüyor, saklıyor.
   Eski Flutter uygulaması (`mobile/`) 2026-10-18'de kaldırıldı; geçmişi git'te.
 - Skill'ler: `/mobil-api-ucu` (web↔mobil aynı servis), `/commit`; Expo için `expo:*` skill'leri.
 - MCP (`.mcp.json`): `context7` (Expo / Next.js güncel doküman).
-- Hook (`.claude/settings.json`): `EXPO_PUBLIC_API_BASE_URL` bagajpark.com'u gösterirken
-  `expo start` / `expo run:*` engellenir; geliştirme yalnızca yerel backend'e karşı.
+- Geliştirme yalnızca yerel backend'e karşı: `EXPO_PUBLIC_API_BASE_URL` bagajpark.com'u
+  gösterirken `expo start` / `expo run:*` çalıştırma. (Bunu engelleyen hook repoda yok:
+  `.claude/*` gitignore'da; varsa yerel ayardır.)
 
 # This is NOT the Next.js you know
 
