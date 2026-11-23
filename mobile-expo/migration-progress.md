@@ -73,11 +73,12 @@ talebi + çalışma saatleri, admin akışı (`admin@test.com`), sonra iOS (maki
 - [x] Esnaf: mühür talebi / arızalı bildir (`/partner/seals`) — main'de
 - [x] Şifre sıfırlama + profil düzenleme (kayıt OTP ile otomatik). OTP girişi artık e-postayı doğrulanmış sayar
 - [x] Google girişi (Android) — 2026-10-18
-- [ ] Google (iOS) / Apple girişi — Apple Developer hesabı ve iOS istemci kimliği bekliyor
+- [x] Apple ile giriş (iOS) — 2026-11-23, iPhone'da denendi; web'de de açık (#204, #205)
+- [ ] Google ile giriş (iOS) — Google Cloud'da iOS OAuth istemcisi + `iosUrlScheme` bekliyor; iOS'ta düğme gizli
 - [x] Rezervasyon değiştir (`bookings/[id]/modify`) — main'de
 - [x] Değerlendirme yaz (`reviews`) — main'de
 - [x] İtiraz / hasar bildirimi — main'de
-- [x] Push: esnafa yeni rezervasyon (FCM; `FIREBASE_SERVICE_ACCOUNT_JSON` SSM'de, 2026-10-18). iOS APNs Apple hesabı bekliyor
+- [x] Push: esnafa yeni rezervasyon (FCM; `FIREBASE_SERVICE_ACCOUNT_JSON` SSM'de, 2026-10-18). iOS: Expo push + APNs anahtarı EAS'ta (2026-11-23), iPhone'da bildirim geldi
 
 ## Admin (2026-10-18 yerel inceleme; uygulama yayından sonra)
 
@@ -119,7 +120,7 @@ blog, blog/[slug], become-partner, esnaf, esnaf/nasil-calisir
 
 ## Yalnızca web (mobilde yok)
 
-- `admin/*` (27 sayfa) — Flutter'da admin vardı; Expo'ya alınmıyor
+- `admin/*` — 2026-11-22/23'te yönetim işlerinin çoğu mobile taşındı (aşağıda "Admin web → mobil"); web'de kalanlar raporlar ve toplu dışa aktarımlar
 - `bookings/lookup`, `bookings/manage/[token]` — hesapsız misafir, e-posta bağlantısıyla gelir
 - `luggage-storage`, `luggage-storage/[slug]`, `hotels`, `partners`, `demand`, `[...slug]` — SEO/pazarlama
 - `auth/error`
@@ -174,3 +175,44 @@ Sırada: iOS. Makinede Xcode yok → `eas-simulator` (bulut) ya da Xcode kurulum
   Android uygulamasına Play imzalama, yükleme ve debug SHA-1'leri eklendi (2026-10-18). Emülatörde
   düğme → hesap ekleme akışı → vazgeçme doğrulandı; hesapla giriş gerçek cihazda (sürüm 15) denenecek
 - [x] Sunucu: istemci kimliği tanımsızsa `auth/google` 503, audience kontrolü kapanmaz
+
+## Admin web → mobil (2026-11-22/23)
+
+Hedef: günlük yönetim web paneline girmeden telefondan yürüsün. Kural aynı: gövde
+`src/services/`'te, web action'ı ve mobil uç aynı servisi çağırır.
+
+- [x] Rezervasyon yönetimi: admin/esnaf/misafir iptali, gelmedi, süresi dolanı kapatma (#174–#176)
+- [x] Duyuru gönderme: Esnaflar / Misafirler / Herkes, "Kendime test gönder" (#180, #182, #184)
+- [x] Kullanıcılar: detay, rol değişikliği (ikinci admin onayı), anonimleştirme, denetim kaydı (#186)
+- [x] Dükkanlar: fotoğraf, çalışma saatleri, yorum moderasyonu (#194)
+- [x] Operasyon: itirazlar, kuponlar, ödemeler, platform ayarları, özellik bayrakları (#195)
+- [x] İnceleme (App Review) hesabı anahtarı; test dükkanını yalnızca bu hesaplar görür (#200)
+- [x] Mağaza ayarları: "iOS yayında" / "Android yayında" (#206)
+- [ ] Aracı (affiliate) programı: aracı ekle/onayla, oranlar, ödeme işaretleme (#207, QA düzeltmesinde)
+- [ ] Esnaf ön kaydını tek adımda esnaf hesabı + dükkana çevirme (#208, QA düzeltmesinde)
+
+## Misafir ve esnaf akışları (2026-11-22/23)
+
+- [x] Aramada şehirden sonra ilçe adımı ("Merkez" + dükkanı olan ilçeler); ana sayfa şehir
+  kartından da açılır, adların baş harfi büyük (#192, #202, #203)
+- [x] Bırakma saatine gecikme: +15/+30/+45 dk hatırlatma, +60 dk otomatik kapanış; esnafta
+  "Misafiri bekle (+30 dk)" (#196). Zamanlayıcı `late-dropoff-scan`, 5 dakikada bir
+- [x] Telefon numarası 0 ile gösterilir, arama +90 ile yapılır (#199)
+- [x] Açılış animasyonu durgun logo beklemeden başlar; slogan "Valizini bırak, keyfine bak." (#197)
+- [x] Esnaf için yazdırılabilir QR afişi (web, `partner/poster`) ve `bagajpark.com/app` akıllı
+  indirme bağlantısı (#206)
+- [ ] Yeni dükkanın slotları onay anında üretilir (#208). Bugün yalnızca gece işi üretiyor:
+  gündüz onaylanan dükkan ertesi sabaha kadar web aramada görünmez
+
+## iOS yayını (2026-11-23)
+
+Makinede Xcode yok; build ve yükleme EAS ile (`IOS_YAYIN.md`). İlk build/submit Apple ID
+girişi istediği için kullanıcının Terminal'inden; sonrakiler etkileşimsiz.
+
+- [x] Apple Developer (bireysel), bundle `com.bagajpark`, App Store Connect kaydı
+- [x] TestFlight: dahili grup, iPhone'da kurulum ve deneme
+- [x] Sürüm 0.3.4 build 4 incelemeye gönderildi; yalnızca Türkiye, onaylanınca otomatik yayın.
+  Build 3 geri çekildi: gömülü JS inceleme hesabının demo dükkanını ilk açılışta göstermiyordu
+- [x] Yerel açılış ekranı 0.3.4'te boş; işaret animasyonla gelir (eski ikililer logodan başlar)
+- bulgu (düzeltildi): sunucudaki `call-internal-job.sh` 2026-10-25'ten beri `.env` arıyordu,
+  dosya `docker-compose.env`; hatırlatma, slot üretimi ve diğer gece işleri 4 hafta çalışmadı (#201)
