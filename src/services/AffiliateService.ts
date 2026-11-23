@@ -106,7 +106,13 @@ export function applyAffiliateGuestDiscount(
 }
 
 /** Misafirin kimligi: hesapli ise `userId`, hesapsiz web odemesinde e-posta. */
-export type AffiliateGuest = { userId?: string | null; guestEmail?: string | null };
+export type AffiliateGuest = { userId?: string | null; guestEmail?: string | null; guestPhone?: string | null };
+
+/** Telefon karsilastirma anahtari: son 10 rakam (`0532...` ile `+90532...` ayni). */
+function phoneKey(raw: string | null | undefined): string | null {
+  const digits = (raw ?? "").replace(/\D/g, "");
+  return digits.length >= 7 ? digits.slice(-10) : null;
+}
 
 export type AffiliateAttribution = {
   affiliateId: string;
@@ -136,6 +142,7 @@ export class AffiliateService {
         status: true,
         userId: true,
         contactEmail: true,
+        contactPhone: true,
         commissionRate: true,
         guestDiscountRate: true,
         user: { select: { email: true } },
@@ -143,15 +150,24 @@ export class AffiliateService {
     });
     if (!affiliate || affiliate.status !== AffiliateStatus.ACTIVE) return { ok: false, reason: "invalid_code" };
 
-    // Kendine komisyon yok: aracinin hesabi ya da kendi e-postasi.
+    // Kendine komisyon yok: aracinin hesabi, kendi e-postasi ya da telefonu.
     if (guest.userId && affiliate.userId && guest.userId === affiliate.userId) {
       return { ok: false, reason: "own_code" };
     }
-    const email = guest.guestEmail?.trim().toLowerCase();
-    if (email) {
-      const own = [affiliate.contactEmail, affiliate.user?.email].some((e) => e?.trim().toLowerCase() === email);
-      if (own) return { ok: false, reason: "own_code" };
-    }
+    /*
+      Girisli misafirde e-posta/telefon HESAPTAN okunur (QA, PR #207): tasiyici
+      yalnizca `userId` veriyordu ve aracinin ikinci bir hesapla kendi kodunu
+      kullanmasi e-posta karsilastirmasina hic girmiyordu.
+    */
+    const account = guest.userId
+      ? await prisma.user.findUnique({ where: { id: guest.userId }, select: { email: true, phone: true } })
+      : null;
+    const emails = [guest.guestEmail, account?.email].map((e) => e?.trim().toLowerCase()).filter(Boolean);
+    const ownEmails = [affiliate.contactEmail, affiliate.user?.email].map((e) => e?.trim().toLowerCase()).filter(Boolean);
+    if (emails.some((e) => ownEmails.includes(e))) return { ok: false, reason: "own_code" };
+    const phones = [guest.guestPhone, account?.phone].map(phoneKey).filter(Boolean);
+    const ownPhone = phoneKey(affiliate.contactPhone);
+    if (ownPhone && phones.includes(ownPhone)) return { ok: false, reason: "own_code" };
     return {
       ok: true,
       attribution: {

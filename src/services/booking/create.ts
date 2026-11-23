@@ -48,7 +48,11 @@ async function affiliateFields(data: CreateInitialBookingInput) {
       : 0;
   const none = { affiliateId: null, affiliateCommissionRate: null, affiliateGuestDiscountRate: null, affiliateDiscountAmount };
   if (!data.affiliateCode) return none;
-  const r = await affiliateService.resolve(data.affiliateCode, { userId: data.guestId, guestEmail: data.guestEmail });
+  const r = await affiliateService.resolve(data.affiliateCode, {
+    userId: data.guestId,
+    guestEmail: data.guestEmail,
+    guestPhone: data.guestPhone,
+  });
   if (!r.ok) return none;
   return {
     affiliateId: r.attribution.affiliateId,

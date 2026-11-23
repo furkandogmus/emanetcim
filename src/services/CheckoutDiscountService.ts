@@ -14,12 +14,15 @@
  */
 import { applyReferralDiscount } from "@/lib/referral-discount";
 import { couponService } from "@/services/CouponService";
-import { referralService, type ReferralGuest, type ReferralRejection } from "@/services/ReferralService";
+import { referralService, type ReferralRejection } from "@/services/ReferralService";
 import {
   affiliateService,
   applyAffiliateGuestDiscount,
   type AffiliateAttribution,
+  type AffiliateGuest,
 } from "@/services/AffiliateService";
+
+type ReferralGuest = AffiliateGuest;
 
 export type AffiliateQuote = {
   code: string;

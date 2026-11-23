@@ -162,7 +162,7 @@ export async function createBookingAction(data: CreateBookingInput) {
     couponCode: data.couponCode,
     referralCode: data.referralCode,
     affiliateCode,
-    guest: { userId, guestEmail: data.guestEmail },
+    guest: { userId, guestEmail: data.guestEmail, guestPhone: data.guestPhone },
   });
   const totalPrice = discounts.totalPrice;
   const appliedCouponId = discounts.couponId;
