@@ -2,8 +2,8 @@ import { snapStayToShopHours } from "@/lib/stay-days";
 import { loadScheduleParts } from "@/services/ShopScheduleService";
 import { toDatetimeLocalValueInTimeZone } from "@/lib/datetime-local";
 import { couponService } from "@/services/CouponService";
+import { checkoutDiscountService } from "@/services/CheckoutDiscountService";
 import { rateLimit } from "@/lib/rate-limit";
-import { referralService } from "@/services/ReferralService";
 import { resolveRequestLocale } from "@/lib/request-locale";
 import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
@@ -67,6 +67,8 @@ const schema = z.object({
   couponCode: z.string().trim().min(1).max(64).optional(),
   /** Davet kodu (2026-09-23). Kural `ReferralService`te; web ile ayni cagri. */
   referralCode: z.string().trim().min(1).max(32).optional(),
+  /** Araci kodu (2026-11-23): odeme ekranindaki "Referans kodu" ya da `?ref=` derin baglantisi. */
+  affiliateCode: z.string().trim().min(1).max(40).optional(),
   /*
     Ekranda gosterilen toplam (`checkout/quote`). Sunucunun hesapladigi tutar
     bundan farkliysa (kupon kotasi bitti, davet kodu gecmez, fiyat kurali
@@ -187,39 +189,19 @@ export async function POST(req: NextRequest) {
   );
 
   /*
-    Kupon hakki rezervasyondan ONCE alinir (web ile ayni sira): yaris
-    kosulunda kota tutmazsa indirim hic uygulanmaz. Rezervasyon olusmazsa
-    asagidaki `catch` hakki geri verir.
+    Indirim secimi `CheckoutDiscountService`te (web ile ayni kural, tek indirim).
+    Kupon hakki rezervasyondan ONCE alinir; rezervasyon olusmazsa asagidaki
+    `catch` hakki geri verir.
   */
-  let toplam = totals.subtotalBeforeCoupon;
-  let couponDiscountAmount = 0;
-  let appliedCouponCode: string | undefined;
-  let appliedCouponId: string | undefined;
-  if (parsed.data.couponCode) {
-    const claim = await couponService.claim(parsed.data.couponCode, toplam);
-    if (claim.ok) {
-      toplam = claim.claimed.totalPrice;
-      appliedCouponId = claim.claimed.couponId;
-      couponDiscountAmount = claim.claimed.discountAmount;
-      appliedCouponCode = claim.claimed.code;
-    }
-  }
-
-  // Referans indirimi: kupon uygulandiysa uygulanmaz (web ile ayni kural).
-  let referralDiscountAmount = 0;
-  let appliedReferralCode: string | undefined;
-  if (!appliedCouponCode) {
-    const referral = await referralService.resolveDiscount(
-      parsed.data.referralCode,
-      { userId: auth.user.id },
-      toplam,
-    );
-    if (referral) {
-      referralDiscountAmount = referral.discountAmount;
-      toplam = referral.totalPrice;
-      appliedReferralCode = referral.code;
-    }
-  }
+  const discounts = await checkoutDiscountService.claim({
+    subtotal: totals.subtotalBeforeCoupon,
+    couponCode: parsed.data.couponCode,
+    referralCode: parsed.data.referralCode,
+    affiliateCode: parsed.data.affiliateCode,
+    guest: { userId: auth.user.id },
+  });
+  const toplam = discounts.totalPrice;
+  const appliedCouponId = discounts.couponId;
 
   /*
     Gosterilen tutar ile hesaplanan tutar ayrisirsa YAZMADAN reddedilir; alinan
@@ -245,10 +227,12 @@ export async function POST(req: NextRequest) {
       */
       locale: resolveRequestLocale(req.headers.get("accept-language")),
       totalPrice: toplam,
-      couponDiscountAmount,
-      couponCode: appliedCouponCode,
-      referralDiscountAmount,
-      referredByCode: appliedReferralCode,
+      couponDiscountAmount: discounts.couponDiscountAmount,
+      couponCode: discounts.couponCode,
+      referralDiscountAmount: discounts.referralDiscountAmount,
+      referredByCode: discounts.referredByCode,
+      affiliateCode: discounts.affiliateCode,
+      affiliateDiscountAmount: discounts.affiliateDiscountAmount,
       unitPrice: totals.unitPrice,
       insuranceFee: totals.insuranceFee,
       bagCountS: totals.bagCountS,

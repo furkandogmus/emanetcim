@@ -44,6 +44,9 @@ const KEPT: Record<string, string> = {
   Shop: "Dükkan bir işletme kaydıdır; anonimleştirme aktif rezervasyonu olan hesabı zaten reddeder.",
   Booking: "Ticari kayıt — muhasebe/yasal saklama ve esnafın hakediş defteri buna dayanır.",
   AuditLog: "Denetim izi. Silinebilen bir denetim izi denetim değildir.",
+  Affiliate:
+    "Aracı kaydı ticari bir sözleşme tarafıdır; ödenmemiş komisyon borcu ona bağlı. Hesap bağı kalır, " +
+    "iletişim alanlarını gerekirse yönetici temizler (açık soru, PR notu).",
   AnalyticsEvent:
     "Ürün analitiği. SİLİNMİYOR — gerekçesi zayıf ve gözden geçirilmeli (DEFECT_BACKLOG 2026-09-01).",
 };
