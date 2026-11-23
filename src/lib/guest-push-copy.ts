@@ -13,9 +13,12 @@ export type GuestPushEvent =
   | "reminderCheckOut"
   | "overdue"
   | "bagRevision"
-  | "noShow";
+  | "noShow"
+  | "lateDropoff"
+  | "lateHold"
+  | "lateClosed";
 
-export type GuestPushVars = { shop: string; time?: string; total?: string };
+export type GuestPushVars = { shop: string; time?: string; total?: string; phone?: string };
 
 type Copy = Record<GuestPushEvent, (v: GuestPushVars) => { title: string; body: string }>;
 
@@ -30,6 +33,9 @@ export const GUEST_PUSH_COPY: Record<AppLocale, Copy> = {
     overdue: (v) => ({ title: "Valizin hâlâ dükkanda", body: `Alma saatin geçti. Valizin ${v.shop} noktasında bekliyor.` }),
     bagRevision: (v) => ({ title: "Onayın gerekiyor", body: `${v.shop} valiz sayını düzeltti. Yeni toplam ${v.total ?? ""}.` }),
     noShow: (v) => ({ title: "Seni göremedik", body: `${v.shop} rezervasyonunu kapattı. Yeni bir rezervasyonla her zaman bekleriz.` }),
+    lateDropoff: (v) => ({ title: "Bırakma saatin geçti", body: `${v.shop} rezervasyonun saat ${v.time ?? ""} itibarıyla otomatik kapanacak. Geliyorsan dükkanı ara${v.phone ? ` (${v.phone})` : ""}; gelemiyorsan yeni bir rezervasyon yap.` }),
+    lateHold: (v) => ({ title: "Dükkan seni bekliyor", body: `${v.shop} rezervasyonunu senin için açık tutuyor. Son saat: ${v.time ?? ""}.` }),
+    lateClosed: (v) => ({ title: "Rezervasyonun kapandı", body: `Bırakma saatin 1 saat geçtiği için ${v.shop} rezervasyonun kapandı. Yeni bir rezervasyon yapabilirsin.` }),
   },
   en: {
     approved: (v) => ({ title: "Your booking is confirmed", body: `${v.shop} is expecting you. Your QR code is in the app.` }),
@@ -41,6 +47,9 @@ export const GUEST_PUSH_COPY: Record<AppLocale, Copy> = {
     overdue: (v) => ({ title: "Your bags are still at the shop", body: `Your pickup time has passed. Your bags are waiting at ${v.shop}.` }),
     bagRevision: (v) => ({ title: "Your approval is needed", body: `${v.shop} corrected your bag count. New total ${v.total ?? ""}.` }),
     noShow: (v) => ({ title: "We missed you", body: `${v.shop} closed your booking. You are welcome to book again anytime.` }),
+    lateDropoff: (v) => ({ title: "Your drop-off time has passed", body: `Your booking at ${v.shop} closes automatically at ${v.time ?? ""}. If you are on your way, call the shop${v.phone ? ` (${v.phone})` : ""}; otherwise make a new booking.` }),
+    lateHold: (v) => ({ title: "The shop is waiting for you", body: `${v.shop} is holding your booking until ${v.time ?? ""}.` }),
+    lateClosed: (v) => ({ title: "Your booking was closed", body: `Your booking at ${v.shop} was closed because the drop-off time passed by 1 hour. You can make a new booking.` }),
   },
   de: {
     approved: (v) => ({ title: "Buchung bestätigt", body: `${v.shop} erwartet dich. Dein QR-Code ist in der App.` }),
@@ -52,6 +61,9 @@ export const GUEST_PUSH_COPY: Record<AppLocale, Copy> = {
     overdue: (v) => ({ title: "Dein Gepäck ist noch im Laden", body: `Deine Abholzeit ist vorbei. Dein Gepäck wartet bei ${v.shop}.` }),
     bagRevision: (v) => ({ title: "Deine Zustimmung ist nötig", body: `${v.shop} hat die Gepäckanzahl korrigiert. Neuer Gesamtbetrag ${v.total ?? ""}.` }),
     noShow: (v) => ({ title: "Wir haben dich verpasst", body: `${v.shop} hat deine Buchung geschlossen. Du kannst jederzeit neu buchen.` }),
+    lateDropoff: (v) => ({ title: "Deine Abgabezeit ist vorbei", body: `Deine Buchung bei ${v.shop} wird um ${v.time ?? ""} automatisch geschlossen. Wenn du unterwegs bist, ruf den Laden an${v.phone ? ` (${v.phone})` : ""}; sonst buche neu.` }),
+    lateHold: (v) => ({ title: "Der Laden wartet auf dich", body: `${v.shop} hält deine Buchung bis ${v.time ?? ""} offen.` }),
+    lateClosed: (v) => ({ title: "Deine Buchung wurde geschlossen", body: `Deine Buchung bei ${v.shop} wurde geschlossen, weil die Abgabezeit um 1 Stunde überschritten wurde. Du kannst neu buchen.` }),
   },
   fr: {
     approved: (v) => ({ title: "Réservation confirmée", body: `${v.shop} vous attend. Votre QR code est dans l'app.` }),
@@ -63,6 +75,9 @@ export const GUEST_PUSH_COPY: Record<AppLocale, Copy> = {
     overdue: (v) => ({ title: "Vos bagages sont toujours au commerce", body: `L'heure de retrait est passée. Vos bagages vous attendent chez ${v.shop}.` }),
     bagRevision: (v) => ({ title: "Votre accord est nécessaire", body: `${v.shop} a corrigé le nombre de bagages. Nouveau total ${v.total ?? ""}.` }),
     noShow: (v) => ({ title: "Nous vous avons manqué", body: `${v.shop} a clôturé votre réservation. Vous pouvez réserver à nouveau à tout moment.` }),
+    lateDropoff: (v) => ({ title: "L'heure de dépôt est passée", body: `Votre réservation chez ${v.shop} sera clôturée automatiquement à ${v.time ?? ""}. Si vous arrivez, appelez le commerce${v.phone ? ` (${v.phone})` : ""} ; sinon, faites une nouvelle réservation.` }),
+    lateHold: (v) => ({ title: "Le commerce vous attend", body: `${v.shop} garde votre réservation jusqu'à ${v.time ?? ""}.` }),
+    lateClosed: (v) => ({ title: "Votre réservation a été clôturée", body: `Votre réservation chez ${v.shop} a été clôturée car l'heure de dépôt est dépassée d'une heure. Vous pouvez réserver à nouveau.` }),
   },
   ja: {
     approved: (v) => ({ title: "予約が確定しました", body: `${v.shop}がお待ちしています。QRコードはアプリにあります。` }),
@@ -74,6 +89,9 @@ export const GUEST_PUSH_COPY: Record<AppLocale, Copy> = {
     overdue: (v) => ({ title: "お荷物はまだ店舗にあります", body: `受け取り時間を過ぎました。お荷物は${v.shop}でお待ちしています。` }),
     bagRevision: (v) => ({ title: "承認が必要です", body: `${v.shop}が荷物の数を修正しました。新しい合計 ${v.total ?? ""}。` }),
     noShow: (v) => ({ title: "お会いできませんでした", body: `${v.shop}がご予約を終了しました。またいつでもご予約ください。` }),
+    lateDropoff: (v) => ({ title: "預け入れ時間を過ぎました", body: `${v.shop}のご予約は${v.time ?? ""}に自動で終了します。向かっている場合は店舗にお電話ください${v.phone ? `（${v.phone}）` : ""}。難しい場合は新しくご予約ください。` }),
+    lateHold: (v) => ({ title: "店舗がお待ちしています", body: `${v.shop}は${v.time ?? ""}までご予約を保持しています。` }),
+    lateClosed: (v) => ({ title: "ご予約が終了しました", body: `預け入れ時間を1時間過ぎたため、${v.shop}のご予約は終了しました。新しくご予約いただけます。` }),
   },
   fa: {
     approved: (v) => ({ title: "رزرو شما تأیید شد", body: `${v.shop} منتظر شماست. کد QR در برنامه است.` }),
@@ -85,5 +103,8 @@ export const GUEST_PUSH_COPY: Record<AppLocale, Copy> = {
     overdue: (v) => ({ title: "چمدان شما هنوز در فروشگاه است", body: `زمان تحویل گذشته است. چمدان شما در ${v.shop} منتظر است.` }),
     bagRevision: (v) => ({ title: "تأیید شما لازم است", body: `${v.shop} تعداد چمدان‌ها را اصلاح کرد. مبلغ جدید ${v.total ?? ""}.` }),
     noShow: (v) => ({ title: "شما را ندیدیم", body: `${v.shop} رزرو شما را بست. هر زمان خواستید دوباره رزرو کنید.` }),
+    lateDropoff: (v) => ({ title: "زمان تحویل دادن گذشته است", body: `رزرو شما در ${v.shop} ساعت ${v.time ?? ""} به‌طور خودکار بسته می‌شود. اگر در راه هستید با فروشگاه تماس بگیرید${v.phone ? ` (${v.phone})` : ""}؛ وگرنه رزرو جدیدی ثبت کنید.` }),
+    lateHold: (v) => ({ title: "فروشگاه منتظر شماست", body: `${v.shop} رزرو شما را تا ساعت ${v.time ?? ""} نگه می‌دارد.` }),
+    lateClosed: (v) => ({ title: "رزرو شما بسته شد", body: `چون یک ساعت از زمان تحویل دادن گذشت، رزرو شما در ${v.shop} بسته شد. می‌توانید دوباره رزرو کنید.` }),
   },
 };
