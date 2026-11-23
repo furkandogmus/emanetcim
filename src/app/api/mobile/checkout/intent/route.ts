@@ -149,7 +149,7 @@ export async function POST(req: NextRequest) {
     `public-shop-filter.ts`te: prelaunch noktalarinda slot hic uretilmiyor.
   */
   /*
-    Inceleme kum havuzu (2026-11-23): `isTest` hesap test dukkanina rezervasyon
+    Inceleme kum havuzu (2026-11-23): `reviewSandbox` hesap test dukkanina rezervasyon
     yapabilir (Apple incelemesi gercek esnafa dusmesin). Gercek kullanici icin
     kosul degismedi: `isActive && !isTest && !isPrelaunch`.
   */

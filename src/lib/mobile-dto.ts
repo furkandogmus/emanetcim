@@ -773,6 +773,7 @@ export function toMobileAdminUser(u: AdminUserSource) {
     role: u.role,
     isBanned: u.isBanned,
     isTest: u.isTest,
+    reviewSandbox: u.reviewSandbox,
     bookingCount: u._count.bookings,
     shopCount: u._count.shops,
     createdAt: u.createdAt.toISOString(),

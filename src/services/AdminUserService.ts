@@ -9,6 +9,7 @@ import { isAnonymizedEmail } from "@/lib/anonymized-account";
 import { generateVerificationToken } from "@/lib/tokens";
 import { sendVerificationEmail } from "@/lib/mail";
 import { requestPasswordReset } from "@/services/auth/password-reset";
+import { roleChangeData } from "@/lib/role-change-data";
 
 export type AdminActor = { userId: string | null; ip: string | null };
 
@@ -38,6 +39,7 @@ const LIST_SELECT = {
   role: true,
   isBanned: true,
   isTest: true,
+  reviewSandbox: true,
   createdAt: true,
   _count: { select: { bookings: true, shops: true } },
 } as const satisfies Prisma.UserSelect;
@@ -117,31 +119,32 @@ export class AdminUserService {
   }
 
   /*
-    INCELEME KUM HAVUZU HESABI (2026-11-23). `isTest` artik yalnizca etiket
-    degil: bu hesap test dukkanlarini gorur ve onlara rezervasyon yapabilir
-    (Apple App Review demo hesabi gercek esnafa dusmesin). Bayrak yalnizca
-    misafir aramasini ve rezervasyon kapisini etkiler; token iptali gerekmez,
-    her istek bayragi veritabanindan okur. ADMIN reddedilir: yonetici hesabinin
-    gorunumu degismesin, kum havuzu bilerek misafir/esnaf hesabina ozgu.
+    INCELEME (App Review) HESABI (2026-11-23): `reviewSandbox` hesap test
+    dukkanlarini gorur ve onlara rezervasyon yapabilir. `isTest`ten ayri bayrak:
+    o el ile verilen etiket ve davranisi degistirmemeli. ADMIN reddedilir;
+    token iptali gerekmez, bayrak her istekte veritabanindan okunur.
   */
-  async setTestAccount(
+  async setReviewSandbox(
     userId: string,
-    isTest: boolean,
+    reviewSandbox: boolean,
     actor: AdminActor,
   ): Promise<{ ok: true } | { ok: false; error: "not_found" | "cannot_flag_admin" }> {
-    const exists = await prisma.user.findUnique({ where: { id: userId }, select: { id: true, role: true, isTest: true } });
+    const exists = await prisma.user.findUnique({
+      where: { id: userId },
+      select: { id: true, role: true, reviewSandbox: true },
+    });
     if (!exists) return { ok: false, error: "not_found" };
-    if (isTest && exists.role === "ADMIN") return { ok: false, error: "cannot_flag_admin" };
-    if (exists.isTest === isTest) return { ok: true };
+    if (reviewSandbox && exists.role === "ADMIN") return { ok: false, error: "cannot_flag_admin" };
+    if (exists.reviewSandbox === reviewSandbox) return { ok: true };
 
-    await prisma.user.update({ where: { id: userId }, data: { isTest } });
+    await prisma.user.update({ where: { id: userId }, data: { reviewSandbox } });
     writeAuditLog({
       actorUserId: actor.userId,
       actorRole: "ADMIN",
-      action: "user.test_toggle",
+      action: "user.review_sandbox_toggle",
       entityType: "User",
       entityId: userId,
-      metadata: { isTest },
+      metadata: { reviewSandbox },
       ip: actor.ip,
     });
     return { ok: true };
@@ -272,10 +275,7 @@ export class AdminUserService {
     actor: AdminActor,
     metadataExtra: Record<string, string> = {},
   ) {
-    await prisma.user.update({
-      where: { id: targetUserId },
-      data: { role: newRole, tokenVersion: { increment: 1 } },
-    });
+    await prisma.user.update({ where: { id: targetUserId }, data: roleChangeData(newRole) });
     writeAuditLog({
       actorUserId: actor.userId,
       actorRole: "ADMIN",

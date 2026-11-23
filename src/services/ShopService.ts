@@ -51,7 +51,7 @@ export type ShopWithDistance = {
   longitude: number | null;
   capacity: number;
   isActive: boolean;
-  /** Inceleme kum havuzu dukkani; yalnizca `isTest` izleyicinin aramasinda `true` olabilir. */
+  /** Inceleme kum havuzu dukkani; yalnizca `reviewSandbox` izleyicinin aramasinda `true` olabilir. */
   isTest: boolean;
   rating: number | null;
   pricePerDay: number;
@@ -263,7 +263,7 @@ export type FindShopsForSearchOptions = {
   includeOutsideHours?: boolean;
   /**
    * Bakan kisi (inceleme kum havuzu). Verilmezse anonim: test dukkanlari HIC
-   * donmez. `isTest` kullanicida test dukkanlari da doner; bkz. `ShopViewer`.
+   * donmez. `reviewSandbox` kullanicida test dukkanlari da doner; bkz. `ShopViewer`.
    */
   viewer?: ShopViewer;
 };

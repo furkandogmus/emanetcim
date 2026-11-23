@@ -1,9 +1,11 @@
 import { describe, it, expect, vi, beforeAll, beforeEach } from "vitest";
 import { NextRequest } from "next/server";
+import { SignJWT } from "jose";
+import { JWT_AUDIENCE, JWT_ISSUER } from "@/lib/jwt-audience";
 import { Prisma } from "@prisma/client";
 
 /**
- * INCELEME KUM HAVUZU (2026-11-23): `User.isTest` hesap test dukkanlarini gorur
+ * INCELEME KUM HAVUZU (2026-11-23): `User.reviewSandbox` hesap test dukkanlarini gorur
  * ve rezervasyon yapar; anonim ve gercek kullanici icin hicbir sey degismez.
  * Token'lar gercek (`signAccessToken`), Prisma sahte ama `where`i gercekten uygular.
  */
@@ -52,8 +54,8 @@ const SHOPS: Row[] = [
   { ...baseShop, id: ids.prelaunchSandbox, isTest: true, isPrelaunch: true },
 ];
 const USERS: Row[] = [
-  { id: "u-real", role: "GUEST", email: null, isBanned: false, tokenVersion: 0, isTest: false },
-  { id: "u-test", role: "GUEST", email: null, isBanned: false, tokenVersion: 0, isTest: true },
+  { id: "u-real", role: "GUEST", email: null, isBanned: false, tokenVersion: 0, isTest: true, reviewSandbox: false },
+  { id: "u-test", role: "GUEST", email: null, isBanned: false, tokenVersion: 0, isTest: false, reviewSandbox: true },
 ];
 
   return { matches, ids, SHOPS, USERS };
@@ -132,12 +134,21 @@ import { POST as quotePOST } from "@/app/api/mobile/checkout/quote/route";
 import { POST as intentPOST } from "@/app/api/mobile/checkout/intent/route";
 
 type Who = "anon" | "real" | "test";
-const tokens: Record<Exclude<Who, "anon">, string> = { real: "", test: "" };
+const tokens: Record<Exclude<Who, "anon"> | "expired", string> = { real: "", test: "", expired: "" };
 
 beforeAll(async () => {
   process.env.MOBILE_JWT_SECRET = "unit-test-secret-not-real-0123456789";
   tokens.real = await signAccessToken("u-real", "GUEST", 0);
   tokens.test = await signAccessToken("u-test", "GUEST", 0);
+  // Ayni iddialar, suresi gecmis: istemcinin 15 dk sonra elinde kalan token.
+  tokens.expired = await new SignJWT({ role: "GUEST", type: "access", tv: 0 })
+    .setProtectedHeader({ alg: "HS256" })
+    .setIssuer(JWT_ISSUER)
+    .setAudience(JWT_AUDIENCE.mobile)
+    .setSubject("u-test")
+    .setIssuedAt(Math.floor(Date.now() / 1000) - 3600)
+    .setExpirationTime(Math.floor(Date.now() / 1000) - 60)
+    .sign(new TextEncoder().encode(process.env.MOBILE_JWT_SECRET));
 });
 beforeEach(() => {
   mocks.rawSql.length = 0;
@@ -172,17 +183,17 @@ const params = (id: string) => ({ params: Promise.resolve({ id }) });
 
 describe("kural: tek yardimci", () => {
   it("anonim ve gercek kullaniciya sabitin KENDISI doner", () => {
-    for (const v of [null, undefined, {}, { isTest: false }, { isTest: null }]) {
+    for (const v of [null, undefined, {}, { reviewSandbox: false }, { reviewSandbox: null }, { isTest: true }]) {
       expect(shopVisibilityFilter(v)).toBe(PUBLIC_SHOP_FILTER);
       expect(shopVisibilitySqlCondition(v)).toBe(PUBLIC_SHOP_SQL_CONDITION);
     }
   });
 
   it("test izleyici: gercek kosul + aktif test dukkani", () => {
-    expect(shopVisibilityFilter({ isTest: true })).toEqual({
+    expect(shopVisibilityFilter({ reviewSandbox: true })).toEqual({
       OR: [PUBLIC_SHOP_FILTER, { isActive: true, isTest: true }],
     });
-    expect(shopVisibilitySqlCondition({ isTest: true })).toContain(PUBLIC_SHOP_SQL_CONDITION);
+    expect(shopVisibilitySqlCondition({ reviewSandbox: true })).toContain(PUBLIC_SHOP_SQL_CONDITION);
   });
 
   it("rezervasyon kapisi", () => {
@@ -194,25 +205,41 @@ describe("kural: tek yardimci", () => {
     });
     expect(isShopBookableBy(s({}), null)).toBe(true);
     expect(isShopBookableBy(s({ isTest: true }), null)).toBe(false);
-    expect(isShopBookableBy(s({ isTest: true }), { isTest: false })).toBe(false);
-    expect(isShopBookableBy(s({ isTest: true }), { isTest: true })).toBe(true);
-    expect(isShopBookableBy(s({ isTest: true, isActive: false }), { isTest: true })).toBe(false);
-    expect(isShopBookableBy(s({ isTest: true, isPrelaunch: true }), { isTest: true })).toBe(false);
+    expect(isShopBookableBy(s({ isTest: true }), { reviewSandbox: false })).toBe(false);
+    expect(isShopBookableBy(s({ isTest: true }), { reviewSandbox: true })).toBe(true);
+    expect(isShopBookableBy(s({ isTest: true, isActive: false }), { reviewSandbox: true })).toBe(false);
+    expect(isShopBookableBy(s({ isTest: true, isPrelaunch: true }), { reviewSandbox: true })).toBe(false);
     // OPERATING_SHOP_FILTER'in anonim karsiligi degismedi.
     expect(OPERATING_SHOP_FILTER).toEqual({ isActive: true, isTest: false, isPrelaunch: false });
   });
 });
 
 describe("resolveMobileShopViewer", () => {
-  it("token yok / bozuk: anonim, 401 DEGIL", async () => {
-    expect(await resolveMobileShopViewer(get("/x", "anon"))).toBeNull();
-    const bad = new NextRequest("https://bagajpark.com/api/mobile/x", { headers: { authorization: "Bearer bozuk" } });
-    expect(await resolveMobileShopViewer(bad)).toBeNull();
+  it("token yok: anonim, bayat degil", async () => {
+    expect(await resolveMobileShopViewer(get("/x", "anon"))).toEqual({ viewer: null, stale: false });
   });
 
-  it("bayrak veritabanindan", async () => {
-    expect(await resolveMobileShopViewer(get("/x", "real"))).toEqual({ isTest: false });
-    expect(await resolveMobileShopViewer(get("/x", "test"))).toEqual({ isTest: true });
+  it("bozuk ya da suresi dolmus token: anonim + stale (401 DEGIL)", async () => {
+    const bad = new NextRequest("https://bagajpark.com/api/mobile/x", { headers: { authorization: "Bearer bozuk" } });
+    expect(await resolveMobileShopViewer(bad)).toEqual({ viewer: null, stale: true });
+    const expired = new NextRequest("https://bagajpark.com/api/mobile/x", { headers: { authorization: `Bearer ${tokens.expired}` } });
+    expect(await resolveMobileShopViewer(expired)).toEqual({ viewer: null, stale: true });
+  });
+
+  it("bayrak `reviewSandbox`tan; `User.isTest` etiketi kum havuzu acmaz", async () => {
+    expect(await resolveMobileShopViewer(get("/x", "real"))).toEqual({ viewer: { reviewSandbox: false }, stale: false });
+    expect(await resolveMobileShopViewer(get("/x", "test"))).toEqual({ viewer: { reviewSandbox: true }, stale: false });
+  });
+
+  it("uclar bayat token'da `X-Auth-Stale: 1` koyar, gecerli/olmayan token'da koymaz", async () => {
+    const stale = new NextRequest(`https://bagajpark.com/api/mobile/shops/${ids.sandbox}`, {
+      headers: { authorization: `Bearer ${tokens.expired}` },
+    });
+    const res = await detailGET(stale, params(ids.sandbox));
+    expect(res.status).toBe(404);
+    expect(res.headers.get("X-Auth-Stale")).toBe("1");
+    expect((await detailGET(get(`/shops/${ids.sandbox}`, "test"), params(ids.sandbox))).headers.get("X-Auth-Stale")).toBeNull();
+    expect((await nearbyGET(get("/shops/nearby?lat=41&lng=29", "anon"))).headers.get("X-Auth-Stale")).toBeNull();
   });
 });
 
@@ -225,7 +252,7 @@ describe("mesafe sorgusu", () => {
   });
 
   it("test izleyici: test dukkani da gelir", async () => {
-    const rows = await getActiveShopsOrderedByDistanceKm({ centerLat: 41, centerLng: 29, radiusKm: 5, viewer: { isTest: true } });
+    const rows = await getActiveShopsOrderedByDistanceKm({ centerLat: 41, centerLng: 29, radiusKm: 5, viewer: { reviewSandbox: true } });
     // Prelaunch test noktasi ayni konumdaki gercek dukkanca gizlenir (`hideSupersededPrelaunch`, kural aynen).
     expect(rows.map((r) => r.shop.id).sort()).toEqual([ids.real, ids.sandbox].sort());
     expect(mocks.rawSql[0]).toContain(`s."isTest" = true`);

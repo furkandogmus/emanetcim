@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
-import { resolveMobileShopViewer } from "@/lib/mobile-auth";
+import { markAuthStale, resolveMobileShopViewer } from "@/lib/mobile-auth";
+import type { ShopViewer } from "@/lib/public-shop-filter";
 import { ShopService } from "@/services/ShopService";
 import { toMobilePriceBySize, toMobilePricing, toMobilePublicGallery, toMobileShop } from "@/lib/mobile-dto";
 import { shopGalleryService } from "@/services/ShopGalleryService";
@@ -10,7 +11,11 @@ import { loadScheduleParts } from "@/services/ShopScheduleService";
 const shopService = new ShopService();
 
 export async function GET(req: Request, { params }: { params: Promise<{ id: string }> }) {
-  const { id } = await params;
+  const { viewer, stale } = await resolveMobileShopViewer(req);
+  return markAuthStale(await detail((await params).id, viewer), stale);
+}
+
+async function detail(id: string, viewer: ShopViewer) {
   /*
     FILTRELI OKUMA (2026-08-31). `getShopDetails` filtresizdi, yani bu KIMLIKSIZ
     uc test dukkanlarini donduruyordu -- "test kaydi kamuya HIC gorunmez"
@@ -18,10 +23,10 @@ export async function GET(req: Request, { params }: { params: Promise<{ id: stri
     filtreden GECER: gorunmeleri gerekiyor.
   */
   /*
-    Inceleme kum havuzu (2026-11-23): `isTest` hesap test dukkaninin detayini da
+    Inceleme kum havuzu (2026-11-23): `reviewSandbox` hesap test dukkaninin detayini da
     gorur. Anonim ve gercek kullanici icin filtre aynen PUBLIC_SHOP_FILTER.
   */
-  const s = await shopService.getPublicShopById(id, await resolveMobileShopViewer(req));
+  const s = await shopService.getPublicShopById(id, viewer);
   if (!s) return NextResponse.json({ error: "not_found" }, { status: 404 });
   /*
     `isVerified` bu uctan EKSIKTI: liste yaniti tasiyordu, detay tasimiyordu —
