@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { sanitizeAuthCallbackUrl } from "@/lib/auth-callback-url";
+import { sanitizeAuthCallbackUrl, withAuthCallback, MAX_AUTH_CALLBACK_URL_LENGTH } from "@/lib/auth-callback-url";
 
 /**
  * `callbackUrl` AÇIK YÖNLENDİRMEYE kapalı olmalı.
@@ -64,5 +64,21 @@ describe("sanitizeAuthCallbackUrl", () => {
     for (const attack of ["javascript:alert(1)", "data:text/html,<script>1</script>"]) {
       expect(resolvesToSameOrigin(attack), attack).toBe(true);
     }
+  });
+});
+
+describe("uzunluk siniri ve withAuthCallback", () => {
+  it("siniri asan donus adresi '/' olur", () => {
+    const ok = `/tr/checkout/s1?coupon=${"a".repeat(MAX_AUTH_CALLBACK_URL_LENGTH - 30)}`;
+    expect(sanitizeAuthCallbackUrl(ok)).toBe(ok);
+    expect(sanitizeAuthCallbackUrl(`/x?${"a".repeat(MAX_AUTH_CALLBACK_URL_LENGTH)}`)).toBe("/");
+  });
+
+  it("guvenli hedefi kodlayarak ekler, guvensizde parametresiz yol", () => {
+    expect(withAuthCallback("/login", "/tr/checkout/s1?bagM=1")).toBe(
+      `/login?callbackUrl=${encodeURIComponent("/tr/checkout/s1?bagM=1")}`,
+    );
+    expect(withAuthCallback("/login", "//evil.com")).toBe("/login");
+    expect(withAuthCallback("/register", null)).toBe("/register");
   });
 });

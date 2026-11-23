@@ -1,6 +1,7 @@
 import { verifyEmailToken, type VerifyEmailErrorCode } from "@/services/auth/verify-email";
 import { CheckCircle2, XCircle } from 'lucide-react';
 import { Link } from "@/i18n/routing";
+import { withAuthCallback } from "@/lib/auth-callback-url";
 import { getTranslations } from "next-intl/server";
 import AmbientBackdrop from "@/components/common/AmbientBackdrop";
 
@@ -15,12 +16,14 @@ const VERIFY_ERROR_KEY: Record<VerifyEmailErrorCode, string> = {
 
 
 interface VerifyEmailPageProps {
-  searchParams: Promise<{ token?: string }>;
+  searchParams: Promise<{ token?: string; callbackUrl?: string }>;
   params: Promise<{ locale: string }>;
 }
 
 export default async function VerifyEmailPage({ searchParams }: VerifyEmailPageProps) {
-  const { token } = await searchParams;
+  const { token, callbackUrl } = await searchParams;
+  // Kayit checkout'tan geldiyse girisle ayni secime donulur.
+  const loginHref = withAuthCallback("/login", typeof callbackUrl === "string" ? callbackUrl : null);
   const t = await getTranslations("Auth");
 
   /*
@@ -29,7 +32,7 @@ export default async function VerifyEmailPage({ searchParams }: VerifyEmailPageP
   */
   const result = await verifyEmailToken(token);
   if (!result.ok) {
-    return <ErrorState message={t(VERIFY_ERROR_KEY[result.code])} tAuth={t} />;
+    return <ErrorState message={t(VERIFY_ERROR_KEY[result.code])} tAuth={t} loginHref={loginHref} />;
   }
 
   // Doğrulama bandını gizlemek için layout'u tazele.
@@ -48,7 +51,7 @@ export default async function VerifyEmailPage({ searchParams }: VerifyEmailPageP
           {t("verifyEmailSuccess")}
         </p>
         <Link
-          href="/login"
+          href={loginHref}
           className="w-full h-12 bg-orange-600 hover:bg-orange-700 text-white rounded-xl font-bold text-sm transition-all flex items-center justify-center"
         >
           {t("verifyEmailGoToLogin")}
@@ -58,7 +61,7 @@ export default async function VerifyEmailPage({ searchParams }: VerifyEmailPageP
   );
 }
 
-function ErrorState({ message, tAuth }: { message: string, tAuth: (key: string) => string }) {
+function ErrorState({ message, tAuth, loginHref }: { message: string, tAuth: (key: string) => string, loginHref: string }) {
   return (
     <div className="relative min-h-screen bg-gray-50 flex flex-col items-center justify-center p-6 font-sans overflow-hidden">
       <AmbientBackdrop />
@@ -71,7 +74,7 @@ function ErrorState({ message, tAuth }: { message: string, tAuth: (key: string) 
           {message}
         </p>
         <Link
-          href="/login"
+          href={loginHref}
           className="w-full h-12 border-2 border-gray-100 rounded-xl font-bold text-sm text-gray-600 hover:border-orange-200 transition-all flex items-center justify-center"
         >
           {tAuth("verifyEmailBackToLogin")}

@@ -23,7 +23,7 @@ import AmbientBackdrop from "@/components/common/AmbientBackdrop";
 import BrandMark from "@/components/common/BrandMark";
 import FieldError from "@/components/common/FieldError";
 import { useFieldErrors } from "@/lib/hooks/useFieldErrors";
-import { sanitizeAuthCallbackUrl } from "@/lib/auth-callback-url";
+import { withAuthCallback } from "@/lib/auth-callback-url";
 
 type RegisterField = 'email' | 'phone';
 
@@ -86,10 +86,7 @@ export default function RegisterPage() {
       if (ref) {
         setReferredByCode(ref);
       }
-      const callback = sanitizeAuthCallbackUrl(params.get("callbackUrl"));
-      if (callback !== "/") {
-        setLoginHref(`/login?callbackUrl=${encodeURIComponent(callback)}`);
-      }
+      setLoginHref(withAuthCallback("/login", params.get("callbackUrl")));
     }
   }, []);
 
