@@ -19,7 +19,7 @@ export PATH=$PATH:/usr/local/bin:/usr/bin:/bin
 
 readonly SCRIPT_NAME="$(basename "$0")"
 # Uygulama dizini /opt/emanetci: canli sunucu 2026-08-23 kesimiyle AWS EC2'ye
-# tasindi (bkz. infra/aws/CUTOVER.md). Eski Hetzner yolu /root/emanetci idi ve
+# tasindi (bkz. infra/aws/README.md). Eski Hetzner yolu /root/emanetci idi ve
 # varsayilan orada kalirsa bu script VAR OLMAYAN bir yola isaret eden crontab
 # satirlari uretir -- cron da bunu sessizce basarisiz eder.
 readonly DEFAULT_APP_DIR="/opt/emanetci"

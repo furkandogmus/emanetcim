@@ -689,7 +689,7 @@ model PlatformSettings {
   /// env'inden okunuyordu ve kaybolduğunda kodda yazılı `0.5`'e SESSİZCE
   /// düşüyordu — yani esnaf, kimse fark etmeden parasının yarısını alırdı.
   /// Burada durunca yönetim arayüzü, önbellek ve audit'i hazır geliyor
-  /// (docs/PLATFORM_SETTINGS.md) ve değişiklik iz bırakıyor.
+  /// (docs/URUN_VE_IS_KURALLARI.md) ve değişiklik iz bırakıyor.
   ///
   /// Varsayılan 0.5, üretimdeki fiilî değerle birebir — bu alanın eklenmesi
   /// hiçbir hesabı değiştirmesin diye.

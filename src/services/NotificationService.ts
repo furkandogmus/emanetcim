@@ -446,7 +446,7 @@ export class NotificationService implements INotificationService {
    * `VAPID_PUBLIC_KEY`/`VAPID_PRIVATE_KEY` ile BİREBİR aynı yapılandırma
    * deseni: `FIREBASE_SERVICE_ACCOUNT_JSON` tanımsızsa gönderim `SKIPPED`
    * olarak loglanır, kod yolu ÇALIŞIR ama gerçek bir gönderim yapmaz (bkz.
-   * `docs/DEFECT_BACKLOG.md` C2). Tanımlandığında bu, o son C2 benzeri
+   * `docs/BACKLOG.md` C2). Tanımlandığında bu, o son C2 benzeri
    * eksiğin TEK gereken adımdır.
    *
    * Geçersiz/silinmiş token'lar (`registration-token-not-registered`,

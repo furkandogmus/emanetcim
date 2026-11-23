@@ -7,7 +7,7 @@
 
 | Parça | Durum |
 |---|---|
-| Parameter Store `/bagajpark/env/app/*` | canlı; 2026-10-25 hesap taşımasında 42 anahtar yeni hesaba kopyalandı (`infra/aws/CUTOVER.md`) |
+| Parameter Store `/bagajpark/env/app/*` | canlı; 2026-10-25 hesap taşımasında 42 anahtar yeni hesaba kopyalandı (`infra/aws/README.md`) |
 | CI deploy'da render adımı | `main`'de (2026-08-29'dan beri): `scripts/secrets-render.sh --prefix ${{ vars.SSM_APP_PARAMETER_PREFIX }} --out /opt/emanetci/docker-compose.env --manifest /opt/emanetci/secrets.manifest` |
 | `ops/secrets.manifest` | 10 zorunlu anahtar; biri SSM'de yoksa render durur ve mevcut dosyaya dokunmaz |
 | IAM `read-app-env-ssm-parameters` | instance rolünde, uygulanmış |

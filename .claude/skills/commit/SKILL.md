@@ -5,7 +5,7 @@ description: Bu repo'nun commit disipliniyle (Conventional Commits, ASCII başl�
 
 # Commit
 
-Kaynak: `docs/GIT_COMMIT_GUIDE.md`. Kullanıcı açıkça istemeden `git push` YAPMA.
+Kaynak: `docs/GELISTIRME.md`. Kullanıcı açıkça istemeden `git push` YAPMA.
 
 1. `git status` ve `git diff --staged` oku. Staged bir şey yoksa kullanıcıya hangi dosyaları
    ekleyeceğini sor; `git add -A` ile körlemesine ekleme (ekran görüntüsü, log, `.env`,

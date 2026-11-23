@@ -41,7 +41,7 @@ haftalık `docker image prune`) kayıt defterinde değil, `ops/crontab.prod`'un 
 bölümündedir. Loglar `/opt/emanetci/logs/` altında (`ec2-user`'ın `/var/log`'a yazma izni yok).
 
 **Sağlık kontrolü:** `GET /api/health/jobs` — sır gerektirmez, sağlıksızsa **503**.
-Herhangi bir HTTP izleyici bunu izleyebilir (`docs/OBSERVABILITY.md`). Beş sinyal:
+Herhangi bir HTTP izleyici bunu izleyebilir (`docs/GUVENLIK_VE_IZLEME.md`). Beş sinyal:
 
 | Kontrol | Neyi ölçer | `stale`/`broken` ne demek |
 |---|---|---|
@@ -130,7 +130,7 @@ Geri dönüş yolu yedektir — satır satır geri alınamazlar.
 
 | Betik | Ne onarır | Not |
 |---|---|---|
-| `repair-seal-ownership.sh` | `STOCK` dışında olup dükkanı olmayan mühürleri `STOCK`'a alır (2026-08-22: 1.277 mührün 1.247'si sahipsiz `ASSIGNED`) | `--apply --validate` ile `Seal_ownership_matches_status` kısıtını da doğrular; canlıda uygulanıp uygulanmadığı `docs/DEFECT_BACKLOG.md` P1-7'de açık. Doğrulama: `/api/health/jobs` → `sealIntegrity` |
+| `repair-seal-ownership.sh` | `STOCK` dışında olup dükkanı olmayan mühürleri `STOCK`'a alır (2026-08-22: 1.277 mührün 1.247'si sahipsiz `ASSIGNED`) | `--apply --validate` ile `Seal_ownership_matches_status` kısıtını da doğrular; canlıda uygulanıp uygulanmadığı `docs/BACKLOG.md` P1-7'de açık. Doğrulama: `/api/health/jobs` → `sealIntegrity` |
 | `repair-slot-timezone.sh` | UTC'de üretilmiş yanlış saatli gelecek slotları siler (2026-08-24 saat dilimi hatası) | Rezervasyonlu ve geçmiş slotlara dokunmaz. **`--apply`'dan sonra `./scripts/generate-slots.sh` zorunlu**, yoksa saatlik ürün seçilemez |
 | `repair-bypass-bookings.sh` | Çıkış saati geçmiş açık test (`bypass_`) rezervasyonlarını kapatır | Kapsam bilerek dar; ödemeyi `REFUNDED`'a alır |
 | `repair-stale-checkin.sh` | Mühürsüz, ödemesiz, çıkışı çoktan geçmiş `CHECKED_IN` kayıtları `CANCELLED`'a alır | `BookingService` bu geçişi kasten reddettiği için veri onarımı olarak ayrı |
@@ -401,7 +401,7 @@ kapsamın daraldığı görünmeli.
 
 ## Esnaf aday listesi — `find-esnaf-leads.ts`
 
-Pilot bölgede (Galata/Karaköy, bkz. `marketing/MARKETING_PLAN.md` § 7.2)
+Pilot bölgede (Galata/Karaköy, bkz. `docs/BUYUME.md` § 8.2)
 telesatış için aranacak esnaf adaylarını Google Places API'den toplu çeker:
 isim, adres, telefon, website, puan → CSV. **E-posta yok** — Places API hiçbir
 planda e-posta alanı döndürmez; plan zaten telefonla aramayı öngörüyor.
@@ -474,7 +474,7 @@ Prod EC2'de her gün 06:05 UTC (09:05 TR) çalışır ve e-postayla şunları g�
 brüt harcama, ay toplamı, günlük ortalama, kalan free tier kredisi, "bu hızla kredi ne zaman
 biter" tahmini ve plan bitiş tarihi. Free plan'da kredi biterse hesap kapanır; bu e-posta
 o kesintinin erken uyarısıdır. (2026-10-25 hesap taşımasının sebebi tam buydu,
-`infra/aws/CUTOVER.md`.)
+`infra/aws/README.md`.)
 
 Yetki EC2 rolünden gelir (`infra/aws/stack/main.tf` → `app_cost_read`: salt okur
 `ce:GetCostAndUsage`, `freetier:GetAccountPlanState`). Sunucuda statik anahtar yok.
@@ -530,9 +530,9 @@ doğrulanmamış ya da anahtar yanlış; `AccessDenied` (ce/freetier) → 2. ad�
 | `backup.sh`, `backup-s3.sh`, `restore.sh` | Postgres yedeği, S3 kopyası, geri yükleme | `ops/README.md` |
 | `secrets-render.sh`, `secrets-remote.sh`, `secrets-put.sh`, `tls-put.sh` | SSM sırları ve TLS materyali | `ops/SECRETS.md` |
 | `update.sh` | CI yokken sunucuda elle güncelleme (GHCR `latest`) | `ops/README.md` |
-| `docker-entrypoint.sh` | Konteyner başlangıcı: `prisma migrate deploy`, sonra sunucu | `docs/DOCKER.md` |
+| `docker-entrypoint.sh` | Konteyner başlangıcı: `prisma migrate deploy`, sonra sunucu | `docs/GELISTIRME.md` |
 | `verify-migrations.sh` | `npm run db:verify` — geçici DB'de migrasyon ↔ şema sapması | — |
-| `audit-deps.mjs` | `npm run audit` — prod bağımlılığında yüksek/kritik açık kapısı | `docs/CI_CD.md` |
+| `audit-deps.mjs` | `npm run audit` — prod bağımlılığında yüksek/kritik açık kapısı | `docs/GELISTIRME.md` |
 | `check-internal-links.mjs` | `npm run link-check` — çalışan sunucuda yaygın misafir yollarına GET (Markdown'ı denetlemez) | — |
 | `copy-maplibre-worker.mjs` | `predev`/`prebuild`: MapLibre worker'ını `public/`'e kopyalar | — |
 | `create-user.sh` | `/api/admin/setup` ile kullanıcı oluşturur/günceller (`ADMIN_SETUP_KEY`) | betik başlığı |

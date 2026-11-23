@@ -29,7 +29,7 @@
 #   scripts/repair-slot-timezone.sh --apply
 #   scripts/generate-slots.sh
 #
-# Ayrinti: docs/DEFECT_BACKLOG.md -> 2026-08-24 slot uretimi P0
+# Ayrinti: docs/BACKLOG.md -> 2026-08-24 slot uretimi P0
 # ============================================================
 
 # 2026-08-29: bu script bu sunucuda HIC calismiyordu. Iki sebep vardi ve

@@ -19,7 +19,7 @@ import { notFound } from "next/navigation";
  * hiçbir route'a düşmez ve Next kendi 404'ünü doğru durum koduyla döner. Ama o
  * zaman markalı "KAYBOLDUN!" ekranının korunup korunmayacağı doğrulanmalı.
  * `noindex` zaten devrede olduğu için bu iş düşük öncelikli
- * (bkz. `docs/DEFECT_BACKLOG.md` → P2).
+ * (bkz. `docs/BACKLOG.md` → P2).
  */
 export default function CatchAllLocale() {
   notFound();

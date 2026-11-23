@@ -16,10 +16,10 @@ npm run test:e2e     # Playwright; dev sunucuyu kendisi kaldırır
 
 - Tanımlayıcılar İngilizce; yorumlar, commit mesajları, dokümanlar Türkçe.
 - Commit: Conventional Commits, başlık ASCII (`fix(seal): muhur ...`). Gövdede **neden**
-  — hangi prod verisi / hangi hata buna yol açtı. `docs/GIT_COMMIT_GUIDE.md`.
+  — hangi prod verisi / hangi hata buna yol açtı. `docs/GELISTIRME.md` § 2.
 - **`main`'e doğrudan push YOK** (ruleset, 2026-09-23). Her iş kendi dalında, tek
   konulu küçük commit'lerle, PR ile gelir; birleştirme yalnızca rebase merge.
-  Merge = prod deploy. Süreç: `docs/GIT_COMMIT_GUIDE.md` § Değişiklik süreci.
+  Merge = prod deploy. Süreç: `docs/GELISTIRME.md` § 2 Değişiklik süreci.
 - Kullanıcıya görünen her metin `src/locales/<dil>.json`'a girer; bileşende
   `locale === "tr" ? ... : ...` yazılmaz (mandal testi var).
 
@@ -83,17 +83,17 @@ Tavan sayısını yükselten bir PR, sorunu çözmüyor, saklıyor.
 
 ## Nerede ne var
 
-- Kanıtlı hata kuyruğu: `docs/DEFECT_BACKLOG.md` (tek iş listesi; `PRODUCTION_BACKLOG`
-  stratejik dilek listesi ve yol haritasıdır). Eski tarihli denetimler git geçmişinde.
-- Ürün ve iş kuralları `docs/URUN_VE_IS_KURALLARI.md`, sayısal kurallar
-  `docs/PLATFORM_SETTINGS.md`, ödeme `docs/PAYMENTS.md`, cron/sağlık `scripts/README.md`,
-  deploy ve sunucu `ops/README.md`, yerel Docker `docs/DOCKER.md`.
-- CI/CD `docs/CI_CD.md` — tek workflow `.github/workflows/ci.yml`
+- Tek iş listesi `docs/BACKLOG.md`: açık kararlar, kanıtlı hatalar, açık teknik işler,
+  sürüm öncesi kontrol. Eski tarihli denetimler git geçmişinde.
+- Ürün, iş kuralları ve platform ayarları `docs/URUN_VE_IS_KURALLARI.md`, ödeme
+  `docs/PAYMENTS.md`, güvenlik/OAuth/izleme `docs/GUVENLIK_VE_IZLEME.md`, pazarlama ve
+  rakipler `docs/BUYUME.md`, cron/sağlık `scripts/README.md`, deploy ve sunucu `ops/README.md`.
+- Yerel ortam, değişiklik süreci ve CI/CD `docs/GELISTIRME.md` — tek workflow `.github/workflows/ci.yml`
   (`checks` ∥ `e2e` → `verify` toplayıcı; `image` paralel → `deploy`). Deploy
   doğrulamanın her parçasına `needs` ile bağlı ve `latest`i doğrulanmış imaja o
   taşır, yani kırmızı commit üretime çıkamaz. Actions kotası bitince job'lar 0 adımda düşer
   ve hiç log bırakmaz (repo özelken; artık herkese açık); o tabloyu kodda aramayın, belgede yazıyor.
-- Prod: AWS EC2 (2026-08-23'te Hetzner'den taşındı, `infra/aws/CUTOVER.md`).
+- Prod: AWS EC2 (2026-08-23'te Hetzner'den taşındı; taşımalar `infra/aws/README.md` § Hesap taşımaları).
   `main` push → doğrulama ∥ GHCR imajı → `latest` terfisi + SSM ile deploy. Altyapı kodu `infra/aws`.
   Sunucudaki sır dosyası `/opt/emanetci/docker-compose.env` (SSM'den üretilir); `.env` yoktur.
 

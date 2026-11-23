@@ -12,7 +12,7 @@
 # VARSAYILAN KURU CALISMADIR. Hicbir sey degistirmez, yalnizca ne yapacagini
 # soyler. Gercekten degistirmek icin `--apply` gerekir.
 #
-# Ayrinti: docs/DEFECT_BACKLOG.md -> P1-7, scripts/README.md
+# Ayrinti: docs/BACKLOG.md -> P1-7, scripts/README.md
 # ============================================================
 
 # 2026-08-29: bu script bu sunucuda HIC calismiyordu. Iki sebep vardi ve

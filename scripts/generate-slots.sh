@@ -6,6 +6,6 @@
 # urun secilemez hale geldi ve per-slot kapasite kontrolu yerini kaba, dukkan
 # geneli bir kontrole birakti. Slotlar 30 gun ileriye uretildigi icin bu is
 # calismazsa kesinti sessizce tekrarlanir.
-# Ayrinti: docs/DEFECT_BACKLOG.md -> P0-1
+# Ayrinti: docs/BACKLOG.md -> P0-1
 set -e
 exec "$(dirname "$0")/call-internal-job.sh" --job generate-slots "$@"

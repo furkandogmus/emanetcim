@@ -16,7 +16,7 @@ variable "aws_profile" {
   # Varsayilan 2026-08-29'da `bagajpark`'tan `bagajpark-yeni`ye alindi: yerel workspace
   # zaten `hesap2` (yani CANLI hesabin state'i) ama profil hala eski hesaba bakiyordu.
   # Bu ikisi ayristiginda `terraform plan` her kaynagi "to create" gosterir ve bir apply
-  # altyapiyi YANLIS hesapta ikinci kez kurar. Kesim kaydi: infra/aws/CUTOVER.md.
+  # altyapiyi YANLIS hesapta ikinci kez kurar. Kesim kaydi: infra/aws/README.md.
   # Dogrulama (salt okunur):
   #   terraform workspace show
   #   aws sts get-caller-identity --profile personal-prod --query Account --output text

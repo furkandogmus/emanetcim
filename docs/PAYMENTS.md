@@ -20,14 +20,14 @@ lansmanda sıfır.
 | Sunucu tarafı metinlerin yeteneğe bağlanması | ✅ uygulandı | `src/lib/payment-copy.ts`, FAQ sayfası |
 | İstemci bileşenlerinde aynı bağlama | ✅ uygulandı (P1-19) | `src/components/providers/CommerceProvider.tsx` (sunucuda çözülen bağlam layout'tan geçer) |
 | Iyzico / PayTR adaptörü | ❌ yapılmadı | şirket kurulumunu bekliyor; `REGISTRY`'de yalnızca `manual` var |
-| Gelen ödeme webhook ucu | ❌ yapılmadı | sözleşme `PaymentProvider.verifyWebhook()` hazır, HTTP ucu PSP seçimine bırakıldı (`docs/PRODUCTION_BACKLOG.md` § 15) |
+| Gelen ödeme webhook ucu | ❌ yapılmadı | sözleşme `PaymentProvider.verifyWebhook()` hazır, HTTP ucu PSP seçimine bırakıldı (`docs/BACKLOG.md` § 2) |
 | Marketplace split (esnaf payının sağlayıcıda ayrılması) | ❌ yapılmadı | `capabilities.supportsSplit` false |
 
 ### Değişmeyen şeyler
 
 - Prod'daki eski `PaymentLog` satırlarına dokunulmadı. `provider='legacy_unverified'`
   olarak damgalandılar. Karşılığı olmayan 3.480 TRY'lik defterin kaynağı bulundu ve
-  kapatıldı; veri temizliği açık (`docs/DEFECT_BACKLOG.md` → F tablosu, P1-5).
+  kapatıldı; veri temizliği açık (`docs/BACKLOG.md` § 1.F, P1-5).
 - Komisyonla hesaplanan esnaf payı mantığı aynı
   (`src/lib/platform-split.ts`). Platform tahsilat yapmadığı için etkin oran bugün
   **0**; tahsilat esnafın elindeyken komisyon açılırsa sağlayıcıda kesilmez, esnaftan
@@ -229,14 +229,14 @@ tahsilat kalemi akışı yok. Sağlayıcı `manual` olduğu sürece bu pratikte 
 çıkışta ek ücreti alması demek: rezervasyon detayı teslimde oluşacak gecikme ücretini
 ve erken teslim iadesini esnafa önceden gösterir (`src/services/booking/check-out.ts`),
 ama "tahsil ettim" işaretleme ekranı yok. Prod'da `latePickupFeeTry` varsayılanı 0.
-Bkz. `docs/DEFECT_BACKLOG.md` → B10 (eski P1-21).
+Bkz. `docs/BACKLOG.md` § 1.B, B10 (eski P1-21).
 
 ---
 
 ## İptal, iade ve istisnalar (bugünkü kurallar)
 
 Eski "finansal mutabakat ve istisnalar rehberi"nin yerine; yalnızca kodda karşılığı
-olan kurallar. Oranlar ve tutarlar `docs/PLATFORM_SETTINGS.md`'deki ayarlardan gelir.
+olan kurallar. Oranlar ve tutarlar `docs/URUN_VE_IS_KURALLARI.md` § Platform ayarları'ndan gelir.
 
 | Durum | Kural | Nerede |
 |---|---|---|

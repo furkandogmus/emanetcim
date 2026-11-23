@@ -209,7 +209,7 @@ export async function POST(req: Request) {
 
           DOGRUSU saglayicinin `email_id`'sini satirda saklamak ve onunla
           eslestirmek; `NotificationLog`ta oyle bir sutun YOK, eklemek migration
-          istiyor (docs/DEFECT_BACKLOG.md'de kayitli). O gelene kadar o adresin
+          istiyor (docs/BACKLOG.md'de kayitli). O gelene kadar o adresin
           EN YENI satiri guncelleniyor: Resend olaylari e-posta basina sirali
           geldigi icin ilgili satir ezici cogunlukla odur, ve yanlis olsa bile
           etkisi bir satirla sinirli kaliyor.

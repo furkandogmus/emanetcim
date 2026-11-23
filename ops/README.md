@@ -1,9 +1,9 @@
 # ops/ — canlı sunucunun işletimi
 
 Canlı sunucu: AWS EC2, `eu-central-1`, kullanıcı `ec2-user`, SSH portu `2222`, uygulama
-dizini `/opt/emanetci`. Hesap, Terraform ve kurulum: [`infra/aws/README.md`](../infra/aws/README.md);
-taşıma geçmişi: [`infra/aws/CUTOVER.md`](../infra/aws/CUTOVER.md). Yerel Docker kullanımı:
-[`docs/DOCKER.md`](../docs/DOCKER.md).
+dizini `/opt/emanetci`. Hesap, Terraform, kurulum ve taşıma geçmişi: [`infra/aws/README.md`](../infra/aws/README.md).
+Yerel Docker kullanımı:
+[`docs/GELISTIRME.md`](../docs/GELISTIRME.md).
 
 (2026-11-23: eski `docs/BACKUP.md` bu dosyanın "Yedek ve geri yükleme" bölümüne katıldı.)
 
@@ -22,7 +22,7 @@ Sunucuya normalde elle girilmez. `main`'e merge → `.github/workflows/ci.yml` �
 ∥ GHCR imajı → `deploy` job'ı (GitHub OIDC + SSM Run Command). Deploy `docker-compose.yml`,
 `public/`, `scripts/`, `nginx/conf.d/` ve `ops/secrets.manifest`'i S3 üzerinden
 `/opt/emanetci`'ye taşır, `docker-compose.env`'i SSM'den yeniden üretir
-(`scripts/secrets-render.sh`) ve `docker compose up -d` çalıştırır. Ayrıntı: [`docs/CI_CD.md`](../docs/CI_CD.md).
+(`scripts/secrets-render.sh`) ve `docker compose up -d` çalıştırır. Ayrıntı: [`docs/GELISTIRME.md`](../docs/GELISTIRME.md).
 
 CI kullanılamıyorsa sunucuda elle: `cd /opt/emanetci && ./scripts/update.sh` (GHCR'dan
 `latest` çeker, imaj derlemez).
@@ -77,7 +77,7 @@ curl -s http://127.0.0.1/api/health/live   # sonra
 S3'teki bir yedeği geri yüklemek için önce `aws s3 cp s3://<yedek-bucket>/backups/<dosya> backups/`.
 Tam dump şemayı da taşıdığı için ayrıca `prisma migrate deploy` gerekmez; `web` başlarken
 zaten koşar. `pg_restore`'un `EXTENSION`/sahip uyarıları kritik hata değildir. Hesap
-taşımalarında aynı iki betik kullanıldı (`infra/aws/CUTOVER.md`).
+taşımalarında aynı iki betik kullanıldı (`infra/aws/README.md`).
 
 ## Kurallar
 

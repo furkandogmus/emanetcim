@@ -28,7 +28,7 @@
 # bu hale getiren hata sinifinin ta kendisi. O kayit icin once para tarafina
 # karar verilir (PaymentService.refund), sonra bu script tekrar kosulur.
 #
-# Ayrinti: docs/DEFECT_BACKLOG.md -> madde 6, scripts/README.md
+# Ayrinti: docs/BACKLOG.md -> madde 6, scripts/README.md
 # ============================================================
 
 set -e
