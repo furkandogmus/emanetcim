@@ -1,57 +1,76 @@
-# Canlıya çıkış (go-live) eksik listesi
+# Canlıya çıkış ve sürüm hazırlık listesi
 
-> 2026-06-10 denetimi. Geniş kapsamlı liste için [PRODUCTION_BACKLOG.md](PRODUCTION_BACKLOG.md); bu dosya **lansmanı bloklayan asgari** maddeler içindir. Pazarlama/reklam planı: [`marketing/MARKETING_PLAN.md`](../marketing/MARKETING_PLAN.md).
+Bu dosya iki şeyi tutar: (1) lansman sırasında kapatılan asgari maddelerin bugünkü
+durumu, (2) büyük bir sürümden (ör. online ödemenin açılması, mobil mağaza yayını)
+önce her seferinde yeniden yürünen kontrol listesi. Eski
+`RELEASE_READINESS_CHECKLIST.md` 2026-11-23'te buraya katıldı. Geniş kapsamlı dilek
+listesi `docs/PRODUCTION_BACKLOG.md`, kanıtlı hatalar `docs/DEFECT_BACKLOG.md`.
 
-## Beta lansman planı (karar: 2026-06-10)
+## Son durum — 2026-11-23
 
-Beta **ödemesiz** çıkar: `PAYMENTS_ENABLED=false` (env kill switch) + `NEXT_PUBLIC_BETA_BADGE=true` (header rozeti). Rezervasyon akışı çalışır, online ödeme adımı kapalıdır; fiili ödeme dükkânda elden yapılır. Esnaf kayıtları beta ile başlar.
+Site `bagajpark.com`'da yayında (AWS EC2, `infra/aws/`). Lansman ödemesiz yapıldı ve öyle
+sürüyor: sağlayıcı `manual`, ödeme dükkanda (`docs/PAYMENTS.md`). Header'daki beta
+rozeti `NEXT_PUBLIC_BETA_BADGE=true` ile açılır. Eski `PAYMENTS_ENABLED` env'i ve
+`payments_enabled` bayrağı kodda yok; ödemeyi açan/kapatan tek anahtar `PAYMENT_PROVIDER`.
 
-- **Esnaf sözleşmesi:** Komisyon oranı sözleşmeye şimdiden yazılır; "beta süresince komisyon alınmaz" açıkça belirtilir. Elden ödeme alışkanlığı kalıcılaşmadan beklenti kurulur.
-- **Betadan çıkış kriterleri (ödeme açılır):**
-  - [ ] 50 aktif nokta
-  - [ ] 100 sorunsuz rezervasyon (iptal/şikâyet hariç, uçtan uca tamamlanmış)
-  - [ ] Esnaf onboarding'inde bilinen tıkanma kalmaması
+**Online ödemeyi açma kriterleri (2026-06-10 kararı, açık):**
 
-## A. Bloklayanlar (bunlar olmadan açılmaz)
+- [ ] 50 aktif nokta
+- [ ] 100 sorunsuz, uçtan uca tamamlanmış rezervasyon
+- [ ] Esnaf onboarding'inde bilinen tıkanma kalmaması
+- [ ] Şirket kuruluşu + PSP sözleşmesi, adaptör ve webhook ucu (`docs/PAYMENTS.md`)
 
-- [ ] **Domain + TLS:** `bagajpark.com` DNS, Nginx sertifika (Let's Encrypt) ve 80→443 yönlendirme; `AUTH_PUBLIC_HOST` + `PUBLIC_URL_PROTOCOL=https`.
-- [ ] **`NEXT_PUBLIC_BASE_URL=https://bagajpark.com`:** Boş kalırsa canonical, hreflang ve sitemap **localhost** üretir — SEO'yu kökten bozar. (Şablona eklendi: `docker-compose.env.example`.)
-- [ ] **Üretim secret'ları:** `AUTH_SECRET`, güçlü `POSTGRES_PASSWORD`, `ADMIN_SETUP_KEY`, `CRON_SECRET`; `.env` asla repoya girmez.
-- [ ] **Google OAuth:** Cloud Console'da prod redirect URI (`https://bagajpark.com/api/auth/callback/google`).
-- [ ] **E-posta (SMTP) + Netgsm:** Şifre sıfırlama, rezervasyon onayı, esnaf SMS'i prod kimlik bilgileriyle test edilmiş.
-- [ ] **Veritabanı:** Yönetilen Postgres veya VM'de `DATABASE_SSL=true`; `prisma migrate deploy` + seed (`PlatformSettings` default satırı); **otomatik yedek + bir kez geri yükleme tatbikatı**.
-- [ ] **Lokal build doğrulaması:** `npm run build` lokalde `DATABASE_URL` ister (`/api/admin/setup` page-data). CI Postgres'le geçiyor; deploy pipeline'ında da DB erişimi olduğundan emin olun.
+Esnaf sözleşmesi: komisyon oranı yazılı, beta süresince komisyon alınmaz
+(`platformCommissionRate` 0.20, etkin oran 0).
 
-## B. Lansman günü (SEO/ölçüm — kod hazır, operasyon eksik)
+## A. Lansman bloklayanları (kapandı)
 
-- [ ] **Google Search Console:** Domain property aç → `NEXT_PUBLIC_GOOGLE_SITE_VERIFICATION` env'ini doldur (meta tag desteği eklendi) → `sitemap.xml` gönder.
-- [ ] **Bing Webmaster Tools:** GSC'den içe aktar (5 dk).
-- [ ] **Plausible:** `NEXT_PUBLIC_PLAUSIBLE_DOMAIN=bagajpark.com`; `booking_paid`, `partner_apply` custom event hedefleri.
-- [ ] **Redis rate limit:** `REDIS_URL` (compose varsayılanı `redis://redis:6379`) + `REQUIRE_DISTRIBUTED_RATE_LIMIT=true` (login/ödeme brute-force koruması).
-- [ ] **Synthetic monitoring:** UptimeRobot vb. ile `/tr`, `/api/health` (varsa) ping + SSL süre uyarısı.
+- [x] Domain + TLS, 80→443 (`nginx/`, sertifika `scripts/tls-put.sh`); `AUTH_PUBLIC_HOST`.
+- [x] `NEXT_PUBLIC_BASE_URL=https://bagajpark.com` (boşken canonical/hreflang/sitemap localhost üretiyordu).
+- [x] Üretim sırları SSM'de, env dosyası deploy'da üretilir (`ops/SECRETS.md`); Postgres parolası döndürüldü.
+- [x] Google OAuth prod yönlendirmesi; Apple girişi web + iOS (`docs/OAUTH.md`).
+- [x] E-posta (Resend) prod'da. SMS (Netgsm) bilerek kapalı.
+- [x] `prisma migrate deploy` deploy'da; `PlatformSettings` default satırı var; seed prod'a karşı çalışmaz (`seed-guard`).
+- [x] Yedek: 6 saatte bir S3'e (`scripts/backup-s3.sh`, `ops/crontab.prod`); geri yükleme `ops/README.md` § Yedek ve geri yükleme.
 
-## C. İlk hafta (bloklamaz ama erken yapılmalı)
+## B. SEO ve ölçüm
 
-- [ ] **Güvenlik başlıkları:** Nginx'te `HSTS`, `X-Frame-Options`, `Referrer-Policy`, temel CSP (backlog §1).
-- [ ] **Şehir sayfası hero görseli:** `luggage-storage/[slug]` sayfası Unsplash hotlink kullanıyor (`page.tsx`) — yerel optimize görsele (next/image) taşı; LCP + telif + dış bağımlılık.
-- [ ] **Blog içerik:** Yayında 0 yazı varsa ilk 2 yazıyı lansmanla birlikte çıkar (takvim: marketing planı §2).
-- [ ] **Partner GBP:** İlk noktalar için Google Business Profile kayıtları.
-- [ ] **KVKK metinleri son okuma:** `/kvkk`, `/privacy`, `/terms` gerçek şirket bilgileriyle güncel mi (unvan, adres, veri sorumlusu).
-- [ ] **`npm audit`** + bağımlılık taraması.
+- [x] Search Console doğrulaması (`NEXT_PUBLIC_GOOGLE_SITE_VERIFICATION`) ve sitemap; `robots.ts` `force-dynamic` (localhost sitemap hatası 2026-06-10'da düzeltildi).
+- [x] Plausible, çerez onayına bağlı (`src/components/ConsentAwareAnalytics.tsx`).
+- [x] Dağıtık rate limit: `REDIS_URL` + `REQUIRE_DISTRIBUTED_RATE_LIMIT` (varsayılan açık).
+- [ ] Bing Webmaster Tools (GSC'den içe aktarma).
+- [ ] Dışarıdan sentetik izleme ve SSL süre uyarısı (`/api/health/live`).
 
-## Canlı site denetimi bulguları (2026-06-10, bagajpark.com)
+## C. İlk haftalar
 
-Site Cloudflare arkasında ayakta; TR/EN ana sayfa, arama, şehir, login, FAQ sayfaları iPhone viewport'ta temiz render oluyor (yatay taşma yok, 4xx/5xx yok). Tespit edilen sorunlar:
+- [x] Güvenlik başlıkları `next.config.ts`'te: HSTS, `X-Frame-Options`, `Referrer-Policy`, COOP, CSP; ek olarak sıkı CSP `Report-Only` ve `/api/csp-report` (2026-11-23).
+- [x] Bağımlılık taraması CI'da (`npm run audit`, `scripts/audit-deps.mjs`).
+- [ ] Ana sayfa şehir kartlarında Unsplash hotlink görselleri (`src/app/[locale]/page.tsx`) yerel optimize görsele taşınmalı.
+- [ ] Partner noktaları için Google Business Profile kayıtları.
+- [ ] KVKK / gizlilik / şartlar metinlerinde şirket bilgileri, şirket kurulunca güncellenmeli.
 
-- 🔴 **Canlı robots.txt `Sitemap: http://localhost:3000/sitemap.xml` gösteriyor** — robots build sırasında statik üretildiği için build env'inde base URL yokmuş. Kodda düzeltildi (`force-dynamic`); **yeni deploy gerekiyor**. Sitemap'in kendisi doğru (406 URL, hepsi https://bagajpark.com).
-- 🟠 **`/tr/search` haritası CSP'ye takılıyor:** MapLibre blob worker'ı engelleniyordu. CSP'ye `worker-src 'self' blob:` eklendi.
-- 🟠 **Crisp chat CSP'de yoktu:** `client.crisp.chat` script/style/font-src'ye eklendi.
-- ℹ️ Search Console zaten aktif; deploy sonrası sitemap'i yeniden gönder + "URL Inspection" ile /tr'yi test et.
+## Sürüm öncesi kontrol listesi (her büyük sürümde)
 
-## Bu denetimde yapılan kod düzeltmeleri (2026-06-10)
+**Akışlar** (Playwright `tests/e2e/` bir kısmını kapsar — `booking-lifecycle`, `use-cases`, `admin-platform-settings`; kalanı elle):
 
-- `robots.ts`: `/account` ve `/auth` rotaları disallow'a eklendi; localhost hatasına karşı `force-dynamic` yapıldı.
-- `sitemap.ts`: noindex olan `/checkout/{shopId}` URL'leri sitemap'ten çıkarıldı (robots disallow ile çelişiyordu); tüm girdilere hreflang `alternates.languages` (14 dil + x-default) eklendi.
-- `next.config.ts` CSP: `worker-src 'self' blob:` (MapLibre) ve `client.crisp.chat` (Crisp) eklendi.
-- `[locale]/layout.tsx`: `NEXT_PUBLIC_GOOGLE_SITE_VERIFICATION` ile Search Console meta doğrulama desteği.
-- `docker-compose.env.example`: SEO/analitik env bölümü (`NEXT_PUBLIC_BASE_URL`, GSC, Plausible).
+- Misafir kayıt, e-posta doğrulama, giriş (e-posta, Google, Apple)
+- Arama → dükkan → rezervasyon → onay e-postası
+- Esnaf check-in (QR, mühür), valiz revizyonu, check-out; geç bırakma ve "Misafiri bekle"
+- Misafir rezervasyon detayı, iptal, itiraz, yorum
+- Yönetici: başvuru onayı, iptal, itiraz çözümü, platform ayarı değişikliği
+
+**Veri bütünlüğü:**
+
+- Durum geçişleri `APPROVED → PAID → CHECKED_IN → CHECKED_OUT`, iptalde `CANCELLED`; her geçiş `BookingEvent`'te
+- Çakışan pencerelerde kapasite aşılmıyor; iptalde slot ve kupon geri dönüyor
+- Mühür seri numaraları check-in ↔ check-out tutarlı (`consistency-check` işi temiz)
+
+**Altyapı:**
+
+- `/api/health/live` 200; `web`, `nginx`, `postgres`, `redis` sağlıklı
+- Zamanlanmış işler yeşil (`/admin/jobs`, `scripts/README.md`)
+- CI kırmızıysa deploy olmaz (`docs/CI_CD.md`); geri dönüş önceki `sha-<sha>` imajıyla
+
+**Mobil sürüm ek olarak:** `npm run verify` (mobile-expo), OTA çalışma zamanı uyumu ve
+mağaza bayrakları (`docs/PLATFORM_SETTINGS.md` § Mağaza yayın bayrakları);
+`mobile-expo/IOS_YAYIN.md`, `mobile-expo/PLAY_YAYIN.md`.
