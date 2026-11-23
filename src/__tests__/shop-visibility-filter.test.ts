@@ -65,6 +65,12 @@ describe("dukkan gorunurluk filtresi cagri yerlerinde uygulaniyor", () => {
 
   it.each(BOOKING_PATHS)("%s test ve prelaunch dukkanini reddediyor", (rel) => {
     const src = stripComments(read(rel));
+    /*
+      Ya kosul elle (`isTest` + `isPrelaunch`) ya da tek kuralin kendisi:
+      `isShopBookableBy` (inceleme kum havuzu, 2026-11-23). Kural ve testleri
+      `public-shop-filter.ts` / `review-sandbox.test.ts`te.
+    */
+    if (src.includes("isShopBookableBy(")) return;
     expect(src, `${rel} \`isTest\` kontrolu tasimali`).toMatch(/isTest/);
     expect(src, `${rel} \`isPrelaunch\` kontrolu tasimali`).toMatch(/isPrelaunch/);
   });

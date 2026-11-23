@@ -17,6 +17,7 @@ const role = vi.hoisted(() => ({ current: "PARTNER" }));
 vi.mock("@/lib/db", () => ({ default: db }));
 vi.mock("@/lib/mobile-auth", () => ({
   requireMobileUser: vi.fn(async () => ({ user: { id: "u1", role: role.current } })),
+  resolveMobileShopViewer: vi.fn(async () => null),
   requireRole: vi.fn((u: { role: string }, roles: string[]) =>
     roles.includes(u.role) ? null : new Response(null, { status: 403 }),
   ),

@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { resolveMobileShopViewer } from "@/lib/mobile-auth";
 import { ShopService } from "@/services/ShopService";
 import { toMobilePriceBySize, toMobilePricing, toMobilePublicGallery, toMobileShop } from "@/lib/mobile-dto";
 import { shopGalleryService } from "@/services/ShopGalleryService";
@@ -8,7 +9,7 @@ import { loadScheduleParts } from "@/services/ShopScheduleService";
 
 const shopService = new ShopService();
 
-export async function GET(_req: Request, { params }: { params: Promise<{ id: string }> }) {
+export async function GET(req: Request, { params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
   /*
     FILTRELI OKUMA (2026-08-31). `getShopDetails` filtresizdi, yani bu KIMLIKSIZ
@@ -16,7 +17,11 @@ export async function GET(_req: Request, { params }: { params: Promise<{ id: str
     kuralinin (P1-4) mobil tasiyicida delindigi yer. Prelaunch noktalari bu
     filtreden GECER: gorunmeleri gerekiyor.
   */
-  const s = await shopService.getPublicShopById(id);
+  /*
+    Inceleme kum havuzu (2026-11-23): `isTest` hesap test dukkaninin detayini da
+    gorur. Anonim ve gercek kullanici icin filtre aynen PUBLIC_SHOP_FILTER.
+  */
+  const s = await shopService.getPublicShopById(id, await resolveMobileShopViewer(req));
   if (!s) return NextResponse.json({ error: "not_found" }, { status: 404 });
   /*
     `isVerified` bu uctan EKSIKTI: liste yaniti tasiyordu, detay tasimiyordu —

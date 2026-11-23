@@ -31,7 +31,10 @@ vi.mock("@/services/ShopService", () => ({
 vi.mock("@/lib/db", () => ({ default: { shop: { findUnique: mockFindUnique } } }));
 vi.mock("@/lib/rate-limit", () => ({ rateLimit: async () => true }));
 vi.mock("@/lib/get-ip", () => ({ getClientIp: async () => "1.1.1.1" }));
-vi.mock("@/lib/mobile-auth", () => ({ requireMobileUser: async () => ({ user: { id: "u1" } }) }));
+vi.mock("@/lib/mobile-auth", () => ({
+  requireMobileUser: async () => ({ user: { id: "u1" } }),
+  resolveMobileShopViewer: async () => null,
+}));
 vi.mock("@/services/ShopScheduleService", () => ({ loadScheduleParts: async () => new Map() }));
 vi.mock("@/lib/platform-settings", () => ({ getPricingRules: async () => RULES }));
 vi.mock("@/services/CouponService", () => ({ couponService: { preview: vi.fn() } }));
