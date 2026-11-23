@@ -1366,7 +1366,8 @@
     "appLinkStatsSource": "Source",
     "appLinkStatsPlatform": "Platform",
     "appLinkStatsOutcome": "Outcome",
-    "appLinkStatsCount": "Count"
+    "appLinkStatsCount": "Count",
+    "appLinkStatsRest": "Other groups"
   },
   "Auth": {
     "loginTitle": "Sign in to BagajPark",

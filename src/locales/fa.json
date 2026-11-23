@@ -1366,7 +1366,8 @@
     "appLinkStatsSource": "منبع",
     "appLinkStatsPlatform": "پلتفرم",
     "appLinkStatsOutcome": "نتیجه",
-    "appLinkStatsCount": "تعداد"
+    "appLinkStatsCount": "تعداد",
+    "appLinkStatsRest": "سایر گروه‌ها"
   },
   "Auth": {
     "loginTitle": "ورود به BagajPark",

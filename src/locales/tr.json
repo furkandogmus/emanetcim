@@ -1366,7 +1366,8 @@
     "appLinkStatsSource": "Kaynak",
     "appLinkStatsPlatform": "Platform",
     "appLinkStatsOutcome": "Sonuç",
-    "appLinkStatsCount": "Adet"
+    "appLinkStatsCount": "Adet",
+    "appLinkStatsRest": "Diğer gruplar"
   },
   "Auth": {
     "loginTitle": "BagajPark'a Giriş Yap",
