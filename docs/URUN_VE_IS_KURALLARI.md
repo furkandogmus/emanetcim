@@ -54,6 +54,14 @@ APPROVED ──check-in (tahsilat)──> PAID ──> CHECKED_IN ──check-ou
   `createBookingAction` ve mobil `checkout/intent` aynı servisi çağırır,
   `src/services/booking/create.ts`). `WAITING_APPROVAL` eski talep akışından kalan
   durumdur; esnaf onay/ret modülü (`partner-review.ts`) onu hâlâ işler.
+- **Rezervasyon hesap ister** (2026-11-23, web ve mobil). Oturumsuz istek kupon,
+  kapasite ve slot işine girmeden `login_required` alır; kapı serviste
+  (`LOGIN_REQUIRED`) ve web action'ında. Web checkout oturumsuz misafiri giriş/kayıt
+  ekranına gönderir; dönüş adresi dükkanı, günleri, valizleri ve kuponu taşır
+  (`src/lib/checkout-return-url.ts`), aracı çerezi (`bp_aff`) girişten etkilenmez.
+  Daha önce açılmış hesapsız rezervasyonlar çalışmaya devam eder: e-postadaki
+  yönetim bağlantısı, `/bookings/lookup`, misafir iptali, valiz revizyonu onayı ve
+  e-posta doğrulanınca hesaba bağlama.
 - Kapasite kontrolü slot satırları üzerinde kilitle yapılır (`ReservationSlot`);
   platform tatil günleri ve dükkan kapanışları (`ShopClosure`, `ShopWeeklyHours`)
   rezervasyonu reddeder. Bırakma takviminde geçmiş günler seçilemez.
@@ -82,7 +90,7 @@ APPROVED ──check-in (tahsilat)──> PAID ──> CHECKED_IN ──check-ou
 | Hasar / kayıp | Misafir itiraz açar; yönetici check-in mühür kaydı ve fotoğrafı ile karar verir | `DisputeService` |
 | Kupon | Yönetici tanımlar (`/admin/coupons`, mobil "Kuponlar"); iptalde kupon iade edilir | `CouponService` |
 | Davet indirimi | Başka bir misafirin kodu, ilk rezervasyonda, kuponsuz, ara toplamdan `REFERRAL_DISCOUNT_PCT` (varsayılan %5) | `ReferralService` |
-| Yönetim bağlantısı | Hesapsız misafirin rezervasyon yönetim bağlantısı en fazla 7 gün geçerli | `guest-link.ts` |
+| Yönetim bağlantısı | Eski hesapsız rezervasyonun yönetim bağlantısı en fazla 7 gün geçerli; yeni hesapsız rezervasyon açılmaz | `guest-link.ts` |
 
 ## Dükkan ve esnaf
 
