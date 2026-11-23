@@ -106,6 +106,10 @@ services:
       EXPO_ACCESS_TOKEN: ${EXPO_ACCESS_TOKEN:-}
       APPLE_ID: ${APPLE_ID:-}
       APPLE_SECRET: ${APPLE_SECRET:-}
+      # Web Apple girisi: istemci sirri bu anahtardan uretilir (src/lib/auth-providers.ts).
+      # Anahtar SSM'de SecureString, base64 (env dosyasi cok satir tasimaz).
+      APPLE_KEY_ID: ${APPLE_KEY_ID:-}
+      APPLE_PRIVATE_KEY_B64: ${APPLE_PRIVATE_KEY_B64:-}
       # Google Play inceleme hesabi (sabit OTP); bos -> kapali.
       PLAY_REVIEW_EMAIL: ${PLAY_REVIEW_EMAIL:-}
       PLAY_REVIEW_OTP: ${PLAY_REVIEW_OTP:-}

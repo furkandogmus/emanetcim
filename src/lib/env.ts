@@ -89,7 +89,8 @@ export function requireProdSecrets(): void {
     process.env.GOOGLE_CLIENT_ID?.trim() &&
     process.env.GOOGLE_CLIENT_SECRET?.trim();
   const hasAppleOAuth =
-    process.env.APPLE_ID?.trim() && process.env.APPLE_SECRET?.trim();
+    process.env.APPLE_ID?.trim() &&
+    (process.env.APPLE_SECRET?.trim() || process.env.APPLE_PRIVATE_KEY_B64?.trim());
   if (
     (hasGoogleOAuth || hasAppleOAuth) &&
     !process.env.AUTH_PUBLIC_HOST?.trim()
