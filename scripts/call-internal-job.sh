@@ -8,7 +8,7 @@
 # demekti. Odeme mutabakat cron'u tam bu yuzden 2 ay boyunca 404 alip kimseye
 # haber vermedi -- kopyalardan biri hatayi yutuyordu. Tek yer, tek davranis.
 #
-# SIR CRONTAB'A YAZILMAZ: CRON_SECRET calisma aninda .env'den okunur. Crontab
+# SIR CRONTAB'A YAZILMAZ: CRON_SECRET calisma aninda env dosyasindan okunur. Crontab
 # dosyasina gomulen bir token, `crontab -l` calistiran herkese gorunur olur.
 # ============================================================
 
@@ -17,7 +17,9 @@ export PATH=$PATH:/usr/local/bin:/usr/bin:/bin
 
 readonly SCRIPT_NAME="$(basename "$0")"
 # Uygulama dizini /opt/emanetci: canli sunucu AWS EC2 (2026-08-23 kesimi).
-# .env bu dizinde aranir; eski Hetzner yolu /root/emanetci artik gecerli degil.
+# Sir dosyasi bu dizinde: once docker-compose.env (secrets-render.sh uretir), yoksa .env.
+# 2026-10-25'te sunucu yeniden kurulunca yalnizca docker-compose.env kaldi; betik .env
+# aradigi icin bu betigi kullanan butun cron isleri 4 hafta boyunca hic calismadi.
 readonly DEFAULT_APP_DIR="/opt/emanetci"
 readonly DEFAULT_BASE_URL="https://bagajpark.com"
 
@@ -38,7 +40,7 @@ function print_usage() {
   echo "Secenekler:"
   echo -e "  --job\t\tIc is adi (uc yolu: /api/internal/<ad>). ZORUNLU."
   echo -e "  --base-url\tUygulama adresi. Varsayilan: $DEFAULT_BASE_URL"
-  echo -e "  --app-dir\t.env dosyasinin bulundugu dizin. Varsayilan: $DEFAULT_APP_DIR"
+  echo -e "  --app-dir\tdocker-compose.env (yoksa .env) dosyasinin dizini. Varsayilan: $DEFAULT_APP_DIR"
   echo -e "  --method\tHTTP metodu (GET|POST). Varsayilan: POST"
   echo -e "\t\tUcun kabul ettigi metot src/lib/jobs/registry.ts icinde yazili;"
   echo -e "\t\tcrontab satirini emit-crontab.sh oradan uretir. Yanlis metot"
@@ -113,7 +115,8 @@ function main() {
   assert_not_empty "--job" "$job"
   assert_is_installed "curl"
 
-  local -r env_file="$app_dir/.env"
+  local env_file="$app_dir/docker-compose.env"
+  [[ -f "$env_file" ]] || env_file="$app_dir/.env"
   local secret
   # Ayri satirda atama: `local x=$(...)` cikis kodunu maskeler.
   secret=$(read_cron_secret "$env_file")
