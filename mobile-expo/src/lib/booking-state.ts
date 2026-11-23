@@ -20,7 +20,7 @@ export function isCancelReason(v: unknown): v is CancelReason {
 
 /**
  * Misafir rezervasyonunun "suresi doldu" durumu. Karar SUNUCUDA (`expired`,
- * `../src/lib/mobile-dto.ts` `isBookingExpired`): bekleyen/onayli/odenmis, valiz hic
+ * `../src/lib/mobile-dto/booking.ts` `isBookingExpired`): bekleyen/onayli/odenmis, valiz hic
  * birakilmamis ve alma saati gecmis. Alan yoksa (eski sunucu, cihazdaki eski
  * bilet) ayni kural yerel saatle uygulanir.
  */
