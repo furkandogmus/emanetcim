@@ -109,6 +109,18 @@ blog, blog/[slug], become-partner, esnaf, esnaf/nasil-calisir
 - `bookings/lookup`, `bookings/manage/[token]` — hesapsız misafir, e-posta bağlantısıyla gelir
 - `luggage-storage`, `luggage-storage/[slug]`, `hotels`, `partners`, `demand`, `[...slug]` — SEO/pazarlama
 - `auth/error`
+- iOS'ta Google ile giriş: iOS OAuth istemcisi bekliyor, düğme gizli
+- Mühür kanıt fotoğrafı: yalnızca web esnaf check-in'i (`SealService.uploadSealPhoto`); mobil
+  check-in ucu fotoğraf almıyor (`docs/BACKLOG.md` B3 / C4)
+- KVKK veri dışa aktarma (`/account/privacy`, `/api/account/data-export`); misafir hesabını
+  uygulamadan siler, esnaf/yönetici "silme talebi" web iletişim sayfasını açar
+- Yazdırılabilir QR afişi (`/partner/poster`)
+- Yönetici: mühür envanteri, esnaf listesi, analitik, blog, kampanyalar, sorunlar, işler,
+  bildirimler, esnaf adayları, ön kayıt, rol onayları, durum (pano "Web paneli" bağlantısı)
+
+Bilinçli farklar: uygulama yalnızca açık temada (`userInterfaceStyle: "light"`); ödeme
+dükkanda, mağaza içi satın alma yok. (Eski `docs/web_vs_mobile_comparison.md` 2026-11-23'te
+bu bölüme katıldı.)
 
 ## 2026-10-18 doğrulama turları (özet)
 
