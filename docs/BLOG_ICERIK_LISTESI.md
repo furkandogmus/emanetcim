@@ -32,11 +32,11 @@ npx tsx scripts/blog-images.ts --verify        # gorsel dosyalari ve kredi bilgi
 
 | # | Ülke | Şehir | Anahtar | Nokta | Durum | TR slug | EN slug |
 |---|---|---|---|---|---|---|---|
-| 1 | TR | İstanbul | `istanbul` | 10 | yayında | istanbul-valiz-emanet-rehberi | istanbul-luggage-storage-guide |
+| 1 | TR | İstanbul | `istanbul` | 13 | yayında | istanbul-valiz-emanet-rehberi | istanbul-luggage-storage-guide |
 | 2 | TR | Ankara | `ankara` | 6 | yayında | ankara-valiz-birakma-noktalari | ankara-luggage-storage-guide |
-| 3 | TR | İzmir | `izmir` | 5 | yayında | izmir-valiz-emanet-konak-alsancak | izmir-luggage-storage-guide |
-| 4 | TR | Antalya | `antalya` | 5 | yayında | antalya-son-gun-valiz-nereye | antalya-luggage-storage-last-day |
-| 5 | TR | Bodrum | `bodrum` | 5 | yayında | bodrum-valiz-emanet-tekne-turu | bodrum-luggage-storage-boat-day |
+| 3 | TR | İzmir | `izmir` | 7 | yayında | izmir-valiz-emanet-konak-alsancak | izmir-luggage-storage-guide |
+| 4 | TR | Antalya | `antalya` | 7 | yayında | antalya-son-gun-valiz-nereye | antalya-luggage-storage-last-day |
+| 5 | TR | Bodrum | `bodrum` | 6 | yayında | bodrum-valiz-emanet-tekne-turu | bodrum-luggage-storage-boat-day |
 | 6 | TR | Bursa | `bursa` | 4 | yayında | bursa-gunubirlik-valiz-nereye | bursa-day-trip-luggage-storage |
 | 7 | TR | Adana | `adana` | 2 | yayında | adana-aktarma-gunu-valiz | adana-layover-luggage-storage |
 | 8 | TR | Gaziantep | `gaziantep` | 2 | yayında | gaziantep-yemek-turu-valiz | gaziantep-food-trip-luggage-storage |
