@@ -74,6 +74,31 @@ test.describe('UC: Misafir — Checkout fiyat ve çanta (anonim)', () => {
   });
 });
 
+/*
+  Web'de hesapsiz rezervasyon kapali (2026-11-23): oturumsuz misafir fiyati
+  gorur ama "tamamla" giris penceresini acar; giris baglantisi secimi tasir.
+*/
+test.describe('UC: Misafir — Oturumsuz rezervasyon giriş ister', () => {
+  test('Tamamla → giriş penceresi, dönüş adresi seçimi korur', async ({ page }) => {
+    await page.goto('/tr/search');
+    await openCheckoutFromSearchList(page);
+    await waitForCheckoutDatesReady(page);
+    await page.getByTestId('bag-s-increase').click();
+    await page.getByTestId('checkout-footer-primary').click();
+    await page.getByRole('button', { name: 'Rezervasyonu tamamla' }).click();
+
+    const dialog = page.getByRole('dialog');
+    await expect(dialog).toBeVisible();
+    const href = await dialog.getByRole('link', { name: 'Giriş Yap' }).getAttribute('href');
+    const callback = new URL(href!, 'http://localhost').searchParams.get('callbackUrl')!;
+    expect(callback).toMatch(/^\/tr\/checkout\/[^/?]+\?/);
+    const sp = new URL(callback, 'http://localhost').searchParams;
+    expect(sp.get('bagS')).toBe('1');
+    expect(sp.get('bagM')).toBe('1');
+    expect(sp.get('checkIn')).toMatch(/^\d{4}-\d{2}-\d{2}$/);
+  });
+});
+
 test.describe('UC: Misafir — Demo giriş ve rezervasyonlar', () => {
   test('Misafir demo ile giriş ve seed rezervasyon', async ({ page }) => {
     await page.goto('/tr/login');
