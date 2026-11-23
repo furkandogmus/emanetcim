@@ -313,7 +313,7 @@ export default async function GuestPage({ params }: { params: Promise<{ locale: 
               </div>
               <h3 className="text-sm font-black text-gray-900">{msg("homeStep2Title", "Drop Off")}</h3>
               <p className="text-sm text-gray-500 leading-relaxed max-w-[220px]">
-                {msg("homeStep2Desc", "Go to the shop and show your QR code. Bags are sealed and stored.")}
+                {msg("homeStep2Desc", "Go to the shop and show your QR code. The shopkeeper checks your bags in and the hand-over is recorded.")}
               </p>
             </div>
             <div className="flex flex-col items-center gap-4">
