@@ -268,7 +268,8 @@
       "invalid": "This code isn't valid or has expired.",
       "min_price": "This code works on bookings of {{amount}} or more.",
       "own_code": "You can't use your own invite code.",
-      "not_first_booking": "Invite codes only work on your first booking."
+      "not_first_booking": "Invite codes only work on your first booking.",
+      "not_combinable": "This code is valid, but a larger referral discount already applies; discounts do not combine."
     },
     "hours": {
       "title": "Times set to the shop's hours",
@@ -276,7 +277,20 @@
       "pickupCloses": "The shop closes at {{time}}, so your pickup is now {{time}}. Collect your bags by then.",
       "pickupOpens": "Your pickup is now {{time}}, when the shop opens."
     },
-    "total": "Total"
+    "total": "Total",
+    "affiliate": {
+      "prompt": "Have a referral code?",
+      "label": "Referral code",
+      "placeholder": "E.G. AHMET-EV",
+      "hint": "The code your host, hotel or guide gave you.",
+      "applied": "Referral discount applied ({{pct}}%)",
+      "attributed": "Referral saved",
+      "invalid": "This referral code is not valid.",
+      "own_code": "You cannot use your own referral code.",
+      "checking": "Checking…",
+      "remove": "Remove referral code",
+      "line": "Referral discount · {{code}}"
+    }
   },
   "success": {
     "title": "You're booked",
@@ -1500,7 +1514,8 @@
       "coupons": "Coupons",
       "payments": "Payments",
       "settings": "Platform settings",
-      "flags": "Feature flags"
+      "flags": "Feature flags",
+      "affiliates": "Referrers"
     },
     "impersonating": "You are in a view-as session. Changes are not allowed here.",
     "edit": "Edit",
@@ -1684,6 +1699,54 @@
       "stale_settings": "Someone else saved the settings meanwhile. Refresh the screen and make your change again.",
       "invalid_version_gate": "The minimum version cannot exceed the latest version, and needs a latest version set. Otherwise everyone is stuck on the update screen.",
       "note_too_long": "The note can be at most 2000 characters."
+    },
+    "affiliates": {
+      "title": "Referrers",
+      "payoutTitle": "Monthly payout",
+      "payoutMonth": "Month (YYYY-MM)",
+      "payoutReference": "Payment reference",
+      "payoutSubmit": "Mark month as paid",
+      "payoutDone": "{{count}} commissions marked as paid ({{total}}).",
+      "csvOnWeb": "The unpaid commissions CSV is in the web dashboard.",
+      "create": "New referrer",
+      "submit": "Add referrer",
+      "created": "Referrer added: {{code}}",
+      "empty": "No referrers yet.",
+      "displayName": "Name",
+      "code": "Code",
+      "codeHint": "Generated from the name if empty. Letters, digits, single hyphens.",
+      "type": "Type",
+      "contactEmail": "Contact email",
+      "contactPhone": "Contact phone",
+      "linkedUserEmail": "Linked account email",
+      "commissionRate": "Commission (%)",
+      "guestDiscountRate": "Guest discount (%)",
+      "status": "Status",
+      "rates": "commission {{commission}}% · discount {{discount}}%",
+      "statsLine": "{{clicks}} clicks · {{bookings}} bookings · {{completed}} completed · to pay {{unpaid}} · paid {{paid}}",
+      "approve": "Approve",
+      "errors": {
+        "forbidden": "This action needs admin rights.",
+        "not_allowed_while_impersonating": "Admin actions are not allowed while viewing as someone.",
+        "invalid_data": "Check the fields (rates 0–50%, month YYYY-MM).",
+        "invalid_code": "Code: 3–32 characters, letters, digits and single hyphens.",
+        "duplicate_code": "Another referrer uses this code.",
+        "not_found": "Referrer not found; refresh the list.",
+        "user_not_found": "No account with this email.",
+        "user_already_linked": "This account is linked to another referrer."
+      },
+      "types": {
+        "airbnb_host": "Host",
+        "hotel": "Hotel",
+        "guide": "Guide",
+        "agency": "Agency",
+        "other": "Other"
+      },
+      "statuses": {
+        "pending": "Pending",
+        "active": "Active",
+        "paused": "Paused"
+      }
     }
   }
 }

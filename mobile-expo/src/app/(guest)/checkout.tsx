@@ -1,6 +1,6 @@
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { KeyboardAvoidingView, Pressable, ScrollView, StyleSheet, View } from "react-native";
-import { TicketPercent, X } from "lucide-react-native";
+import { Handshake, TicketPercent, X } from "lucide-react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { Redirect, router, useLocalSearchParams } from "expo-router";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
@@ -13,6 +13,7 @@ import { api, ApiError } from "@/lib/api";
 import { useAuth } from "@/lib/auth";
 import { errorMessage } from "@/lib/errors";
 import { newIdempotencyKey } from "@/lib/idempotency";
+import { clearPendingReferral, loadPendingReferral, normalizeReferralCode } from "@/lib/pending-referral";
 import { formatMoney, formatStayWindow } from "@/lib/format";
 import { keys, useOnlinePayments, useShop } from "@/lib/queries";
 import { totalBags, useSearch } from "@/lib/search";
@@ -33,6 +34,22 @@ export default function CheckoutScreen() {
   const [quote, setQuote] = useState<CheckoutQuote | null>(null);
   const [codeError, setCodeError] = useState<string | null>(null);
   const [quotedFor, setQuotedFor] = useState<string | null>(null);
+  /*
+    Araci "Referans kodu": `?ref=` derin baglantisindan dolar ya da elle girilir.
+    Gecerliligi, indirimi ve atfi sunucu belirler (`checkout/quote`).
+  */
+  const [affiliateCode, setAffiliateCode] = useState<string | null>(null);
+  const [affOpen, setAffOpen] = useState(false);
+  const [affInput, setAffInput] = useState("");
+  useEffect(() => {
+    let alive = true;
+    void loadPendingReferral().then((code) => {
+      if (alive && code) setAffiliateCode((cur) => cur ?? code);
+    });
+    return () => {
+      alive = false;
+    };
+  }, []);
 
   /*
     Saatler dukkanin saatine oturtulur (sunucu, `snapStayToShopHours`): alis
@@ -41,7 +58,7 @@ export default function CheckoutScreen() {
   */
   const hoursQuote = useQuery({
     enabled: !!shopId && authState.status === "signedIn",
-    queryKey: ["checkout", "hours", shopId, search.checkIn.toISOString(), search.checkOut.toISOString(), search.bags],
+    queryKey: ["checkout", "hours", shopId, search.checkIn.toISOString(), search.checkOut.toISOString(), search.bags, affiliateCode],
     queryFn: () =>
       api<CheckoutQuote>("/checkout/quote", {
         method: "POST",
@@ -52,6 +69,7 @@ export default function CheckoutScreen() {
           bagCountS: search.bags.s,
           bagCountM: search.bags.m,
           bagCountXl: search.bags.xl,
+          ...(affiliateCode ? { affiliateCode } : {}),
         },
       }),
     retry: false,
@@ -74,6 +92,7 @@ export default function CheckoutScreen() {
       api<CheckoutResponse>("/checkout/intent", { method: "POST", body, headers: { "Idempotency-Key": key } }),
     onSuccess: (res) => {
       attempt.current = null;
+      clearPendingReferral();
       void queryClient.invalidateQueries({ queryKey: keys.myBookings });
       router.replace({ pathname: "/success", params: { bookingId: res.bookingId } });
     },
@@ -95,7 +114,7 @@ export default function CheckoutScreen() {
   });
 
   const quoteMutation = useMutation({
-    mutationFn: (body: Omit<CheckoutRequest, "couponCode" | "referralCode"> & { code: string }) =>
+    mutationFn: (body: Omit<CheckoutRequest, "couponCode" | "referralCode"> & { code: string; affiliateCode?: string }) =>
       api<CheckoutQuote>("/checkout/quote", { method: "POST", body }),
     onSuccess: (res) => {
       if (res.codeStatus === "applied") {
@@ -136,8 +155,8 @@ export default function CheckoutScreen() {
     bagCountM: search.bags.m,
     bagCountXl: search.bags.xl,
   };
-  // Onizleme baska bir sepet icin alinmissa (tarih/valiz degisti) gecersizdir.
-  const quoteKey = JSON.stringify(booking);
+  // Onizleme baska bir sepet ya da referans kodu icin alinmissa gecersizdir.
+  const quoteKey = JSON.stringify([booking, affiliateCode]);
   const applied = quote && quotedFor === quoteKey ? quote : null;
   /*
     Fiyat YALNIZCA sunucudan (checkout/quote). Ekran eskiden kendi formuluyle
@@ -146,13 +165,30 @@ export default function CheckoutScreen() {
   */
   const priced = applied ?? hoursQuote.data ?? null;
   const total = priced?.total ?? null;
+  const affiliate = priced?.affiliate ?? null;
+  // Sunucu kodu kabul ettiyse (indirimli ya da yalnizca atif) rezervasyona gider.
+  const affiliateAccepted = !!affiliateCode && (affiliate?.status === "applied" || affiliate?.status === "attributed");
+  const shownDiscount = priced?.discount ?? null;
 
   function applyCode() {
     const code = codeInput.trim();
     if (!code) return;
     setCodeError(null);
     setQuotedFor(quoteKey);
-    quoteMutation.mutate({ ...booking, code });
+    quoteMutation.mutate({ ...booking, code, ...(affiliateCode ? { affiliateCode } : {}) });
+  }
+
+  function applyAffiliate() {
+    const code = normalizeReferralCode(affInput);
+    if (!code) return;
+    setAffiliateCode(code);
+    setAffOpen(false);
+  }
+
+  function removeAffiliate() {
+    setAffiliateCode(null);
+    setAffInput("");
+    clearPendingReferral();
   }
 
   function removeCode() {
@@ -167,6 +203,7 @@ export default function CheckoutScreen() {
       ...booking,
       ...(applied?.discount?.kind === "coupon" ? { couponCode: applied.discount.code } : {}),
       ...(applied?.discount?.kind === "referral" ? { referralCode: applied.discount.code } : {}),
+      ...(affiliateAccepted && affiliateCode ? { affiliateCode } : {}),
       ...(total != null ? { expectedTotal: total } : {}),
     };
     const sig = JSON.stringify(request);
@@ -252,15 +289,20 @@ export default function CheckoutScreen() {
               <AppText variant="body">{formatMoney(priced.insuranceFee)}</AppText>
             </View>
           ) : null}
-          {applied?.discount ? (
+          {shownDiscount ? (
             <View style={styles.priceRow}>
               <AppText variant="body" style={{ flex: 1, color: colors.success }}>
-                {t(applied.discount.kind === "coupon" ? "checkout.code.couponLine" : "checkout.code.referralLine", {
-                  code: applied.discount.code,
-                })}
+                {t(
+                  shownDiscount.kind === "coupon"
+                    ? "checkout.code.couponLine"
+                    : shownDiscount.kind === "affiliate"
+                      ? "checkout.affiliate.line"
+                      : "checkout.code.referralLine",
+                  { code: shownDiscount.code },
+                )}
               </AppText>
               <AppText variant="body" style={{ color: colors.success }}>
-                −{formatMoney(applied.discount.amount)}
+                −{formatMoney(shownDiscount.amount)}
               </AppText>
             </View>
           ) : null}
@@ -336,6 +378,73 @@ export default function CheckoutScreen() {
               <TicketPercent size={18} strokeWidth={1.75} color={colors.inkSecondary} />
               <AppText variant="bodyMedium" style={{ flex: 1 }}>
                 {t("checkout.code.prompt")}
+              </AppText>
+              <AppText variant="bodyMedium" style={{ color: colors.accent }}>
+                {t("checkout.code.add")}
+              </AppText>
+            </Pressable>
+          )}
+        </Card>
+
+        <Card style={{ gap: space.md }}>
+          {affiliateCode ? (
+            <View style={styles.editRow}>
+              <Handshake size={18} strokeWidth={1.75} color={affiliateAccepted ? colors.success : colors.inkSecondary} />
+              <View style={{ flex: 1, gap: 2 }}>
+                <AppText variant="bodyMedium">{affiliateCode}</AppText>
+                <AppText variant="caption" style={!affiliateAccepted && !hoursQuote.isFetching ? { color: colors.danger } : undefined}>
+                  {!affiliate
+                    ? hoursQuote.isFetching
+                      ? t("checkout.affiliate.checking")
+                      : t("checkout.affiliate.invalid")
+                    : affiliate.status === "applied"
+                      ? t("checkout.affiliate.applied", { pct: affiliate.ratePct })
+                      : affiliate.status === "attributed"
+                        ? t("checkout.affiliate.attributed")
+                        : t(`checkout.affiliate.${affiliate.status}`)}
+                </AppText>
+              </View>
+              <Pressable
+                accessibilityRole="button"
+                accessibilityLabel={t("checkout.affiliate.remove")}
+                onPress={removeAffiliate}
+                hitSlop={10}
+              >
+                <X size={18} strokeWidth={1.75} color={colors.inkSecondary} />
+              </Pressable>
+            </View>
+          ) : affOpen ? (
+            <>
+              <AppText variant="label">{t("checkout.affiliate.label")}</AppText>
+              <View style={styles.codeRow}>
+                <Input
+                  value={affInput}
+                  onChangeText={setAffInput}
+                  accessibilityLabel={t("checkout.affiliate.label")}
+                  placeholder={t("checkout.affiliate.placeholder")}
+                  placeholderTextColor={colors.inkMuted}
+                  autoCapitalize="characters"
+                  autoCorrect={false}
+                  autoFocus
+                  maxLength={32}
+                  returnKeyType="done"
+                  onSubmitEditing={applyAffiliate}
+                  style={styles.codeInput}
+                />
+                <Button
+                  variant="secondary"
+                  title={t("checkout.apply")}
+                  disabled={!normalizeReferralCode(affInput)}
+                  onPress={applyAffiliate}
+                />
+              </View>
+              <AppText variant="caption">{t("checkout.affiliate.hint")}</AppText>
+            </>
+          ) : (
+            <Pressable accessibilityRole="button" onPress={() => setAffOpen(true)} style={styles.editRow}>
+              <Handshake size={18} strokeWidth={1.75} color={colors.inkSecondary} />
+              <AppText variant="bodyMedium" style={{ flex: 1 }}>
+                {t("checkout.affiliate.prompt")}
               </AppText>
               <AppText variant="bodyMedium" style={{ color: colors.accent }}>
                 {t("checkout.code.add")}

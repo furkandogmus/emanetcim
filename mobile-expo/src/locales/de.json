@@ -268,7 +268,8 @@
       "invalid": "Dieser Code ist ungültig oder abgelaufen.",
       "min_price": "Dieser Code gilt für Buchungen ab {{amount}}.",
       "own_code": "Du kannst deinen eigenen Einladungscode nicht verwenden.",
-      "not_first_booking": "Einladungscodes gelten nur für deine erste Buchung."
+      "not_first_booking": "Einladungscodes gelten nur für deine erste Buchung.",
+      "not_combinable": "Der Code ist gültig, aber ein höherer Empfehlungsrabatt gilt bereits; Rabatte sind nicht kombinierbar."
     },
     "hours": {
       "title": "Zeiten an die Öffnungszeiten angepasst",
@@ -276,7 +277,20 @@
       "pickupCloses": "Der Laden schließt um {{time}}, deine Abholung ist jetzt um {{time}}. Hol dein Gepäck bis dahin ab.",
       "pickupOpens": "Deine Abholung ist jetzt um {{time}}, wenn der Laden öffnet."
     },
-    "total": "Gesamt"
+    "total": "Gesamt",
+    "affiliate": {
+      "prompt": "Hast du einen Empfehlungscode?",
+      "label": "Empfehlungscode",
+      "placeholder": "Z. B. AHMET-EV",
+      "hint": "Der Code von deinem Gastgeber, Hotel oder Reiseleiter.",
+      "applied": "Empfehlungsrabatt angewendet ({{pct}} %)",
+      "attributed": "Empfehlung gespeichert",
+      "invalid": "Dieser Empfehlungscode ist ungültig.",
+      "own_code": "Du kannst deinen eigenen Empfehlungscode nicht nutzen.",
+      "checking": "Wird geprüft…",
+      "remove": "Empfehlungscode entfernen",
+      "line": "Empfehlungsrabatt · {{code}}"
+    }
   },
   "success": {
     "title": "Du bist gebucht",
@@ -1500,7 +1514,8 @@
       "coupons": "Gutscheine",
       "payments": "Zahlungen",
       "settings": "Plattformeinstellungen",
-      "flags": "Feature-Flags"
+      "flags": "Feature-Flags",
+      "affiliates": "Vermittler"
     },
     "impersonating": "Du bist in einer Ansicht-als-Sitzung. Änderungen sind hier nicht möglich.",
     "edit": "Bearbeiten",
@@ -1684,6 +1699,54 @@
       "stale_settings": "Jemand anderes hat die Einstellungen inzwischen gespeichert. Aktualisiere den Bildschirm und nimm deine Änderung erneut vor.",
       "invalid_version_gate": "Die Mindestversion darf die aktuelle Version nicht übersteigen und braucht eine gesetzte aktuelle Version. Sonst hängen alle im Update-Bildschirm fest.",
       "note_too_long": "Die Notiz darf höchstens 2000 Zeichen haben."
+    },
+    "affiliates": {
+      "title": "Vermittler",
+      "payoutTitle": "Monatliche Auszahlung",
+      "payoutMonth": "Monat (JJJJ-MM)",
+      "payoutReference": "Zahlungsreferenz",
+      "payoutSubmit": "Monat als bezahlt markieren",
+      "payoutDone": "{{count}} Provisionen als bezahlt markiert ({{total}}).",
+      "csvOnWeb": "Die CSV offener Provisionen gibt es im Web-Dashboard.",
+      "create": "Neuer Vermittler",
+      "submit": "Vermittler anlegen",
+      "created": "Vermittler angelegt: {{code}}",
+      "empty": "Noch keine Vermittler.",
+      "displayName": "Name",
+      "code": "Code",
+      "codeHint": "Leer = aus dem Namen erzeugt. Buchstaben, Ziffern, einzelne Bindestriche.",
+      "type": "Art",
+      "contactEmail": "Kontakt-E-Mail",
+      "contactPhone": "Kontakttelefon",
+      "linkedUserEmail": "E-Mail des verknüpften Kontos",
+      "commissionRate": "Provision (%)",
+      "guestDiscountRate": "Gastrabatt (%)",
+      "status": "Status",
+      "rates": "Provision {{commission}} % · Rabatt {{discount}} %",
+      "statsLine": "{{clicks}} Klicks · {{bookings}} Buchungen · {{completed}} abgeschlossen · offen {{unpaid}} · bezahlt {{paid}}",
+      "approve": "Freigeben",
+      "errors": {
+        "forbidden": "Für diese Aktion sind Adminrechte nötig.",
+        "not_allowed_while_impersonating": "In einer Ansichtssitzung sind Admin-Aktionen nicht erlaubt.",
+        "invalid_data": "Felder prüfen (Sätze 0–50 %, Monat JJJJ-MM).",
+        "invalid_code": "Code: 3–32 Zeichen, Buchstaben, Ziffern und einzelne Bindestriche.",
+        "duplicate_code": "Dieser Code gehört einem anderen Vermittler.",
+        "not_found": "Vermittler nicht gefunden; Liste aktualisieren.",
+        "user_not_found": "Kein Konto mit dieser E-Mail.",
+        "user_already_linked": "Dieses Konto ist mit einem anderen Vermittler verknüpft."
+      },
+      "types": {
+        "airbnb_host": "Gastgeber",
+        "hotel": "Hotel",
+        "guide": "Reiseleiter",
+        "agency": "Agentur",
+        "other": "Sonstige"
+      },
+      "statuses": {
+        "pending": "Wartet",
+        "active": "Aktiv",
+        "paused": "Pausiert"
+      }
     }
   }
 }

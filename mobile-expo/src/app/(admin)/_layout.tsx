@@ -25,6 +25,7 @@ export default function AdminLayout() {
       <Stack.Screen name="admin/disputes" />
       <Stack.Screen name="admin/dispute/[id]" />
       <Stack.Screen name="admin/coupons" />
+      <Stack.Screen name="admin/affiliates" />
       <Stack.Screen name="admin/payments" />
       <Stack.Screen name="admin/platform-settings" />
       <Stack.Screen name="admin/feature-flags" />

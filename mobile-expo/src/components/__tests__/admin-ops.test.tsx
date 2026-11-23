@@ -378,7 +378,7 @@ describe("kupon formu sunucu semasiyla ayni sinirlar", () => {
 });
 
 describe("Ozet: Yonetim araclari", () => {
-  it("bes araca uygulama icinde gider; acik uyusmazlik satiri web yerine ekrani acar", async () => {
+  it("alti araca uygulama icinde gider; acik uyusmazlik satiri web yerine ekrani acar", async () => {
     mockHandler = async ({ path }) =>
       path === "/admin/overview"
         ? {
@@ -394,6 +394,7 @@ describe("Ozet: Yonetim araclari", () => {
     for (const [label, href] of [
       ["Uyuşmazlıklar", "/admin/disputes"],
       ["Kuponlar", "/admin/coupons"],
+      ["Aracılar", "/admin/affiliates"],
       ["Ödemeler", "/admin/payments"],
       ["Platform ayarları", "/admin/platform-settings"],
       ["Özellik bayrakları", "/admin/feature-flags"],

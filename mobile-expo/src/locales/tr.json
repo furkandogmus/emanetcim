@@ -268,7 +268,8 @@
       "invalid": "Bu kod geçerli değil ya da süresi dolmuş.",
       "min_price": "Bu kod {{amount}} ve üzeri rezervasyonlarda geçerli.",
       "own_code": "Kendi davet kodunu kullanamazsın.",
-      "not_first_booking": "Davet kodu yalnızca ilk rezervasyonda geçerli."
+      "not_first_booking": "Davet kodu yalnızca ilk rezervasyonda geçerli.",
+      "not_combinable": "Bu kod geçerli ama daha büyük referans indirimi uygulanıyor; indirimler birleşmez."
     },
     "hours": {
       "title": "Saatler dükkana göre ayarlandı",
@@ -276,7 +277,20 @@
       "pickupCloses": "Dükkan {{time}} itibarıyla kapanıyor; alış saatin {{time}} oldu. Valizini en geç bu saatte almalısın.",
       "pickupOpens": "Alış saatin dükkanın açılışına göre {{time}} oldu."
     },
-    "total": "Toplam"
+    "total": "Toplam",
+    "affiliate": {
+      "prompt": "Referans kodun var mı?",
+      "label": "Referans kodu",
+      "placeholder": "ÖRN. AHMET-EV",
+      "hint": "Ev sahibinin, otelin ya da rehberinin verdiği kod.",
+      "applied": "Referans indirimi uygulandı (%{{pct}})",
+      "attributed": "Referans kaydedildi",
+      "invalid": "Bu referans kodu geçerli değil.",
+      "own_code": "Kendi referans kodunu kullanamazsın.",
+      "checking": "Kontrol ediliyor…",
+      "remove": "Referans kodunu kaldır",
+      "line": "Referans indirimi · {{code}}"
+    }
   },
   "success": {
     "title": "Rezervasyonun hazır",
@@ -1500,7 +1514,8 @@
       "coupons": "Kuponlar",
       "payments": "Ödemeler",
       "settings": "Platform ayarları",
-      "flags": "Özellik bayrakları"
+      "flags": "Özellik bayrakları",
+      "affiliates": "Aracılar"
     },
     "impersonating": "Görüntüleme oturumundasın. Bu ekranda değişiklik yapılamaz.",
     "edit": "Düzenle",
@@ -1684,6 +1699,54 @@
       "stale_settings": "Ayarları bu arada başka biri kaydetti. Ekranı yenile ve değişikliğini yeniden yap.",
       "invalid_version_gate": "En düşük sürüm, güncel sürümü geçemez; güncel sürüm boşken en düşük sürüm konamaz. Yoksa herkes güncelleme ekranında kalır.",
       "note_too_long": "Not en fazla 2000 karakter olabilir."
+    },
+    "affiliates": {
+      "title": "Aracılar",
+      "payoutTitle": "Aylık ödeme",
+      "payoutMonth": "Ay (YYYY-AA)",
+      "payoutReference": "Ödeme referansı",
+      "payoutSubmit": "Ayı ödendi işaretle",
+      "payoutDone": "{{count}} komisyon ödendi işaretlendi ({{total}}).",
+      "csvOnWeb": "Ödenmemiş komisyon CSV'si web panelinde.",
+      "create": "Yeni aracı",
+      "submit": "Aracı ekle",
+      "created": "Aracı eklendi: {{code}}",
+      "empty": "Henüz aracı yok.",
+      "displayName": "Ad",
+      "code": "Kod",
+      "codeHint": "Boşsa addan üretilir. Harf, rakam ve tek tire.",
+      "type": "Tür",
+      "contactEmail": "İletişim e-postası",
+      "contactPhone": "İletişim telefonu",
+      "linkedUserEmail": "Bağlı hesap e-postası",
+      "commissionRate": "Komisyon (%)",
+      "guestDiscountRate": "Misafir indirimi (%)",
+      "status": "Durum",
+      "rates": "komisyon %{{commission}} · indirim %{{discount}}",
+      "statsLine": "{{clicks}} tık · {{bookings}} rez. · {{completed}} tamamlandı · ödenecek {{unpaid}} · ödendi {{paid}}",
+      "approve": "Onayla",
+      "errors": {
+        "forbidden": "Bu işlem için yönetici yetkisi gerekiyor.",
+        "not_allowed_while_impersonating": "Görüntüleme oturumunda yönetim işlemi yapılamaz.",
+        "invalid_data": "Alanları kontrol et (oranlar %0–50, ay YYYY-AA).",
+        "invalid_code": "Kod 3–32 karakter: harf, rakam ve tek tire.",
+        "duplicate_code": "Bu kod başka bir aracıda.",
+        "not_found": "Aracı bulunamadı; listeyi yenile.",
+        "user_not_found": "Bu e-postayla hesap yok.",
+        "user_already_linked": "Bu hesap başka bir aracıya bağlı."
+      },
+      "types": {
+        "airbnb_host": "Ev sahibi",
+        "hotel": "Otel",
+        "guide": "Rehber",
+        "agency": "Acente",
+        "other": "Diğer"
+      },
+      "statuses": {
+        "pending": "Onay bekliyor",
+        "active": "Aktif",
+        "paused": "Durduruldu"
+      }
     }
   }
 }
