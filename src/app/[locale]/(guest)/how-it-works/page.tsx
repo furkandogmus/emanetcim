@@ -18,7 +18,7 @@ import { serializeJsonLd } from "@/lib/json-ld-script";
  * durdurur.
  *
  * Adım metinleri SÜRE ve SOMUT DAVRANIŞ içerir ("bir dakika sürer", "kimlik ya
- * da depozito istenmez", "mühür kopartılmadan çıkarılamaz") — çünkü belirsizlik
+ * da depozito istenmez", "bırakma saati ve valiz sayısı kayda yazılır") — çünkü belirsizlik
  * bırakan bir güven metni, güven vermez.
  */
 export async function generateMetadata({

@@ -141,7 +141,7 @@ export default function HowItWorksAnimation({
             />
             <rect x="-5" y="-9" width="10" height="8" rx="2" fill="var(--id-accent, #e2620f)" />
             <rect x="-15" y="7" width="30" height="3" fill="white" fillOpacity="0.5" />
-            {/* Mühür 3. adımda takılır */}
+            {/* Teslim işareti 3. adımda (esnaf teslim aldı) belirir */}
             <circle className="hiw-seal" cx="14" cy="18" r="7" fill="#0f766e" />
             <path
               className="hiw-seal"
