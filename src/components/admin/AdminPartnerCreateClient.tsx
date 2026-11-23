@@ -17,6 +17,7 @@ import {
 import { Link } from "@/i18n/routing";
 import { adminCreatePartnerAction } from "@/actions/admin-partner-create";
 import { adminConvertGuestToPartnerAction } from "@/actions/admin-user-account";
+import { convertPartnerLeadAction } from "@/actions/partner-lead";
 import { actionErrorKey } from "@/lib/action-error";
 import { parseCoordinates } from "@/lib/coordinates";
 import { waMeUrl } from "@/lib/whatsapp";
@@ -35,19 +36,44 @@ const EMPTY = {
 const INPUT =
   "w-full bg-gray-50 border-2 border-transparent focus:border-orange-500 rounded-2xl p-4 text-sm font-bold outline-none transition-all";
 
-type Created = { shopId: string; resetUrl: string | null; ownerName: string; phone: string };
+type Created = {
+  shopId: string | null;
+  resetUrl: string | null;
+  ownerName: string;
+  phone: string;
+  /** On kayittan cevirmede: dukkan yayina alindi mi / alinamadi mi / zaten cevrilmis mi. */
+  activated?: boolean;
+  activationFailed?: boolean;
+  alreadyConverted?: boolean;
+};
 
 export type ConvertFrom = { id: string; name: string | null; email: string | null; phone: string | null };
 
-export default function AdminPartnerCreateClient({ convertFrom = null }: { convertFrom?: ConvertFrom | null }) {
+/** Esnaf on kaydi: form `leadConversionDraft` ile dolar; `convertedShopId` dolu = zaten cevrilmis. */
+export type FromLead = { id: string; draft: typeof EMPTY; convertedShopId: string | null };
+
+export default function AdminPartnerCreateClient({
+  convertFrom = null,
+  fromLead = null,
+}: {
+  convertFrom?: ConvertFrom | null;
+  fromLead?: FromLead | null;
+}) {
   const t = useTranslations("Admin");
   const tErrors = useTranslations("Errors");
   const tCommon = useTranslations("Common");
-  const initialForm = convertFrom
-    ? { ...EMPTY, ownerName: convertFrom.name ?? "", email: convertFrom.email ?? "", phone: convertFrom.phone ?? "" }
-    : EMPTY;
+  const initialForm = fromLead
+    ? fromLead.draft
+    : convertFrom
+      ? { ...EMPTY, ownerName: convertFrom.name ?? "", email: convertFrom.email ?? "", phone: convertFrom.phone ?? "" }
+      : EMPTY;
   const [form, setForm] = useState(initialForm);
-  const [created, setCreated] = useState<Created | null>(null);
+  const [activate, setActivate] = useState(false);
+  const [created, setCreated] = useState<Created | null>(
+    fromLead?.convertedShopId != null
+      ? { shopId: fromLead.convertedShopId || null, resetUrl: null, ownerName: "", phone: "", alreadyConverted: true }
+      : null,
+  );
   const [copied, setCopied] = useState(false);
   const [copyFailed, setCopyFailed] = useState(false);
   const [pending, startTransition] = useTransition();
@@ -68,6 +94,23 @@ export default function AdminPartnerCreateClient({ convertFrom = null }: { conve
     }
     startTransition(async () => {
       try {
+        if (fromLead) {
+          const res = await convertPartnerLeadAction({ leadId: fromLead.id, ...form, activate });
+          if (!res.ok) {
+            toast.error(tErrors(actionErrorKey(new Error(res.error))));
+            return;
+          }
+          setCreated({
+            shopId: res.shopId,
+            resetUrl: res.resetUrl,
+            ownerName: form.ownerName.trim(),
+            phone: form.phone,
+            activated: res.activated,
+            activationFailed: res.activationFailed,
+            alreadyConverted: res.alreadyConverted,
+          });
+          return;
+        }
         const res = convertFrom
           ? await adminConvertGuestToPartnerAction({
               userId: convertFrom.id,
@@ -111,15 +154,15 @@ export default function AdminPartnerCreateClient({ convertFrom = null }: { conve
   const header = (
     <header className="mb-10">
       <Link
-        href="/admin/partners"
+        href={fromLead ? "/admin/partner-leads" : "/admin/partners"}
         className="flex items-center gap-2 text-gray-500 hover:text-gray-900 transition-colors mb-4 group"
       >
         <ArrowLeft size={16} className="group-hover:-translate-x-1 transition-transform" />
-        <span className="text-xs id-eyebrow">{t("backToPartners")}</span>
+        <span className="text-xs id-eyebrow">{fromLead ? t("partnerLeadConvertBack") : t("backToPartners")}</span>
       </Link>
       <h1 className="text-4xl font-black tracking-tighter text-gray-900 flex items-center gap-3">
         <UserPlus className="text-orange-600" />
-        {convertFrom ? t("partnerConvertTitle") : t("partnerCreateTitle")}
+        {fromLead ? t("partnerLeadConvertTitle") : convertFrom ? t("partnerConvertTitle") : t("partnerCreateTitle")}
       </h1>
     </header>
   );
@@ -135,8 +178,17 @@ export default function AdminPartnerCreateClient({ convertFrom = null }: { conve
         <section className="max-w-2xl bg-white rounded-4xl p-8 border border-gray-100 shadow-sm">
           <h2 className="text-lg font-black tracking-tight mb-2 flex items-center gap-2">
             <Check size={20} className="text-green-600" />
-            {convertFrom ? t("partnerConvertSuccessTitle") : t("partnerCreateSuccessTitle")}
+            {created.alreadyConverted
+              ? t("partnerLeadConvertAlready")
+              : convertFrom
+                ? t("partnerConvertSuccessTitle")
+                : t("partnerCreateSuccessTitle")}
           </h2>
+          {created.activated ? (
+            <p className="text-sm font-bold text-green-700 mb-4">{t("partnerLeadConvertActivated")}</p>
+          ) : created.activationFailed ? (
+            <p className="text-sm font-bold text-red-600 mb-4">{t("partnerLeadConvertActivationFailed")}</p>
+          ) : null}
           {resetUrl ? (
           <>
           <p className="text-sm text-gray-600 mb-6">{t("partnerCreateSuccessBody")}</p>
@@ -165,7 +217,7 @@ export default function AdminPartnerCreateClient({ convertFrom = null }: { conve
             <p className="mt-2 text-xs font-bold text-red-600">{tCommon("linkCopyFailed")}</p>
           ) : null}
           </>
-          ) : (
+          ) : created.alreadyConverted ? null : (
             <p className="text-sm text-gray-600">{t("partnerConvertSuccessBody")}</p>
           )}
 
@@ -181,14 +233,24 @@ export default function AdminPartnerCreateClient({ convertFrom = null }: { conve
                 {t("partnerCreateSendWhatsapp")}
               </a>
             ) : null}
-            <Link
-              href={`/admin/partners/${created.shopId}/edit`}
-              className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-bold text-gray-700 bg-gray-100 hover:bg-gray-200 transition-colors"
-            >
-              <Store size={16} />
-              {t("partnerCreateOpenShop")}
-            </Link>
-            {convertFrom ? (
+            {created.shopId ? (
+              <Link
+                href={`/admin/partners/${created.shopId}/edit`}
+                className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-bold text-gray-700 bg-gray-100 hover:bg-gray-200 transition-colors"
+              >
+                <Store size={16} />
+                {t("partnerCreateOpenShop")}
+              </Link>
+            ) : null}
+            {fromLead ? (
+              <Link
+                href="/admin/partner-leads"
+                className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-bold id-accent-soft hover:opacity-80 transition-colors"
+              >
+                <ArrowLeft size={16} />
+                {t("partnerLeadConvertBack")}
+              </Link>
+            ) : convertFrom ? (
               <Link
                 href="/admin/users"
                 className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-bold id-accent-soft hover:opacity-80 transition-colors"
@@ -219,7 +281,9 @@ export default function AdminPartnerCreateClient({ convertFrom = null }: { conve
     <div className="min-h-screen bg-gray-50 px-6 py-32 md:px-10 md:pt-40">
       {header}
       <section className="max-w-3xl bg-white rounded-4xl p-8 border border-gray-100 shadow-sm">
-        <p className="text-sm text-gray-600 mb-8">{convertFrom ? t("partnerConvertIntro") : t("partnerCreateIntro")}</p>
+        <p className="text-sm text-gray-600 mb-8">
+          {fromLead ? t("partnerLeadConvertIntro") : convertFrom ? t("partnerConvertIntro") : t("partnerCreateIntro")}
+        </p>
 
         <form onSubmit={handleSubmit} className="grid grid-cols-1 md:grid-cols-2 gap-6">
           <div className="flex flex-col gap-2">
@@ -315,7 +379,34 @@ export default function AdminPartnerCreateClient({ convertFrom = null }: { conve
                 <span className="text-gray-400">{t("partnerCreateLocationHint")}</span>
               )}
             </p>
+            {fromLead && form.shopAddress.trim() ? (
+              <a
+                href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(form.shopAddress.trim())}`}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="px-4 text-xs font-bold underline inline-flex items-center gap-1 text-gray-600"
+              >
+                {t("partnerLeadMapsSearch")}
+                <ExternalLink size={12} />
+              </a>
+            ) : null}
           </div>
+
+          {fromLead ? (
+            <div className="md:col-span-2 flex items-start gap-3 px-4">
+              <input
+                id="partner-lead-activate"
+                type="checkbox"
+                checked={activate}
+                onChange={(e) => setActivate(e.target.checked)}
+                className="mt-1 h-4 w-4"
+              />
+              <label htmlFor="partner-lead-activate" className="text-sm text-gray-700">
+                <span className="font-bold">{t("partnerLeadConvertActivate")}</span>
+                <span className="block text-xs text-gray-500">{t("partnerLeadConvertActivateHint")}</span>
+              </label>
+            </div>
+          ) : null}
 
           <div className="md:col-span-2">
             <button
@@ -324,7 +415,7 @@ export default function AdminPartnerCreateClient({ convertFrom = null }: { conve
               className="inline-flex items-center gap-2 px-6 py-3 rounded-2xl text-sm font-bold text-white bg-orange-600 hover:bg-orange-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
             >
               {pending ? <Loader2 size={16} className="animate-spin" /> : <UserPlus size={16} />}
-              {convertFrom ? t("partnerConvertSubmit") : t("partnerCreateSubmit")}
+              {fromLead ? t("partnerLeadConvertSubmit") : convertFrom ? t("partnerConvertSubmit") : t("partnerCreateSubmit")}
             </button>
           </div>
         </form>

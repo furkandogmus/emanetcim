@@ -1367,7 +1367,19 @@
     "appLinkStatsPlatform": "Platform",
     "appLinkStatsOutcome": "Outcome",
     "appLinkStatsCount": "Count",
-    "appLinkStatsRest": "Other groups"
+    "appLinkStatsRest": "Other groups",
+    "partnerLeadsConvert": "Convert to partner account",
+    "partnerLeadsConverted": "Converted to partner",
+    "partnerLeadConvertTitle": "Convert pre-registration to a partner account",
+    "partnerLeadConvertIntro": "Details come from the pre-registration; check them and fill in what is missing. Enter the location from the Google Maps link the partner sent. The account opens without a password; send the link that appears to the partner.",
+    "partnerLeadConvertActivate": "Publish the shop now",
+    "partnerLeadConvertActivateHint": "If unchecked, the shop goes to the applications list and stays out of search until you approve it.",
+    "partnerLeadConvertSubmit": "Open partner account",
+    "partnerLeadConvertActivated": "The shop is live; booking times are being prepared.",
+    "partnerLeadConvertActivationFailed": "The account was opened but the shop could not be published. Approve it from the applications list.",
+    "partnerLeadConvertAlready": "This pre-registration was already converted",
+    "partnerLeadConvertBack": "Back to pre-registrations",
+    "partnerLeadMapsSearch": "Search the address on Google Maps"
   },
   "Auth": {
     "loginTitle": "Sign in to BagajPark",

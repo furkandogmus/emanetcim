@@ -1367,7 +1367,19 @@
     "appLinkStatsPlatform": "Platform",
     "appLinkStatsOutcome": "Sonuç",
     "appLinkStatsCount": "Adet",
-    "appLinkStatsRest": "Diğer gruplar"
+    "appLinkStatsRest": "Diğer gruplar",
+    "partnerLeadsConvert": "Esnaf hesabına çevir",
+    "partnerLeadsConverted": "Esnaf hesabına çevrildi",
+    "partnerLeadConvertTitle": "Ön kaydı esnaf hesabına çevir",
+    "partnerLeadConvertIntro": "Bilgiler ön kayıttan geldi; kontrol edip eksikleri tamamlayın. Konumu esnafın gönderdiği Google Maps linkinden girin. Hesap şifresiz açılır; çıkan bağı esnafa iletin.",
+    "partnerLeadConvertActivate": "Dükkanı hemen yayına al",
+    "partnerLeadConvertActivateHint": "İşaretlemezseniz dükkan başvurular listesine düşer ve onaylayana kadar aramada görünmez.",
+    "partnerLeadConvertSubmit": "Esnaf hesabını aç",
+    "partnerLeadConvertActivated": "Dükkan yayında; rezervasyon saatleri hazırlanıyor.",
+    "partnerLeadConvertActivationFailed": "Hesap açıldı ama dükkan yayına alınamadı. Başvurular listesinden onaylayın.",
+    "partnerLeadConvertAlready": "Bu ön kayıt daha önce esnaf hesabına çevrildi",
+    "partnerLeadConvertBack": "Ön kayıtlara dön",
+    "partnerLeadMapsSearch": "Adresi Google Maps'te ara"
   },
   "Auth": {
     "loginTitle": "BagajPark'a Giriş Yap",
