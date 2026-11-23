@@ -1,5 +1,4 @@
 import { jwtVerify, SignJWT } from "jose";
-import type { NextRequest } from "next/server";
 import { NextResponse } from "next/server";
 import prisma from "./db";
 import type { Role } from "@prisma/client";
@@ -168,6 +167,12 @@ export type MobileActor = {
   email: string | null;
   /** Bir yonetici bu kullanici olarak goruntuluyorsa o yoneticinin id'si. */
   impersonatedBy?: string;
+  /**
+   * Inceleme kum havuzu hesabi (`User.isTest`): test dukkanlarini da gorur ve
+   * rezervasyon yapabilir. Eksikse gercek kullanici sayilir; kural
+   * `public-shop-filter.ts` -> `ShopViewer`.
+   */
+  isTest?: boolean;
 };
 
 /** Yonetici goruntuleme oturumunda kapali uclar (hesap silme, push kaydi, cikis iptali). */
@@ -188,9 +193,16 @@ export function serviceUnavailable() {
   return NextResponse.json({ error: "service_unavailable" }, { status: 503 });
 }
 
-type ActorRow = { id: string; role: Role; email: string | null; isBanned: boolean; tokenVersion: number };
+type ActorRow = {
+  id: string;
+  role: Role;
+  email: string | null;
+  isBanned: boolean;
+  tokenVersion: number;
+  isTest: boolean;
+};
 
-export async function requireMobileUser(req: NextRequest) {
+export async function requireMobileUser(req: Request) {
   const header = req.headers.get("authorization");
   if (!header?.startsWith("Bearer ")) return { error: unauthorized() } as const;
   const token = header.slice(7);
@@ -212,7 +224,7 @@ export async function requireMobileUser(req: NextRequest) {
   try {
     user = await prisma.user.findUnique({
       where: { id: claims.sub },
-      select: { id: true, role: true, email: true, isBanned: true, tokenVersion: true },
+      select: { id: true, role: true, email: true, isBanned: true, tokenVersion: true, isTest: true },
     });
     if (user && claims.imp) {
       admin = await prisma.user.findUnique({
@@ -226,7 +238,7 @@ export async function requireMobileUser(req: NextRequest) {
   }
 
   if (!user || user.isBanned || user.tokenVersion !== (claims.tv ?? 0)) return { error: unauthorized() } as const;
-  const actor: MobileActor = { id: user.id, role: user.role, email: user.email };
+  const actor: MobileActor = { id: user.id, role: user.role, email: user.email, isTest: user.isTest };
   if (claims.imp) {
     // Oturum suresince ADMIN'e yukseltilen hedef de goruntulenemez.
     if (user.role === "ADMIN") return { error: unauthorized() } as const;
@@ -246,6 +258,24 @@ export async function requireMobileUser(req: NextRequest) {
     }
   }
   return { user: actor } as const;
+}
+
+/**
+ * KIMLIKSIZ uclar (arama, dukkan detayi, yorumlar) icin istege bagli izleyici.
+ *
+ * Token yoksa, gecersizse ya da suresi dolmussa ANONIM (`null`) doner; 401
+ * DONMEZ. Bu uclar oturumsuz da calisiyor ve istemci 401'de oturumu kapatip
+ * giris ekranina atiyor: suresi dolmus bir token yuzunden arama ekrani
+ * oturumu dusurmemeli. Anonim = gercek kullanici, yani hata yonu guvenli:
+ * en kotu ihtimalle test kullanicisi bir an test dukkanlarini gormez.
+ *
+ * Dogrulama `requireMobileUser` ile AYNI (yasak, tokenVersion, goruntuleme).
+ */
+export async function resolveMobileShopViewer(req: Request): Promise<{ isTest: boolean } | null> {
+  if (!req.headers.get("authorization")?.startsWith("Bearer ")) return null;
+  const auth = await requireMobileUser(req);
+  if ("error" in auth) return null;
+  return { isTest: auth.user.isTest === true };
 }
 
 export function requireRole(user: { role: Role }, roles: Role[]) {

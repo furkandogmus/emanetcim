@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { resolveMobileShopViewer } from "@/lib/mobile-auth";
 import { ShopService } from "@/services/ShopService";
 import { reviewService } from "@/services/ReviewService";
 import { toMobileReview } from "@/lib/mobile-dto";
@@ -17,7 +18,7 @@ export async function GET(req: Request, { params }: { params: Promise<{ id: stri
     gecmeli, yoksa test/pasif bir dukkanin yorumlari kimligi bilen herkese
     aciliyor.
   */
-  const shop = await shopService.getPublicShopById(id);
+  const shop = await shopService.getPublicShopById(id, await resolveMobileShopViewer(req));
   if (!shop) return NextResponse.json({ error: "not_found" }, { status: 404 });
 
   const sp = new URL(req.url).searchParams;

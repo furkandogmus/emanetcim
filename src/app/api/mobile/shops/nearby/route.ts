@@ -12,6 +12,7 @@ import { toDatetimeLocalValueInTimeZone } from "@/lib/datetime-local";
 import { nextOpening, snapStayToShopHours } from "@/lib/stay-days";
 import logger from "@/lib/logger";
 import { loadScheduleParts } from "@/services/ShopScheduleService";
+import { resolveMobileShopViewer } from "@/lib/mobile-auth";
 
 const MAX_RADIUS_M = 50_000;
 const MAX_LIMIT = 50;
@@ -58,6 +59,8 @@ export async function GET(req: NextRequest) {
   const mixTotal = mix ? mix.s + mix.m + mix.xl : 0;
 
   const radiusKm = r / 1000;
+  // Inceleme kum havuzu: `isTest` hesapta test dukkanlari da doner; anonim/gercek kullanicida degisiklik yok.
+  const viewer = await resolveMobileShopViewer(req);
 
   if (checkIn && checkOut) {
     const rules = await getPricingRules();
@@ -85,6 +88,7 @@ export async function GET(req: NextRequest) {
         ignoreOpenHours: true,
         strict: true,
         includeOutsideHours: !!includeClosed,
+        viewer,
         /*
           Web aramasiyla (`actions/search-shops.ts`) ayni gun kapisi: haftalik
           takvim ve kapanislar. Yoksa pazar gunu kapali ya da o tarihte izinli
@@ -165,7 +169,7 @@ export async function GET(req: NextRequest) {
   }
 
   const [shops, rules] = await Promise.all([
-    shopService.findNearby(lat, lng, radiusKm, page, limit),
+    shopService.findNearby(lat, lng, radiusKm, page, limit, viewer),
     getPricingRules(),
   ]);
   return NextResponse.json(

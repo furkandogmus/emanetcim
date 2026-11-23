@@ -13,6 +13,7 @@ import { loadScheduleParts } from "@/services/ShopScheduleService";
 import { toDatetimeLocalValueInTimeZone } from "@/lib/datetime-local";
 import { couponService } from "@/services/CouponService";
 import { referralService } from "@/services/ReferralService";
+import { isShopBookableBy } from "@/lib/public-shop-filter";
 
 /**
  * Odeme ekrani fiyat ONIZLEMESI (2026-11-18).
@@ -67,7 +68,8 @@ export async function POST(req: NextRequest) {
       timezone: true,
     },
   });
-  if (!shop?.isActive || shop.isTest || shop.isPrelaunch) {
+  // Pasif, prelaunch ve (kum havuzu hesabi disinda) test dukkani: 404. Kural `public-shop-filter.ts`te.
+  if (!shop || !isShopBookableBy(shop, auth.user)) {
     return NextResponse.json({ error: "shop_not_found" }, { status: 404 });
   }
 
