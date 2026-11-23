@@ -101,10 +101,15 @@ export default function SearchWizard() {
   const openedFromHome = useRef(false);
   useEffect(() => {
     if (!cityFromHome || openedFromHome.current || cityList.length === 0) return;
-    openedFromHome.current = true;
     const city = cityList.find((c) => (c.slug ?? c.name) === cityFromHome);
     // Listede yoksa (kart eski veriyle) sehir listesi acik kalir; misafir oradan secer.
-    if (city) void chooseCity(city);
+    if (!city) return;
+    // Bir sonraki tikte: etkinin icinden senkron setState zincirleme render tetikler.
+    const timer = setTimeout(() => {
+      openedFromHome.current = true;
+      void chooseCity(city);
+    }, 0);
+    return () => clearTimeout(timer);
     // chooseCity her render'da yeniden tanimlaniyor; yalnizca liste gelince bir kez calisir.
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [cityFromHome, cityList.length]);
