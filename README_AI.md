@@ -57,12 +57,15 @@ Projeyle ilgili çalışırken bakılması gereken ana klasörler ve kritik dosy
 
 ## 4. Dokümantasyon dizini
 
-*   [URUN_VE_IS_KURALLARI.md](docs/URUN_VE_IS_KURALLARI.md): roller, rezervasyon yaşam döngüsü, iş kuralları, bildirim kanalları, dükkan/mühür işleyişi (kodla doğrulanmış tek ürün belgesi).
-*   [PLATFORM_SETTINGS.md](docs/PLATFORM_SETTINGS.md): sayısal kurallar ve admin'den yönetimi.
+`docs/` altı altı belgeden ibarettir:
+
+*   [URUN_VE_IS_KURALLARI.md](docs/URUN_VE_IS_KURALLARI.md): roller, rezervasyon yaşam döngüsü, iş kuralları, platform ayarları, bildirimler, dükkan/mühür işleyişi.
 *   [PAYMENTS.md](docs/PAYMENTS.md): ödeme mimarisi, defter, iptal/iade, finans dışa aktarma.
-*   [DEFECT_BACKLOG.md](docs/DEFECT_BACKLOG.md): kanıtlı açık hatalar (tek iş listesi); [PRODUCTION_BACKLOG.md](docs/PRODUCTION_BACKLOG.md): stratejik liste ve yol haritası.
-*   [rakip_analizi.md](docs/rakip_analizi.md): rakiplerle özellik karşılaştırması; [web_vs_mobile_comparison.md](docs/web_vs_mobile_comparison.md): web ↔ Expo eşliği.
-*   Operasyon: [ops/README.md](ops/README.md), [scripts/README.md](scripts/README.md), [infra/aws/README.md](infra/aws/README.md), [docs/CI_CD.md](docs/CI_CD.md).
+*   [BACKLOG.md](docs/BACKLOG.md): tek iş listesi (açık kararlar, kanıtlı hatalar, açık teknik işler, sürüm öncesi kontrol).
+*   [GELISTIRME.md](docs/GELISTIRME.md): yerel ortam, değişiklik süreci, CI/CD.
+*   [GUVENLIK_VE_IZLEME.md](docs/GUVENLIK_VE_IZLEME.md): kimlik doğrulama ve OAuth, uygulama/altyapı güvenliği, log ve sağlık uçları.
+*   [BUYUME.md](docs/BUYUME.md): pazarlama planı, blog içerik kuralları, rakipler.
+*   Operasyon: [ops/README.md](ops/README.md), [ops/SECRETS.md](ops/SECRETS.md), [scripts/README.md](scripts/README.md), [infra/aws/README.md](infra/aws/README.md). Mobil: `mobile-expo/` altındaki `CLAUDE.md`, `migration-progress.md` (web ↔ mobil eşliği), `IOS_YAYIN.md`, `PLAY_YAYIN.md`.
 *   Eski tarihli denetimler ve anlık görüntüler repoda tutulmaz; git geçmişindedir.
 
 ---

@@ -54,7 +54,7 @@ export type PartnerReviewResult =
  * varsayilanina (`"tr"`) duser — `NotificationService` imzasiyla ayni.
  *
  * Not: bu HALA misafirin degil, ISTEGIN dilidir. Dogru cozum misafirin dilini
- * rezervasyonda saklamak; `docs/DEFECT_BACKLOG.md` icinde acik madde olarak duruyor.
+ * rezervasyonda saklamak; `docs/BACKLOG.md` icinde acik madde olarak duruyor.
  */
 type ReviewOptions = { locale?: string };
 

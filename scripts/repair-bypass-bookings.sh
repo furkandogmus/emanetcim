@@ -30,7 +30,7 @@
 #
 # VARSAYILAN KURU CALISMADIR. Degistirmek icin `--apply` gerekir.
 #
-# Ayrinti: docs/DEFECT_BACKLOG.md -> madde 6
+# Ayrinti: docs/BACKLOG.md -> madde 6
 # ============================================================
 
 set -e

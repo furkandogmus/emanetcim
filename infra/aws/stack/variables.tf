@@ -15,7 +15,7 @@ variable "aws_profile" {
   # Varsayilan 2026-08-29'da `bagajpark`'tan `bagajpark-yeni`ye alindi: yerel workspace
   # zaten `hesap2` (yani CANLI hesabin state'i) ama profil hala eski hesaba bakiyordu.
   # Bu ikisi ayristiginda `terraform plan` her kaynagi "to create" gosterir ve bir apply
-  # altyapiyi YANLIS hesapta ikinci kez kurar. Kesim kaydi: infra/aws/CUTOVER.md.
+  # altyapiyi YANLIS hesapta ikinci kez kurar. Kesim kaydi: infra/aws/README.md.
   # Dogrulama (salt okunur):
   #   terraform workspace show
   #   aws sts get-caller-identity --profile personal-prod --query Account --output text
@@ -92,7 +92,7 @@ variable "enable_secret_seeding" {
 variable "deploy_config_bucket" {
   # 2026-08-29: varsayilan eski hesabin (269174115166) bucket'i olan
   # `bagajpark-backups-43403243`ti; canli hesabin bucket'i `bagajpark-backups-1d9eb152`
-  # (infra/aws/CUTOVER.md "Son durum"). Stale varsayilan, IAM policy'sini BASKA BIR
+  # (infra/aws/README.md "Son durum"). Stale varsayilan, IAM policy'sini BASKA BIR
   # HESABIN bucket'ina baglar -- CI'nin sunucuya biraktigi deploy config okunamaz.
   # Dogrulama: cd infra/aws/bootstrap && terraform output backup_bucket_name
   description = "bootstrap/ çıktısındaki backup_bucket_name — bucket adı random_id içerdiğinden isimlendirme sözleşmesiyle DEĞİL, bu değişkenle bağlanıyor. Hesap değişirse `terraform output backup_bucket_name` ile güncellenmeli."

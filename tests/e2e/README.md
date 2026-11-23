@@ -18,14 +18,14 @@ sunucuyu yeniden başlatın ya da Redis'i `FLUSHALL` edin.
 ## Yerelde çalıştırma
 
 1. Veritabanını ayağa kaldırın ve şemayı uygulayın:
-   - `npm run db:up` (yalnızca Postgres; ya da mevcut Postgres’iniz — `docs/DOCKER.md`)
+   - `npm run db:up` (yalnızca Postgres; ya da mevcut Postgres’iniz — `docs/GELISTIRME.md`)
    - `npx prisma migrate deploy`
    - `npx prisma db seed`
 2. `DATABASE_URL`'i açıkça verin (`.env.local` ya da ortam). `playwright.config.ts`'teki yedek
    değer eski `emanetci:emanetci@…/emanetci` bilgilerini taşıyor ve bugünkü compose varsayılanıyla uyuşmaz.
    - Uygulama **host’ta** (`npm run dev`), Postgres **Docker’da** ise `docker-compose` portu **5433**’tür; örnek:
      `postgresql://bagajpark:<POSTGRES_PASSWORD>@localhost:5433/bagajpark?schema=public`
-     (kullanıcı/DB varsayılanı `bagajpark`, parola `docker-compose.env`'deki değer — `docs/DOCKER.md`)
+     (kullanıcı/DB varsayılanı `bagajpark`, parola `docker-compose.env`'deki değer — `docs/GELISTIRME.md`)
    - Sadece `docker compose up` ile `web` konteyneri kullanıyorsanız Compose içi `postgres:5432` kullanılır (host portu gerekmez).
 3. Demo giriş şifresi seed ile aynı olmalı: `NEXT_PUBLIC_DEMO_PASSWORD` (yoksa `Demo123!`; seed ve giriş sayfası aynı değişkeni okur). Demo düğmeleri yalnızca `NEXT_PUBLIC_ENABLE_AUTH_DEMO=true` ile derlenen build'de görünür.
 4. `npm run test:e2e` (`playwright.config.ts` dev sunucuyu kendisi kaldırır)

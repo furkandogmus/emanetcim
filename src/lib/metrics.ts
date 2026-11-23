@@ -2,7 +2,7 @@ import logger from "@/lib/logger";
 
 /**
  * Yapılandırılmış log üzerinden metrik olayı (Prometheus/Datadog tarafında parse edilebilir).
- * Bkz. docs/OBSERVABILITY.md
+ * Bkz. docs/GUVENLIK_VE_IZLEME.md
  */
 export function recordMetric(
   name: string,

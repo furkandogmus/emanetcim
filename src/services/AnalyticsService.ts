@@ -62,7 +62,7 @@ class AnalyticsService {
 
   /**
    * Admin panelindeki `/admin/analytics` sayfası için özet. Ön-hesaplanmış
-   * tablo/cron YOK — bu ölçekte (bkz. docs/DEFECT_BACKLOG.md'deki dükkan/rezervasyon
+   * tablo/cron YOK — bu ölçekte (bkz. docs/BACKLOG.md'deki dükkan/rezervasyon
    * sayıları) doğrudan agregasyon yeterince hızlı; erken optimizasyon yapılmadı.
    */
   async getDashboardSummary(days: number) {
