@@ -43,6 +43,9 @@ export async function POST(req: NextRequest) {
     });
     return NextResponse.json({ success: true, review: { id: review.id, rating: review.rating } });
   } catch (e: unknown) {
+    if (e instanceof Error && e.message === "REVIEW_INAPPROPRIATE") {
+      return NextResponse.json({ error: "inappropriate_content" }, { status: 422 });
+    }
     const err = e as { code?: string };
     if (err.code === "P2002") {
       return NextResponse.json({ error: "duplicate_review" }, { status: 409 });

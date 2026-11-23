@@ -1,8 +1,8 @@
-import { useInfiniteQuery, useQuery } from "@tanstack/react-query";
+import { useInfiniteQuery, useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { api } from "../api";
 import { nextCursorOf } from "../paging";
 import { totalBags, type Bags } from "../search";
-import type { NearbyShop, ShopDetail, ShopReviewsPage } from "../types";
+import type { NearbyShop, ReportReviewRequest, ShopDetail, ShopReviewsPage } from "../types";
 import { keys } from "./keys";
 
 export function useShop(id: string) {
@@ -67,5 +67,23 @@ export function useNearbyShops(p: NearbyParams | null) {
       // Token gider: kum havuzu hesabi test dukkanlarini da gorur (bkz. `useShop`).
       return api<NearbyShop[]>(`/shops/nearby?${q}`, { optionalAuth: true });
     },
+  });
+}
+
+/** Yorum bildir (App Review 1.2). */
+export function useReportReview() {
+  return useMutation({
+    mutationFn: ({ id, ...body }: { id: string } & ReportReviewRequest) =>
+      api<{ ok: true; autoHidden: boolean }>(`/reviews/${encodeURIComponent(id)}/report`, { method: "POST", body }),
+  });
+}
+
+/** "Bu kullanicinin yorumlarini gizle": sunucu bu goruntuleyen icin yazarin yorumlarini atlar. */
+export function useBlockReviewAuthor(shopId: string) {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: (reviewId: string) =>
+      api<{ ok: true }>(`/reviews/${encodeURIComponent(reviewId)}/block`, { method: "POST" }),
+    onSuccess: () => void qc.invalidateQueries({ queryKey: ["shops", shopId, "reviews"] }),
   });
 }

@@ -966,8 +966,33 @@
       "booking_not_completed": "Valizini teslim aldıktan sonra değerlendirme yapabilirsin.",
       "duplicate_review": "Bu rezervasyonu zaten değerlendirdin.",
       "not_found": "Rezervasyon bulunamadı.",
-      "forbidden": "Bu rezervasyonu değerlendiremezsin."
-    }
+      "forbidden": "Bu rezervasyonu değerlendiremezsin.",
+      "own_review": "Kendi yorumunu bildiremezsin.",
+      "duplicate": "Bu yorumu zaten bildirdin.",
+      "rate_limited": "Çok fazla bildirim gönderdin; biraz sonra tekrar dene.",
+      "inappropriate_content": "Yorumunda uygunsuz ifade var; lütfen düzenleyip tekrar gönder."
+    },
+    "report": "Bildir",
+    "blockAuthor": "Bu kullanıcının yorumlarını gizle",
+    "blockTitle": "Bu kullanıcının yorumları gizlensin mi?",
+    "blockBody": "Bu kişinin yorumlarını artık görmezsin. Diğer misafirler görmeye devam eder.",
+    "blockConfirm": "Gizle",
+    "blockDone": "Bu kullanıcının yorumları gizlendi.",
+    "actionFailed": "İşlem tamamlanamadı",
+    "reportTitle": "Yorumu bildir",
+    "reportBody": "Ekibimiz yorumu inceler. Birden fazla bildirim alan yorum inceleme bitene kadar gizlenir.",
+    "reportReason": {
+      "SPAM": "Spam ya da reklam",
+      "OFFENSIVE": "Küfür veya hakaret",
+      "HARASSMENT": "Taciz ya da nefret söylemi",
+      "FALSE_INFO": "Yanlış veya yanıltıcı bilgi",
+      "PERSONAL_INFO": "Kişisel bilgi paylaşıyor",
+      "OTHER": "Diğer"
+    },
+    "reportNoteLabel": "Açıklama (isteğe bağlı)",
+    "reportNotePlaceholder": "Neden bildiriyorsun?",
+    "reportSend": "Bildir",
+    "reportThanks": "Teşekkürler, bildirimin ekibimize ulaştı."
   },
   "dispute": {
     "open": "Sorun bildir",
@@ -1522,7 +1547,10 @@
       "not_hidden": "Bu yorum zaten görünür; liste yenilendi.",
       "invalid_action": "Geçersiz işlem.",
       "invalid_data": "Girilen değer geçersiz."
-    }
+    },
+    "filterReported": "Bildirilen",
+    "reportCount": "{{count}} bildirim",
+    "autoHiddenTag": "Otomatik gizlendi"
   },
   "adminOps": {
     "tools": {

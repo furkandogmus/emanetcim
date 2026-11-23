@@ -14,3 +14,7 @@ export type ShopReviewsPage = { items: ShopReview[]; total: number; nextCursor: 
 export type CreateReviewRequest = { bookingId: string; rating: number; comment?: string };
 
 export type CreateReviewResponse = { success: true; review: { id: string; rating: number } };
+
+/** `POST reviews/:id/report` (App Review 1.2). Sunucudaki `REVIEW_REPORT_REASONS` ile ayni. */
+export type ReviewReportReason = "SPAM" | "OFFENSIVE" | "HARASSMENT" | "FALSE_INFO" | "PERSONAL_INFO" | "OTHER";
+export type ReportReviewRequest = { reason: ReviewReportReason; note?: string };

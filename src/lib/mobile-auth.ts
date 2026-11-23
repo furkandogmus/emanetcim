@@ -274,12 +274,12 @@ export const AUTH_STALE_HEADER = "X-Auth-Stale";
  */
 export async function resolveMobileShopViewer(
   req: Request,
-): Promise<{ viewer: { reviewSandbox: boolean } | null; stale: boolean }> {
+): Promise<{ viewer: { id: string; reviewSandbox: boolean } | null; stale: boolean }> {
   if (!req.headers.get("authorization")?.startsWith("Bearer ")) return { viewer: null, stale: false };
   const auth = await requireMobileUser(req);
   // 503 (veritabani) bayat token degil: tekrar denemek yardim etmez.
   if ("error" in auth) return { viewer: null, stale: auth.error?.status === 401 };
-  return { viewer: { reviewSandbox: auth.user.reviewSandbox === true }, stale: false };
+  return { viewer: { id: auth.user.id, reviewSandbox: auth.user.reviewSandbox === true }, stale: false };
 }
 
 /** `resolveMobileShopViewer` `stale` dediyse yanita isaret koyar. */

@@ -250,7 +250,7 @@ function Reviews({ shopId }: { shopId: string }) {
       <AppText variant="heading">{t("shop.reviews", { count: total })}</AppText>
       {items.length === 0 ? <AppText variant="caption">{t("shop.noReviews")}</AppText> : null}
       {items.map((r) => (
-        <ReviewItem key={r.id} review={r} />
+        <ReviewItem key={r.id} review={r} shopId={shopId} />
       ))}
       {total > items.length ? (
         <Button

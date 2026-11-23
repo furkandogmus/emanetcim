@@ -19,6 +19,7 @@ import { prelaunchInterestService } from "@/services/PrelaunchInterestService";
 import { resolveServerSessionId } from "@/lib/analytics-server";
 import { socialMetadata } from "@/lib/social-metadata";
 import { serializeJsonLd } from "@/lib/json-ld-script";
+import { reviewService } from "@/services/ReviewService";
 
 /**
  * Ayni istek icinde TEK sorgu.
@@ -160,6 +161,9 @@ export default async function ShopDetailPage({
     { name: shop.name, path: `/${locale}/shop/${shop.id}` },
   ]);
 
+  // "Bu kullanicinin yorumlarini gizle" (App Review 1.2): yalnizca bu goruntuleyen icin.
+  const blockedAuthors = new Set(await reviewService.blockedAuthorIds(session?.user?.id).catch(() => []));
+
   const scheduleParts = (
     await loadScheduleParts([shop.id], new Date().toISOString().slice(0, 10))
   ).get(shop.id);
@@ -187,7 +191,7 @@ export default async function ShopDetailPage({
     isVerified: shop.isVerified,
     isPrelaunch: shop.isPrelaunch,
     responseTimeMinutes: shop.responseTimeMinutes,
-    reviews: shop.reviews.map((r) => ({
+    reviews: shop.reviews.filter((r) => !blockedAuthors.has(r.guestId)).map((r) => ({
       id: r.id,
       rating: r.rating,
       comment: r.comment,
@@ -215,6 +219,7 @@ export default async function ShopDetailPage({
         shop={clientShop}
         pricingRules={JSON.parse(JSON.stringify(pricingRules))}
         prelaunchWantCount={prelaunchWantCount}
+        signedIn={!!session?.user?.id}
       />
     </>
   );

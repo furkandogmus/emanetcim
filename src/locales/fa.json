@@ -1895,7 +1895,14 @@
     "accountDeletionNotPending": "این درخواست دیگر در انتظار نیست.",
     "accountDeletionSelf": "نمی‌توانید درخواست خودتان را تکمیل کنید.",
     "accountDeletionPendingPayouts": "تسویهٔ معوق وجود دارد؛ ابتدا باید پرداخت شود.",
-    "accountDeletionReason": "دلیل باید دست‌کم ۵ نویسه باشد."
+    "accountDeletionReason": "دلیل باید دست‌کم ۵ نویسه باشد.",
+    "reviewInappropriate": "نظر شما عبارت نامناسب دارد؛ لطفاً ویرایش و دوباره ارسال کنید.",
+    "reviewReportOwn": "نمی‌توانید نظر خودتان را گزارش کنید.",
+    "reviewReportDuplicate": "این نظر را قبلاً گزارش کرده‌اید.",
+    "reviewReportRateLimited": "گزارش‌های زیادی فرستاده‌اید؛ کمی بعد دوباره امتحان کنید.",
+    "reviewAlreadyHidden": "این نظر از قبل پنهان است.",
+    "reviewNotHidden": "این نظر پنهان نیست.",
+    "reviewReasonRequired": "برای پنهان کردن دلیل بنویسید."
   },
   "Emails": {
     "verificationSubject": "ایمیل خود را تأیید کنید",
@@ -1912,7 +1919,26 @@
     "subtitle": "تجربه خود را از ۱ تا ۵ ستاره امتیاز دهید تا به دیگر مسافران کمک شود.",
     "submit": "ارسال نظر",
     "success": "نظر شما ذخیره شد.",
-    "error": "ذخیره نظر ممکن نشد."
+    "error": "ذخیره نظر ممکن نشد.",
+    "report": "گزارش",
+    "reportSignIn": "برای گزارش وارد شوید",
+    "reportTitle": "گزارش نظر",
+    "reportBody": "تیم ما آن را بررسی می‌کند. نظری که چند گزارش بگیرد تا پایان بررسی پنهان می‌شود.",
+    "reportSend": "گزارش",
+    "reportReasonLabel": "دلیل",
+    "reportNoteLabel": "توضیح (اختیاری)",
+    "reportThanks": "سپاس، گزارش شما به تیم ما رسید.",
+    "blockAuthor": "پنهان کردن نظرهای این کاربر",
+    "blockTitle": "نظرهای این کاربر پنهان شود؟",
+    "blockBody": "دیگر نظرهای این شخص را نمی‌بینید. سایر مهمانان همچنان می‌بینند.",
+    "blockConfirm": "پنهان کن",
+    "blockDone": "نظرهای این کاربر پنهان شد.",
+    "reportReason_SPAM": "هرزنامه یا تبلیغ",
+    "reportReason_OFFENSIVE": "فحش یا توهین",
+    "reportReason_HARASSMENT": "آزار یا نفرت‌پراکنی",
+    "reportReason_FALSE_INFO": "نادرست یا گمراه‌کننده",
+    "reportReason_PERSONAL_INFO": "اطلاعات شخصی را فاش می‌کند",
+    "reportReason_OTHER": "سایر"
   },
   "CityStorage": {
     "istanbul": {
@@ -2673,5 +2699,34 @@
     "cancelBody": "فروشگاه‌های بسته دوباره باز می‌شوند. دلیل در گزارش ممیزی ثبت می‌شود.",
     "cancelled": "درخواست لغو شد.",
     "reasonLabel": "دلیل (دست‌کم ۵ نویسه)"
+  },
+  "AdminReviews": {
+    "back": "بازگشت به داشبورد",
+    "title": "مدیریت نظرها",
+    "intro": "نظرهای گزارش‌شده اول می‌آیند. وقتی سه کاربر مختلف نظری را گزارش کنند، تا تصمیم شما خودکار پنهان می‌شود.",
+    "empty": "در این فیلتر نظری نیست.",
+    "total": "{count} نظر",
+    "filter_reported": "گزارش‌شده",
+    "filter_all": "همه",
+    "filter_low": "امتیاز پایین",
+    "filter_hidden": "پنهان",
+    "reportCount": "{count} گزارش",
+    "autoHidden": "خودکار پنهان شد",
+    "hidden": "پنهان",
+    "noComment": "بدون متن",
+    "hiddenBecause": "دلیل: {reason}",
+    "hide": "پنهان کن",
+    "unhide": "بازگردان",
+    "delete": "حذف",
+    "reasonLabel": "دلیل",
+    "confirmTitle_hide": "این نظر پنهان شود؟",
+    "confirmBody_hide": "مهمانان آن را نمی‌بینند و از میانگین خارج می‌شود. گزارش‌ها بسته می‌شوند.",
+    "done_hide": "نظر پنهان شد.",
+    "confirmTitle_unhide": "این نظر دوباره نمایش داده شود؟",
+    "confirmBody_unhide": "نظر دوباره دیده می‌شود و گزارش‌ها بسته می‌شوند.",
+    "done_unhide": "نظر دوباره دیده می‌شود.",
+    "confirmTitle_delete": "این نظر حذف شود؟",
+    "confirmBody_delete": "نظر برای همیشه حذف می‌شود.",
+    "done_delete": "نظر حذف شد."
   }
 }

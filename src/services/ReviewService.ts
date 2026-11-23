@@ -1,18 +1,41 @@
-import type { Prisma } from "@prisma/client";
+import { Prisma, type ReviewReportReason } from "@prisma/client";
 import prisma from "@/lib/db";
 import { writeAuditLog } from "@/lib/audit-log";
 import { cursorArgs, toPage } from "@/lib/cursor-page";
 import { VISIBLE_REVIEW } from "@/lib/review-visibility";
+import { containsBlockedWords } from "@/lib/review-content-filter";
+import { rateLimit } from "@/lib/rate-limit";
+import { notificationService } from "@/services/NotificationService";
 
 /** "Dusuk puan" moderasyon filtresi: 1-2 yildiz. */
 export const LOW_RATING_MAX = 2;
 
-export type AdminReviewFilter = "all" | "low" | "hidden";
+export type AdminReviewFilter = "all" | "low" | "hidden" | "reported";
 
 /** `?filter=` okuma; bilinmeyen deger `all`. */
 export function parseAdminReviewFilter(raw: string | null | undefined): AdminReviewFilter {
-  return raw === "low" || raw === "hidden" ? raw : "all";
+  return raw === "low" || raw === "hidden" || raw === "reported" ? raw : "all";
 }
+
+/** Bu kadar FARKLI kullanici bildirince yorum yonetici kararina kadar gizlenir (App Review 1.2). */
+export const REVIEW_AUTO_HIDE_REPORTS = 3;
+/** Otomatik gizlemenin `hiddenReason` isareti; yonetici ekraninda ayri gosterilir. */
+export const AUTO_HIDE_REASON = "auto:reports";
+export const MAX_REPORT_NOTE = 500;
+export const REVIEW_REPORT_REASONS = [
+  "SPAM",
+  "OFFENSIVE",
+  "HARASSMENT",
+  "FALSE_INFO",
+  "PERSONAL_INFO",
+  "OTHER",
+] as const satisfies readonly ReviewReportReason[];
+
+export type ReportReviewResult =
+  | { ok: true; autoHidden: boolean }
+  | { ok: false; reason: "not_found" | "own_review" | "duplicate" | "rate_limited" };
+
+export type BlockAuthorResult = { ok: true } | { ok: false; reason: "not_found" | "own_review" };
 
 export type ModerationActor = { id: string; ip?: string | null };
 
@@ -76,6 +99,10 @@ export class ReviewService {
     if (data.comment != null && data.comment.length > MAX_REVIEW_COMMENT_LENGTH) {
       throw new Error("REVIEW_COMMENT_TOO_LONG");
     }
+    // App Review 1.2: acik hakaret yazildigi anda reddedilir; kalani bildir + moderasyon.
+    if (containsBlockedWords(data.comment)) {
+      throw new Error("REVIEW_INAPPROPRIATE");
+    }
     // 1. Yorumu Kaydet
     const review = await prisma.review.create({
       data: {
@@ -135,9 +162,9 @@ export class ReviewService {
   /**
    * Dükkana ait yorumları getirir.
    */
-  async getShopReviews(shopId: string) {
+  async getShopReviews(shopId: string, viewerId?: string | null) {
     return await prisma.review.findMany({
-      where: { shopId, ...VISIBLE_REVIEW },
+      where: { shopId, ...VISIBLE_REVIEW, ...(await this.viewerFilter(viewerId)) },
       include: {
         guest: {
           select: { name: true, image: true }
@@ -152,18 +179,114 @@ export class ReviewService {
    * Sayfali yorum listesi + gercek toplam. `getShopReviews` 50'de kesiyordu ve
    * toplam donmuyordu: mobil baslik "Yorumlar (50)" yazip bes yorum gosteriyordu.
    */
-  async listShopReviews(shopId: string, opts: { cursor?: string | null; take?: number } = {}) {
+  async listShopReviews(
+    shopId: string,
+    opts: { cursor?: string | null; take?: number; viewerId?: string | null } = {},
+  ) {
     const take = Math.min(Math.max(1, opts.take ?? 20), 50);
+    const where = { shopId, ...VISIBLE_REVIEW, ...(await this.viewerFilter(opts.viewerId)) };
     const [rows, total] = await Promise.all([
       prisma.review.findMany({
-        where: { shopId, ...VISIBLE_REVIEW },
+        where,
         include: { guest: { select: { name: true, image: true } } },
         orderBy: [{ createdAt: 'desc' }, { id: 'desc' }],
         ...cursorArgs(opts.cursor ?? null, take),
       }),
-      prisma.review.count({ where: { shopId, ...VISIBLE_REVIEW } }),
+      prisma.review.count({ where }),
     ]);
     return { ...toPage(rows, take), total };
+  }
+
+  /** Goruntuleyenin engelledigi yazarlar (`ReviewBlock`). Oturumsuz ya da engelsiz: bos. */
+  async blockedAuthorIds(viewerId: string | null | undefined): Promise<string[]> {
+    if (!viewerId) return [];
+    const rows = await prisma.reviewBlock.findMany({ where: { userId: viewerId }, select: { blockedUserId: true } });
+    return rows.map((r) => r.blockedUserId);
+  }
+
+  private async viewerFilter(viewerId: string | null | undefined): Promise<Prisma.ReviewWhereInput> {
+    const ids = await this.blockedAuthorIds(viewerId);
+    return ids.length > 0 ? { guestId: { notIn: ids } } : {};
+  }
+
+  /**
+   * Yorum bildir (App Review 1.2). Web ve mobil AYNI govde. Kullanici basina yorum
+   * basina tek bildirim (benzersiz anahtar); saatte 10 bildirim. Acik bildirim sayisi
+   * `REVIEW_AUTO_HIDE_REPORTS`e ulasinca yorum yonetici kararina kadar gizlenir.
+   * Esnaf kendi dukkanindaki yorumu da bildirebilir; yalnizca yazari kendi yorumunu bildiremez.
+   */
+  async report(params: {
+    reviewId: string;
+    reporterId: string;
+    reason: ReviewReportReason;
+    note?: string | null;
+  }): Promise<ReportReviewResult> {
+    if (!(await rateLimit(`review_report:user:${params.reporterId}`, 10, 60 * 60_000))) {
+      return { ok: false, reason: "rate_limited" };
+    }
+    const review = await prisma.review.findUnique({
+      where: { id: params.reviewId },
+      select: { id: true, guestId: true, shopId: true },
+    });
+    if (!review) return { ok: false, reason: "not_found" };
+    if (review.guestId === params.reporterId) return { ok: false, reason: "own_review" };
+
+    const note = params.note?.trim().slice(0, MAX_REPORT_NOTE) || null;
+    let result: { count: number; autoHidden: boolean };
+    try {
+      result = await prisma.$transaction(async (tx) => {
+        await tx.reviewReport.create({
+          data: { reviewId: review.id, userId: params.reporterId, reason: params.reason, note },
+        });
+        const updated = await tx.review.update({
+          where: { id: review.id },
+          data: { openReportCount: { increment: 1 }, lastReportedAt: new Date() },
+          select: { openReportCount: true },
+        });
+        let autoHidden = false;
+        if (updated.openReportCount >= REVIEW_AUTO_HIDE_REPORTS) {
+          const { count } = await tx.review.updateMany({
+            where: { id: review.id, hiddenAt: null },
+            data: { hiddenAt: new Date(), hiddenReason: AUTO_HIDE_REASON, hiddenById: null },
+          });
+          if (count > 0) {
+            autoHidden = true;
+            await this.updateShopAverageRating(review.shopId, tx);
+          }
+        }
+        return { count: updated.openReportCount, autoHidden };
+      });
+    } catch (e) {
+      if (e instanceof Prisma.PrismaClientKnownRequestError && e.code === "P2002") {
+        return { ok: false, reason: "duplicate" };
+      }
+      throw e;
+    }
+
+    writeAuditLog({
+      actorUserId: params.reporterId,
+      actorRole: "USER",
+      action: result.autoHidden ? "review.report_auto_hidden" : "review.report",
+      entityType: "Review",
+      entityId: review.id,
+      metadata: { reason: params.reason, openReports: result.count },
+      ip: null,
+    });
+    notificationService.pushAdmins("reviewReport", { code: String(result.count) }, { adminScreen: "reviews" });
+    return { ok: true, autoHidden: result.autoHidden };
+  }
+
+  /** "Bu kullanicinin yorumlarini gizle": goruntuleyen basina, yorum uzerinden (yazar kimligi istemciye cikmaz). */
+  async blockAuthor(params: { reviewId: string; viewerId: string }): Promise<BlockAuthorResult> {
+    const review = await prisma.review.findUnique({ where: { id: params.reviewId }, select: { guestId: true } });
+    if (!review) return { ok: false, reason: "not_found" };
+    if (review.guestId === params.viewerId) return { ok: false, reason: "own_review" };
+    await prisma.reviewBlock.upsert({
+      where: { userId_blockedUserId: { userId: params.viewerId, blockedUserId: review.guestId } },
+      create: { userId: params.viewerId, blockedUserId: review.guestId },
+      update: {},
+    });
+    return { ok: true };
   }
 
   /**
@@ -179,6 +302,7 @@ export class ReviewService {
       ...(opts.shopId ? { shopId: opts.shopId } : {}),
       ...(opts.filter === "low" ? { rating: { lte: LOW_RATING_MAX } } : {}),
       ...(opts.filter === "hidden" ? { hiddenAt: { not: null } } : {}),
+      ...(opts.filter === "reported" ? { openReportCount: { gt: 0 } } : {}),
     };
     const [rows, total] = await Promise.all([
       prisma.review.findMany({
@@ -186,8 +310,15 @@ export class ReviewService {
         include: {
           guest: { select: { name: true } },
           shop: { select: { id: true, name: true } },
+          reports: {
+            where: { resolvedAt: null },
+            select: { reason: true, note: true },
+            orderBy: { createdAt: "desc" },
+            take: 5,
+          },
         },
-        orderBy: [{ createdAt: "desc" }, { id: "desc" }],
+        // Bildirilenler once: moderasyon kuyrugu (App Review 1.2).
+        orderBy: [{ openReportCount: "desc" }, { createdAt: "desc" }, { id: "desc" }],
         ...cursorArgs(opts.cursor ?? null, take),
       }),
       prisma.review.count({ where }),
@@ -242,6 +373,11 @@ export class ReviewService {
                 data: { hiddenAt: null, hiddenReason: null, hiddenById: null },
               });
       if (count === 0) return false;
+      // Yonetici karar verdi: acik bildirimler kapanir (silmede satirlar cascade ile gider).
+      if (params.action !== "delete") {
+        await tx.reviewReport.updateMany({ where: { reviewId: id, resolvedAt: null }, data: { resolvedAt: new Date() } });
+        await tx.review.update({ where: { id }, data: { openReportCount: 0 } });
+      }
       await this.updateShopAverageRating(review.shopId, tx);
       return true;
     });

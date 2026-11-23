@@ -1970,7 +1970,14 @@
     "accountDeletionNotPending": "Talep artık beklemede değil.",
     "accountDeletionSelf": "Kendi hesabınızın talebini tamamlayamazsınız.",
     "accountDeletionPendingPayouts": "Bekleyen hakediş var; önce ödenmeli.",
-    "accountDeletionReason": "Gerekçe en az 5 karakter olmalı."
+    "accountDeletionReason": "Gerekçe en az 5 karakter olmalı.",
+    "reviewInappropriate": "Yorumunuzda uygunsuz ifade var; lütfen düzenleyip tekrar gönderin.",
+    "reviewReportOwn": "Kendi yorumunuzu bildiremezsiniz.",
+    "reviewReportDuplicate": "Bu yorumu zaten bildirdiniz.",
+    "reviewReportRateLimited": "Çok fazla bildirim gönderdiniz; biraz sonra tekrar deneyin.",
+    "reviewAlreadyHidden": "Yorum zaten gizli.",
+    "reviewNotHidden": "Yorum gizli değil.",
+    "reviewReasonRequired": "Gizlemek için gerekçe yazın."
   },
   "Emails": {
     "verificationSubject": "E-postanızı Doğrulayın",
@@ -1987,7 +1994,26 @@
     "subtitle": "Deneyiminizi 1-5 yıldız arasında puanlayarak diğer gezginlere rehber olun.",
     "submit": "DEĞERLENDİRMEYİ GÖNDER",
     "success": "Yorumunuz başarıyla kaydedildi.",
-    "error": "Yorum kaydedilemedi."
+    "error": "Yorum kaydedilemedi.",
+    "report": "Bildir",
+    "reportSignIn": "Bildirmek için giriş yap",
+    "reportTitle": "Yorumu bildir",
+    "reportBody": "Ekibimiz yorumu inceler. Birden fazla bildirim alan yorum inceleme bitene kadar gizlenir.",
+    "reportSend": "Bildir",
+    "reportReasonLabel": "Neden",
+    "reportNoteLabel": "Açıklama (isteğe bağlı)",
+    "reportThanks": "Teşekkürler, bildiriminiz ekibimize ulaştı.",
+    "blockAuthor": "Bu kullanıcının yorumlarını gizle",
+    "blockTitle": "Bu kullanıcının yorumları gizlensin mi?",
+    "blockBody": "Bu kişinin yorumlarını artık görmezsiniz. Diğer misafirler görmeye devam eder.",
+    "blockConfirm": "Gizle",
+    "blockDone": "Bu kullanıcının yorumları gizlendi.",
+    "reportReason_SPAM": "Spam ya da reklam",
+    "reportReason_OFFENSIVE": "Küfür veya hakaret",
+    "reportReason_HARASSMENT": "Taciz ya da nefret söylemi",
+    "reportReason_FALSE_INFO": "Yanlış veya yanıltıcı bilgi",
+    "reportReason_PERSONAL_INFO": "Kişisel bilgi paylaşıyor",
+    "reportReason_OTHER": "Diğer"
   },
   "CityStorage": {
     "istanbul": {
@@ -2818,5 +2844,34 @@
     "cancelBody": "Kapatılan dükkanlar yeniden açılır. Gerekçe denetim kaydına girer.",
     "cancelled": "Talep iptal edildi.",
     "reasonLabel": "Gerekçe (en az 5 karakter)"
+  },
+  "AdminReviews": {
+    "back": "Panele dön",
+    "title": "Yorum moderasyonu",
+    "intro": "Bildirilen yorumlar önce gelir. Üç farklı kullanıcı bildirince yorum kararınıza kadar otomatik gizlenir.",
+    "empty": "Bu filtrede yorum yok.",
+    "total": "{count} yorum",
+    "filter_reported": "Bildirilen",
+    "filter_all": "Tümü",
+    "filter_low": "Düşük puan",
+    "filter_hidden": "Gizli",
+    "reportCount": "{count} bildirim",
+    "autoHidden": "Otomatik gizlendi",
+    "hidden": "Gizli",
+    "noComment": "Yorum metni yok",
+    "hiddenBecause": "Gerekçe: {reason}",
+    "hide": "Gizle",
+    "unhide": "Geri al",
+    "delete": "Sil",
+    "reasonLabel": "Gerekçe",
+    "confirmTitle_hide": "Yorum gizlensin mi?",
+    "confirmBody_hide": "Yorum misafirlere görünmez ve ortalamaya girmez. Bildirimler kapanır.",
+    "done_hide": "Yorum gizlendi.",
+    "confirmTitle_unhide": "Yorum yeniden gösterilsin mi?",
+    "confirmBody_unhide": "Yorum yeniden görünür ve bildirimler kapanır.",
+    "done_unhide": "Yorum yeniden görünüyor.",
+    "confirmTitle_delete": "Yorum silinsin mi?",
+    "confirmBody_delete": "Yorum kalıcı olarak silinir.",
+    "done_delete": "Yorum silindi."
   }
 }

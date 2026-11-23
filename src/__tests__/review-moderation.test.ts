@@ -29,7 +29,9 @@ const db = vi.hoisted(() => ({
     updateMany: vi.fn(),
     deleteMany: vi.fn(),
     aggregate: vi.fn(),
+    update: vi.fn(),
   },
+  reviewReport: { updateMany: vi.fn() },
   shop: { update: vi.fn() },
   $transaction: vi.fn(),
 }));
@@ -85,6 +87,16 @@ beforeEach(() => {
 });
 
 describe("ReviewService.moderate", () => {
+  it("yonetici karari acik bildirimleri kapatir ve kuyruk sayacini sifirlar (App Review 1.2)", async () => {
+    const r = await reviewService.moderate({ reviewId: "r1", action: "hide", reason: "Hakaret", actor: ADMIN });
+    expect(r.ok).toBe(true);
+    expect(db.reviewReport.updateMany).toHaveBeenCalledWith({
+      where: { reviewId: "r1", resolvedAt: null },
+      data: { resolvedAt: expect.any(Date) },
+    });
+    expect(db.review.update).toHaveBeenCalledWith({ where: { id: "r1" }, data: { openReportCount: 0 } });
+  });
+
   it("gizlenen yorum dukkan ortalamasindan cikar, geri alinca geri girer", async () => {
     expect(await reviewService.moderate({ reviewId: "r1", action: "hide", reason: "Hakaret", actor: ADMIN })).toEqual({
       ok: true,
