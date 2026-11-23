@@ -753,6 +753,7 @@
     "broadcast": "Ankündigung senden",
     "partnerLeads": "Partner-Vorregistrierungen",
     "partnerLeadsEmpty": "Noch keine Vorregistrierungen.",
+    "roleApprovals": "Rollenfreigaben",
     "partnerLeadsConvert": "In Partnerkonto umwandeln",
     "partnerLeadsConverted": "Umgewandelt · Geschäft öffnen",
     "leadConvertTitle": "Partnerkonto eröffnen",
@@ -1751,6 +1752,28 @@
         "active": "Aktiv",
         "paused": "Pausiert"
       }
+    }
+  },
+  "roleApprovals": {
+    "title": "Rollenfreigaben",
+    "intro": "Änderungen, die die Admin-Rolle betreffen, warten auf die Freigabe eines zweiten Admins.",
+    "empty": "Keine Rollenänderungen warten auf Freigabe.",
+    "change": "{{from}} → {{to}}",
+    "requestedBy": "Angefragt von {{name}} · {{date}}",
+    "ownRequest": "Du hast diese Anfrage gestellt; ein anderer Admin muss sie freigeben.",
+    "approve": "Freigeben",
+    "reject": "Ablehnen",
+    "approveTitle": "Rollenänderung freigeben?",
+    "approveBody": "Die Rolle von {{name}} wechselt von {{from}} zu {{to}}. Offene Sitzungen enden sofort.",
+    "rejectTitle": "Anfrage ablehnen?",
+    "rejectBody": "Die Anfrage für {{name}} wird gelöscht; die Rolle bleibt {{from}}.",
+    "approved": "Rollenänderung übernommen.",
+    "rejected": "Anfrage abgelehnt.",
+    "errors": {
+      "cannot_self_approve": "Du kannst deine eigene Anfrage nicht freigeben.",
+      "stale": "Die Rolle wurde inzwischen geändert; die Anfrage wurde entfernt.",
+      "cannot_demote_sole_admin": "Der letzte Admin kann die Rolle nicht verlieren; die Anfrage wurde entfernt.",
+      "not_found": "Anfrage nicht gefunden; ein anderer Admin hat sie vielleicht bearbeitet."
     }
   }
 }

@@ -350,6 +350,18 @@ export type AdminApplication = {
   owner: { name: string | null; phone: string | null; email: string | null; whatsapp?: string | null };
 };
 
+/** `toMobileAdminRoleChangeRequest` (mobile-dto.ts) — `GET /admin/role-approvals`. */
+export type AdminRoleChangeRequest = {
+  id: string;
+  previousRole: Role;
+  requestedRole: Role;
+  createdAt: string;
+  target: { id: string; name: string | null; email: string | null; role: Role };
+  requestedBy: { id: string; name: string | null; email: string | null };
+  /** Istegi bu yonetici acti: onaylayamaz (sunucu kurali `cannot_self_approve`). */
+  isOwnRequest: boolean;
+};
+
 /** `toMobileAdminPartnerLead` (mobile-dto.ts) — `GET /admin/partner-leads`. Yeni alanlar istege bagli: eski sunucu. */
 export type AdminPartnerLead = {
   id: string;

@@ -753,6 +753,7 @@
     "broadcast": "Send announcement",
     "partnerLeads": "Partner pre-registrations",
     "partnerLeadsEmpty": "No pre-registrations yet.",
+    "roleApprovals": "Role approvals",
     "partnerLeadsConvert": "Convert to partner account",
     "partnerLeadsConverted": "Converted · Open shop",
     "leadConvertTitle": "Open partner account",
@@ -1751,6 +1752,28 @@
         "active": "Active",
         "paused": "Paused"
       }
+    }
+  },
+  "roleApprovals": {
+    "title": "Role approvals",
+    "intro": "Changes that affect the admin role wait for a second admin's approval.",
+    "empty": "No role changes waiting for approval.",
+    "change": "{{from}} → {{to}}",
+    "requestedBy": "Requested by {{name}} · {{date}}",
+    "ownRequest": "You opened this request; another admin must approve it.",
+    "approve": "Approve",
+    "reject": "Reject",
+    "approveTitle": "Approve this role change?",
+    "approveBody": "{{name}}'s role will change from {{from}} to {{to}}. Their open sessions end immediately.",
+    "rejectTitle": "Reject this request?",
+    "rejectBody": "The role change request for {{name}} is deleted; their role stays {{from}}.",
+    "approved": "Role change applied.",
+    "rejected": "Request rejected.",
+    "errors": {
+      "cannot_self_approve": "You can't approve a request you opened.",
+      "stale": "The user's role changed in the meantime; the request was removed.",
+      "cannot_demote_sole_admin": "The last admin can't be removed from the role; the request was removed.",
+      "not_found": "Request not found; another admin may have handled it."
     }
   }
 }

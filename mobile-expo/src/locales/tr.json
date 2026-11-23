@@ -753,6 +753,7 @@
     "broadcast": "Duyuru gönder",
     "partnerLeads": "Esnaf ön kayıtları",
     "partnerLeadsEmpty": "Henüz ön kayıt yok.",
+    "roleApprovals": "Rol onayları",
     "partnerLeadsConvert": "Esnaf hesabına çevir",
     "partnerLeadsConverted": "Esnaf hesabına çevrildi · Dükkanı aç",
     "leadConvertTitle": "Esnaf hesabı aç",
@@ -1751,6 +1752,28 @@
         "active": "Aktif",
         "paused": "Durduruldu"
       }
+    }
+  },
+  "roleApprovals": {
+    "title": "Rol onayları",
+    "intro": "Yönetici rolünü etkileyen değişiklikler ikinci bir yöneticinin onayını bekler.",
+    "empty": "Onay bekleyen rol değişikliği yok.",
+    "change": "{{from}} → {{to}}",
+    "requestedBy": "İsteyen: {{name}} · {{date}}",
+    "ownRequest": "Bu isteği sen açtın; başka bir yönetici onaylamalı.",
+    "approve": "Onayla",
+    "reject": "Reddet",
+    "approveTitle": "Rol değişikliği onaylansın mı?",
+    "approveBody": "{{name}} kullanıcısının rolü {{from}} → {{to}} olacak. Açık oturumları hemen kapanır.",
+    "rejectTitle": "İstek reddedilsin mi?",
+    "rejectBody": "{{name}} için rol değişikliği isteği silinir; rolü {{from}} olarak kalır.",
+    "approved": "Rol değişikliği uygulandı.",
+    "rejected": "İstek reddedildi.",
+    "errors": {
+      "cannot_self_approve": "Kendi açtığın isteği onaylayamazsın.",
+      "stale": "Kullanıcının rolü bu arada değişmiş; istek kaldırıldı.",
+      "cannot_demote_sole_admin": "Sistemdeki son yönetici rolünden çıkarılamaz; istek kaldırıldı.",
+      "not_found": "İstek bulunamadı; başka bir yönetici işlemiş olabilir."
     }
   }
 }
