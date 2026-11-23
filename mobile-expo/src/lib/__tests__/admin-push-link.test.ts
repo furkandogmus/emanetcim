@@ -31,7 +31,9 @@ describe("adminPathFromPush", () => {
 });
 
 describe("openFromNotification for admins", () => {
-  beforeEach(() => router.push.mockClear());
+  beforeEach(() => {
+    router.push.mockClear();
+  });
 
   it("opens the dispute for an admin", () => {
     openFromNotification(response({ adminScreen: "dispute", disputeId: "d1" }), "ADMIN");
