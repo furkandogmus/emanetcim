@@ -1,15 +1,12 @@
-# AWS — **canlı** ortam (Terraform)
+# AWS — canlı ortam (Terraform)
 
-> **Bu dizin artık bir test ortamını değil, canlı `bagajpark.com`'u tarif ediyor.**
-> 2026-08-23 kesimiyle uygulama Hetzner'den AWS EC2'ye taşındı; ardından hesap
-> değişikliği yapıldı. Kesim kaydı ve son durum: [`CUTOVER.md`](./CUTOVER.md).
-> Bu dosya 2026-08-29'da güncellendi — o tarihe kadar hâlâ "AWS = Hetzner'in
-> önündeki doğrulama kapısı, `aws-test.bagajpark.com`" diyordu ve bu **yanlıştı**
-> (düzeltilmesi gerektiği `CUTOVER.md` 5. bölümde açık iş olarak duruyordu).
+Bu dizin canlı `bagajpark.com`'u tarif eder: tek EC2 (`c7i-flex.large`, eu-central-1)
+üzerinde Docker Compose. Hesap **710882445040**, profil `personal-prod`, workspace `hesap3`
+(2026-10-25'ten beri). Taşıma kaydı ve bir sonraki taşımanın kontrol listesi:
+[`CUTOVER.md`](./CUTOVER.md). Sunucu işletimi (deploy, yedek, sırlar): [`ops/README.md`](../../ops/README.md).
 
-Bağlı olduğu değişiklik önerisi: `openspec/changes/aws-paralel-ortam/` — orası ortamın
-**nasıl kurulduğunun** kaydıdır (tasks.md: ne yapıldı, hangi sırayla, hangi hatalarla).
-Ortamın bugünkü rolü burada ve `CUTOVER.md`'de yazar.
+Ortamın ilk kuruluş kaydı (paralel AWS ortamı, Hetzner'den kesim):
+`openspec/changes/archive/2026-11-23-aws-paralel-ortam/`.
 
 ## İsimler yalan söylüyor — bilerek değiştirilmedi
 
@@ -22,38 +19,23 @@ Terraform kaynak adları, SSM önekleri ve bütçe adı hâlâ `aws-test` içeri
 - IAM rol / instance profile / EIP adları bu önekten türüyor; değiştirmek kaynakların
   yeniden yaratılması, yani **canlı kesinti** demektir.
 
-Adı okurken "test" değil "bu projenin AWS ortamı" diye okuyun. Değişkenin kendisinde de
-aynı not duruyor (`stack/variables.tf` → `project_name`).
+Adı okurken "test" değil "bu projenin AWS ortamı" diye okuyun (`stack/variables.tf` →
+`project_name`).
 
-## Deploy politikası (2026-08-23 kesiminden itibaren)
+## Deploy politikası
 
-**`main`'e push = canlıya deploy.** Ayrı bir doğrulama ortamı ARTIK YOK.
+**`main`'e merge = canlıya deploy.** Ayrı bir doğrulama ortamı yok; koruma katmanı
+`main` ruleset'i (yalnızca PR, zorunlu kontroller — `docs/GIT_COMMIT_GUIDE.md`) ve
+`deploy`'un doğrulama job'larına `needs` ile bağlı olmasıdır (`docs/CI_CD.md`).
 
 | Ne | Ne zaman | Nasıl |
 |----|----------|-------|
-| Canlı (`bagajpark.com`) | `main`'e her push'ta, otomatik | `.github/workflows/ci.yml` → `verify` → `image` → `deploy` (GitHub OIDC + SSM Run Command, hedef dizin `/opt/emanetci`) |
-| Elle güncelleme | CI kullanılamadığında | Sunucuda `cd /opt/emanetci && ./scripts/update.sh` (ya da `./scripts/vm-update.sh`) |
+| Canlı (`bagajpark.com`) | `main`'e her merge'de, otomatik | `.github/workflows/ci.yml` → `checks` ∥ `e2e` → `verify`, `image` paralel → `deploy` (GitHub OIDC + SSM Run Command, hedef dizin `/opt/emanetci`) |
+| Elle güncelleme | CI kullanılamadığında | Sunucuda `cd /opt/emanetci && ./scripts/update.sh` |
 
-`deploy` job'ı `needs: image`, `image` de `needs: verify` — yani doğrulamadan geçmeyen
-bir commit üretime çıkamaz. Ayrıntı: `docs/CI_CD.md`.
-
-Doğrulama ortamı olmadığı için `main`'e doğrudan push riskli: `develop` → PR → `main`
-disiplini bu ortamda tek koruma katmanıdır.
-
-### Hetzner
-
-Kesimden sonra trafiksiz kaldı; aboneliğin iptali kullanıcıya bırakıldı
-(`CUTOVER.md` 5. bölüm). Bu dosyanın eski sürümündeki "Hetzner canlıdır, AWS
-doğrulama kapısıdır" tablosu ve "Hetzner'de elle `update.sh`" akışı **kaldırıldı** —
-o makine artık trafik almıyor.
-
-Eski sürümde ayrıca "Hetzner crontab'ının diğer 4 işi (yedekleme, ödeme reconciliation,
-disk temizliği, mühür tahmini) çalışmaya devam ediyor" cümlesi vardı. **Bu cümle
-silindi**: (a) o makineye ait bir gözlemdi, (b) "mühür tahmini" iddiası tek kaynak olan
-`src/lib/jobs/registry.ts` ile çelişiyordu (`seal-forecast` orada `enforced: false`,
-"kurulmadı"), (c) "ödeme reconciliation" cron'u 2026-08-22'de kasten kapatılmıştı
-(`docs/DEFECT_BACKLOG.md`). Zamanlanmış işlerin tek doğru kaynağı kayıt defteridir;
-sunucuda gerçekte ne kurulu olduğu ise yalnızca `crontab -l` ile öğrenilir.
+Zamanlanmış işlerin tek doğru kaynağı `src/lib/jobs/registry.ts`, sunucudaki kopyası
+`ops/crontab.prod`; gerçekte ne kurulu olduğu yalnızca sunucuda `crontab -l` ile öğrenilir
+(`scripts/README.md`).
 
 ## Neden iki kök var
 
@@ -75,19 +57,18 @@ sertifikasının yanlışlıkla silinmesini engeller.
   terraform workspace show   # Beklenen: hesap3
   ```
   Profil ve workspace BİRLİKTE değişir; ayrışırsa `plan` her kaynağı "to create" gösterir
-  (ayrıntı `stack/variables.tf` → `aws_profile` notu). Eski hesap (269174115166) profili
-  `bagajpark`, workspace `default` — kapatılıyor.
+  (ayrıntı `stack/variables.tf` → `aws_profile` notu). Eski hesapların workspace'leri
+  (`default`, `hesap2`) boşaltıldı.
 - `~/.ssh/aws-bagajpark` / `.pub` keypair'i (üretildi, tekrar gerekmez):
   ```bash
   ssh-keygen -t ed25519 -f ~/.ssh/aws-bagajpark -N "" -C "aws-bagajpark-test"
   ```
 - Kendi public IP'ni öğren (SSH'ı sadece kendine açmak için): `curl -s https://ifconfig.me`
-- Cloudflare Origin Certificate — `.crt`/`.key` dosyaları yerelde dursun (varsayılan yol
-  `~/Documents/personal/tls/aws-test.{crt,key}`, `bootstrap/variables.tf` →
-  `tls_cert_path`/`tls_key_path` ile değiştirilebilir). **Dosya adındaki `aws-test`
-  tarihseldir**; ortam artık `bagajpark.com`'u sunuyor. Sertifikanın hangi alan adı için
-  düzenlendiği bu repodan doğrulanamaz — aşağıdaki "Bilinen sınırlamalar"da duran nginx
-  ↔ cloud-init uyuşmazlığına bakın.
+- Cloudflare Origin Certificate: `bootstrap/` TLS parametresini yalnızca ilk oluşturmada
+  yerel dosyadan yazar (`tls_cert_path`/`tls_key_path`, varsayılan `aws-test.{crt,key}`) ve
+  sonra değeri `ignore_changes` ile korur. Canlı `bagajpark.com` sertifikası SSM'e
+  `scripts/tls-put.sh` ile yazılır. Yerel `aws-test` dosyası canlı alan adına ait **değildir**
+  (2026-10-25 taşımasında yanlışlıkla bu yazılmıştı, `CUTOVER.md`).
 - **`terraform-bagajpark` IAM kullanıcısının yetkileri EC2/VPC/S3 FullAccess'in ÜZERİNDE**
   — SSM+KMS+scoped-IAM-role izinleri de gerekiyor (aşağıya bak, "IAM kullanıcı yetkileri").
 
@@ -147,8 +128,10 @@ Beklenen: `apply` ~1-2 dakika sürer (EC2 boot + cloud-init). cloud-init şunlar
 yapar — manuel adım yok:
 - Docker + Compose plugin kurulumu
 - SSH portunu değiştirme (SELinux label + fail2ban, doğru portu izleyecek şekilde)
-- **TLS sertifikasını SSM'den kendi IAM rolüyle çekme** (`/etc/ssl/cloudflare/aws-test.{crt,key}`)
-  — statik AWS key instance'a hiç konmaz
+- `amazon-ssm-agent` ve `cronie` kurulumu (AL2023 kurulu getirmiyor)
+- **TLS sertifikasını SSM'den kendi IAM rolüyle çekme** (`/etc/ssl/cloudflare/bagajpark.{crt,key}`,
+  nginx'in beklediği ad) — statik AWS key instance'a hiç konmaz
+- `/opt/emanetci` dizini (`ec2-user`'a ait)
 
 **Doğrulama:**
 ```bash
@@ -157,7 +140,8 @@ $(terraform output -raw ssh_command)
 cat /var/log/bagajpark-cloud-init-done   # "cloud-init tamam: ..." görmelisin
 docker compose version
 sudo fail2ban-client status sshd
-ls -la /etc/ssl/cloudflare/   # aws-test.crt (644) + aws-test.key (600) OTOMATİK burada olmalı
+ls -la /etc/ssl/cloudflare/   # bagajpark.crt (644) + bagajpark.key (600) OTOMATİK burada olmalı
+systemctl is-active amazon-ssm-agent crond   # ikisi de active
 ```
 
 ### 3. DNS'i güncelle (EIP her `destroy`+`apply`'da DEĞİŞİR)
@@ -165,85 +149,61 @@ ls -la /etc/ssl/cloudflare/   # aws-test.crt (644) + aws-test.key (600) OTOMATİ
 `stack` her `destroy`+`apply` edildiğinde yeni bir Elastic IP allocation'ı oluşur — eski IP
 kaybolur. Cloudflare'de **`bagajpark.com` ve `www`** A kayıtlarını yeni
 `terraform output public_ip` değerine **elle** güncellemek gerekir (Proxied/turuncu bulut
-açık kalsın). Otomatik değil; Cloudflare API token'ı bu projede yok (`CUTOVER.md`).
+açık kalsın). Otomatik değil; Cloudflare API token'ı bu projede yok. Hesap taşımasında
+EIP transferi ile adres korunabilir (`CUTOVER.md`).
 
 > Bu artık canlı alan adıdır: adım atlanırsa site DNS düzeyinde erişilemez kalır.
 
-### 4. Uygulamayı yerleştir (ilk kurulum — sonrası CI'da)
+### 4. Uygulamayı yerleştir (ilk kurulum)
 
-Sıradan deploy'da bu adım GEREKMEZ: `main`'e push → CI, `docker-compose.yml` ve `public/`
-dosyalarını S3 üzerinden `/opt/emanetci`'ye senkronlar. Aşağıdakiler yalnızca **sıfırdan
-kurulan** bir instance için.
+Elle kopyalama gerekmez. Sırlar zaten SSM'deyse (`ops/SECRETS.md`) ilk deploy'u
+tetiklemek yeter:
 
 ```bash
-SSH_PORT=$(terraform output -raw ssh_port)
-HOST=$(terraform output -raw public_ip)
-
-scp -i ~/.ssh/aws-bagajpark -P "$SSH_PORT" \
-  ../../../docker-compose.yml \
-  ec2-user@"$HOST":/opt/emanetci/docker-compose.yml
-
-# docker-compose.env — CANLI değerler. AUTH_SECRET'i YENİDEN ÜRETMEYİN: mevcut
-# oturumlar ve token'lar geçersiz olur. Var olan sunucudan taşıyın.
-# (Dosya Terraform'a hiç girmez; sır repo/state'e yazılmasın diye elle yönetilir.)
-cat > /tmp/docker-compose.env <<'EOF'
-AUTH_PUBLIC_HOST=bagajpark.com
-NEXT_PUBLIC_APP_URL=https://bagajpark.com
-AUTH_TRUST_HOST=true
-# AUTH_SECRET, POSTGRES_PASSWORD, RESEND_API_KEY, CRON_SECRET ... —
-# tam liste docker-compose.env.example / docker-compose.yml içinde
-EOF
-scp -i ~/.ssh/aws-bagajpark -P "$SSH_PORT" \
-  /tmp/docker-compose.env ec2-user@"$HOST":/opt/emanetci/docker-compose.env
-rm /tmp/docker-compose.env
-
-# nginx: üç dosya da repodan aynen gider (default.conf server_name=bagajpark.com)
-ssh -i ~/.ssh/aws-bagajpark -p "$SSH_PORT" ec2-user@"$HOST" \
-  "mkdir -p /opt/emanetci/nginx/conf.d /opt/emanetci/public"
-scp -i ~/.ssh/aws-bagajpark -P "$SSH_PORT" \
-  ../../../nginx/conf.d/00-map.conf ../../../nginx/conf.d/01-hardening.conf \
-  ../../../nginx/conf.d/default.conf ec2-user@"$HOST":/opt/emanetci/nginx/conf.d/
-
-ssh -i ~/.ssh/aws-bagajpark -p "$SSH_PORT" ec2-user@"$HOST" \
-  "cd /opt/emanetci && docker compose --env-file docker-compose.env up -d"
-curl -s https://bagajpark.com/api/health/live
+gh workflow run CI --ref main     # ya da main'e bir merge
 ```
 
-> **Bu adım bugün olduğu gibi çalışmaz.** `default.conf`
-> `/etc/ssl/cloudflare/bagajpark.{crt,key}` bekliyor, cloud-init ise SSM'deki materyali
-> `aws-test.{crt,key}` adıyla yazıyor — nginx sertifikayı bulamaz. "Bilinen
-> sınırlamalar" bölümündeki nota bakın.
+`deploy` job'ı `docker-compose.yml`, `public/`, `scripts/`, `nginx/conf.d/` ve
+`ops/secrets.manifest`'i S3 üzerinden `/opt/emanetci`'ye taşır, `docker-compose.env`'i
+SSM'den üretir, `up -d` ve `nginx -t` koşar. Sonra:
 
-## Medya bucket'ı (dükkan fotoğrafları) — state'e alınacak
+- Crontab: deploy `ops/crontab.prod`'u taşımaz; dosyayı sunucuya kopyalayıp başındaki
+  KURULUM adımlarını izleyin (önce `mkdir -p /opt/emanetci/logs`).
+- Doğrulama: `curl -s https://bagajpark.com/api/health/live`, ertesi gün
+  `/api/health/jobs` → `scheduledJobs`.
 
-2026-10-18'de CLI ile kuruldu (`bagajpark-media-1d9eb152`, eu-central-1): yalnızca
-`shops/*` herkese okunur, uygulama rolü `write-shop-media` ile yazar/siler, statik
-anahtar yok. Kod `stack/main.tf`'te; `plan` drift göstermemesi için bir kez import:
+Veri taşınıyorsa geri yükleme `ops/README.md` § Yedek ve geri yükleme.
+
+## Medya bucket'ı (dükkan fotoğrafları)
+
+`bagajpark-media-7bec61c6` (hesap3; `stack/variables.tf` → `media_bucket_name`).
+Yalnızca `shops/*` herkese okunur, uygulama rolü `write-shop-media` ile yazar/siler,
+statik anahtar yok. Kod `stack/main.tf`'te (`aws_s3_bucket.media` ve ilgili kaynaklar).
+Bucket ilk kez CLI ile kurulduysa `plan` drift göstermemesi için state'e alınır:
 
 ```bash
 cd infra/aws/stack && terraform workspace select hesap3
-export AWS_PROFILE=personal-prod   # ya da aynı hesaba bağlı başka bir profil
-terraform import aws_s3_bucket.media bagajpark-media-1d9eb152
-terraform import aws_s3_bucket_ownership_controls.media bagajpark-media-1d9eb152
-terraform import aws_s3_bucket_public_access_block.media bagajpark-media-1d9eb152
-terraform import aws_s3_bucket_server_side_encryption_configuration.media bagajpark-media-1d9eb152
-terraform import aws_s3_bucket_policy.media_public_read bagajpark-media-1d9eb152
+terraform state list | grep media        # boşsa aşağıdaki import'lar
+B=bagajpark-media-7bec61c6
+terraform import aws_s3_bucket.media $B
+terraform import aws_s3_bucket_ownership_controls.media $B
+terraform import aws_s3_bucket_public_access_block.media $B
+terraform import aws_s3_bucket_server_side_encryption_configuration.media $B
+terraform import aws_s3_bucket_policy.media_public_read $B
 terraform import aws_iam_role_policy.app_media_write bagajpark-aws-test-app-role:write-shop-media
-terraform plan   # beklenen: yalnızca tag farkı (ManagedBy etiketi CLI'dan kaldı)
 ```
 
-Uygulama ayarları SSM'de (`/bagajpark/env/app/S3_BUCKET`, `S3_REGION`,
-`S3_PUBLIC_BASE_URL`); deploy `secrets-render.sh` ile env dosyasına yazar.
+Uygulama ayarları SSM'de (`/bagajpark/env/app/S3_BUCKET`, `S3_REGION`); vitrin
+fotoğraflarının adresi `S3_PUBLIC_BASE_URL` GitHub değişkeninden imaja da gömülür.
 
 ## Maliyet
 
-- **Free Plan hesap kısıtı**: EC2 API sadece `free-tier-eligible=true` instance tiplerini
-  kabul ediyor (`aws ec2 describe-instance-types --filters Name=free-tier-eligible,Values=true`).
+- **Free Plan hesap kısıtı** (ilk hesapta 2026-08-21'de ölçüldü; canlı hesabın planı ve
+  kalan kredisi her sabah gelen maliyet e-postasında, `scripts/README.md` § Günlük AWS maliyet
+  raporu): EC2 API sadece `free-tier-eligible=true` instance tiplerini kabul ediyor (`aws ec2 describe-instance-types --filters Name=free-tier-eligible,Values=true`).
   `t3.medium` reddedildi; `instance_type` varsayılanı `c7i-flex.large` (4GB, x86_64, izinli).
 - **Gerçek fiyat (2026-08-29, AWS fiyat listesi, eu-central-1, Linux on-demand):**
-  `c7i-flex.large` **$0.09676/saat = ~$70.63/ay**. Bu README daha önce "≈ $0.04-0.06/saat"
-  diyordu; rakam gerçeğin yarısıydı ve runway hesabını iki katına şişiriyordu.
-  Aynı listedeki free-tier-eligible alternatifler:
+  `c7i-flex.large` **$0.09676/saat = ~$70.63/ay**. Aynı listedeki free-tier-eligible alternatifler:
 
   | Tip | vCPU / RAM | Mimari | $/saat | ~$/ay |
   |---|---|---|---|---|
@@ -260,12 +220,10 @@ Uygulama ayarları SSM'de (`/bagajpark/env/app/S3_BUCKET`, `S3_REGION`,
 - **Public IPv4 ücretlidir ve free tier'ı yoktur**: $0.005/saat = ~$3.65/ay. Elastic IP
   yerine otomatik atanan IP kullanmak bir şey kazandırmaz — ikisi de aynı ücrete tabi,
   dolayısıyla EIP'yi (sabit adres) tutmak doğru tercih.
-- **Instance'ı durdurmak artık bir seçenek değil** — bu makine canlıyı sunuyor. Eski
-  sürümdeki "test bitince `stop-instances`" tavsiyesi kaldırıldı; o komut bugün siteyi
-  kapatır.
+- **Instance'ı durdurmak bir seçenek değil** — bu makine canlıyı sunuyor; `stop-instances`
+  siteyi kapatır.
 - Bütçe alarmı `bootstrap/budget.tf` ile kuruluyor. **Eşik kodda `monthly_budget_usd`
-  değişkenidir (varsayılan 25 USD)**; bu README daha önce "$40/ay kurulu" diyordu ama
-  kod ile belge ayrışmıştı ve hangisinin uygulandığı repodan doğrulanamıyor. Gerçeği
+  değişkenidir (varsayılan 25 USD)**; uygulanan değer repodan doğrulanamaz. Gerçeği
   okumak (salt okunur):
   ```bash
   aws budgets describe-budgets --profile personal-prod \
@@ -283,9 +241,8 @@ Uygulama ayarları SSM'de (`/bagajpark/env/app/S3_BUCKET`, `S3_REGION`,
 > **🚨 `stack/` CANLI ORTAMDIR.** `hesap3` workspace'inde `terraform destroy`, EC2'yi ve
 > Elastic IP'yi silerek `bagajpark.com`'u kapatır; **veritabanı da o instance'ın diskinde
 > durduğu için veri kaybı demektir**. Yedekler S3'te (`bootstrap/` sağ kalır) ama geri
-> yükleme elle yapılır. Aşağıdaki komut yalnızca kapatılmakta olan eski hesap
-> (workspace `default`, profil `bagajpark`) için ya da kasıtlı bir yeniden kurulum için
-> anlamlıdır. Çalıştırmadan önce: `terraform workspace show`.
+> yükleme elle yapılır. Aşağıdaki komut yalnızca boşaltılan eski bir hesap ya da kasıtlı bir
+> yeniden kurulum için anlamlıdır. Çalıştırmadan önce: `terraform workspace show`.
 
 ```bash
 cd infra/aws/stack
@@ -298,10 +255,11 @@ terraform destroy -var="allowed_ssh_cidr=<senin-ip>/32"
 ## Taşınabilirlik (hesap/kredi değişirse)
 
 Hesap ID'si ve bölgeye özel kaynak ID'si hiçbir dosyada hardcode edilmez (AMI `data`
-kaynağıyla sorgulanır). **Tek istisna `stack/variables.tf` → `deploy_config_bucket`**:
-bucket adı `random_id` içerdiği için isimlendirme sözleşmesiyle bağlanamıyor, varsayılan
-olarak yazılıdır ve hesap değişiminde elle güncellenmelidir (2026-08-23'te unutuldu, eski
-hesabın bucket'ını gösteriyordu). Yeni bir hesaba geçişte:
+kaynağıyla sorgulanır). **İstisnalar `stack/variables.tf` → `deploy_config_bucket` ve
+`media_bucket_name`**: bucket adları `random_id` içerdiği için isimlendirme sözleşmesiyle
+bağlanamıyor, varsayılan olarak yazılıdır ve hesap değişiminde elle güncellenmelidir
+(2026-08-23'te unutuldu). Aynısı `ops/crontab.prod`'daki yedek bucket'ı için de geçerli.
+Uçtan uca sıra `CUTOVER.md` § Bir sonraki taşıma için kontrol listesi. Terraform tarafı:
 
 1. Yeni hesapta `aws configure --profile <yeni-profil>` yap, "IAM kullanıcı yetkileri"
    bölümündeki policy'leri yeni kullanıcıya da ekle
@@ -317,24 +275,31 @@ hesabın bucket'ını gösteriyordu). Yeni bir hesaba geçişte:
 
 - **State local'de tutulur** (S3 backend yok) — sadece bu makineden `apply`/`destroy`
   edilebilir. Tek geliştirici için kabul edilebilir; ekip büyürse S3+DynamoDB backend'e
-  geçilmeli.
-- **Elastic IP her `stack` yeniden kurulduğunda değişir** — DNS güncellemesi elle (yukarıya
-  bak). Otomatikleştirilmedi.
-- **Uygulama taşıma (docker-compose.yml/.env/nginx) henüz otomatik değil** — her
-  `stack` yeniden kurulduğunda elle `scp` gerekiyor. TLS materyali gibi SSM'e taşınabilir
-  ama bu iterasyonun kapsamı dışında tutuldu.
-- `docker-compose.env` ve gerçek `.env` dosyaları Terraform'a hiç girmez — bilinçli olarak
-  elle yapılıyor, sır repo/state'e girmesin diye.
-- **Sertifika dosya adı uyuşmuyor — yeni bir instance TLS'siz açılır.**
-  `stack/cloud-init.sh.tftpl` SSM'den çektiği materyali
-  `/etc/ssl/cloudflare/aws-test.{crt,key}` olarak yazıyor; repodaki
-  `nginx/conf.d/default.conf` ise `/etc/ssl/cloudflare/bagajpark.{crt,key}` bekliyor.
-  Bugünkü sunucu çalışıyor çünkü dosyalar oraya elle yerleştirildi — ama `stack`
-  yeniden kurulursa nginx sertifikayı bulamadan açılmaz. Düzeltmek için SSM
-  parametresindeki sertifikanın hangi alan adına ait olduğunu bilmek gerekiyor; bu
-  repodan doğrulanamadığı için bilerek **değiştirilmedi**, kayıt altına alındı
-  (`docs/DEFECT_BACKLOG.md`).
-- **Sunucudaki crontab repoda yok.** `CUTOVER.md` 3c adımı `/opt/emanetci/crontab.prod`
-  dosyasını kuruyor ama o dosya bu repoda hiçbir yerde yok — tek kopyası sunucuda.
-  Zamanlanmış işlerin uygulama tarafı `src/lib/jobs/registry.ts`'ten türetilebilir
-  (`scripts/emit-crontab.sh`), sunucuya özgü işler (yedekleme, disk temizliği) türetilemez.
+  geçilmeli. State dosyaları git'e girmez (`.gitignore` → `infra/**/*.tfstate*`).
+- **Elastic IP her `stack` yeniden kurulduğunda değişir** — DNS güncellemesi elle.
+- `docker-compose.env` Terraform'a hiç girmez — değerler SSM'de, dosya deploy'da üretilir.
+
+## Ölçekleme yolu
+
+(2026-11-23: eski `docs/SCALING.md`'nin — self-hosted / Vercel karşılaştırması ve 10k/100k
+kullanıcı boyutlandırması — karar ve yol kısmı buraya alındı; karar verilmiş olduğu için
+karşılaştırma kısmı çıkarıldı.)
+
+**Karar: self-hosted, tek kutu.** Uygulama, Postgres, Redis ve nginx aynı EC2'de Docker
+Compose ile koşar; Cloudflare önde (TLS, CDN, WAF). 2026-08-29 ölçümü: yük ortalaması ~0.19,
+konteynerler toplam ~424 MiB — kutu büyük ölçüde boşta (yukarıdaki Maliyet).
+
+Kayıtlı kullanıcı sayısı değil **eşzamanlı istek** zorlar. Metrikler (CPU, p95, bağlantı
+sayısı) eşiği aşınca sırayla:
+
+| Adım | Ne | Ne zaman |
+|---|---|---|
+| 1 | Postgres'i ayrı/managed instance'a al (RDS vb.), `pg_stat_statements` ile yavaş sorgular | DB CPU/disk kutuyu zorladığında; ayrıca tek kutu = tek arıza noktası |
+| 2 | Bağlantı havuzu (PgBouncer, transaction mode) | Uygulama replica'sı birden fazla olunca |
+| 3 | Aynı imajdan N `web` replica, önde yük dengeleyici | Uygulama CPU'su darboğaz olunca |
+| 4 | Redis'i önbellek + kuyruk için de kullan (bugün yalnızca rate limit) | Bildirim/webhook yoğunluğu artınca |
+| 5 | Okuma replica'sı, eski rezervasyonlar için arşiv/partition | `Booking`/`PaymentLog` milyon satıra yaklaşınca |
+
+Kabaca bantlar (load test ile doğrulanmadı): ~10k misafir / ~1k esnaf bugünkü tek kutu +
+ayrı DB ile; ~100k / ~10k için 4–8 vCPU / 16–32 GB DB, 4–8 uygulama replica'sı, Redis
+kuyruğu ve APM (`docs/OBSERVABILITY.md`). Yük testi araçları: `tests/stress/README.md`.
