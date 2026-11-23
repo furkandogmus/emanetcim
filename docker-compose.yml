@@ -99,7 +99,8 @@ services:
       # Uygulama baglantisi dogrulamasi (src/lib/app-links.ts); bossa dosyalar 404.
       # Play uygulama imzalama anahtari (Play Console > App signing); gizli degil.
       ANDROID_APP_LINK_SHA256: ${ANDROID_APP_LINK_SHA256:-D0:5C:5F:5B:1A:00:F2:70:D3:DD:A2:BC:20:50:FA:86:FA:41:FD:C4:EA:04:28:D3:E5:7E:14:72:BA:F0:81:1B}
-      APPLE_TEAM_ID: ${APPLE_TEAM_ID:-}
+      # Apple Developer Team ID (developer.apple.com > Membership); gizli degil.
+      APPLE_TEAM_ID: ${APPLE_TEAM_ID:-524ZQ83Q42}
       # iOS bildirimleri Expo push uzerinden (src/lib/expo-push.ts); Expo'da push
       # guvenligi acilmadikca bos kalabilir.
       EXPO_ACCESS_TOKEN: ${EXPO_ACCESS_TOKEN:-}
