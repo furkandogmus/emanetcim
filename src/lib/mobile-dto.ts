@@ -1148,3 +1148,67 @@ export function toMobileAdminFeatureFlag(f: AdminFeatureFlagSource) {
     updatedAt: f.updatedAt.toISOString(),
   };
 }
+
+type AdminPartnerLeadSource = {
+  id: string;
+  fullName: string;
+  phone: string;
+  shopName: string | null;
+  address: string;
+  status: string;
+  createdAt: Date;
+  convertedAt: Date | null;
+  convertedShopId: string | null;
+};
+
+/**
+ * Mobil admin esnaf on kaydi. `draft` cevirme panelinin on dolgusu
+ * (`leadConversionDraft`); istemci kendi eslemesini yazmaz.
+ */
+export function toMobileAdminPartnerLead(
+  l: AdminPartnerLeadSource,
+  draft: {
+    ownerName: string;
+    phone: string;
+    email: string;
+    shopName: string;
+    shopAddress: string;
+    city: string;
+    district: string;
+    location: string;
+  },
+) {
+  return {
+    id: l.id,
+    fullName: l.fullName,
+    phone: l.phone,
+    whatsapp: toWhatsAppNumber(l.phone),
+    shopName: l.shopName,
+    address: l.address,
+    contacted: l.status === "CONTACTED",
+    converted: l.convertedAt != null,
+    convertedShopId: l.convertedShopId,
+    createdAt: l.createdAt.toISOString(),
+    draft,
+  };
+}
+
+/** `POST /admin/partner-leads/:id/convert` yaniti (`PartnerLeadService.convertToPartner`). */
+export function toMobileLeadConversion(r: {
+  alreadyConverted: boolean;
+  shopId: string | null;
+  userId: string | null;
+  resetUrl: string | null;
+  activated: boolean;
+  activationError?: string;
+}) {
+  return {
+    ok: true as const,
+    alreadyConverted: r.alreadyConverted,
+    shopId: r.shopId,
+    userId: r.userId,
+    resetUrl: r.resetUrl,
+    activated: r.activated,
+    activationFailed: Boolean(r.activationError),
+  };
+}
