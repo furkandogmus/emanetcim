@@ -3,7 +3,7 @@ import { Linking, Pressable, RefreshControl, ScrollView, StyleSheet, View } from
 import { SafeAreaView } from "react-native-safe-area-context";
 import { router } from "expo-router";
 import type { Href } from "expo-router";
-import { ChevronRight, ExternalLink, Megaphone, ScrollText, Store, User, Users, MessageSquareText, AlertTriangle, Flag, SlidersHorizontal, Ticket, Wallet, Handshake, UserCheck } from "lucide-react-native";
+import { ChevronRight, ExternalLink, User } from "lucide-react-native";
 import { useTranslation } from "react-i18next";
 
 import { LuggageTag, MapSnippet } from "@/components/Illustrations";
@@ -11,6 +11,7 @@ import { LinkGroup, LinkRow } from "@/components/LinkRow";
 import { RevenueChart } from "@/components/RevenueChart";
 import { StatusBadge } from "@/components/StatusBadge";
 import { AppText, Button, Card, CenterMessage, IconButton, Loading } from "@/components/ui";
+import { ADMIN_MANAGE_LINKS, ADMIN_TOOL_SECTIONS, ADMIN_WEB_SECTIONS } from "@/lib/admin-tools";
 import { errorMessage } from "@/lib/errors";
 import { formatDay, formatDayTime, formatMoney } from "@/lib/format";
 import { SITE_ORIGIN } from "@/lib/images";
@@ -19,19 +20,6 @@ import { useAdminOverview } from "@/lib/queries";
 import type { AdminBookingFilter, AdminOverview } from "@/lib/types";
 import { colors, fonts, radius, space } from "@/theme/tokens";
 import { StaleQueryBanner } from "@/components/StaleQueryBanner";
-
-/** Mobilde olmayan yonetim isleri web panelinde; yollar `src/app/[locale]/admin/*` ile ayni. */
-const WEB_SECTIONS = ["seals", "partners"] as const;
-
-/** Uygulama ici yonetim araclari; odemeler ve platform ayarlari web listesinden buraya tasindi. */
-const TOOL_SCREENS = [
-  { key: "disputes", href: "/admin/disputes", Icon: AlertTriangle },
-  { key: "coupons", href: "/admin/coupons", Icon: Ticket },
-  { key: "affiliates", href: "/admin/affiliates", Icon: Handshake },
-  { key: "payments", href: "/admin/payments", Icon: Wallet },
-  { key: "settings", href: "/admin/platform-settings", Icon: SlidersHorizontal },
-  { key: "flags", href: "/admin/feature-flags", Icon: Flag },
-] as const;
 
 /** Son 7 gun ile onceki 7 gunun cirosu; karsilastirma her zaman neye gore oldugunu soyler. */
 function weekChange(series: AdminOverview["series"]) {
@@ -165,53 +153,31 @@ function Dashboard({
           <AttentionRow label={t("admin.overdueBookings")} value={a.overdueBookings} onPress={() => openBookings("overdue")} />
         </LinkGroup>
         <LinkGroup>
-          <LinkRow
-            icon={<Users size={18} color={colors.inkSecondary} />}
-            label={t("admin.users")}
-            onPress={() => router.push("/admin/users")}
-          />
-          <LinkRow
-            icon={<UserCheck size={18} color={colors.inkSecondary} />}
-            label={t("admin.roleApprovals")}
-            onPress={() => router.push("/admin/role-approvals")}
-          />
-          <LinkRow
-            icon={<Store size={18} color={colors.inkSecondary} />}
-            label={t("admin.partnerLeads")}
-            onPress={() => router.push("/admin/partner-leads")}
-          />
-          {/* Yonetim araclari burada (Kullanicilar'in yaninda): gelen kutusu bir okuma ekrani, duyuru bir eylem. */}
-          <LinkRow
-            icon={<Megaphone size={18} color={colors.inkSecondary} />}
-            label={t("admin.broadcast")}
-            onPress={() => router.push("/admin/broadcast")}
-          />
-          <LinkRow
-            icon={<ScrollText size={18} color={colors.inkSecondary} />}
-            label={t("adminUsers.auditLog")}
-            onPress={() => router.push("/admin/audit-log")}
-          />
-
-          <LinkRow
-            icon={<MessageSquareText size={18} color={colors.inkSecondary} />}
-            label={t("adminShop.recentReviews")}
-            onPress={() => router.push("/admin/reviews")}
-          />
-        </LinkGroup>
-      </Section>
-
-      <Section title={t("adminOps.tools.title")}>
-        <LinkGroup>
-          {TOOL_SCREENS.map(({ key, href, Icon }) => (
+          {ADMIN_MANAGE_LINKS.map(({ key, href, Icon, labelKey }) => (
             <LinkRow
               key={key}
               icon={<Icon size={18} color={colors.inkSecondary} />}
-              label={t(`adminOps.tools.${key}`)}
+              label={t(labelKey)}
               onPress={() => router.push(href)}
             />
           ))}
         </LinkGroup>
       </Section>
+
+      {ADMIN_TOOL_SECTIONS.map((section) => (
+        <Section key={section.key} title={t(section.titleKey)}>
+          <LinkGroup>
+            {section.links.map(({ key, href, Icon, labelKey }) => (
+              <LinkRow
+                key={key}
+                icon={<Icon size={18} color={colors.inkSecondary} />}
+                label={t(labelKey)}
+                onPress={() => router.push(href)}
+              />
+            ))}
+          </LinkGroup>
+        </Section>
+      ))}
 
       <Section title={t("admin.recent")} action={{ label: t("home.allBookings"), onPress: () => openBookings("all") }}>
         {data.recent.length === 0 ? (
@@ -250,7 +216,7 @@ function Dashboard({
 
       <Section title={t("admin.webPanel")}>
         <LinkGroup>
-          {WEB_SECTIONS.map((s) => (
+          {ADMIN_WEB_SECTIONS.map((s) => (
             <Pressable
               key={s}
               accessibilityRole="link"
