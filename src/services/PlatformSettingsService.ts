@@ -7,6 +7,8 @@ import { DEFAULT_PRICING_RULES } from "@/lib/pricing-rules";
 import { parsePlatformHolidayDates } from "@/lib/booking-holidays";
 import { invalidatePricingRulesCache } from "@/lib/platform-settings";
 import { invalidateAppVersionGateCache } from "@/lib/app-version";
+import { invalidateAppStoreFlagsCache } from "@/lib/app-stores";
+import { revalidatePath } from "next/cache";
 import {
   compareSemver,
   platformSettingsConfirmPhrase,
@@ -47,6 +49,9 @@ export const platformSettingsUpdateSchema = z.object({
     .default([]),
   minAppVersion: semverOrEmpty,
   latestAppVersion: semverOrEmpty,
+  // Istege bagli: eski mobil surumler bu alanlari gondermez; gelmezse mevcut deger korunur.
+  iosAppStoreLive: z.boolean().optional(),
+  androidPlayLive: z.boolean().optional(),
 })
   /*
     KILITLENME KAPISI: en yeni yayindaki surumun ustunde bir `minAppVersion`
@@ -82,6 +87,8 @@ export type PlatformSettingsValues = {
   platformHolidayDates: string[];
   minAppVersion: string | null;
   latestAppVersion: string | null;
+  iosAppStoreLive: boolean;
+  androidPlayLive: boolean;
 };
 
 /** Yonetici ekranlarinin gosterdigi degerler; satir yoksa varsayilan kurallar. */
@@ -112,6 +119,8 @@ export async function getPlatformSettingsForAdmin(): Promise<{
         platformHolidayDates: [],
         minAppVersion: null,
         latestAppVersion: null,
+        iosAppStoreLive: false,
+        androidPlayLive: false,
       },
     };
   }
@@ -135,6 +144,8 @@ export async function getPlatformSettingsForAdmin(): Promise<{
       platformHolidayDates: parsePlatformHolidayDates(row.platformHolidayDates),
       minAppVersion: row.minAppVersion,
       latestAppVersion: row.latestAppVersion,
+      iosAppStoreLive: row.iosAppStoreLive,
+      androidPlayLive: row.androidPlayLive,
     },
   };
 }
@@ -199,6 +210,8 @@ export async function updatePlatformSettings(
     platformHolidayDates: holidayJson,
     minAppVersion: d.minAppVersion,
     latestAppVersion: d.latestAppVersion,
+    iosAppStoreLive: d.iosAppStoreLive ?? snapshot.values.iosAppStoreLive,
+    androidPlayLive: d.androidPlayLive ?? snapshot.values.androidPlayLive,
   };
   if (!versioned) {
     await prisma.platformSettings.upsert({ where: { id: "default" }, create: { id: "default", ...fields }, update: fields });
@@ -220,14 +233,37 @@ export async function updatePlatformSettings(
   }
   invalidatePricingRulesCache();
   invalidateAppVersionGateCache();
+  invalidateAppStoreFlagsCache();
+  const storeFlagsChanged =
+    fields.iosAppStoreLive !== snapshot.values.iosAppStoreLive ||
+    fields.androidPlayLive !== snapshot.values.androidPlayLive;
+  if (storeFlagsChanged) revalidateStorePromotionPages();
   writeAuditLog({
     actorUserId: actor.id,
     actorRole: actor.role,
     action: "platform_settings.update",
     entityType: "PlatformSettings",
     entityId: "default",
-    metadata: { riskyChanged: changes.map((c) => c.field) },
+    metadata: {
+      riskyChanged: changes.map((c) => c.field),
+      ...(storeFlagsChanged
+        ? { storeFlags: { iosAppStoreLive: fields.iosAppStoreLive, androidPlayLive: fields.androidPlayLive } }
+        : {}),
+    },
     ip: opts.ip ?? null,
   });
   return { ok: true };
+}
+
+/**
+ * Magaza bayragi degisti: statik uretilmis sayfalar (kok layout'taki Safari
+ * bandi meta'si, ana sayfa rozetleri) eski bayrakla kalmasin. Istek baglami
+ * disinda (test, betik) `revalidatePath` firlatir; o durumda yapacak is yok.
+ */
+function revalidateStorePromotionPages(): void {
+  try {
+    revalidatePath("/[locale]", "layout");
+  } catch {
+    /* istek baglami yok */
+  }
 }

@@ -685,6 +685,13 @@ model PlatformSettings {
   /// ÜSTÜNDEKİ istemcilere kapatılabilir "yeni sürüm var" bildirimi gösterilir.
   /// `null` = bildirim gösterilmez.
   latestAppVersion String?
+
+  /// iOS uygulaması App Store'da YAYINDA mı? Açılınca web'de Safari akıllı
+  /// bandı, mağaza rozetleri, e-posta satırı ve `/app` yönlendirmesi devreye
+  /// girer. Varsayılan `false`: inceleme sürerken site bugünkü gibi kalır.
+  iosAppStoreLive  Boolean @default(false)
+  /// Android uygulaması Google Play'de HERKESE AÇIK mı (kapalı test değil)?
+  androidPlayLive  Boolean @default(false)
 }
 
 /// Zamanlanmış iş çalıştırma defteri.
@@ -1258,4 +1265,22 @@ model TeamIssueEvent {
   issue     TeamIssue @relation(fields: [issueId], references: [id], onDelete: Cascade)
 
   @@index([issueId])
+}
+
+/// `/app` akıllı indirme bağlantısının her isabeti — kanal ölçümü.
+///
+/// KİŞİSEL VERİ YOK: IP ve tam User-Agent bilerek tutulmaz; yalnızca kaynak
+/// etiketi (`kaynak`/`utm_source`), kaba platform ve sonuç. Amaç "hangi afiş /
+/// e-posta indirme getiriyor" sorusunu yanıtlamak, ziyaretçiyi izlemek değil.
+model AppLinkHit {
+  id        String   @id @default(cuid())
+  /// Normalleştirilmiş kaynak (`web-home`, `afis-<shopId>`, `email-onay`...); yoksa `direct`.
+  source    String
+  /// `ios` | `android` | `other`
+  platform  String
+  /// `redirect` (mağazaya gönderildi) | `landing` (açılış sayfası gösterildi)
+  outcome   String
+  createdAt DateTime @default(now())
+
+  @@index([createdAt])
 }
