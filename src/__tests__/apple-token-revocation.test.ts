@@ -14,6 +14,7 @@ vi.mock("@/lib/async-timeout", () => ({ fetchWithTimeout: m.fetch }));
 
 import { loadSealKey, sealSecret, unsealSecret } from "@/lib/sealed-secret";
 import { appleTokenService } from "@/services/AppleTokenService";
+import { optionalSecretWarnings } from "@/lib/env";
 
 const pem = generateKeyPairSync("ec", { namedCurve: "P-256" })
   .privateKey.export({ type: "pkcs8", format: "pem" })
@@ -48,6 +49,13 @@ describe("sealed-secret", () => {
     expect(unsealSecret(parts.join("."), key)).toBeNull();
   });
 
+  it("16 bayttan kisa dogrulama etiketini reddeder", () => {
+    const key = loadSealKey(KEY_B64)!;
+    const parts = sealSecret("rt-123", key).split(".");
+    parts[2] = Buffer.from(parts[2], "base64url").subarray(0, 4).toString("base64url");
+    expect(unsealSecret(parts.join("."), key)).toBeNull();
+  });
+
   it("32 bayt olmayan ya da bos anahtari reddeder", () => {
     expect(loadSealKey("")).toBeNull();
     expect(loadSealKey(Buffer.from("kisa").toString("base64"))).toBeNull();
@@ -71,6 +79,7 @@ describe("AppleTokenService.exchangeAndStore", () => {
     const written = m.prisma.account.updateMany.mock.calls[0][0];
     expect(written.where).toEqual({ provider: "apple", providerAccountId: "sub-1" });
     expect(written.data.refresh_token).not.toContain("rt-app");
+    expect(written.data).toMatchObject({ access_token: null, id_token: null });
     expect(JSON.parse(unsealSecret(written.data.refresh_token, loadSealKey(KEY_B64)!)!)).toEqual({
       c: "com.example.app",
       r: "rt-app",
@@ -123,5 +132,17 @@ describe("AppleTokenService.revokeForUser", () => {
   it("veritabani ya da Apple hatasinda 0 doner, silmeyi durdurmaz", async () => {
     m.prisma.account.findMany.mockRejectedValue(new Error("db down"));
     await expect(appleTokenService.revokeForUser("u1")).resolves.toBe(0);
+  });
+});
+
+describe("optionalSecretWarnings", () => {
+  it("Apple girisi acik ama anahtar yoksa ya da bozuksa uyarir", () => {
+    const base = { APPLE_BUNDLE_ID: "com.bagajpark" } as unknown as NodeJS.ProcessEnv;
+    expect(optionalSecretWarnings(base)).toEqual([expect.stringContaining("APPLE_TOKEN_ENCRYPTION_KEY is not set")]);
+    expect(optionalSecretWarnings({ ...base, APPLE_TOKEN_ENCRYPTION_KEY: "kisa" })).toEqual([
+      expect.stringContaining("must be 32 bytes"),
+    ]);
+    expect(optionalSecretWarnings({ ...base, APPLE_TOKEN_ENCRYPTION_KEY: KEY_B64 })).toEqual([]);
+    expect(optionalSecretWarnings({} as NodeJS.ProcessEnv)).toEqual([]);
   });
 });

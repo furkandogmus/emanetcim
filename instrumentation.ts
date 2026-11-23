@@ -1,11 +1,12 @@
 import "@/lib/auth-public-url";
-import { requireProdSecrets } from "@/lib/env";
+import { optionalSecretWarnings, requireProdSecrets } from "@/lib/env";
 import logger from "@/lib/logger";
 import type { InstrumentationOnRequestError } from "next/dist/server/instrumentation/types";
 
 export async function register() {
   if (process.env.NEXT_RUNTIME === "nodejs") {
     requireProdSecrets();
+    for (const warning of optionalSecretWarnings()) logger.warn({ startup: true }, warning);
   }
 }
 

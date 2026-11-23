@@ -29,7 +29,7 @@ export function isSealed(value: string): boolean {
 
 export function sealSecret(plain: string, key: Buffer): string {
   const iv = randomBytes(12);
-  const cipher = createCipheriv("aes-256-gcm", key, iv);
+  const cipher = createCipheriv("aes-256-gcm", key, iv, { authTagLength: 16 });
   const ct = Buffer.concat([cipher.update(plain, "utf8"), cipher.final()]);
   const tag = cipher.getAuthTag();
   return [PREFIX, iv.toString("base64url"), tag.toString("base64url"), ct.toString("base64url")].join(".");
@@ -39,9 +39,12 @@ export function sealSecret(plain: string, key: Buffer): string {
 export function unsealSecret(sealed: string, key: Buffer): string | null {
   if (!isSealed(sealed)) return null;
   const [, iv, tag, ct] = sealed.split(".");
+  const tagBuf = Buffer.from(tag, "base64url");
+  // Kisa etiket GCM dogrulamasini zayiflatir; yalnizca 16 bayt kabul edilir.
+  if (tagBuf.length !== 16) return null;
   try {
-    const decipher = createDecipheriv("aes-256-gcm", key, Buffer.from(iv, "base64url"));
-    decipher.setAuthTag(Buffer.from(tag, "base64url"));
+    const decipher = createDecipheriv("aes-256-gcm", key, Buffer.from(iv, "base64url"), { authTagLength: 16 });
+    decipher.setAuthTag(tagBuf);
     return Buffer.concat([decipher.update(Buffer.from(ct, "base64url")), decipher.final()]).toString("utf8");
   } catch {
     return null;
