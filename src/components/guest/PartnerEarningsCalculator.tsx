@@ -13,7 +13,7 @@ type Labels = {
 /**
  * Esnaf başvuru sayfasındaki "kazanç tahmini" — eskiden "örnek hesap için
  * ortak ekibimizle görüşün" diyen statik bir metindi (bkz.
- * docs/archive/2026-11-23-denetim-gecmisi/KOD_TARAMA_2026-08-23.md). Aday esnafın bir telefon görüşmesi
+ * 2026-08-23 kod taramasi (docs/KOD_TARAMA_2026-08-23.md, git gecmisinde)). Aday esnafın bir telefon görüşmesi
  * beklemeden ANINDA gördüğü, gerçek fiyat/komisyon verisiyle çalışan bir
  * araca çevrildi.
  *

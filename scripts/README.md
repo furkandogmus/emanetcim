@@ -390,7 +390,7 @@ gerçek bir mobil viewport'ta gezip yedi kuralı doğrular:
 **Çıkış kodu 1** kural bozulursa — bir cron ya da CI adımı buna bakıp alarm
 üretebilir.
 
-**Neden var:** bu kuralların hepsi `docs/archive/2026-11-23-denetim-gecmisi/UX_AUDIT_2026-08-31.md`'de kanıtıyla kayıtlı
+**Neden var:** bu kuralların hepsi 2026-08-31 UX denetiminde (`docs/UX_AUDIT.md`, git geçmişinde) kanıtıyla kayıtlı
 gerçek hatalardan geliyor ve **hiçbiri gözle bakınca görünmüyordu** — 2 px'lik
 kayma, ekran okuyucuya İngilizce konuşan takvim, güvenli bölgeyi aşan PWA
 ikonu. Geri sızmalarının tek güvencesi tekrar ölçmek.

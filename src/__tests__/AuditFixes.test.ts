@@ -152,7 +152,7 @@ describe("Audit Fix #1: Coupon usedCount Increment", () => {
   });
 
   it("does not discount the booking when the quota claim loses the race (BULGU 9.1)", async () => {
-    // bkz. docs/archive/2026-11-23-denetim-gecmisi/KOD_TARAMA_2026-08-23.md: kota kontrolü artık booking oluşmadan ÖNCE,
+    // bkz. 2026-08-23 kod taramasi (docs/KOD_TARAMA_2026-08-23.md, git gecmisinde): kota kontrolü artık booking oluşmadan ÖNCE,
     // atomik `updateMany` ile yapılıyor. Kota doluysa (count: 0) indirim hiç
     // uygulanmamalı — booking, kuponsuz haliyle aynı tam fiyattan oluşmalı.
     mockAuth.mockResolvedValue({ user: { id: "guest-1", role: "GUEST" } });
@@ -354,7 +354,7 @@ describe("Audit Fix #5: Review Rating Integer Check", () => {
   });
 
   it("ignores client-supplied shopId and reviews the booking's real shop", async () => {
-    // bkz. docs/archive/2026-11-23-denetim-gecmisi/KOD_TARAMA_2026-08-23.md, BULGU 10.1: istemci `shopId`'yi başka bir
+    // bkz. 2026-08-23 kod taramasi (docs/KOD_TARAMA_2026-08-23.md, git gecmisinde), BULGU 10.1: istemci `shopId`'yi başka bir
     // dükkana ayarlayıp o dükkana sahte yorum bırakabiliyordu.
     mockAuth.mockResolvedValue({ user: { id: "guest-1" } });
     mockPrisma.booking.findUnique.mockResolvedValue({
