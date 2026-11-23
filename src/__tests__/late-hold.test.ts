@@ -59,7 +59,14 @@ describe("holdLateBooking", () => {
     const r = await holdLateBooking("b1", OWNER, at(45));
     expect(r).toEqual({ ok: true, until: at(90) });
     expect(m.prisma.booking.updateMany).toHaveBeenCalledWith({
-      where: { id: "b1", status: { in: ["APPROVED", "PAID"] }, checkedInAt: null, lateHoldUntil: null },
+      where: {
+        id: "b1",
+        status: { in: ["APPROVED", "PAID"] },
+        checkedInAt: null,
+        lateHoldUntil: null,
+        checkInTime: CHECK_IN,
+        checkOutTime: at(120),
+      },
       data: { lateHoldUntil: at(90) },
     });
     expect(m.record).toHaveBeenCalledWith(
@@ -75,6 +82,15 @@ describe("holdLateBooking", () => {
     expect(await holdLateBooking("b1", OWNER, at(50))).toEqual({ ok: false, code: "INVALID_STATUS" });
     expect(m.prisma.booking.updateMany.mock.calls[0][0].where.lateHoldUntil).toEqual(at(90));
     expect(m.notice).not.toHaveBeenCalled();
+  });
+
+  it("suren bekletmeyi uzatmak misafire yeniden bildirim gondermez; bitmis bekletmeden sonra gonderir", async () => {
+    m.prisma.booking.findUnique.mockResolvedValue(booking({ lateHoldUntil: at(90) }));
+    expect((await holdLateBooking("b1", OWNER, at(70))).ok).toBe(true);
+    expect(m.notice).not.toHaveBeenCalled();
+    m.prisma.booking.findUnique.mockResolvedValue(booking({ lateHoldUntil: at(90) }));
+    expect((await holdLateBooking("b1", OWNER, at(91))).ok).toBe(true);
+    expect(m.notice).toHaveBeenCalledTimes(1);
   });
 
   it("alma saatine dayandiysa HOLD_LIMIT, yazmaz", async () => {
