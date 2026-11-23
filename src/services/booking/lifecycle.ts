@@ -86,6 +86,14 @@ export type CancelBookingOptions = {
    * yaptiysa cagiran `true` gecer.
    */
   notifyPartner?: boolean;
+  /**
+   * Iptal kilidine eklenen KOSUL. Otomatik kapanis (`late-dropoff-scan`) taramayla
+   * kilit arasinda check-in ya da "Misafiri bekle" gelirse iptal etmemeli; kosul
+   * ayni kosullu yazimda dogrulanir, eslesmezse `INVALID_STATUS` doner.
+   */
+  guard?: Prisma.BookingWhereInput;
+  /** `CANCELLED` olayina eklenen alanlar (ornegin `auto: true`). */
+  eventMetadata?: Record<string, unknown>;
 };
 
 export async function cancelBooking(
@@ -158,10 +166,12 @@ export async function cancelBooking(
     iptalden ONCE satiri okumus bir check-in, slotlari bosaltilmis ve iadesi
     yazilmis CANCELLED kaydi CHECKED_IN'e cevirebiliyordu.
   */
+  const guard = opts.guard ? { AND: [opts.guard] } : {};
   const kilit = await prisma.booking.updateMany({
     where: {
       id: bookingId,
       status: { notIn: ['CANCELLED', 'CHECKED_IN', 'CHECKED_OUT'] },
+      ...guard,
     },
     data: { status: 'CANCELLED', pendingBagRevision: Prisma.JsonNull, bookingRowVersion: { increment: 1 } },
   });
@@ -242,6 +252,7 @@ export async function cancelBooking(
       ...(opts.reason ? { reason: opts.reason } : {}),
       ...(opts.detail ? { detail: opts.detail } : {}),
       ...(opts.note ? { note: opts.note } : {}),
+      ...(opts.eventMetadata ?? {}),
     },
   }).catch((err) => logger.error({ err, bookingId }, "booking_event_cancelled_failed"));
 
@@ -553,6 +564,8 @@ export async function modifyBooking(
           data: {
             checkInTime: kayitliGiris,
             checkOutTime: kayitliCikis,
+            // Eski birakma saatine verilmis "Misafiri bekle" yeni saatte anlamsiz.
+            ...(kayitliGiris.getTime() !== booking.checkInTime.getTime() ? { lateHoldUntil: null } : {}),
             bagCountS: authTotals.bagCountS,
             bagCountM: authTotals.bagCountM,
             bagCountXl: authTotals.bagCountXl,
