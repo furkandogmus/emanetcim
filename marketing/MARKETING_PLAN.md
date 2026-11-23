@@ -1,6 +1,14 @@
 # BagajPark — Lansman Pazarlama ve Reklam Planı
 
 > Hazırlanma: 2026-06-10. Hedef: canlıya çıkış sonrası ilk 90 günde organik + ücretli kanallardan ilk rezervasyonları üretmek.
+> Eski `docs/pazarlama_stratejisi_tr.md` (esnaf kazanımı, pilot bölge) 2026-11-23'te § 7'ye katıldı.
+
+## Son durum — 2026-11-23
+
+- Teknik SEO yayında: 6 dilde hreflang, sitemap, robots, JSON-LD, 13 şehir sayfası (`src/lib/storage-cities.ts`).
+- Ölçüm: Plausible, çerez onayına bağlı; olaylar `SearchSubmitted`, `ShopViewed`, `CheckoutStarted`, `BookingCreated` (`src/lib/plausible-events.ts`).
+- Uygulama tanıtımı: `/app` akıllı indirme bağı (kaynak etiketli, isabetler `AppLinkHit`'te), `/<dil>/app` açılış sayfası, esnaf QR afişi (`/partner/poster`). Mağaza rozetleri `iosAppStoreLive` / `androidPlayLive` bayraklarıyla açılır (`docs/PLATFORM_SETTINGS.md`). iOS App Review'da (yalnız Türkiye), Android Play'e hazırlanıyor.
+- Online ödeme yok (dükkanda ödeme); reklam metinlerinde "online ödeme" vaadi verilmez.
 
 ---
 
@@ -19,7 +27,7 @@ Pazar yeri olduğumuz için **arz önce gelir**: reklam harcamasına başlamadan
 
 ## 2. SEO — mevcut durum ve içerik planı
 
-Teknik SEO büyük oranda hazır (hreflang ×14 dil, sitemap, robots, JSON-LD: WebSite/Organization/FAQ/Breadcrumb, şehir landing'leri). Kalan işler `docs/LAUNCH_CHECKLIST.md`'de.
+Teknik SEO hazır (hreflang × 6 dil, sitemap, robots, JSON-LD: WebSite/Organization/FAQ/Breadcrumb, şehir landing'leri). Kalan işler `docs/LAUNCH_CHECKLIST.md`'de.
 
 ### İçerik takvimi (blog, ilk 8 hafta — TR + EN çiftli yayın)
 
@@ -27,7 +35,7 @@ Teknik SEO büyük oranda hazır (hreflang ×14 dil, sitemap, robots, JSON-LD: W
 2. "Otel check-out sonrası valiz nereye bırakılır?" / "Where to leave luggage after hotel checkout"
 3. "İstanbul Havalimanı emanet ücretleri vs BagajPark karşılaştırması"
 4. "Kapadokya'da 1 gün: valizsiz gezi rotası"
-5. "Bagaj emanetinde sigorta nasıl çalışır?" (güven içeriği — dönüşüm sayfalarına iç link)
+5. "Bagaj emanetinde güvence nasıl çalışır?" (güven içeriği — dönüşüm sayfalarına iç link)
 6. "Antalya kaleiçi bagaj emanet noktaları"
 7. "Esnaflar için: dükkânınız BagajPark noktası olursa ne kazanırsınız?" (arz tarafı SEO)
 8. "İzmir Alsancak — Basmane arası valizsiz gezi"
@@ -35,8 +43,8 @@ Teknik SEO büyük oranda hazır (hreflang ×14 dil, sitemap, robots, JSON-LD: W
 Kural: her yazı bir şehir landing'ine (`/luggage-storage/{slug}`) ve `/search`e iç link verir; başlıkta hedef sorgu geçer; 800+ kelime; FAQ bloğu + FAQPage JSON-LD.
 
 ### Şehir sayfası genişletmesi
-- Mevcut 12 şehir slug'ı var; TR odaklı eksikler: **bursa, eskişehir, trabzon, fethiye, alanya, marmaris** (arz açıldıkça eklenir, `storage-cities.ts` + `CityStorage` i18n anahtarları).
-- Şehir sayfalarındaki Unsplash hero görseli yerine şehir bazlı yerel/optimize görsel (LCP + telif).
+- Mevcut 13 şehir slug'ı var (7'si Türkiye, 6'sı Avrupa); TR odaklı eksikler: **bursa, eskişehir, trabzon, alanya, marmaris** (arz açıldıkça eklenir, `storage-cities.ts` + `CityStorage` i18n anahtarları).
+- Ana sayfa şehir kartlarındaki Unsplash görselleri yerine yerel/optimize görsel (LCP + telif).
 
 ### Yerel SEO
 - Her partner dükkân için **Google Business Profile** "luggage storage" kategorisinde kayıt teşviki; profil açıklamasına BagajPark rezervasyon linki (UTM'li).
@@ -52,8 +60,8 @@ Ad group'lar: `bagaj emanet`, `valiz emanet`, `emanet dolabı`, `şehir + bagaj 
 Anahtar kelimeler (phrase/exact): "bagaj emanet", "valiz emanet yeri", "istanbul bagaj emanet", "taksim emanetçi", "sultanahmet bagaj bırakma", "havalimanı emanet ücreti", "valiz nereye bırakılır".
 
 Örnek RSA:
-- Başlıklar: "Bagaj Emanet — Dakikada Rezervasyon" · "Valizini Bırak, Şehri Gez" · "Sigortalı Bagaj Emanet Noktaları" · "İstanbul'da Yakınında Emanet Noktası" · "Saatlik Değil, Günlük Sabit Fiyat"
-- Açıklamalar: "Merkezi noktalardaki güvenli esnaflara valizini bırak. Online rezervasyon, şeffaf fiyat, sigorta dahil." · "Otel check-in öncesi valiz derdi yok. En yakın BagajPark noktasını bul, 2 dakikada ayırt."
+- Başlıklar: "Bagaj Emanet — Dakikada Rezervasyon" · "Valizini Bırak, Şehri Gez" · "Güvenceli Bagaj Emanet Noktaları" · "İstanbul'da Yakınında Emanet Noktası" · "Saatlik Değil, Günlük Sabit Fiyat"
+- Açıklamalar: "Merkezi noktalardaki güvenli esnaflara valizini bırak. Online rezervasyon, şeffaf fiyat, 10.000 TL'ye kadar güvence." · "Otel check-in öncesi valiz derdi yok. En yakın BagajPark noktasını bul, 2 dakikada ayırt."
 
 ### Kampanya 2 — EN Arama (turist, konum hedefi: Türkiye + kaynak ülkeler)
 Ad group'lar: `luggage storage istanbul`, `bag drop istanbul`, `luggage storage antalya/cappadocia`.
@@ -66,20 +74,20 @@ Anahtar kelimeler: "luggage storage istanbul", "left luggage istanbul", "bag sto
 "iş ilanı", "kiralık dolap satın al", "ikinci el valiz", "bagaj fiyatları thy", "ek bagaj", "bagaj hakkı", "kayıp bagaj" — havayolu bagaj sorguları bütçeyi yer.
 
 ### Dönüşüm izleme
-- Plausible custom event'leri: `booking_started`, `booking_paid`, `partner_apply` (CookieConsent `all` koşuluna dikkat).
-- Google Ads dönüşümü için ya GA4/gtag eklenmeli (çerez onayına bağlı) ya da Plausible→server-side import; **ilk fazda en azından "Teşekkürler/ödeme başarılı" sayfa URL hedefi** tanımlayın.
+- Plausible custom event'leri: `SearchSubmitted`, `ShopViewed`, `CheckoutStarted`, `BookingCreated` (CookieConsent `all` koşuluna dikkat). Esnaf başvurusu için olay yok.
+- Google Ads dönüşümü için ya GA4/gtag eklenmeli (çerez onayına bağlı) ya da Plausible→server-side import; **ilk fazda en azından rezervasyon onay sayfası URL hedefi** tanımlayın.
 - UTM standardı: `utm_source=google&utm_medium=cpc&utm_campaign=tr-search-{city}`.
 
 ## 4. Meta (Instagram/Facebook)
 - İlk fazda **retargeting yok** (piksel + çerez onayı işi); bunun yerine organik: haftada 3 Reels — "valizle gezilmez" mini skeçleri, partner dükkân tanıtımları, şehir rehberi carousel'leri.
-- `marketing/video/` klasörü bunun için kullanılabilir; 9:16, 15–30 sn, TR altyazı + EN versiyon.
+- Video üretimi: 9:16, 15–30 sn, TR altyazı + EN versiyon.
 - Lansmandan 4–6 hafta sonra trafik kampanyası (hedef: İstanbul'a seyahat ilgisi, EN + TR kreatif ayrı).
 
 ## 5. Ücretsiz/PR kanalları (ilk 30 gün)
 - TripAdvisor forum + Reddit r/istanbul "where to store luggage" başlıklarında **bilgilendirici** yanıtlar (spam değil; tek link, şehir landing'ine).
 - Ekşi Sözlük "bagaj emanet" başlığı; Webrazzi/StartupCentrum lansman haberi pitch'i.
 - Otel resepsiyonları ile anlaşma: doluyken BagajPark'a yönlendirme kartı (QR → UTM'li link).
-- App Store / Play Store (mobil uygulama yayınlanınca): ASO başlık "BagajPark: Bagaj & Valiz Emanet", anahtar kelime alanına TR+EN sorgular.
+- App Store / Play Store (mobil uygulama yayınlanınca): ASO başlık "BagajPark: Bagaj & Valiz Emanet", anahtar kelime alanına TR+EN sorgular. Mağaza bağlantıları `/app?kaynak=<etiket>` üzerinden verilir ki kanal ölçülsün (izinli etiketler `docs/PLATFORM_SETTINGS.md`).
 
 ## 6. Ölçüm ve hedefler (ilk 90 gün)
 
@@ -92,3 +100,35 @@ Anahtar kelimeler: "luggage storage istanbul", "left luggage istanbul", "bag sto
 | Blog yayını | 8 | 24 |
 
 Haftalık rutin: GSC sorgu raporu → yeni içerik fikri; Ads arama terimleri raporu → negatif kelime ekleme; Plausible funnel kontrolü.
+
+## 7. Esnaf (arz) kazanımı
+
+Pazar yerinde arz önce gelir: talep reklamı ancak bir bölgede yeterli nokta olunca para
+eder.
+
+### 7.1 Pilot bölge (hiper-lokal lansman)
+
+Tüm şehre yayılmak yerine tek bir pilot hatla başlanır: **Galata–Karaköy**. O hatta
+yaklaşık 20 esnafı ikna etmek yeter; kazanan esnafın sözü komşusuna yayılır.
+
+### 7.2 Aday listesi ve telefonla ulaşım
+
+Pilot hattaki kafe, hediyelik eşya, büfe vb. işletmelerin listesi
+`scripts/find-esnaf-leads.ts` ile çıkarılır (`scripts/README.md`), telefonla aranır ve
+`/become-partner` bağlantısı WhatsApp'tan gönderilir. Başvurular `PartnerLead` olarak
+`/admin/partner-leads`'e düşer.
+
+### 7.3 Saha yönlendiricileri
+
+Tur rehberleri ve öğrenciler için "getirdiğin ve ilk valizini alan esnaf başına prim"
+modeli düşünüldü; kodda karşılığı yok, ortaklık programı (PR #207) birleşince yeniden
+değerlendirilir.
+
+### 7.4 Misafir tarafı fiziksel çapalar
+
+Airbnb yoğun sokaklarda ve anlaşmalı dükkan camlarında QR afişi (`/partner/poster`);
+host'lara "misafirine bu bağlantıyı gönder" önerisi. Komisyonlu host/otel payı da
+ortaklık programına bağlı.
+
+**Bilerek yapılmayanlar:** App Clip / Instant App (Expo uygulaması tam sürüm), yabancı
+kartla online ödeme vaadi (PSP yok).
