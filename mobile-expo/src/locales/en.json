@@ -663,7 +663,7 @@
       },
       "isTest": {
         "title": "Mark {{name}} as a test record?",
-        "body": "It drops out of everything guests see and out of statistics. The partner panel keeps working.",
+        "body": "It drops out of everything guests see and out of statistics; only test accounts can see and book it. The partner panel keeps working.",
         "cta": "Mark as test"
       }
     },
@@ -679,7 +679,7 @@
     "flagHint": {
       "isActive": "Shown in search, takes bookings",
       "isVerified": "Guests see a trust badge",
-      "isTest": "Hidden everywhere guests look"
+      "isTest": "Hidden from guests; only test accounts see it"
     },
     "listedOn": "City pages: {{cities}}",
     "today": "Today",
@@ -1359,6 +1359,13 @@
     "anonymized": "This account is deleted (anonymised). Email, password and delete actions are off.",
     "eraseConfirmPlaceholder": "Type the email or phone",
     "anonymizedLabel": "Deleted account",
+    "testAccount": "Test account",
+    "testAccountHint": "Sees test shops and can book them (for app store review)",
+    "testAccountConfirmTitle": "Make {{name}} a test account?",
+    "testAccountConfirmBody": "This account will see test shops in search and can book them. Real shops stay visible as before.",
+    "testAccountConfirm": "Make test account",
+    "testAccountOnDone": "Account is now a test account.",
+    "testAccountOffDone": "Account is a regular user again.",
     "errors": {
       "forbidden": "This action needs admin access.",
       "not_allowed_while_impersonating": "This can't be done while viewing as a user.",
@@ -1379,7 +1386,8 @@
       "invalid_reason": "The reason must be at least 5 characters.",
       "confirm_mismatch": "What you typed is not this account's email or phone.",
       "not_guest": "Only guest accounts can be deleted.",
-      "active_bookings": "The account has an active booking; it can be deleted once that is completed or cancelled."
+      "active_bookings": "The account has an active booking; it can be deleted once that is completed or cancelled.",
+      "cannot_flag_admin": "An admin account can't be made a test account."
     },
     "audit": {
       "title": "Audit log",

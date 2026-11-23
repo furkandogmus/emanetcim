@@ -663,7 +663,7 @@
       },
       "isTest": {
         "title": "{{name}} test kaydı yapılsın mı?",
-        "body": "Kayıt misafirin gördüğü her yerden ve istatistiklerden düşer. Esnaf paneli çalışmaya devam eder.",
+        "body": "Kayıt misafirin gördüğü her yerden ve istatistiklerden düşer; yalnızca test hesapları görüp rezervasyon yapabilir. Esnaf paneli çalışmaya devam eder.",
         "cta": "Test kaydı yap"
       }
     },
@@ -679,7 +679,7 @@
     "flagHint": {
       "isActive": "Aramada görünür, rezervasyon alır",
       "isVerified": "Misafire güven rozeti gösterilir",
-      "isTest": "Misafirin gördüğü her yerden gizlenir"
+      "isTest": "Misafirden gizlenir; yalnızca test hesapları görür"
     },
     "listedOn": "Şehir sayfaları: {{cities}}",
     "today": "Bugün",
@@ -1359,6 +1359,13 @@
     "anonymized": "Bu hesap silinmiş (anonim). E-posta, şifre ve silme işlemleri kapalı.",
     "eraseConfirmPlaceholder": "E-posta ya da telefonu yazın",
     "anonymizedLabel": "Silinmiş hesap",
+    "testAccount": "Test hesabı",
+    "testAccountHint": "Test dükkanlarını görür ve onlara rezervasyon yapabilir (uygulama mağazası incelemesi için)",
+    "testAccountConfirmTitle": "{{name}} test hesabı yapılsın mı?",
+    "testAccountConfirmBody": "Bu hesap test dükkanlarını aramada görür ve onlara rezervasyon yapabilir. Gerçek dükkanlar aynen görünmeye devam eder.",
+    "testAccountConfirm": "Test hesabı yap",
+    "testAccountOnDone": "Hesap test hesabı yapıldı.",
+    "testAccountOffDone": "Hesap artık gerçek kullanıcı.",
     "errors": {
       "forbidden": "Bu işlem için yönetici yetkisi gerekir.",
       "not_allowed_while_impersonating": "Bu işlem kullanıcı olarak görüntülerken yapılamaz.",
@@ -1379,7 +1386,8 @@
       "invalid_reason": "Gerekçe en az 5 karakter olmalı.",
       "confirm_mismatch": "Yazdığın metin hesabın e-postası ya da telefonu değil.",
       "not_guest": "Yalnızca misafir hesapları silinebilir.",
-      "active_bookings": "Hesabın aktif rezervasyonu var; tamamlanınca ya da iptal edilince silinebilir."
+      "active_bookings": "Hesabın aktif rezervasyonu var; tamamlanınca ya da iptal edilince silinebilir.",
+      "cannot_flag_admin": "Yönetici hesabı test hesabı yapılamaz."
     },
     "audit": {
       "title": "Denetim kaydı",

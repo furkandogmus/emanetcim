@@ -10,6 +10,7 @@ import { Field } from "@/components/Field";
 import { Sheet } from "@/components/Sheet";
 import { StackHeader } from "@/components/StackHeader";
 import { StaleQueryBanner } from "@/components/StaleQueryBanner";
+import { ToggleRow } from "@/components/ToggleRow";
 import { AppText, Banner, Button, Card, CenterMessage, Loading } from "@/components/ui";
 import {
   anonymizeUser,
@@ -22,6 +23,7 @@ import {
   ROLES,
   sendUserPasswordReset,
   setUserPassword,
+  setUserTestAccount,
 } from "@/lib/admin-user-actions";
 import { useAuth } from "@/lib/auth";
 import { errorMessage } from "@/lib/errors";
@@ -70,9 +72,25 @@ export default function AdminUserScreen() {
     onSuccess: () => notify(t("adminUsers.resendVerificationDone")),
     onError: fail,
   });
+  const sandbox = useMutation({
+    mutationFn: (on: boolean) => setUserTestAccount(id, on),
+    onSuccess: (_r, on) => notify(on ? t("adminUsers.testAccountOnDone") : t("adminUsers.testAccountOffDone")),
+    onError: fail,
+    onSettled: refresh,
+  });
 
   const u = query.data;
   const label = !u ? "" : u.isAnonymized ? t("adminUsers.anonymizedLabel") : u.name || u.email || u.phone;
+
+  // Acmak onay ister: hesap test dukkanlarini gorur ve onlara rezervasyon yapar. Kapatmak geri donus, onaysiz.
+  function toggleTestAccount(on: boolean) {
+    if (!u) return;
+    if (!on) return sandbox.mutate(false);
+    Alert.alert(t("adminUsers.testAccountConfirmTitle", { name: label }), t("adminUsers.testAccountConfirmBody"), [
+      { text: t("common.cancel"), style: "cancel" },
+      { text: t("adminUsers.testAccountConfirm"), onPress: () => sandbox.mutate(true) },
+    ]);
+  }
 
   function confirmRole(next: Role) {
     if (!u) return;
@@ -131,6 +149,19 @@ export default function AdminUserScreen() {
           {u.isAnonymized ? <Banner tone="warning" body={t("adminUsers.anonymized")} /> : null}
           {u.pendingRole ? (
             <Banner tone="warning" body={t("adminUsers.pendingRole", { role: t(`admin.role.${u.pendingRole}`) })} />
+          ) : null}
+
+          {u.role !== "ADMIN" && !u.isAnonymized ? (
+            <Card style={{ gap: 0, paddingVertical: space.sm }}>
+              <ToggleRow
+                label={t("adminUsers.testAccount")}
+                hint={t("adminUsers.testAccountHint")}
+                value={u.isTest}
+                disabled={sandbox.isPending}
+                onChange={toggleTestAccount}
+                last
+              />
+            </Card>
           ) : null}
 
           <AppText variant="label">{t("adminUsers.actions")}</AppText>
