@@ -1,16 +1,19 @@
-# BagajPark — Lansman Pazarlama ve Reklam Planı
+# Büyüme: pazarlama, içerik ve rakipler
 
-> Hazırlanma: 2026-06-10. Hedef: canlıya çıkış sonrası ilk 90 günde organik + ücretli kanallardan ilk rezervasyonları üretmek.
-> Eski `docs/pazarlama_stratejisi_tr.md` (esnaf kazanımı, pilot bölge) 2026-11-23'te § 7'ye katıldı.
+Lansman pazarlama planı (2026-06-10), blog içerik kuralları ve rakip karşılaştırması tek
+belgede. 2026-11-23'te eski `marketing/MARKETING_PLAN.md`, `docs/BLOG_ICERIK_LISTESI.md` ve
+`docs/rakip_analizi.md` burada birleşti.
 
 ## Son durum — 2026-11-23
 
-- Teknik SEO yayında: 6 dilde hreflang, sitemap, robots, JSON-LD, 13 şehir sayfası (`src/lib/storage-cities.ts`).
-- Ölçüm: Plausible, çerez onayına bağlı; olaylar `SearchSubmitted`, `ShopViewed`, `CheckoutStarted`, `BookingCreated` (`src/lib/plausible-events.ts`).
-- Uygulama tanıtımı: `/app` akıllı indirme bağı (kaynak etiketli, isabetler `AppLinkHit`'te), `/<dil>/app` açılış sayfası, esnaf QR afişi (`/partner/poster`). Mağaza rozetleri `iosAppStoreLive` / `androidPlayLive` bayraklarıyla açılır (`docs/PLATFORM_SETTINGS.md`). iOS App Review'da (yalnız Türkiye), Android Play'e hazırlanıyor.
+- Teknik SEO yayında: 6 dilde hreflang, sitemap, robots, JSON-LD, 13 şehir sayfası
+  (`src/lib/storage-cities.ts`); şehir blog yazıları 265 şehir × TR + EN (§ 3).
+- Ölçüm: Plausible, çerez onayına bağlı; olaylar `SearchSubmitted`, `ShopViewed`,
+  `CheckoutStarted`, `BookingCreated` (`src/lib/plausible-events.ts`). Esnaf başvurusu için olay yok.
+- Uygulama tanıtımı: `/app` akıllı indirme bağı (kaynak etiketli, `AppLinkHit`), `/<dil>/app`
+  açılış sayfası, esnaf QR afişi (`/partner/poster`); mağaza rozetleri `iosAppStoreLive` /
+  `androidPlayLive` bayraklarıyla açılır. iOS App Review'da (yalnız Türkiye), Android kapalı testte.
 - Online ödeme yok (dükkanda ödeme); reklam metinlerinde "online ödeme" vaadi verilmez.
-
----
 
 ## 1. Konumlandırma ve hedef kitle
 
@@ -25,22 +28,11 @@
 
 Pazar yeri olduğumuz için **arz önce gelir**: reklam harcamasına başlamadan önce İstanbul'da en az 15–20 aktif nokta hedeflenmeli (Sultanahmet, Taksim/Beyoğlu, Kadıköy, havalimanı hatları).
 
-## 2. SEO — mevcut durum ve içerik planı
+## 2. SEO
 
-Teknik SEO hazır (hreflang × 6 dil, sitemap, robots, JSON-LD: WebSite/Organization/FAQ/Breadcrumb, şehir landing'leri). Kalan işler `docs/LAUNCH_CHECKLIST.md`'de.
-
-### İçerik takvimi (blog, ilk 8 hafta — TR + EN çiftli yayın)
-
-1. "İstanbul'da bagaj emanet: havalimanı, Sultanahmet ve Taksim rehberi" / EN karşılığı ("luggage storage Istanbul")
-2. "Otel check-out sonrası valiz nereye bırakılır?" / "Where to leave luggage after hotel checkout"
-3. "İstanbul Havalimanı emanet ücretleri vs BagajPark karşılaştırması"
-4. "Kapadokya'da 1 gün: valizsiz gezi rotası"
-5. "Bagaj emanetinde güvence nasıl çalışır?" (güven içeriği — dönüşüm sayfalarına iç link)
-6. "Antalya kaleiçi bagaj emanet noktaları"
-7. "Esnaflar için: dükkânınız BagajPark noktası olursa ne kazanırsınız?" (arz tarafı SEO)
-8. "İzmir Alsancak — Basmane arası valizsiz gezi"
-
-Kural: her yazı bir şehir landing'ine (`/luggage-storage/{slug}`) ve `/search`e iç link verir; başlıkta hedef sorgu geçer; 800+ kelime; FAQ bloğu + FAQPage JSON-LD.
+Teknik SEO hazır; kalan işler (Bing, Google Business Profile, Unsplash görselleri)
+`docs/BACKLOG.md` § 2'de. Her içerik bir şehir landing'ine (`/luggage-storage/{slug}`) ve
+`/search`'e iç link verir; başlıkta hedef sorgu geçer; FAQ bloğu + FAQPage JSON-LD.
 
 ### Şehir sayfası genişletmesi
 - Mevcut 13 şehir slug'ı var (7'si Türkiye, 6'sı Avrupa); TR odaklı eksikler: **bursa, eskişehir, trabzon, alanya, marmaris** (arz açıldıkça eklenir, `storage-cities.ts` + `CityStorage` i18n anahtarları).
@@ -50,7 +42,26 @@ Kural: her yazı bir şehir landing'ine (`/luggage-storage/{slug}`) ve `/search`
 - Her partner dükkân için **Google Business Profile** "luggage storage" kategorisinde kayıt teşviki; profil açıklamasına BagajPark rezervasyon linki (UTM'li).
 - `LocalBusiness` JSON-LD shop sayfalarında olduğundan emin olun (varsa koordinat + openingHours alanlarıyla zenginleştirin).
 
-## 3. Google Ads — kampanya yapısı
+## 3. Blog içeriği
+
+Şehir yazıları koddan üretilir (`scripts/blog-city-posts.ts`, içerik `content/blog/`).
+Durum tablosu repoda tutulmaz: 265 satırlık tablo elle güncellenince güvenilmez oluyordu.
+
+```bash
+npx tsx scripts/blog-city-posts.ts --verify    # govde, slug, gorsel ve uzunluk denetimi
+npx tsx scripts/blog-city-posts.ts             # kuru calisma: neyin yazilacagini gosterir
+npx tsx scripts/blog-city-posts.ts --apply     # veritabanina yazar (canli Postgres ister)
+npx tsx scripts/blog-city-posts.ts --list-md   # sehir/yazi durum tablosunu basar
+npx tsx scripts/blog-images.ts --verify        # gorsel dosyalari ve kredi bilgileri
+```
+
+Kurallar: gövdede ham `<img>` yok, `{{img:anahtar}}` yer tutucusu (alt metin ve kredi
+`content/blog/images.json`'dan); görselin `cityKey`i yazınınkiyle aynı; ticari olmayan /
+türetilemez lisanslı görsel indirilmez; görsel ≤ 400 KB ve WebP; slug ve görsel anahtarı
+yalnızca `[a-z0-9-]`; Türkçe yazı en az 350 kelime, kısa kalana dolgu değil o şehre ait
+gerçek bölüm eklenir.
+
+## 4. Google Ads — kampanya yapısı
 
 Bütçe önerisi (başlangıç): **günlük 600–900 TL** (~%70 Arama TR/EN, %20 Performance Max, %10 marka koruma). İlk 2 hafta veri toplama; tCPA'ya rezervasyon dönüşümü 30+ olunca geçilir.
 
@@ -78,18 +89,18 @@ Anahtar kelimeler: "luggage storage istanbul", "left luggage istanbul", "bag sto
 - Google Ads dönüşümü için ya GA4/gtag eklenmeli (çerez onayına bağlı) ya da Plausible→server-side import; **ilk fazda en azından rezervasyon onay sayfası URL hedefi** tanımlayın.
 - UTM standardı: `utm_source=google&utm_medium=cpc&utm_campaign=tr-search-{city}`.
 
-## 4. Meta (Instagram/Facebook)
+## 5. Meta (Instagram/Facebook)
 - İlk fazda **retargeting yok** (piksel + çerez onayı işi); bunun yerine organik: haftada 3 Reels — "valizle gezilmez" mini skeçleri, partner dükkân tanıtımları, şehir rehberi carousel'leri.
 - Video üretimi: 9:16, 15–30 sn, TR altyazı + EN versiyon.
 - Lansmandan 4–6 hafta sonra trafik kampanyası (hedef: İstanbul'a seyahat ilgisi, EN + TR kreatif ayrı).
 
-## 5. Ücretsiz/PR kanalları (ilk 30 gün)
+## 6. Ücretsiz/PR kanalları (ilk 30 gün)
 - TripAdvisor forum + Reddit r/istanbul "where to store luggage" başlıklarında **bilgilendirici** yanıtlar (spam değil; tek link, şehir landing'ine).
 - Ekşi Sözlük "bagaj emanet" başlığı; Webrazzi/StartupCentrum lansman haberi pitch'i.
 - Otel resepsiyonları ile anlaşma: doluyken BagajPark'a yönlendirme kartı (QR → UTM'li link).
-- App Store / Play Store (mobil uygulama yayınlanınca): ASO başlık "BagajPark: Bagaj & Valiz Emanet", anahtar kelime alanına TR+EN sorgular. Mağaza bağlantıları `/app?kaynak=<etiket>` üzerinden verilir ki kanal ölçülsün (izinli etiketler `docs/PLATFORM_SETTINGS.md`).
+- App Store / Play Store (mobil uygulama yayınlanınca): ASO başlık "BagajPark: Bagaj & Valiz Emanet", anahtar kelime alanına TR+EN sorgular. Mağaza bağlantıları `/app?kaynak=<etiket>` üzerinden verilir ki kanal ölçülsün (izinli etiketler `docs/URUN_VE_IS_KURALLARI.md` § Mağaza yayın bayrakları).
 
-## 6. Ölçüm ve hedefler (ilk 90 gün)
+## 7. Ölçüm ve hedefler (ilk 90 gün)
 
 | Metrik | 30 gün | 90 gün |
 |---|---|---|
@@ -101,30 +112,30 @@ Anahtar kelimeler: "luggage storage istanbul", "left luggage istanbul", "bag sto
 
 Haftalık rutin: GSC sorgu raporu → yeni içerik fikri; Ads arama terimleri raporu → negatif kelime ekleme; Plausible funnel kontrolü.
 
-## 7. Esnaf (arz) kazanımı
+## 8. Esnaf (arz) kazanımı
 
 Pazar yerinde arz önce gelir: talep reklamı ancak bir bölgede yeterli nokta olunca para
 eder.
 
-### 7.1 Pilot bölge (hiper-lokal lansman)
+### 8.1 Pilot bölge (hiper-lokal lansman)
 
 Tüm şehre yayılmak yerine tek bir pilot hatla başlanır: **Galata–Karaköy**. O hatta
 yaklaşık 20 esnafı ikna etmek yeter; kazanan esnafın sözü komşusuna yayılır.
 
-### 7.2 Aday listesi ve telefonla ulaşım
+### 8.2 Aday listesi ve telefonla ulaşım
 
 Pilot hattaki kafe, hediyelik eşya, büfe vb. işletmelerin listesi
 `scripts/find-esnaf-leads.ts` ile çıkarılır (`scripts/README.md`), telefonla aranır ve
 `/become-partner` bağlantısı WhatsApp'tan gönderilir. Başvurular `PartnerLead` olarak
 `/admin/partner-leads`'e düşer.
 
-### 7.3 Saha yönlendiricileri
+### 8.3 Saha yönlendiricileri
 
 Tur rehberleri ve öğrenciler için "getirdiğin ve ilk valizini alan esnaf başına prim"
 modeli düşünüldü; kodda karşılığı yok, ortaklık programı (PR #207) birleşince yeniden
 değerlendirilir.
 
-### 7.4 Misafir tarafı fiziksel çapalar
+### 8.4 Misafir tarafı fiziksel çapalar
 
 Airbnb yoğun sokaklarda ve anlaşmalı dükkan camlarında QR afişi (`/partner/poster`);
 host'lara "misafirine bu bağlantıyı gönder" önerisi. Komisyonlu host/otel payı da
@@ -132,3 +143,26 @@ ortaklık programına bağlı.
 
 **Bilerek yapılmayanlar:** App Clip / Instant App (Expo uygulaması tam sürüm), yabancı
 kartla online ödeme vaadi (PSP yok).
+
+## 9. Rakipler (2026-09-10/11 taraması, yeniden taranmadı)
+
+| Platform | Odak | Ödeme | Güvence | Türkçe | Zayıf nokta |
+| :--- | :--- | :--- | :--- | :--- | :--- |
+| Bounce | Küresel (30.000+ nokta) | Online ön ödeme | $10.000 | Yok (İstanbul'da EN/RU, EUR) | Gizli booking fee şikâyetleri |
+| Stasher | UK / Avrupa / ABD | Online, zorunlu | £10.000 (çanta başı £1.000) | Yok | Drop-off sonrası iade yok |
+| LuggageHero | Avrupa / ABD | Online + "service fee" | $500 + isteğe bağlı $3.000 | İstanbul'da bile yok | Ayrı ücret kalemleri sürpriz hissi |
+| Radical Storage | Avrupa / Akdeniz | Online ön ödeme | €10.000 | Yok (EUR) | Kanal-arası tutarsız güvence rakamı |
+| Nannybag | Fransa / Batı Avrupa | Online ön ödeme | €10.000 (App Store'da €1.000) | Yok | Kanal-arası tutarsızlık; esnafa ayrı uygulama |
+| Vertoe | ABD, 2026'da kapandı | Online ön ödeme | $5.000 | Yok | Gizli ücret ve operasyon güvenilirliği kapanma nedeni |
+
+**BagajPark'ın koddan doğrulanmış farkları:** dükkanda öde, kart bilgisi istenmez (incelenen
+altı rakibin hepsi ön ödeme alıyor); gün bazlı fiyat (saatlik seçim 2026-09-23'te kaldırıldı,
+Bounce/Radical'ın "saatlik değil günlük" mesajıyla aynı konum); TL fiyat ve tam Türkçe; web 6
+dil (Farsça, Japonca dahil), mobil 4 dil; fiziksel mühür + isteğe bağlı kanıt fotoğrafı (yalnız
+web check-in, misafire gösterilmiyor); kupon + davet indirimi; güvence rakamı 6 dilde mandal
+testiyle tutarlı (`coverage-amount-consistency.test.ts`).
+
+**Açık rekabet boşlukları:** WhatsApp yalnızca rezervasyon detayında, genel destek kanalı değil;
+büyük/özel eşya politikası net iletilmiyor; sigorta ile güvence farkını anlatan SSS yok; 10.000
+TL güvence dövizle düşük algılanabilir (fiyat kararı); esnaf paneli mağazada ayrı konumlanmıyor
+(ASO, yalnızca metadata).
