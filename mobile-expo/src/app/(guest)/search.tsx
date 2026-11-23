@@ -35,13 +35,17 @@ export default function SearchWizard() {
     "Aramayi duzenle": yer secili, tarih adiminda acilir; yer ve valiz satirlarindan
     ilgili adima gidilir.
   */
-  const params = useLocalSearchParams<{ step?: string; returnTo?: string; from?: string; locationError?: string }>();
+  const params = useLocalSearchParams<{ step?: string; returnTo?: string; from?: string; city?: string; locationError?: string }>();
   const editing = params.returnTo === "back" || (params.returnTo === "map" && !!search.place);
-  // Ana sayfadaki sehir kartindan gelince yer secili: dogrudan "ne zaman" adimi.
+  /*
+    Ana sayfadaki sehir kartindan gelince once ilce adimi acilir (asagidaki etki); kart
+    slug gondermiyorsa (eski surum) yer secili oldugu icin dogrudan "ne zaman" adimi.
+  */
+  const cityFromHome = !editing && params.from === "city" ? params.city : undefined;
   const [step, setStep] = useState(() =>
     editing
       ? Math.min(2, Math.max(0, params.step === undefined ? 1 : Number(params.step) || 0))
-      : params.from === "city" && search.place ? 1 : 0,
+      : params.from === "city" && search.place && !cityFromHome ? 1 : 0,
   );
 
   const [checkIn, setCheckIn] = useState(search.checkIn);
@@ -89,6 +93,21 @@ export default function SearchWizard() {
     if (districts.length > 0) setDistrictStep({ city, districts });
     else choosePlace(cityPlace(city));
   }
+
+  /*
+    Sehir kartindan gelindiyse sehir listesinde dokunulmus gibi ilce adimini ac: kart
+    dogrudan tarihe atliyordu ve ilce secimi hic gorunmuyordu (2026-11-23).
+  */
+  const openedFromHome = useRef(false);
+  useEffect(() => {
+    if (!cityFromHome || openedFromHome.current || cityList.length === 0) return;
+    openedFromHome.current = true;
+    const city = cityList.find((c) => (c.slug ?? c.name) === cityFromHome);
+    if (city) void chooseCity(city);
+    else setStep(1);
+    // chooseCity her render'da yeniden tanimlaniyor; yalnizca liste gelince bir kez calisir.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [cityFromHome, cityList.length]);
 
   // Android geri tusu ilce adimindan sihirbazi kapatmasin, sehir listesine donsun.
   useEffect(() => {
