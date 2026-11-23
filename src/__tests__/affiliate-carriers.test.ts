@@ -180,6 +180,16 @@ describe("web: cerez", () => {
     expect(m.create).toHaveBeenCalledWith(expect.objectContaining({ totalPrice: 270, affiliateCode: "AHMET-EV" }));
   });
 
+  it("ekran toplami sunucu toplamindan farkliysa yazmaz, kupon hakkini geri verir", async () => {
+    m.auth.mockResolvedValue({ user: { id: "guest-1", role: "GUEST" } });
+    m.cookie.mockImplementation((k: string) => (k === "bp_aff" ? { value: "AHMET-EV" } : undefined));
+    m.claim.mockResolvedValue({ ...AFF_CLAIM, couponId: "c1" });
+    const r = await createBookingAction({ ...input, expectedTotal: 250 });
+    expect(r).toEqual({ success: false, error: "Errors.priceChanged" });
+    expect(m.create).not.toHaveBeenCalled();
+    expect(m.release).toHaveBeenCalledWith("c1");
+  });
+
   it("cerez yoksa atif kodu gitmez", async () => {
     m.auth.mockResolvedValue({ user: { id: "guest-1", role: "GUEST" } });
     m.claim.mockResolvedValue({ ...AFF_CLAIM, totalPrice: 300, affiliateDiscountAmount: 0, affiliateCode: undefined, affiliate: null });

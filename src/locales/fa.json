@@ -1893,7 +1893,8 @@
     "currentPasswordRequired": "رمز عبور فعلی خود را وارد کنید.",
     "invalidCurrentPassword": "رمز عبور فعلی نادرست است.",
     "lateHoldLimit": "به زمان تحویل گرفتن رسیدید؛ رزرو بیش از این نگه داشته نمی‌شود.",
-    "affiliateAlreadyApplied": "این حساب از قبل درخواست همکاری معرف دارد."
+    "affiliateAlreadyApplied": "این حساب از قبل درخواست همکاری معرف دارد.",
+    "priceChanged": "قیمت تغییر کرد (یک تخفیف دیگر اعمال نمی‌شود). مبلغ جدید را بررسی و دوباره تأیید کنید."
   },
   "Emails": {
     "verificationSubject": "ایمیل خود را تأیید کنید",

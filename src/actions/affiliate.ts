@@ -123,7 +123,9 @@ export async function previewAffiliateCheckoutAction(input: unknown) {
   const session = await auth();
   const q = await checkoutDiscountService.preview({
     subtotal: totals.subtotalBeforeCoupon,
-    code: d.couponCode || d.referralCode || undefined,
+    // Web'de kupon ve davet kodu ayri alanlar: `claim` ile ayni girdiler.
+    couponCode: d.couponCode || undefined,
+    referralCode: d.couponCode ? undefined : d.referralCode || undefined,
     affiliateCode: code,
     guest: { userId: session?.user?.id, guestEmail: d.guestEmail },
   });

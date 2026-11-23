@@ -1893,7 +1893,8 @@
     "currentPasswordRequired": "Geben Sie Ihr aktuelles Passwort ein.",
     "invalidCurrentPassword": "Das aktuelle Passwort ist falsch.",
     "lateHoldLimit": "Abholzeit erreicht; die Buchung kann nicht länger gehalten werden.",
-    "affiliateAlreadyApplied": "Für dieses Konto gibt es bereits eine Vermittler-Bewerbung."
+    "affiliateAlreadyApplied": "Für dieses Konto gibt es bereits eine Vermittler-Bewerbung.",
+    "priceChanged": "Der Preis hat sich geändert (ein Rabatt gilt nicht mehr). Prüfen Sie den neuen Gesamtbetrag und bestätigen Sie erneut."
   },
   "Emails": {
     "verificationSubject": "Bestätigen Sie Ihre E-Mail",
