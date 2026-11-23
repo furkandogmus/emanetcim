@@ -1,12 +1,12 @@
 import { useEffect, useRef, useState } from "react";
-import { AppState, StyleSheet, View } from "react-native";
+import { AppState, Platform, StyleSheet, View } from "react-native";
 import * as Updates from "expo-updates";
 import { usePathname } from "expo-router";
 import { X } from "lucide-react-native";
 import { useTranslation } from "react-i18next";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
-import { isOtaBannerBlocked, isUpdateRequired, openPlayStore } from "@/lib/app-update";
+import { isOtaBannerBlocked, isUpdateRequired, openAppStore } from "@/lib/app-update";
 import { AppText, Button, IconButton } from "@/components/ui";
 import { colors, radius, space } from "@/theme/tokens";
 
@@ -15,7 +15,7 @@ const OTA_CHECK_MIN_GAP_MS = 5 * 60_000;
 
 /**
  * Acilista `/config` okunur; yuklu ikili `minAppVersion`un altindaysa uygulama
- * engellenir ve Play baglantisi gosterilir. Ag hatasinda kapi acik kalir.
+ * engellenir ve cihazin magaza baglantisi (App Store / Google Play) gosterilir. Ag hatasinda kapi acik kalir.
  * Acilisi bekletmez: yanit gelene kadar uygulama normal acilir.
  */
 export function useUpdateRequired(): boolean {
@@ -53,9 +53,12 @@ export function ForcedUpdateScreen() {
         {t("update.requiredTitle")}
       </AppText>
       <AppText variant="body" style={[styles.center, { color: colors.inkSecondary }]}>
-        {t("update.requiredBody")}
+        {t(Platform.OS === "ios" ? "update.requiredBodyIos" : "update.requiredBody")}
       </AppText>
-      <Button title={t("update.requiredCta")} onPress={() => void openPlayStore()} />
+      <Button
+        title={t(Platform.OS === "ios" ? "update.requiredCtaIos" : "update.requiredCta")}
+        onPress={() => void openAppStore()}
+      />
     </View>
   );
 }

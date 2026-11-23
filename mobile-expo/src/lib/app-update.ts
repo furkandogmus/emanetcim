@@ -1,4 +1,4 @@
-import { Linking } from "react-native";
+import { Linking, Platform } from "react-native";
 import * as Updates from "expo-updates";
 import Constants from "expo-constants";
 
@@ -8,6 +8,15 @@ import type { AppConfig } from "./types";
 /** Play Store sayfasi; `market://` Play yoksa (emulator, Huawei) https'e duser. */
 const PLAY_URL = "https://play.google.com/store/apps/details?id=com.bagajpark";
 const PLAY_MARKET_URL = "market://details?id=com.bagajpark";
+/** App Store sayfasi (App Store Connect uygulama kimligi); `itms-apps://` acilamazsa https. */
+const APP_STORE_ID = "6838203193";
+const APP_STORE_URL = `https://apps.apple.com/app/id${APP_STORE_ID}`;
+const APP_STORE_NATIVE_URL = `itms-apps://apps.apple.com/app/id${APP_STORE_ID}`;
+
+/** Zorunlu guncellemede acilacak magaza adresleri: once uygulama semasi, sonra https. */
+export function storeUrls(os: string): [native: string, web: string] {
+  return os === "ios" ? [APP_STORE_NATIVE_URL, APP_STORE_URL] : [PLAY_MARKET_URL, PLAY_URL];
+}
 
 
 /** "0.3.3" -> [0,3,3]; ayristirilamazsa null (kapi acik kalir, kullaniciyi kilitlemeyiz). */
@@ -51,11 +60,13 @@ export async function isUpdateRequired(): Promise<boolean> {
   }
 }
 
-export async function openPlayStore(): Promise<void> {
+/** Cihazin kendi magazasini acar: iOS'ta App Store, digerlerinde Google Play. */
+export async function openAppStore(os: string = Platform.OS): Promise<void> {
+  const [native, web] = storeUrls(os);
   try {
-    await Linking.openURL(PLAY_MARKET_URL);
+    await Linking.openURL(native);
   } catch {
-    await Linking.openURL(PLAY_URL).catch(() => undefined);
+    await Linking.openURL(web).catch(() => undefined);
   }
 }
 
