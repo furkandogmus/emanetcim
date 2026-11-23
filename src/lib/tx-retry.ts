@@ -11,8 +11,14 @@ import logger from "@/lib/logger";
  */
 const WRITE_CONFLICT = "P2034";
 
+/** Ham sorguda (`$queryRaw`) ayni hata P2010 olarak, Postgres kodu `meta.code`ta gelir. */
+const RAW_QUERY_FAILED = "P2010";
+const PG_RETRYABLE = new Set(["40001", "40P01"]);
+
 function isWriteConflict(e: unknown): boolean {
-  return e instanceof Prisma.PrismaClientKnownRequestError && e.code === WRITE_CONFLICT;
+  if (!(e instanceof Prisma.PrismaClientKnownRequestError)) return false;
+  if (e.code === WRITE_CONFLICT) return true;
+  return e.code === RAW_QUERY_FAILED && PG_RETRYABLE.has(String((e.meta as { code?: unknown } | undefined)?.code));
 }
 
 /**
