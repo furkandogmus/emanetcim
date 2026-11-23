@@ -63,7 +63,7 @@ describe("sendLateDropoffNotice", () => {
     await service.sendLateDropoffNotice({ ...base, kind: "closed", email: "guest@example.com" });
     const [, subject, text] = sendEmail.mock.calls[0];
     expect(subject).toBe("BagajPark: Your booking was closed");
-    expect(text).toContain("passed by 1 hour");
+    expect(text).toContain("the drop-off time passed.");
     expect(text).toContain("/en/search");
   });
 
