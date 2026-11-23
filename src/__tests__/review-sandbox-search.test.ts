@@ -21,7 +21,7 @@ vi.mock("@/lib/db", () => ({ default: mockPrisma }));
 vi.mock("@/lib/shop-distance-postgis", () => ({ getActiveShopsOrderedByDistanceKm: mockGetActiveShops }));
 vi.mock("@/services/SlotService", () => ({
   getSlotAvailabilityForShops: mockSlots,
-  generateSlotsForShop: vi.fn().mockResolvedValue(0),
+  scheduleSlotGeneration: vi.fn(),
 }));
 vi.mock("@/services/NotificationService", () => ({ notificationService: {} }));
 
