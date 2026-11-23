@@ -1,6 +1,7 @@
 import prisma from "@/lib/db";
+import type { Prisma } from "@prisma/client";
 import logger from "@/lib/logger";
-import { generateSlotsForShop } from "@/services/SlotService";
+import { scheduleSlotGeneration } from "@/services/SlotService";
 import { auditAdminShopEdit, type ShopEditActor } from "@/services/admin-shop-audit";
 import { todayInZone } from "@/lib/stay-days";
 import { PLATFORM_TIMEZONE, toDatetimeLocalValueInTimeZone } from "@/lib/datetime-local";
@@ -20,16 +21,18 @@ export type ShopScheduleParts = { weekly: WeeklyDay[]; closures: ClosureRange[] 
 export async function loadScheduleParts(
   shopIds: string[],
   fromDate?: string,
+  // Slot uretimi kendi transaction'inda (dukkan kilidi altinda) okur.
+  db: Pick<Prisma.TransactionClient, "shopWeeklyHours" | "shopClosure"> = prisma,
 ): Promise<Map<string, ShopScheduleParts>> {
   const out = new Map<string, ShopScheduleParts>();
   if (shopIds.length === 0) return out;
 
   const [weekly, closures] = await Promise.all([
-    prisma.shopWeeklyHours.findMany({
+    db.shopWeeklyHours.findMany({
       where: { shopId: { in: shopIds } },
       orderBy: { weekday: "asc" },
     }),
-    prisma.shopClosure.findMany({
+    db.shopClosure.findMany({
       where: { shopId: { in: shopIds }, ...(fromDate ? { endDate: { gte: fromDate } } : {}) },
       orderBy: { startDate: "asc" },
     }),
@@ -204,10 +207,9 @@ export async function saveWeeklyHours(
       },
     }),
   ]);
-  // Yeni acilan gunlerin slotu cron'u (04:17) beklemesin; hata cron'a kalir.
-  generateSlotsForShop(shopId).catch((err: unknown) =>
-    logger.warn({ err, shopId }, "save_weekly_hours_slot_generation_failed"),
-  );
+  // Yeni acilan gunlerin slotu cron'u (04:17) beklemesin, kapanan saatlerin
+  // rezervasyonsuz slotlari da aramadan dussun; hata loglanir, cron'a kalir.
+  scheduleSlotGeneration(shopId, "save_weekly_hours");
   auditAdminShopEdit(actor, shopId, "hours_update", {
     open247,
     days: days.map((d) => ({ weekday: d.weekday, isClosed: d.isClosed, openingTime: d.openingTime, closingTime: d.closingTime })),
@@ -243,6 +245,8 @@ export async function addClosure(
     data: { shopId, startDate, endDate, reason: range.reason?.trim().slice(0, 200) || null },
   });
   auditAdminShopEdit(actor, shopId, "closure_add", { closureId: closure.id, startDate, endDate });
+  // Izin gunlerinin rezervasyonsuz slotlari aramada "musait" gorunmesin.
+  scheduleSlotGeneration(shopId, "closure_add");
   return { ok: true };
 }
 
@@ -250,9 +254,7 @@ export async function removeClosure(shopId: string, closureId: string, actor?: S
   const { count } = await prisma.shopClosure.deleteMany({ where: { id: closureId, shopId } });
   if (count > 0) auditAdminShopEdit(actor, shopId, "closure_remove", { closureId });
   // Kapanis kalkinca o gunlerin slotu cron'u beklemeden uretilir.
-  generateSlotsForShop(shopId).catch((err: unknown) =>
-    logger.warn({ err, shopId }, "remove_closure_slot_generation_failed"),
-  );
+  scheduleSlotGeneration(shopId, "closure_remove");
 }
 
 /**
