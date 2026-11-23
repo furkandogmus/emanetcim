@@ -81,6 +81,15 @@ export const viewport: Viewport = {
  * dinamik kaliyor -- `auth()`/`cookies()` kullanan her yer otomatik hariç
  * tutuluyor.
  */
+/*
+  Kok layout'un metadata'si magaza bayragini okuyor (Safari akilli bandi), ama
+  build'de veritabani yok: tamamen statik sayfalar (hakkimizda, SSS, sozlesmeler...)
+  her deploy'da bayragi "kapali" olarak gomerdi. 5 dakikalik ISR onlari canlida
+  gercek bayrakla yeniden uretir. En dusuk deger kazanir; zaten daha sik
+  yenilenen sayfalar etkilenmez, dinamik sayfalar dinamik kalir.
+*/
+export const revalidate = 300;
+
 export function generateStaticParams() {
   return routing.locales.map((locale) => ({ locale }));
 }
