@@ -1367,7 +1367,19 @@
     "appLinkStatsPlatform": "Plattform",
     "appLinkStatsOutcome": "Ergebnis",
     "appLinkStatsCount": "Anzahl",
-    "appLinkStatsRest": "Weitere Gruppen"
+    "appLinkStatsRest": "Weitere Gruppen",
+    "partnerLeadsConvert": "In Partnerkonto umwandeln",
+    "partnerLeadsConverted": "In Partnerkonto umgewandelt",
+    "partnerLeadConvertTitle": "Vorregistrierung in ein Partnerkonto umwandeln",
+    "partnerLeadConvertIntro": "Die Angaben stammen aus der Vorregistrierung; prüfen und ergänzen Sie sie. Geben Sie den Standort aus dem Google-Maps-Link des Partners ein. Das Konto wird ohne Passwort eröffnet; senden Sie den angezeigten Link an den Partner.",
+    "partnerLeadConvertActivate": "Geschäft sofort veröffentlichen",
+    "partnerLeadConvertActivateHint": "Ohne Häkchen landet das Geschäft in der Antragsliste und erscheint erst nach Ihrer Freigabe in der Suche.",
+    "partnerLeadConvertSubmit": "Partnerkonto eröffnen",
+    "partnerLeadConvertActivated": "Das Geschäft ist online; Buchungszeiten werden vorbereitet.",
+    "partnerLeadConvertActivationFailed": "Das Konto wurde eröffnet, aber das Geschäft konnte nicht veröffentlicht werden. Geben Sie es in der Antragsliste frei.",
+    "partnerLeadConvertAlready": "Diese Vorregistrierung wurde bereits umgewandelt",
+    "partnerLeadConvertBack": "Zurück zu den Vorregistrierungen",
+    "partnerLeadMapsSearch": "Adresse in Google Maps suchen"
   },
   "Auth": {
     "loginTitle": "Melden Sie sich bei BagajPark an",

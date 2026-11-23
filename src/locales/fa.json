@@ -1367,7 +1367,19 @@
     "appLinkStatsPlatform": "پلتفرم",
     "appLinkStatsOutcome": "نتیجه",
     "appLinkStatsCount": "تعداد",
-    "appLinkStatsRest": "سایر گروه‌ها"
+    "appLinkStatsRest": "سایر گروه‌ها",
+    "partnerLeadsConvert": "تبدیل به حساب همکار",
+    "partnerLeadsConverted": "به حساب همکار تبدیل شد",
+    "partnerLeadConvertTitle": "تبدیل پیش‌ثبت‌نام به حساب همکار",
+    "partnerLeadConvertIntro": "اطلاعات از پیش‌ثبت‌نام آمده است؛ آن‌ها را بررسی و موارد ناقص را کامل کنید. موقعیت را از پیوند Google Maps ارسالی همکار وارد کنید. حساب بدون رمز باز می‌شود؛ پیوند نمایش‌داده‌شده را برای همکار بفرستید.",
+    "partnerLeadConvertActivate": "انتشار فوری فروشگاه",
+    "partnerLeadConvertActivateHint": "اگر علامت نزنید، فروشگاه به فهرست درخواست‌ها می‌رود و تا تأیید شما در جستجو دیده نمی‌شود.",
+    "partnerLeadConvertSubmit": "ایجاد حساب همکار",
+    "partnerLeadConvertActivated": "فروشگاه منتشر شد؛ زمان‌های رزرو در حال آماده‌سازی است.",
+    "partnerLeadConvertActivationFailed": "حساب ایجاد شد اما فروشگاه منتشر نشد. آن را از فهرست درخواست‌ها تأیید کنید.",
+    "partnerLeadConvertAlready": "این پیش‌ثبت‌نام قبلاً تبدیل شده است",
+    "partnerLeadConvertBack": "بازگشت به پیش‌ثبت‌نام‌ها",
+    "partnerLeadMapsSearch": "جستجوی نشانی در Google Maps"
   },
   "Auth": {
     "loginTitle": "ورود به BagajPark",
