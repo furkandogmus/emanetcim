@@ -1,5 +1,6 @@
 import logger from "../lib/logger";
 import { GUEST_PUSH_COPY, type GuestPushEvent, type GuestPushVars } from "@/lib/guest-push-copy";
+import { formatPhoneForDisplay } from "@/lib/phone-format";
 import prisma from "../lib/db";
 import { formatTryCurrency } from "@/lib/currency";
 import { fetchWithTimeout } from "@/lib/async-timeout";
@@ -2182,7 +2183,7 @@ export class NotificationService implements INotificationService {
   }): Promise<{ push: boolean; email: boolean }> {
     const { bookingId, kind, locale, shop } = params;
     const time = formatTimeInZone(params.at, { locale: bcp47ForUiLocale(locale), timeZone: shop.timeZone });
-    const phone = shop.phone?.trim() || undefined;
+    const phone = formatPhoneForDisplay(shop.phone);
     const event = kind === "reminder" ? "lateDropoff" : kind === "hold" ? "lateHold" : "lateClosed";
     const pushed = await this.pushGuestNow(bookingId, event, locale, { time, phone }).catch((err) => {
       logger.warn({ err, bookingId, kind }, "late_dropoff_push_failed");

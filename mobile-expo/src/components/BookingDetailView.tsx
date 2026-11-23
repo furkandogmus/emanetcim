@@ -23,7 +23,7 @@ import { isActiveBooking, useBooking, useOnlinePayments } from "@/lib/queries";
 import { defaultWindow, useSearch } from "@/lib/search";
 import type { BookingDetail } from "@/lib/types";
 import { notify } from "@/lib/notify";
-import { whatsappNumber } from "@/lib/phone";
+import { whatsappNumber, dialUrl } from "@/lib/phone";
 import { loadOfflineTicket, saveOfflineTicket, type OfflineTicket } from "@/lib/offline-tickets";
 import { colors, radius, space } from "@/theme/tokens";
 import { StaleQueryBanner } from "@/components/StaleQueryBanner";
@@ -62,7 +62,7 @@ function GuestContact({ phone }: { phone?: string }) {
         variant="secondary"
         style={{ flex: 1 }}
         title={t("partner.callGuest")}
-        onPress={() => void Linking.openURL(`tel:${digits}`).catch(() => undefined)}
+        onPress={() => void Linking.openURL(dialUrl(digits)).catch(() => undefined)}
       />
       {intl ? (
         <Button
@@ -323,7 +323,7 @@ export function BookingDetailView({ id, mode }: { id: string; mode: "guest" | "p
                     variant="secondary"
                     style={{ flex: 1 }}
                     title={t("bookings.call")}
-                    onPress={() => void Linking.openURL(`tel:${b.shopPhone}`).catch(() => undefined)}
+                    onPress={() => void Linking.openURL(dialUrl(b.shopPhone)).catch(() => undefined)}
                   />
                 ) : null}
               </View>
