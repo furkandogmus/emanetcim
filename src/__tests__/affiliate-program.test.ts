@@ -26,7 +26,7 @@ const m = vi.hoisted(() => {
       affiliateCommission: { groupBy: vi.fn(), findMany: vi.fn() },
       booking: { findUnique: vi.fn(), findMany: vi.fn(), groupBy: vi.fn() },
       shop: { findUnique: vi.fn() },
-      user: { findFirst: vi.fn() },
+      user: { findFirst: vi.fn(), findUnique: vi.fn() },
       $transaction: vi.fn(async (f: (t: typeof tx) => unknown) => f(tx)),
     },
     coupon: { preview: vi.fn(), claim: vi.fn(), release: vi.fn() },
@@ -107,6 +107,7 @@ beforeEach(() => {
   vi.clearAllMocks();
   m.prisma.$transaction.mockImplementation(async (f: (t: typeof m.tx) => unknown) => f(m.tx));
   m.prisma.affiliate.findUnique.mockResolvedValue(affiliateRow());
+  m.prisma.user.findUnique.mockResolvedValue({ email: "misafir@example.test", phone: null });
   m.referral.resolveDiscount.mockResolvedValue(null);
   m.referral.check.mockResolvedValue({ ok: false, reason: "invalid_code" });
   m.coupon.preview.mockResolvedValue({ ok: false, reason: "invalid" });
@@ -149,6 +150,17 @@ describe("atif cozumleme", () => {
 
   it("aracinin kendi hesabi atif almaz", async () => {
     expect(await affiliateService.resolve("AHMET-EV", { userId: "aff-user" })).toEqual({ ok: false, reason: "own_code" });
+  });
+
+  it("girisli misafir: hesabin e-postasi ya da telefonu araciyla ayniysa atif yok (ikinci hesap)", async () => {
+    m.prisma.user.findUnique.mockResolvedValue({ email: "Host@Example.test", phone: null });
+    expect(await affiliateService.resolve("AHMET-EV", { userId: "ikinci-hesap" })).toEqual({ ok: false, reason: "own_code" });
+    m.prisma.affiliate.findUnique.mockResolvedValue(affiliateRow({ contactPhone: "+90 532 000 00 00" }));
+    m.prisma.user.findUnique.mockResolvedValue({ email: "baska@example.test", phone: "05320000000" });
+    expect(await affiliateService.resolve("AHMET-EV", { userId: "ikinci-hesap" })).toEqual({ ok: false, reason: "own_code" });
+    m.prisma.user.findUnique.mockResolvedValue({ email: "baska@example.test", phone: null });
+    expect(await affiliateService.resolve("AHMET-EV", { guestPhone: "0532 000 00 00" })).toEqual({ ok: false, reason: "own_code" });
+    expect((await affiliateService.resolve("AHMET-EV", { userId: "ikinci-hesap" })).ok).toBe(true);
   });
 
   it("hesapsiz odemede aracinin kendi e-postasi atif almaz", async () => {
