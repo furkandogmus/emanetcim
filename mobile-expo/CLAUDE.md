@@ -50,3 +50,4 @@ API adresi derleme anında: `EXPO_PUBLIC_API_BASE_URL` (varsayılan emülatör i
 - `android/` ve `ios/` üretilir (CNG), elle düzenlenmez, git'e girmez.
 - **Kabul kriteri: Google Play'e yüklenebilir build.** İzin listesi, hesap silme ve
   production profili bu yüzden var; değiştirmeden önce `PLAY_YAYIN.md`'yi oku.
+- **iOS yayını** `IOS_YAYIN.md`: hesap, ilk build/submit adımları, App Review notları.

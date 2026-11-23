@@ -55,6 +55,9 @@
         "track": "internal",
         "releaseStatus": "draft",
         "serviceAccountKeyPath": "./play-service-account.json"
+      },
+      "ios": {
+        "appleTeamId": "524ZQ83Q42"
       }
     },
     "closed": {

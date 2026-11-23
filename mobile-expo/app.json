@@ -16,7 +16,38 @@
       "usesAppleSignIn": true,
       "associatedDomains": [
         "applinks:bagajpark.com"
-      ]
+      ],
+      "privacyManifests": {
+        "NSPrivacyAccessedAPITypes": [
+          {
+            "NSPrivacyAccessedAPIType": "NSPrivacyAccessedAPICategoryUserDefaults",
+            "NSPrivacyAccessedAPITypeReasons": [
+              "CA92.1"
+            ]
+          },
+          {
+            "NSPrivacyAccessedAPIType": "NSPrivacyAccessedAPICategoryFileTimestamp",
+            "NSPrivacyAccessedAPITypeReasons": [
+              "0A2A.1",
+              "3B52.1",
+              "C617.1"
+            ]
+          },
+          {
+            "NSPrivacyAccessedAPIType": "NSPrivacyAccessedAPICategoryDiskSpace",
+            "NSPrivacyAccessedAPITypeReasons": [
+              "E174.1",
+              "85F4.1"
+            ]
+          },
+          {
+            "NSPrivacyAccessedAPIType": "NSPrivacyAccessedAPICategorySystemBootTime",
+            "NSPrivacyAccessedAPITypeReasons": [
+              "35F9.1"
+            ]
+          }
+        ]
+      }
     },
     "android": {
       "package": "com.bagajpark",
@@ -65,7 +96,12 @@
     "plugins": [
       "expo-router",
       "expo-status-bar",
-      "expo-secure-store",
+      [
+        "expo-secure-store",
+        {
+          "faceIDPermission": "BagajPark Face ID kullanmaz; oturum bilgisi cihazın güvenli deposunda saklanır."
+        }
+      ],
       "expo-font",
       [
         "expo-splash-screen",
@@ -90,7 +126,10 @@
       [
         "expo-location",
         {
-          "locationWhenInUsePermission": "Yakınındaki emanet noktalarını göstermek için konumunu kullanıyoruz."
+          "locationWhenInUsePermission": "Yakınındaki emanet noktalarını göstermek için konumunu kullanıyoruz.",
+          "locationAlwaysAndWhenInUsePermission": "Konumunu yalnızca uygulama açıkken, yakınındaki emanet noktalarını göstermek için kullanıyoruz.",
+          "locationAlwaysPermission": "Konumunu yalnızca uygulama açıkken, yakınındaki emanet noktalarını göstermek için kullanıyoruz.",
+          "motionUsagePermission": "BagajPark hareket verisi kullanmaz."
         }
       ],
       "@maplibre/maplibre-react-native",
@@ -140,7 +179,7 @@
       "eas": {
         "projectId": "e977b077-e469-4d63-a705-99b7ddd86346"
       },
-      "appleSignIn": false
+      "appleSignIn": true
     },
     "owner": "furkandogmus",
     "runtimeVersion": {
