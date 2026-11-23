@@ -412,7 +412,7 @@ function PartnerManageActions({ booking }: { booking: BookingDetail }) {
   return (
     <View style={{ gap: space.sm }}>
       {error ? <Banner tone="danger" body={error} /> : null}
-      {late.kind === "late" ? (
+      {late.kind === "late" && late.actionable ? (
         <View style={{ gap: space.sm }}>
           <Banner
             tone="warning"
