@@ -197,8 +197,15 @@ describe("hatirlatmalar", () => {
 });
 
 describe("otomatik kapanis", () => {
-  it("+60'ta no_show + auto ile, check-in/bekletme kosulu kilide gecerek kapanir; misafire 'kapandi' gider", async () => {
+  const warnedBy = (stage: number, over: Record<string, unknown> = {}) => ({
+    bookingId: "b1",
+    event: LATE_DROPOFF_REMINDER_EVENT,
+    metadata: { stage, checkInTime: CHECK_IN.toISOString(), guest: true, partner: stage === 3, ...over },
+  });
+
+  it("+60'ta no_show + auto ile, check-in/bekletme kosulu kilide gecerek kapanir; uyarilmis misafire 'kapandi' gider", async () => {
     h.db.bookings = [booking()];
+    h.db.events = [warnedBy(3)];
     const r = await svc.run({ now: at(61) });
     expect(r.closed).toBe(1);
     const [id, opts] = h.cancelBooking.mock.calls[0];
@@ -210,6 +217,22 @@ describe("otomatik kapanis", () => {
       OR: [{ lateHoldUntil: null }, { lateHoldUntil: { lte: at(61) } }],
     });
     expect(h.notify.sendLateDropoffNotice).toHaveBeenCalledWith(expect.objectContaining({ kind: "closed", at: at(60) }));
+  });
+
+  it("hic uyarilmamis misafir (ilk yayin / kesinti sonrasi) SESSIZ kapanir", async () => {
+    h.db.bookings = [booking()];
+    const r = await svc.run({ now: at(61) });
+    expect(r).toMatchObject({ closed: 1, closedSilently: 1 });
+    expect(h.cancelBooking.mock.calls[0][1]).toMatchObject({ reason: "no_show", eventMetadata: { auto: true, notified: false } });
+    expect(h.notify.sendLateDropoffNotice).not.toHaveBeenCalled();
+  });
+
+  it("yalniz esnafa giden asama ya da eski birakma saatinin hatirlatmasi uyari sayilmaz", async () => {
+    h.db.bookings = [booking()];
+    h.db.events = [warnedBy(3, { guest: false }), warnedBy(2, { checkInTime: at(-120).toISOString() })];
+    const r = await svc.run({ now: at(61) });
+    expect(r.closedSilently).toBe(1);
+    expect(h.notify.sendLateDropoffNotice).not.toHaveBeenCalled();
   });
 
   it("+60'tan once kapanmaz", async () => {
@@ -235,6 +258,8 @@ describe("otomatik kapanis", () => {
 
   it("eski birikim (kapanisi > 2 sa once) SESSIZ kapanir: hatirlatma da 'kapandi' da yok", async () => {
     h.db.bookings = [booking({ id: "old", checkInTime: at(-24 * 60), checkOutTime: at(-20 * 60) })];
+    // Uyarilmis olsa bile (kesinti uzun surduyse) saatler sonra "kapandi" denmez.
+    h.db.events = [warnedBy(3, { checkInTime: at(-24 * 60).toISOString() })].map((e) => ({ ...e, bookingId: "old" }));
     const r = await svc.run({ now: at(0) });
     expect(r).toMatchObject({ closed: 1, closedSilently: 1 });
     expect(h.cancelBooking.mock.calls[0][1].eventMetadata).toEqual({ auto: true, notified: false });
@@ -242,10 +267,14 @@ describe("otomatik kapanis", () => {
     expect(h.notify.notifyPartnerLateDropoff).not.toHaveBeenCalled();
   });
 
-  it("odemesiz niyet (PENDING) bildirimsiz kapanir", async () => {
-    h.db.bookings = [booking({ status: "PENDING" })];
+  it("odemesiz niyet (PENDING / WAITING_APPROVAL) expired_no_dropoff ile bildirimsiz kapanir", async () => {
+    h.db.bookings = [booking({ status: "PENDING" }), booking({ id: "w", status: "WAITING_APPROVAL" })];
+    h.db.events = [warnedBy(3)];
     const r = await svc.run({ now: at(61) });
-    expect(r.closedSilently).toBe(1);
+    expect(r.closedSilently).toBe(2);
+    for (const [, opts] of h.cancelBooking.mock.calls) {
+      expect(opts).toMatchObject({ reason: "expired_no_dropoff", eventMetadata: { auto: true, notified: false } });
+    }
     expect(h.notify.sendLateDropoffNotice).not.toHaveBeenCalled();
   });
 
