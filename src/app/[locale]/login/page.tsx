@@ -1,5 +1,6 @@
 import { auth } from "@/auth";
 import { redirect } from "next/navigation";
+import { signedInAuthPageRedirect } from "@/lib/auth-landing";
 import LoginClient from "./LoginClient";
 import { setRequestLocale } from "next-intl/server";
 import type { Metadata } from "next";
@@ -32,15 +33,20 @@ export async function generateMetadata({
   };
 }
 
-export default async function LoginPage({ params }: { params: Promise<{ locale: string }> }) {
+export default async function LoginPage({
+  params,
+  searchParams,
+}: {
+  params: Promise<{ locale: string }>;
+  searchParams?: Promise<Record<string, string | string[] | undefined>>;
+}) {
   const { locale } = await params;
   setRequestLocale(locale);
   const session = await auth();
 
   if (session?.user) {
-    if (session.user.role === 'ADMIN') redirect(`/${locale}/admin`);
-    if (session.user.role === 'PARTNER') redirect(`/${locale}/partner`);
-    redirect(`/${locale}/search`);
+    const sp = searchParams ? await searchParams : {};
+    redirect(signedInAuthPageRedirect(locale, session.user.role, sp.callbackUrl));
   }
 
   return (

@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { resolveLoginLanding, defaultLandingForRole } from "@/lib/auth-landing";
+import { resolveLoginLanding, defaultLandingForRole, signedInAuthPageRedirect } from "@/lib/auth-landing";
 
 /**
  * Giriş sonrası yönlendirme.
@@ -44,5 +44,25 @@ describe("resolveLoginLanding", () => {
     expect(defaultLandingForRole("ADMIN")).toBe("/admin");
     expect(defaultLandingForRole("USER")).toBe("/");
     expect(defaultLandingForRole(null)).toBe("/");
+  });
+});
+
+describe("signedInAuthPageRedirect (oturum acikken /login, /register)", () => {
+  it("callbackUrl varsa oraya: checkout donusu baska sekmede giris yapilmis olabilir", () => {
+    const cb = "/tr/checkout/s1?checkIn=2030-05-01&bagM=2";
+    expect(signedInAuthPageRedirect("tr", "USER", cb)).toBe(cb);
+    expect(signedInAuthPageRedirect("tr", "PARTNER", "/partner/bookings")).toBe("/partner/bookings");
+  });
+
+  it("dis siteye giden callbackUrl rol sayfasina duser", () => {
+    expect(signedInAuthPageRedirect("en", "USER", "//evil.com/x")).toBe("/en/search");
+    expect(signedInAuthPageRedirect("en", "ADMIN", "/\\evil.com")).toBe("/en/admin");
+    expect(signedInAuthPageRedirect("en", "USER", ["/a", "/b"])).toBe("/en/search");
+  });
+
+  it("callbackUrl yoksa eski davranis: rolun sayfasi", () => {
+    expect(signedInAuthPageRedirect("tr", "ADMIN", undefined)).toBe("/tr/admin");
+    expect(signedInAuthPageRedirect("tr", "PARTNER", null)).toBe("/tr/partner");
+    expect(signedInAuthPageRedirect("tr", "USER", "/")).toBe("/tr/search");
   });
 });

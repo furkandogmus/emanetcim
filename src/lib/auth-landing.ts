@@ -1,3 +1,5 @@
+import { sanitizeAuthCallbackUrl } from "@/lib/auth-callback-url";
+
 /**
  * Giriş sonrası varış noktası — role göre, sekmeye göre DEĞİL.
  *
@@ -44,4 +46,21 @@ export function resolveLoginLanding(
   const explicit = callbackUrl?.trim();
   if (explicit && explicit !== "/") return explicit;
   return defaultLandingForRole(role);
+}
+
+/**
+ * Oturumu zaten acik kullanici giris/kayit sayfasina geldiginde nereye gider.
+ * `callbackUrl` varsa ORAYA (checkout donusu baska sekmede giris yapilmis
+ * olabilir); yoksa rolun sayfasi. Ham deger burada suzulur.
+ */
+export function signedInAuthPageRedirect(
+  locale: string,
+  role: LandingRole,
+  rawCallbackUrl: string | string[] | null | undefined,
+): string {
+  const callback = sanitizeAuthCallbackUrl(typeof rawCallbackUrl === "string" ? rawCallbackUrl : null);
+  if (callback !== "/") return resolveLoginLanding(callback, role);
+  if (role === "ADMIN") return `/${locale}/admin`;
+  if (role === "PARTNER") return `/${locale}/partner`;
+  return `/${locale}/search`;
 }
