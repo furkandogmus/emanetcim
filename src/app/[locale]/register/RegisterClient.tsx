@@ -23,6 +23,7 @@ import AmbientBackdrop from "@/components/common/AmbientBackdrop";
 import BrandMark from "@/components/common/BrandMark";
 import FieldError from "@/components/common/FieldError";
 import { useFieldErrors } from "@/lib/hooks/useFieldErrors";
+import { sanitizeAuthCallbackUrl } from "@/lib/auth-callback-url";
 
 type RegisterField = 'email' | 'phone';
 
@@ -69,6 +70,8 @@ export default function RegisterPage() {
   const tErrors = useTranslations('Errors');
   const [activeTab, setActiveTab] = useState<RegisterType>('GUEST');
   const [referredByCode, setReferredByCode] = useState<string | undefined>(undefined);
+  /* Checkout'tan gelindiyse (`callbackUrl`) giris baglantisi oraya geri doner. */
+  const [loginHref, setLoginHref] = useState('/login');
 
   useEffect(() => {
     if (typeof window !== "undefined") {
@@ -82,6 +85,10 @@ export default function RegisterPage() {
       const ref = params.get("ref");
       if (ref) {
         setReferredByCode(ref);
+      }
+      const callback = sanitizeAuthCallbackUrl(params.get("callbackUrl"));
+      if (callback !== "/") {
+        setLoginHref(`/login?callbackUrl=${encodeURIComponent(callback)}`);
       }
     }
   }, []);
@@ -205,7 +212,7 @@ export default function RegisterPage() {
             }
           </p>
           <Link
-            href="/login"
+            href={loginHref}
             className="inline-flex items-center justify-center gap-2 text-sm font-bold text-orange-600 hover:text-orange-700 transition-colors"
           >
             {t('backToLogin')} <ChevronRight size={16} />
@@ -416,7 +423,7 @@ export default function RegisterPage() {
         <div className="mt-8 pt-8 border-t border-gray-50 w-full text-center">
           <p className="text-sm text-gray-400 font-medium">
             {t('alreadyHaveAccount')}{' '}
-            <Link href="/login" className="text-orange-600 font-bold hover:underline">{t('signInEmail')}</Link>
+            <Link href={loginHref} className="text-orange-600 font-bold hover:underline">{t('signInEmail')}</Link>
           </p>
         </div>
 

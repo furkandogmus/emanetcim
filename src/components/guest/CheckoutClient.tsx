@@ -53,7 +53,7 @@ import StayDaysPicker from "@/components/guest/StayDaysPicker";
 import Money from "@/components/common/Money";
 import { foreignDisplayCurrency, formatTryCurrency } from "@/lib/currency";
 import { useModalBehavior } from "@/lib/hooks/useModalBehavior";
-import GuestContactForm from "@/components/guest/GuestContactForm";
+import { buildCheckoutReturnPath, checkoutAuthHref } from "@/lib/checkout-return-url";
 import { useActionErrorText } from "@/lib/use-action-error";
 interface CheckoutClientProps {
   shopId: string;
@@ -64,7 +64,11 @@ interface CheckoutClientProps {
   isLoggedIn?: boolean;
   initialCheckIn?: string;
   initialCheckOut?: string;
+  /** Orta boy (M) valiz sayisi. */
   initialBags?: number;
+  initialBagS?: number;
+  initialBagXl?: number;
+  initialCouponCode?: string;
   /**
    * Dükkanın kendi saat dilimi (`Shop.timezone`). `SlotService` müsaitliği bu
    * dilimde üretiyordu ama checkout her yerde platform varsayılanını (İstanbul)
@@ -113,6 +117,9 @@ export default function CheckoutClient({
   initialCheckIn,
   initialCheckOut,
   initialBags,
+  initialBagS,
+  initialBagXl,
+  initialCouponCode,
   timeZone = PLATFORM_TIMEZONE,
   openingTime,
   closingTime,
@@ -148,9 +155,9 @@ export default function CheckoutClient({
     ref: modalRef,
   });
 
-  const [bagS, setBagS] = useState(0);
+  const [bagS, setBagS] = useState(initialBagS ?? 0);
   const [bagM, setBagM] = useState(initialBags ?? 1);
-  const [bagXl, setBagXl] = useState(0);
+  const [bagXl, setBagXl] = useState(initialBagXl ?? 0);
 
   const [stay, setStay] = useState(() =>
     normalizeStayDays(dateOnlyFromParam(initialCheckIn), dateOnlyFromParam(initialCheckOut), hours),
@@ -185,12 +192,10 @@ export default function CheckoutClient({
   const [error, setError] = useState<string | null>(null);
   const [bookingId, setBookingId] = useState("");
   const [qrDataUrl, setQrDataUrl] = useState<string | null>(null);
-  const [couponCode, setCouponCode] = useState("");
+  const [couponCode, setCouponCode] = useState(initialCouponCode ?? "");
   const [referralCode, setReferralCode] = useState("");
   const [referralPct, setReferralPct] = useState<number | null>(null);
   const [referralReason, setReferralReason] = useState<string | null>(null);
-  const [guestEmail, setGuestEmail] = useState("");
-  const [guestPhone, setGuestPhone] = useState("");
 
   // Restore draft from localStorage on mount
   useEffect(() => {
@@ -230,7 +235,7 @@ export default function CheckoutClient({
     if (!referralInput || couponEntered) return;
     let cancelled = false;
     const timer = setTimeout(() => {
-      void validateReferralCodeAction(referralInput, guestEmail.trim() || undefined)
+      void validateReferralCodeAction(referralInput)
         .then((res) => {
           if (cancelled) return;
           setReferralPct(res.valid ? res.discountPct : null);
@@ -244,7 +249,7 @@ export default function CheckoutClient({
       cancelled = true;
       clearTimeout(timer);
     };
-  }, [referralInput, couponEntered, guestEmail]);
+  }, [referralInput, couponEntered]);
   const referralActive = referralInput !== "" && !couponEntered && referralPct !== null;
 
   // Save draft to localStorage when inputs change
@@ -292,12 +297,12 @@ export default function CheckoutClient({
   >(null);
   const previewKey =
     hasAffiliate && windowOk && checkInDate && checkOutDate && bagS + bagM + bagXl > 0
-      ? JSON.stringify([shopId, bagS, bagM, bagXl, checkInDate.toISOString(), checkOutDate.toISOString(), couponCode.trim(), referralInput, guestEmail.trim()])
+      ? JSON.stringify([shopId, bagS, bagM, bagXl, checkInDate.toISOString(), checkOutDate.toISOString(), couponCode.trim(), referralInput])
       : null;
   useEffect(() => {
     if (!previewKey) return;
     let cancelled = false;
-    const [, s, m, xl, ci, co, cc, rc, ge] = JSON.parse(previewKey) as [string, number, number, number, string, string, string, string, string];
+    const [, s, m, xl, ci, co, cc, rc] = JSON.parse(previewKey) as [string, number, number, number, string, string, string, string];
     const timer = setTimeout(() => {
       void previewAffiliateCheckoutAction({
         shopId,
@@ -308,7 +313,6 @@ export default function CheckoutClient({
         checkOutTime: new Date(co),
         couponCode: cc || undefined,
         referralCode: rc || undefined,
-        guestEmail: ge || undefined,
       })
         .then((res) => {
           if (!cancelled) setAffiliatePreview(res);
@@ -331,6 +335,16 @@ export default function CheckoutClient({
   const insuranceEnabled = isInsuranceEnabled(pricingRules);
 
   const totalBags = bagS + bagM + bagXl;
+
+  /* Giris/kayittan bu ekrana, ayni secimle donulur (kupon dahil). */
+  const authReturnPath = buildCheckoutReturnPath(locale, shopId, {
+    checkIn: dropDate,
+    checkOut: pickupDate,
+    bagS,
+    bagM,
+    bagXl,
+    couponCode,
+  });
 
   const handleBooking = async (skipAuthCheck = false) => {
     if (!isLoggedIn && !skipAuthCheck) {
@@ -361,8 +375,6 @@ export default function CheckoutClient({
       checkOutTime: checkOutDate,
       couponCode: couponCode.trim() || undefined,
       referralCode: couponEntered ? undefined : referralInput || undefined,
-      guestEmail: !isLoggedIn ? (guestEmail.trim() || undefined) : undefined,
-      guestPhone: !isLoggedIn ? (guestPhone.trim() || undefined) : undefined,
     });
 
     setIsProcessing(false);
@@ -380,15 +392,8 @@ export default function CheckoutClient({
       setIsSuccess(true);
       // Ana ekrana ekleme davetinin en anlamli ani: QR artik elde.
       markBooked();
-    } else if (result.error === "Errors.guestContactRequired") {
-      /*
-        OTURUM SÜRESİ CHECKOUT SIRASINDA DOLMUŞ OLABİLİR (2026-09-10). `isLoggedIn`
-        sayfa ilk yüklenirken SUNUCUDA hesaplanan sabit bir prop; burada tekrar
-        kontrol edilmiyor. Sunucu bizi artık misafir sayıp iletişim bilgisi
-        istediğinde, ekranda o bilgiyi toplayacak HİÇBİR alan yoktu — misafir aynı
-        hatayı tekrar tekrar görüyordu. Sunucunun "misafirim" dediği an, tam da o
-        bilgiyi toplayan modali açıyoruz.
-      */
+    } else if ("code" in result && result.code === "login_required") {
+      // `isLoggedIn` ilk yuklemedeki oturum; checkout sirasinda dusmus olabilir.
       setShowAuthModal(true);
       setError(null);
     } else {
@@ -983,7 +988,7 @@ export default function CheckoutClient({
           <div
             role="dialog"
             aria-modal="true"
-            aria-label={t("checkoutGuestContinue")}
+            aria-label={t("checkoutLoginRequiredTitle")}
             className="relative bg-white rounded-3xl shadow-2xl border border-gray-100 max-w-md w-full overflow-hidden p-8 animate-slide-up text-center"
             onClick={(e) => e.stopPropagation()}
           >
@@ -1002,47 +1007,23 @@ export default function CheckoutClient({
             </div>
 
             <h3 className="text-xl font-black text-gray-900 tracking-tight mb-3">
-              {t("checkoutContinueWithoutAccount")}
+              {t("checkoutLoginRequiredTitle")}
             </h3>
-            
+
             <p className="text-sm font-semibold text-gray-500 leading-relaxed mb-6">
-              {t("checkoutGuestContactHint")}
+              {t("checkoutLoginRequiredHint")}
             </p>
 
-            <GuestContactForm
-              email={guestEmail}
-              phone={guestPhone}
-              onEmailChange={setGuestEmail}
-              onPhoneChange={setGuestPhone}
-              error={error}
-              onError={setError}
-              isProcessing={isProcessing}
-              onValid={() => {
-                setShowAuthModal(false);
-                void handleBooking(true);
-              }}
-            />
-
             <div className="flex flex-col gap-3 mt-3">
-              <div className="relative my-2">
-                <div className="absolute inset-0 flex items-center">
-                  <div className="w-full border-t border-gray-200" />
-                </div>
-                <div className="relative flex justify-center text-xs uppercase">
-                  <span className="bg-white px-3 text-gray-400 font-bold">
-                    {t("checkoutOrWithAccount")}
-                  </span>
-                </div>
-              </div>
               <div className="flex gap-2">
                 <Link
-                  href={`/login?callbackUrl=/checkout/${shopId}`}
-                  className="flex-1 bg-gray-50 hover:bg-gray-100 text-gray-700 py-3 px-4 rounded-2xl font-bold text-xs text-center transition-all"
+                  href={checkoutAuthHref("login", authReturnPath)}
+                  className="flex-1 bg-orange-600 hover:bg-orange-700 text-white py-3 px-4 rounded-2xl font-bold text-xs text-center transition-all"
                 >
                   {t("authModalLogin")}
                 </Link>
                 <Link
-                  href={`/register?callbackUrl=/checkout/${shopId}`}
+                  href={checkoutAuthHref("register", authReturnPath)}
                   className="flex-1 bg-gray-50 hover:bg-gray-100 text-gray-700 py-3 px-4 rounded-2xl font-bold text-xs text-center transition-all"
                 >
                   {t("authModalRegister")}

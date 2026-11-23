@@ -486,7 +486,13 @@ export default function LoginPage({
           <p className="text-sm text-gray-400 font-medium lowercase">
             {t('noAccount')} {' '}
             <Link 
-              href={activeTab === 'PARTNER' ? "/register?role=partner" : "/register"} 
+              href={
+                activeTab === 'PARTNER'
+                  ? "/register?role=partner"
+                  : callbackUrl !== '/'
+                    ? `/register?callbackUrl=${encodeURIComponent(callbackUrl)}`
+                    : "/register"
+              } 
               className="text-orange-600 font-bold hover:underline"
             >
               {t('signUp')}
