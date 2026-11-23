@@ -211,3 +211,97 @@ describe("api ek basliklar", () => {
     expect(headers.Accept).toBe("application/json");
   });
 });
+
+/** JWT bicimli sahte token: yalnizca `exp` okunur, imza istemcide dogrulanmaz. */
+function jwt(name: string, expSec: number) {
+  const b64 = (o: object) => Buffer.from(JSON.stringify(o)).toString("base64url");
+  return `${b64({ alg: "HS256" })}.${b64({ sub: name, exp: expSec })}.imza`;
+}
+const now = () => Math.floor(Date.now() / 1000);
+const withHeaders = (status: number, body: unknown, h: Record<string, string> = {}) => ({
+  ...json(status, body),
+  headers: { get: (k: string) => h[k] ?? null },
+});
+const authOf = (init?: RequestInit) => (init?.headers as Record<string, string>).Authorization;
+
+describe("suresi dolan token (inceleme hesabi, 2026-11-23)", () => {
+  it("accessTokenExpiring: dolmus ve 30 sn icinde dolacak token; okunamayan token false", () => {
+    const { accessTokenExpiring } = freshApi();
+    expect(accessTokenExpiring(jwt("a", now() - 10))).toBe(true);
+    expect(accessTokenExpiring(jwt("a", now() + 10))).toBe(true);
+    expect(accessTokenExpiring(jwt("a", now() + 600))).toBe(false);
+    expect(accessTokenExpiring("opak-token")).toBe(false);
+  });
+
+  it("dolmus token istekten ONCE tek ucusta yenilenir; iki istek tek refresh", async () => {
+    const { api, saveTokens } = freshApi();
+    await saveTokens(jwt("eski", now() - 60), "refresh-1");
+    const fresh = jwt("yeni", now() + 900);
+    fetchMock.mockImplementation(async (url: string, init?: RequestInit) => {
+      if (url.endsWith("/auth/refresh")) {
+        await new Promise((r) => setTimeout(r, 10));
+        return json(200, { accessToken: fresh, refreshToken: "refresh-2" });
+      }
+      return withHeaders(200, { auth: authOf(init) });
+    });
+    const [a, b] = await Promise.all([
+      api<{ auth: string }>("/shops/nearby", { optionalAuth: true }),
+      api<{ auth: string }>("/bookings/me"),
+    ]);
+    expect(a.auth).toBe(`Bearer ${fresh}`);
+    expect(b.auth).toBe(`Bearer ${fresh}`);
+    expect(fetchMock.mock.calls.filter(([u]) => String(u).endsWith("/auth/refresh"))).toHaveLength(1);
+  });
+
+  it("istege bagli uc: yenileme reddedilirse istek ANONIM gider, oturum kapatilmaz", async () => {
+    const { api, saveTokens, setSessionExpiredHandler } = freshApi();
+    const expired = jest.fn();
+    setSessionExpiredHandler(expired);
+    await saveTokens(jwt("eski", now() - 60), "refresh-1");
+    fetchMock.mockImplementation(async (url: string, init?: RequestInit) =>
+      url.endsWith("/auth/refresh") ? json(401, { error: "unauthorized" }) : withHeaders(200, { auth: authOf(init) ?? null }),
+    );
+    const r = await api<{ auth: string | null }>("/shops/nearby", { optionalAuth: true });
+    expect(r.auth).toBeNull();
+    expect(expired).not.toHaveBeenCalled();
+  });
+
+  it("X-Auth-Stale: bir kez yenileyip tekrarlar, test dukkanlari ikinci yanitta gelir", async () => {
+    const { api, saveTokens } = freshApi();
+    // Istemci saatine gore gecerli ama sunucu reddetti (saat kaymasi / iptal).
+    await saveTokens(jwt("eski", now() + 600), "refresh-1");
+    const fresh = jwt("yeni", now() + 900);
+    fetchMock.mockImplementation(async (url: string, init?: RequestInit) => {
+      if (url.endsWith("/auth/refresh")) return json(200, { accessToken: fresh, refreshToken: "refresh-2" });
+      return authOf(init) === `Bearer ${fresh}`
+        ? withHeaders(200, ["gercek", "test"])
+        : withHeaders(200, ["gercek"], { "X-Auth-Stale": "1" });
+    });
+    expect(await api<string[]>("/shops/nearby", { optionalAuth: true })).toEqual(["gercek", "test"]);
+  });
+
+  it("X-Auth-Stale ve yenileme reddi: anonim yanit kalir, oturum kapatilmaz", async () => {
+    const { api, saveTokens, setSessionExpiredHandler } = freshApi();
+    const expired = jest.fn();
+    setSessionExpiredHandler(expired);
+    await saveTokens(jwt("eski", now() + 600), "refresh-1");
+    fetchMock.mockImplementation(async (url: string) =>
+      url.endsWith("/auth/refresh") ? json(401, { error: "unauthorized" }) : withHeaders(200, ["gercek"], { "X-Auth-Stale": "1" }),
+    );
+    expect(await api<string[]>("/shops/nearby", { optionalAuth: true })).toEqual(["gercek"]);
+    expect(expired).not.toHaveBeenCalled();
+  });
+
+  it("zorunlu uc: onceden reddedilen yenileme 401'de TEKRAR denenmez (refresh token iki kez yanmaz)", async () => {
+    const { api, saveTokens, setSessionExpiredHandler } = freshApi();
+    const expired = jest.fn();
+    setSessionExpiredHandler(expired);
+    await saveTokens(jwt("eski", now() - 60), "refresh-1");
+    fetchMock.mockImplementation(async (url: string) =>
+      url.endsWith("/auth/refresh") ? json(401, { error: "unauthorized" }) : withHeaders(401, { error: "unauthorized" }),
+    );
+    await expect(api("/bookings/me")).rejects.toMatchObject({ code: "session_expired" });
+    expect(fetchMock.mock.calls.filter(([u]) => String(u).endsWith("/auth/refresh"))).toHaveLength(1);
+    expect(expired).toHaveBeenCalledTimes(1);
+  });
+});
