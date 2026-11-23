@@ -33,7 +33,7 @@ export default async function PartnerPosterPage({
   searchParams,
 }: {
   params: Promise<{ locale: string }>;
-  searchParams?: Promise<{ shop?: string }>;
+  searchParams?: Promise<{ shop?: string | string[] }>;
 }) {
   const { locale } = await params;
   setRequestLocale(locale);
@@ -41,13 +41,15 @@ export default async function PartnerPosterPage({
   const tCommon = await getTranslations("Common");
   const actor = await requirePartnerPage(locale, "/partner/poster");
   const sp = (await searchParams) ?? {};
+  // `?shop=a&shop=b` dizi getirir; dizi Prisma'ya gidince 500 oluyordu.
+  const shopParam = typeof sp.shop === "string" ? sp.shop : undefined;
 
   // Esnaf yalnizca kendi dukkanini gorur (`resolvePartnerShops` sahiplige bakar);
   // yonetici `?shop=` ile herhangi bir dukkanin afisini acabilir.
   const shop =
-    actor.role === "ADMIN" && sp.shop
-      ? await prisma.shop.findUnique({ where: { id: sp.shop }, select: { id: true, name: true } })
-      : (await resolvePartnerShops(actor.id, sp.shop)).activeShop;
+    actor.role === "ADMIN" && shopParam
+      ? await prisma.shop.findUnique({ where: { id: shopParam }, select: { id: true, name: true } })
+      : (await resolvePartnerShops(actor.id, shopParam)).activeShop;
 
   if (!shop) {
     return (
