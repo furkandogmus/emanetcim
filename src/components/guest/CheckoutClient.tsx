@@ -20,6 +20,7 @@ import BagSizeGuide from "@/components/guest/BagSizeGuide";
 import CheckoutWhatIsIncluded from "@/components/guest/CheckoutWhatIsIncluded";
 import { createBookingAction } from "@/actions/booking";
 import { validateReferralCodeAction } from "@/actions/referral";
+import { previewAffiliateCheckoutAction } from "@/actions/affiliate";
 import { clearReferralCode, readReferralCode } from "@/lib/referral-capture";
 import { applyReferralDiscount } from "@/lib/referral-discount";
 import { markBooked } from "@/lib/pwa-install";
@@ -78,6 +79,8 @@ interface CheckoutClientProps {
   open247?: boolean;
   weekly?: WeeklyDay[];
   closures?: ClosureRange[];
+  /** `/r/<kod>` araci cerezi var: indirimli toplam sunucudan (`previewAffiliateCheckoutAction`). */
+  hasAffiliate?: boolean;
 }
 
 /** URL/taslaktan gelen gunleri gecerli bir araliga ceker; bugun artik olmuyorsa yarina kaydirir. */
@@ -116,6 +119,7 @@ export default function CheckoutClient({
   open247 = false,
   weekly,
   closures,
+  hasAffiliate = false,
 }: CheckoutClientProps) {
   const hours = useMemo(
     () => ({ openingTime, closingTime, open247, timeZone, weekly, closures }),
@@ -278,9 +282,52 @@ export default function CheckoutClient({
       : 0;
   const insuranceFee = totalPrice > 0 ? pricingRules.insuranceFeeTry : 0;
   const subtotal = totalPrice + insuranceFee;
+  /*
+    Araci linkiyle gelindiyse fiyat SUNUCUDA hesaplanir (tek indirim kurali,
+    `CheckoutDiscountService`): araci indirimi davet/kupondan buyukse onlarin
+    yerine gecer. Istemci yalnizca sunucunun dondurdugunu gosterir.
+  */
+  const [affiliatePreview, setAffiliatePreview] = useState<
+    Awaited<ReturnType<typeof previewAffiliateCheckoutAction>>
+  >(null);
+  const previewKey =
+    hasAffiliate && windowOk && checkInDate && checkOutDate && bagS + bagM + bagXl > 0
+      ? JSON.stringify([shopId, bagS, bagM, bagXl, checkInDate.toISOString(), checkOutDate.toISOString(), couponCode.trim(), referralInput, guestEmail.trim()])
+      : null;
+  useEffect(() => {
+    if (!previewKey) return;
+    let cancelled = false;
+    const [, s, m, xl, ci, co, cc, rc, ge] = JSON.parse(previewKey) as [string, number, number, number, string, string, string, string, string];
+    const timer = setTimeout(() => {
+      void previewAffiliateCheckoutAction({
+        shopId,
+        bagCountS: s,
+        bagCountM: m,
+        bagCountXl: xl,
+        checkInTime: new Date(ci),
+        checkOutTime: new Date(co),
+        couponCode: cc || undefined,
+        referralCode: rc || undefined,
+        guestEmail: ge || undefined,
+      })
+        .then((res) => {
+          if (!cancelled) setAffiliatePreview(res);
+        })
+        .catch(() => {
+          if (!cancelled) setAffiliatePreview(null);
+        });
+    }, 300);
+    return () => {
+      cancelled = true;
+      clearTimeout(timer);
+    };
+  }, [previewKey, shopId]);
+  const serverPriced = previewKey && affiliatePreview && affiliatePreview.subtotal === subtotal ? affiliatePreview : null;
+  const affiliateDiscount = serverPriced?.discount?.kind === "affiliate" ? serverPriced.discount : null;
+
   const referral =
-    referralActive && subtotal > 0 ? applyReferralDiscount(subtotal, referralPct) : null;
-  const grandTotal = referral ? referral.totalPrice : subtotal;
+    !affiliateDiscount && referralActive && subtotal > 0 ? applyReferralDiscount(subtotal, referralPct) : null;
+  const grandTotal = affiliateDiscount ? serverPriced!.total : referral ? referral.totalPrice : subtotal;
   const insuranceEnabled = isInsuranceEnabled(pricingRules);
 
   const totalBags = bagS + bagM + bagXl;
@@ -747,6 +794,16 @@ export default function CheckoutClient({
                   </span>
                   <span className="text-emerald-700 font-bold">
                     −<Money amount={referral.discountAmount} />
+                  </span>
+                </div>
+              ) : null}
+              {affiliateDiscount ? (
+                <div className="flex justify-between items-center text-sm" data-testid="checkout-affiliate-line">
+                  <span className="text-emerald-700 font-medium">
+                    {t("checkoutAffiliateLine", { pct: serverPriced?.affiliatePct ?? 0 })}
+                  </span>
+                  <span className="text-emerald-700 font-bold">
+                    −<Money amount={affiliateDiscount.amount} />
                   </span>
                 </div>
               ) : null}

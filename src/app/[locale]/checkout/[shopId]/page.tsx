@@ -1,3 +1,5 @@
+import { cookies } from 'next/headers';
+import { AFFILIATE_COOKIE } from '@/services/AffiliateService';
 import { loadScheduleParts } from "@/services/ShopScheduleService";
 import { cache } from 'react';
 import { setRequestLocale, getTranslations } from 'next-intl/server';
@@ -102,6 +104,8 @@ export default async function CheckoutPage({
       open247={shop.open247}
       weekly={scheduleParts?.weekly}
       closures={scheduleParts?.closures}
+      /* Araci cerezi (HttpOnly) istemciden okunamaz; varsa fiyat sunucudan sorulur. */
+      hasAffiliate={(await cookies()).has(AFFILIATE_COOKIE)}
     />
   );
 }

@@ -2,7 +2,7 @@ import { setRequestLocale, getTranslations } from "next-intl/server";
 import { auth } from "@/auth";
 import { redirect } from "next/navigation";
 import { Link } from "@/i18n/routing";
-import { CalendarDays, ChevronRight, CircleHelp, MapPin, Lock, UserRound } from "lucide-react";
+import { CalendarDays, ChevronRight, CircleHelp, Handshake, MapPin, Lock, UserRound } from "lucide-react";
 import ReferralCodeCard from "@/components/account/ReferralCodeCard";
 
 export default async function AccountPage({
@@ -29,6 +29,7 @@ export default async function AccountPage({
   );
 
   const t = await getTranslations("Account");
+  const tAffiliate = await getTranslations("Affiliate");
   const copy = {
     title: t("title"),
     hello: t("hello"),
@@ -100,6 +101,17 @@ export default async function AccountPage({
             <span>
               <span className="block text-sm font-bold text-gray-800">{copy.editProfile}</span>
               <span className="block text-xs text-gray-400">{copy.editProfileDesc}</span>
+            </span>
+            <ChevronRight size={16} className="ml-auto text-gray-300" />
+          </Link>
+          <Link
+            href="/account/affiliate"
+            className="flex items-center gap-3 px-5 py-5 hover:bg-gray-50 transition-colors"
+          >
+            <Handshake size={18} className="text-gray-400" />
+            <span>
+              <span className="block text-sm font-bold text-gray-800">{tAffiliate("panelTitle")}</span>
+              <span className="block text-xs text-gray-400">{tAffiliate("panelNavDesc")}</span>
             </span>
             <ChevronRight size={16} className="ml-auto text-gray-300" />
           </Link>
