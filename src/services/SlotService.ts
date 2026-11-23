@@ -1,5 +1,5 @@
 import { hoursForDate } from "@/lib/shop-schedule";
-import { loadScheduleParts } from "@/services/ShopScheduleService";
+import { loadScheduleParts, type ShopScheduleParts } from "@/services/ShopScheduleService";
 import { slotCalendarDays } from "@/lib/slot-calendar";
 import prisma from "@/lib/db";
 import logger from "@/lib/logger";
@@ -54,17 +54,36 @@ export function operatingHoursToSlots(
   return Math.max(0, Math.ceil(totalMins / SLOT_MINUTES));
 }
 
-export async function generateSlotsForShop(
-  shopId: string,
-  daysForward = 30,
-) {
-  const shop = await prisma.shop.findUniqueOrThrow({
-    where: { id: shopId },
-    select: { id: true, open247: true, openingTime: true, closingTime: true, capacity: true, timezone: true },
-  });
+/**
+ * Slot ufku: gece isi ve dukkan basina uretim AYNI sayiyi kullanir. Iki ayri
+ * sabit olsaydi bir gun ayrisir ve gece isi, gun icinde uretilenin bir kismini
+ * "fazla" sayardi.
+ */
+export const SLOT_HORIZON_DAYS = 30;
 
+/** Uretimin okudugu dukkan alanlari (takvim parcalari ayri: `loadScheduleParts`). */
+export type SlotPlanShop = {
+  open247: boolean;
+  openingTime: string | null;
+  closingTime: string | null;
+  timezone: string | null;
+};
+
+/**
+ * Bir dukkanin ufuk icinde OLMASI GEREKEN slot baslangiclari -- saf fonksiyon.
+ *
+ * Gece isi (`fillMissingSlots`) ve dukkan basina uretim (`generateSlotsForShop`)
+ * ayni plani kullanir: haftalik saat, 7/24, izin gunleri ve saat dilimi kurali
+ * TEK yerde. `windowStart`/`windowEnd`: planin kapsadigi takvim gunlerinin dukkan
+ * saatindeki sinirlari; uzlastirma yalnizca bu araliktaki slotlara dokunur.
+ */
+export function planSlotStarts(
+  shop: SlotPlanShop,
+  parts: Partial<ShopScheduleParts> | undefined,
+  now: Date,
+  horizonDays: number = SLOT_HORIZON_DAYS,
+): { starts: Date[]; windowEnd: Date | null } {
   const tz = shop.timezone || "Europe/Istanbul";
-  const parts = (await loadScheduleParts([shopId])).get(shopId);
   const schedule = {
     open247: shop.open247,
     openingTime: shop.openingTime,
@@ -73,14 +92,10 @@ export async function generateSlotsForShop(
     ...parts,
   };
 
-  let created = 0;
-  const now = new Date();
+  const starts: Date[] = [];
+  const takvimGunleri = slotCalendarDays(now, tz, horizonDays);
 
-  const takvimGunleri = slotCalendarDays(now, tz, daysForward);
-
-  for (let dayOffset = 0; dayOffset < takvimGunleri.length; dayOffset++) {
-    const localDay = takvimGunleri[dayOffset];
-
+  for (const localDay of takvimGunleri) {
     // Gunun kendi saati: haftalik satir ya da izin gunu (null = o gun slot yok).
     const dayHours = hoursForDate(schedule, localDay);
     if (!dayHours) continue;
@@ -90,6 +105,8 @@ export async function generateSlotsForShop(
 
     for (let slotIdx = 0; slotIdx < slotsPerDay; slotIdx++) {
       const slotStartMins = baseMins + slotIdx * SLOT_MINUTES;
+      // Gece yarisini asan vardiya ayni takvim gununun sabahina sarar (gece isinin
+      // 2026-11-23 oncesi davranisi aynen korunuyor).
       const h = Math.floor(slotStartMins / 60) % 24;
       const m = slotStartMins % 60;
 
@@ -128,31 +145,208 @@ export async function generateSlotsForShop(
 
       if (!startUtc || isNaN(startUtc.getTime())) continue;
       if (startUtc < now) continue;
-
-      // Handle overnight slots: if slot is in next calendar day
-      const endUtc = new Date(startUtc.getTime() + MS_PER_SLOT);
-
-      try {
-        await prisma.shopTimeSlot.upsert({
-          where: { shopId_startTime: { shopId, startTime: startUtc } },
-          create: {
-            shopId,
-            startTime: startUtc,
-            endTime: endUtc,
-            capacity: shop.capacity,
-          },
-          update: {},
-        });
-        created++;
-      } catch {
-        // slot exists, skip
-      }
+      starts.push(startUtc);
     }
   }
 
-  return created;
+  const lastDay = takvimGunleri[takvimGunleri.length - 1];
+  const windowEnd = lastDay
+    ? parseDatetimeLocalInTimeZone(`${addCalendarDays(lastDay, 1)}T00:00:00`, tz)
+    : null;
+  return { starts, windowEnd };
 }
 
+function addCalendarDays(ymd: string, n: number): string {
+  const [y, mo, d] = ymd.split("-").map(Number);
+  return new Date(Date.UTC(y, mo - 1, d + n)).toISOString().slice(0, 10);
+}
+
+/**
+ * - `fill`: yalnizca EKSIK slotu yazar, mevcut satira dokunmaz. Gece isinin
+ *   davranisi (eskiden `upsert(update: {})`).
+ * - `reconcile`: eksikleri yazar, ufuk icindeki REZERVASYONSUZ gelecek slotlari
+ *   yeni takvime ve kapasiteye cekir. Saat/izin/kapasite degisince kullanilir.
+ */
+export type SlotGenerationMode = "fill" | "reconcile";
+
+export type SlotGenerationResult = {
+  created: number;
+  reactivated: number;
+  deactivated: number;
+  capacityUpdated: number;
+  /** Uretim yapilmadi: dukkan yok ya da isletilmiyor (pasif / test / talep testi). */
+  skipped?: "not_found" | "not_operating";
+};
+
+const EMPTY_RESULT: Omit<SlotGenerationResult, "skipped"> = {
+  created: 0,
+  reactivated: 0,
+  deactivated: 0,
+  capacityUpdated: 0,
+};
+
+/**
+ * TEK DUKKANIN slotlarini hemen uretir -- gece isini beklemeden.
+ *
+ * NEDEN (2026-11-23 olayi): yeni onaylanan bir dukkan web aramasinda hic
+ * cikmadi, cunku `ShopTimeSlot` satiri sifirdi. Slotlari yalnizca gece 04:17
+ * isi uretiyordu ve o is haftalardir basarisizdi; web aramasi slot dalinda
+ * slotu olmayan dukkani eliyor (`findShopsForSearch`). Mobil yakindakiler
+ * kapasite yolunu kullandigi icin dukkan orada gorunuyordu -- yani sorun
+ * yalnizca web'de, sessizce.
+ *
+ * Kurallar:
+ *   - Plan gece isiyle AYNI (`planSlotStarts`, `SLOT_HORIZON_DAYS`).
+ *   - Yalnizca isletilen dukkan (`OPERATING_SHOP_FILTER`): pasif, test ve talep
+ *     testi noktasina slot yazilmaz -- gece isi de yazmiyor.
+ *   - Idempotent: `@@unique([shopId, startTime])` + `createMany(skipDuplicates)`;
+ *     iki kez cagirmak ikinci kez hicbir sey yazmaz.
+ *   - Es zamanli guvenli: dukkan basina `pg_advisory_xact_lock`. Gece isi de ayni
+ *     kilidi alir; takvim KILIT ALTINDA okunur, yani eski takvimle calisan bir tur
+ *     yeni takvimin uzerine yazamaz.
+ *   - Rezervasyonu olan slot SILINMEZ ve DEGISTIRILMEZ. Takvim disina dusen
+ *     rezervasyonsuz slot silinmez, `isActive=false` olur: `ReservationSlot`
+ *     slot silinince cascade ile silinir, yani yarista yeni alinmis bir
+ *     rezervasyonun slot defteri sessizce kaybolabilirdi.
+ */
+export async function generateSlotsForShop(
+  shopId: string,
+  opts: { horizonDays?: number; mode?: SlotGenerationMode; now?: Date } = {},
+): Promise<SlotGenerationResult> {
+  const horizonDays = opts.horizonDays ?? SLOT_HORIZON_DAYS;
+  const mode = opts.mode ?? "reconcile";
+  const now = opts.now ?? new Date();
+
+  return prisma.$transaction(
+    async (tx) => {
+      await tx.$executeRaw`SELECT pg_advisory_xact_lock(hashtext(${`shop-slots:${shopId}`})::bigint)`;
+
+      const shop = await tx.shop.findUnique({
+        where: { id: shopId },
+        select: {
+          id: true,
+          open247: true,
+          openingTime: true,
+          closingTime: true,
+          capacity: true,
+          timezone: true,
+          isActive: true,
+          isTest: true,
+          isPrelaunch: true,
+        },
+      });
+      if (!shop) return { ...EMPTY_RESULT, skipped: "not_found" as const };
+      if (
+        shop.isActive !== OPERATING_SHOP_FILTER.isActive ||
+        shop.isTest !== OPERATING_SHOP_FILTER.isTest ||
+        shop.isPrelaunch !== OPERATING_SHOP_FILTER.isPrelaunch
+      ) {
+        return { ...EMPTY_RESULT, skipped: "not_operating" as const };
+      }
+
+      const parts = (await loadScheduleParts([shopId], undefined, tx)).get(shopId);
+      const { starts, windowEnd } = planSlotStarts(shop, parts, now, horizonDays);
+
+      const { count: created } = starts.length
+        ? await tx.shopTimeSlot.createMany({
+            data: starts.map((startTime) => ({
+              shopId,
+              startTime,
+              endTime: new Date(startTime.getTime() + MS_PER_SLOT),
+              capacity: shop.capacity,
+            })),
+            skipDuplicates: true,
+          })
+        : { count: 0 };
+
+      if (mode === "fill" || !windowEnd) return { ...EMPTY_RESULT, created };
+
+      /*
+        Uzlastirma. Once ufuktaki gelecek slotlar KILITLENIR (rezervasyon akisi
+        `reserveSlots` ayni satirlari FOR UPDATE ile kilitliyor), sonra
+        rezervasyon defteri kilit ALTINDA okunur: READ COMMITTED'da her ifade
+        taze goruntu alir, yani kilidi bekledigimiz sirada islenen rezervasyon
+        burada gorunur ve o slota dokunulmaz.
+      */
+      const future = await tx.$queryRaw<
+        Array<{ id: string; startTime: Date; capacity: number; isActive: boolean }>
+      >`SELECT id, "startTime", capacity, "isActive" FROM "ShopTimeSlot"
+         WHERE "shopId" = ${shopId} AND "startTime" >= ${now} AND "startTime" < ${windowEnd}
+         FOR UPDATE`;
+      if (future.length === 0) return { ...EMPTY_RESULT, created };
+
+      const booked = new Set(
+        (
+          await tx.reservationSlot.findMany({
+            where: { slotId: { in: future.map((f) => f.id) } },
+            select: { slotId: true },
+            distinct: ["slotId"],
+          })
+        ).map((r) => r.slotId),
+      );
+      const wanted = new Set(starts.map((d) => d.getTime()));
+
+      const toDeactivate: string[] = [];
+      const toReactivate: string[] = [];
+      const toResize: string[] = [];
+      for (const slot of future) {
+        if (booked.has(slot.id)) continue;
+        const keep = wanted.has(new Date(slot.startTime).getTime());
+        if (!keep) {
+          if (slot.isActive) toDeactivate.push(slot.id);
+          continue;
+        }
+        if (!slot.isActive) toReactivate.push(slot.id);
+        else if (slot.capacity !== shop.capacity) toResize.push(slot.id);
+      }
+
+      if (toDeactivate.length) {
+        await tx.shopTimeSlot.updateMany({ where: { id: { in: toDeactivate } }, data: { isActive: false } });
+      }
+      if (toReactivate.length) {
+        await tx.shopTimeSlot.updateMany({
+          where: { id: { in: toReactivate } },
+          data: { isActive: true, capacity: shop.capacity },
+        });
+      }
+      if (toResize.length) {
+        await tx.shopTimeSlot.updateMany({ where: { id: { in: toResize } }, data: { capacity: shop.capacity } });
+      }
+
+      return {
+        created,
+        deactivated: toDeactivate.length,
+        reactivated: toReactivate.length,
+        capacityUpdated: toResize.length,
+      };
+    },
+    // Ufukta en fazla ~1.440 satir (30 gun x 48); varsayilan 5 sn kisa kalabilir.
+    { timeout: 30_000, maxWait: 10_000 },
+  );
+}
+
+/**
+ * Dukkan basina uretimi ates-ve-unut olarak baslatir; hata HER ZAMAN loglanir.
+ *
+ * Onay, aktiflestirme ve takvim degisikligi bunu cagirir: slot hatasi asil
+ * islemi (onay, kayit) asla dusurmez; kacan dukkani gece isi yakalar.
+ */
+export function scheduleSlotGeneration(shopId: string, reason: string): void {
+  void generateSlotsForShop(shopId)
+    .then((r) => {
+      if (r.skipped) return;
+      logger.info({ shopId, reason, ...r }, "shop_slot_generation_done");
+    })
+    .catch((err: unknown) => logger.warn({ err, shopId, reason }, "shop_slot_generation_failed"));
+}
+
+/**
+ * Gece isi: isletilen her dukkan icin EKSIK slotlari uretir (`fill`).
+ *
+ * Bir dukkanin hatasi digerlerini durdurmaz -- eskiden ilk hata butun turu
+ * kesiyordu ve listenin geri kalani o gece slot almiyordu. Hata varsa tur
+ * sonunda firlatilir: `withJobRun` isi basarisiz yazar, saglik kontrolu gorur.
+ */
 export async function fillMissingSlots() {
   // Talep testi noktalarina slot URETILMEZ: rezervasyon almiyorlar, dolayisiyla
   // slot bekleyen her sey (kapasite, saglik kontrolu) onlari saymamali.
@@ -161,8 +355,17 @@ export async function fillMissingSlots() {
     select: { id: true },
   });
   let total = 0;
+  const failed: string[] = [];
   for (const s of shops) {
-    total += await generateSlotsForShop(s.id);
+    try {
+      total += (await generateSlotsForShop(s.id, { mode: "fill" })).created;
+    } catch (err) {
+      failed.push(s.id);
+      logger.error({ err, shopId: s.id }, "generate_slots_shop_failed");
+    }
+  }
+  if (failed.length > 0) {
+    throw new Error(`generate_slots_failed_for_${failed.length}_of_${shops.length}_shops`);
   }
   return total;
 }
