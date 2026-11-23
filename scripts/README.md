@@ -1,47 +1,47 @@
-# Zamanlanmış işler — kurulum ve çalıştırma
+# scripts/ — zamanlanmış işler ve operasyon betikleri
 
-## Son durum — 2026-08-30
+## Son durum — 2026-11-23
 
-> **Sekiz işin tamamı canlı sunucuda kurulu ve `enforced=true`.** 2026-08-29
-> akşamı `crontab -l -u ec2-user` ile ölçüldü, eksik beş iş kuruldu ve kurulum
-> sırasında çıkan üç gizli hata düzeltildi (`docs/DEFECT_BACKLOG.md` madde 9).
-> Listenin repodaki kopyası: [`ops/crontab.prod`](../ops/crontab.prod) — sunucu
-> giderse liste onunla gitmesin diye.
+> **On iş, hepsi `enforced=true`.** Kaynak `src/lib/jobs/registry.ts`; crontab satırlarını
+> `scripts/emit-crontab.sh` üretir, sunucudaki listenin repodaki kopyası
+> [`ops/crontab.prod`](../ops/crontab.prod). `src/__tests__/jobs-registry.test.ts`
+> kayıt defteri ile `/api/internal/*` uçlarının ayrışmasını ve `enforced=false` bir işi
+> CI'da kırmızı yakar.
+>
+> **2026-10-25 → 2026-11-23 arası `call-internal-job.sh` kullanan bütün işler hiç
+> çalışmadı:** sunucu yeniden kurulunca sır dosyası yalnızca `docker-compose.env` olarak
+> kaldı, betik `.env` arıyordu. Betik artık önce `docker-compose.env`'i, yoksa `.env`'i
+> okur (`47dbe18f`). Düzeltmeden sonra her işin `lastSuccessAt`'i
+> `/api/health/jobs` → `checks.scheduledJobs`'ta tazelenmeli.
+>
+> **2026-11-23:** `late-dropoff-scan` (5 dk) `close-expired-bookings`'in yerini aldı; eski
+> iş ve ucu kaldırıldı. Sunucudaki crontab'da eski satır varsa silinip yenisi kurulmalı
+> (`crontab -l` ile `ops/crontab.prod` karşılaştırması).
 
-| İş | Cron | Sarmalayıcı | Metot | `enforced` |
+| İş | Cron (sunucu yerel saati) | Sarmalayıcı | Metot | Ne yapar |
 |---|---|---|---|---|
-| `generate-slots` | `17 4 * * *` | `generate-slots.sh` | POST | ✅ |
-| `overdue-scan` | `47 4 * * *` | `overdue-scan.sh` | POST | ✅ |
-| `late-dropoff-scan` | `2,7,…,57 * * * *` (5 dk) | — | POST | ✅ |
-| `booking-reminders` | `7 9 * * *` | — | GET | ✅ |
-| `cleanup` | `23 3 * * *` | — | POST | ✅ |
-| `seal-forecast` | `37 6 * * 1` | — | POST | ✅ |
-| `classify-inbox` | `13 5 * * *` | — | POST | ✅ |
-| `response-times` | `29 3 * * *` | — | POST | ✅ |
-| `finance-export` | `53 2 * * *` | — | GET | ✅ |
+| `generate-slots` | `17 4 * * *` | `generate-slots.sh` | POST | 30 gün ileriye slot üretir |
+| `overdue-scan` | `47 4 * * *` | `overdue-scan.sh` | POST | Çıkış saati geçmiş açık rezervasyonlara olay yazar (durum değiştirmez) |
+| `late-dropoff-scan` | `2,7,…,57 * * * *` (5 dk) | — | POST | Bırakma saatinde gelmeyen misafire +15/+30/+45 dk hatırlatma, +60 dk'da (ya da esnafın bekletmesi bitince) kapanış |
+| `booking-reminders` | `7,22,37,52 * * * *` (15 dk) | — | GET | Yaklaşan check-in hatırlatması; geç teslimde esnaf/misafir uyarıları (`NotificationLog` ile tekrar kontrollü) |
+| `consistency-check` | `41 5 * * *` | — | GET | Ayrışmış rezervasyon/dükkan kayıtlarını sayar (düzeltmez) |
+| `cleanup` | `23 3 * * *` | — | POST | Süresi geçmiş token/oturum, 90 günden eski `AnalyticsEvent` ve `AppLinkHit` |
+| `seal-forecast` | `37 6 * * 1` | — | POST | Mühür ihtiyacı öngörüsü |
+| `classify-inbox` | `13 5 * * *` | — | POST | Gelen kutusunu destek/toplu/otomatik ayırır |
+| `response-times` | `29 3 * * *` | — | POST | Dükkan "yanıt süresi" rozeti |
+| `finance-export` | `53 2 * * *` | — | GET | Finans/mutabakat dışa aktarımı |
 
-> **`late-dropoff-scan` (2026-11-23) sunucuda kurulmalı**: eski `close-expired-bookings`
-> satırı hiç kurulmamıştı; yeni satır `ops/crontab.prod`'da. Kurulana kadar
-> `/api/health/jobs` bu işi gecikmiş gösterir.
-
-> Bu tablonun kaynağı **`src/lib/jobs/registry.ts`**'tir. Elle güncellemeyin —
-> `./scripts/emit-crontab.sh` çalıştırıp güncel hâli görün. Kayıt defterinin
-> gerçekle ayrışmasını `src/__tests__/jobs-registry.test.ts` CI'da kırmızı yakar.
-> **Metot sütunu da oradan gelir**: `booking-reminders` ve `finance-export`
-> yalnızca `GET` export ediyor; sabit `POST` gönderilen bir crontab satırı ikisini
-> de **405** ile sessizce düşürüyordu.
-
-> **Açık kalan:** `booking-reminders` "bildirildi" işareti tutmuyor
-> (`src/app/api/internal/booking-reminders/route.ts`), yani çıkış saati geçmiş açık
-> bir rezervasyon varsa esnaf her koşuda aynı uyarıyı alır. Bugün tetikleyen kayıt
-> yok (`CHECKED_IN` = 0), ama yenisi takılırsa geri gelir.
+Bu tabloyu elle değil kayıt defterinden güncelleyin (`./scripts/emit-crontab.sh`).
+**Metot da oradan gelir:** yalnızca `GET` export eden bir uca `POST` gönderen crontab
+satırı **405** ile sessizce düşer.
 
 Hepsi `call-internal-job.sh` üzerinden çalışır; sarmalayıcısı olan işlerde iş adı
-**sabitlenir** ki crontab'a elle yanlış ad yazılamasın.
+sabitlenir. Sunucuya özgü işler (6 saatlik Postgres yedeği, günlük AWS maliyet raporu,
+haftalık `docker image prune`) kayıt defterinde değil, `ops/crontab.prod`'un ikinci
+bölümündedir. Loglar `/opt/emanetci/logs/` altında (`ec2-user`'ın `/var/log`'a yazma izni yok).
 
-**Sağlık kontrolü:** `GET /api/health/jobs` — sır gerektirmez, sağlıksızsa **503**
-döner. Herhangi bir HTTP izleyici (UptimeRobot, Cloudflare health check, telefondan
-`curl`) bunu izleyebilir. **Beş** sinyal ölçer:
+**Sağlık kontrolü:** `GET /api/health/jobs` — sır gerektirmez, sağlıksızsa **503**.
+Herhangi bir HTTP izleyici bunu izleyebilir (`docs/OBSERVABILITY.md`). Beş sinyal:
 
 | Kontrol | Neyi ölçer | `stale`/`broken` ne demek |
 |---|---|---|
@@ -49,7 +49,7 @@ döner. Herhangi bir HTTP izleyici (UptimeRobot, Cloudflare health check, telefo
 | `overdueReconciliation` | en eski açık rezervasyonun yaşı | 72 saati aşmış açık rezervasyon var |
 | `sealIntegrity` | mühür sahiplik değişmezi | sahipsiz `ASSIGNED` veya dükkanlı `STOCK` mühür var |
 | `partnerReachability` | partnerin ulaşılabilir kanalı | ne e-postası ne telefonu olan partner var |
-| `scheduledJobs` | işlerin son başarılı çalışması | `enforced` bir iş `maxStaleHours`'ı aşmış |
+| `scheduledJobs` | işlerin son başarılı çalışması | bir iş `maxStaleHours`'ı aşmış |
 
 Biri bozuksa diğerleri **maskelemez** — toplam durum `DEGRADED` olur.
 
@@ -57,383 +57,95 @@ Biri bozuksa diğerleri **maskelemez** — toplam durum `DEGRADED` olur.
 
 ## Ön koşullar
 
-- Sunucuda uygulama dizini: `/opt/emanetci` (farklıysa `--app-dir` ile verin).
-- `CRON_SECRET` uygulamanın `.env` dosyasında tanımlı olmalı. Script değeri
-  **çalışma anında** okur — crontab'a sır yazılmaz, çünkü `crontab -l` çalıştıran
-  herkes görür.
-- `curl` kurulu olmalı (script kontrol eder).
+- Sunucuda uygulama dizini `/opt/emanetci` (farklıysa `--app-dir`).
+- `CRON_SECRET` sunucudaki `docker-compose.env`'de (SSM'den üretilir, `ops/SECRETS.md`).
+  Betik değeri **çalışma anında** okur — crontab'a sır yazılmaz, çünkü `crontab -l`
+  çalıştıran herkes görür. Dosya `ec2-user`'ın okuyabileceği izinle (640) üretilir.
+- `curl` kurulu olmalı (betik kontrol eder).
 
-Sunucuya bağlandıktan sonra bir kez:
+## Bir işi elle çalıştırmak
 
 ```bash
 cd /opt/emanetci
+./scripts/overdue-scan.sh                                  # sarmalayıcılı iş
+./scripts/call-internal-job.sh --job cleanup               # diğerleri
+./scripts/call-internal-job.sh --job booking-reminders --method GET
+./scripts/overdue-scan.sh --base-url https://staging.example.com --app-dir /srv/bagajpark
 ```
 
----
-
-## Adımlar
-
-### 1. Salt okunur doğrulama — hiçbir şey değiştirmez
-
-```bash
-curl -s https://bagajpark.com/api/health/jobs | jq
-```
-
-Beklenen: `"status": "UP"` ve HTTP 200. `"DEGRADED"` + 503 görürsen `checks`
-altındaki hangi kontrolün `stale` olduğuna bak:
-
-- `slotGeneration.status = "stale"` → slot üretimi ~2 gündür çalışmamış.
-- `overdueReconciliation.status = "stale"` → çıkış saatini 72 saatten fazla aşmış
-  ve hâlâ açık en az bir rezervasyon var.
-
-> **2026-08-22 itibarıyla bu uç 503 dönüyor** ve bu doğrudur: prod'da 18 açık
-> gecikmiş rezervasyon var, en eskisi Haziran'dan beri. Kontrol çalışıyor demektir,
-> bozuk demek değil. Rakam düzelince yeşile döner.
-
-### 2. Süre aşımı taramasını elle bir kez çalıştır
-
-İlk çalıştırma **olay yazar** (`BookingEvent` → `OVERDUE`), ama **hiçbir
-rezervasyonun durumunu değiştirmez** — gerekçe `src/services/OverdueBookingService.ts`
-başında.
-
-```bash
-./scripts/overdue-scan.sh
-```
-
-Beklenen çıktı (stderr'e, zaman damgalı):
-
-```
-[...] [call-internal-job.sh] INFO  overdue-scan tetikleniyor -> https://bagajpark.com/api/internal/overdue-scan
-[...] [call-internal-job.sh] INFO  BASARILI (HTTP 200): {"ok":true,"scannedAt":"...","overdueCount":18,...}
-```
-
-Başarısızlıkta çıkış kodu 1 ve sebep açıkça yazılır:
+Beklenen (stderr, zaman damgalı): `INFO  BASARILI (HTTP 200): {...}`. Başarısızlıkta
+çıkış kodu 1 ve sebep açıkça yazılır:
 
 | HTTP | Anlamı |
 |---|---|
 | 401 | `CRON_SECRET` uyuşmuyor |
+| 405 | Yanlış metot (kayıt defterindeki `method`'a bakın) |
 | 503 | Uygulamada `CRON_SECRET` tanımsız |
 | 404 | Uç kaldırılmış (ödeme mutabakat cron'unda böyle oldu, 2 ay fark edilmedi) |
 | 000 | Bağlantı kurulamadı |
 
-### 3. Günlük cron'a ekle — **ilk değiştiren adım**
-
-```bash
-crontab -e
-```
-
-Şu satırı ekleyin (slot üretiminden sonra çalışsın diye 4:47):
-
-```
-47 4 * * * /opt/emanetci/scripts/overdue-scan.sh >> /var/log/bagajpark-overdue.log 2>&1
-```
-
-Doğrulama:
-
-```bash
-crontab -l | grep -c overdue-scan
-```
-
-Beklenen: `1`.
-
-### 4. Ertesi gün doğrula
-
-```bash
-tail -20 /var/log/bagajpark-overdue.log
-```
-
-Beklenen: bir `BASARILI (HTTP 200)` satırı. İkinci çalıştırmada
-`"eventsRecorded"` genelde **0** olur — tarama idempotenttir, aynı rezervasyon için
-aynı eşiği iki kez yazmaz. Bu bir hata değil, doğru davranıştır.
+`overdue-scan` ve `classify-inbox` idempotenttir: ikinci koşu `eventsRecorded: 0` /
+`classified: 0` döner. `classify-inbox` parti başına 500 mesaj işler; `moreToDo: true`
+görürseniz `remaining` sıfırlanana kadar tekrar çalıştırın.
 
 ---
 
-## Geri alma
+## Crontab'ı kurma ve güncelleme
 
-Cron'u kaldırmak:
+İş tanımlarının tek kaynağı **`src/lib/jobs/registry.ts`**'tir. Crontab'ı elle yazmak,
+kayıt defteriyle gerçeğin ayrılmasının ta kendisidir — slot üretiminin 37 gün, ödeme
+mutabakat cron'unun 2 ay fark edilmeden durması bu yüzdendi.
 
-```bash
-crontab -l | grep -v overdue-scan | crontab -
-```
+**Yeni bir iş eklemek:** registry'ye `enforced: true` ile ekle (test başka değeri kabul
+etmez) → `bash scripts/emit-crontab.sh` çıktısıyla `ops/crontab.prod`'un ilk bölümünü
+güncelle → PR. Merge sonrası sunucuya kurulana kadar `/api/health/jobs` o işi gecikmiş
+gösterir; bu bilinçli bir hatırlatıcıdır.
 
-Yazılan olayları geri almak gerekmez: `OVERDUE` olayları salt kayıttır, hiçbir
-durumu veya parayı etkilemez. İstenirse temizlenebilir:
-
-```sql
-DELETE FROM "BookingEvent" WHERE event = 'OVERDUE';
-```
-
----
-
-## Farklı ortama çalıştırma
+**Sunucuya kurmak** (`ec2-user` olarak; deploy `ops/crontab.prod`'u taşımaz, dosyayı
+kopyalayın):
 
 ```bash
-./scripts/overdue-scan.sh \
-  --base-url https://staging.bagajpark.com \
-  --app-dir /srv/bagajpark
+mkdir -p /opt/emanetci/logs                 # yoksa hiçbir iş çalışmaz
+crontab -l > /tmp/crontab.yedek             # mevcut listeyi yedekle
+crontab /tmp/crontab.prod                   # ops/crontab.prod'un kopyası
+crontab -l | grep -c call-internal-job      # doğrula
 ```
 
-`--help` her sarmalayıcıda çalışır.
+**Geri alma:** `crontab /tmp/crontab.yedek`.
 
-
----
-
-## Mühür sahiplik onarımı (tek seferlik)
-
-`STOCK` dışında olup hiçbir dükkana ait olmayan mühürleri `STOCK`'a geri alır.
-
-**Neden gerekli:** 2026-08-22 denetiminde 1.277 mührün **1.247'si** `ASSIGNED` ama
-`shopId` NULL'du. `ASSIGNED` + sahipsiz bir mühür **anlamsız** bir durumdur: hiçbir
-dükkana atanmamış bir mühür "atanmış" olamaz. `STOCK`'a dönmesi bilgi kaybı değil,
-bilginin düzeltilmesidir. Mühür anlaşmazlıkta fiziksel zilyetliğin kanıtı olduğu
-için envanterin %96'sının eşleştirilememesi ciddi bir açıktı.
-
-**Yeni bozuk satır artık oluşamaz:** `Seal_ownership_matches_status` DB kısıtı
-`NOT VALID` olarak eklendi — mevcut satırlar tolere ediliyor, her yeni
-INSERT/UPDATE kontrol ediliyor. Bu adım eskileri temizler ve kısıtı tamamlar.
-
-### 1. Kuru çalışma — hiçbir şey değiştirmez
-
-```bash
-cd /opt/emanetci
-./scripts/repair-seal-ownership.sh
-```
-
-Beklenen: mevcut durum tablosu, ardından
-
-```
-[...] INFO  Onarilacak satir sayisi: 1249
-[...] WARN  KURU CALISMA -- hicbir sey degistirilmedi.
-[...] WARN  Gercekten onarmak icin: repair-seal-ownership.sh --apply
-```
-
-> 1249 = 1.247 sahipsiz `ASSIGNED` + 2 sahipsiz `FAULTY` (151 ve 152 — P0-6
-> soruşturmasında test amaçlı işaretlendikleri doğrulanmıştı).
-
-### 2. Yedek al — **onarımdan önce zorunlu**
-
-```bash
-./scripts/backup.sh
-```
-
-### 3. Onar ve kısıtı doğrula — **ilk değiştiren adım**
-
-```bash
-./scripts/repair-seal-ownership.sh --apply --validate
-```
-
-Beklenen:
-
-```
-[...] INFO  Onariliyor (1249 satir -> STOCK)...
-[...] INFO  Onarim tamamlandi.
-[...] INFO  DB kisiti dogrulaniyor...
-[...] INFO  Kisit dogrulandi -- bundan sonra gecersiz satir DB seviyesinde imkansiz.
-```
-
-`VALIDATE CONSTRAINT` hata verirse onarım eksik kalmıştır: 1. adımı tekrar
-çalıştırıp kalan satırları görün. Kısıt `NOT VALID` hâlinde kalır, yani yeni
-yazımlar yine korunur — acil bir durum değildir.
-
-### 4. Doğrula
-
-```bash
-curl -s https://bagajpark.com/api/health/jobs | jq '.checks.sealIntegrity'
-```
-
-Beklenen: `"status": "ok"`, `"orphanedNonStock": 0`, `"stockWithShop": 0`.
-
-`checkedInWithoutSeals` alanı ayrı bir sorundur ve bu onarımla **düzelmez**:
-bavula hiç mühür kaydedilmemiş `CHECKED_IN` rezervasyon sayısını verir
-(2026-08-22'de 3). Bkz. `docs/DEFECT_BACKLOG.md` → P1-23.
-
-
-### Geri alma
-
-Onarım `assignedAt` alanını da `NULL` yapar, yani satır satır geri alınamaz.
-Geri dönüş yolu 2. adımdaki yedektir — bu yüzden zorunlu.
-
-Kısıt doğrulamasını geri almak (kısıtı `NOT VALID` hâline döndürmek) mümkün
-değildir; kısıtın tamamen kaldırılması gerekir:
-
-```sql
-ALTER TABLE "Seal" DROP CONSTRAINT "Seal_ownership_matches_status";
-```
-
----
-
-## Slot saat dilimi onarımı — `repair-slot-timezone.sh`
-
-**Neden gerekli (2026-08-24):** `generateSlotsForShop` duvar saatini
-`new Date("2026-06-15T09:00:00")` ile ana çeviriyordu. Saat dilimi eki **olmayan**
-bir ISO dizesi, çalışma ortamının **yerel** saatine göre ayrıştırılır; konteynerde
-`TZ` ayarlı olmadığı için prod UTC. Sonuç: 09:00–20:00 açık bir İstanbul dükkanının
-slotları `09:00Z–20:00Z` olarak üretiliyordu — misafirin takviminde **12:00–23:00**.
-
-| Gerçek durum | Misafirin gördüğü | Sonuç |
-|---|---|---|
-| Dükkan açık, 09:00–12:00 | slot yok | arama dükkanı o pencerede eliyor |
-| Dükkan kapalı, 20:00–23:00 | slot var | rezervasyon alınıyor; misafir geliyor; `isShopOpenAt` check-in'i **reddediyor** |
-
-Geliştirici makinesi İstanbul saatinde olduğu için hata **yalnızca prod'da**
-görünüyordu. Kod düzeltildi (`src/services/SlotService.ts`), ama üretim
-`(shopId, startTime)` üzerinden `upsert` yapıyor: iş tekrar koştuğunda **doğru
-slotlar eklenir, yanlış olanlar yerinde kalır**. Bu script yanlış olanları siler.
-
-**Dokunulmayanlar:** rezervasyonu olan slotlar ve geçmiş slotlar — ikisi de
-tarihsel kayıt. `open247` dükkanlar da kapsam dışı (her saat açıklar).
-
-### 1. Kuru çalışma — hiçbir şey silmez
-
-```bash
-cd /opt/emanetci
-./scripts/repair-slot-timezone.sh
-```
-
-Beklenen: önce dükkan başına gelecek slot tablosu (`ilk_slot_yerel` /
-`son_slot_yerel` sütunları hatayı doğrudan gösterir — açılış 09:00 iken ilk slot
-12:00 çıkıyorsa kayma budur), sonra:
-
-```
-[...] INFO  Toplam silinecek satir: <N>
-[...] WARN  KURU CALISMA -- hicbir sey silinmedi.
-```
-
-Rezervasyonu **olan** ve kapalı saate düşen slot varsa ayrıca uyarır. Onlara
-dokunulmaz: her biri için esnafla konuşulup misafire yeni saat önerilmelidir.
-
-### 2. Yedek al — **silmeden önce zorunlu**
-
-```bash
-./scripts/backup.sh
-```
-
-### 3. Sil — **ilk değiştiren adım**
-
-```bash
-./scripts/repair-slot-timezone.sh --apply
-```
-
-### 4. Slotları yeniden üret — **zorunlu, atlanamaz**
-
-```bash
-./scripts/generate-slots.sh
-```
-
-3. adımdan sonra doğru saatlerdeki slotlar **henüz yoktur**; bu adım koşmadan
-dükkanların saatlik ürünü seçilemez hâlde kalır.
-
-### 5. Doğrula
-
-```bash
-./scripts/repair-slot-timezone.sh
-```
-
-Beklenen: `Toplam silinecek satir: 0` ve dükkan tablosunda `ilk_slot_yerel`
-değerinin `acilis` ile, `son_slot_yerel` değerinin `kapanis`'tan bir slot öncesiyle
-uyuşması.
-
-### Geri alma
-
-Silme satır satır geri alınamaz; geri dönüş yolu 2. adımdaki yedektir. Ancak
-slotlar türetilmiş veridir: yedek olmadan da `generate-slots.sh` doğru slotları
-yeniden üretir. Kaybolan tek şey silinen yanlış satırlardır ki amaç zaten odur.
-
----
-
-## Crontab'ı kayıt defterinden üretme
-
-İş tanımlarının tek kaynağı **`src/lib/jobs/registry.ts`**'tir. Crontab'ı elle
-yazmak, kayıt defteriyle gerçeğin ayrılmasının ta kendisidir — slot üretiminin
-37 gün, ödeme mutabakat cron'unun 2 ay fark edilmeden durması bu yüzdendi (P1-11).
-
-### 1. Üretilecek satırları gör — hiçbir şey değiştirmez
-
-```bash
-cd /opt/emanetci
-./scripts/emit-crontab.sh
-```
-
-Her iş için ne yaptığı, çalışmazsa ne olacağı ve cron satırı yazılır. `enforced`
-olmayan işlerde ayrıca bir not düşülür.
-
-### 2. Mevcut crontab'ı yedekle
-
-```bash
-crontab -l > /tmp/crontab.bak && wc -l /tmp/crontab.bak
-```
-
-### 3. Ekle — **ilk değiştiren adım**
-
-`emit-crontab.sh | crontab -` **kullanmayın**: mevcut crontab'ı ezer. Ekleyin:
-
-```bash
-(crontab -l; ./scripts/emit-crontab.sh 2>/dev/null) | crontab -
-```
-
-Doğrulama:
-
-```bash
-crontab -l | grep -c bagajpark-
-```
-
-Beklenen: kurduğunuz iş sayısı kadar satır.
-
-### 4. Bir iş gerçekten çalıştıktan sonra `enforced` yap
-
-Yeni kurulan bir iş kayıt defterinde `enforced: false`'tur. Bu bilinçli: cron'u
-kurulmamış bir iş **"bozuk" değil, "beklemede"dir** ve onu kırmızı saymak kalıcı
-kırmızı bir sağlık kontrolü demektir — kalıcı kırmızı, kimsenin bakmadığı
-kontroldür.
-
-İş ilk kez başarıyla çalıştıktan sonra:
+**Ertesi gün:**
 
 ```bash
 curl -s https://bagajpark.com/api/health/jobs | jq '.checks.scheduledJobs.jobs[] | {job, lastSuccessAt, status}'
 ```
 
-`lastSuccessAt` dolu görünen işler için `src/lib/jobs/registry.ts` içinde
-`enforced: true` yapın ve deploy edin. Artık o iş durursa sağlık kontrolü 503 döner.
+---
 
-### Geri alma
+## Tek seferlik veri onarım betikleri
 
-```bash
-crontab /tmp/crontab.bak
-```
+Hepsi aynı kalıpla çalışır: **varsayılan kuru çalışma** (hiçbir şey yazmaz) → **yedek
+zorunlu** (`./scripts/backup.sh`, `ops/README.md`) → `--apply` → kuru çalışmayı tekrar
+koşarak doğrulama. Neden ve kapsam her betiğin başlığında; `--help` her birinde çalışır.
+Geri dönüş yolu yedektir — satır satır geri alınamazlar.
 
+| Betik | Ne onarır | Not |
+|---|---|---|
+| `repair-seal-ownership.sh` | `STOCK` dışında olup dükkanı olmayan mühürleri `STOCK`'a alır (2026-08-22: 1.277 mührün 1.247'si sahipsiz `ASSIGNED`) | `--apply --validate` ile `Seal_ownership_matches_status` kısıtını da doğrular; canlıda uygulanıp uygulanmadığı `docs/DEFECT_BACKLOG.md` P1-7'de açık. Doğrulama: `/api/health/jobs` → `sealIntegrity` |
+| `repair-slot-timezone.sh` | UTC'de üretilmiş yanlış saatli gelecek slotları siler (2026-08-24 saat dilimi hatası) | Rezervasyonlu ve geçmiş slotlara dokunmaz. **`--apply`'dan sonra `./scripts/generate-slots.sh` zorunlu**, yoksa saatlik ürün seçilemez |
+| `repair-bypass-bookings.sh` | Çıkış saati geçmiş açık test (`bypass_`) rezervasyonlarını kapatır | Kapsam bilerek dar; ödemeyi `REFUNDED`'a alır |
+| `repair-stale-checkin.sh` | Mühürsüz, ödemesiz, çıkışı çoktan geçmiş `CHECKED_IN` kayıtları `CANCELLED`'a alır | `BookingService` bu geçişi kasten reddettiği için veri onarımı olarak ayrı |
+
+Bu betikler sunucuda `docker-compose.env` değil `--app-dir` altındaki `.env`'i bekliyor
+(betik başlıkları); sunucuda `.env` yok, çalıştırmadan önce bağlantı değerini kontrol edin.
 
 ---
 
-## Gelen kutusunu sınıflandırma (tek seferlik + günlük)
+## Gelen kutusunu sınıflandırma
 
-`destek@bagajpark.com`'a gelen her e-posta `ContactMessage` olarak yazılıyor.
-2026-08-22'de kutuda 67 mesaj vardı, **57'si okunmamış** ve ezici çoğunluğu soğuk
-pazarlamaydı — gerçek bir misafir şikâyeti bunların arasında kaybolur.
-
-Yeni mesajlar **giriş anında** sınıflandırılıyor. Geçmiş mesajlar için bu işi bir
-kez çalıştırın:
-
-```bash
-cd /opt/emanetci
-./scripts/call-internal-job.sh --job classify-inbox
-```
-
-Beklenen:
-
-```
-[...] INFO  BASARILI (HTTP 200): {"ok":true,"classified":67,"byCategory":{"BULK":54,"SUPPORT":11,"AUTOMATED":2},"remaining":0,"moreToDo":false}
-```
-
-`moreToDo: true` görürseniz kutu tek partiye sığmamış demektir (parti 500) —
-`remaining` sıfırlanana kadar tekrar çalıştırın. İş **idempotenttir**: yalnızca
-`UNCLASSIFIED` satırlara dokunur, ikinci çalıştırma `classified: 0` döner.
-
-Sonra `/admin/messages` varsayılan olarak yalnızca **Destek** gösterir; seçicideki
-sayaçlar diğer kategorilerde ne biriktiğini bakmadan söyler.
-
-> Sınıflandırma migrasyonda SQL ile yapılmadı: kural `List-Unsubscribe` /
-> `Auto-Submitted` gibi başlıklara bakıyor ve o başlıklar `raw` JSON'unun içinde.
-> SQL'de yeniden yazmak, kuralın ikinci bir kopyası olurdu ve iki kopya ayrışırdı.
+`destek@bagajpark.com`'a gelen her e-posta `ContactMessage` olarak yazılır ve **giriş
+anında** sınıflandırılır; `classify-inbox` işi kalanları her gün süpürür. `/admin/messages`
+varsayılan olarak yalnızca **Destek**'i gösterir. Kural `List-Unsubscribe` /
+`Auto-Submitted` gibi başlıklara baktığı için SQL'de değil kodda tek kopya durur.
 
 ---
 
@@ -624,89 +336,34 @@ yeniden koşun.
 **Koşuldu (2026-08-30):** `--verify` 482 noktanın hepsinde `hepsi dogru ulkede`
 döndü (önce 456'lık liste toptan, sonra elle koordinat eklenen 10 şehir tek tek).
 
-### Üretime uygulandı — 2026-08-31
+### Üretime yazma
 
-482 noktanın tamamı üretim veritabanına yazıldı (`Olusturulacak: 482,
-Guncellenecek: 0` — prod'da daha önce hiç talep testi noktası yoktu). Hemen
-ardından koşulan ikinci kuru çalışma `Olusturulacak: 0, Guncellenecek: 482`
-verdi, yani idempotentlik üretimde de ölçüldü: kopya üretilmedi.
+İlk yükleme 2026-08-31'de yapıldı (482 nokta / 252 şehir; ikinci kuru çalışma
+`Olusturulacak: 0` — idempotentlik üretimde de ölçüldü). **Sıra önemliydi:** önce
+`OPERATING_SHOP_FILTER` düzeltmesi deploy edildi, sonra noktalar yazıldı; ters sırada
+kamuya açık sayılar kısa süre noktaları da sayardı.
 
-**Sıra önemliydi ve öyle uygulandı:** önce `OPERATING_SHOP_FILTER` düzeltmesinin
-deploy'u tamamlandı, sonra noktalar yazıldı. Ters sırada ana sayfa ve
-`/become-partner` kısa süreliğine 485 lokasyon/ortak iddia ederdi.
+Üretim Postgres'i dışarı açık değil (`127.0.0.1:5433`) ve sunucudaki imajda `scripts/` ile
+`src/` yok (`Dockerfile`), yani betik **yerelden, SSH tüneliyle** koşar. Bağlantı değerini
+`docker-compose.env`'den değil, çalışan `web` konteynerinden alın — compose `DATABASE_URL`'i
+`POSTGRES_*`'dan orada kurar. Değer ekrana basılmaz, doğrudan değişkene girer.
 
-Uygulama sonrası üretimde ölçülenler:
+```bash
+source ops/server.env    # SSH_HOST / SSH_PORT / SSH_USER / SSH_KEY_PATH
+ssh -i "$SSH_KEY_PATH" -p "$SSH_PORT" -f -N -L 15433:127.0.0.1:5433 "$SSH_USER@$SSH_HOST"
+export DATABASE_URL=$(ssh -i "$SSH_KEY_PATH" -p "$SSH_PORT" "$SSH_USER@$SSH_HOST" \
+  "docker exec emanetci-web-1 printenv DATABASE_URL" | sed -E 's#@[^/]+/#@127.0.0.1:15433/#')
 
-| Ölçüm | Değer |
-|---|---|
-| `isPrelaunch` nokta / şehir | 482 / 252 |
-| İşletilen dükkan (`OPERATING_SHOP_FILTER`) | 3 |
-| Kamuya görünür (`PUBLIC_SHOP_FILTER`) | 485 |
-| `/become-partner` sosyal kanıtı | `socialProofEarly` ("İlk esnaf ortaklarımızdan biri olun") — eski filtreyle "485 aktif esnaf ortağı" yazacaktı |
-| Bir nokta sayfası (Paris/Eyfel) | fiyat yerine "Yakında"; `Valiz Fiyatları` bölümü ve `₺` yok |
+npx tsx scripts/prelaunch-points.ts --city istanbul            # kuru: OLUSTUR / guncelle
+npx tsx scripts/prelaunch-points.ts --apply --city istanbul    # ilk yazan adım
+npx tsx scripts/prelaunch-points.ts --city istanbul            # doğrula: Olusturulacak: 0
 
-Erişim yolu: üretim Postgres dışarı açık değil (`127.0.0.1:5433`), script yerelden
-SSH tüneliyle koşuldu — sunucudaki imajda `scripts/` ve `src/` yok
-(bkz. `Dockerfile`), o yüzden konteyner içinde koşturulamıyor.
+unset DATABASE_URL; pkill -f "15433:127.0.0.1:5433"
+```
 
-### Üretime yazma adımları
-
-Ön koşul: repo kökündesiniz, `~/.ssh/aws-bagajpark` anahtarı var. Sunucu IP/port
-`infra/aws/stack` (`hesap2`) çıktısında; aşağıda 2026-09-13 değerleri.
-
-**Bağlantıyı `/opt/emanetci/docker-compose.env`ten ALMAYIN.** Oradaki
-`DATABASE_URL` eski (veritabanı adı `emanetci`, parola eski) ve Postgres
-`Authentication failed ... for bagajpark` (P1000) döner. Gerçek değeri compose,
-Parameter Store'dan gelen `POSTGRES_*` ile çalışan `web` konteynerine kuruyor;
-oradan okunur. Değer ekrana basılmaz, doğrudan değişkene girer.
-
-1. Tünel (salt okuma, hiçbir şey yazmaz):
-
-   ```bash
-   ssh -i ~/.ssh/aws-bagajpark -p 2222 -f -N \
-     -L 15433:127.0.0.1:5433 ec2-user@3.120.254.170
-   ```
-
-2. Bağlantı, konteynerden, host tünele çevrilerek:
-
-   ```bash
-   export DATABASE_URL=$(ssh -i ~/.ssh/aws-bagajpark -p 2222 ec2-user@3.120.254.170 \
-     "docker exec emanetci-web-1 printenv DATABASE_URL" \
-     | sed -E 's#@[^/]+/#@127.0.0.1:15433/#')
-   ```
-
-3. Kuru çalışma (yazmaz). Beklenen: yeni noktalar `OLUSTUR`, var olanlar
-   `guncelle`, sonda `Olusturulacak: N   Guncellenecek: M`.
-
-   ```bash
-   npx tsx scripts/prelaunch-points.ts --city istanbul
-   ```
-
-4. Yazma — değişiklik yapan İLK adım:
-
-   ```bash
-   npx tsx scripts/prelaunch-points.ts --apply --city istanbul
-   ```
-
-5. Doğrulama: 3. adımı tekrar koşun, `Olusturulacak: 0` beklenir (idempotent).
-   Şehir sayfası (`/tr/luggage-storage/<şehir>`) en geç 5 dakikada yeni noktayı
-   "Yakında" rozetiyle gösterir (`revalidate = 300`).
-
-6. Kapatma:
-
-   ```bash
-   unset DATABASE_URL
-   pkill -f "15433:127.0.0.1:5433"
-   ```
-
-Geri alma: `--apply --close <key>-<slug>` noktayı SİLMEZ, gizler (`isActive = false`);
-kayıt ve toplanan talep verisi durur.
-
-**Uygulananlar:**
-
-| Tarih (UTC) | Ne | Sonuç |
-|---|---|---|
-| 2026-09-13 15:50–15:52 | Search Console'da aranan 8 yer: `istanbul-havalimani`, `istanbul-sabiha-gokcen`, `istanbul-haydarpasa`, `bodrum-merkez-garaj`, `antalya-havalimani`, `antalya-mall-of-antalya`, `izmir-havalimani`, `izmir-otogar` | 8 oluşturuldu; tekrar koşu `Olusturulacak: 0`; dört şehir sayfasında 8/8 göründü |
+Şehir sayfası (`/tr/luggage-storage/<şehir>`) en geç 5 dakikada yeni noktayı "Yakında"
+rozetiyle gösterir (`revalidate = 300`). Geri alma: `--apply --close <key>-<slug>` noktayı
+silmez, gizler (`isActive = false`); toplanan talep verisi durur.
 
 ## UI/UX regresyon taraması — `ux-sweep.mjs`
 
@@ -733,7 +390,7 @@ gerçek bir mobil viewport'ta gezip yedi kuralı doğrular:
 **Çıkış kodu 1** kural bozulursa — bir cron ya da CI adımı buna bakıp alarm
 üretebilir.
 
-**Neden var:** bu kuralların hepsi `docs/UX_AUDIT.md`'de kanıtıyla kayıtlı
+**Neden var:** bu kuralların hepsi `docs/archive/2026-11-23-denetim-gecmisi/UX_AUDIT_2026-08-31.md`'de kanıtıyla kayıtlı
 gerçek hatalardan geliyor ve **hiçbiri gözle bakınca görünmüyordu** — 2 px'lik
 kayma, ekran okuyucuya İngilizce konuşan takvim, güvenli bölgeyi aşan PWA
 ikonu. Geri sızmalarının tek güvencesi tekrar ölçmek.
@@ -744,7 +401,7 @@ kapsamın daraldığı görünmeli.
 
 ## Esnaf aday listesi — `find-esnaf-leads.ts`
 
-Pilot bölgede (Galata/Karaköy, bkz. `docs/pazarlama_stratejisi_tr.md` § 1.2)
+Pilot bölgede (Galata/Karaköy, bkz. `marketing/MARKETING_PLAN.md` § 7.2)
 telesatış için aranacak esnaf adaylarını Google Places API'den toplu çeker:
 isim, adres, telefon, website, puan → CSV. **E-posta yok** — Places API hiçbir
 planda e-posta alanı döndürmez; plan zaten telefonla aramayı öngörüyor.
@@ -813,23 +470,21 @@ Varsayılan kategori listesini kalıcı değiştirmek için dosyanın başındak
 
 ## Günlük AWS maliyet raporu — `aws-cost-report.sh`
 
-Prod EC2'de her gün 06:05 UTC (09:05 TR) çalışır ve e-postayla şunları gönderir:
-dünkü brüt harcama, ay toplamı, günlük ortalama, kalan free tier kredisi, "bu hızla
-kredi ne zaman biter" tahmini ve plan bitiş tarihi. Hesap AWS'nin **FREE** planında;
-kredi biterse hesap kapanır, yani bu e-posta bir kesinti erken uyarısıdır.
-
-**2026-09-23 ölçümü:** kalan $122.12, günde ~$2.5 → kredi ~2026-11-10'da biter
-(plan bitişi 2027-02-23'ten çok önce).
+Prod EC2'de her gün 06:05 UTC (09:05 TR) çalışır ve e-postayla şunları gönderir: dünkü
+brüt harcama, ay toplamı, günlük ortalama, kalan free tier kredisi, "bu hızla kredi ne zaman
+biter" tahmini ve plan bitiş tarihi. Free plan'da kredi biterse hesap kapanır; bu e-posta
+o kesintinin erken uyarısıdır. (2026-10-25 hesap taşımasının sebebi tam buydu,
+`infra/aws/CUTOVER.md`.)
 
 Yetki EC2 rolünden gelir (`infra/aws/stack/main.tf` → `app_cost_read`: salt okur
 `ce:GetCostAndUsage`, `freetier:GetAccountPlanState`). Sunucuda statik anahtar yok.
-Resend anahtarı sunucunun `docker-compose.env`'inden okunur; alıcı SSM'de durur,
-repo public olduğu için adres git'e yazılmaz. Cost Explorer istek başına $0.01;
-günlük koşu ayda ~$0.60.
+Resend anahtarı sunucunun `docker-compose.env`'inden okunur; alıcı SSM'de durur
+(`/bagajpark/env/app/COST_REPORT_TO`), repo public olduğu için adres git'e yazılmaz.
+Cost Explorer istek başına $0.01; günlük koşu ayda ~$0.60.
 
 ### Kurulum (bir kere)
 
-Önkoşul: prod hesabına (772853132412) yazma yetkili bir AWS kimliği; komutlar repo
+Önkoşul: canlı hesaba (`infra/aws/README.md`) yazma yetkili bir AWS kimliği; komutlar repo
 kökünden. Profil adı sizin yerel ayarınızdır.
 
 1. Alıcıyı SSM'e yaz:
@@ -865,3 +520,24 @@ doğrulanmamış ya da anahtar yanlış; `AccessDenied` (ce/freetier) → 2. ad�
 
 `ops/crontab.prod`'dan satırı sil ve crontab'ı yeniden kur. İzin zararsızdır
 (salt okuma), ama kaldırmak için `app_cost_read` bloğunu silip `terraform apply`.
+
+---
+
+## Diğer betikler (kısa dizin)
+
+| Betik | Ne | Ayrıntı |
+|---|---|---|
+| `backup.sh`, `backup-s3.sh`, `restore.sh` | Postgres yedeği, S3 kopyası, geri yükleme | `ops/README.md` |
+| `secrets-render.sh`, `secrets-remote.sh`, `secrets-put.sh`, `tls-put.sh` | SSM sırları ve TLS materyali | `ops/SECRETS.md` |
+| `update.sh` | CI yokken sunucuda elle güncelleme (GHCR `latest`) | `ops/README.md` |
+| `docker-entrypoint.sh` | Konteyner başlangıcı: `prisma migrate deploy`, sonra sunucu | `docs/DOCKER.md` |
+| `verify-migrations.sh` | `npm run db:verify` — geçici DB'de migrasyon ↔ şema sapması | — |
+| `audit-deps.mjs` | `npm run audit` — prod bağımlılığında yüksek/kritik açık kapısı | `docs/CI_CD.md` |
+| `check-internal-links.mjs` | `npm run link-check` — çalışan sunucuda yaygın misafir yollarına GET (Markdown'ı denetlemez) | — |
+| `copy-maplibre-worker.mjs` | `predev`/`prebuild`: MapLibre worker'ını `public/`'e kopyalar | — |
+| `create-user.sh` | `/api/admin/setup` ile kullanıcı oluşturur/günceller (`ADMIN_SETUP_KEY`) | betik başlığı |
+| `blog-city-posts.ts`, `blog-images.ts`, `prelaunch-city-index.ts` | Şehir blog yazıları ve görselleri | betik başlıkları |
+| `generate-brand-assets.mjs`, `pwa-screenshots.mjs` | Marka görselleri, PWA ekran görüntüleri | betik başlıkları |
+| `load-test.k6.js` | Tek dosyalık k6 yük testi | `tests/stress/README.md` |
+| `local-ci.sh`, `pre-commit.sh` | `act` ile yerel CI, pre-commit kancası | betik başlıkları |
+| `vm-update.sh` | Hetzner/LAN VM dönemi: `develop`'u çekip yerinde derler | **eski** — canlı sunucuda kullanmayın, `update.sh` kullanın |
