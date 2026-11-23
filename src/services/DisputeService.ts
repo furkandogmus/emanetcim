@@ -161,7 +161,7 @@ class DisputeService {
       .catch((err) => logger.error({ err, bookingId }, "booking_event_disputed_failed"));
 
     void notificationService
-      .notifyAdminsForDispute({ bookingId, reason })
+      .notifyAdminsForDispute({ bookingId, reason, disputeId: dispute.id })
       .catch((err) => logger.error({ err, bookingId }, "notify_admins_dispute_failed"));
 
     return { ok: true, id: dispute.id };

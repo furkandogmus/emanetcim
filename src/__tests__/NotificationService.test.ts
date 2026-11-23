@@ -460,6 +460,7 @@ describe("NotificationService", () => {
   describe("notifyAdminsForDispute", () => {
     it("should send email to admins", async () => {
       (global.fetch as any).mockResolvedValue({ ok: true });
+      mockPrisma.mobilePushToken.findMany.mockResolvedValue([]);
       process.env.ADMIN_EMAILS = "admin1@example.com,admin2@example.com";
 
       await service.notifyAdminsForDispute({
@@ -469,6 +470,71 @@ describe("NotificationService", () => {
 
       // Should call fetch for both admin emails
       expect(global.fetch).toHaveBeenCalledTimes(2);
+    });
+  });
+
+  describe("pushAdminsNow", () => {
+    it("yalnizca yasakli olmayan, anonimlestirilmemis ADMIN cihazlarini secer", async () => {
+      mockPrisma.mobilePushToken.findMany.mockResolvedValue([]);
+
+      const sent = await service.pushAdminsNow("partnerLead", { name: "Kahveci" }, { adminScreen: "partnerLeads" });
+
+      expect(sent).toBe(0);
+      expect(mockPrisma.mobilePushToken.findMany).toHaveBeenCalledWith({
+        where: {
+          user: {
+            role: "ADMIN",
+            isBanned: false,
+            OR: [{ email: null }, { NOT: { email: { endsWith: "@invalid.local" } } }],
+          },
+        },
+        select: { token: true, locale: true },
+      });
+    });
+
+    it("cihaz diline gore TR/EN metin ve yonetici ekrani verisi gonderir", async () => {
+      process.env.FIREBASE_SERVICE_ACCOUNT_JSON = JSON.stringify({ project_id: "p" });
+      mockPrisma.mobilePushToken.findMany.mockResolvedValue([
+        { token: "t-tr", locale: "tr-TR" },
+        { token: "t-en", locale: "de-DE" },
+      ]);
+      mockSendEachForMulticast.mockResolvedValue({ successCount: 1, responses: [{ success: true }] });
+
+      const sent = await service.pushAdminsNow(
+        "dispute",
+        { code: "AB12", reason: "DAMAGE" },
+        { adminScreen: "dispute", disputeId: "d1" },
+      );
+
+      expect(sent).toBe(2);
+      expect(mockSendEachForMulticast).toHaveBeenCalledWith(
+        expect.objectContaining({
+          tokens: ["t-tr"],
+          notification: { title: "Yeni şikayet", body: "Rezervasyon AB12 · DAMAGE" },
+          data: { adminScreen: "dispute", disputeId: "d1" },
+        }),
+      );
+      expect(mockSendEachForMulticast).toHaveBeenCalledWith(
+        expect.objectContaining({ tokens: ["t-en"], notification: expect.objectContaining({ title: "New dispute" }) }),
+      );
+    });
+
+    it("push hatasi e-posta akisini dusurmez", async () => {
+      (global.fetch as any).mockResolvedValue({ ok: true });
+      process.env.ADMIN_EMAILS = "admin1@example.com";
+      mockPrisma.mobilePushToken.findMany.mockRejectedValue(new Error("db down"));
+
+      await expect(
+        service.notifyAdminsForAffiliateApplication({
+          displayName: "Rehber",
+          type: "GUIDE",
+          contactEmail: null,
+          contactPhone: null,
+          applicationNote: null,
+        }),
+      ).resolves.toBeUndefined();
+      expect(global.fetch).toHaveBeenCalledTimes(1);
+      mockPrisma.mobilePushToken.findMany.mockReset();
     });
   });
 });

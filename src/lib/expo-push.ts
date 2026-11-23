@@ -28,6 +28,7 @@ export async function sendExpoPush(
   title: string,
   body: string,
   bookingId?: string,
+  extraData: Record<string, string> = {},
 ): Promise<ExpoPushResult> {
   const result: ExpoPushResult = { successCount: 0, staleTokens: [], failures: [] };
   const accessToken = process.env.EXPO_ACCESS_TOKEN?.trim();
@@ -40,7 +41,7 @@ export async function sendExpoPush(
       body,
       sound: "default",
       priority: "high",
-      data: bookingId ? { bookingId } : {},
+      data: { ...extraData, ...(bookingId ? { bookingId } : {}) },
     }));
     try {
       const res = await fetchWithTimeout(

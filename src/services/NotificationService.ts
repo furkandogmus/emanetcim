@@ -5,6 +5,15 @@ import prisma from "../lib/db";
 import { formatTryCurrency } from "@/lib/currency";
 import { fetchWithTimeout } from "@/lib/async-timeout";
 import { isExpoPushToken, sendExpoPush } from "@/lib/expo-push";
+import {
+  ADMIN_PUSH_COPY,
+  adminPushLang,
+  type AdminPushData,
+  type AdminPushEvent,
+  type AdminPushLang,
+  type AdminPushVars,
+} from "@/lib/admin-push-copy";
+import { ANONYMIZED_EMAIL_DOMAIN } from "@/lib/anonymized-account";
 import { renderEmailHtml, escapeEmailHtml, EMAIL_BRAND_COLOR } from "@/lib/email-template";
 import { bcp47ForUiLocale } from "@/lib/intl-locale";
 import { formatDateTimeInZone, formatTimeInZone } from "@/lib/format-datetime";
@@ -365,6 +374,7 @@ export class NotificationService implements INotificationService {
     message: string,
     bookingId?: string,
     logCtx: Record<string, unknown> = {},
+    extraData: Record<string, string> = {},
   ): Promise<{ sent: number; failed: number; skipped: number; staleTokens: string[] }> {
     const serviceAccountJson = process.env.FIREBASE_SERVICE_ACCOUNT_JSON?.trim();
     /*
@@ -391,7 +401,7 @@ export class NotificationService implements INotificationService {
       const resp = await messaging.sendEachForMulticast({
         tokens: fcmTokens,
         notification: { title, body: message },
-        data: bookingId ? { bookingId } : undefined,
+        data: bookingId || Object.keys(extraData).length > 0 ? { ...extraData, ...(bookingId ? { bookingId } : {}) } : undefined,
         /*
           Uygulamanin olusturdugu YUKSEK onemli "default" kanali (push.ts).
           kanal verilmezse sistem FCM'in "Miscellaneous" kanalina dusuyor:
@@ -416,7 +426,7 @@ export class NotificationService implements INotificationService {
     }
 
     if (expoTokens.length > 0) {
-      const expo = await sendExpoPush(expoTokens, title, message, bookingId);
+      const expo = await sendExpoPush(expoTokens, title, message, bookingId, extraData);
       sent += expo.successCount;
       failed += expo.failures.length;
       staleTokens.push(...expo.staleTokens);
@@ -508,6 +518,59 @@ export class NotificationService implements INotificationService {
       logger.error({ error, userId }, "[Notification] Mobile Push Failed");
       return false;
     }
+  }
+
+  /**
+   * Mobil cihazi kayitli butun yoneticilere push (yasakli/anonimlestirilmis disarida,
+   * `audienceUserWhere` ile ayni kural). Cihaz dili `tr` ise Turkce, degilse Ingilizce.
+   * Ateşle-unut cagrilir: e-posta/SMS akisini hicbir durumda bekletmez ya da dusurmez.
+   */
+  pushAdmins(event: AdminPushEvent, vars: AdminPushVars, data: AdminPushData): void {
+    void this.pushAdminsNow(event, vars, data).catch((err) =>
+      logger.warn({ err, event }, "admin_push_failed"),
+    );
+  }
+
+  /** `pushAdmins`in beklenebilir hali; gonderilen cihaz sayisini dondurur. */
+  async pushAdminsNow(event: AdminPushEvent, vars: AdminPushVars, data: AdminPushData): Promise<number> {
+    const tokens = await prisma.mobilePushToken.findMany({
+      where: {
+        user: {
+          role: "ADMIN",
+          isBanned: false,
+          OR: [{ email: null }, { NOT: { email: { endsWith: ANONYMIZED_EMAIL_DOMAIN } } }],
+        },
+      },
+      select: { token: true, locale: true },
+    });
+    if (tokens.length === 0) return 0;
+
+    const byLang = new Map<AdminPushLang, string[]>();
+    for (const t of tokens) {
+      const lang = adminPushLang(t.locale);
+      byLang.set(lang, [...(byLang.get(lang) ?? []), t.token]);
+    }
+
+    const extraData: Record<string, string> = { adminScreen: data.adminScreen };
+    if (data.disputeId) extraData.disputeId = data.disputeId;
+
+    let sent = 0;
+    for (const [lang, list] of byLang) {
+      const { title, body } = ADMIN_PUSH_COPY[lang][event](vars);
+      const r = await this.deliverMobilePush(list, title, body, undefined, { event }, extraData);
+      sent += r.sent;
+      await prisma.notificationLog.create({
+        data: {
+          type: "MOBILE_PUSH",
+          recipient: `admins:${lang}`,
+          subject: title,
+          content: body,
+          status: r.sent > 0 ? "SENT" : r.failed > 0 ? "FAILED" : "SKIPPED",
+          error: r.sent > 0 ? null : r.failed > 0 ? "all_tokens_failed" : "fcm_not_configured",
+        },
+      });
+    }
+    return sent;
   }
 
   /**
@@ -1595,9 +1658,16 @@ export class NotificationService implements INotificationService {
   async notifyAdminsForDispute(params: {
     bookingId: string;
     reason: string;
+    disputeId?: string;
   }): Promise<void> {
     const { bookingId, reason } = params;
     const shortId = bookingShortCode(bookingId);
+
+    this.pushAdmins(
+      "dispute",
+      { code: shortId, reason },
+      params.disputeId ? { adminScreen: "dispute", disputeId: params.disputeId } : { adminScreen: "dispute" },
+    );
 
     // 1. E-posta Bildirimi
     const adminEmails = (process.env.ADMIN_EMAILS ?? "")
@@ -1696,6 +1766,7 @@ export class NotificationService implements INotificationService {
     }
 
     if (role !== "PARTNER") return;
+    this.pushAdmins("partnerApplication", { name: name ?? identity }, { adminScreen: "applications" });
     if (!isNetgsmConfigured()) {
       logger.debug({ source }, "netgsm_off_skipping_new_partner_sms");
       return;
@@ -1717,6 +1788,7 @@ export class NotificationService implements INotificationService {
     address: string;
   }): Promise<void> {
     const { fullName, phone, shopName, address } = params;
+    this.pushAdmins("partnerLead", { name: shopName ?? fullName }, { adminScreen: "partnerLeads" });
     const adminEmails = (process.env.ADMIN_EMAILS ?? "")
       .split(",")
       .map((e) => e.trim().toLowerCase())
@@ -1761,6 +1833,7 @@ export class NotificationService implements INotificationService {
       .map((e) => e.trim().toLowerCase())
       .filter(Boolean);
     const { displayName, type, contactEmail, contactPhone, applicationNote } = params;
+    this.pushAdmins("affiliateApplication", { name: displayName }, { adminScreen: "affiliates" });
     const subject = `[Admin] BagajPark: Aracı başvurusu (${displayName})`;
     const body = `Yeni aracı başvurusu.\n\nAd: ${displayName}\nTür: ${type}\nE-posta: ${contactEmail ?? "—"}\nTelefon: ${contactPhone ?? "—"}\nPaylaşım: ${applicationNote ?? "—"}`;
     // Alanlar formdan geliyor: kacirilmadan tabloya girmez.
