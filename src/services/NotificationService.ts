@@ -1748,6 +1748,45 @@ export class NotificationService implements INotificationService {
     }
   }
 
+  /** "Araci ol" basvurusu (`AffiliateService.submitApplication`). Yalnizca yoneticiye, Turkce. */
+  async notifyAdminsForAffiliateApplication(params: {
+    displayName: string;
+    type: string;
+    contactEmail: string | null;
+    contactPhone: string | null;
+    applicationNote: string | null;
+  }): Promise<void> {
+    const adminEmails = (process.env.ADMIN_EMAILS ?? "")
+      .split(",")
+      .map((e) => e.trim().toLowerCase())
+      .filter(Boolean);
+    const { displayName, type, contactEmail, contactPhone, applicationNote } = params;
+    const subject = `[Admin] BagajPark: Aracı başvurusu (${displayName})`;
+    const body = `Yeni aracı başvurusu.\n\nAd: ${displayName}\nTür: ${type}\nE-posta: ${contactEmail ?? "—"}\nTelefon: ${contactPhone ?? "—"}\nPaylaşım: ${applicationNote ?? "—"}`;
+    // Alanlar formdan geliyor: kacirilmadan tabloya girmez.
+    const html = renderEmailHtml({
+      locale: "tr",
+      tone: "info",
+      heading: "Aracı başvurusu",
+      paragraphs: ["Onay bekliyor: Yönetim → Aracılar."],
+      rows: [
+        { label: "Ad", value: escapeEmailHtml(displayName), emphasized: true },
+        { label: "Tür", value: escapeEmailHtml(type) },
+        { label: "E-posta", value: escapeEmailHtml(contactEmail ?? "—") },
+        { label: "Telefon", value: escapeEmailHtml(contactPhone ?? "—") },
+        { label: "Paylaşım", value: escapeEmailHtml(applicationNote ?? "—") },
+      ],
+      footer: "BagajPark — Yönetim Masası",
+    });
+    for (const adminEmail of adminEmails) {
+      if (adminEmail.includes("@")) {
+        void this.sendEmail(adminEmail, subject, body, undefined, html).catch((e) => {
+          logger.error({ err: e, adminEmail }, "notifyAdminsForAffiliateApplication_email_failed");
+        });
+      }
+    }
+  }
+
   /**
    * `locale` VARSAYILANI YOK (2026-09-02'de kaldirildi).
    *

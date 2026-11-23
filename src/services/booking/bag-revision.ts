@@ -220,7 +220,9 @@ export async function proposeBagRevision(
     // gerekce (2026-09-10'da bulundu).
     const lockedDiscountPreview =
       moneyToNumber(booking.couponDiscountAmount) +
-      moneyToNumber(booking.referralDiscountAmount);
+      moneyToNumber(booking.referralDiscountAmount) +
+      // Araci misafir indirimi de kilitli indirimdir (2026-11-23).
+      moneyToNumber(booking.affiliateDiscountAmount);
     const afterTotal = Math.max(0, round2(after.subtotalBeforeCoupon - lockedDiscountPreview));
     const beforeTotal = Math.max(0, round2(before.subtotalBeforeCoupon - lockedDiscountPreview));
     const extraAmount = round2(afterTotal - beforeTotal);
@@ -356,7 +358,9 @@ export async function applyBagRevision(
     */
     const lockedDiscount =
       moneyToNumber(booking.couponDiscountAmount) +
-      moneyToNumber(booking.referralDiscountAmount);
+      moneyToNumber(booking.referralDiscountAmount) +
+      // Araci misafir indirimi de kilitli indirimdir (2026-11-23).
+      moneyToNumber(booking.affiliateDiscountAmount);
     const newTotal = Math.max(0, round2(totals.subtotalBeforeCoupon - lockedDiscount));
     const previousTotal = moneyToNumber(booking.totalPrice);
     const delta = round2(newTotal - previousTotal);

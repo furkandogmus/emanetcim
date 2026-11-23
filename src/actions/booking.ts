@@ -17,7 +17,7 @@ import {
 import { getPricingRules } from "@/lib/platform-settings";
 import { moneyToNumber } from "@/lib/money";
 import { BookingStatus } from "@prisma/client";
-import { headers } from "next/headers";
+import { cookies, headers } from "next/headers";
 import { rateLimit } from "@/lib/rate-limit";
 import { getClientIp } from "@/lib/get-ip";
 import { analyticsService } from "@/services/AnalyticsService";
@@ -25,7 +25,8 @@ import { resolveServerSessionId } from "@/lib/analytics-server";
 import { getLocale } from "next-intl/server";
 import logger from "@/lib/logger";
 import { couponService } from "@/services/CouponService";
-import { referralService } from "@/services/ReferralService";
+import { checkoutDiscountService } from "@/services/CheckoutDiscountService";
+import { AFFILIATE_COOKIE } from "@/services/AffiliateService";
 import { requireUser } from "@/lib/action-auth";
 import { canGuestSelfCancel } from "@/services/booking/access";
 import type {
@@ -149,50 +150,22 @@ export async function createBookingAction(data: CreateBookingInput) {
     pricingRules
   );
 
-  let totalPrice = authTotals.subtotalBeforeCoupon;
-
   /*
-    Kupon hakkı rezervasyon oluşmadan ÖNCE atomik olarak alınır; oluşturma
-    başarısız olursa aşağıdaki `catch` bloğunda geri verilir. Kota mantığı ve
-    indirim aritmetiği `CouponService`'te — para değiştiren her yol servis
-    katmanından geçer (`service-layer-writes` mandalı).
+    Indirim secimi `CheckoutDiscountService`te (mobil ile ayni kural): tek
+    indirim; kupon hakki rezervasyondan ONCE atomik alinir ve olusturma
+    basarisiz olursa asagidaki `catch` geri verir. Araci kodu `/r/<kod>`
+    linkinin biraktigi cerezden okunur; atfi servis yeniden dogrular.
   */
-  let appliedCouponId: string | undefined;
-  /*
-    INDIRIM DEFTERE YAZILIYOR (2026-09-01). Onceden yalnizca indirilmis
-    `totalPrice` kaydediliyordu; kuponun kendisinden hicbir iz kalmiyordu ve
-    "bu rezervasyon neden 50 degil de 40 TRY?" sorusunun cevabi veride yoktu.
-    Referans indirimi (`referralDiscountAmount`) ta bastan kaydediliyordu --
-    ayni olay bir yolda denetlenebilir, digerinde gorunmezdi.
-  */
-  let couponDiscountAmount = 0;
-  let appliedCouponCode: string | undefined;
-  if (data.couponCode) {
-    const claim = await couponService.claim(data.couponCode, totalPrice);
-    if (claim.ok) {
-      totalPrice = claim.claimed.totalPrice;
-      appliedCouponId = claim.claimed.couponId;
-      couponDiscountAmount = claim.claimed.discountAmount;
-      appliedCouponCode = claim.claimed.code;
-    }
-  }
-
-  // Referans indirimi: kupon ile birlikte uygulanmaz. Kural `ReferralService`te
-  // (ilk rezervasyon, esnaf kodu degil, kendi kodu degil) -- mobil ayni cagriyi yapar.
-  let referralDiscountAmount = 0;
-  let appliedReferralCode: string | undefined;
-  if (!appliedCouponCode) {
-    const referral = await referralService.resolveDiscount(
-      data.referralCode,
-      { userId, guestEmail: data.guestEmail },
-      totalPrice,
-    );
-    if (referral) {
-      referralDiscountAmount = referral.discountAmount;
-      totalPrice = referral.totalPrice;
-      appliedReferralCode = referral.code;
-    }
-  }
+  const affiliateCode = (await cookies()).get(AFFILIATE_COOKIE)?.value ?? null;
+  const discounts = await checkoutDiscountService.claim({
+    subtotal: authTotals.subtotalBeforeCoupon,
+    couponCode: data.couponCode,
+    referralCode: data.referralCode,
+    affiliateCode,
+    guest: { userId, guestEmail: data.guestEmail },
+  });
+  const totalPrice = discounts.totalPrice;
+  const appliedCouponId = discounts.couponId;
 
   // Sıfır valizle rezervasyon oluşturulamaz
   const totalBags = authTotals.bagCountS + authTotals.bagCountM + authTotals.bagCountXl;
@@ -219,10 +192,12 @@ export async function createBookingAction(data: CreateBookingInput) {
       checkOutTime: data.checkOutTime,
       unitPrice: authTotals.unitPrice,
       insuranceFee: authTotals.insuranceFee,
-      referralDiscountAmount,
-      referredByCode: appliedReferralCode,
-      couponDiscountAmount,
-      couponCode: appliedCouponCode,
+      referralDiscountAmount: discounts.referralDiscountAmount,
+      referredByCode: discounts.referredByCode,
+      couponDiscountAmount: discounts.couponDiscountAmount,
+      couponCode: discounts.couponCode,
+      affiliateCode: discounts.affiliateCode,
+      affiliateDiscountAmount: discounts.affiliateDiscountAmount,
       // Misafirin dili: rota zaten `[locale]` tasiyor, bildirimler bunu okur.
       locale: await getLocale(),
       slotIds: data.slotIds,

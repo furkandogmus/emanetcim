@@ -87,6 +87,7 @@ vi.mock("next/headers", () => ({
   headers: vi.fn().mockResolvedValue({
     get: () => "127.0.0.1",
   }),
+  cookies: vi.fn().mockResolvedValue({ get: () => undefined }),
 }));
 vi.mock("next-intl/server", () => ({
   getLocale: vi.fn().mockResolvedValue("tr"),

@@ -1212,3 +1212,73 @@ export function toMobileLeadConversion(r: {
     activationFailed: Boolean(r.activationError),
   };
 }
+
+/** `checkout/quote`: secilen tek indirim ve araci kodu durumu (`CheckoutDiscountService.preview`). */
+export function toMobileCheckoutDiscount(q: {
+  total: number;
+  discount: { kind: "coupon" | "referral" | "affiliate"; code: string; amount: number } | null;
+  codeStatus: string | null;
+  minPrice: number | null;
+  affiliate: { code: string; status: string; ratePct: number; amount: number } | null;
+}) {
+  return {
+    total: q.total,
+    discount: q.discount ? { kind: q.discount.kind, code: q.discount.code, amount: q.discount.amount } : null,
+    codeStatus: q.codeStatus,
+    minPrice: q.minPrice,
+    affiliate: q.affiliate
+      ? { code: q.affiliate.code, status: q.affiliate.status, ratePct: q.affiliate.ratePct, amount: q.affiliate.amount }
+      : null,
+  };
+}
+
+type AffiliateStatsSource = {
+  clicks: number;
+  bookings: number;
+  completedBookings: number;
+  earned: number;
+  unpaid: number;
+  paid: number;
+};
+
+/** Yonetici araci satiri (web + mobil ayni alanlar). Notlar yalniz yoneticiye. */
+export function toMobileAdminAffiliate(a: {
+  id: string;
+  code: string;
+  displayName: string;
+  type: string;
+  status: string;
+  contactEmail: string | null;
+  contactPhone: string | null;
+  commissionRate: unknown;
+  guestDiscountRate: unknown;
+  notes: string | null;
+  applicationNote: string | null;
+  createdAt: Date;
+  user: { email: string | null } | null;
+  stats: AffiliateStatsSource;
+}) {
+  return {
+    id: a.id,
+    code: a.code,
+    displayName: a.displayName,
+    type: a.type.toLowerCase(),
+    status: a.status.toLowerCase(),
+    contactEmail: a.contactEmail,
+    contactPhone: a.contactPhone,
+    commissionRate: moneyToNumber(a.commissionRate),
+    guestDiscountRate: moneyToNumber(a.guestDiscountRate),
+    notes: a.notes,
+    applicationNote: a.applicationNote,
+    linkedUserEmail: a.user?.email ?? null,
+    createdAt: a.createdAt.toISOString(),
+    stats: {
+      clicks: a.stats.clicks,
+      bookings: a.stats.bookings,
+      completedBookings: a.stats.completedBookings,
+      earned: a.stats.earned,
+      unpaid: a.stats.unpaid,
+      paid: a.stats.paid,
+    },
+  };
+}
