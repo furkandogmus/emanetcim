@@ -8,6 +8,7 @@ import {
   cancelReasonOf,
   isAdminNoteValid,
   isSameWallDay,
+  lateDropoffState,
   noShowState,
   partnerCancelBody,
 } from "../booking-actions";
@@ -115,5 +116,39 @@ describe("hata kodlari", () => {
     for (const code of ["invalid_status", "not_found", "forbidden", "cancel_failed", "server_error"]) {
       expect(errorMessage(new ApiError(400, code), "bookings")).not.toBe(generic());
     }
+  });
+});
+
+describe("lateDropoffState", () => {
+  const base = {
+    status: "PAID" as const,
+    checkInTime: "2026-11-22T09:00:00Z",
+    checkOutTime: "2026-11-22T15:00:00Z",
+  };
+  const at = (iso: string) => Date.parse(iso);
+
+  it("eski sunucu (alan yok) ve birakma saatinden once gizli", () => {
+    expect(lateDropoffState(base, at("2026-11-22T09:20:00Z"))).toEqual({ kind: "hidden" });
+    expect(lateDropoffState({ ...base, lateCloseAt: "2026-11-22T10:00:00Z" }, at("2026-11-22T08:59:00Z"))).toEqual({
+      kind: "hidden",
+    });
+  });
+
+  it("gec: kapanis ani, bekletme yok, bekletilebilir", () => {
+    const s = lateDropoffState({ ...base, lateCloseAt: "2026-11-22T10:00:00Z" }, at("2026-11-22T09:20:00Z"));
+    expect(s).toEqual({ kind: "late", closeAt: new Date("2026-11-22T10:00:00Z"), holdUntil: null, canHold: true });
+  });
+
+  it("suren bekletme gosterilir; alma saatine dayanmis kapanis bekletilemez", () => {
+    const s = lateDropoffState(
+      { ...base, lateCloseAt: "2026-11-22T15:00:00Z", lateHoldUntil: "2026-11-22T15:00:00Z" },
+      at("2026-11-22T14:00:00Z"),
+    );
+    expect(s).toMatchObject({ kind: "late", holdUntil: new Date("2026-11-22T15:00:00Z"), canHold: false });
+  });
+
+  it("odemesiz niyet (PENDING) bekletilemez", () => {
+    const s = lateDropoffState({ ...base, status: "PENDING", lateCloseAt: "2026-11-22T10:00:00Z" }, at("2026-11-22T09:20:00Z"));
+    expect(s).toMatchObject({ kind: "late", canHold: false });
   });
 });

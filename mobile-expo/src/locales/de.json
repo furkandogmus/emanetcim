@@ -334,7 +334,9 @@
     "closeExpired": "Buchung schließen",
     "closeExpiredTitle": "Buchung schließen?",
     "closeExpiredBody": "Wenn du dein Gepäck nicht abgegeben hast, kannst du diese Buchung schließen. Das kann nicht rückgängig gemacht werden.",
-    "closeExpiredConfirm": "Ja, schließen"
+    "closeExpiredConfirm": "Ja, schließen",
+    "lateDropoff": "Deine Abgabezeit ist vorbei. Deine Buchung schließt automatisch um {{time}}; wenn du unterwegs bist, ruf den Laden an.",
+    "lateDropoffHold": "Der Laden wartet bis {{time}} auf dich."
   },
   "status": {
     "PENDING": "Ausstehend",
@@ -1223,7 +1225,15 @@
       "noShowConfirm": "Ja, schließen",
       "noShowDoneTitle": "Buchung geschlossen",
       "noShowDoneBody": "Der reservierte Platz wurde freigegeben.",
-      "noteRequiredHint": "Bei „Sonstiges“ ist eine Notiz erforderlich."
+      "noteRequiredHint": "Bei „Sonstiges“ ist eine Notiz erforderlich.",
+      "lateTitle": "Gast verspätet sich",
+      "lateCloseAt": "Schließt automatisch: {{time}}",
+      "lateHoldActive": "Du wartest auf den Gast. Bis: {{time}}",
+      "lateHint": "Wenn du das Gepäck erhalten hast, checke es ein. Hat der Gast angerufen, kannst du warten.",
+      "lateHold": "Auf Gast warten (+30 Min.)",
+      "lateHoldDoneTitle": "Gast wird erwartet",
+      "lateHoldDoneBody": "Die Buchung bleibt 30 Minuten länger offen.",
+      "lateHoldLimit": "Abholzeit erreicht; länger warten ist nicht möglich."
     },
     "reasons": {
       "guest_request": "Gast hat gefragt",
@@ -1239,7 +1249,8 @@
       "invalid_reason": "Ungültiger Stornierungsgrund; wähle einen aus der Liste.",
       "too_early": "Die Wartezeit ist noch nicht vorbei; der Gast kann noch nicht als nicht erschienen markiert werden.",
       "server_error": "Auf dem Server ist ein Fehler aufgetreten; versuche es gleich noch einmal.",
-      "http_404": "Diese Aktion ist noch nicht verfügbar; nutze vorerst das Web-Panel."
+      "http_404": "Diese Aktion ist noch nicht verfügbar; nutze vorerst das Web-Panel.",
+      "hold_limit": "Abholzeit erreicht; die Buchung kann nicht länger gehalten werden."
     }
   },
   "broadcast": {

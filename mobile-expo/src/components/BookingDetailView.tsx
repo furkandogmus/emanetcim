@@ -16,7 +16,8 @@ import { PartnerBookingActions } from "@/components/PartnerBookingActions";
 import { AppText, Banner, Button, CenterMessage, IconButton, Loading } from "@/components/ui";
 import { api, ApiError } from "@/lib/api";
 import { errorMessage } from "@/lib/errors";
-import { formatMoney } from "@/lib/format";
+import { formatMoney, formatTime } from "@/lib/format";
+import { lateDropoffState } from "@/lib/booking-actions";
 import { BEFORE_DROP_OFF, isBookingExpired } from "@/lib/booking-state";
 import { isActiveBooking, useBooking, useOnlinePayments } from "@/lib/queries";
 import { defaultWindow, useSearch } from "@/lib/search";
@@ -72,6 +73,23 @@ function GuestContact({ phone }: { phone?: string }) {
         />
       ) : null}
     </View>
+  );
+}
+
+/** Misafir: birakma saati gectiyse rezervasyonun ne zaman otomatik kapanacagi. */
+function GuestLateNotice({ booking }: { booking: BookingDetail }) {
+  const { t } = useTranslation();
+  const late = lateDropoffState(booking);
+  if (late.kind !== "late") return null;
+  return (
+    <Banner
+      tone="warning"
+      body={
+        late.holdUntil
+          ? t("bookings.lateDropoffHold", { time: formatTime(late.holdUntil) })
+          : t("bookings.lateDropoff", { time: formatTime(late.closeAt) })
+      }
+    />
   );
 }
 
@@ -245,6 +263,7 @@ export function BookingDetailView({ id, mode }: { id: string; mode: "guest" | "p
         {mode === "guest" ? (
           <ExpiredBookingActions booking={b} onRebook={rebook} onClose={confirmCloseExpired} closing={cancel.isPending} />
         ) : null}
+        {mode === "guest" ? <GuestLateNotice booking={b} /> : null}
         {/* Onay bekleyen duzeltme bilet ve QR'in USTUNDE: misafirin yapmasi gereken tek is bu. */}
         {mode === "guest" ? <GuestBagRevisionCard booking={b} /> : null}
         <BookingTicket
