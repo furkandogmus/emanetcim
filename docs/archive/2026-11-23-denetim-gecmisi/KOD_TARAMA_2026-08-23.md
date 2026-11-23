@@ -1,3 +1,10 @@
+> **ARŞİV — 2026-11-23'te `docs/` altından taşındı.** 2026-08-23 tarihli statik kod
+> taraması; güncellenmez. Durumu: B1–B6, B8, B9, B11–B14 aynı gün düzeltildi; B10
+> (referans linki okunmuyordu) 2026-09-23'te `7fe82aed` ile kapandı. Açık kalan tek
+> madde B7 (fiyat güven sınırı çağıranda) `docs/DEFECT_BACKLOG.md` → D10 olarak
+> taşındı. Metindeki `mobile/` yolları 2026-10-18'de kaldırılan Flutter uygulamasına
+> aittir.
+
 # Kod Taraması — 2026-08-23
 
 > Bu doküman `docs/DEFECT_BACKLOG.md`'den **ayrı**. O dosya prod DB sorguları ve canlı

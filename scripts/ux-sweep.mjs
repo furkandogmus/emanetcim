@@ -8,7 +8,7 @@
  *   BASE_URL=http://localhost:3000 node scripts/ux-sweep.mjs
  *   HEADLESS=1 node scripts/ux-sweep.mjs           # CI (Cloudflare'e takılabilir)
  *
- * NEDEN VAR: `docs/UX_AUDIT.md` içindeki bulguların çoğu, gözle bakınca
+ * NEDEN VAR: `docs/archive/2026-11-23-denetim-gecmisi/UX_AUDIT_2026-08-31.md` içindeki bulguların çoğu, gözle bakınca
  * görünmeyen ama ölçünce net olan şeylerdi — 2 px'lik yatay kayma, ekran
  * okuyucuya İngilizce konuşan bir takvim, güvenli bölgeyi aşan bir PWA ikonu.
  * Bir daha sızmalarının tek güvencesi tekrar ÖLÇMEK. Bu script o ölçümü tek
