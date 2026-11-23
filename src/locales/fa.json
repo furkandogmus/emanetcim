@@ -774,7 +774,8 @@
     "stayPickupHours": "دریافت {date}: {open}–{close}.",
     "stayDayClosed": "فروشگاه در {date} بسته است؛ روز دیگری انتخاب کنید.",
     "shopClosedOn": "تعطیل: {range}",
-    "searchSubmit": "جستجو"
+    "searchSubmit": "جستجو",
+    "checkoutAffiliateLine": "تخفیف معرفی ({pct}٪)"
   },
   "Admin": {
     "dashboardTitle": "مرکز مدیریت BagajPark",
@@ -1379,7 +1380,8 @@
     "partnerLeadConvertActivationFailed": "حساب ایجاد شد اما فروشگاه منتشر نشد. آن را از فهرست درخواست‌ها تأیید کنید.",
     "partnerLeadConvertAlready": "این پیش‌ثبت‌نام قبلاً تبدیل شده است",
     "partnerLeadConvertBack": "بازگشت به پیش‌ثبت‌نام‌ها",
-    "partnerLeadMapsSearch": "جستجوی نشانی در Google Maps"
+    "partnerLeadMapsSearch": "جستجوی نشانی در Google Maps",
+    "affiliatesTitle": "معرف‌ها"
   },
   "Auth": {
     "loginTitle": "ورود به BagajPark",
@@ -1890,7 +1892,8 @@
     "invalidName": "نام باید ۱ تا ۱۰۰ نویسه باشد.",
     "currentPasswordRequired": "رمز عبور فعلی خود را وارد کنید.",
     "invalidCurrentPassword": "رمز عبور فعلی نادرست است.",
-    "lateHoldLimit": "به زمان تحویل گرفتن رسیدید؛ رزرو بیش از این نگه داشته نمی‌شود."
+    "lateHoldLimit": "به زمان تحویل گرفتن رسیدید؛ رزرو بیش از این نگه داشته نمی‌شود.",
+    "affiliateAlreadyApplied": "این حساب از قبل درخواست همکاری معرف دارد."
   },
   "Emails": {
     "verificationSubject": "ایمیل خود را تأیید کنید",
@@ -2525,5 +2528,114 @@
     "print": "چاپ",
     "printHint": "روی کاغذ A4 بدون حاشیه چاپ کنید.",
     "noShop": "برای چاپ پوستر ابتدا به یک فروشگاه نیاز دارید."
+  },
+  "Affiliate": {
+    "applyMetaTitle": "معرف شوید — BagajPark",
+    "applyTitle": "مهمانانتان را معرفی کنید، کمیسیون بگیرید",
+    "applyIntro": "اگر میزبان Airbnb، هتل، راهنما یا آژانس هستید، لینک شخصی BagajPark خود را به مهمانان بدهید. برای هر مهمانی که چمدانش را تحویل دهد و پس بگیرد کمیسیون دریافت می‌کنید.",
+    "applyPoint1": "لینک و کد QR شخصی: در پیام، کارت خوشامد یا پذیرش به اشتراک بگذارید.",
+    "applyPoint2": "کمیسیون فقط برای رزروهای تکمیل‌شده؛ لغو و عدم حضور حساب نمی‌شود.",
+    "applyPoint3": "پرداخت ماهانه است؛ در پنل خود کلیک‌ها، رزروها و درآمد را می‌بینید.",
+    "fieldName": "نام / نام کسب‌وکار",
+    "fieldType": "چه نوع معرفی هستید؟",
+    "fieldEmail": "ایمیل",
+    "fieldPhone": "تلفن",
+    "fieldContactHint": "دست‌کم یکی از ایمیل یا تلفن لازم است.",
+    "fieldShare": "لینک را چگونه به اشتراک می‌گذارید؟",
+    "fieldSharePlaceholder": "مثلاً در پیام‌های Airbnb، روی کارت اطلاعات خانه",
+    "applySubmit": "ارسال درخواست",
+    "applySuccessTitle": "درخواست شما دریافت شد",
+    "applySuccessBody": "پس از بررسی و تأیید، لینک شما فعال می‌شود؛ با شما تماس می‌گیریم.",
+    "panelTitle": "پنل معرف",
+    "panelNavDesc": "لینک، کد QR و درآمد شما",
+    "panelNone": "هیچ حساب معرفی به این حساب متصل نیست. اگر مهمان معرفی می‌کنید، می‌توانید درخواست دهید.",
+    "panelApply": "درخواست معرف شدن",
+    "panelQrAlt": "کد QR لینک معرف",
+    "panelLink": "لینک شخصی شما",
+    "panelRates": "کمیسیون {commission}٪ · تخفیف مهمان {discount}٪",
+    "panelInactive": "حساب شما هنوز فعال نیست؛ پس از تأیید لینک کار می‌کند.",
+    "panelShareTip": "لینک را با پیام یا کارت اطلاعات به مهمان بدهید. در متن آگهی Airbnb لینک خارجی نگذارید.",
+    "statClicks": "کلیک",
+    "statBookings": "رزرو",
+    "statCompleted": "تکمیل‌شده",
+    "statEarned": "درآمد",
+    "statUnpaid": "قابل پرداخت",
+    "panelBookings": "رزروها",
+    "panelNoBookings": "هنوز رزروی از طریق لینک شما ثبت نشده است.",
+    "panelCommissionPaid": "کمیسیون ₺{amount} (پرداخت شد)",
+    "panelCommissionUnpaid": "کمیسیون ₺{amount} (قابل پرداخت)",
+    "panelCancelled": "لغو شده — بدون کمیسیون",
+    "panelPending": "کمیسیون پس از تکمیل",
+    "types": {
+      "airbnb_host": "میزبان Airbnb / اجاره کوتاه‌مدت",
+      "hotel": "هتل / مهمان‌خانه",
+      "guide": "راهنمای تور",
+      "agency": "آژانس مسافرتی",
+      "other": "سایر"
+    }
+  },
+  "AdminAffiliates": {
+    "back": "بازگشت به داشبورد",
+    "title": "معرف‌ها",
+    "intro": "میزبان‌ها، هتل‌ها و راهنماهایی که مهمان معرفی می‌کنند. کمیسیون فقط از رزرو تکمیل‌شده ایجاد می‌شود؛ پرداخت دستی است.",
+    "payoutTitle": "پرداخت ماهانه",
+    "payoutMonth": "ماه",
+    "payoutAffiliate": "معرف",
+    "payoutAll": "همه",
+    "payoutReference": "مرجع پرداخت (شماره حواله)",
+    "payoutSubmit": "علامت‌گذاری پرداخت‌شده",
+    "payoutDone": "{count} کمیسیون پرداخت‌شده علامت خورد (₺{total}).",
+    "csv": "CSV کمیسیون‌های پرداخت‌نشده",
+    "createTitle": "معرف جدید",
+    "createSubmit": "افزودن معرف",
+    "created": "معرف اضافه شد.",
+    "saved": "ذخیره شد.",
+    "approved": "معرف تأیید شد.",
+    "approve": "تأیید",
+    "edit": "ویرایش",
+    "save": "ذخیره",
+    "empty": "هنوز معرفی وجود ندارد.",
+    "rates": "کمیسیون {commission}٪ · تخفیف {discount}٪",
+    "stats": {
+      "clicks": "کلیک",
+      "bookings": "رزرو",
+      "completed": "تکمیل‌شده",
+      "earned": "درآمد",
+      "unpaid": "قابل پرداخت",
+      "paid": "پرداخت‌شده"
+    },
+    "fields": {
+      "displayName": "نام",
+      "code": "کد",
+      "codePlaceholder": "اگر خالی باشد از نام ساخته می‌شود",
+      "type": "نوع",
+      "contactEmail": "ایمیل تماس",
+      "contactPhone": "تلفن تماس",
+      "linkedUserEmail": "ایمیل حساب متصل",
+      "commissionRate": "کمیسیون (٪)",
+      "guestDiscountRate": "تخفیف مهمان (٪)",
+      "status": "وضعیت",
+      "notes": "یادداشت (فقط مدیر)"
+    },
+    "errors": {
+      "invalid_data": "فیلدها را بررسی کنید (نرخ‌ها ۰ تا ۵۰٪).",
+      "invalid_code": "کد: ۳ تا ۳۲ نویسه، حرف، رقم و خط تیره تکی.",
+      "duplicate_code": "این کد متعلق به معرف دیگری است.",
+      "not_found": "معرف پیدا نشد.",
+      "user_not_found": "حسابی با این ایمیل وجود ندارد.",
+      "user_already_linked": "این حساب به معرف دیگری متصل است."
+    },
+    "types": {
+      "airbnb_host": "میزبان Airbnb / اجاره کوتاه‌مدت",
+      "hotel": "هتل / مهمان‌خانه",
+      "guide": "راهنمای تور",
+      "agency": "آژانس مسافرتی",
+      "other": "سایر"
+    },
+    "statuses": {
+      "pending": "در انتظار تأیید",
+      "active": "فعال",
+      "paused": "متوقف"
+    }
   }
 }
