@@ -16,7 +16,7 @@ uçta yeniden yazılmaz (kök CLAUDE.md, 24 Ağustos vakası). Yazma işlemleri 
 2. Uç: `src/app/api/mobile/<alan>/route.ts`. Komşu bir uçtan (örn. `bookings/`) şablonu al:
    - kimlik: `requireMobileUser` — FIRLATMAZ, `{ error }` döndürür; sonucu kontrol et,
    - gövde doğrulaması web ile aynı şemadan (örn. `src/lib/seal-payload.ts` deseni),
-   - yanıt gövdesi `src/lib/mobile-dto.ts`'ten (`toXDto`); uçta elle alan listesi kurma
+   - yanıt gövdesi `src/lib/mobile-dto/<alan>.ts`'ten (`toXDto`, `@/lib/mobile-dto` ile ithal); uçta elle alan listesi kurma
      (`mobile-dto.test.ts` mandalı yakalar),
    - `Decimal` → `moneyToNumber`,
    - ateşle-unut promise `.catch` taşır (`unhandled-rejection` mandalı, tavan 0).
@@ -24,10 +24,10 @@ uçta yeniden yazılmaz (kök CLAUDE.md, 24 Ağustos vakası). Yazma işlemleri 
 
 ## Mobil (Expo, `mobile-expo/`)
 
-4. Tip: `src/lib/types.ts` — alanlar DTO ile birebir (kaynağı `mobile-dto.ts`). Sözleşme
+4. Tip: `src/lib/types/<alan>.ts` — alanlar DTO ile birebir (kaynağı `mobile-dto/<alan>.ts`). Sözleşme
    testleri (`partner-shop-phone.test.ts` okuma, `mobile-shop-update-fields.test.ts` yazma)
    tiplerdeki ve `body: { ... }` içindeki her alanı sunucuda arar.
-5. Okuma: `src/lib/queries.ts`'te `useQuery`; anahtar ailesi (`["partner", ...]` gibi)
+5. Okuma: `src/lib/queries/<alan>.ts`'te `useQuery`; anahtar ailesi (`["partner", ...]` gibi)
    mutasyon sonrası doğru şeyi geçersiz kılacak şekilde seçilir.
 6. Yazma: ekranda `useMutation` + `api(...)`; hata `errorMessage(err, "<ad alanı>")` ile
    çevrilir, metin `src/locales/{tr,en}.json`'a ikisine birden girer.
@@ -37,7 +37,7 @@ uçta yeniden yazılmaz (kök CLAUDE.md, 24 Ağustos vakası). Yazma işlemleri 
 ## Kontrol listesi
 
 - [ ] Web ve mobil aynı servis fonksiyonunu çağırıyor
-- [ ] DTO `mobile-dto.ts`'te, uçta elle alan yok
+- [ ] DTO `mobile-dto/<alan>.ts`'te, uçta elle alan yok
 - [ ] `requireMobileUser` sonucu kontrol edildi
-- [ ] `types.ts` alanları DTO ile aynı
+- [ ] `types/<alan>.ts` alanları DTO ile aynı
 - [ ] Her iki tarafta test var, mandallar artmadı
