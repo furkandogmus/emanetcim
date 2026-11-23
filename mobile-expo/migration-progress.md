@@ -179,8 +179,10 @@ Hedef: günlük yönetim web paneline girmeden telefondan yürüsün. Kural ayn�
   indirme bağlantısı (#206)
 - [x] Yeni dükkanın slotları onay anında üretilir (#208); eskiden yalnızca gece işi üretiyordu
 - [x] Metin gerçeğe uyduruldu: mühür kapalı, check-in fotoğraf almıyor. Misafir "teslim alındı"
-  push'u, web SSS/şartlar/güvence/nasıl çalışır "mühür + fotoğraf" demiyor; iOS'ta geçersiz
-  telefon uyarısı Google girişi önermiyor
+  push'u; web SSS, güvence, nasıl çalışır, Hakkımızda, şehir sayfaları, esnaf tanıtımı ve blog
+  şehir yazıları "mühür + fotoğraf" demiyor. Kullanım koşullarının metni `src/lib/legal/terms-content.ts`
+  (mühür şartı yerine QR teslim kaydı; sahibin onayında). iOS'ta geçersiz telefon uyarısı Google
+  girişi önermiyor
 
 ## iOS yayını (2026-11-23)
 
