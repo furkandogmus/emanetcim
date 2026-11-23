@@ -22,7 +22,13 @@ export async function appleSignInAvailable(): Promise<boolean> {
   return AppleAuthentication.isAvailableAsync().catch(() => false);
 }
 
-export type AppleCredential = { identityToken: string; givenName?: string; familyName?: string };
+/** `authorizationCode`: sunucu refresh token'a cevirir; hesap silinince Apple yetkisi onunla iptal edilir. */
+export type AppleCredential = {
+  identityToken: string;
+  authorizationCode?: string;
+  givenName?: string;
+  familyName?: string;
+};
 
 export class AppleSignInError extends Error {
   constructor() {
@@ -45,6 +51,7 @@ export async function pickAppleCredential(): Promise<AppleCredential | null> {
     if (!res.identityToken) throw new AppleSignInError();
     return {
       identityToken: res.identityToken,
+      authorizationCode: res.authorizationCode ?? undefined,
       givenName: res.fullName?.givenName ?? undefined,
       familyName: res.fullName?.familyName ?? undefined,
     };

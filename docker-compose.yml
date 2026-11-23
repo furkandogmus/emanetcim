@@ -110,6 +110,8 @@ services:
       # Anahtar SSM'de SecureString, base64 (env dosyasi cok satir tasimaz).
       APPLE_KEY_ID: ${APPLE_KEY_ID:-}
       APPLE_PRIVATE_KEY_B64: ${APPLE_PRIVATE_KEY_B64:-}
+      # Apple refresh token'larini sifreler (hesap silmede iptal icin); bos -> token saklanmaz.
+      APPLE_TOKEN_ENCRYPTION_KEY: ${APPLE_TOKEN_ENCRYPTION_KEY:-}
       # Google Play inceleme hesabi (sabit OTP); bos -> kapali.
       PLAY_REVIEW_EMAIL: ${PLAY_REVIEW_EMAIL:-}
       PLAY_REVIEW_OTP: ${PLAY_REVIEW_OTP:-}

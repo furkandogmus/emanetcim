@@ -12,6 +12,7 @@ import { resolveServerSessionId } from "@/lib/analytics-server";
 import logger from "@/lib/logger";
 import { getClientIpOrNull } from "@/lib/client-ip";
 import { linkGuestBookingsToVerifiedUser } from "@/services/booking/guest-link";
+import { appleTokenService } from "@/services/AppleTokenService";
 
 /**
  * Auth.js (v5) - Merkezi Kimlik Doğrulama Konfigürasyonu
@@ -32,8 +33,19 @@ const adminEmailSet = new Set(
     .filter(Boolean)
 );
 
+/*
+  Adapter Apple refresh token'ini duz metin yaziyordu. Satira bos yazilir;
+  sifreli hali `events.signIn` -> `AppleTokenService` koyar (iptal icin gerekli).
+*/
+const baseAdapter = PrismaAdapter(prisma);
+const appleSafeAdapter: typeof baseAdapter = {
+  ...baseAdapter,
+  linkAccount: (account) =>
+    baseAdapter.linkAccount!(account.provider === "apple" ? { ...account, refresh_token: undefined } : account),
+};
+
 export const { handlers, auth, signIn, signOut } = NextAuth({
-  adapter: PrismaAdapter(prisma),
+  adapter: appleSafeAdapter,
   session: { strategy: "jwt" },
   ...authConfig,
   /*
@@ -47,6 +59,18 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
   */
   debug: process.env.NODE_ENV !== "production",
   events: {
+    async signIn({ account }) {
+      const clientId = process.env.APPLE_ID?.trim();
+      if (account?.provider === "apple" && account.refresh_token && clientId) {
+        await appleTokenService
+          .storeRefreshToken({
+            providerAccountId: account.providerAccountId,
+            clientId,
+            refreshToken: account.refresh_token,
+          })
+          .catch((err) => logger.warn({ err }, "apple_token_store_failed"));
+      }
+    },
     async linkAccount({ user, account }) {
       if (account.type === "oauth") {
         await prisma.user.update({

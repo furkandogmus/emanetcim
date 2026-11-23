@@ -6,6 +6,7 @@ import { ANONYMIZED_EMAIL_DOMAIN, isAnonymizedEmail } from "@/lib/anonymized-acc
 import { NOT_DROPPED_STATUSES } from "@/lib/booking-closure";
 import { closeExpiredBookingsForGuest } from "@/services/booking/closure";
 import { normalizeTrGsm10 } from "@/lib/netgsm";
+import { appleTokenService } from "@/services/AppleTokenService";
 
 /**
  * Hesap anonimleştirme (KVKK silme hakkı) — iki taşıyıcının ORTAK gövdesi.
@@ -181,6 +182,8 @@ class AccountPrivacyService {
   /** Silme govdesi -- kendi silmesi ve yonetici silmesi AYNI listeyi kullanir. */
   private async erase(userId: string, now: Date): Promise<void> {
     await closeExpiredBookingsForGuest(userId, now);
+    // Apple yetkisi hesap satirlari silinmeden ONCE iptal edilir (5.1.1(v)); hata silmeyi durdurmaz.
+    await appleTokenService.revokeForUser(userId);
 
     const anonEmail = `gdpr_${userId.replace(/-/g, "").slice(0, 20)}${ANONYMIZED_EMAIL_DOMAIN}`;
     // E-postaya bagli (userId'siz) satirlar: sifirlama kodu, sifirlama/dogrulama token'lari.
@@ -199,6 +202,8 @@ class AccountPrivacyService {
       prisma.session.deleteMany({ where: { userId } }),
       prisma.account.deleteMany({ where: { userId } }),
       prisma.review.deleteMany({ where: { guestId: userId } }),
+      prisma.reviewReport.deleteMany({ where: { userId } }),
+      prisma.reviewBlock.deleteMany({ where: { OR: [{ userId }, { blockedUserId: userId }] } }),
       prisma.legalAcceptance.deleteMany({ where: { userId } }),
       prisma.pushSubscription.deleteMany({ where: { userId } }),
       /*
