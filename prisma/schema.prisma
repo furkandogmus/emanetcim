@@ -13,6 +13,8 @@ model User {
   emailVerified            DateTime?
   image                    String?
   phone                    String?                  @unique
+  partnerLeadsConverted    PartnerLead[]            @relation("PartnerLeadConvertedBy")
+  partnerLeadsAsPartner    PartnerLead[]            @relation("PartnerLeadConvertedUser")
   name                     String?
   /// bcrypt hash; OAuth-only kullanıcılarda null
   passwordHash             String?
@@ -192,6 +194,7 @@ model Shop {
   timeSlots           ShopTimeSlot[]
   weeklyHours         ShopWeeklyHours[]
   closures            ShopClosure[]
+  partnerLeads        PartnerLead[]
   owner               User                @relation(fields: [ownerId], references: [id], onDelete: Cascade)
 
   merchantProfile        MerchantProfile?
@@ -1218,10 +1221,19 @@ model PartnerLead {
   address     String
   locale      String?
   source      String    @default("web")
-  /// NEW | CONTACTED
-  status      String    @default("NEW")
-  contactedAt DateTime?
-  createdAt   DateTime  @default(now())
+  /// NEW | CONTACTED | CONVERTED
+  status          String    @default("NEW")
+  contactedAt     DateTime?
+  createdAt       DateTime  @default(now())
+  /// Esnaf hesabina cevrildigi an (`PartnerLeadService.convertToPartner`). Dolu =
+  /// cevrildi; ikinci cevirme yeni hesap acmaz, bu kayda bagli sonucu doner.
+  convertedAt     DateTime?
+  convertedById   String?
+  convertedUserId String?
+  convertedShopId String?
+  convertedBy     User?     @relation("PartnerLeadConvertedBy", fields: [convertedById], references: [id], onDelete: SetNull)
+  convertedUser   User?     @relation("PartnerLeadConvertedUser", fields: [convertedUserId], references: [id], onDelete: SetNull)
+  convertedShop   Shop?     @relation(fields: [convertedShopId], references: [id], onDelete: SetNull)
 
   @@index([phone])
   @@index([status, createdAt])
