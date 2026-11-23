@@ -256,6 +256,8 @@ export type CheckoutRequest = {
   bagCountXl: number;
   couponCode?: string;
   referralCode?: string;
+  /** Araci "Referans kodu" (`?ref=` derin baglantisi ya da elle). Atfi sunucu dogrular. */
+  affiliateCode?: string;
   /** Ekranda gosterilen toplam: sunucu farkli hesaplarsa 409 `price_changed` doner. */
   expectedTotal?: number;
 };
@@ -268,9 +270,13 @@ export type CheckoutQuote = {
   insuranceFee?: number;
   subtotal: number;
   total: number;
-  discount: { kind: "coupon" | "referral"; code: string; amount: number } | null;
-  codeStatus: "applied" | "invalid" | "min_price" | "own_code" | "not_first_booking" | null;
+  /** Tek indirim: kupon, davet ya da araci (buyuk olan; `CheckoutDiscountService`). */
+  discount: { kind: "coupon" | "referral" | "affiliate"; code: string; amount: number } | null;
+  /** `not_combinable`: kod gecerli ama daha buyuk referans indirimi uygulaniyor. */
+  codeStatus: "applied" | "invalid" | "min_price" | "own_code" | "not_first_booking" | "not_combinable" | null;
   minPrice: number | null;
+  /** Araci kodu durumu; `attributed` = atif var, indirim yok ya da kaybetti. Eski sunucu gondermez. */
+  affiliate?: { code: string; status: "applied" | "attributed" | "invalid" | "own_code"; ratePct: number; amount: number } | null;
   /** Dukkanin saatine oturtulmus anlar; rezervasyon bunlarla olusur. */
   checkInTime?: string;
   checkOutTime?: string;
@@ -753,6 +759,26 @@ export type AdminCoupon = {
   expiresAt: string | null;
   isActive: boolean;
   createdAt: string;
+};
+
+/** `toMobileAdminAffiliate` (kaynak `../src/lib/mobile-dto.ts`). */
+export type AdminAffiliateType = "airbnb_host" | "hotel" | "guide" | "agency" | "other";
+export type AdminAffiliateStatus = "pending" | "active" | "paused";
+export type AdminAffiliate = {
+  id: string;
+  code: string;
+  displayName: string;
+  type: AdminAffiliateType;
+  status: AdminAffiliateStatus;
+  contactEmail: string | null;
+  contactPhone: string | null;
+  commissionRate: number;
+  guestDiscountRate: number;
+  notes: string | null;
+  applicationNote: string | null;
+  linkedUserEmail: string | null;
+  createdAt: string;
+  stats: { clicks: number; bookings: number; completedBookings: number; earned: number; unpaid: number; paid: number };
 };
 
 /** `toMobileAdminPayments`: salt okunur defter. */

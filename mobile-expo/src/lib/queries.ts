@@ -11,7 +11,7 @@ import { totalBags, type Bags } from "./search";
 import { partnerSearchTerm } from "./booking-search";
 import { useDebouncedValue } from "./use-debounced-value";
 import { BROADCAST_POLL_MS, hasActiveBroadcast } from "./broadcast";
-import type { AdminApplication, AdminPartnerLead, AdminStats, BookingDetail, ContactMessage, PartnerEarnings, PartnerSealsResponse, PartnerShop, BookingSummary, NearbyShop, PartnerBookingsResponse, ShopDetail, ShopReviewsPage, PartnerShopSettings, PartnerSchedule, PartnerDashboard, AdminOverview, AdminBookingFilter, AdminBookingCounts, AdminBookingsResponse, AdminBookingDetail, AdminShop, AdminShopDetail, AdminUser, AdminBroadcast, BroadcastAudience, BroadcastPreview, CityCoverage, AppConfig, PartnerCancelRequest, AdminAuditPage, AdminUserDetail, AdminReviewFilter, AdminReviewsPage, AdminShopPhotos, ReviewModerationAction, AdminCoupon, AdminDispute, AdminDisputeStatus, AdminFeatureFlag, AdminPayments, AdminPlatformSettings } from "./types";
+import type { AdminApplication, AdminPartnerLead, AdminStats, BookingDetail, ContactMessage, PartnerEarnings, PartnerSealsResponse, PartnerShop, BookingSummary, NearbyShop, PartnerBookingsResponse, ShopDetail, ShopReviewsPage, PartnerShopSettings, PartnerSchedule, PartnerDashboard, AdminOverview, AdminBookingFilter, AdminBookingCounts, AdminBookingsResponse, AdminBookingDetail, AdminShop, AdminShopDetail, AdminUser, AdminBroadcast, BroadcastAudience, BroadcastPreview, CityCoverage, AppConfig, PartnerCancelRequest, AdminAuditPage, AdminUserDetail, AdminReviewFilter, AdminReviewsPage, AdminShopPhotos, ReviewModerationAction, AdminCoupon, AdminAffiliate, AdminDispute, AdminDisputeStatus, AdminFeatureFlag, AdminPayments, AdminPlatformSettings } from "./types";
 
 export const keys = {
   myBookings: ["bookings", "me"] as const,
@@ -587,6 +587,7 @@ export function useModerateReview() {
 export const adminOpsKeys = {
   disputes: [...keys.admin, "disputes"] as const,
   coupons: [...keys.admin, "coupons"] as const,
+  affiliates: [...keys.admin, "affiliates"] as const,
   payments: [...keys.admin, "payments"] as const,
   settings: [...keys.admin, "platform-settings"] as const,
   flags: [...keys.admin, "feature-flags"] as const,
@@ -614,6 +615,13 @@ export function useAdminCoupons() {
   return useQuery({
     queryKey: adminOpsKeys.coupons,
     queryFn: () => api<{ items: AdminCoupon[] }>("/admin/coupons").then((r) => r.items),
+  });
+}
+
+export function useAdminAffiliates() {
+  return useQuery({
+    queryKey: adminOpsKeys.affiliates,
+    queryFn: () => api<{ items: AdminAffiliate[] }>("/admin/affiliates").then((r) => r.items),
   });
 }
 
