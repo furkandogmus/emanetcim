@@ -208,7 +208,7 @@ async function coverage() {
 }
 
 /**
- * `docs/BLOG_ICERIK_LISTESI.md` içindeki tabloyu üretir.
+ * Şehir/yazı durum tablosunu Markdown olarak basar (repoda tutulmaz, `docs/BUYUME.md` § 3).
  *
  * NEDEN ELLE TUTULMUYOR: 265 satırlık bir durum tablosu elle güncellendiğinde
  * ilk atlanan satırdan sonra belgenin tamamı güvenilmez oluyor. Tablo koddan
