@@ -136,7 +136,13 @@ describe("lateDropoffState", () => {
 
   it("gec: kapanis ani, bekletme yok, bekletilebilir", () => {
     const s = lateDropoffState({ ...base, lateCloseAt: "2026-11-22T10:00:00Z" }, at("2026-11-22T09:20:00Z"));
-    expect(s).toEqual({ kind: "late", closeAt: new Date("2026-11-22T10:00:00Z"), holdUntil: null, canHold: true });
+    expect(s).toEqual({
+      kind: "late",
+      closeAt: new Date("2026-11-22T10:00:00Z"),
+      holdUntil: null,
+      actionable: true,
+      canHold: true,
+    });
   });
 
   it("suren bekletme gosterilir; alma saatine dayanmis kapanis bekletilemez", () => {
@@ -147,8 +153,8 @@ describe("lateDropoffState", () => {
     expect(s).toMatchObject({ kind: "late", holdUntil: new Date("2026-11-22T15:00:00Z"), canHold: false });
   });
 
-  it("odemesiz niyet (PENDING) bekletilemez", () => {
+  it("odemesiz niyet (PENDING) bekletilemez ve bekle blogu sunulmaz", () => {
     const s = lateDropoffState({ ...base, status: "PENDING", lateCloseAt: "2026-11-22T10:00:00Z" }, at("2026-11-22T09:20:00Z"));
-    expect(s).toMatchObject({ kind: "late", canHold: false });
+    expect(s).toMatchObject({ kind: "late", actionable: false, canHold: false });
   });
 });
