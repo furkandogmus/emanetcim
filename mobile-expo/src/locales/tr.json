@@ -1733,7 +1733,8 @@
         "duplicate_code": "Bu kod başka bir aracıda.",
         "not_found": "Aracı bulunamadı; listeyi yenile.",
         "user_not_found": "Bu e-postayla hesap yok.",
-        "user_already_linked": "Bu hesap başka bir aracıya bağlı."
+        "user_already_linked": "Bu hesap başka bir aracıya bağlı.",
+        "code_reserved": "Bu kod bir kullanıcı davet kodu; başka bir kod seç."
       },
       "types": {
         "airbnb_host": "Ev sahibi",

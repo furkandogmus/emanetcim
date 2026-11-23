@@ -2624,7 +2624,8 @@
       "duplicate_code": "Ce code est déjà utilisé par un autre apporteur.",
       "not_found": "Apporteur introuvable.",
       "user_not_found": "Aucun compte avec cet e-mail.",
-      "user_already_linked": "Ce compte est lié à un autre apporteur."
+      "user_already_linked": "Ce compte est lié à un autre apporteur.",
+      "code_reserved": "Ce code est déjà un code d'invitation utilisateur ; choisissez-en un autre."
     },
     "types": {
       "airbnb_host": "Hôte Airbnb / location courte",

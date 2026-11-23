@@ -1,7 +1,7 @@
 import * as SecureStore from "expo-secure-store";
 
 /**
- * Derin baglantidaki araci kodu (`https://bagajpark.com/tr/shop/<id>?ref=KOD`).
+ * Derin baglantidaki araci kodu (`https://bagajpark.com/tr/shop/<id>?aff=KOD`).
  * Uygulama baglantiyi acarken yakalanir, odeme ekrani "Referans kodu" alanina
  * doldurur. Web cereziyle ayni omur (30 gun); kodun gecerliligine sunucu karar verir.
  */

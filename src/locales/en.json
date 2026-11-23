@@ -2782,7 +2782,8 @@
       "duplicate_code": "Another referrer uses this code.",
       "not_found": "Referrer not found.",
       "user_not_found": "No account with this email.",
-      "user_already_linked": "This account is linked to another referrer."
+      "user_already_linked": "This account is linked to another referrer.",
+      "code_reserved": "This code is already a user invite code; choose another."
     },
     "types": {
       "airbnb_host": "Airbnb / short-let host",

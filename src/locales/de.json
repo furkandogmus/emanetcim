@@ -2624,7 +2624,8 @@
       "duplicate_code": "Dieser Code gehört einem anderen Vermittler.",
       "not_found": "Vermittler nicht gefunden.",
       "user_not_found": "Kein Konto mit dieser E-Mail.",
-      "user_already_linked": "Dieses Konto ist mit einem anderen Vermittler verknüpft."
+      "user_already_linked": "Dieses Konto ist mit einem anderen Vermittler verknüpft.",
+      "code_reserved": "Dieser Code ist bereits ein Einladungscode eines Nutzers; wählen Sie einen anderen."
     },
     "types": {
       "airbnb_host": "Airbnb-/Ferienwohnungs-Gastgeber",

@@ -35,7 +35,7 @@ export default function CheckoutScreen() {
   const [codeError, setCodeError] = useState<string | null>(null);
   const [quotedFor, setQuotedFor] = useState<string | null>(null);
   /*
-    Araci "Referans kodu": `?ref=` derin baglantisindan dolar ya da elle girilir.
+    Araci "Referans kodu": `?aff=` derin baglantisindan dolar ya da elle girilir.
     Gecerliligi, indirimi ve atfi sunucu belirler (`checkout/quote`).
   */
   const [affiliateCode, setAffiliateCode] = useState<string | null>(null);

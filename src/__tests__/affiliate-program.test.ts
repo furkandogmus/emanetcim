@@ -107,7 +107,9 @@ beforeEach(() => {
   vi.clearAllMocks();
   m.prisma.$transaction.mockImplementation(async (f: (t: typeof m.tx) => unknown) => f(m.tx));
   m.prisma.affiliate.findUnique.mockResolvedValue(affiliateRow());
-  m.prisma.user.findUnique.mockResolvedValue({ email: "misafir@example.test", phone: null });
+  m.prisma.user.findUnique.mockImplementation(async ({ where }: { where: { id?: string; referralCode?: string } }) =>
+    where.referralCode ? (where.referralCode === "DAVET123" ? { id: "u-davet" } : null) : { email: "misafir@example.test", phone: null },
+  );
   m.referral.resolveDiscount.mockResolvedValue(null);
   m.referral.check.mockResolvedValue({ ok: false, reason: "invalid_code" });
   m.coupon.preview.mockResolvedValue({ ok: false, reason: "invalid" });
@@ -153,12 +155,11 @@ describe("atif cozumleme", () => {
   });
 
   it("girisli misafir: hesabin e-postasi ya da telefonu araciyla ayniysa atif yok (ikinci hesap)", async () => {
-    m.prisma.user.findUnique.mockResolvedValue({ email: "Host@Example.test", phone: null });
+    m.prisma.user.findUnique.mockResolvedValueOnce({ email: "Host@Example.test", phone: null });
     expect(await affiliateService.resolve("AHMET-EV", { userId: "ikinci-hesap" })).toEqual({ ok: false, reason: "own_code" });
     m.prisma.affiliate.findUnique.mockResolvedValue(affiliateRow({ contactPhone: "+90 532 000 00 00" }));
-    m.prisma.user.findUnique.mockResolvedValue({ email: "baska@example.test", phone: "05320000000" });
+    m.prisma.user.findUnique.mockResolvedValueOnce({ email: "baska@example.test", phone: "05320000000" });
     expect(await affiliateService.resolve("AHMET-EV", { userId: "ikinci-hesap" })).toEqual({ ok: false, reason: "own_code" });
-    m.prisma.user.findUnique.mockResolvedValue({ email: "baska@example.test", phone: null });
     expect(await affiliateService.resolve("AHMET-EV", { guestPhone: "0532 000 00 00" })).toEqual({ ok: false, reason: "own_code" });
     expect((await affiliateService.resolve("AHMET-EV", { userId: "ikinci-hesap" })).ok).toBe(true);
   });
@@ -434,6 +435,21 @@ describe("yonetim: oran/durum denetimi, odeme, CSV", () => {
     expect(await adminCreateAffiliate(ADMIN, form)).toEqual({ ok: false, reason: "duplicate_code" });
   });
 
+  it("kullanici davet koduyla cakisan araci kodu reddedilir", async () => {
+    expect(await adminCreateAffiliate(ADMIN, { ...form, code: "davet123" })).toEqual({ ok: false, reason: "code_reserved" });
+    expect(m.prisma.affiliate.create).not.toHaveBeenCalled();
+  });
+
+  it("basvuru onaylaninca rastgele kod yerine addan okunur kod verilir", async () => {
+    m.prisma.affiliate.findUnique.mockImplementation(async ({ where }: { where: { id?: string; code?: string } }) =>
+      where.id ? { ...existing, code: "BASVURU-ABCDEFGH" } : null,
+    );
+    m.prisma.affiliate.update.mockResolvedValue({});
+    const r = await adminUpdateAffiliate(ADMIN, "aff-1", { ...form, displayName: "Ahmet Ev", code: "BASVURU-ABCDEFGH" });
+    expect(r).toEqual({ ok: true });
+    expect(m.prisma.affiliate.update.mock.calls[0][0].data.code).toBe("AHMET-EV");
+  });
+
   it("ay odemesi yalnizca UNPAID satirlari kapatir, referans ve tutari denetime yazar", async () => {
     m.tx.affiliateCommission.findMany.mockResolvedValue([
       { id: "c1", amount: D("24.99") },
@@ -514,7 +530,10 @@ describe("Araci ol basvurusu", () => {
     m.prisma.affiliate.create.mockResolvedValue({ id: "aff-9", code: "ORNEK-OTEL" });
     const r = await affiliateService.submitApplication({ displayName: "Ornek Otel", type: "hotel", contactEmail: "otel@example.test" });
     expect(r).toEqual({ ok: true, id: "aff-9" });
-    expect(m.prisma.affiliate.create.mock.calls[0][0].data).toMatchObject({ status: "PENDING", code: "ORNEK-OTEL", type: "HOTEL" });
+    const data = m.prisma.affiliate.create.mock.calls[0][0].data;
+    // Bekleyen basvuru okunur adi kapmaz: rastgele kod, okunuru onayda verilir.
+    expect(data).toMatchObject({ status: "PENDING", type: "HOTEL" });
+    expect(data.code).toMatch(/^BASVURU-[A-Z0-9]{8}$/);
     expect(m.notify).toHaveBeenCalled();
   });
 
