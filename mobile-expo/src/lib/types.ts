@@ -344,6 +344,41 @@ export type AdminApplication = {
   owner: { name: string | null; phone: string | null; email: string | null; whatsapp?: string | null };
 };
 
+/** `toMobileAdminPartnerLead` (mobile-dto.ts) — `GET /admin/partner-leads`. Yeni alanlar istege bagli: eski sunucu. */
+export type AdminPartnerLead = {
+  id: string;
+  fullName: string;
+  phone: string;
+  whatsapp?: string | null;
+  shopName: string | null;
+  address: string;
+  contacted: boolean;
+  converted?: boolean;
+  convertedShopId?: string | null;
+  createdAt: string;
+  draft?: {
+    ownerName: string;
+    phone: string;
+    email: string;
+    shopName: string;
+    shopAddress: string;
+    city: string;
+    district: string;
+    location: string;
+  };
+};
+
+/** `toMobileLeadConversion` (mobile-dto.ts) — `POST /admin/partner-leads/:id/convert`. */
+export type LeadConversion = {
+  ok: true;
+  alreadyConverted: boolean;
+  shopId: string | null;
+  userId: string | null;
+  resetUrl: string | null;
+  activated: boolean;
+  activationFailed?: boolean;
+};
+
 /** `toMobileGeocodeResult` (mobile-dto.ts) — `GET /geocode?q=`. */
 export type GeocodeResult = {
   label: string;
