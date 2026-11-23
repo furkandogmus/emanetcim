@@ -10,6 +10,7 @@ import {
   Wallet,
   Calendar,
   ShieldCheck,
+  QrCode,
 } from "lucide-react";
 
 import { Link } from "@/i18n/routing";
@@ -487,7 +488,7 @@ export default function PartnerClient({
             </div>
           )}
         </div>
-        <div className="grid grid-cols-3 gap-2 sm:flex sm:flex-col">
+        <div className="grid grid-cols-4 gap-2 sm:flex sm:flex-col">
           <Link
             href="/partner/earnings"
             className="flex min-w-0 flex-col items-center justify-center gap-1 rounded-2xl bg-orange-50 px-2 py-2.5 text-center text-[10px] font-bold text-orange-700 transition-all hover:bg-orange-100 active:scale-[0.97] sm:flex-row sm:gap-3 sm:px-4 sm:text-sm"
@@ -508,6 +509,13 @@ export default function PartnerClient({
           >
             <ShieldCheck size={18} />
             {t("sealsTitle")}
+          </Link>
+          <Link
+            href={{ pathname: "/partner/poster", query: { shop: shopId } }}
+            className="id-accent-soft flex min-w-0 flex-col items-center justify-center gap-1 rounded-2xl px-2 py-2.5 text-center text-[10px] font-bold transition-all hover:opacity-90 active:scale-[0.97] sm:flex-row sm:gap-3 sm:px-4 sm:text-sm"
+          >
+            <QrCode size={18} />
+            {t("posterNav")}
           </Link>
         </div>
       </header>
