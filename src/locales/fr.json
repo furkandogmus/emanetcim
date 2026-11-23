@@ -1375,7 +1375,9 @@
     "partnerLeadConvertAlready": "Cette pré-inscription a déjà été convertie",
     "partnerLeadConvertBack": "Retour aux pré-inscriptions",
     "partnerLeadMapsSearch": "Rechercher l'adresse sur Google Maps",
-    "affiliatesTitle": "Apporteurs"
+    "affiliatesTitle": "Apporteurs",
+    "accountDeletionsNav": "Demandes de suppression",
+    "reviewModerationNav": "Modération des avis"
   },
   "Auth": {
     "loginTitle": "Connectez-vous à BagajPark",
@@ -1886,7 +1888,12 @@
     "invalidCurrentPassword": "Le mot de passe actuel est incorrect.",
     "lateHoldLimit": "Heure de retrait atteinte ; la réservation ne peut plus être prolongée.",
     "affiliateAlreadyApplied": "Ce compte a déjà une demande d'apporteur d'affaires.",
-    "priceChanged": "Le prix a changé (une remise ne s'applique plus). Vérifiez le nouveau total et confirmez à nouveau."
+    "priceChanged": "Le prix a changé (une remise ne s'applique plus). Vérifiez le nouveau total et confirmez à nouveau.",
+    "accountDeletionLastAdmin": "Vous êtes le seul administrateur ; ajoutez d’abord un autre administrateur.",
+    "accountDeletionNotPending": "La demande n’est plus en attente.",
+    "accountDeletionSelf": "Vous ne pouvez pas finaliser votre propre demande.",
+    "accountDeletionPendingPayouts": "Des versements sont en attente ; ils doivent d’abord être payés.",
+    "accountDeletionReason": "Le motif doit comporter au moins 5 caractères."
   },
   "Emails": {
     "verificationSubject": "Vérifiez votre e-mail",
@@ -2178,10 +2185,21 @@
       "authRequired": "Veuillez vous connecter.",
       "guestContactRequired": "Veuillez saisir un e-mail ou un numéro de téléphone.",
       "unauthorized": "Vous n’êtes pas autorisé à faire cela.",
-      "generic": "Une erreur est survenue."
+      "generic": "Une erreur est survenue.",
+      "lastAdmin": "Vous êtes le seul administrateur ; ajoutez d’abord un autre administrateur."
     },
     "deleteTypeConfirmLabel": "Tapez {phrase} ci-dessous pour confirmer :",
-    "deleteTypeConfirmPhrase": "SUPPRIMER MON COMPTE"
+    "deleteTypeConfirmPhrase": "SUPPRIMER MON COMPTE",
+    "requestTitle": "Supprimer mon compte",
+    "requestDesc": "Les comptes partenaire et administrateur envoient une demande de suppression. Avant de l’envoyer :",
+    "requestConsequenceShops": "Votre commerce cesse immédiatement de prendre de nouvelles réservations ; vous pouvez continuer à rendre les bagages en cours.",
+    "requestConsequenceTimeline": "Quand il ne reste ni réservation active ni versement en attente, votre compte est supprimé sous 30 jours et vous recevez un e-mail.",
+    "requestButton": "Envoyer la demande",
+    "requestConfirmTitle": "Envoyer une demande de suppression ?",
+    "requestConfirmBody": "Votre commerce ne prend plus de nouvelles réservations et votre demande est transmise à notre équipe.",
+    "requestConfirmYes": "Oui, envoyer",
+    "requestReceivedBody": "Demande reçue ; votre compte sera supprimé sous {days} jours et vous recevrez un e-mail une fois terminé.",
+    "requestPendingBody": "Votre demande de suppression a été reçue. Votre compte sera supprimé au plus tard le {date}."
   },
   "WebPush": {
     "title": "Notifications push",
@@ -2363,7 +2381,7 @@
     "webStep1": "Connectez-vous à votre compte sur bagajpark.com.",
     "webStep2": "Sur la page « Données et confidentialité », choisissez « Fermer le compte ».",
     "webLink": "Aller à « Données et confidentialité »",
-    "partnerNote": "Les comptes partenaires (commerces) demandent la fermeture via la page de contact.",
+    "partnerNote": "Les comptes partenaire et administrateur envoient une demande dans l’app (Profil → « Supprimer mon compte ») ou sur la page Données et confidentialité ; le compte est supprimé sous 30 jours et vous recevez un e-mail. Questions :",
     "contactLink": "Contact",
     "deletedTitle": "Données supprimées",
     "deletedBody": "Vos nom, adresse e-mail, numéro de téléphone et photo sont retirés ; vos avis et votre abonnement aux notifications sont supprimés. Le compte ne permet plus de se connecter.",
@@ -2630,5 +2648,28 @@
       "active": "Actif",
       "paused": "En pause"
     }
+  },
+  "AdminAccountDeletions": {
+    "back": "Retour au tableau de bord",
+    "title": "Demandes de suppression",
+    "intro": "Demandes des partenaires et administrateurs. Finalisez quand il ne reste ni réservation active ni versement en attente ; le compte est anonymisé et l’utilisateur reçoit un e-mail.",
+    "empty": "Aucune demande en attente.",
+    "role_GUEST": "Client",
+    "role_PARTNER": "Partenaire",
+    "role_ADMIN": "Administrateur",
+    "status_PENDING": "En attente",
+    "status_COMPLETED": "Terminée",
+    "status_CANCELLED": "Annulée",
+    "dates": "Demandée le {requested} · échéance {due}",
+    "blockers": "Impossible : {bookings} réservations actives, {payouts} versements en attente.",
+    "complete": "Finaliser",
+    "completeTitle": "Supprimer ce compte ?",
+    "completeBody": "Le compte est anonymisé. C’est irréversible.",
+    "completed": "Compte supprimé.",
+    "cancel": "Annuler la demande",
+    "cancelTitle": "Annuler cette demande ?",
+    "cancelBody": "Les commerces fermés sont rouverts. Le motif est consigné dans le journal d’audit.",
+    "cancelled": "Demande annulée.",
+    "reasonLabel": "Motif (au moins 5 caractères)"
   }
 }

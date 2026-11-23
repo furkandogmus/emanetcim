@@ -1,12 +1,14 @@
+import { describe, expect, it, jest } from "@jest/globals";
+
 /**
  * Apple girisi `authorizationCode`u da sunucuya tasir: sunucu onu refresh token'a
  * cevirir ve hesap silinince Apple yetkisini iptal eder (App Store 5.1.1(v)).
  */
-const mockSignIn = jest.fn();
+const mockSignIn = jest.fn<(...args: unknown[]) => Promise<unknown>>();
 
 jest.mock("expo-apple-authentication", () => ({
   signInAsync: (...args: unknown[]) => mockSignIn(...args),
-  isAvailableAsync: jest.fn().mockResolvedValue(true),
+  isAvailableAsync: () => Promise.resolve(true),
   AppleAuthenticationScope: { FULL_NAME: 0, EMAIL: 1 },
 }));
 

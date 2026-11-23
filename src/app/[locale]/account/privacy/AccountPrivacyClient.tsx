@@ -2,13 +2,16 @@
 
 import { useState, useTransition } from "react";
 import { signOut, useSession } from "next-auth/react";
-import { useTranslations } from "next-intl";
+import { useLocale, useTranslations } from "next-intl";
 import { Download, UserX } from "lucide-react";
-import { anonymizeGuestAccountAction } from "@/actions/account-privacy";
+import { anonymizeGuestAccountAction, requestAccountDeletionAction } from "@/actions/account-privacy";
 import WebPushOptIn from "@/components/WebPushOptIn";
 import ConfirmDialog from "@/components/common/ConfirmDialog";
+import { formatInstant } from "@/lib/format-datetime";
 
-export default function AccountPrivacyClient() {
+type DeletionRequestState = { status: "PENDING"; dueAtIso: string } | null;
+
+export default function AccountPrivacyClient({ deletionRequest = null }: { deletionRequest?: DeletionRequestState }) {
   const t = useTranslations("AccountPrivacy");
   const tCommon = useTranslations("Common");
   const { data: session, status } = useSession();
@@ -104,10 +107,9 @@ export default function AccountPrivacyClient() {
     );
   }
 
+  // Esnaf ve yonetici aninda silemez (dukkan, hakedis, yetki): talep birakir (App Store 5.1.1(v)).
   if (session?.user?.role !== "GUEST") {
-    return (
-      <p className="text-sm text-gray-600">{t("guestOnly")}</p>
-    );
+    return <DeletionRequestCard initial={deletionRequest} />;
   }
 
   return (
@@ -196,6 +198,90 @@ export default function AccountPrivacyClient() {
           phrase: t("deleteTypeConfirmPhrase"),
           label: t("deleteTypeConfirmLabel", { phrase: t("deleteTypeConfirmPhrase") }),
         }}
+      />
+    </div>
+  );
+}
+
+function DeletionRequestCard({ initial }: { initial: DeletionRequestState }) {
+  const t = useTranslations("AccountPrivacy");
+  const tCommon = useTranslations("Common");
+  const locale = useLocale();
+  const [state, setState] = useState<DeletionRequestState>(initial);
+  const [justSent, setJustSent] = useState<{ days: number } | null>(null);
+  const [confirmOpen, setConfirmOpen] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [pending, startTransition] = useTransition();
+
+  const send = () => {
+    setConfirmOpen(false);
+    setError(null);
+    startTransition(async () => {
+      try {
+        const r = await requestAccountDeletionAction({ locale });
+        if (!r.success) {
+          setError(r.error === "Errors.accountDeletionLastAdmin" ? t("errors.lastAdmin") : t("errors.generic"));
+          return;
+        }
+        setState({ status: "PENDING", dueAtIso: r.dueAtIso });
+        setJustSent({ days: r.slaDays });
+      } catch {
+        setError(t("errors.generic"));
+      }
+    });
+  };
+
+  const dueDate = state ? formatInstant(state.dueAtIso, locale, { dateStyle: "long" }) : "";
+
+  return (
+    <div className="flex max-w-lg flex-col gap-6">
+      <div className="rounded-2xl border border-red-100 bg-red-50/40 p-6">
+        <h2 className="flex items-center gap-2 text-lg id-display text-red-900">
+          <UserX size={20} className="text-red-700" aria-hidden />
+          {t("requestTitle")}
+        </h2>
+        {state ? (
+          <div role="status" className="mt-2 flex flex-col gap-1 text-sm text-red-900">
+            {justSent ? <p className="font-bold">{t("requestReceivedBody", { days: justSent.days })}</p> : null}
+            <p>{t("requestPendingBody", { date: dueDate })}</p>
+          </div>
+        ) : (
+          <>
+            <p className="mt-2 text-sm text-red-800/90">{t("requestDesc")}</p>
+            <ul className="mt-3 flex flex-col gap-1.5 text-xs font-semibold text-red-800/80">
+              <li className="flex gap-2">
+                <span aria-hidden>•</span>
+                {t("requestConsequenceShops")}
+              </li>
+              <li className="flex gap-2">
+                <span aria-hidden>•</span>
+                {t("requestConsequenceTimeline")}
+              </li>
+              <li className="flex gap-2 text-red-900">
+                <span aria-hidden>•</span>
+                {t("deleteConsequenceIrreversible")}
+              </li>
+            </ul>
+            {error ? <p className="mt-2 text-sm font-bold text-red-700">{error}</p> : null}
+            <button
+              type="button"
+              disabled={pending}
+              onClick={() => setConfirmOpen(true)}
+              className="mt-4 rounded-full bg-red-600 px-6 py-3 text-xs id-eyebrow text-white hover:bg-red-700 disabled:opacity-50"
+            >
+              {pending ? "…" : t("requestButton")}
+            </button>
+          </>
+        )}
+      </div>
+      <ConfirmDialog
+        open={confirmOpen}
+        title={t("requestConfirmTitle")}
+        message={t("requestConfirmBody")}
+        confirmLabel={t("requestConfirmYes")}
+        cancelLabel={tCommon("cancel")}
+        onConfirm={send}
+        onCancel={() => setConfirmOpen(false)}
       />
     </div>
   );

@@ -4,6 +4,7 @@ import { redirect } from "next/navigation";
 import { Link } from "@/i18n/routing";
 import { ChevronLeft } from "lucide-react";
 import AccountPrivacyClient from "./AccountPrivacyClient";
+import { accountPrivacyService } from "@/services/AccountPrivacyService";
 
 export default async function AccountPrivacyPage({
   params,
@@ -28,6 +29,9 @@ export default async function AccountPrivacyPage({
   }
 
   const t = await getTranslations("AccountPrivacy");
+  const deletion = await accountPrivacyService.getDeletionRequest(session.user.id);
+  const deletionRequest =
+    deletion?.status === "PENDING" ? { status: deletion.status, dueAtIso: deletion.dueAt.toISOString() } : null;
 
   return (
     <div className="min-h-screen bg-gray-50 px-4 py-10 font-sans">
@@ -52,7 +56,7 @@ export default async function AccountPrivacyPage({
         </h1>
         <p className="mt-2 text-sm text-gray-600">{t("pageIntro")}</p>
         <div className="mt-8">
-          <AccountPrivacyClient />
+          <AccountPrivacyClient deletionRequest={deletionRequest} />
         </div>
       </div>
     </div>

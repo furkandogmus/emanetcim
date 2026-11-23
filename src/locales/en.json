@@ -1375,7 +1375,9 @@
     "partnerLeadConvertAlready": "This pre-registration was already converted",
     "partnerLeadConvertBack": "Back to pre-registrations",
     "partnerLeadMapsSearch": "Search the address on Google Maps",
-    "affiliatesTitle": "Referrers"
+    "affiliatesTitle": "Referrers",
+    "accountDeletionsNav": "Account deletion requests",
+    "reviewModerationNav": "Review moderation"
   },
   "Auth": {
     "loginTitle": "Sign in to BagajPark",
@@ -1506,13 +1508,24 @@
       "authRequired": "Please sign in.",
       "unauthorized": "You are not allowed to do this.",
       "generic": "Something went wrong.",
-      "guestContactRequired": "Please enter an email or phone number."
+      "guestContactRequired": "Please enter an email or phone number.",
+      "lastAdmin": "You are the only admin; add another admin first."
     },
     "deleteConfirmTitle": "You are about to close your account",
     "deleteConfirmBody": "This cannot be undone. Your personal data will be anonymised and you will be signed out.",
     "deleteConfirmYes": "Yes, close my account",
     "deleteTypeConfirmLabel": "Type {phrase} below to confirm:",
-    "deleteTypeConfirmPhrase": "DELETE MY ACCOUNT"
+    "deleteTypeConfirmPhrase": "DELETE MY ACCOUNT",
+    "requestTitle": "Delete my account",
+    "requestDesc": "Partner and admin accounts send a deletion request. Before you send it:",
+    "requestConsequenceShops": "Your shop stops taking new bookings right away; you can still hand back ongoing bookings.",
+    "requestConsequenceTimeline": "Once no active bookings or pending payouts remain, your account is deleted within 30 days and you get an email.",
+    "requestButton": "Send deletion request",
+    "requestConfirmTitle": "Send an account deletion request?",
+    "requestConfirmBody": "Your shop stops taking new bookings and your request goes to our team.",
+    "requestConfirmYes": "Yes, send request",
+    "requestReceivedBody": "Request received; your account will be deleted within {days} days and you will get an email when it is done.",
+    "requestPendingBody": "Your deletion request was received. Your account will be deleted by {date}."
   },
   "WebPush": {
     "title": "Push notifications",
@@ -1950,7 +1963,12 @@
     "invalidCurrentPassword": "Current password is incorrect.",
     "lateHoldLimit": "Pick-up time reached; the booking cannot be held any longer.",
     "affiliateAlreadyApplied": "This account already has a partner-referrer application.",
-    "priceChanged": "The price changed (a discount no longer applies). Check the updated total and confirm again."
+    "priceChanged": "The price changed (a discount no longer applies). Check the updated total and confirm again.",
+    "accountDeletionLastAdmin": "You are the only admin; add another admin first.",
+    "accountDeletionNotPending": "The request is no longer pending.",
+    "accountDeletionSelf": "You cannot complete your own request.",
+    "accountDeletionPendingPayouts": "There are pending payouts; they must be paid first.",
+    "accountDeletionReason": "The reason must be at least 5 characters."
   },
   "Emails": {
     "verificationSubject": "Verify Your Email",
@@ -2521,7 +2539,7 @@
     "webStep1": "Sign in to your account at bagajpark.com.",
     "webStep2": "On the Data & privacy page, choose “Close account”.",
     "webLink": "Go to Data & privacy",
-    "partnerNote": "Partner (shop) accounts request closure through the contact page.",
+    "partnerNote": "Partner and admin accounts send a deletion request in the app (Profile → “Delete my account”) or on the Data & privacy page; the account is deleted within 30 days and you get an email. Questions:",
     "contactLink": "Contact",
     "deletedTitle": "What is deleted",
     "deletedBody": "Your name, email address, phone number and photo are removed; your reviews and notification subscription are deleted. The account can no longer be used to sign in.",
@@ -2788,5 +2806,28 @@
       "active": "Active",
       "paused": "Paused"
     }
+  },
+  "AdminAccountDeletions": {
+    "back": "Back to dashboard",
+    "title": "Account deletion requests",
+    "intro": "Partner and admin requests. Complete once no active bookings or pending payouts remain; the account is anonymized and the user gets an email.",
+    "empty": "No pending requests.",
+    "role_GUEST": "Guest",
+    "role_PARTNER": "Partner",
+    "role_ADMIN": "Admin",
+    "status_PENDING": "Pending",
+    "status_COMPLETED": "Completed",
+    "status_CANCELLED": "Cancelled",
+    "dates": "Requested {requested} · due {due}",
+    "blockers": "Cannot complete: {bookings} active bookings, {payouts} pending payouts.",
+    "complete": "Complete",
+    "completeTitle": "Delete this account?",
+    "completeBody": "The account is anonymized. This cannot be undone.",
+    "completed": "Account deleted.",
+    "cancel": "Cancel request",
+    "cancelTitle": "Cancel this request?",
+    "cancelBody": "Closed shops are reopened. The reason goes into the audit log.",
+    "cancelled": "Request cancelled.",
+    "reasonLabel": "Reason (at least 5 characters)"
   }
 }

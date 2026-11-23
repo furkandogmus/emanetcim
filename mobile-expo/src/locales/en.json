@@ -89,7 +89,10 @@
     "resendIn": "Resend in {{seconds}}s",
     "sessionExpiredTitle": "Your session has ended. Please sign in again.",
     "sessionExpiredBody": "Sign in again to see your bookings.",
-    "sessionExpiredBodyStaff": "Sign in again to get back to your shop panel. The action you were doing was not saved; please try it again after signing in."
+    "sessionExpiredBodyStaff": "Sign in again to get back to your shop panel. The action you were doing was not saved; please try it again after signing in.",
+    "legalKvkkPrefix": " How we process your data: ",
+    "legalKvkk": "KVKK privacy notice",
+    "legalKvkkSuffix": "."
   },
   "home": {
     "heroTitle": "Drop your bags.\nEnjoy the city.",
@@ -482,7 +485,6 @@
     "deleteConfirm": "Yes, delete my account",
     "deleteFailedTitle": "Couldn’t delete the account",
     "deleteActiveBookings": "You have ongoing bookings. Cancel them first or wait until they’re completed.",
-    "deleteRequest": "Request account closure",
     "sections": {
       "account": "Account",
       "support": "Support"
@@ -495,7 +497,18 @@
     "faq": "FAQ",
     "contact": "Contact us",
     "terms": "Terms of use",
-    "addPhone": "Add a phone number"
+    "addPhone": "Add a phone number",
+    "kvkk": "KVKK privacy notice",
+    "requestTitle": "Delete your account?",
+    "requestBody": "Your request goes to our team and your shop stops taking new bookings right away. Once ongoing bookings and payouts are settled, your account is deleted within {{days}} days and you get an email when it is done.",
+    "requestConfirm": "Send deletion request",
+    "requestReceivedTitle": "Request received",
+    "requestReceivedBody": "Request received; your account will be deleted within {{days}} days and you will get an email when it is done.",
+    "requestPending": "Deletion requested. Your account will be deleted by {{date}}; you will get an email when it is done.",
+    "errors": {
+      "last_admin": "You are the only admin; add another admin first.",
+      "guest_use_delete": "You can delete your account directly."
+    }
   },
   "admin": {
     "title": "Admin",
@@ -1777,6 +1790,35 @@
       "stale": "The user's role changed in the meantime; the request was removed.",
       "cannot_demote_sole_admin": "The last admin can't be removed from the role; the request was removed.",
       "not_found": "Request not found; another admin may have handled it."
+    }
+  },
+  "accountDeletions": {
+    "title": "Account deletion requests",
+    "intro": "Partner and admin requests. Complete once no active bookings or pending payouts remain; the account is anonymized and the user gets an email.",
+    "empty": "No pending requests.",
+    "complete": "Complete",
+    "completeTitle": "Delete this account?",
+    "completeBody": "The account is anonymized. This cannot be undone.",
+    "completed": "Account deleted.",
+    "failed": "Could not complete",
+    "cancel": "Cancel request",
+    "cancelTitle": "Cancel this request?",
+    "cancelBody": "Closed shops are reopened. The reason goes into the audit log.",
+    "cancelled": "Request cancelled.",
+    "dates": "Requested {{requested}} · due {{due}}",
+    "blockers": "Cannot complete: {{bookings}} active bookings, {{payouts}} pending payouts.",
+    "status": {
+      "PENDING": "Pending",
+      "COMPLETED": "Completed",
+      "CANCELLED": "Cancelled"
+    },
+    "errors": {
+      "active_bookings": "There are active bookings; they must finish first.",
+      "pending_payouts": "There are pending payouts; they must be paid first.",
+      "not_pending": "The request is no longer pending.",
+      "cannot_delete_self": "You cannot complete your own request.",
+      "invalid_reason": "The reason must be at least 5 characters.",
+      "not_found": "Request not found."
     }
   }
 }

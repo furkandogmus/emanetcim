@@ -106,7 +106,15 @@ const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 
 export function adminPathFromPush(
   data: Record<string, unknown> | undefined,
-): "/admin/disputes" | `/admin/dispute/${string}` | "/admin/applications" | "/admin/partner-leads" | "/admin/affiliates" | null {
+):
+  | "/admin/disputes"
+  | `/admin/dispute/${string}`
+  | "/admin/applications"
+  | "/admin/partner-leads"
+  | "/admin/affiliates"
+  | "/admin/account-deletions"
+  | "/admin/reviews"
+  | null {
   switch (data?.adminScreen) {
     case "dispute":
       // Yol parcasi push verisinden geliyor: yalnizca uuid kabul edilir (`Dispute.id`).
@@ -119,6 +127,10 @@ export function adminPathFromPush(
       return "/admin/partner-leads";
     case "affiliates":
       return "/admin/affiliates";
+    case "accountDeletions":
+      return "/admin/account-deletions";
+    case "reviews":
+      return "/admin/reviews";
     default:
       return null;
   }

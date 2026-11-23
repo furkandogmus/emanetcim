@@ -89,7 +89,10 @@
     "resendIn": "Erneut senden in {{seconds}} s",
     "sessionExpiredTitle": "Deine Sitzung ist abgelaufen. Bitte melde dich erneut an.",
     "sessionExpiredBody": "Melde dich erneut an, um deine Buchungen zu sehen.",
-    "sessionExpiredBodyStaff": "Melde dich erneut an, um zu deinem Shop-Bereich zurückzukehren. Die letzte Aktion wurde nicht gespeichert; versuch sie nach der Anmeldung noch einmal."
+    "sessionExpiredBodyStaff": "Melde dich erneut an, um zu deinem Shop-Bereich zurückzukehren. Die letzte Aktion wurde nicht gespeichert; versuch sie nach der Anmeldung noch einmal.",
+    "legalKvkkPrefix": " Wie wir deine Daten verarbeiten: ",
+    "legalKvkk": "KVKK-Datenschutzhinweis",
+    "legalKvkkSuffix": "."
   },
   "home": {
     "heroTitle": "Gepäck abgeben.\nStadt genießen.",
@@ -482,7 +485,6 @@
     "deleteConfirm": "Ja, mein Konto löschen",
     "deleteFailedTitle": "Das Konto konnte nicht gelöscht werden",
     "deleteActiveBookings": "Du hast laufende Buchungen. Storniere sie zuerst oder warte, bis sie abgeschlossen sind.",
-    "deleteRequest": "Kontoschließung beantragen",
     "sections": {
       "account": "Konto",
       "support": "Support"
@@ -495,7 +497,18 @@
     "faq": "FAQ",
     "contact": "Kontakt",
     "terms": "Nutzungsbedingungen",
-    "addPhone": "Telefonnummer hinzufügen"
+    "addPhone": "Telefonnummer hinzufügen",
+    "kvkk": "KVKK-Datenschutzhinweis",
+    "requestTitle": "Konto löschen?",
+    "requestBody": "Deine Anfrage geht an unser Team und dein Geschäft nimmt sofort keine neuen Buchungen mehr an. Sobald laufende Buchungen und Auszahlungen abgeschlossen sind, wird dein Konto innerhalb von {{days}} Tagen gelöscht; danach bekommst du eine E-Mail.",
+    "requestConfirm": "Löschanfrage senden",
+    "requestReceivedTitle": "Anfrage erhalten",
+    "requestReceivedBody": "Anfrage erhalten; dein Konto wird innerhalb von {{days}} Tagen gelöscht, danach bekommst du eine E-Mail.",
+    "requestPending": "Löschung angefragt. Dein Konto wird spätestens am {{date}} gelöscht; danach bekommst du eine E-Mail.",
+    "errors": {
+      "last_admin": "Du bist der einzige Admin; füge zuerst einen weiteren Admin hinzu.",
+      "guest_use_delete": "Du kannst dein Konto direkt löschen."
+    }
   },
   "admin": {
     "title": "Admin",
@@ -1777,6 +1790,35 @@
       "stale": "Die Rolle wurde inzwischen geändert; die Anfrage wurde entfernt.",
       "cannot_demote_sole_admin": "Der letzte Admin kann die Rolle nicht verlieren; die Anfrage wurde entfernt.",
       "not_found": "Anfrage nicht gefunden; ein anderer Admin hat sie vielleicht bearbeitet."
+    }
+  },
+  "accountDeletions": {
+    "title": "Löschanfragen",
+    "intro": "Anfragen von Partnern und Admins. Abschließen, wenn keine aktiven Buchungen oder offenen Auszahlungen mehr bestehen; das Konto wird anonymisiert und der Nutzer erhält eine E-Mail.",
+    "empty": "Keine offenen Anfragen.",
+    "complete": "Abschließen",
+    "completeTitle": "Dieses Konto löschen?",
+    "completeBody": "Das Konto wird anonymisiert. Das kann nicht rückgängig gemacht werden.",
+    "completed": "Konto gelöscht.",
+    "failed": "Nicht abgeschlossen",
+    "cancel": "Anfrage abbrechen",
+    "cancelTitle": "Anfrage abbrechen?",
+    "cancelBody": "Geschlossene Geschäfte werden wieder geöffnet. Die Begründung wird protokolliert.",
+    "cancelled": "Anfrage abgebrochen.",
+    "dates": "Angefragt {{requested}} · fällig {{due}}",
+    "blockers": "Nicht möglich: {{bookings}} aktive Buchungen, {{payouts}} offene Auszahlungen.",
+    "status": {
+      "PENDING": "Offen",
+      "COMPLETED": "Abgeschlossen",
+      "CANCELLED": "Abgebrochen"
+    },
+    "errors": {
+      "active_bookings": "Es gibt aktive Buchungen; sie müssen zuerst enden.",
+      "pending_payouts": "Es gibt offene Auszahlungen; sie müssen zuerst bezahlt werden.",
+      "not_pending": "Die Anfrage ist nicht mehr offen.",
+      "cannot_delete_self": "Du kannst deine eigene Anfrage nicht abschließen.",
+      "invalid_reason": "Die Begründung braucht mindestens 5 Zeichen.",
+      "not_found": "Anfrage nicht gefunden."
     }
   }
 }

@@ -1375,7 +1375,9 @@
     "partnerLeadConvertAlready": "Bu ön kayıt daha önce esnaf hesabına çevrildi",
     "partnerLeadConvertBack": "Ön kayıtlara dön",
     "partnerLeadMapsSearch": "Adresi Google Maps'te ara",
-    "affiliatesTitle": "Aracılar"
+    "affiliatesTitle": "Aracılar",
+    "accountDeletionsNav": "Hesap silme talepleri",
+    "reviewModerationNav": "Yorum moderasyonu"
   },
   "Auth": {
     "loginTitle": "BagajPark'a Giriş Yap",
@@ -1506,13 +1508,24 @@
       "authRequired": "Oturum açmanız gerekiyor.",
       "guestContactRequired": "Lütfen e-posta veya telefon girin",
       "unauthorized": "Bu işlem için yetkiniz yok.",
-      "generic": "İşlem tamamlanamadı."
+      "generic": "İşlem tamamlanamadı.",
+      "lastAdmin": "Tek yönetici sizsiniz; önce başka bir yönetici ekleyin."
     },
     "deleteConfirmTitle": "Hesabınızı kapatmak üzeresiniz",
     "deleteConfirmBody": "Bu işlem geri alınamaz. Kişisel verileriniz anonimleştirilir ve oturumunuz kapatılır.",
     "deleteConfirmYes": "Evet, hesabımı kapat",
     "deleteTypeConfirmLabel": "Onaylamak için aşağıya {phrase} yazın:",
-    "deleteTypeConfirmPhrase": "HESABIMI SİL"
+    "deleteTypeConfirmPhrase": "HESABIMI SİL",
+    "requestTitle": "Hesabımı sil",
+    "requestDesc": "Esnaf ve yönetici hesapları silme talebi gönderir. Göndermeden önce şunları bilin:",
+    "requestConsequenceShops": "Dükkanınız hemen yeni rezervasyona kapanır; devam eden rezervasyonları teslim etmeye devam edebilirsiniz.",
+    "requestConsequenceTimeline": "Aktif rezervasyon ve bekleyen hakediş kalmayınca hesabınız en geç 30 gün içinde silinir ve size e-posta gelir.",
+    "requestButton": "Silme talebi gönder",
+    "requestConfirmTitle": "Hesap silme talebi gönderilsin mi?",
+    "requestConfirmBody": "Dükkanınız yeni rezervasyona kapanır ve talebiniz yöneticiye iletilir.",
+    "requestConfirmYes": "Evet, talep gönder",
+    "requestReceivedBody": "Talebin alındı; {days} gün içinde hesabın silinir, tamamlanınca e-posta gelir.",
+    "requestPendingBody": "Silme talebiniz alındı. Hesabınız en geç {date} tarihinde silinir."
   },
   "WebPush": {
     "title": "Anlık bildirimler",
@@ -1950,7 +1963,12 @@
     "invalidCurrentPassword": "Mevcut şifre hatalı.",
     "lateHoldLimit": "Alma saatine ulaşıldı; rezervasyon daha fazla bekletilemez.",
     "affiliateAlreadyApplied": "Bu hesapla zaten bir aracı başvurusu var.",
-    "priceChanged": "Tutar değişti (indirim artık geçerli değil). Güncel toplamı kontrol edip tekrar onaylayın."
+    "priceChanged": "Tutar değişti (indirim artık geçerli değil). Güncel toplamı kontrol edip tekrar onaylayın.",
+    "accountDeletionLastAdmin": "Tek yönetici sizsiniz; önce başka bir yönetici ekleyin.",
+    "accountDeletionNotPending": "Talep artık beklemede değil.",
+    "accountDeletionSelf": "Kendi hesabınızın talebini tamamlayamazsınız.",
+    "accountDeletionPendingPayouts": "Bekleyen hakediş var; önce ödenmeli.",
+    "accountDeletionReason": "Gerekçe en az 5 karakter olmalı."
   },
   "Emails": {
     "verificationSubject": "E-postanızı Doğrulayın",
@@ -2508,7 +2526,7 @@
     "webStep1": "bagajpark.com adresinde hesabınıza giriş yapın.",
     "webStep2": "Veri ve gizlilik sayfasında “Hesabı kapat”ı seçin.",
     "webLink": "Veri ve gizlilik sayfasına git",
-    "partnerNote": "Esnaf hesapları kapatma talebini iletişim sayfasından iletir.",
+    "partnerNote": "Esnaf ve yönetici hesapları uygulamada Profil → “Hesabımı sil” ya da Veri ve gizlilik sayfasından silme talebi gönderir; hesap en geç 30 gün içinde silinir ve e-posta gelir. Sorularınız için:",
     "contactLink": "İletişim",
     "deletedTitle": "Silinen veriler",
     "deletedBody": "Adınız, e-posta adresiniz, telefon numaranız ve fotoğrafınız kaldırılır; yorumlarınız ve bildirim aboneliğiniz silinir. Bu hesapla bir daha giriş yapılamaz.",
@@ -2775,5 +2793,28 @@
       "active": "Aktif",
       "paused": "Durduruldu"
     }
+  },
+  "AdminAccountDeletions": {
+    "back": "Panele dön",
+    "title": "Hesap silme talepleri",
+    "intro": "Esnaf ve yönetici talepleri. Aktif rezervasyon ve bekleyen hakediş kalmayınca tamamlayın; hesap anonimleştirilir ve kullanıcıya e-posta gider.",
+    "empty": "Bekleyen talep yok.",
+    "role_GUEST": "Misafir",
+    "role_PARTNER": "Esnaf",
+    "role_ADMIN": "Yönetici",
+    "status_PENDING": "Bekliyor",
+    "status_COMPLETED": "Tamamlandı",
+    "status_CANCELLED": "İptal edildi",
+    "dates": "Talep {requested} · son gün {due}",
+    "blockers": "Tamamlanamaz: {bookings} aktif rezervasyon, {payouts} bekleyen hakediş.",
+    "complete": "Tamamla",
+    "completeTitle": "Hesap silinsin mi?",
+    "completeBody": "Hesap anonimleştirilir ve bu işlem geri alınamaz.",
+    "completed": "Hesap silindi.",
+    "cancel": "Talebi iptal et",
+    "cancelTitle": "Talep iptal edilsin mi?",
+    "cancelBody": "Kapatılan dükkanlar yeniden açılır. Gerekçe denetim kaydına girer.",
+    "cancelled": "Talep iptal edildi.",
+    "reasonLabel": "Gerekçe (en az 5 karakter)"
   }
 }

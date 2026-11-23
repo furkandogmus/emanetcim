@@ -24,3 +24,4 @@ export * from "./admin-broadcast";
 export * from "./admin-reviews";
 export * from "./admin-ops";
 export * from "./affiliate";
+export * from "./account-deletion";

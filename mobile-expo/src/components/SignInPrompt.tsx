@@ -40,6 +40,11 @@ export function SignInPrompt({ title, body }: { title: string; body: string }) {
             {t("auth.legalPrivacy")}
           </AppText>
           {t("auth.legalSuffix")}
+          {t("auth.legalKvkkPrefix")}
+          <AppText variant="caption" accessibilityRole="link" style={styles.legalLink} onPress={() => openSite("kvkk")}>
+            {t("auth.legalKvkk")}
+          </AppText>
+          {t("auth.legalKvkkSuffix")}
         </AppText>
       </View>
     </SafeAreaView>
