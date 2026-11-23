@@ -49,7 +49,8 @@ npm run test:e2e     # Playwright; dev sunucuyu kendisi kaldırır
 - **Yetki** kapısı `src/lib/action-auth.ts` (`requireAdmin`/`requirePartner`/
   `assertAdmin`); action içinde elle rol kontrolü yazılmaz. Mobil uçlarda
   `requireMobileUser` — o FIRLATMAZ, `{ error }` döndürür.
-- **Mobil yanıt gövdeleri** `src/lib/mobile-dto.ts`'te; uçta elle alan listesi kurulmaz.
+- **Mobil yanıt gövdeleri** `src/lib/mobile-dto/` klasöründe, alan başına bir dosya, `index.ts`
+  yeniden dışa aktarır (`@/lib/mobile-dto`); uçta elle alan listesi kurulmaz.
 - **Ateşle-unut promise HER ZAMAN `.catch` taşır** (`void x().catch(...)`).
   Yakalanmamış red Node'da süreci düşürür: bir bildirim hatası tüm sunucuyu
   indirir. Mandal `unhandled-rejection`, tavan 0.
