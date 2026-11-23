@@ -6,7 +6,7 @@ import type { Role, User as PrismaUser } from "@prisma/client";
 import { z } from "zod";
 import { rateLimit } from "@/lib/rate-limit";
 import { clientIpFromHeaders } from "@/lib/client-ip";
-import { isAppleOAuthConfigured } from "@/lib/auth-providers";
+import { appleClientSecret, isAppleOAuthConfigured } from "@/lib/auth-providers";
 
 /**
  * `authorize` içinde düz `Error` fırlatmak Auth.js'te **CallbackRouteError**
@@ -45,7 +45,7 @@ export const authConfig: NextAuthConfig = {
       ? [
           Apple({
             clientId: process.env.APPLE_ID!,
-            clientSecret: process.env.APPLE_SECRET!,
+            clientSecret: appleClientSecret()!,
           }),
         ]
       : []),
