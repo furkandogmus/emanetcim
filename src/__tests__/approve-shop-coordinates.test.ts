@@ -76,14 +76,28 @@ describe("cagiranlar sonucu DOGRU okuyor", () => {
 describe("slotlar cron'u beklemez", () => {
   const servis = oku("src/services/ShopService.ts");
 
-  it("approveShop onaydan sonra slot uretir ve hatayi yutmaz (.catch)", () => {
-    expect(servis).toMatch(/generateSlotsForShop\(shopId\)\.catch\(/);
+  it("approveShop onaydan SONRA slot uretir (ates-unut, hata loglanir)", () => {
     const onay = servis.slice(servis.indexOf("async approveShop"));
-    expect(onay.indexOf("generateSlotsForShop")).toBeGreaterThan(onay.indexOf("$transaction"));
+    expect(onay).toMatch(/scheduleSlotGeneration\(shopId, 'approve'\)/);
+    expect(onay.indexOf("scheduleSlotGeneration")).toBeGreaterThan(onay.indexOf("$transaction"));
   });
 
-  it("updateShop saat degisince slot uretir", () => {
+  it("updateShop saat ya da kapasite degisince slot uretir", () => {
     const guncelle = servis.slice(servis.indexOf("async updateShop"), servis.indexOf("async updateShop") + 900);
-    expect(guncelle).toContain("generateSlotsForShop(shopId)");
+    expect(guncelle).toContain("scheduleSlotGeneration(shopId");
+    expect(guncelle).toContain("'capacity' in data");
+  });
+
+  it("adminUpdateShop aktiflestirme / test / kapasite degisince slot uretir", () => {
+    const admin = servis.slice(servis.indexOf("async adminUpdateShop"));
+    expect(admin).toMatch(/data\.isActive !== undefined \|\| data\.isTest !== undefined \|\| data\.capacity !== undefined/);
+    expect(admin).toContain("scheduleSlotGeneration(shopId, 'admin_update_shop')");
+  });
+
+  it("takvim servisi saat, izin ekleme ve kaldirmada slot uretir", () => {
+    const takvim = oku("src/services/ShopScheduleService.ts");
+    for (const reason of ["save_weekly_hours", "closure_add", "closure_remove"]) {
+      expect(takvim).toContain(`scheduleSlotGeneration(shopId, "${reason}")`);
+    }
   });
 });

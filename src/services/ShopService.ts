@@ -23,7 +23,7 @@ import { getActiveShopsOrderedByDistanceKm } from '@/lib/shop-distance-postgis';
 import { isShopOpenForStay } from '@/lib/shop-hours';
 import { hoursForDate } from '@/lib/shop-schedule';
 import { loadScheduleParts } from '@/services/ShopScheduleService';
-import { generateSlotsForShop } from '@/services/SlotService';
+import { scheduleSlotGeneration } from '@/services/SlotService';
 import { PUBLIC_SHOP_FILTER, OPERATING_SHOP_FILTER, shopVisibilityFilter, type ShopViewer } from '@/lib/public-shop-filter';
 import { sealService } from "@/services/SealService";
 import { notificationService } from '@/services/NotificationService';
@@ -987,12 +987,11 @@ export class ShopService implements IShopService {
       /*
         Yeni onaylanan dukkanin slotu yok: arama slot satirlarina bakiyor, slotlari
         ise gece 04:17 cron'u uretiyordu; onay sabah 14:00'te gelirse dukkan ertesi
-        sabaha kadar hicbir aramada cikmiyordu. Yanit beklemez (30 gunluk upsert
-        uzun surer); hata cron'a kalir.
+        sabaha kadar hicbir aramada cikmiyordu (2026-11-23 olayi). Yanit beklemez;
+        hata loglanir ve gece isi yakalar. Onay transaction'indan SONRA: slot
+        uretimi isletilen dukkani okur, commit edilmemis `isActive`i goremezdi.
       */
-      generateSlotsForShop(shopId).catch((err: unknown) =>
-        logger.warn({ err, shopId }, 'approve_shop_slot_generation_failed'),
-      );
+      scheduleSlotGeneration(shopId, 'approve');
 
       return { ok: true, notified: { email: Boolean(partnerEmail), push: pushable } };
     } catch (error) {
@@ -1086,12 +1085,10 @@ export class ShopService implements IShopService {
       where: { id: shopId },
       data,
     });
-    // Saat degisince yeni gunlerin slotlari beklemeden uretilir (cron 04:17).
-    // Kapasite tetikleyici degil: slotlar `update: {}` ile upsert edilir, mevcut slot kapasitesi degismez.
-    if ('open247' in data || 'openingTime' in data || 'closingTime' in data) {
-      generateSlotsForShop(shopId).catch((err: unknown) =>
-        logger.warn({ err, shopId }, 'update_shop_slot_generation_failed'),
-      );
+    // Saat ya da kapasite degisince gelecekteki rezervasyonsuz slotlar beklemeden
+    // yeni duzene cekilir (cron 04:17 yalnizca eksik slotu yazar, mevcuda dokunmaz).
+    if ('open247' in data || 'openingTime' in data || 'closingTime' in data || 'capacity' in data) {
+      scheduleSlotGeneration(shopId, 'update_shop');
     }
     return updated;
   }
@@ -1430,6 +1427,12 @@ export class ShopService implements IShopService {
       },
       select: { name: true },
     });
+
+    // Acilan, test etiketi kalkan ya da kapasitesi degisen dukkan gece isini
+    // beklemez. Isletilmeyen dukkanda uretim kendiliginden atlanir.
+    if (data.isActive !== undefined || data.isTest !== undefined || data.capacity !== undefined) {
+      scheduleSlotGeneration(shopId, 'admin_update_shop');
+    }
 
     // Gorunurluk ve guven bayraklari misafire verilen iddialar: kim, ne zaman.
     const flags = (["isActive", "isTest", "isVerified"] as const).filter((k) => data[k] !== undefined);
