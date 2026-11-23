@@ -3,7 +3,7 @@
     "name": "BagajPark",
     "slug": "bagajpark",
     "scheme": "bagajpark",
-    "version": "0.3.3",
+    "version": "0.3.4",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
     "userInterfaceStyle": "light",
@@ -70,7 +70,7 @@
       [
         "expo-splash-screen",
         {
-          "image": "./assets/splash-icon.png",
+          "image": "./assets/splash-blank.png",
           "imageWidth": 160,
           "backgroundColor": "#FDFCFB"
         }
