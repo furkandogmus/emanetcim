@@ -57,6 +57,57 @@ export const OPERATING_SHOP_SQL_CONDITION =
   `s."isActive" = true AND s."isTest" = false AND s."isPrelaunch" = false`;
 
 /**
+ * İNCELEME KUM HAVUZU (2026-11-23): dükkan listesine BAKAN kişi.
+ *
+ * NEDEN VAR: Apple App Review demo hesapla rezervasyon akışını baştan sona
+ * deniyor. Test dükkanları (`isTest`) herkesten gizli olduğu için inceleyici
+ * GERÇEK bir esnafa rezervasyon açıyor ve gerçek esnafa bildirim gidiyordu.
+ * Kural: `User.isTest` olan kullanıcı test dükkanlarını EK OLARAK görür ve
+ * onlara rezervasyon yapabilir. Anonim istek ve gerçek kullanıcı için
+ * davranış birebir eskisi: aşağıdaki yardımcılar onlara sabitlerin KENDİSİNİ
+ * döndürür.
+ *
+ * Tek kural, tek yer: mobil arama, detay, yorumlar, quote ve intent bu
+ * yardımcılardan geçer. Toplu sayımlar (şehir/ilçe kapsamı, site haritası,
+ * ana sayfa istatistiği) BİLEREK izleyiciye duyarsız kalır; paylaşılan
+ * önbelleğe test dükkanı karışmasın.
+ */
+export type ShopViewer = { isTest?: boolean | null } | null | undefined;
+
+/** Yalnızca açıkça `isTest: true` olan izleyici kum havuzunu görür; eksik alan = gerçek kullanıcı. */
+export function isSandboxViewer(viewer: ShopViewer): boolean {
+  return viewer?.isTest === true;
+}
+
+/** Kum havuzu dükkanı: test kaydı ama pasif değil (pasif test dükkanı test kullanıcısından da gizli). */
+const SANDBOX_SHOP_FILTER = { isActive: true, isTest: true } as const satisfies Prisma.ShopWhereInput;
+
+/** `PUBLIC_SHOP_FILTER`ın izleyiciye göre hali: "bu kişiye gösterilsin mi?" */
+export function shopVisibilityFilter(viewer: ShopViewer): Prisma.ShopWhereInput {
+  return isSandboxViewer(viewer) ? { OR: [PUBLIC_SHOP_FILTER, SANDBOX_SHOP_FILTER] } : PUBLIC_SHOP_FILTER;
+}
+
+/** `PUBLIC_SHOP_SQL_CONDITION`ın izleyiciye göre hali. Tablo takma adı `s`; parantezli döner. */
+export function shopVisibilitySqlCondition(viewer: ShopViewer): string {
+  return isSandboxViewer(viewer)
+    ? `((${PUBLIC_SHOP_SQL_CONDITION}) OR (s."isActive" = true AND s."isTest" = true))`
+    : PUBLIC_SHOP_SQL_CONDITION;
+}
+
+/**
+ * "Bu kişi bu dükkana rezervasyon açabilir mi?" — `OPERATING_SHOP_FILTER`ın
+ * satır üstündeki karşılığı. Prelaunch noktası test kullanıcısına da kapalı:
+ * slot üretilmiyor, işletilmiyor.
+ */
+export function isShopBookableBy(
+  shop: { isActive: boolean; isTest: boolean; isPrelaunch: boolean },
+  viewer: ShopViewer,
+): boolean {
+  if (!shop.isActive || shop.isPrelaunch) return false;
+  return !shop.isTest || isSandboxViewer(viewer);
+}
+
+/**
  * Talep testi noktası, yakınında GERÇEK bir dükkan açılınca misafirden gizlenir.
  *
  * NEDEN VAR (2026-09-30): prelaunch noktası "bu semtte talep var mı" sorusunu

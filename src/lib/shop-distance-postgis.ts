@@ -4,10 +4,11 @@ import prisma from "@/lib/db";
 import logger from "@/lib/logger";
 import { distanceKm } from "@/lib/geo";
 import {
-  PUBLIC_SHOP_FILTER,
-  PUBLIC_SHOP_SQL_CONDITION,
   PRELAUNCH_NOT_SUPERSEDED_SQL_CONDITION,
   hideSupersededPrelaunch,
+  shopVisibilityFilter,
+  shopVisibilitySqlCondition,
+  type ShopViewer,
 } from "@/lib/public-shop-filter";
 
 type IdDistRow = { id: string; dist_km: unknown };
@@ -42,6 +43,7 @@ function distanceSubselect(
   centerLat: number,
   centerLng: number,
   radiusKm: number | null,
+  viewer: ShopViewer,
 ) {
   const shopPoint = Prisma.sql`geography(ST_SetSRID(ST_MakePoint(s."longitude", s."latitude"), 4326))`;
   const centerPoint = Prisma.sql`geography(ST_SetSRID(ST_MakePoint(${centerLng}, ${centerLat}), 4326))`;
@@ -55,7 +57,7 @@ function distanceSubselect(
       s.id,
       (ST_Distance(${shopPoint}, ${centerPoint}) / 1000.0) AS dist_km
     FROM "Shop" s
-    WHERE ${Prisma.raw(PUBLIC_SHOP_SQL_CONDITION)}
+    WHERE ${Prisma.raw(shopVisibilitySqlCondition(viewer))}
       AND ${Prisma.raw(PRELAUNCH_NOT_SUPERSEDED_SQL_CONDITION)}
       AND s."latitude" IS NOT NULL
       AND s."longitude" IS NOT NULL
@@ -123,9 +125,10 @@ async function fallbackActiveShopsByDistance(
   radiusKm: number | null,
   skip: number,
   take: number | null,
+  viewer: ShopViewer,
 ): Promise<Array<{ shop: Shop; distanceKm: number }>> {
   const shops = await prisma.shop.findMany({
-    where: PUBLIC_SHOP_FILTER,
+    where: shopVisibilityFilter(viewer),
   });
   // Yaricaptan ONCE: yaricapin disindaki bir esnaf da icerideki noktayi gizler.
   const withDist = hideSupersededPrelaunch(shops)
@@ -153,6 +156,8 @@ export type ActiveShopsDistanceOptions = {
   radiusKm: number | null;
   skip?: number;
   take?: number | null;
+  /** Bakan kisi; verilmezse anonim (gercek kullanici). Bkz. `ShopViewer`. */
+  viewer?: ShopViewer;
 };
 
 /**
@@ -168,6 +173,7 @@ export async function getActiveShopsOrderedByDistanceKm(
     radiusKm,
     skip = 0,
     take = null,
+    viewer = null,
   } = options;
 
   /*
@@ -189,7 +195,7 @@ export async function getActiveShopsOrderedByDistanceKm(
   try {
     const rows = await prisma.$queryRaw<IdDistRow[]>`
       SELECT sub.id, sub.dist_km
-      FROM (${distanceSubselect(centerLat, centerLng, radiusKm)}) AS sub
+      FROM (${distanceSubselect(centerLat, centerLng, radiusKm, viewer)}) AS sub
       WHERE ${radiusFilter}
       ORDER BY sub.dist_km ASC
       ${limitFrag}
@@ -202,7 +208,7 @@ export async function getActiveShopsOrderedByDistanceKm(
 
     const ids = rows.map((r) => r.id);
     const shops = await prisma.shop.findMany({
-      where: { id: { in: ids }, ...PUBLIC_SHOP_FILTER },
+      where: { id: { in: ids }, ...shopVisibilityFilter(viewer) },
     });
     noteBackend("postgis");
     return mapRowsToShops(rows, shops);
@@ -220,6 +226,7 @@ export async function getActiveShopsOrderedByDistanceKm(
       radiusKm,
       skip,
       take,
+      viewer,
     );
   }
 }

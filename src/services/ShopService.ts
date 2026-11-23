@@ -24,7 +24,7 @@ import { isShopOpenForStay } from '@/lib/shop-hours';
 import { hoursForDate } from '@/lib/shop-schedule';
 import { loadScheduleParts } from '@/services/ShopScheduleService';
 import { generateSlotsForShop } from '@/services/SlotService';
-import { PUBLIC_SHOP_FILTER, OPERATING_SHOP_FILTER } from '@/lib/public-shop-filter';
+import { PUBLIC_SHOP_FILTER, OPERATING_SHOP_FILTER, shopVisibilityFilter, type ShopViewer } from '@/lib/public-shop-filter';
 import { sealService } from "@/services/SealService";
 import { notificationService } from '@/services/NotificationService';
 import {
@@ -51,6 +51,8 @@ export type ShopWithDistance = {
   longitude: number | null;
   capacity: number;
   isActive: boolean;
+  /** Inceleme kum havuzu dukkani; yalnizca `isTest` izleyicinin aramasinda `true` olabilir. */
+  isTest: boolean;
   rating: number | null;
   pricePerDay: number;
   hasRestroom: boolean;
@@ -179,6 +181,7 @@ function toShopWithDistance(shop: Shop, distanceKm: number): ShopWithDistance {
     longitude: shop.longitude,
     capacity: shop.capacity,
     isActive: shop.isActive,
+    isTest: shop.isTest,
     rating: shop.rating,
     pricePerDay: moneyToNumber(shop.pricePerDay),
     hasRestroom: shop.hasRestroom,
@@ -258,6 +261,11 @@ export type FindShopsForSearchOptions = {
    * sonuclardan SONRA doner. Yalnizca mobil uc ister.
    */
   includeOutsideHours?: boolean;
+  /**
+   * Bakan kisi (inceleme kum havuzu). Verilmezse anonim: test dukkanlari HIC
+   * donmez. `isTest` kullanicida test dukkanlari da doner; bkz. `ShopViewer`.
+   */
+  viewer?: ShopViewer;
 };
 
 /** Esnafin ayarlar formundan gelen alanlar (web action + mobil uc ORTAK). */
@@ -292,7 +300,8 @@ export interface IShopService {
     longitude: number,
     radiusInKm: number,
     page?: number,
-    limit?: number
+    limit?: number,
+    viewer?: ShopViewer,
   ): Promise<ShopWithDistance[]>;
   getAllActive(latitude: number, longitude: number): Promise<ShopWithDistance[]>;
   /** Tarih aralığı + valiz sayısına göre müsait dükkanlar (kapasite + çalışma saati). */
@@ -411,7 +420,8 @@ export class ShopService implements IShopService {
     longitude: number,
     radiusInKm: number,
     page: number = 1,
-    limit: number = 10
+    limit: number = 10,
+    viewer: ShopViewer = null,
   ): Promise<ShopWithDistance[]> {
     try {
       const skip = (page - 1) * limit;
@@ -421,6 +431,7 @@ export class ShopService implements IShopService {
         radiusKm: radiusInKm,
         skip,
         take: limit,
+        viewer,
       });
       return pairs.map(({ shop, distanceKm }) =>
         toShopWithDistance(shop, distanceKm),
@@ -467,6 +478,7 @@ export class ShopService implements IShopService {
       ignoreOpenHours = false,
       strict = false,
       includeOutsideHours = false,
+      viewer = null,
     } = options;
     const bags = Math.max(1, Math.floor(requestedBags));
 
@@ -476,6 +488,7 @@ export class ShopService implements IShopService {
           centerLng,
           radiusKm,
           take: 100,
+          viewer,
         });
         const withDist: ShopWithDistance[] = pairs.map(({ shop, distanceKm }) =>
           toShopWithDistance(shop, distanceKm),
@@ -528,7 +541,23 @@ export class ShopService implements IShopService {
           }))
           .sort((a, b) => (b._score ?? 0) - (a._score ?? 0));
 
-        if (operating.length === 0) return prelaunchHits;
+        /*
+          KUM HAVUZU DUKKANLARI SLOT YOLUNA GIRMEZ (2026-11-23). Slot ureteci
+          yalnizca `OPERATING_SHOP_FILTER`a slot yazar, test dukkanlari orada
+          yok; slot dalinda "slotu yok" diye elenir ya da kapali gorunurlerdi.
+          Kapasiteleri rezervasyon yolunun (legacy) kullandigi hesapla bulunur
+          ve test kullanicisina EN BASTA gosterilir: inceleyici ilk karti secer,
+          o kart gercek bir esnaf olmamali. Anonim/gercek kullanicida `sandbox`
+          bostur (sorgu onlari hic getirmez), yani akis birebir eskisi.
+        */
+        const sandbox = operating.filter((s) => s.isTest);
+        operating = operating.filter((s) => !s.isTest);
+        const sandboxHits =
+          sandbox.length > 0
+            ? await this.capacityHits(sandbox, checkIn, checkOut, bags, ignoreOpenHours)
+            : [];
+
+        if (operating.length === 0) return [...sandboxHits, ...prelaunchHits];
 
         const shopIds = operating.map((s) => s.id);
 
@@ -617,83 +646,99 @@ export class ShopService implements IShopService {
           if (hits.length > 0) {
             hits.sort((a, b) => (b._score ?? 0) - (a._score ?? 0));
             outsideHits.sort((a, b) => a.distanceKm - b.distanceKm);
-            return [...hits, ...outsideHits, ...prelaunchHits];
+            return [...sandboxHits, ...hits, ...outsideHits, ...prelaunchHits];
           }
         }
 
         // Legacy capacity check (fallback for long stays or when slots are unavailable)
-        const now = new Date();
-        const staleThreshold = new Date(now.getTime() - 24 * 60 * 60 * 1000);
-
-        const pendingStatuses = ['WAITING_APPROVAL', 'APPROVED', 'PENDING'] as const;
-        const reservedStatuses = ['PAID', 'CHECKED_IN'] as const;
-
-        const aggregations = await prisma.booking.groupBy({
-          by: ['shopId'],
-          where: {
-            shopId: { in: shopIds },
-            AND: [
-              { checkInTime: { lt: checkOut } },
-              { checkOutTime: { gt: checkIn } },
-            ],
-            OR: [
-              { status: { in: [...reservedStatuses] } },
-              {
-                status: { in: [...pendingStatuses] },
-                checkInTime: { gt: staleThreshold },
-              },
-            ],
-          },
-          _sum: {
-            bagCountS: true,
-            bagCountM: true,
-            bagCountXl: true,
-          },
-        });
- 
-        const usedByShop = new Map<string, number>();
-        for (const agg of aggregations) {
-          const n = 
-            (agg._sum.bagCountS || 0) + 
-            (agg._sum.bagCountM || 0) + 
-            (agg._sum.bagCountXl || 0);
-          usedByShop.set(agg.shopId, n);
-        }
-
-        const hits: ShopSearchHit[] = [];
-
-        for (const shop of operating) {
-          const used = usedByShop.get(shop.id) ?? 0;
-          const bagsAvailable = Math.max(0, shop.capacity - used);
-          if (bagsAvailable < bags) continue;
-
-          const openOk = ignoreOpenHours || isShopOpenForStay(
-            shop.openingTime,
-            shop.closingTime,
-            shop.open247,
-            checkIn,
-            checkOut,
-            shop.timezone ?? "Europe/Istanbul",
-          );
-          if (!openOk) continue;
-
-          // Weighted score: 50% distance + 30% rating + 20% availability
-          const distScore = 1 - Math.min(1, shop.distanceKm / 20);
-          const rScore = ratingScore(shop.rating);
-          const availScore = Math.min(1, bagsAvailable / Math.max(10, shop.capacity));
-          const score = distScore * 0.5 + rScore * 0.3 + availScore * 0.2;
-
-          hits.push({ ...shop, bagsAvailable, _score: score });
-        }
-
-        // Sort by weighted score (desc), then fallback to distance
-        hits.sort((a, b) => (b._score ?? 0) - (a._score ?? 0));
-        return [...hits, ...prelaunchHits];
+        const hits = await this.capacityHits(operating, checkIn, checkOut, bags, ignoreOpenHours);
+        return [...sandboxHits, ...hits, ...prelaunchHits];
     } catch (error) {
       console.error('ShopService::findShopsForSearch Error:', error);
       if (strict) throw error;
       return [];
     }
+  }
+
+  /**
+   * Ortusen rezervasyonlarin valiz toplamiyla kapasite (slotsuz yol). Arama bunu
+   * uzun kalislar ve slot tablosu bos oldugunda, kum havuzu dukkanlari icin de
+   * her zaman kullanir. Govde 2026-11-23'te `findShopsForSearch`ten tasindi.
+   */
+  private async capacityHits(
+    shops: ShopWithDistance[],
+    checkIn: Date,
+    checkOut: Date,
+    bags: number,
+    ignoreOpenHours: boolean,
+  ): Promise<ShopSearchHit[]> {
+    const now = new Date();
+    const staleThreshold = new Date(now.getTime() - 24 * 60 * 60 * 1000);
+
+    const pendingStatuses = ['WAITING_APPROVAL', 'APPROVED', 'PENDING'] as const;
+    const reservedStatuses = ['PAID', 'CHECKED_IN'] as const;
+
+    const aggregations = await prisma.booking.groupBy({
+      by: ['shopId'],
+      where: {
+        shopId: { in: shops.map((s) => s.id) },
+        AND: [
+          { checkInTime: { lt: checkOut } },
+          { checkOutTime: { gt: checkIn } },
+        ],
+        OR: [
+          { status: { in: [...reservedStatuses] } },
+          {
+            status: { in: [...pendingStatuses] },
+            checkInTime: { gt: staleThreshold },
+          },
+        ],
+      },
+      _sum: {
+        bagCountS: true,
+        bagCountM: true,
+        bagCountXl: true,
+      },
+    });
+ 
+    const usedByShop = new Map<string, number>();
+    for (const agg of aggregations) {
+      const n = 
+        (agg._sum.bagCountS || 0) + 
+        (agg._sum.bagCountM || 0) + 
+        (agg._sum.bagCountXl || 0);
+      usedByShop.set(agg.shopId, n);
+    }
+
+    const hits: ShopSearchHit[] = [];
+
+    for (const shop of shops) {
+      const used = usedByShop.get(shop.id) ?? 0;
+      const bagsAvailable = Math.max(0, shop.capacity - used);
+      if (bagsAvailable < bags) continue;
+
+      const openOk = ignoreOpenHours || isShopOpenForStay(
+        shop.openingTime,
+        shop.closingTime,
+        shop.open247,
+        checkIn,
+        checkOut,
+        shop.timezone ?? "Europe/Istanbul",
+      );
+      if (!openOk) continue;
+
+      // Weighted score: 50% distance + 30% rating + 20% availability
+      const distScore = 1 - Math.min(1, shop.distanceKm / 20);
+      const rScore = ratingScore(shop.rating);
+      const availScore = Math.min(1, bagsAvailable / Math.max(10, shop.capacity));
+      const score = distScore * 0.5 + rScore * 0.3 + availScore * 0.2;
+
+      hits.push({ ...shop, bagsAvailable, _score: score });
+    }
+
+    // Sort by weighted score (desc), then fallback to distance
+    hits.sort((a, b) => (b._score ?? 0) - (a._score ?? 0));
+    return hits;
   }
 
   /**
@@ -726,9 +771,10 @@ export class ShopService implements IShopService {
    * cagri yeri eklendiginde biri unutulurdu". Dort cagri yeri eklenmis, dordu
    * de unutulmustu.
    */
-  async getPublicShopById(shopId: string): Promise<Shop | null> {
+  async getPublicShopById(shopId: string, viewer: ShopViewer = null): Promise<Shop | null> {
+    // Anonim/gercek kullanicida `shopVisibilityFilter` = PUBLIC_SHOP_FILTER.
     return await prisma.shop.findFirst({
-      where: { id: shopId, ...PUBLIC_SHOP_FILTER },
+      where: { id: shopId, ...shopVisibilityFilter(viewer) },
     });
   }
 
