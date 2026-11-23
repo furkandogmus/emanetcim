@@ -1766,7 +1766,8 @@ export class NotificationService implements INotificationService {
     }
 
     if (role !== "PARTNER") return;
-    this.pushAdmins("partnerApplication", { name: name ?? identity }, { adminScreen: "applications" });
+    // E-posta/telefon (`identity`) kilit ekranina dusmesin diye push yalnizca adi tasir.
+    this.pushAdmins("partnerApplication", { name: name?.trim() || undefined }, { adminScreen: "applications" });
     if (!isNetgsmConfigured()) {
       logger.debug({ source }, "netgsm_off_skipping_new_partner_sms");
       return;

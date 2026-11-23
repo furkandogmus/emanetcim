@@ -510,12 +510,38 @@ describe("NotificationService", () => {
       expect(mockSendEachForMulticast).toHaveBeenCalledWith(
         expect.objectContaining({
           tokens: ["t-tr"],
-          notification: { title: "Yeni şikayet", body: "Rezervasyon AB12 · DAMAGE" },
+          notification: { title: "Yeni şikayet", body: "Rezervasyon AB12 · Hasar" },
           data: { adminScreen: "dispute", disputeId: "d1" },
         }),
       );
       expect(mockSendEachForMulticast).toHaveBeenCalledWith(
         expect.objectContaining({ tokens: ["t-en"], notification: expect.objectContaining({ title: "New dispute" }) }),
+      );
+    });
+
+    it("esnaf basvurusu push'u e-posta/telefon tasimaz; ad yoksa genel metin", async () => {
+      process.env.FIREBASE_SERVICE_ACCOUNT_JSON = JSON.stringify({ project_id: "p" });
+      process.env.ADMIN_EMAILS = "";
+      mockPrisma.mobilePushToken.findMany.mockResolvedValue([{ token: "t-tr", locale: "tr" }]);
+      mockSendEachForMulticast.mockResolvedValue({ successCount: 1, responses: [{ success: true }] });
+
+      await service.notifyAdminsForNewUser({
+        name: null,
+        email: "esnaf@example.com",
+        phone: "5551112233",
+        role: "PARTNER",
+        source: "web",
+      });
+
+      await vi.waitFor(() => expect(mockSendEachForMulticast).toHaveBeenCalled());
+      const sent = JSON.stringify(mockSendEachForMulticast.mock.calls);
+      expect(sent).not.toContain("esnaf@example.com");
+      expect(sent).not.toContain("5551112233");
+      expect(mockSendEachForMulticast).toHaveBeenCalledWith(
+        expect.objectContaining({
+          notification: { title: "Yeni esnaf başvurusu", body: "Yeni bir esnaf başvurusu onay bekliyor." },
+          data: { adminScreen: "applications" },
+        }),
       );
     });
 

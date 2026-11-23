@@ -14,18 +14,53 @@ export type AdminPushVars = { name?: string; code?: string; reason?: string };
 
 type Copy = Record<AdminPushEvent, (v: AdminPushVars) => { title: string; body: string }>;
 
+/** Sikayet nedeni (`CreateDisputeInput.reason`) -> push'ta okunur etiket; bilinmeyen deger "Diger"e duser. */
+export type AdminDisputeReason = "DAMAGE" | "THEFT" | "OTHER";
+
+const DISPUTE_REASON: Record<AdminPushLang, Record<AdminDisputeReason, string>> = {
+  tr: { DAMAGE: "Hasar", THEFT: "Hırsızlık", OTHER: "Diğer" },
+  en: { DAMAGE: "Damage", THEFT: "Theft", OTHER: "Other" },
+};
+
+export function disputeReasonLabel(lang: AdminPushLang, reason: string | undefined): string {
+  const table = DISPUTE_REASON[lang];
+  return reason && reason in table ? table[reason as AdminDisputeReason] : table.OTHER;
+}
+
+/*
+  Push kilit ekranina duser: basvuranin e-postasi/telefonu buraya YAZILMAZ. Ad yoksa
+  genel metin gider; ayrintisi uygulamadaki ekranda.
+*/
 export const ADMIN_PUSH_COPY: Record<AdminPushLang, Copy> = {
   tr: {
-    dispute: (v) => ({ title: "Yeni şikayet", body: `Rezervasyon ${v.code ?? ""} · ${v.reason ?? ""}` }),
-    partnerApplication: (v) => ({ title: "Yeni esnaf başvurusu", body: `${v.name ?? ""} onay bekliyor.` }),
-    partnerLead: (v) => ({ title: "Esnaf ön kaydı", body: `${v.name ?? ""} aranmayı bekliyor.` }),
-    affiliateApplication: (v) => ({ title: "Aracı başvurusu", body: `${v.name ?? ""} onay bekliyor.` }),
+    dispute: (v) => ({ title: "Yeni şikayet", body: `Rezervasyon ${v.code ?? ""} · ${disputeReasonLabel("tr", v.reason)}` }),
+    partnerApplication: (v) => ({
+      title: "Yeni esnaf başvurusu",
+      body: v.name ? `${v.name} onay bekliyor.` : "Yeni bir esnaf başvurusu onay bekliyor.",
+    }),
+    partnerLead: (v) => ({
+      title: "Esnaf ön kaydı",
+      body: v.name ? `${v.name} aranmayı bekliyor.` : "Yeni bir ön kayıt aranmayı bekliyor.",
+    }),
+    affiliateApplication: (v) => ({
+      title: "Aracı başvurusu",
+      body: v.name ? `${v.name} onay bekliyor.` : "Yeni bir aracı başvurusu onay bekliyor.",
+    }),
   },
   en: {
-    dispute: (v) => ({ title: "New dispute", body: `Booking ${v.code ?? ""} · ${v.reason ?? ""}` }),
-    partnerApplication: (v) => ({ title: "New partner application", body: `${v.name ?? ""} is waiting for approval.` }),
-    partnerLead: (v) => ({ title: "Partner pre-registration", body: `${v.name ?? ""} is waiting for a call.` }),
-    affiliateApplication: (v) => ({ title: "Affiliate application", body: `${v.name ?? ""} is waiting for approval.` }),
+    dispute: (v) => ({ title: "New dispute", body: `Booking ${v.code ?? ""} · ${disputeReasonLabel("en", v.reason)}` }),
+    partnerApplication: (v) => ({
+      title: "New partner application",
+      body: v.name ? `${v.name} is waiting for approval.` : "A new partner application is waiting for approval.",
+    }),
+    partnerLead: (v) => ({
+      title: "Partner pre-registration",
+      body: v.name ? `${v.name} is waiting for a call.` : "A new pre-registration is waiting for a call.",
+    }),
+    affiliateApplication: (v) => ({
+      title: "Affiliate application",
+      body: v.name ? `${v.name} is waiting for approval.` : "A new affiliate application is waiting for approval.",
+    }),
   },
 };
 
