@@ -1,85 +1,79 @@
-# Docker Compose (Postgres + Next.js + Nginx)
+# Docker Compose — yerel çalıştırma
 
-Vercel/serverless kullanmadan tek makinede veya sunucuda çalıştırmak için **PostgreSQL 16**, **Next.js (standalone)** ve önde **Nginx** (reverse proxy + `public/` statikleri) birlikte ayağa kalkar.
+`docker-compose.yml` **üretim** dosyasıdır: canlı sunucu (`/opt/emanetci`, AWS EC2) aynı
+dosyayla koşar ve CI her deploy'da onu sunucuya gönderir. Bu sayfa aynı dosyanın yerelde
+nasıl kullanılacağını anlatır. Sunucu işletimi (erişim, deploy, yedek): [`ops/README.md`](../ops/README.md);
+altyapı: [`infra/aws/README.md`](../infra/aws/README.md).
 
-**LAN’daki Ubuntu VM + `emanetci.local`:** [VM-LAN.md](./VM-LAN.md).
+(2026-11-23: eski `docs/VM-LAN.md` — LAN'daki Ubuntu VM + `emanetci.local` akışı — buraya
+katıldı ve kaldırıldı; o kurulum Hetzner dönemine aitti.)
 
-**Yedek / geri yükleme (Postgres):** [BACKUP.md](./BACKUP.md).
+## Servisler
 
-## Gereksinimler
+| Servis | İmaj | Not |
+|---|---|---|
+| `postgres` | `postgis/postgis:16-3.4-alpine` | Host'ta yalnızca `127.0.0.1:5433` (konteyner içi `postgres:5432`) |
+| `redis` | `redis:7-alpine` | Rate limit sayaçları; kalıcılık kapalı |
+| `web` | `ghcr.io/furkandogmus/emanetcim:latest` (`build: .` ile yerelde derlenebilir) | Next.js standalone, `web:3000`; başlarken `prisma migrate deploy` koşar (`scripts/docker-entrypoint.sh`) |
+| `nginx` | `nginx:1.27-alpine` | 80/443; **yalnızca üretim için** yapılandırılmış (aşağıya bakın) |
 
-- Docker + Docker Compose v2
-- İlk çalıştırmada imaj derlenir (`docker compose build`)
-- **80** numaralı port boş olmalı (Nginx). Doluysa `docker-compose.yml` içinde `nginx` → `ports` satırını örneğin `"8080:80"` yapın.
+## En kısa yol: yalnızca Postgres Docker'da
 
-## Hızlı başlangıç
-
-```bash
-docker compose up --build -d
-```
-
-- Uygulama (Nginx üzerinden): **http://localhost** (port **80**)
-- Next.js konteyneri dışarıya kapalıdır; yalnızca Docker ağında `web:3000` olarak dinler.
-- Postgres (host makineden): **localhost:5433** → konteyner içi `postgres:5432` (host’ta **5432** çoğu zaman dolu olduğu için **5433** kullanılır)
-
-### Nginx ne yapıyor?
-
-| Yol | Davranış |
-|-----|----------|
-| `/_next/static/` | Next.js’e proxy; `Cache-Control: public, max-age=31536000, immutable` |
-| `public/` altında dosya (ör. `/manifest.json`, `/icons/…`, `*.svg`) | Doğrudan diskten (volume) |
-| Diğer tüm istekler | Next.js’e proxy (sayfalar, API, RSC) |
-
-Yapılandırma: `nginx/conf.d/default.conf`.
-
-**Auth.js** Nginx arkasında doğru çalışsın diye `web` servisinde **`AUTH_TRUST_HOST=true`** (varsayılan) verilir; kapatmak için `AUTH_TRUST_HOST=false` kullanın.
-
-Next.js’e doğrudan **3000** portundan erişmek için: `docker-compose.override.example.yml` dosyasını `docker-compose.override.yml` olarak kopyalayın (`.gitignore`’da); sonra `docker compose up -d`.
-
-Sağlık kontrolleri (Nginx üzerinden):
-
-- `GET http://localhost/api/health/live` — süreç ayakta (DB yok)
-- `GET http://localhost/api/health` — Postgres `SELECT 1`
-
-## Ortam değişkenleri
-
-`docker-compose.yml` içinde **`AUTH_URL` / `NEXT_PUBLIC_APP_URL` varsayılan olarak boştur**; Auth.js isteğin `Host` ve `X-Forwarded-*` başlıklarından URL üretir (ngrok ve tek makinede localhost uyumu). Tek sabit domain (ör. `emanetci.local`) için `docker-compose.env` içinde bu iki değişkeni doldurun — aksi halde OAuth yine tünel adresine döner. Üretim benzeri deneme için:
+Günlük geliştirmede uygulama host'ta koşar, Docker yalnızca veritabanını verir:
 
 ```bash
-export AUTH_SECRET="$(openssl rand -base64 32)"
-docker compose up -d --build
+cp docker-compose.env.example docker-compose.env   # POSTGRES_PASSWORD vb. doldurun
+docker compose --env-file docker-compose.env up -d postgres   # ya da: npm run db:up
+# .env.local içinde:
+# DATABASE_URL=postgresql://bagajpark:<parola>@127.0.0.1:5433/bagajpark?schema=public
+npx prisma migrate deploy && npx prisma db seed
+npm run dev
 ```
 
-İsteğe bağlı: `docker-compose.env.example` dosyasını kopyalayıp düzenleyin:
+`POSTGRES_PASSWORD` **zorunludur** — compose onsuz başlamaz (üretimde değer SSM'den gelir,
+`ops/SECRETS.md`). Kullanıcı ve veritabanı adı varsayılanı `bagajpark`.
+
+## Tam yığın (web konteyneri dahil)
 
 ```bash
-cp docker-compose.env.example docker-compose.env
-# düzenle
-docker compose --env-file docker-compose.env up -d --build
+cp docker-compose.override.example.yml docker-compose.override.yml   # web:3000'i host'a açar
+docker compose --env-file docker-compose.env up -d postgres redis web
+curl -s http://localhost:3000/api/health/live
 ```
 
+`docker compose build web` imajı yerelde derler; derlemezseniz GHCR'daki `latest` çekilir.
 
-## Veritabanı şeması
+**nginx yerelde kullanılmaz.** `nginx/conf.d/default.conf` üretim konfigidir: 80'i
+`https://bagajpark.com`'a yönlendirir, 443 için `/etc/ssl/cloudflare/bagajpark.{crt,key}`
+bekler. Bu sertifikalar yalnızca sunucuda vardır; yerelde nginx açılmaz. Konfigi
+değiştirdiyseniz sınamak için: `bash scripts/verify-nginx-conf.sh` (`scripts/README.md`).
 
-Web image'ı Prisma CLI içermez ve başlangıçta otomatik migration çalıştırmaz.
-Şema değişiklikleri deploy öncesinde ayrı bir migration adımıyla uygulanmalıdır.
+## Auth adresleri (tünel / sabit alan adı)
 
-Eski volume farklı kullanıcı/şifreyle oluşturulduysa **P1000 (authentication failed)** görürsünüz; veriyi silmek kabul edilebilirse:
+`AUTH_URL` ve `NEXT_PUBLIC_APP_URL` compose'da varsayılan olarak boştur; Auth.js adresi
+isteğin `Host` / `X-Forwarded-*` başlıklarından üretir (`AUTH_TRUST_HOST=true`).
 
-```bash
-docker compose down -v
-docker compose up -d --build
-```
+- **Sabit bir alan adı** (ör. yerel ağdaki bir makine) kullanılacaksa iki değişkeni
+  `docker-compose.env` içinde o adrese ayarlayın.
+- **ngrok gibi bir tünel** kullanılacaksa ikisini **boş bırakın**; dolu `AUTH_URL`, OAuth
+  dönüşünü tünel yerine o adrese yönlendirir. Google OAuth istemcisine
+  `https://<tünel-adresi>/api/auth/callback/google` dönüş adresini ekleyin.
 
-## Seed (isteğe bağlı)
+## Sağlık uçları
 
-Konteyner içinde `tsx` yoktur. Seed’i geliştirme makinesinden, host’taki Postgres’e bağlanarak çalıştırın:
+- `GET /api/health/live` — süreç ayakta (DB'ye dokunmaz)
+- `GET /api/health` — Postgres + Redis
+- `GET /api/health/jobs` — zamanlanmış işler (`docs/OBSERVABILITY.md`)
 
-```bash
-DATABASE_URL="postgresql://emanetci:emanetci@127.0.0.1:5433/emanetci?schema=public" npx tsx prisma/seed.ts
-```
+## Sık sorunlar
+
+- **P1000 (authentication failed):** volume farklı kullanıcı/parolayla oluşturulmuş.
+  Yerel veriyi silmek kabul edilebilirse `docker compose down -v` ve yeniden `up`.
+- **Seed:** konteynerde `tsx` yok; seed host'tan, `127.0.0.1:5433`'e bağlanarak koşar.
+  Seed'i asla prod'a karşı çalıştırmayın (`seed-guard`).
 
 ## Mimari notlar
 
-- `next.config.ts` içinde **`output: "standalone"`** — üretim imajı için gerekli.
-- Prisma CLI web runtime image'ına girmez.
+- `next.config.ts` → `output: "standalone"` üretim imajı için gerekli.
+- İmaj Prisma CLI'ı taşır; migrasyon konteyner başlarken uygulanır ve başarısızsa
+  konteyner açılmaz (`scripts/docker-entrypoint.sh`).
