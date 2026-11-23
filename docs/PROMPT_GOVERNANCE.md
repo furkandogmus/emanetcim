@@ -1,15 +1,18 @@
 # Prompt governance (AI-assisted development)
 
-Bu repo’da Cursor/ChatGPT vb. ile üretilen değişikliklerin tekrarlanabilir ve güvenli olması için minimum standartlar.
+Bu repo’da yapay zekâ araçlarıyla (Claude Code, Cursor vb.) üretilen değişikliklerin tekrarlanabilir ve güvenli olması için minimum standartlar.
 
 ## Definition of Done (her PR)
 
-- [ ] `npm run test` geçer
-- [ ] `npm run build` geçer
-- [ ] `npm run lint` (varsa uyarılar gerekçelendirilir)
-- [ ] Finans/ödeme dokunulduysa: server-side fiyat doğrulaması ve webhook imzası davranışı gözden geçirildi
-- [ ] Migration varsa: `prisma migrate` ile uyumlu SQL ve geri alma notu
+- [ ] `npm run typecheck && npm run lint && npm test` geçer (üçü birden; CI aynı kapıları ve e2e'yi koşar, `docs/CI_CD.md`)
+- [ ] Mobil dokunulduysa `cd mobile-expo && npm run verify`
+- [ ] Mandal (ratchet) testlerinin tavanı yükselmedi (`CLAUDE.md` § Mandal testleri)
+- [ ] Ödeme dokunulduysa: yazım yalnız `PaymentService` üzerinden, sunucu tarafı fiyat doğrulaması (`docs/PAYMENTS.md`)
+- [ ] Migration varsa: `npm run db:verify` (migrasyon ↔ şema) ve geri alma notu
 - [ ] Risk notu: rollback adımı veya feature flag stratejisi (kısa)
+- [ ] Davranış değiştiyse ilgili belge aynı PR'da güncellendi
+
+Commit ve PR süreci: `docs/GIT_COMMIT_GUIDE.md`. Ajan kuralları: kök `CLAUDE.md`, `mobile-expo/CLAUDE.md`.
 
 ## Prompt şablonları
 
