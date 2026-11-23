@@ -67,7 +67,8 @@ describe("filtreyi kullanan yüzeyler", () => {
 
   it("PostGIS ham sorgusu paylaşılan SQL koşulunu kullanıyor", () => {
     const src = read("src/lib/shop-distance-postgis.ts");
-    expect(src).toContain("PUBLIC_SHOP_SQL_CONDITION");
+    // Izleyiciye gore kosul tek yardimcidan; anonimde PUBLIC_SHOP_SQL_CONDITION'in kendisi.
+    expect(src).toContain("shopVisibilitySqlCondition");
     // Eski elle yazilmis kosul kalmamis olmali.
     expect(src).not.toContain('WHERE s."isActive" = true');
   });
