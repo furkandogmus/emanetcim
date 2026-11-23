@@ -20,8 +20,9 @@ import type { CityCoverage } from "@/lib/types";
 jest.setTimeout(20_000);
 
 jest.mock("expo-secure-store", () => ({}));
+let mockParams: Record<string, string> = {};
 jest.mock("expo-router", () => ({
-  useLocalSearchParams: () => ({}),
+  useLocalSearchParams: () => mockParams,
   router: { push: jest.fn(), back: jest.fn(), replace: jest.fn() },
 }));
 jest.mock("expo-image", () => ({ Image: () => null }));
@@ -100,6 +101,7 @@ afterEach(() => qc.clear());
 beforeEach(() => {
   qc = new QueryClient({ defaultOptions: { queries: { retry: false, gcTime: Infinity } } });
   mockPaths.length = 0;
+  mockParams = {};
   mockHandler = async () => ({ districts: DISTRICTS });
 });
 
@@ -111,6 +113,23 @@ async function openCity() {
 }
 
 describe("ilce adimi", () => {
+  it("ana sayfadaki sehir kartindan gelince de ilce adimi acilir", async () => {
+    mockParams = { from: "city", city: "istanbul" };
+    await render(<SearchWizard />, { wrapper });
+    await screen.findByText("İstanbul içinde nerede?");
+    expect(mockPaths).toContain("/cities/istanbul/districts");
+    await fireEvent.press(screen.getByText("Kadıköy"));
+    expect(placed()).toEqual({ label: "Kadıköy, İstanbul", latitude: 40.99, longitude: 29.03, radiusM: 18_000 });
+  });
+
+  it("sehir kartindan gelip ilce yoksa dogrudan zaman adimi", async () => {
+    mockParams = { from: "city", city: "istanbul" };
+    mockHandler = async () => ({ districts: [] });
+    await render(<SearchWizard />, { wrapper });
+    await screen.findByText("Ne zaman lazım?");
+    expect(placed()).toEqual(TODAY_CITY_PLACE);
+  });
+
   it("sehirden sonra Merkez ilk satir, ilceler sunucu sirasiyla altinda", async () => {
     await openCity();
     await screen.findByText("İstanbul içinde nerede?");
