@@ -50,6 +50,8 @@ model User {
   reviews                  Review[]
   sessions                 Session[]
   shops                    Shop[]
+  /// Bu hesaba bagli araci kaydi (varsa). Hesap silinse de araci kaydi kalir.
+  affiliate                Affiliate?
 
   @@index([email])
 }
@@ -278,34 +280,34 @@ model ReservationSlot {
 }
 
 model Booking {
-  id                     String            @id @default(uuid())
-  guestId                String?
-  shopId                 String
-  status                 BookingStatus     @default(PENDING)
+  id                         String               @id @default(uuid())
+  guestId                    String?
+  shopId                     String
+  status                     BookingStatus        @default(PENDING)
   /// E-posta ile guest checkout (accountsız kullanıcılar için)
-  guestEmail             String?
+  guestEmail                 String?
   /// Telefon ile guest checkout
-  guestPhone             String?
+  guestPhone                 String?
   /// REZERVE edilen pencere. Yaratılışta yazılır, yaşam döngüsü boyunca DEĞİŞMEZ.
   ///
   /// 2026-08-22'ye kadar `checkOut()` buraya `now` yazıyordu, yani rezerve bitiş
   /// zamanı yok oluyordu. Gecikme ücreti ve erken iade ikisi de bu alandan
   /// hesaplandığı için, çıkıştan sonra faturanın girdileri yeniden kurulamıyordu
   /// (P1-10). Gerçekleşen zamanlar artık `checkedInAt` / `checkedOutAt`.
-  checkInTime            DateTime
-  checkOutTime           DateTime
+  checkInTime                DateTime
+  checkOutTime               DateTime
   /// GERÇEKLEŞEN teslim alma anı. Bavul dükkana bırakıldığında yazılır.
-  checkedInAt            DateTime?
+  checkedInAt                DateTime?
   /// GERÇEKLEŞEN teslim etme anı. Bavul misafire verildiğinde yazılır.
-  checkedOutAt           DateTime?
-  bagCountS              Int               @default(0)
-  bagCountM              Int               @default(0)
-  bagCountXl             Int               @default(0)
-  unitPrice              Decimal           @default(50) @db.Decimal(12, 2)
-  totalPrice             Decimal           @default(0) @db.Decimal(12, 2)
+  checkedOutAt               DateTime?
+  bagCountS                  Int                  @default(0)
+  bagCountM                  Int                  @default(0)
+  bagCountXl                 Int                  @default(0)
+  unitPrice                  Decimal              @default(50) @db.Decimal(12, 2)
+  totalPrice                 Decimal              @default(0) @db.Decimal(12, 2)
   /// Sigorta / güvence ücreti (iptal ve erken iade hesaplarında hariç tutulur)
-  insuranceFee           Decimal           @default(0) @db.Decimal(12, 2)
-  qrCodeToken            String?           @unique
+  insuranceFee               Decimal              @default(0) @db.Decimal(12, 2)
+  qrCodeToken                String?              @unique
   /// Mobil checkout tekrar denemesini tek rezervasyona indiren istemci anahtari.
   ///
   /// Istemci 12 sn'de istegi iptal edip ayni onayi yeniden gonderdiginde sunucu
@@ -313,12 +315,12 @@ model Booking {
   /// `(guestId, idempotencyKey)` benzersiz: ayni misafir ayni anahtarla ikinci
   /// rezervasyon acamaz. `null` = anahtarsiz (web, eski istemci); Postgres
   /// benzersizlikte NULL'lari ayri sayar.
-  idempotencyKey         String?
-  sealPhotoUrl           String?
-  lateFeeApplied         Decimal           @default(0) @db.Decimal(12, 2)
-  pendingBagRevision     Json?
+  idempotencyKey             String?
+  sealPhotoUrl               String?
+  lateFeeApplied             Decimal              @default(0) @db.Decimal(12, 2)
+  pendingBagRevision         Json?
   /// Erken teslimat iadesi başarısız olduysa reconcile için tutulan tutar
-  failedRefundAmount     Decimal?          @default(0) @db.Decimal(12, 2)
+  failedRefundAmount         Decimal?             @default(0) @db.Decimal(12, 2)
   /// Misafirin REZERVASYON ANINDAKİ dili (`tr`, `en`, `de`, ...).
   ///
   /// NEDEN VAR (2026-09-02): bildirimler dil seçemiyordu. `NotificationService`
@@ -333,11 +335,11 @@ model Booking {
   ///
   /// `null` = bilinmiyor (bu alandan ÖNCEKİ rezervasyonlar). Okuyan taraf
   /// platform diline düşer, yani eski davranış aynen korunur.
-  locale                 String?
-  createdAt              DateTime          @default(now())
-  updatedAt              DateTime          @updatedAt
+  locale                     String?
+  createdAt                  DateTime             @default(now())
+  updatedAt                  DateTime             @updatedAt
   /// Eşzamanlı durum geçişleri için optimistic sürüm (onay vb. updateMany ile artırılır).
-  bookingRowVersion      Int               @default(0)
+  bookingRowVersion          Int                  @default(0)
   /// Rezervasyonun fiyatını üreten kural kümesinin ANLIK KOPYASI (`PricingRules`).
   ///
   /// NEDEN: `PlatformSettings` tek satırlık ve sürümsüz — admin bir çarpanı
@@ -348,11 +350,11 @@ model Booking {
   /// geçerliydi" sorusunun cevabı burasıdır.
   ///
   /// Yalnızca rezervasyon YARATILIRKEN yazılır, sonra DEĞİŞMEZ.
-  pricingSnapshot        Json?
+  pricingSnapshot            Json?
   /// Referans kodu ile uygulanan indirim miktarı (TRY)
-  referralDiscountAmount Decimal           @default(0) @db.Decimal(12, 2)
+  referralDiscountAmount     Decimal              @default(0) @db.Decimal(12, 2)
   /// Rezervasyonda kullanılan referans kodu (varsa)
-  referredByCode         String?
+  referredByCode             String?
   /// Kupon ile uygulanan indirim miktarı (TRY).
   ///
   /// NEDEN EKLENDİ (2026-09-01'de ölçüldü): kupon `totalPrice`'ı DOĞRUDAN
@@ -368,24 +370,38 @@ model Booking {
   /// Esnafın hakedişi indirilmiş `totalPrice` üzerinden hesaplandığı için
   /// pazarlama indiriminin bedelini bugün esnaf karşılıyor; bu bir İŞ KARARIDIR
   /// ve burada değiştirilmiyor — ama artık ÖLÇÜLEBİLİR.
-  couponDiscountAmount   Decimal           @default(0) @db.Decimal(12, 2)
+  couponDiscountAmount       Decimal              @default(0) @db.Decimal(12, 2)
   /// Rezervasyonda kullanılan kupon kodu (varsa)
-  couponCode             String?
+  couponCode                 String?
   /// Esnafin "Misafiri bekle" ile uzattigi otomatik kapanis ani (gec birakma).
   ///
   /// Valiz birakma saatinden 60 dk sonra hala birakilmamis rezervasyon otomatik
   /// kapanir (`late-dropoff-scan`). Misafir dukkani arayip "geliyorum" dediyse
   /// esnaf bu ani 30'ar dk ileri alir; `checkOutTime`i asamaz. `null` = bekletme
   /// yok, kapanis `checkInTime + 60 dk`. Kural: `src/lib/late-dropoff.ts`.
-  lateHoldUntil          DateTime?
-  reservationSlots       ReservationSlot[]
-  guest                  User?             @relation(fields: [guestId], references: [id], onDelete: Cascade)
-  shop                   Shop              @relation(fields: [shopId], references: [id], onDelete: Cascade)
-  seals                  BookingSeal[]
-  dispute                Dispute?
-  notificationLogs       NotificationLog[]
-  paymentLog             PaymentLog?
-  review                 Review?
+  lateHoldUntil              DateTime?
+  /// Araci (affiliate) atfi: rezervasyonu getiren aracinin id'si. YALNIZCA
+  /// olusturmada yazilir (`booking/create`), sonra degismez. Aracinin kendi
+  /// hesabiyla yaptigi rezervasyonda bos kalir (kendine komisyon yok).
+  affiliateId                String?
+  /// Olusturma anindaki komisyon orani (yuzde). Admin orani sonradan degistirse
+  /// de bu rezervasyonun komisyonu bu oranla hesaplanir.
+  affiliateCommissionRate    Decimal?             @db.Decimal(5, 2)
+  /// Olusturma anindaki misafir indirimi orani (yuzde).
+  affiliateGuestDiscountRate Decimal?             @db.Decimal(5, 2)
+  /// Araci misafir indirimiyle dusulen tutar (TRY). Kupon/davet indirimiyle
+  /// birlesmez: tek indirim uygulanir (`CheckoutDiscountService`).
+  affiliateDiscountAmount    Decimal              @default(0) @db.Decimal(12, 2)
+  affiliate                  Affiliate?           @relation(fields: [affiliateId], references: [id], onDelete: SetNull)
+  affiliateCommission        AffiliateCommission?
+  reservationSlots           ReservationSlot[]
+  guest                      User?                @relation(fields: [guestId], references: [id], onDelete: Cascade)
+  shop                       Shop                 @relation(fields: [shopId], references: [id], onDelete: Cascade)
+  seals                      BookingSeal[]
+  dispute                    Dispute?
+  notificationLogs           NotificationLog[]
+  paymentLog                 PaymentLog?
+  review                     Review?
 
   @@unique([guestId, idempotencyKey])
   @@index([guestId])
@@ -407,6 +423,7 @@ model Booking {
   /// (guest checkout) rezervasyonların sorgulanması her seferinde tam tablo
   /// taraması yapıyordu. 2026-08-31'de ölçüldü.
   @@index([guestEmail])
+  @@index([affiliateId])
 }
 
 /// Rezervasyon başına tek ödeme defteri satırı.
@@ -477,21 +494,21 @@ model NotificationLog {
 }
 
 model Review {
-  id        String   @id @default(uuid())
-  bookingId String   @unique
-  guestId   String
-  shopId    String
-  rating    Int      @default(5)
-  comment   String?
-  createdAt DateTime @default(now())
+  id           String    @id @default(uuid())
+  bookingId    String    @unique
+  guestId      String
+  shopId       String
+  rating       Int       @default(5)
+  comment      String?
+  createdAt    DateTime  @default(now())
   /// Yonetici moderasyonu: doluysa yorum misafire gosterilmez ve dukkan
   /// ortalamasina (`Shop.rating`) girmez. Silmeden farki geri alinabilmesi.
   hiddenAt     DateTime?
   hiddenReason String?
   hiddenById   String?
-  booking   Booking  @relation(fields: [bookingId], references: [id], onDelete: Cascade)
-  guest     User     @relation(fields: [guestId], references: [id], onDelete: Cascade)
-  shop      Shop     @relation(fields: [shopId], references: [id], onDelete: Cascade)
+  booking      Booking   @relation(fields: [bookingId], references: [id], onDelete: Cascade)
+  guest        User      @relation(fields: [guestId], references: [id], onDelete: Cascade)
+  shop         Shop      @relation(fields: [shopId], references: [id], onDelete: Cascade)
 
   @@index([shopId])
   @@index([guestId])
@@ -692,9 +709,9 @@ model PlatformSettings {
   /// iOS uygulaması App Store'da YAYINDA mı? Açılınca web'de Safari akıllı
   /// bandı, mağaza rozetleri, e-posta satırı ve `/app` yönlendirmesi devreye
   /// girer. Varsayılan `false`: inceleme sürerken site bugünkü gibi kalır.
-  iosAppStoreLive  Boolean @default(false)
+  iosAppStoreLive Boolean @default(false)
   /// Android uygulaması Google Play'de HERKESE AÇIK mı (kapalı test değil)?
-  androidPlayLive  Boolean @default(false)
+  androidPlayLive Boolean @default(false)
 }
 
 /// Zamanlanmış iş çalıştırma defteri.
@@ -1213,14 +1230,14 @@ model PrelaunchInterest {
 /// hedefleniyor, o yuzden formun tek isi geri donus icin gereken iletisim bilgisini
 /// almak. `Shop`/`User` burada olusmaz; onlari ekip, esnafla konustuktan sonra acar.
 model PartnerLead {
-  id          String    @id @default(cuid())
-  fullName    String
+  id              String    @id @default(cuid())
+  fullName        String
   /// 10 hane, basinda 0/90 olmadan (orn. 5321234567). Sabit hat da kabul edilir.
-  phone       String
-  shopName    String?
-  address     String
-  locale      String?
-  source      String    @default("web")
+  phone           String
+  shopName        String?
+  address         String
+  locale          String?
+  source          String    @default("web")
   /// NEW | CONTACTED | CONVERTED
   status          String    @default("NEW")
   contactedAt     DateTime?
@@ -1295,4 +1312,99 @@ model AppLinkHit {
   createdAt DateTime @default(now())
 
   @@index([createdAt])
+}
+
+enum AffiliateType {
+  AIRBNB_HOST
+  HOTEL
+  GUIDE
+  AGENCY
+  OTHER
+}
+
+enum AffiliateStatus {
+  /// Basvuru: link calismaz, admin onayi bekler.
+  PENDING
+  ACTIVE
+  /// Gecici durdurma: link yine ana sayfaya gider ama atif yazilmaz.
+  PAUSED
+}
+
+enum AffiliateCommissionStatus {
+  UNPAID
+  PAID
+}
+
+/// Araci (Airbnb ev sahibi, otel, rehber, acente): misafirlerini kisisel bir
+/// linkle BagajPark'a yonlendirir; tamamlanan rezervasyonlardan komisyon kazanir.
+///
+/// Kullanici davet kodundan (`User.referralCode`) AYRI kavram: o tek seferlik
+/// misafir indirimidir, bu ise rezervasyon basina komisyon. Odeme ELLE yapilir
+/// (ayda bir); sistem yalnizca borcu izler (`AffiliateCommission`).
+///
+/// Tek yazici `src/services/AffiliateService.ts`.
+model Affiliate {
+  id                String                @id @default(uuid())
+  /// Bagli hesap (istege bagli). Aracinin kendi rezervasyonlari komisyon uretmez.
+  userId            String?               @unique
+  displayName       String
+  type              AffiliateType         @default(OTHER)
+  contactEmail      String?
+  contactPhone      String?
+  /// Insan okur kod (`AHMET-EV`). HER ZAMAN buyuk harfe cevrilip yazilir, yani
+  /// benzersizlik buyuk/kucuk harf duyarsizdir.
+  code              String                @unique
+  /// Komisyon orani (yuzde), rezervasyonun misafirin odedigi toplamindan.
+  commissionRate    Decimal               @default(10) @db.Decimal(5, 2)
+  /// Misafire uygulanan indirim (yuzde). 0 = indirim yok, yalnizca atif.
+  guestDiscountRate Decimal               @default(0) @db.Decimal(5, 2)
+  status            AffiliateStatus       @default(PENDING)
+  /// Yonetici notu (misafire ve araciya gosterilmez).
+  notes             String?
+  /// Basvuru formundaki "linki nasil paylasacaksiniz" cevabi.
+  applicationNote   String?
+  createdAt         DateTime              @default(now())
+  updatedAt         DateTime              @updatedAt
+  user              User?                 @relation(fields: [userId], references: [id], onDelete: SetNull)
+  bookings          Booking[]
+  commissions       AffiliateCommission[]
+  clickDays         AffiliateClickDay[]
+
+  @@index([status])
+}
+
+/// Link tiklama sayaci, gun basina tek satir. IP / tarayici / kisi bilgisi YOK.
+model AffiliateClickDay {
+  affiliateId String
+  day         DateTime  @db.Date
+  count       Int       @default(0)
+  affiliate   Affiliate @relation(fields: [affiliateId], references: [id], onDelete: Cascade)
+
+  @@id([affiliateId, day])
+}
+
+/// Komisyon defteri: rezervasyon TAMAMLANDIGINDA (check-out) bir satir.
+/// Iptal / gelmedi / suresi dolan rezervasyonda satir hic olusmaz.
+/// Tutar = `baseAmount` x `rate` / 100, 2 haneye yuvarlanir; ikisi de o anki
+/// rezervasyon kaydindan (anlik oran kopyasi) gelir.
+model AffiliateCommission {
+  id              String                    @id @default(cuid())
+  affiliateId     String
+  bookingId       String                    @unique
+  /// Misafirin odedigi toplam (indirim sonrasi; gecikme ucreti haric).
+  baseAmount      Decimal                   @db.Decimal(12, 2)
+  rate            Decimal                   @db.Decimal(5, 2)
+  amount          Decimal                   @db.Decimal(12, 2)
+  earnedAt        DateTime
+  status          AffiliateCommissionStatus @default(UNPAID)
+  paidAt          DateTime?
+  /// Odemeyi isaretleyen yoneticinin User.id'si. Iliski bilerek yok.
+  paidById        String?
+  payoutReference String?
+  createdAt       DateTime                  @default(now())
+  affiliate       Affiliate                 @relation(fields: [affiliateId], references: [id], onDelete: Restrict)
+  booking         Booking                   @relation(fields: [bookingId], references: [id], onDelete: Cascade)
+
+  @@index([affiliateId, status])
+  @@index([status, earnedAt])
 }
