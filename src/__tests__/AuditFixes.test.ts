@@ -56,7 +56,6 @@ vi.mock("@/services/SealService", () => ({ sealService: mockSealService }));
 vi.mock("@/services/NotificationService", () => ({
   notificationService: {
     notifyPartnerAndAdminsForNewPaidBooking: vi.fn().mockResolvedValue(true),
-    notifyGuestBookingRequestSms: vi.fn().mockResolvedValue(true),
     notifyBookingCancelled: vi.fn().mockResolvedValue(true),
     notifyBookingApproved: vi.fn().mockResolvedValue(true),
     notifyCheckIn: vi.fn().mockResolvedValue(true),

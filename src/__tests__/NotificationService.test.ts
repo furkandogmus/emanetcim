@@ -58,7 +58,6 @@ describe("NotificationService", () => {
   beforeEach(() => {
     vi.clearAllMocks();
     process.env.RESEND_API_KEY = "test_key";
-    process.env.GUEST_SMS_BOOKING_NOTIFICATIONS = "true";
     delete process.env.FIREBASE_SERVICE_ACCOUNT_JSON;
   });
 

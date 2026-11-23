@@ -5,7 +5,7 @@
  * yasam dongusu adimini tasiyordu. Sinif cephe olarak kaldi; davranis ayni.
  */
 import {
-  BookingGuestEmailRequiredError,
+  BookingLoginRequiredError,
   BookingInputInvalidError,
   BookingShopClosedError,
 } from '@/services/booking/errors';
@@ -48,11 +48,7 @@ async function affiliateFields(data: CreateInitialBookingInput) {
       : 0;
   const none = { affiliateId: null, affiliateCommissionRate: null, affiliateGuestDiscountRate: null, affiliateDiscountAmount };
   if (!data.affiliateCode) return none;
-  const r = await affiliateService.resolve(data.affiliateCode, {
-    userId: data.guestId,
-    guestEmail: data.guestEmail,
-    guestPhone: data.guestPhone,
-  });
+  const r = await affiliateService.resolve(data.affiliateCode, { userId: data.guestId });
   if (!r.ok) return none;
   return {
     affiliateId: r.attribution.affiliateId,
@@ -100,20 +96,16 @@ function assertBookingInput(data: CreateInitialBookingInput): void {
   }
 }
 
-const GUEST_EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-
 /**
- * Hesapsiz rezervasyonun iletisim kapisi: e-posta ZORUNLU, telefon istege bagli.
- * Adres kucuk harfe indirilir; yonetim bagi ve hesaba baglama onunla eslesir.
+ * Oturum kapisi: yeni rezervasyon yalnizca hesapla acilir (2026-11-23).
+ *
+ * Tip `guestId: string` diyor ama cagiran `as` ile ya da bos dizeyle gecebilir;
+ * kapi bu yuzden calisma zamaninda da var. Gerekce `BookingLoginRequiredError`de.
  */
-function normalizeGuestContact(data: CreateInitialBookingInput): CreateInitialBookingInput {
-  if (data.guestId) return data;
-  const email = typeof data.guestEmail === 'string' ? data.guestEmail.trim().toLowerCase() : '';
-  if (!email || email.length > 320 || !GUEST_EMAIL_RE.test(email)) {
-    throw new BookingGuestEmailRequiredError();
+function assertSignedInGuest(data: CreateInitialBookingInput): void {
+  if (typeof data.guestId !== 'string' || data.guestId.trim() === '') {
+    throw new BookingLoginRequiredError();
   }
-  const phone = typeof data.guestPhone === 'string' ? data.guestPhone.trim() : '';
-  return { ...data, guestEmail: email, guestPhone: phone || null };
 }
 
 /**
@@ -139,7 +131,6 @@ export async function createInitialBooking(data: CreateInitialBookingInput): Pro
     */
     if (
       data.idempotencyKey &&
-      data.guestId &&
       e instanceof Prisma.PrismaClientKnownRequestError &&
       e.code === 'P2002' &&
       JSON.stringify(e.meta?.target ?? '').includes('idempotencyKey')
@@ -151,10 +142,11 @@ export async function createInitialBooking(data: CreateInitialBookingInput): Pro
   }
 }
 
-async function createInitialBookingOnce(input: CreateInitialBookingInput): Promise<Booking> {
-  assertBookingInput(input);
-  const data = normalizeGuestContact(input);
-  if (data.idempotencyKey && data.guestId) {
+async function createInitialBookingOnce(data: CreateInitialBookingInput): Promise<Booking> {
+  // Oturum kapisi EN ONCE: hesapsiz istek kapasite/slot sorgusu da yaptirmaz.
+  assertSignedInGuest(data);
+  assertBookingInput(data);
+  if (data.idempotencyKey) {
     const existing = await findBookingByIdempotencyKey(data.guestId, data.idempotencyKey);
     if (existing) throw new BookingIdempotentReplayError(existing);
   }
@@ -255,9 +247,7 @@ async function createInitialBookingOnce(input: CreateInitialBookingInput): Promi
 
       const booking = await tx.booking.create({
         data: {
-          guestId: data.guestId ?? null,
-          guestEmail: data.guestEmail ?? null,
-          guestPhone: data.guestPhone ?? null,
+          guestId: data.guestId,
           // Misafirin dili: bildirimler bunu okur. Bkz. `Booking.locale`.
           locale: data.locale ?? null,
           shopId: data.shopId,
@@ -295,7 +285,7 @@ async function createInitialBookingOnce(input: CreateInitialBookingInput): Promi
       */
       const qrCodeToken = await createQrToken({
         bookingId: booking.id,
-        guestId: data.guestId ?? booking.id,
+        guestId: data.guestId,
         shopId: data.shopId,
         checkOutTime: data.checkOutTime.toISOString(),
       });
@@ -317,7 +307,7 @@ async function createInitialBookingOnce(input: CreateInitialBookingInput): Promi
   void bookingEventService.record({
     bookingId: booking.id,
     event: "CREATED",
-    actorId: data.guestId ?? "guest",
+    actorId: data.guestId,
     actorRole: "GUEST",
     metadata: {
       shopId: data.shopId,
@@ -336,7 +326,7 @@ async function createInitialBookingOnce(input: CreateInitialBookingInput): Promi
     void bookingEventService.record({
       bookingId: booking.id,
       event: 'APPROVED',
-      actorId: data.guestId ?? 'guest',
+      actorId: data.guestId,
       actorRole: 'GUEST',
       metadata: { autoApproved: true },
     }).catch((err) => logger.error({ err, bookingId: booking.id }, 'booking_event_approved_failed'));
@@ -427,9 +417,7 @@ export async function createSlotBooking(
 
       const booking = await tx.booking.create({
         data: {
-          guestId: data.guestId ?? null,
-          guestEmail: data.guestEmail ?? null,
-          guestPhone: data.guestPhone ?? null,
+          guestId: data.guestId,
           // Misafirin dili: bildirimler bunu okur. Bkz. `Booking.locale`.
           locale: data.locale ?? null,
           shopId: data.shopId,
@@ -469,7 +457,7 @@ export async function createSlotBooking(
       // Slot sinirlarina yuvarlanmis, KAYDEDILEN cikis saati (yukaridaki not).
       const qrCodeToken = await createQrToken({
         bookingId: booking.id,
-        guestId: data.guestId ?? booking.id,
+        guestId: data.guestId,
         shopId: data.shopId,
         checkOutTime: checkOutTime.toISOString(),
       });
@@ -485,7 +473,7 @@ export async function createSlotBooking(
   void bookingEventService.record({
     bookingId: booking.id,
     event: "CREATED",
-    actorId: data.guestId ?? "guest",
+    actorId: data.guestId,
     actorRole: "GUEST",
     metadata: {
       shopId: data.shopId,
@@ -502,7 +490,7 @@ export async function createSlotBooking(
     void bookingEventService.record({
       bookingId: booking.id,
       event: 'APPROVED',
-      actorId: data.guestId ?? 'guest',
+      actorId: data.guestId,
       actorRole: 'GUEST',
       metadata: { autoApproved: true },
     }).catch((err) => logger.error({ err, bookingId: booking.id }, 'booking_event_approved_failed'));

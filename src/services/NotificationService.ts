@@ -574,20 +574,6 @@ export class NotificationService implements INotificationService {
   }
 
   /**
-   * Misafir: `GUEST_SMS_BOOKING_NOTIFICATIONS=true` iken yeni talep SMS’i (Netgsm).
-   */
-  async notifyGuestBookingRequestSms(
-    phoneE164OrTr10: string,
-    bookingId: string,
-    shopName: string,
-  ): Promise<void> {
-    if (process.env.GUEST_SMS_BOOKING_NOTIFICATIONS !== "true") return;
-    const shortId = bookingShortCode(bookingId);
-    const msg = `BagajPark: Talebiniz alindi — ${shopName}. Kod: ${shortId}`;
-    await this.sendSms(phoneE164OrTr10, msg, bookingId);
-  }
-
-  /**
    * Netgsm ile SMS (REST). NETGSM_* tanımlı değilse SKIPPED.
    * `to` — normalize edilmiş 10 hane (5xxxxxxxxx) veya ham GSM; içeride normalize edilir.
    */

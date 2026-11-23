@@ -30,9 +30,12 @@ import {
 } from '@/services/booking/bag-revision';
 
 export type CreateInitialBookingInput = {
-  guestId?: string | null;
-  guestEmail?: string | null;
-  guestPhone?: string | null;
+  /**
+   * Rezervasyonu yapan hesap. ZORUNLU (2026-11-23): yeni rezervasyon yalnizca
+   * oturumla acilir; hesapsiz (guestEmail/guestPhone ile) yaratma yolu kaldirildi.
+   * Eski hesapsiz kayitlar okunmaya ve yonetilmeye devam eder.
+   */
+  guestId: string;
   shopId: string;
   totalPrice: number;
   bagCountS: number;
