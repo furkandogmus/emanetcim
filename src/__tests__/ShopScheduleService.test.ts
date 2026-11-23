@@ -12,7 +12,7 @@ const { mockPrisma, mockGenerate } = vi.hoisted(() => ({
 }));
 vi.mock("@/lib/db", () => ({ default: mockPrisma }));
 
-vi.mock("@/services/SlotService", () => ({ generateSlotsForShop: mockGenerate }));
+vi.mock("@/services/SlotService", () => ({ scheduleSlotGeneration: mockGenerate }));
 const mockAudit = vi.hoisted(() => vi.fn());
 vi.mock("@/lib/audit-log", () => ({ writeAuditLog: mockAudit }));
 
@@ -147,11 +147,22 @@ describe("takvim degisince slot uretimi", () => {
     mockGenerate.mockResolvedValue(0);
   });
 
-  it("removeClosure slotlari yeniden uretir; uretim hatasi yutulur", async () => {
+  it("removeClosure slotlari yeniden uretir", async () => {
     mockPrisma.shopClosure.deleteMany.mockResolvedValue({ count: 1 });
-    mockGenerate.mockRejectedValue(new Error("db"));
     await expect(removeClosure("s1", "c1")).resolves.toBeUndefined();
-    expect(mockGenerate).toHaveBeenCalledWith("s1");
+    expect(mockGenerate).toHaveBeenCalledWith("s1", "closure_remove");
+  });
+
+  it("addClosure izin gunlerinin slotlarini uzlastirir", async () => {
+    mockPrisma.shop.findUnique.mockResolvedValue({
+      open247: false, openingTime: "09:00", closingTime: "20:00", timezone: "Europe/Istanbul",
+    });
+    mockPrisma.shopWeeklyHours.findMany.mockResolvedValue([]);
+    mockPrisma.shopClosure.findMany.mockResolvedValue([]);
+    mockPrisma.booking.findMany.mockResolvedValue([]);
+    mockPrisma.shopClosure.create.mockResolvedValue({ id: "c2" });
+    expect(await addClosure("s1", { startDate: "2026-10-12", endDate: "2026-10-12" }, NOW)).toEqual({ ok: true });
+    expect(mockGenerate).toHaveBeenCalledWith("s1", "closure_add");
   });
 
   it("gecersiz haftalik saat slot uretmez", async () => {

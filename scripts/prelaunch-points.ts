@@ -2258,6 +2258,19 @@ async function main() {
       data: { isPrelaunch: false },
     });
 
+    /*
+      Acilan noktanin slotu gece isini beklemez: web aramasi slotu olmayan
+      dukkani eler (2026-11-23 olayi). Isletilmeyen (test) noktada uretim
+      kendiliginden atlanir. Burada BEKLENIR: betik bitince surec kapanir.
+    */
+    const { generateSlotsForShop } = await import("../src/services/SlotService");
+    const slots = await generateSlotsForShop(shop.id);
+    console.log(
+      slots.skipped
+        ? `Slot uretilmedi: ${slots.skipped}`
+        : `Slot: ${slots.created} yeni, ${slots.reactivated} yeniden acildi`,
+    );
+
     const { prelaunchInterestService } = await import(
       "../src/services/PrelaunchInterestService"
     );
