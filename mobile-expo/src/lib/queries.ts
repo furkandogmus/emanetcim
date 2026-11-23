@@ -11,7 +11,7 @@ import { totalBags, type Bags } from "./search";
 import { partnerSearchTerm } from "./booking-search";
 import { useDebouncedValue } from "./use-debounced-value";
 import { BROADCAST_POLL_MS, hasActiveBroadcast } from "./broadcast";
-import type { AdminApplication, AdminStats, BookingDetail, ContactMessage, PartnerEarnings, PartnerSealsResponse, PartnerShop, BookingSummary, NearbyShop, PartnerBookingsResponse, ShopDetail, ShopReviewsPage, PartnerShopSettings, PartnerSchedule, PartnerDashboard, AdminOverview, AdminBookingFilter, AdminBookingCounts, AdminBookingsResponse, AdminBookingDetail, AdminShop, AdminShopDetail, AdminUser, AdminBroadcast, BroadcastAudience, BroadcastPreview, CityCoverage, AppConfig, PartnerCancelRequest, AdminAuditPage, AdminUserDetail, AdminReviewFilter, AdminReviewsPage, AdminShopPhotos, ReviewModerationAction, AdminCoupon, AdminDispute, AdminDisputeStatus, AdminFeatureFlag, AdminPayments, AdminPlatformSettings } from "./types";
+import type { AdminApplication, AdminPartnerLead, AdminStats, BookingDetail, ContactMessage, PartnerEarnings, PartnerSealsResponse, PartnerShop, BookingSummary, NearbyShop, PartnerBookingsResponse, ShopDetail, ShopReviewsPage, PartnerShopSettings, PartnerSchedule, PartnerDashboard, AdminOverview, AdminBookingFilter, AdminBookingCounts, AdminBookingsResponse, AdminBookingDetail, AdminShop, AdminShopDetail, AdminUser, AdminBroadcast, BroadcastAudience, BroadcastPreview, CityCoverage, AppConfig, PartnerCancelRequest, AdminAuditPage, AdminUserDetail, AdminReviewFilter, AdminReviewsPage, AdminShopPhotos, ReviewModerationAction, AdminCoupon, AdminDispute, AdminDisputeStatus, AdminFeatureFlag, AdminPayments, AdminPlatformSettings } from "./types";
 
 export const keys = {
   myBookings: ["bookings", "me"] as const,
@@ -267,6 +267,13 @@ export function useAdminApplications() {
   return useQuery({
     queryKey: [...keys.admin, "applications"],
     queryFn: () => api<AdminApplication[]>("/admin/applications"),
+  });
+}
+
+export function useAdminPartnerLeads() {
+  return useQuery({
+    queryKey: [...keys.admin, "partner-leads"],
+    queryFn: () => api<AdminPartnerLead[]>("/admin/partner-leads"),
   });
 }
 
