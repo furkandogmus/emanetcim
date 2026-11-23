@@ -23,7 +23,7 @@ import {
   ROLES,
   sendUserPasswordReset,
   setUserPassword,
-  setUserTestAccount,
+  setUserReviewSandbox,
 } from "@/lib/admin-user-actions";
 import { useAuth } from "@/lib/auth";
 import { errorMessage } from "@/lib/errors";
@@ -73,8 +73,8 @@ export default function AdminUserScreen() {
     onError: fail,
   });
   const sandbox = useMutation({
-    mutationFn: (on: boolean) => setUserTestAccount(id, on),
-    onSuccess: (_r, on) => notify(on ? t("adminUsers.testAccountOnDone") : t("adminUsers.testAccountOffDone")),
+    mutationFn: (on: boolean) => setUserReviewSandbox(id, on),
+    onSuccess: (_r, on) => notify(on ? t("adminUsers.reviewSandboxOnDone") : t("adminUsers.reviewSandboxOffDone")),
     onError: fail,
     onSettled: refresh,
   });
@@ -83,12 +83,12 @@ export default function AdminUserScreen() {
   const label = !u ? "" : u.isAnonymized ? t("adminUsers.anonymizedLabel") : u.name || u.email || u.phone;
 
   // Acmak onay ister: hesap test dukkanlarini gorur ve onlara rezervasyon yapar. Kapatmak geri donus, onaysiz.
-  function toggleTestAccount(on: boolean) {
+  function toggleReviewSandbox(on: boolean) {
     if (!u) return;
     if (!on) return sandbox.mutate(false);
-    Alert.alert(t("adminUsers.testAccountConfirmTitle", { name: label }), t("adminUsers.testAccountConfirmBody"), [
+    Alert.alert(t("adminUsers.reviewSandboxConfirmTitle", { name: label }), t("adminUsers.reviewSandboxConfirmBody"), [
       { text: t("common.cancel"), style: "cancel" },
-      { text: t("adminUsers.testAccountConfirm"), onPress: () => sandbox.mutate(true) },
+      { text: t("adminUsers.reviewSandboxConfirm"), onPress: () => sandbox.mutate(true) },
     ]);
   }
 
@@ -154,11 +154,11 @@ export default function AdminUserScreen() {
           {u.role !== "ADMIN" && !u.isAnonymized ? (
             <Card style={{ gap: 0, paddingVertical: space.sm }}>
               <ToggleRow
-                label={t("adminUsers.testAccount")}
-                hint={t("adminUsers.testAccountHint")}
-                value={u.isTest}
+                label={t("adminUsers.reviewSandbox")}
+                hint={t("adminUsers.reviewSandboxHint")}
+                value={u.reviewSandbox}
                 disabled={sandbox.isPending}
-                onChange={toggleTestAccount}
+                onChange={toggleReviewSandbox}
                 last
               />
             </Card>
