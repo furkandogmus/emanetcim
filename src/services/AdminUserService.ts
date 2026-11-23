@@ -117,6 +117,37 @@ export class AdminUserService {
   }
 
   /*
+    INCELEME KUM HAVUZU HESABI (2026-11-23). `isTest` artik yalnizca etiket
+    degil: bu hesap test dukkanlarini gorur ve onlara rezervasyon yapabilir
+    (Apple App Review demo hesabi gercek esnafa dusmesin). Bayrak yalnizca
+    misafir aramasini ve rezervasyon kapisini etkiler; token iptali gerekmez,
+    her istek bayragi veritabanindan okur. ADMIN reddedilir: yonetici hesabinin
+    gorunumu degismesin, kum havuzu bilerek misafir/esnaf hesabina ozgu.
+  */
+  async setTestAccount(
+    userId: string,
+    isTest: boolean,
+    actor: AdminActor,
+  ): Promise<{ ok: true } | { ok: false; error: "not_found" | "cannot_flag_admin" }> {
+    const exists = await prisma.user.findUnique({ where: { id: userId }, select: { id: true, role: true, isTest: true } });
+    if (!exists) return { ok: false, error: "not_found" };
+    if (isTest && exists.role === "ADMIN") return { ok: false, error: "cannot_flag_admin" };
+    if (exists.isTest === isTest) return { ok: true };
+
+    await prisma.user.update({ where: { id: userId }, data: { isTest } });
+    writeAuditLog({
+      actorUserId: actor.userId,
+      actorRole: "ADMIN",
+      action: "user.test_toggle",
+      entityType: "User",
+      entityId: userId,
+      metadata: { isTest },
+      ip: actor.ip,
+    });
+    return { ok: true };
+  }
+
+  /*
     "Bu kullanici olarak gir" (destek). Kural burada, token'i uc imzalar.
     ADMIN hedef reddedilir: bir yonetici digerinin yetkisini devralmamali.
   */
