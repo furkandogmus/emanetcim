@@ -1893,7 +1893,8 @@
     "currentPasswordRequired": "現在のパスワードを入力してください。",
     "invalidCurrentPassword": "現在のパスワードが正しくありません。",
     "lateHoldLimit": "受け取り時刻に達したため、これ以上予約を保持できません。",
-    "affiliateAlreadyApplied": "このアカウントには既に紹介パートナーの申請があります。"
+    "affiliateAlreadyApplied": "このアカウントには既に紹介パートナーの申請があります。",
+    "priceChanged": "料金が変わりました（割引が適用されなくなりました）。最新の合計を確認して、もう一度確定してください。"
   },
   "Emails": {
     "verificationSubject": "メールアドレスを確認してください",
