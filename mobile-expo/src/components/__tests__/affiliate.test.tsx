@@ -161,6 +161,42 @@ describe("odeme ekrani referans kodu", () => {
   });
 });
 
+describe("odeme ekrani: kod + referans birlikte", () => {
+  it("referans kodu sonradan eklenince uygulanan indirim kodu DUSMEZ, onunla yeniden sorulur", async () => {
+    mockHandler = async ({ path, body }) => {
+      if (path !== "/checkout/quote") return {};
+      if (body?.code)
+        return { ...QUOTE, total: 280, discount: { kind: "coupon", code: "YAZ20", amount: 20 }, codeStatus: "applied", affiliate: body.affiliateCode ? { ...QUOTE.affiliate, status: "attributed", amount: 0 } : null };
+      return { ...QUOTE, total: 300, discount: null, affiliate: null };
+    };
+    await render(<CheckoutScreen />, { wrapper });
+    await fireEvent.press(await screen.findByText(i18n.t("checkout.code.prompt")));
+    await fireEvent.changeText(screen.getByLabelText(i18n.t("checkout.code.label")), "YAZ20");
+    await fireEvent.press(screen.getByText(i18n.t("checkout.apply")));
+    await screen.findByText(i18n.t("checkout.code.couponLine", { code: "YAZ20" }));
+    await fireEvent.press(screen.getByText(i18n.t("checkout.affiliate.prompt")));
+    await fireEvent.changeText(screen.getByLabelText(i18n.t("checkout.affiliate.label")), "ahmet-ev");
+    const applies = screen.getAllByText(i18n.t("checkout.apply"));
+    await fireEvent.press(applies[applies.length - 1]);
+    await waitFor(() =>
+      expect(mockCalls.some((c) => c.path === "/checkout/quote" && c.body?.code === "YAZ20" && c.body?.affiliateCode === "AHMET-EV")).toBe(true),
+    );
+    expect(await screen.findByText(i18n.t("checkout.code.couponLine", { code: "YAZ20" }))).toBeTruthy();
+  });
+
+  it("ag hatasinda referans karti 'gecersiz' demez, hata ve tekrar dene gosterir", async () => {
+    rememberReferral("AHMET-EV");
+    mockHandler = async ({ path }) => {
+      if (path === "/checkout/quote") throw new ApiError(0, "network");
+      return {};
+    };
+    await render(<CheckoutScreen />, { wrapper });
+    await waitFor(() => expect(screen.getAllByText(i18n.t("common.networkError")).length).toBeGreaterThan(0));
+    expect(screen.queryByText(i18n.t("checkout.affiliate.invalid"))).toBeNull();
+    expect(screen.getAllByText(i18n.t("common.retry")).length).toBeGreaterThan(0);
+  });
+});
+
 const PENDING: AdminAffiliate = {
   id: "aff-1",
   code: "ORNEK-OTEL",
