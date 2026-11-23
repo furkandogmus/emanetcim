@@ -75,7 +75,9 @@ vi.mock("next-intl/server", () => ({ getLocale: vi.fn(async () => "tr") }));
 vi.mock("@/services/ShopService", () => ({ shopService: {} }));
 vi.mock("@/services/ReviewService", () => ({ reviewService: {} }));
 vi.mock("@/services/BookingService", () => ({ bookingService: {} }));
-vi.mock("@/services/AdminUserService", () => ({ adminUserService: {} }));
+// Govde `AdminUserService.approveRoleChange`ta: gercek servis, sahte veritabaniyla kosar.
+vi.mock("@/lib/mail", () => ({ sendVerificationEmail: vi.fn() }));
+vi.mock("@/services/auth/password-reset", () => ({ requestPasswordReset: vi.fn() }));
 
 import { approveAdminRoleChangeAction } from "@/actions/admin-management";
 
@@ -103,6 +105,13 @@ describe("approveAdminRoleChangeAction es zamanli onay", () => {
     expect(results).toContainEqual({ ok: false, error: "cannot_demote_sole_admin" });
     // Gecersizlesen istek de temizlenir.
     expect(fake.state.requests.size).toBe(0);
+  });
+
+  it("istegi acan admin kendi istegini onaylayamaz", async () => {
+    actors.queue = ["B"];
+    await expect(approveAdminRoleChangeAction("r1")).resolves.toEqual({ ok: false, error: "cannot_self_approve" });
+    expect(fake.state.users.get("A")?.role).toBe("ADMIN");
+    expect(fake.state.requests.has("r1")).toBe(true);
   });
 
   it("tek onay normal uygulanir", async () => {

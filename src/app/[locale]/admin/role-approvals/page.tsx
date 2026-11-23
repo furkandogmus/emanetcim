@@ -1,5 +1,5 @@
 import { setRequestLocale } from "next-intl/server";
-import prisma from "@/lib/db";
+import { adminUserService } from "@/services/AdminUserService";
 import { auth } from "@/auth";
 import { redirect } from "next/navigation";
 import AdminRoleApprovalsClient from "@/components/admin/AdminRoleApprovalsClient";
@@ -17,17 +17,7 @@ export default async function AdminRoleApprovalsPage({
     redirect(`/${locale}/login`);
   }
 
-  const rows = await prisma.adminRoleChangeRequest.findMany({
-    orderBy: { createdAt: "asc" },
-    include: {
-      targetUser: {
-        select: { id: true, name: true, email: true, role: true },
-      },
-      requestedBy: {
-        select: { id: true, name: true, email: true },
-      },
-    },
-  });
+  const rows = await adminUserService.listRoleChangeRequests();
 
   const vm = rows.map((r) => ({
     id: r.id,
