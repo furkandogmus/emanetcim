@@ -6,7 +6,11 @@ import { forbidWhileImpersonating, requireMobileUser, requireRole } from "@/lib/
 import { toMobileAdminUserDetail } from "@/lib/mobile-dto";
 import { adminUserService } from "@/services/AdminUserService";
 
-const PatchSchema = z.object({ isBanned: z.boolean() }).strict();
+/** Tek istekte tek bayrak: ikisinin kurali ve denetim kaydi ayri. */
+const PatchSchema = z.union([
+  z.object({ isBanned: z.boolean() }).strict(),
+  z.object({ isTest: z.boolean() }).strict(),
+]);
 
 /** Kullanici detayi: islem bolumu dogrulama/sifre/bekleyen rol durumuna gore acilir. */
 export async function GET(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
@@ -21,7 +25,10 @@ export async function GET(req: NextRequest, { params }: { params: Promise<{ id: 
   return NextResponse.json({ user: toMobileAdminUserDetail(user) });
 }
 
-/** Yasakla / yasagi kaldir; kural (token iptali, denetim kaydi) `AdminUserService.setBanned`ta. */
+/**
+ * Yasakla / yasagi kaldir (`AdminUserService.setBanned`: token iptali, denetim kaydi)
+ * ya da inceleme kum havuzu hesabi yap / geri al (`setTestAccount`).
+ */
 export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   const auth = await requireMobileUser(req);
   if ("error" in auth) return auth.error;
@@ -34,10 +41,11 @@ export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id
   if (!parsed.success) return NextResponse.json({ error: "invalid_data" }, { status: 400 });
 
   const { id } = await params;
-  const result = await adminUserService.setBanned(id, parsed.data.isBanned, {
-    userId: auth.user.id,
-    ip: clientIpFromRequest(req),
-  });
+  const actor = { userId: auth.user.id, ip: clientIpFromRequest(req) };
+  const result =
+    "isTest" in parsed.data
+      ? await adminUserService.setTestAccount(id, parsed.data.isTest, actor)
+      : await adminUserService.setBanned(id, parsed.data.isBanned, actor);
   if (!result.ok) {
     return result.error === "not_found"
       ? NextResponse.json({ error: "not_found" }, { status: 404 })
