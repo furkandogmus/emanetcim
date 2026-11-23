@@ -124,6 +124,8 @@ export class ReferralService {
 
     for (let attempt = 0; attempt < 5; attempt++) {
       const code = generateCode();
+      // Araci koduyla ayni olmasin (`AffiliateService`): misafir ikisini ayni alana yazabilir.
+      if (await prisma.affiliate.findUnique({ where: { code }, select: { id: true } })) continue;
       try {
         await prisma.user.update({ where: { id: userId }, data: { referralCode: code } });
         return code;

@@ -15,8 +15,9 @@ export function appPathFromLink(path: string): string {
     return path;
   }
   if (!/^https?:$/.test(url.protocol) || !WEB_HOSTS.has(url.hostname)) return path;
-  // Araci kodu (`?ref=`): odeme ekraninda "Referans kodu" olarak doldurulur.
-  rememberReferral(url.searchParams.get("ref"));
+  // Araci kodu (`?aff=`, `/r/<kod>` ekler): odeme ekraninda "Referans kodu"na dolar.
+  // `?ref=` kullanici davet kodudur, araci alanina tasinmaz.
+  rememberReferral(url.searchParams.get("aff"));
   const parts = url.pathname.split("/").filter(Boolean);
   // Yalnizca /<dil>/shop/<id> uygulamaya gelir (app.json intentFilters, AASA).
   const [, section, id] = parts;

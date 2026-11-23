@@ -1733,7 +1733,8 @@
         "duplicate_code": "Dieser Code gehört einem anderen Vermittler.",
         "not_found": "Vermittler nicht gefunden; Liste aktualisieren.",
         "user_not_found": "Kein Konto mit dieser E-Mail.",
-        "user_already_linked": "Dieses Konto ist mit einem anderen Vermittler verknüpft."
+        "user_already_linked": "Dieses Konto ist mit einem anderen Vermittler verknüpft.",
+        "code_reserved": "Dieser Code ist ein Einladungscode eines Nutzers; wähle einen anderen."
       },
       "types": {
         "airbnb_host": "Gastgeber",
