@@ -17,7 +17,12 @@ export async function getHomeTestimonials(
 ): Promise<HomeTestimonial[]> {
   try {
     const rows = await prisma.review.findMany({
-      where: { comment: { not: null }, ...VISIBLE_REVIEW },
+      /*
+        Test dukkaninin yorumu ana sayfada cikmaz (2026-11-23): kum havuzu
+        hesaplari test dukkanina rezervasyon ve yorum yapabiliyor; carousel
+        dukkan ADINI da basiyor, yani test kaydi kamuya sizardi.
+      */
+      where: { comment: { not: null }, ...VISIBLE_REVIEW, shop: { isTest: false } },
       orderBy: { createdAt: "desc" },
       take: limit,
       include: {
