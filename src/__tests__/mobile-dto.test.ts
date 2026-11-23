@@ -343,3 +343,17 @@ describe("esnaf dükkan gövdesi", () => {
     expect(src).not.toMatch(/(^|[{,])\s*\.\.\.shop\s*[,}]?\s*$/m);
   });
 });
+
+describe("toMobileBookingDetail: gec birakma alanlari", () => {
+  it("valiz birakilmadiysa lateCloseAt = birakma + 60 dk, bekletme varsa onun sonu", () => {
+    expect(toMobileBookingDetail(BOOKING)).toMatchObject({ lateCloseAt: "2026-09-01T10:00:00.000Z", lateHoldUntil: null });
+    const held = toMobileBookingDetail({ ...BOOKING, lateHoldUntil: new Date("2026-09-01T10:30:00Z") });
+    expect(held).toMatchObject({ lateCloseAt: "2026-09-01T10:30:00.000Z", lateHoldUntil: "2026-09-01T10:30:00.000Z" });
+  });
+
+  it("valiz birakildiysa ya da kapandiysa lateCloseAt null", () => {
+    expect(toMobileBookingDetail({ ...BOOKING, checkedInAt: new Date("2026-09-01T09:10:00Z") }).lateCloseAt).toBeNull();
+    expect(toMobileBookingDetail({ ...BOOKING, status: "CHECKED_IN" }).lateCloseAt).toBeNull();
+    expect(toMobileBookingDetail({ ...BOOKING, status: "CANCELLED" }).lateCloseAt).toBeNull();
+  });
+});

@@ -10,6 +10,7 @@ import { shopVisibilityIssues } from "@/lib/shop-visibility";
 import { storageCitiesListingShop } from "@/lib/storage-cities";
 import { isBagRevisableStatus } from "@/lib/bag-revision-status";
 import { cancelReasonFromEvents, noShowAvailableAt } from "@/lib/booking-closure";
+import { lateCloseAt } from "@/lib/late-dropoff";
 import { DISPUTE_STATUSES, type DisputeStatus } from "@/lib/dispute-status";
 import type { PartnerDashboardSnapshot } from "@/services/PartnerDashboardService";
 import type { PaymentsLedger } from "@/services/AdminPaymentsService";
@@ -118,6 +119,9 @@ type BookingDetailSource = BookingSummarySource & {
   review?: { id: string } | null;
   dispute?: { id: string; status?: string | null } | null;
   pendingBagRevision?: unknown;
+  /* Eski cagiranlar (testler) bu alanlari vermeyebilir: `null` sayilir. */
+  checkedInAt?: Date | null;
+  lateHoldUntil?: Date | null;
 };
 
 /**
@@ -182,6 +186,11 @@ export function toMobileBookingDetail(b: BookingDetailSource, opts: { operator?:
     guestPhone,
     // Yalniz islemi yapan taraf icin: "Misafir gelmedi" dugmesinin acildigi an.
     noShowAvailableAt: opts.operator ? (noShowAvailableAt(b)?.toISOString() ?? null) : null,
+    // Gec birakma: otomatik kapanis ani ve varsa esnafin bekletmesi. Eski uygulama yok sayar.
+    lateCloseAt:
+      lateCloseAt({ ...b, checkedInAt: b.checkedInAt ?? null, lateHoldUntil: b.lateHoldUntil ?? null })?.toISOString() ??
+      null,
+    lateHoldUntil: b.lateHoldUntil?.toISOString() ?? null,
   };
 }
 
