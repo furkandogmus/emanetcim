@@ -78,20 +78,7 @@ describe("onay e-postasi", () => {
     return JSON.parse(fetchMock.mock.calls.at(-1)![1].body as string) as { html: string; text: string };
   }
 
-  it("hesapsiz rezervasyonda 'Rezervasyonunu yonet' bagi imzali token tasir", async () => {
-    await new NotificationService().notifyBookingSuccess("ada@example.com", "b1", 100, "tr", {
-      guestManage: { checkOutTime: new Date(Date.now() + 3600_000) },
-    });
-    const { html, text } = sentBody();
-    expect(html).toContain("Rezervasyonunu yönet");
-    const m = html.match(/https:\/\/example\.test\/tr\/bookings\/manage\/([\w.-]+)/);
-    expect(m).not.toBeNull();
-    expect(text).toContain(m![0]);
-    const auth = await authenticateGuestLookup(`Bearer ${m![1]}`);
-    expect(auth).toEqual({ ok: true, claims: { bookingId: "b1", email: "ada@example.com" } });
-  });
-
-  it("hesapli rezervasyonda bilet sayfasi bagi kalir", async () => {
+  it("onay e-postasi bilet sayfasina gider (yeni rezervasyon hep hesapli)", async () => {
     await new NotificationService().notifyBookingSuccess("ada@example.com", "b1", 100, "tr");
     const { html } = sentBody();
     expect(html).toContain("https://example.test/tr/bookings/b1");
