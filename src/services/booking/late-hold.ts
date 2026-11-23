@@ -3,7 +3,7 @@ import logger from "@/lib/logger";
 import { writeAuditLog } from "@/lib/audit-log";
 import { bookingTimeZone } from "@/lib/format-datetime";
 import { DEFAULT_NOTIFICATION_LOCALE } from "@/lib/request-locale";
-import { LATE_ACTIONABLE_STATUSES, decideLateHold } from "@/lib/late-dropoff";
+import { LATE_ACTIONABLE_STATUSES, decideLateHold, isLateHoldActive } from "@/lib/late-dropoff";
 import { bookingEventService } from "@/services/BookingEventService";
 import { notificationService } from "@/services/NotificationService";
 import { canOperateBookingAtShop } from "@/services/booking/access";
@@ -55,6 +55,9 @@ export async function holdLateBooking(
       status: { in: [...LATE_ACTIONABLE_STATUSES] },
       checkedInAt: null,
       lateHoldUntil: b.lateHoldUntil,
+      // Karar bu saatlerden hesaplandi; arada degisiklik (modifyBooking) geldiyse yazma.
+      checkInTime: b.checkInTime,
+      checkOutTime: b.checkOutTime,
     },
     data: { lateHoldUntil: decision.until },
   });
@@ -82,8 +85,10 @@ export async function holdLateBooking(
     });
   }
 
+  // Yalnizca bekletme serisinin ilkinde: suren bekletmeyi uzatmak misafire yeni haber degil.
+  const streakStart = !isLateHoldActive(b, now);
   const email = bookingNotificationEmail(b);
-  if (email != null || b.guestId != null) {
+  if (streakStart && (email != null || b.guestId != null)) {
     void notificationService
       .sendLateDropoffNotice({
         bookingId,
