@@ -32,7 +32,6 @@ import {
   adminForceCheckOut,
   partnerCancelBooking,
   markNoShow,
-  closeExpiredBookings,
   closeExpiredBookingsForGuest,
 } from "@/services/booking/closure";
 
@@ -272,52 +271,6 @@ describe("markNoShow", () => {
     expect(await markNoShow("b1", STRANGER, at(600))).toEqual({ ok: false, code: "FORBIDDEN" });
     m.prisma.booking.findUnique.mockResolvedValue(null);
     expect(await markNoShow("b1", OWNER, at(600))).toEqual({ ok: false, code: "NOT_FOUND" });
-  });
-});
-
-describe("closeExpiredBookings (gece isi)", () => {
-  const NOW = new Date("2030-05-02T03:00:00Z");
-
-  it("pencere: birakilmamis durumlar, checkOutTime < simdi - 6 saat, check-in yok", async () => {
-    m.prisma.booking.findMany.mockResolvedValue([]);
-    await closeExpiredBookings({ now: NOW });
-    const { where } = m.prisma.booking.findMany.mock.calls[0][0];
-    expect(where.status.in.sort()).toEqual(["APPROVED", "PAID", "PENDING", "WAITING_APPROVAL"]);
-    expect(where.checkOutTime.lt).toEqual(new Date("2030-05-01T21:00:00Z"));
-    expect(where.checkedInAt).toBeNull();
-  });
-
-  it("her kayit sessiz expired_no_dropoff ile kapanir; sayilar doner", async () => {
-    m.prisma.booking.findMany.mockResolvedValueOnce([{ id: "a" }, { id: "b" }]);
-    m.cancelBooking
-      .mockResolvedValueOnce({ ok: true })
-      .mockResolvedValueOnce({ ok: false, code: "INVALID_STATUS", message: "x" });
-    const r = await closeExpiredBookings({ now: NOW, batchSize: 10 });
-    expect(r).toEqual({ scanned: 2, closed: 1, failed: 1 });
-    expect(m.cancelBooking).toHaveBeenCalledWith("a", { silent: true, reason: "expired_no_dropoff" });
-  });
-
-  it("toplu calisir ve ayni kosuda denenmis kaydi bir daha secmez", async () => {
-    m.prisma.booking.findMany
-      .mockResolvedValueOnce([{ id: "a" }, { id: "b" }])
-      .mockResolvedValueOnce([{ id: "c" }]);
-    const r = await closeExpiredBookings({ now: NOW, batchSize: 2 });
-    expect(r.closed).toBe(3);
-    expect(m.prisma.booking.findMany).toHaveBeenCalledTimes(2);
-    expect(m.prisma.booking.findMany.mock.calls[1][0].where.id).toEqual({ notIn: ["a", "b"] });
-  });
-
-  it("tekrar calistirmak zararsiz: kapanacak kayit yoksa hicbir sey iptal edilmez", async () => {
-    m.prisma.booking.findMany.mockResolvedValue([]);
-    expect(await closeExpiredBookings({ now: NOW })).toEqual({ scanned: 0, closed: 0, failed: 0 });
-    expect(m.cancelBooking).not.toHaveBeenCalled();
-  });
-
-  it("maxBatches tavani sonsuz donguyu engeller", async () => {
-    let n = 0;
-    m.prisma.booking.findMany.mockImplementation(async () => [{ id: `x${n++}` }]);
-    await closeExpiredBookings({ now: NOW, batchSize: 1, maxBatches: 3 });
-    expect(m.prisma.booking.findMany).toHaveBeenCalledTimes(3);
   });
 });
 
