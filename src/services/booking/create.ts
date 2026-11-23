@@ -32,6 +32,31 @@ import {
   BookingShopPrelaunchError,
 } from '@/services/booking/errors';
 import type { CreateInitialBookingInput, TxClient } from '@/services/BookingService';
+import { affiliateService } from '@/services/AffiliateService';
+
+/**
+ * Araci atfi: kod burada yeniden dogrulanir (tasiyicinin verdigi kod ACTIVE
+ * olmayabilir ya da aracinin kendi hesabi olabilir). Oranlar o anki
+ * degerleriyle KOPYALANIR; sonraki oran degisikligi bu rezervasyonu etkilemez.
+ * Atif yalnizca olusturmada yazilir, idempotent tekrar ayni kaydi doner.
+ */
+async function affiliateFields(data: CreateInitialBookingInput) {
+  // Indirim fiyata coktan dusuldu: atif dusse bile tutar deftere yazilir.
+  const affiliateDiscountAmount =
+    typeof data.affiliateDiscountAmount === 'number' && Number.isFinite(data.affiliateDiscountAmount)
+      ? Math.max(0, data.affiliateDiscountAmount)
+      : 0;
+  const none = { affiliateId: null, affiliateCommissionRate: null, affiliateGuestDiscountRate: null, affiliateDiscountAmount };
+  if (!data.affiliateCode) return none;
+  const r = await affiliateService.resolve(data.affiliateCode, { userId: data.guestId, guestEmail: data.guestEmail });
+  if (!r.ok) return none;
+  return {
+    affiliateId: r.attribution.affiliateId,
+    affiliateCommissionRate: r.attribution.commissionRate,
+    affiliateGuestDiscountRate: r.attribution.guestDiscountRate,
+    affiliateDiscountAmount,
+  };
+}
 
 /**
  * Rezervasyonun YARATILDIGI durum.
@@ -191,6 +216,7 @@ async function createInitialBookingOnce(input: CreateInitialBookingInput): Promi
     tasarlanmistir ve cagirandan yeniden denemesini bekler -- Postgres'in kendi
     mesaji da "please retry" diyor. Olcum ve gerekce `@/lib/tx-retry`de.
   */
+  const affiliate = await affiliateFields(data);
   const booking = await retryOnWriteConflict(() => prisma.$transaction(
     async (tx) => {
       const shop = await tx.shop.findUnique({ where: { id: data.shopId } });
@@ -244,6 +270,7 @@ async function createInitialBookingOnce(input: CreateInitialBookingInput): Promi
               ? Math.max(0, data.couponDiscountAmount)
               : 0,
           couponCode: data.couponCode ?? null,
+          ...affiliate,
           bagCountS: data.bagCountS,
           bagCountM: data.bagCountM,
           bagCountXl: data.bagCountXl,
@@ -324,6 +351,7 @@ export async function createSlotBooking(
 ): Promise<Booking> {
   assertBookingInput(data);
   const initialStatus = data.initialStatus ?? DEFAULT_INITIAL_STATUS;
+  const affiliate = await affiliateFields(data);
   // Cakismada yeniden denenir; gerekce `@/lib/tx-retry`de.
   const booking = await retryOnWriteConflict(() => prisma.$transaction(
     async (tx) => {
@@ -414,6 +442,7 @@ export async function createSlotBooking(
               ? Math.max(0, data.couponDiscountAmount)
               : 0,
           couponCode: data.couponCode ?? null,
+          ...affiliate,
           bagCountS: data.bagCountS,
           bagCountM: data.bagCountM,
           bagCountXl: data.bagCountXl,

@@ -29,13 +29,20 @@ const uc = stripComments(
   ),
 );
 
+const svc = stripComments(
+  readFileSync(join(process.cwd(), "src/services/CheckoutDiscountService.ts"), "utf-8"),
+);
+
 describe("mobil checkout kupon", () => {
   it("sema `couponCode` alanini taniyor", () => {
     expect(uc).toMatch(/couponCode:\s*z\.string\(\)/);
   });
 
   it("kupon ORTAK servisten aliniyor -- ayri aritmetik yok", () => {
-    expect(uc).toContain("couponService.claim");
+    // 2026-11-23: secim (kupon / davet / araci, tek indirim) `CheckoutDiscountService`te;
+    // kota yine `couponService.claim` ile aliniyor (servisin icinde).
+    expect(uc).toContain("checkoutDiscountService.claim");
+    expect(svc).toContain("couponService.claim");
     expect(uc, "indirim elle hesaplanmamali").not.toMatch(/\*\s*\(1\s*-\s*discount/);
   });
 
@@ -47,7 +54,7 @@ describe("mobil checkout kupon", () => {
   it("indirim deftere yaziliyor", () => {
     // "Bu rezervasyon neden 240 degil de 180?" sorusunun cevabi veride olmali.
     expect(uc).toContain("couponDiscountAmount");
-    expect(uc).toContain("couponCode: appliedCouponCode");
+    expect(uc).toContain("couponCode: discounts.couponCode");
   });
 
   it("kupon sonrasi tutar HER YERDE kullaniliyor", () => {
@@ -58,7 +65,8 @@ describe("mobil checkout kupon", () => {
     */
     const kalan = (uc.match(/totals\.subtotalBeforeCoupon/g) ?? []).length;
     expect(kalan, "yalnizca kupon tabani olarak bir kez gecmeli").toBe(1);
-    expect(uc).toMatch(/let toplam = totals\.subtotalBeforeCoupon;/);
+    expect(uc).toMatch(/subtotal: totals\.subtotalBeforeCoupon,/);
+    expect(uc).toMatch(/const toplam = discounts\.totalPrice;/);
     expect(uc).toMatch(/totalPrice: toplam,/);
   });
 
@@ -66,7 +74,7 @@ describe("mobil checkout kupon", () => {
     const web = stripComments(
       readFileSync(join(process.cwd(), "src/actions/booking.ts"), "utf-8"),
     );
-    expect(web).toContain("couponService.claim");
+    expect(web).toContain("checkoutDiscountService.claim");
     expect(web).toContain("couponService.release");
   });
 });

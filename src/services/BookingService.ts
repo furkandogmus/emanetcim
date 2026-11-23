@@ -74,6 +74,13 @@ export type CreateInitialBookingInput = {
    * `BookingIdempotentReplayError` firlatir. Bkz. `Booking.idempotencyKey`.
    */
   idempotencyKey?: string;
+  /**
+   * Araci kodu (web cerezi / mobil `affiliateCode`). Atfi SERVIS dogrular ve
+   * yazar: ACTIVE degilse ya da aracinin kendi hesabiysa yok sayilir.
+   */
+  affiliateCode?: string | null;
+  /** `CheckoutDiscountService` araci indirimini sectiyse dusulen tutar. */
+  affiliateDiscountAmount?: number;
 };
 
 export type ModifyBookingInput = {

@@ -25,7 +25,8 @@ const ALPHABET = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789"; // belirsiz karakterler ç�
 
 // `randomInt` sapmasiz secer; `bayt % 32` 256'yi tam bolse de CodeQL onu
 // (haklı olarak, genel durumda) sapmali sayar.
-function generateCode(length = 8): string {
+/** Davet kodu uretici; araci kodunun cakisma ekinde de kullanilir (`AffiliateService`). */
+export function generateCode(length = 8): string {
   let result = "";
   for (let i = 0; i < length; i++) result += ALPHABET[randomInt(ALPHABET.length)];
   return result;

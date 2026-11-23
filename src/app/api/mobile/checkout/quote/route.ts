@@ -7,13 +7,12 @@ import { requireMobileUser } from "@/lib/mobile-auth";
 import { checkoutLineItems, computeAuthoritativeCheckoutTotals } from "@/lib/booking-server-price";
 import { getPricingRules } from "@/lib/platform-settings";
 import { moneyToNumber } from "@/lib/money";
-import { applyReferralDiscount } from "@/lib/referral-discount";
 import { snapStayToShopHours } from "@/lib/stay-days";
 import { loadScheduleParts } from "@/services/ShopScheduleService";
 import { toDatetimeLocalValueInTimeZone } from "@/lib/datetime-local";
-import { couponService } from "@/services/CouponService";
-import { referralService } from "@/services/ReferralService";
 import { isShopBookableBy } from "@/lib/public-shop-filter";
+import { toMobileCheckoutDiscount } from "@/lib/mobile-dto";
+import { checkoutDiscountService } from "@/services/CheckoutDiscountService";
 
 /**
  * Odeme ekrani fiyat ONIZLEMESI (2026-11-18).
@@ -34,9 +33,8 @@ const schema = z.object({
   bagCountM: z.number().int().min(0).max(20),
   bagCountXl: z.number().int().min(0).max(20),
   code: z.string().trim().min(1).max(64).optional(),
+  affiliateCode: z.string().trim().min(1).max(40).optional(),
 });
-
-type CodeStatus = "applied" | "invalid" | "min_price" | "own_code" | "not_first_booking";
 
 export async function POST(req: NextRequest) {
   const auth = await requireMobileUser(req);
@@ -95,33 +93,13 @@ export async function POST(req: NextRequest) {
   );
   const subtotal = totals.subtotalBeforeCoupon;
 
-  let total = subtotal;
-  let discount: { kind: "coupon" | "referral"; code: string; amount: number } | null = null;
-  let codeStatus: CodeStatus | null = null;
-  let minPrice: number | undefined;
-
-  if (d.code) {
-    // Once kupon: `intent` de kuponu once dener ve kupon varsa davet indirimi uygulanmaz.
-    const coupon = await couponService.preview(d.code, subtotal);
-    if (coupon.ok) {
-      total = coupon.totalPrice;
-      discount = { kind: "coupon", code: coupon.code, amount: coupon.discountAmount };
-      codeStatus = "applied";
-    } else if (coupon.reason === "min_price") {
-      codeStatus = "min_price";
-      minPrice = coupon.minPrice;
-    } else {
-      const referral = await referralService.check(d.code, { userId: auth.user.id });
-      if (referral.ok && referral.discountPct > 0) {
-        const applied = applyReferralDiscount(subtotal, referral.discountPct);
-        total = applied.totalPrice;
-        discount = { kind: "referral", code: referral.code, amount: applied.discountAmount };
-        codeStatus = "applied";
-      } else {
-        codeStatus = referral.ok ? "invalid" : referral.reason === "invalid_code" ? "invalid" : referral.reason;
-      }
-    }
-  }
+  // Kural (tek indirim, buyuk olan) `CheckoutDiscountService`te; `intent` ayni servisi cagirir.
+  const q = await checkoutDiscountService.preview({
+    subtotal,
+    code: d.code,
+    affiliateCode: d.affiliateCode,
+    guest: { userId: auth.user.id },
+  });
 
   // Odeme ekrani fiyati KENDISI hesaplamaz: satirlar, gun ve sigorta buradan.
   return NextResponse.json({
@@ -129,10 +107,7 @@ export async function POST(req: NextRequest) {
     lines: checkoutLineItems(totals, rules),
     insuranceFee: totals.insuranceFee,
     subtotal,
-    total,
-    discount,
-    codeStatus,
-    minPrice: minPrice ?? null,
+    ...toMobileCheckoutDiscount(q),
     checkInTime: snapped.checkIn.toISOString(),
     checkOutTime: snapped.checkOut.toISOString(),
     hoursNotice: snapped.drop || snapped.pickup ? { drop: snapped.drop ?? null, pickup: snapped.pickup ?? null } : null,

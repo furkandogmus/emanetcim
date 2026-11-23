@@ -443,7 +443,9 @@ export async function modifyBooking(
   */
   const lockedDiscount =
     moneyToNumber(booking.couponDiscountAmount) +
-    moneyToNumber(booking.referralDiscountAmount);
+    moneyToNumber(booking.referralDiscountAmount) +
+    // Araci misafir indirimi de kilitli indirimdir (2026-11-23).
+    moneyToNumber(booking.affiliateDiscountAmount);
   const newTotal = Math.max(
     0,
     Math.round((authTotals.subtotalBeforeCoupon - lockedDiscount) * 100) / 100

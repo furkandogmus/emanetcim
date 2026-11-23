@@ -10,6 +10,7 @@ import { getPricingRules } from '@/lib/platform-settings';
 import { PartnerCheckOutResult } from '@/types/partner-booking';
 import { bookingEventService } from '@/services/BookingEventService';
 import type { PaymentActor } from '@/services/PaymentService';
+import { affiliateService } from '@/services/AffiliateService';
 
 type CheckOutChargeSource = Parameters<
   (typeof import('@/services/PricingService'))['pricingService']['calculateEarlyRefund']
@@ -137,6 +138,8 @@ export async function checkOut(
       if (updateResult.count === 0) {
         throw new Error("Concurrency conflict: Rezervasyon başka bir işlem tarafından güncellendi.");
       }
+      // Araci komisyonu YALNIZCA burada dogar: tamamlanan rezervasyon (birakildi + teslim alindi).
+      await affiliateService.recordCommissionWithinTx(tx, booking, now);
     });
 
     /*
