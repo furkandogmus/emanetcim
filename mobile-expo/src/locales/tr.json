@@ -1213,6 +1213,8 @@
     "requiredTitle": "Güncelleme gerekli",
     "requiredBody": "Bu sürüm artık desteklenmiyor. Devam etmek için BagajPark'ı Google Play'den güncelle.",
     "requiredCta": "Google Play'de aç",
+    "requiredBodyIos": "Bu sürüm artık desteklenmiyor. Devam etmek için BagajPark'ı App Store'dan güncelle.",
+    "requiredCtaIos": "App Store'da aç",
     "readyBody": "Yeni sürüm hazır.",
     "readyCta": "Yenile"
   },

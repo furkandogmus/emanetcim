@@ -1249,6 +1249,8 @@
     "requiredTitle": "Нужно обновление",
     "requiredBody": "Эта версия больше не поддерживается. Чтобы продолжить, обнови BagajPark в Google Play.",
     "requiredCta": "Открыть Google Play",
+    "requiredBodyIos": "Эта версия больше не поддерживается. Чтобы продолжить, обнови BagajPark в App Store.",
+    "requiredCtaIos": "Открыть App Store",
     "readyBody": "Новая версия готова.",
     "readyCta": "Обновить"
   },

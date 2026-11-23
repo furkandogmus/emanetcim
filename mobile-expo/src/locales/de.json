@@ -1213,6 +1213,8 @@
     "requiredTitle": "Update erforderlich",
     "requiredBody": "Diese Version wird nicht mehr unterstützt. Aktualisiere BagajPark bei Google Play, um fortzufahren.",
     "requiredCta": "Google Play öffnen",
+    "requiredBodyIos": "Diese Version wird nicht mehr unterstützt. Aktualisiere BagajPark im App Store, um fortzufahren.",
+    "requiredCtaIos": "App Store öffnen",
     "readyBody": "Eine neue Version ist bereit.",
     "readyCta": "Neu laden"
   },

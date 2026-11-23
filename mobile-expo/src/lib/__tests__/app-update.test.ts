@@ -1,6 +1,6 @@
 import { describe, expect, it } from "@jest/globals";
 
-import { isBelowMinVersion, isOtaBannerBlocked, parseVersion } from "@/lib/app-update";
+import { isBelowMinVersion, isOtaBannerBlocked, parseVersion, storeUrls } from "@/lib/app-update";
 
 /**
  * Zorunlu guncelleme kapisi: yanlis karsilastirma ya eski surumu iceri alir ya da
@@ -48,5 +48,15 @@ describe("isOtaBannerBlocked", () => {
     expect(isOtaBannerBlocked("/map")).toBe(false);
     expect(isOtaBannerBlocked("/partner/schedule")).toBe(false);
     expect(isOtaBannerBlocked("/bookings/checkout-help")).toBe(false);
+  });
+});
+
+describe("storeUrls", () => {
+  it("iOS'ta App Store'u, digerlerinde Google Play'i acar", () => {
+    expect(storeUrls("ios")).toEqual([
+      "itms-apps://apps.apple.com/app/id6838203193",
+      "https://apps.apple.com/app/id6838203193",
+    ]);
+    expect(storeUrls("android")[1]).toBe("https://play.google.com/store/apps/details?id=com.bagajpark");
   });
 });
