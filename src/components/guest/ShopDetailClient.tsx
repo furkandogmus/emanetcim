@@ -86,6 +86,8 @@ export type ShopDetailClientShop = {
     comment: string | null;
     createdAt: string;
     authorLabel: string;
+    /** Sayfaya ozel opak yazar anahtari ("gizle" ayni yazarin tum yorumlarini saklar). */
+    authorKey?: string;
   }>;
   images: Array<{
     id: string;
@@ -112,9 +114,12 @@ export default function ShopDetailClient({
   const t = useTranslations("Guest");
   const tCommon = useTranslations("Common");
   const tSchedule = useTranslations("Partner.schedule");
-  const [hiddenReviewIds, setHiddenReviewIds] = useState<ReadonlySet<string>>(new Set());
-  const hideReview = (id: string) => setHiddenReviewIds((prev) => new Set(prev).add(id));
-  const reviews = shop.reviews.filter((r) => !hiddenReviewIds.has(r.id));
+  const [hiddenAuthors, setHiddenAuthors] = useState<ReadonlySet<string>>(new Set());
+  const hideReview = (reviewId: string) => {
+    const key = shop.reviews.find((r) => r.id === reviewId)?.authorKey ?? `review:${reviewId}`;
+    setHiddenAuthors((prev) => new Set(prev).add(key));
+  };
+  const reviews = shop.reviews.filter((r) => !hiddenAuthors.has(r.authorKey ?? `review:${r.id}`));
   /**
    * Sigorta gerçekten var mı? Zaten elimizde olan `pricingRules`'tan türüyor —
    * ayrı bir sorgu veya bağlam gerekmiyor (P1-20).

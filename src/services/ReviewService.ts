@@ -35,7 +35,10 @@ export type ReportReviewResult =
   | { ok: true; autoHidden: boolean }
   | { ok: false; reason: "not_found" | "own_review" | "duplicate" | "rate_limited" };
 
-export type BlockAuthorResult = { ok: true } | { ok: false; reason: "not_found" | "own_review" };
+export type BlockAuthorResult = { ok: true } | { ok: false; reason: "not_found" | "own_review" | "rate_limited" };
+
+/** Rezervasyonu tamamlanmamis bir hesabin bildirimi bu yastan sonra esige sayilir. */
+export const REPORTER_MIN_ACCOUNT_AGE_MS = 7 * 24 * 60 * 60 * 1000;
 
 export type ModerationActor = { id: string; ip?: string | null };
 
@@ -211,32 +214,42 @@ export class ReviewService {
 
   /**
    * Yorum bildir (App Review 1.2). Web ve mobil AYNI govde. Kullanici basina yorum
-   * basina tek bildirim (benzersiz anahtar); saatte 10 bildirim. Acik bildirim sayisi
-   * `REVIEW_AUTO_HIDE_REPORTS`e ulasinca yorum yonetici kararina kadar gizlenir.
-   * Esnaf kendi dukkanindaki yorumu da bildirebilir; yalnizca yazari kendi yorumunu bildiremez.
+   * basina tek bildirim (benzersiz anahtar); saatte 10 bildirim. Her bildirim
+   * kuyruga girer, ama otomatik gizleme esigine (`REVIEW_AUTO_HIDE_REPORTS`) yalnizca
+   * `countsTowardAutoHide` olanlar sayilir: dukkan sahibi rakip yorumu, yonetici
+   * kendi karari, yeni acilmis hesap da toplu bildirimle yorumu tek basina indiremesin.
+   * Yazar kendi yorumunu bildiremez.
    */
   async report(params: {
     reviewId: string;
     reporterId: string;
     reason: ReviewReportReason;
     note?: string | null;
+    ip?: string | null;
   }): Promise<ReportReviewResult> {
     if (!(await rateLimit(`review_report:user:${params.reporterId}`, 10, 60 * 60_000))) {
       return { ok: false, reason: "rate_limited" };
     }
     const review = await prisma.review.findUnique({
       where: { id: params.reviewId },
-      select: { id: true, guestId: true, shopId: true },
+      select: { id: true, guestId: true, shopId: true, shop: { select: { ownerId: true } } },
     });
     if (!review) return { ok: false, reason: "not_found" };
     if (review.guestId === params.reporterId) return { ok: false, reason: "own_review" };
 
+    const reporter = await prisma.user.findUnique({
+      where: { id: params.reporterId },
+      select: { role: true, createdAt: true },
+    });
+    if (!reporter) return { ok: false, reason: "not_found" };
+    const counts = await this.reportCountsTowardAutoHide(params.reporterId, reporter, review.shop.ownerId);
+
     const note = params.note?.trim().slice(0, MAX_REPORT_NOTE) || null;
-    let result: { count: number; autoHidden: boolean };
+    let result: { open: number; autoHidden: boolean };
     try {
       result = await prisma.$transaction(async (tx) => {
         await tx.reviewReport.create({
-          data: { reviewId: review.id, userId: params.reporterId, reason: params.reason, note },
+          data: { reviewId: review.id, userId: params.reporterId, reason: params.reason, note, countsTowardAutoHide: counts },
         });
         const updated = await tx.review.update({
           where: { id: review.id },
@@ -244,7 +257,10 @@ export class ReviewService {
           select: { openReportCount: true },
         });
         let autoHidden = false;
-        if (updated.openReportCount >= REVIEW_AUTO_HIDE_REPORTS) {
+        const weighted = counts
+          ? await tx.reviewReport.count({ where: { reviewId: review.id, resolvedAt: null, countsTowardAutoHide: true } })
+          : 0;
+        if (weighted >= REVIEW_AUTO_HIDE_REPORTS) {
           const { count } = await tx.review.updateMany({
             where: { id: review.id, hiddenAt: null },
             data: { hiddenAt: new Date(), hiddenReason: AUTO_HIDE_REASON, hiddenById: null },
@@ -254,7 +270,7 @@ export class ReviewService {
             await this.updateShopAverageRating(review.shopId, tx);
           }
         }
-        return { count: updated.openReportCount, autoHidden };
+        return { open: updated.openReportCount, autoHidden };
       });
     } catch (e) {
       if (e instanceof Prisma.PrismaClientKnownRequestError && e.code === "P2002") {
@@ -265,19 +281,37 @@ export class ReviewService {
 
     writeAuditLog({
       actorUserId: params.reporterId,
-      actorRole: "USER",
+      actorRole: reporter.role,
       action: result.autoHidden ? "review.report_auto_hidden" : "review.report",
       entityType: "Review",
       entityId: review.id,
-      metadata: { reason: params.reason, openReports: result.count },
-      ip: null,
+      metadata: { reason: params.reason, openReports: result.open, countsTowardAutoHide: counts },
+      ip: params.ip ?? null,
     });
-    notificationService.pushAdmins("reviewReport", { code: String(result.count) }, { adminScreen: "reviews" });
+    // Yalnizca kuyruga ilk girdiginde ve otomatik gizlendiginde: her bildirimde push gurultu olur.
+    if (result.open === 1 || result.autoHidden) {
+      notificationService.pushAdmins("reviewReport", { code: String(result.open) }, { adminScreen: "reviews" });
+    }
     return { ok: true, autoHidden: result.autoHidden };
+  }
+
+  /** Dukkan sahibi ve yonetici sayilmaz; digerleri tamamlanmis bir rezervasyonla ya da 7 gunluk hesapla sayilir. */
+  private async reportCountsTowardAutoHide(
+    reporterId: string,
+    reporter: { role: string; createdAt: Date },
+    shopOwnerId: string,
+  ): Promise<boolean> {
+    if (reporterId === shopOwnerId || reporter.role === "ADMIN") return false;
+    if (Date.now() - reporter.createdAt.getTime() >= REPORTER_MIN_ACCOUNT_AGE_MS) return true;
+    const checkedOut = await prisma.booking.count({ where: { guestId: reporterId, status: "CHECKED_OUT" }, take: 1 });
+    return checkedOut > 0;
   }
 
   /** "Bu kullanicinin yorumlarini gizle": goruntuleyen basina, yorum uzerinden (yazar kimligi istemciye cikmaz). */
   async blockAuthor(params: { reviewId: string; viewerId: string }): Promise<BlockAuthorResult> {
+    if (!(await rateLimit(`review_block:user:${params.viewerId}`, 20, 60 * 60_000))) {
+      return { ok: false, reason: "rate_limited" };
+    }
     const review = await prisma.review.findUnique({ where: { id: params.reviewId }, select: { guestId: true } });
     if (!review) return { ok: false, reason: "not_found" };
     if (review.guestId === params.viewerId) return { ok: false, reason: "own_review" };

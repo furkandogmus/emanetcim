@@ -163,6 +163,13 @@ export default async function ShopDetailPage({
 
   // "Bu kullanicinin yorumlarini gizle" (App Review 1.2): yalnizca bu goruntuleyen icin.
   const blockedAuthors = new Set(await reviewService.blockedAuthorIds(session?.user?.id).catch(() => []));
+  // Sayfaya ozel opak yazar anahtari: "gizle" ayni yazarin tum yorumlarini aninda
+  // saklar, ama kullanici kimligi istemciye cikmaz.
+  const authorKeys = new Map<string, string>();
+  const authorKeyOf = (guestId: string) => {
+    if (!authorKeys.has(guestId)) authorKeys.set(guestId, `a${authorKeys.size + 1}`);
+    return authorKeys.get(guestId)!;
+  };
 
   const scheduleParts = (
     await loadScheduleParts([shop.id], new Date().toISOString().slice(0, 10))
@@ -198,6 +205,7 @@ export default async function ShopDetailPage({
       createdAt: r.createdAt.toISOString(),
       authorLabel:
         r.guest?.name?.trim()?.split(/\s+/)[0] ?? "",
+      authorKey: authorKeyOf(r.guestId),
     })),
     images: shopImages.map((img) => ({
       id: img.id,

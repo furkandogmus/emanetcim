@@ -6,7 +6,7 @@ import { Prisma } from "@prisma/client";
 
 const m = vi.hoisted(() => {
   const tx = {
-    reviewReport: { create: vi.fn(), updateMany: vi.fn() },
+    reviewReport: { create: vi.fn(), updateMany: vi.fn(), count: vi.fn() },
     review: { update: vi.fn(), updateMany: vi.fn(), deleteMany: vi.fn(), aggregate: vi.fn() },
     shop: { update: vi.fn() },
   };
@@ -15,6 +15,8 @@ const m = vi.hoisted(() => {
     prisma: {
       review: { findUnique: vi.fn(), findMany: vi.fn(), count: vi.fn(), create: vi.fn(), aggregate: vi.fn() },
       reviewBlock: { findMany: vi.fn(), upsert: vi.fn() },
+      user: { findUnique: vi.fn() },
+      booking: { count: vi.fn() },
       shop: { update: vi.fn() },
       $transaction: vi.fn(),
     },
@@ -32,6 +34,10 @@ vi.mock("@/lib/audit-log", () => ({ writeAuditLog: m.audit }));
 vi.mock("@/services/NotificationService", () => ({ notificationService: { pushAdmins: m.push } }));
 vi.mock("@/auth", () => ({ auth: m.auth }));
 vi.mock("@/lib/revalidate-locales", () => ({ revalidatePathAllLocales: vi.fn() }));
+vi.mock("@/lib/client-ip", async (orig) => ({
+  ...(await orig<typeof import("@/lib/client-ip")>()),
+  getClientIpOrNull: vi.fn(async () => "198.51.100.20"),
+}));
 vi.mock("@/lib/mobile-auth", async (orig) => ({
   ...(await orig<typeof import("@/lib/mobile-auth")>()),
   requireMobileUser: m.requireMobileUser,
@@ -43,7 +49,8 @@ import * as reportRoute from "@/app/api/mobile/reviews/[id]/report/route";
 import * as blockRoute from "@/app/api/mobile/reviews/[id]/block/route";
 import { reportReviewAction } from "@/actions/review-report";
 
-const REVIEW = { id: "r1", guestId: "author", shopId: "s1" };
+const REVIEW = { id: "r1", guestId: "author", shopId: "s1", shop: { ownerId: "shop-owner" } };
+const OLD = new Date(Date.now() - 30 * 86_400_000);
 
 beforeEach(() => {
   vi.clearAllMocks();
@@ -55,17 +62,29 @@ beforeEach(() => {
   m.tx.review.aggregate.mockResolvedValue({ _avg: { rating: 4 }, _count: { id: 2 } });
   m.prisma.reviewBlock.findMany.mockResolvedValue([]);
   m.tx.reviewReport.create.mockResolvedValue({});
+  m.tx.reviewReport.count.mockResolvedValue(1);
+  m.prisma.user.findUnique.mockResolvedValue({ role: "GUEST", createdAt: OLD });
+  m.prisma.booking.count.mockResolvedValue(0);
 });
 
 describe("containsBlockedWords", () => {
-  it.each(["Tam bir orospu cocugu", "SİKTİR git", "s.i.k.t.i.r", "siiiktir", "what a f*cking shit hole", "göt herif"])(
+  it.each(["Tam bir orospu cocugu", "SİKTİR git", "s.i.k.t.i.r", "siiiktir", "what a f*cking shit hole", "göt herif", "You cunt"])(
     "hakareti yakalar: %s",
     (text) => expect(containsBlockedWords(text)).toBe(true),
   );
-  it.each(["Valizim sıkıştı ama esnaf çok yardımcıydı", "Mal kabul hızlıydı", "Götürüp getirdiler", "Picnic sonrası bıraktım", "Dickens Street yakınında", ""])(
-    "masum metni gecirir: %s",
-    (text) => expect(containsBlockedWords(text)).toBe(false),
-  );
+  it.each([
+    "We got there early",
+    "Got it, thanks",
+    "Nice pic of the shop",
+    "Dick was very friendly",
+    "Askeri cunta döneminden kalma bina",
+    "Valizim sıkıştı ama esnaf çok yardımcıydı",
+    "Mal kabul hızlıydı",
+    "Götürüp getirdiler",
+    "Picnic sonrası bıraktım",
+    "Dickens Street yakınında",
+    "",
+  ])("masum metni gecirir: %s", (text) => expect(containsBlockedWords(text)).toBe(false));
 });
 
 describe("ReviewService.addReview kufur suzgeci", () => {
@@ -78,28 +97,58 @@ describe("ReviewService.addReview kufur suzgeci", () => {
 });
 
 describe("ReviewService.report", () => {
-  it("bildirimi yazar, sayaci artirir ve yoneticilere push gider", async () => {
-    const r = await reviewService.report({ reviewId: "r1", reporterId: "u1", reason: "SPAM", note: "  reklam  " });
+  it("ilk bildirim kuyruga girer ve yoneticilere push gider", async () => {
+    const r = await reviewService.report({ reviewId: "r1", reporterId: "u1", reason: "SPAM", note: "  reklam  ", ip: "198.51.100.9" });
     expect(r).toEqual({ ok: true, autoHidden: false });
     expect(m.tx.reviewReport.create).toHaveBeenCalledWith({
-      data: { reviewId: "r1", userId: "u1", reason: "SPAM", note: "reklam" },
+      data: { reviewId: "r1", userId: "u1", reason: "SPAM", note: "reklam", countsTowardAutoHide: true },
     });
-    expect(m.tx.review.update).toHaveBeenCalledWith(
-      expect.objectContaining({ data: expect.objectContaining({ openReportCount: { increment: 1 } }) }),
-    );
     expect(m.tx.review.updateMany).not.toHaveBeenCalled();
     expect(m.push).toHaveBeenCalledWith("reviewReport", { code: "1" }, { adminScreen: "reviews" });
+    expect(m.audit).toHaveBeenCalledWith(expect.objectContaining({ actorRole: "GUEST", ip: "198.51.100.9" }));
   });
 
-  it("ucuncu farkli bildirimde yorum otomatik gizlenir ve ortalama yeniden hesaplanir", async () => {
+  it("ikinci bildirimde push tekrar gitmez", async () => {
+    m.tx.review.update.mockResolvedValue({ openReportCount: 2 });
+    m.tx.reviewReport.count.mockResolvedValue(2);
+    await reviewService.report({ reviewId: "r1", reporterId: "u2", reason: "SPAM" });
+    expect(m.push).not.toHaveBeenCalled();
+  });
+
+  it("ucuncu sayilan bildirimde yorum otomatik gizlenir, ortalama yeniden hesaplanir, push gider", async () => {
     m.tx.review.update.mockResolvedValue({ openReportCount: 3 });
+    m.tx.reviewReport.count.mockResolvedValue(3);
     const r = await reviewService.report({ reviewId: "r1", reporterId: "u3", reason: "OFFENSIVE" });
     expect(r).toEqual({ ok: true, autoHidden: true });
+    expect(m.tx.reviewReport.count).toHaveBeenCalledWith({
+      where: { reviewId: "r1", resolvedAt: null, countsTowardAutoHide: true },
+    });
     expect(m.tx.review.updateMany).toHaveBeenCalledWith({
       where: { id: "r1", hiddenAt: null },
       data: expect.objectContaining({ hiddenReason: AUTO_HIDE_REASON, hiddenById: null }),
     });
     expect(m.tx.shop.update).toHaveBeenCalledWith({ where: { id: "s1" }, data: { rating: 4 } });
+    expect(m.push).toHaveBeenCalledWith("reviewReport", { code: "3" }, { adminScreen: "reviews" });
+  });
+
+  it.each([
+    ["dukkan sahibi", "shop-owner", { role: "PARTNER", createdAt: OLD }],
+    ["yonetici", "admin-1", { role: "ADMIN", createdAt: OLD }],
+    ["yeni ve rezervasyonsuz hesap", "fresh", { role: "GUEST", createdAt: new Date() }],
+  ])("%s bildirimi kaydedilir ama esige sayilmaz", async (_l, reporterId, reporter) => {
+    m.prisma.user.findUnique.mockResolvedValue(reporter);
+    m.tx.review.update.mockResolvedValue({ openReportCount: 5 });
+    const r = await reviewService.report({ reviewId: "r1", reporterId, reason: "FALSE_INFO" });
+    expect(r).toEqual({ ok: true, autoHidden: false });
+    expect(m.tx.reviewReport.create.mock.calls[0][0].data.countsTowardAutoHide).toBe(false);
+    expect(m.tx.review.updateMany).not.toHaveBeenCalled();
+  });
+
+  it("yeni hesap tamamlanmis rezervasyonla sayilir", async () => {
+    m.prisma.user.findUnique.mockResolvedValue({ role: "GUEST", createdAt: new Date() });
+    m.prisma.booking.count.mockResolvedValue(1);
+    await reviewService.report({ reviewId: "r1", reporterId: "fresh", reason: "SPAM" });
+    expect(m.tx.reviewReport.create.mock.calls[0][0].data.countsTowardAutoHide).toBe(true);
   });
 
   it("ayni kullanici ikinci kez bildiremez", async () => {
@@ -125,14 +174,18 @@ describe("ReviewService.report", () => {
     });
     expect(m.tx.reviewReport.create).not.toHaveBeenCalled();
   });
-
-  it("dukkan sahibi (esnaf) kendi dukkanindaki yorumu bildirebilir", async () => {
-    const r = await reviewService.report({ reviewId: "r1", reporterId: "shop-owner", reason: "FALSE_INFO" });
-    expect(r.ok).toBe(true);
-  });
 });
 
 describe("yazari gizle (goruntuleyen basina)", () => {
+  it("gizleme de hiz sinirli", async () => {
+    m.rateLimit.mockResolvedValue(false);
+    await expect(reviewService.blockAuthor({ reviewId: "r1", viewerId: "v1" })).resolves.toEqual({
+      ok: false,
+      reason: "rate_limited",
+    });
+    expect(m.prisma.reviewBlock.upsert).not.toHaveBeenCalled();
+  });
+
   it("engel yorum uzerinden yazara yazilir", async () => {
     await expect(reviewService.blockAuthor({ reviewId: "r1", viewerId: "v1" })).resolves.toEqual({ ok: true });
     expect(m.prisma.reviewBlock.upsert).toHaveBeenCalledWith(

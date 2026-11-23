@@ -1,5 +1,6 @@
 "use server";
 
+import { getClientIpOrNull } from "@/lib/client-ip";
 import { requireUser } from "@/lib/action-auth";
 import { revalidatePathAllLocales } from "@/lib/revalidate-locales";
 import { REVIEW_REPORT_REASONS, reviewService } from "@/services/ReviewService";
@@ -24,6 +25,7 @@ export async function reportReviewAction(input: { reviewId: string; reason: stri
     reporterId: auth.actor.id,
     reason,
     note: typeof input.note === "string" ? input.note : null,
+    ip: await getClientIpOrNull(),
   });
   if (!r.ok) return { success: false, error: ERROR_KEY[r.reason] ?? "Errors.generic" };
   if (r.autoHidden) revalidatePathAllLocales("/search");

@@ -11,20 +11,27 @@
 /** Kelimenin BASINDA eslesen kokler (ekler serbest: "orospu" -> "orospunun"). */
 const PREFIX_ROOTS = [
   // Turkce
-  "amcik", "aminakoy", "aminakoyim", "amk", "aq", "orospu", "orosbu", "pic", "picler", "sikerim", "sikeyim",
-  "siktir", "yarak", "yarrak", "got", "gotveren", "gavat", "pezevenk", "kahpe",
+  "amcik", "aminakoy", "aminakoyim", "amk", "aq", "orospu", "orosbu", "sikerim", "sikeyim",
+  "siktir", "yarak", "yarrak", "gotveren", "gavat", "pezevenk", "kahpe",
   "serefsiz", "yavsak", "ibne", "kaltak", "salak", "gerizekali", "dangalak", "haysiyetsiz",
   // Ingilizce
-  "fuck", "fucking", "shit", "bitch", "asshole", "bastard", "cunt", "dick", "motherfucker", "whore",
+  "fuck", "fucking", "shit", "bitch", "asshole", "bastard", "cunt", "motherfucker", "whore",
   "slut", "retard", "faggot", "nigger", "nigga",
 ];
 
 /**
- * Yalnizca TAM kelime olarak engellenenler: kok olarak cok fazla masum kelimeyi
- * yakalarlar ("got" -> "goturdu", "pic" -> "picnic", "dick" -> "dickens"). "sikis" ve "mal"
- * listede yok: "sıkıştı" ve "mal kabul" gibi masum metinleri reddediyorlardi.
+ * Yalnizca TAM kelime olarak engellenenler: kok olarak masum kelimeyi yakalarlar
+ * ("cunt" -> "cunta").
+ * "got"/"pic"/"dick" listede yok: Ingilizcede "got there", "nice pic", "Dick" (ad)
+ * yorumlari reddediliyordu. "sikis" ve "mal" de yok ("sıkıştı", "mal kabul").
  */
-const EXACT_ONLY = new Set(["got", "pic", "salak", "dick", "aq"]);
+const EXACT_ONLY = new Set(["salak", "aq", "cunt"]);
+
+/**
+ * ASCII'ye katlanmadan, ozgun metinde TAM kelime olarak aranir: "göt" katlaninca
+ * Ingilizce "got" olur ve "We got there" yorumunu reddederdi.
+ */
+const ORIGINAL_EXACT = new Set(["göt", "götveren", "götün"]);
 
 const LEET: Record<string, string> = { "0": "o", "1": "i", "3": "e", "4": "a", "5": "s", "7": "t", "@": "a", $: "s" };
 
@@ -44,6 +51,8 @@ function normalize(text: string): string {
 /** Metinde engelli bir kelime varsa true. Bos/null metin temizdir. */
 export function containsBlockedWords(text: string | null | undefined): boolean {
   if (!text) return false;
+  const original = text.normalize("NFC").toLocaleLowerCase("tr").split(/[^\p{L}]+/u);
+  if (original.some((w) => ORIGINAL_EXACT.has(w))) return true;
   const words = normalize(text).split(/[^\p{L}]+/u).filter(Boolean);
   return words.some((w) =>
     PREFIX_ROOTS.some((root) => (EXACT_ONLY.has(root) ? w === root : w.startsWith(root))),
