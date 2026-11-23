@@ -1,18 +1,33 @@
 # Platform ayarları (merkezi iş kuralları)
 
-Tek kaynak: Prisma `PlatformSettings` (`id = "default"`), okuma için [`getPricingRules()`](../src/lib/platform-settings.ts) (5 saniyelik bellek önbelleği).
+Tek kaynak: Prisma `PlatformSettings` (`id = "default"`), okuma için [`getPricingRules()`](../src/lib/platform-settings.ts) (60 saniyelik bellek önbelleği). Varsayılanlar `src/lib/pricing-rules.ts` ile şemada aynı olmak zorunda (`pricing-defaults.test.ts`); bu varsayılanlar canlı fiyatı değiştirmez, prod satırı yalnızca yönetim arayüzünden değişir.
 
 ## Yönetim arayüzü
 
-Admin: **`/admin/platform-settings`** — tüm sayısal kurallar ve **platform tatil günleri** (`YYYY-MM-DD` listesi, JSON) form üzerinden güncellenir. Bu günlere denk gelen konaklama pencereleri yeni rezervasyonda reddedilir (`BOOKING_CALENDAR_TIMEZONE`, varsayılan `Europe/Istanbul`).
+Web: **`/admin/platform-settings`**. Mobil: yönetici sekmesi → "Platform ayarları" (`/api/mobile/admin/platform-settings`; aynı servis, `src/services/PlatformSettingsService.ts`). Riskli alanlar (komisyon, mühür zorunluluğu vb.) onay ifadesi ister (`src/lib/admin-risky-settings.ts`).
+
+| Alan | Varsayılan | Ne yapar |
+|---|---|---|
+| `defaultPricePerDay` | 250 | Dükkan fiyatı yoksa valiz başına günlük TL |
+| `bagMultiplierS` / `M` / `Xl` | 0.8 / 1.0 / 1.5 | Boy çarpanı (prod satırında üçü de 1.0: tek fiyat iş kararı) |
+| `maxStayDays`, `maxBagsPerSlot`, `defaultShopCapacity` | 30, 50, 10 | Limitler |
+| `insuranceFeeTry` | 0 | Güvence bedeli (misafirden ayrıca alınmaz) |
+| `earlyRefundRatio`, `cancelFixedFeeTry` | 1.0, 0 | İptal kesintisi / iade oranı |
+| `latePickupFeeTry`, `latePickupGraceMin` | 0, 15 | Geç teslim alma ücreti ve toleransı |
+| `checkInGraceMin` | 30 | Kapanıştan sonra check-in toleransı |
+| `requireSealsOnCheckIn` | false | Check-in'de mühür kaydı zorunlu mu |
+| `platformCommissionRate` | 0.20 | Platform payı; tahsilat yokken etkin oran 0 (`docs/PAYMENTS.md`) |
+| `platformHolidayDates` | boş | Rezervasyona kapalı günler (`YYYY-MM-DD` JSON); `BOOKING_CALENDAR_TIMEZONE`, varsayılan `Europe/Istanbul` |
+| `minAppVersion`, `latestAppVersion` | boş | Mobil zorunlu / önerilen güncelleme eşiği (semver) |
+| `iosAppStoreLive`, `androidPlayLive` | false | Mağaza yayın bayrakları (aşağıda) |
 
 ## Önbellek
 
-`updatePlatformSettingsAction` kayıttan sonra `invalidatePricingRulesCache()` çağırır; yeni kurallar saniyeler içinde geçerlidir.
+`updatePlatformSettingsAction` kayıttan sonra `invalidatePricingRulesCache()` çağırır; aynı süreçte yeni kurallar hemen, diğer okuyucularda en geç 60 saniyede geçerlidir.
 
 ## Audit
 
-`PlatformSettings.updatedAt` alanı son değişiklik zamanını tutar; admin ekranında gösterilir.
+`PlatformSettings.updatedAt` son değişiklik zamanını tutar ve ekranda gösterilir; her değişiklik `AuditLog`'a da yazılır (web `/admin/audit-log`, mobil "Denetim kaydı").
 
 ## Mağaza yayın bayrakları (`iosAppStoreLive`, `androidPlayLive`)
 
