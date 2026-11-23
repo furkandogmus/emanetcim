@@ -17,7 +17,7 @@
 
 **İnsan doğrulaması (AI kullanıldıysa zorunlu):**
 
-- [ ] `npm run test` ve `npm run build` yerelde veya CI’da geçti
+- [ ] `npm run typecheck && npm run lint && npm test` (mobil değiştiyse `cd mobile-expo && npm run verify`) yerelde veya CI’da geçti
 - [ ] Finans/ödeme/webhook: server doğrulaması ve imza davranışı kontrol edildi
 - [ ] Migration: SQL ve geri alma notu gözden geçirildi
 
@@ -29,5 +29,6 @@
 
 ## Checklist
 
-- [ ] `.env.example` güncellendi (yeni env varsa)
+- [ ] Yeni env anahtarı varsa: `docker-compose.env.example`, `docker-compose.yml` → `web.environment` ve SSM (`ops/SECRETS.md`); zorunluysa `ops/secrets.manifest`
+- [ ] Yeni zamanlanmış iş varsa: `src/lib/jobs/registry.ts` + `ops/crontab.prod` (`scripts/README.md`)
 - [ ] Dokümantasyon güncellendi (davranış değiştiyse)
