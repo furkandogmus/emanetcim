@@ -1614,13 +1614,17 @@
         "requireSealsOnCheckIn": "Teslim almada mühür zorunlu",
         "platformHolidayDates": "Platform tatil günleri",
         "minAppVersion": "En düşük uygulama sürümü",
-        "latestAppVersion": "Güncel uygulama sürümü"
+        "latestAppVersion": "Güncel uygulama sürümü",
+        "iosAppStoreLive": "iOS uygulaması App Store'da yayında",
+        "androidPlayLive": "Android uygulaması Google Play'de herkese açık"
       },
       "on": "Zorunlu",
       "off": "Zorunlu değil",
       "holidayHint": "Her satıra bir tarih: YYYY-AA-GG",
       "versionHint": "x.y.z; boş bırakılırsa kapalı. En düşük sürüm, güncel sürümü geçemez.",
-      "noChanges": "Değişiklik yok."
+      "noChanges": "Değişiklik yok.",
+      "live": "Yayında",
+      "notLive": "Yayında değil"
     },
     "flags": {
       "title": "Özellik bayrakları",
