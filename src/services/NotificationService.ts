@@ -6,7 +6,7 @@ import { fetchWithTimeout } from "@/lib/async-timeout";
 import { isExpoPushToken, sendExpoPush } from "@/lib/expo-push";
 import { renderEmailHtml, escapeEmailHtml, EMAIL_BRAND_COLOR } from "@/lib/email-template";
 import { bcp47ForUiLocale } from "@/lib/intl-locale";
-import { formatDateTimeInZone } from "@/lib/format-datetime";
+import { formatDateTimeInZone, formatTimeInZone } from "@/lib/format-datetime";
 import {
   isNetgsmConfigured,
   normalizeTrGsm10,
@@ -2161,6 +2161,184 @@ export class NotificationService implements INotificationService {
       this.sendEmail(email, content.subject, body, bookingId, html),
     ]);
     return { push: pushed, email: emailed };
+  }
+
+  /**
+   * Gec birakma bildirimi (`LateDropoffService`): hatirlatma, "dukkan bekliyor" ya da
+   * "kapandi". Once push; ulasmadiysa (cihaz yok, gonderim basarisiz) e-posta. Uc
+   * hatirlatma 30 dk icinde gidiyor: iki kanaldan birden gondermek gurultu olurdu.
+   */
+  async sendLateDropoffNotice(params: {
+    bookingId: string;
+    kind: "reminder" | "hold" | "closed";
+    email: string | null;
+    hasAccount: boolean;
+    locale: string;
+    /** reminder: kapanis ani; hold: bekletmenin bittigi an; closed: kapanis ani. */
+    at: Date;
+    checkOutAt: Date;
+    shop: { name: string; phone: string | null; timeZone: string };
+    now?: Date;
+  }): Promise<{ push: boolean; email: boolean }> {
+    const { bookingId, kind, locale, shop } = params;
+    const time = formatTimeInZone(params.at, { locale: bcp47ForUiLocale(locale), timeZone: shop.timeZone });
+    const phone = shop.phone?.trim() || undefined;
+    const event = kind === "reminder" ? "lateDropoff" : kind === "hold" ? "lateHold" : "lateClosed";
+    const pushed = await this.pushGuestNow(bookingId, event, locale, { time, phone }).catch((err) => {
+      logger.warn({ err, bookingId, kind }, "late_dropoff_push_failed");
+      return false;
+    });
+    const email = params.email;
+    if (pushed || !email || !email.includes("@")) return { push: pushed, email: false };
+
+    const domain = getSiteBaseUrl();
+    const now = params.now ?? new Date();
+    const ctaUrl =
+      kind === "closed"
+        ? `${domain}/${locale}/search`
+        : params.hasAccount
+          ? `${domain}/${locale}/bookings/${bookingId}`
+          : `${domain}/${locale}/bookings/manage/${await signGuestManageLinkToken({
+              bookingId,
+              email,
+              checkOutTime: params.checkOutAt > now ? params.checkOutAt : now,
+              now,
+            })}`;
+
+    const c = pickLocale(
+      {
+        tr: {
+          reminderSubject: "BagajPark: Bırakma saatin geçti",
+          reminderHeading: "Bırakma saatin geçti",
+          reminder: "__SHOP__ rezervasyonun saat __TIME__ itibarıyla otomatik kapanacak. Geliyorsan dükkanı ara__PHONE__; gelemiyorsan yeni bir rezervasyon yap.",
+          holdSubject: "BagajPark: Dükkan seni bekliyor",
+          holdHeading: "Dükkan seni bekliyor",
+          hold: "__SHOP__ rezervasyonunu senin için açık tutuyor. Son saat: __TIME__.",
+          closedSubject: "BagajPark: Rezervasyonun kapandı",
+          closedHeading: "Rezervasyonun kapandı",
+          closed: "Bırakma saatin 1 saat geçtiği için __SHOP__ rezervasyonun kapandı. Yeni bir rezervasyon yapabilirsin.",
+          ctaBooking: "Rezervasyonu görüntüle",
+          ctaSearch: "Yeni rezervasyon yap",
+        },
+        en: {
+          reminderSubject: "BagajPark: Your drop-off time has passed",
+          reminderHeading: "Your drop-off time has passed",
+          reminder: "Your booking at __SHOP__ closes automatically at __TIME__. If you are on your way, call the shop__PHONE__; otherwise make a new booking.",
+          holdSubject: "BagajPark: The shop is waiting for you",
+          holdHeading: "The shop is waiting for you",
+          hold: "__SHOP__ is holding your booking until __TIME__.",
+          closedSubject: "BagajPark: Your booking was closed",
+          closedHeading: "Your booking was closed",
+          closed: "Your booking at __SHOP__ was closed because the drop-off time passed by 1 hour. You can make a new booking.",
+          ctaBooking: "View booking",
+          ctaSearch: "Make a new booking",
+        },
+        de: {
+          reminderSubject: "BagajPark: Deine Abgabezeit ist vorbei",
+          reminderHeading: "Deine Abgabezeit ist vorbei",
+          reminder: "Deine Buchung bei __SHOP__ wird um __TIME__ automatisch geschlossen. Wenn du unterwegs bist, ruf den Laden an__PHONE__; sonst buche neu.",
+          holdSubject: "BagajPark: Der Laden wartet auf dich",
+          holdHeading: "Der Laden wartet auf dich",
+          hold: "__SHOP__ hält deine Buchung bis __TIME__ offen.",
+          closedSubject: "BagajPark: Deine Buchung wurde geschlossen",
+          closedHeading: "Deine Buchung wurde geschlossen",
+          closed: "Deine Buchung bei __SHOP__ wurde geschlossen, weil die Abgabezeit um 1 Stunde überschritten wurde. Du kannst neu buchen.",
+          ctaBooking: "Buchung ansehen",
+          ctaSearch: "Neu buchen",
+        },
+        fr: {
+          reminderSubject: "BagajPark : l'heure de dépôt est passée",
+          reminderHeading: "L'heure de dépôt est passée",
+          reminder: "Votre réservation chez __SHOP__ sera clôturée automatiquement à __TIME__. Si vous arrivez, appelez le commerce__PHONE__ ; sinon, faites une nouvelle réservation.",
+          holdSubject: "BagajPark : le commerce vous attend",
+          holdHeading: "Le commerce vous attend",
+          hold: "__SHOP__ garde votre réservation jusqu'à __TIME__.",
+          closedSubject: "BagajPark : votre réservation a été clôturée",
+          closedHeading: "Votre réservation a été clôturée",
+          closed: "Votre réservation chez __SHOP__ a été clôturée car l'heure de dépôt est dépassée d'une heure. Vous pouvez réserver à nouveau.",
+          ctaBooking: "Voir la réservation",
+          ctaSearch: "Nouvelle réservation",
+        },
+        ja: {
+          reminderSubject: "BagajPark: 預け入れ時間を過ぎました",
+          reminderHeading: "預け入れ時間を過ぎました",
+          reminder: "__SHOP__のご予約は__TIME__に自動で終了します。向かっている場合は店舗にお電話ください__PHONE__。難しい場合は新しくご予約ください。",
+          holdSubject: "BagajPark: 店舗がお待ちしています",
+          holdHeading: "店舗がお待ちしています",
+          hold: "__SHOP__は__TIME__までご予約を保持しています。",
+          closedSubject: "BagajPark: ご予約が終了しました",
+          closedHeading: "ご予約が終了しました",
+          closed: "預け入れ時間を1時間過ぎたため、__SHOP__のご予約は終了しました。新しくご予約いただけます。",
+          ctaBooking: "予約を見る",
+          ctaSearch: "新しく予約する",
+        },
+        fa: {
+          reminderSubject: "BagajPark: زمان تحویل دادن گذشته است",
+          reminderHeading: "زمان تحویل دادن گذشته است",
+          reminder: "رزرو شما در __SHOP__ ساعت __TIME__ به‌طور خودکار بسته می‌شود. اگر در راه هستید با فروشگاه تماس بگیرید__PHONE__؛ وگرنه رزرو جدیدی ثبت کنید.",
+          holdSubject: "BagajPark: فروشگاه منتظر شماست",
+          holdHeading: "فروشگاه منتظر شماست",
+          hold: "__SHOP__ رزرو شما را تا ساعت __TIME__ نگه می‌دارد.",
+          closedSubject: "BagajPark: رزرو شما بسته شد",
+          closedHeading: "رزرو شما بسته شد",
+          closed: "چون یک ساعت از زمان تحویل دادن گذشت، رزرو شما در __SHOP__ بسته شد. می‌توانید دوباره رزرو کنید.",
+          ctaBooking: "مشاهده رزرو",
+          ctaSearch: "رزرو جدید",
+        },
+      },
+      locale,
+    );
+
+    const subject = kind === "reminder" ? c.reminderSubject : kind === "hold" ? c.holdSubject : c.closedSubject;
+    const heading = kind === "reminder" ? c.reminderHeading : kind === "hold" ? c.holdHeading : c.closedHeading;
+    const template = kind === "reminder" ? c.reminder : kind === "hold" ? c.hold : c.closed;
+    // Dukkan adi ve telefonu esnafin yazdigi duz metin: HTML'e kacirilarak girer.
+    const fill = (shopText: string, phoneText: string) =>
+      template.replace("__SHOP__", shopText).replace("__TIME__", time).replace("__PHONE__", phoneText);
+    const text = fill(shop.name, phone ? ` (${phone})` : "");
+    const html = fill(escapeEmailHtml(shop.name), phone ? ` (${escapeEmailHtml(phone)})` : "");
+    const cta = kind === "closed" ? c.ctaSearch : c.ctaBooking;
+
+    const emailed = await this.sendEmail(
+      email,
+      subject,
+      `${text}\n\n${cta}: ${ctaUrl}`,
+      bookingId,
+      renderEmailHtml({
+        locale,
+        heading,
+        paragraphs: [html],
+        cta: { href: ctaUrl, label: cta, variant: "button" },
+        footer: `BagajPark · ${bookingShortCode(bookingId)}`,
+      }),
+    );
+    return { push: false, email: emailed };
+  }
+
+  /**
+   * Gec birakma +45 dk: esnafa "misafir gelmedi, su saatte kapanacak". Metin Turkce
+   * (esnaf bildirimleri gibi, bkz. `notifyPartnerBookingChange`). En az bir kanal
+   * ulastiysa `true`.
+   */
+  async notifyPartnerLateDropoff(params: { bookingId: string; closeAt: Date }): Promise<boolean> {
+    const b = await prisma.booking.findUnique({
+      where: { id: params.bookingId },
+      select: {
+        guest: { select: { name: true } },
+        shop: { select: { timezone: true, owner: { select: { id: true } } } },
+      },
+    });
+    const partnerUserId = b?.shop?.owner?.id;
+    if (!b || !partnerUserId) return false;
+    const time = formatTimeInZone(params.closeAt, { locale: "tr-TR", timeZone: b.shop.timezone || "Europe/Istanbul" });
+    const guestName = b.guest?.name?.trim() || "Misafir";
+    const title = "Misafir henüz gelmedi";
+    const body = `${guestName} · Kod ${bookingShortCode(params.bookingId)} · Otomatik kapanış ${time}. Valizi aldıysan teslim al; misafir aradıysa "Misafiri bekle"ye bas.`;
+    const [web, mobile] = await Promise.all([
+      this.sendPush(partnerUserId, title, body, params.bookingId),
+      this.sendMobilePush(partnerUserId, title, body, params.bookingId),
+    ]);
+    return web || mobile;
   }
 
   /**

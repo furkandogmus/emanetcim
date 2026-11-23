@@ -38,6 +38,12 @@ export function formatDateTimeInZone(
   }).format(d);
 }
 
+/** Yalnızca saat ("14:30") -- aynı gün içindeki bir an için (gec birakma bildirimleri). */
+export function formatTimeInZone(date: Date | string, opts: { locale: string; timeZone: string }): string {
+  const d = typeof date === "string" ? new Date(date) : date;
+  return new Intl.DateTimeFormat(opts.locale, { timeZone: opts.timeZone, timeStyle: "short" }).format(d);
+}
+
 /** Yalnızca tarih -- gün sınırı da dükkanın diliminde geçmeli. */
 export function formatDateInZone(
   date: Date | string,
