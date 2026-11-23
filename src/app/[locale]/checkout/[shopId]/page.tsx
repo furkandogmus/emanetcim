@@ -12,6 +12,7 @@ import type { Metadata } from 'next';
 import { auth } from '@/auth';
 import { analyticsService } from '@/services/AnalyticsService';
 import { resolveServerSessionId } from '@/lib/analytics-server';
+import { parseCheckoutSelectionParams } from '@/lib/checkout-return-url';
 
 /**
  * Ayni istek icinde TEK sorgu -- `shop/[shopId]/page.tsx`teki
@@ -81,9 +82,8 @@ export default async function CheckoutPage({
   const scheduleParts = (await loadScheduleParts([shopId], new Date().toISOString().slice(0, 10))).get(shopId);
 
   const isLoggedIn = !!session?.user?.id;
-  const checkInParam = typeof sp.checkIn === "string" ? sp.checkIn : undefined;
-  const checkOutParam = typeof sp.checkOut === "string" ? sp.checkOut : undefined;
-  const bagsParam = typeof sp.bags === "string" ? parseInt(sp.bags, 10) : undefined;
+  // Giris/kayittan donuste secim URL'den geri gelir (`buildCheckoutReturnPath`).
+  const selection = parseCheckoutSelectionParams(sp);
 
   return (
     <CheckoutClient 
@@ -93,9 +93,12 @@ export default async function CheckoutPage({
       pricePerDay={moneyToNumber(shop.pricePerDay) || pricingRules.defaultPricePerDay}
       pricingRules={pricingRules}
       isLoggedIn={isLoggedIn}
-      initialCheckIn={checkInParam}
-      initialCheckOut={checkOutParam}
-      initialBags={!isNaN(bagsParam ?? -1) ? bagsParam : undefined}
+      initialCheckIn={selection.checkIn ?? undefined}
+      initialCheckOut={selection.checkOut ?? undefined}
+      initialBagS={selection.bagS}
+      initialBags={selection.bagM}
+      initialBagXl={selection.bagXl}
+      initialCouponCode={selection.couponCode ?? undefined}
       /* Gunler dukkanin kendi diliminde yorumlanir; birakis/alis onun
          calisma saatine oturtulur. */
       timeZone={shop.timezone ?? undefined}
