@@ -2,7 +2,7 @@
  * Herhangi bir pilot bölgede potansiyel esnaf adaylarını Google Places API
  * (New) Text Search ile TEK istekte toplu çeker: isim, adres, telefon,
  * website, puan, açık/kapalı durumu. Çıktı CSV — telesatış/kapı ziyareti için
- * arama listesi (bkz. docs/pazarlama_stratejisi_tr.md § 1.2).
+ * arama listesi (bkz. marketing/MARKETING_PLAN.md § 7.2).
  *
  * E-POSTA YOK: Places API hiçbir SKU'da e-posta alanı döndürmez. Bu bilinçli
  * bir kapsam kararı — plan zaten telefonla arama öngörüyor, e-posta gerekmiyor.
@@ -37,7 +37,7 @@ import { dirname } from "node:path";
 
 const API_KEY = process.env.GOOGLE_MAPS_API_KEY;
 
-// Galata Kulesi çevresi — pilot hat (bkz. docs/pazarlama_stratejisi_tr.md § 1.1)
+// Galata Kulesi çevresi — pilot hat (bkz. marketing/MARKETING_PLAN.md § 7.1)
 const DEFAULT_CITY = "Galata-Karaköy";
 const DEFAULT_CENTER = { latitude: 41.0256, longitude: 28.9744 };
 const DEFAULT_RADIUS_METERS = 700;
