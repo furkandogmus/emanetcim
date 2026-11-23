@@ -179,4 +179,12 @@ describe("esnaf: gec birakma (Misafiri bekle)", () => {
     expect(screen.getByRole("button", { name: "Misafiri bekle (+30 dk)" })).toBeDisabled();
     expect(screen.getByText("Alma saatine ulaşıldı, daha fazla beklenemez.")).toBeTruthy();
   });
+
+  it("odemesiz niyette (PENDING) bekle blogu ve tavan yazisi hic gorunmez", async () => {
+    await render(
+      withClient(<PartnerBookingActions booking={booking({ status: "PENDING", lateCloseAt: "2026-11-22T10:00:00Z" })} />),
+    );
+    expect(screen.queryByRole("button", { name: "Misafiri bekle (+30 dk)" })).toBeNull();
+    expect(screen.queryByText("Alma saatine ulaşıldı, daha fazla beklenemez.")).toBeNull();
+  });
 });

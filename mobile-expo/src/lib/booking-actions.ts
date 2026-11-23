@@ -70,12 +70,12 @@ export function noShowState(availableAt: string | null | undefined, now: number 
 export type LateDropoffState =
   | { kind: "hidden" }
   /** Birakma saati gecti, valiz yok. `holdUntil` bekletme suruyorsa bittigi an. */
-  | { kind: "late"; closeAt: Date; holdUntil: Date | null; canHold: boolean };
+  | { kind: "late"; closeAt: Date; holdUntil: Date | null; actionable: boolean; canHold: boolean };
 
 /**
  * Gec birakma bilgisi (sunucu `lateCloseAt`). "Misafiri bekle" yalnizca teslim
- * alinabilir durumda ve kapanis alma saatine dayanmadiysa sunulur; sunucu ayni
- * kurali uygular (`hold_limit`).
+ * alinabilir (`actionable`: APPROVED/PAID) durumda gorunur ve kapanis alma saatine
+ * dayanmadiysa acilir; sunucu ayni kurali uygular (`hold_limit`).
  */
 export function lateDropoffState(
   b: { status: BookingStatus; checkInTime: string; checkOutTime: string; lateCloseAt?: string | null; lateHoldUntil?: string | null },
@@ -88,7 +88,7 @@ export function lateDropoffState(
   const holdUntil = hold && hold.getTime() > now ? hold : null;
   const actionable = b.status === "APPROVED" || b.status === "PAID";
   const canHold = actionable && closeAt.getTime() < new Date(b.checkOutTime).getTime();
-  return { kind: "late", closeAt, holdUntil, canHold };
+  return { kind: "late", closeAt, holdUntil, actionable, canHold };
 }
 
 /** Bekleme yazisinda saat yeter mi, gun de mi gerekir (Istanbul duvar saatiyle). */
