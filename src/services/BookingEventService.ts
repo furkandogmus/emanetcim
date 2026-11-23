@@ -24,7 +24,14 @@ export type BookingEventType =
    * Alma saati gecmis valiz icin misafire hatirlatma gonderildi
    * (`OverdueGuestReminderService`). `metadata.slot` 1..7; ayni slot ikinci kez yazilmaz.
    */
-  | "OVERDUE_GUEST_REMINDER";
+  | "OVERDUE_GUEST_REMINDER"
+  /**
+   * Gec birakma hatirlatmasi sahiplenildi (`LateDropoffService`). `metadata.stage` 1..3,
+   * `metadata.checkInTime` hangi birakma saatine ait oldugu (saat degisirse sayac sifirlanir).
+   */
+  | "LATE_DROPOFF_REMINDER"
+  /** Esnaf/yonetici "Misafiri bekle": `metadata.until` yeni kapanis ani. */
+  | "LATE_HOLD";
 
 export class BookingEventService {
   async record(params: {
