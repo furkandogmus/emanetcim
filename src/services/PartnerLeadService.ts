@@ -170,7 +170,7 @@ export class PartnerLeadService {
     try {
       if (emailOwner && emailOwner.role === "GUEST") {
         const r = await partnerOnboardingService.convertGuestToPartner(
-          { userId: emailOwner.id, phone, ...shop },
+          { userId: emailOwner.id, name: ownerName, phone, ...shop },
           { inTx: markConverted },
         );
         if (!r.ok) return this.failure(lead.id, r.reason === "not_guest" ? "email_already_registered" : r.reason);
@@ -193,14 +193,20 @@ export class PartnerLeadService {
     let activated = false;
     let activationError: LeadActivationError | undefined;
     if (input.activate) {
-      const approval = await shopService.approveApplication(created.shopId, {
-        userId: input.actor.userId,
-        ip: input.actor.ip,
-      });
-      activated = approval.ok;
-      if (!approval.ok) {
-        activationError = approval.reason;
-        logger.warn({ leadId: lead.id, shopId: created.shopId, reason: approval.reason }, "lead_convert_activation_failed");
+      // Hesap ve dukkan artik kayitli: onay hatasi cevirmeyi geri almaz, sonucta doner.
+      try {
+        const approval = await shopService.approveApplication(created.shopId, {
+          userId: input.actor.userId,
+          ip: input.actor.ip,
+        });
+        activated = approval.ok;
+        if (!approval.ok) activationError = approval.reason;
+      } catch (err) {
+        logger.error({ err, leadId: lead.id, shopId: created.shopId }, "lead_convert_activation_threw");
+        activationError = "failed";
+      }
+      if (activationError) {
+        logger.warn({ leadId: lead.id, shopId: created.shopId, reason: activationError }, "lead_convert_activation_failed");
       }
     }
 
@@ -241,14 +247,26 @@ type LeadRow = {
   convertedShopId?: string | null;
 };
 
-function existingConversion(lead: LeadRow): LeadConversionResult {
+/**
+ * Ilk cevirmenin sonucu. Yeniden deneyen admin bagi kaybetmis olabilir (ilk
+ * yanit ulasmadi, sekme kapandi): esnaf hala sifre belirlemediyse yeni bag uretilir.
+ */
+async function existingConversion(lead: LeadRow): Promise<LeadConversionResult> {
+  const user = lead.convertedUserId
+    ? await prisma.user.findUnique({
+        where: { id: lead.convertedUserId },
+        select: { phone: true, passwordHash: true },
+      })
+    : null;
+  const resetUrl =
+    user?.phone && !user.passwordHash ? (await createPartnerResetLink(user.phone)).resetUrl : null;
   return {
     ok: true,
     alreadyConverted: true,
     userId: lead.convertedUserId ?? null,
     shopId: lead.convertedShopId ?? null,
-    phone: lead.phone,
-    resetUrl: null,
+    phone: user?.phone ?? lead.phone,
+    resetUrl,
     activated: false,
   };
 }
@@ -303,7 +321,7 @@ export type LeadConversionFailure =
   | "phone_already_registered"
   | "email_already_registered";
 
-export type LeadActivationError = "missing_coordinates" | "not_found";
+export type LeadActivationError = "missing_coordinates" | "not_found" | "failed";
 
 export type LeadConversionResult =
   | {

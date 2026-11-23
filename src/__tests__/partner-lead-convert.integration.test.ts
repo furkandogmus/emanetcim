@@ -91,7 +91,9 @@ describe.skipIf(!run)("on kaydi esnafa cevirme (gercek DB)", () => {
     expect(new Set([a.shopId, b.shopId]).size).toBe(1);
     expect([a.alreadyConverted, b.alreadyConverted].sort()).toEqual([false, true]);
     const again = await convert(id);
-    expect(again).toMatchObject({ ok: true, alreadyConverted: true, shopId: a.shopId, resetUrl: null });
+    // Esnaf henuz sifre belirlemedi: tekrar deneyen admin yeni bir bag alir.
+    expect(again).toMatchObject({ ok: true, alreadyConverted: true, shopId: a.shopId });
+    expect(again.resetUrl).toMatch(/reset|sifre|password/i);
     expect(await prisma.shop.count({ where: { owner: { phone: gsm(2) } } })).toBe(1);
     expect(await prisma.auditLog.count({ where: { action: "partner.lead_converted", entityId: id } })).toBe(1);
   });
@@ -116,9 +118,15 @@ describe.skipIf(!run)("on kaydi esnafa cevirme (gercek DB)", () => {
     });
     userIds.push(guest.id);
     const id = await lead(gsm(5));
-    const r = await convert(id, { email: `G-${suf}@test.local` });
+    const r = await convert(id, { email: `G-${suf}@test.local`, ownerName: "Duzeltilmis Ad" });
     expect(r).toMatchObject({ ok: true, userId: guest.id, resetUrl: null });
-    expect(await prisma.user.findUnique({ where: { id: guest.id } })).toMatchObject({ role: "PARTNER", phone: gsm(5) });
+    expect(await prisma.user.findUnique({ where: { id: guest.id } })).toMatchObject({
+      role: "PARTNER",
+      phone: gsm(5),
+      name: "Duzeltilmis Ad",
+    });
+    // Sifresi olan hesapta tekrar deneme bag uretmez.
+    expect((await convert(id)).resetUrl).toBeNull();
   });
 
   it("gecersiz girdi ve konumsuz cevirme reddedilir", async () => {
@@ -139,5 +147,15 @@ describe.skipIf(!run)("on kaydi esnafa cevirme (gercek DB)", () => {
       timeout: 10_000,
       interval: 200,
     });
+  });
+
+  it("onay firlatirsa cevirme yine basarili, sonuc activationError tasir", async () => {
+    const { shopService } = await import("@/services/ShopService");
+    const spy = vi.spyOn(shopService, "approveApplication").mockRejectedValueOnce(new Error("db down"));
+    const id = await lead(gsm(8));
+    const r = await convert(id, { activate: true });
+    expect(r).toMatchObject({ ok: true, activated: false, activationError: "failed" });
+    expect((await prisma.partnerLead.findUnique({ where: { id } })).convertedShopId).toBe(r.shopId);
+    spy.mockRestore();
   });
 });
