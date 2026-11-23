@@ -365,6 +365,13 @@ model Booking {
   couponDiscountAmount   Decimal           @default(0) @db.Decimal(12, 2)
   /// Rezervasyonda kullanılan kupon kodu (varsa)
   couponCode             String?
+  /// Esnafin "Misafiri bekle" ile uzattigi otomatik kapanis ani (gec birakma).
+  ///
+  /// Valiz birakma saatinden 60 dk sonra hala birakilmamis rezervasyon otomatik
+  /// kapanir (`late-dropoff-scan`). Misafir dukkani arayip "geliyorum" dediyse
+  /// esnaf bu ani 30'ar dk ileri alir; `checkOutTime`i asamaz. `null` = bekletme
+  /// yok, kapanis `checkInTime + 60 dk`. Kural: `src/lib/late-dropoff.ts`.
+  lateHoldUntil          DateTime?
   reservationSlots       ReservationSlot[]
   guest                  User?             @relation(fields: [guestId], references: [id], onDelete: Cascade)
   shop                   Shop              @relation(fields: [shopId], references: [id], onDelete: Cascade)
