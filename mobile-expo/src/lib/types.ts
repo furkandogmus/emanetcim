@@ -777,6 +777,9 @@ export type AdminPlatformSettingsValues = {
   platformHolidayDates: string[];
   minAppVersion: string | null;
   latestAppVersion: string | null;
+  /** Magaza yayin bayraklari; eski sunucu gondermez (yoksa kapali sayilir). */
+  iosAppStoreLive?: boolean;
+  androidPlayLive?: boolean;
 };
 
 /**

@@ -1664,13 +1664,17 @@
         "requireSealsOnCheckIn": "Пломбы при сдаче обязательны",
         "platformHolidayDates": "Праздничные дни платформы",
         "minAppVersion": "Минимальная версия приложения",
-        "latestAppVersion": "Актуальная версия приложения"
+        "latestAppVersion": "Актуальная версия приложения",
+        "iosAppStoreLive": "Приложение iOS опубликовано в App Store",
+        "androidPlayLive": "Приложение Android доступно всем в Google Play"
       },
       "on": "Обязательно",
       "off": "Необязательно",
       "holidayHint": "По одной дате в строке: ГГГГ-ММ-ДД",
       "versionHint": "x.y.z; оставьте пустым, чтобы отключить. Минимальная версия не может быть выше актуальной.",
-      "noChanges": "Изменений нет."
+      "noChanges": "Изменений нет.",
+      "live": "Опубликовано",
+      "notLive": "Не опубликовано"
     },
     "flags": {
       "title": "Флаги функций",

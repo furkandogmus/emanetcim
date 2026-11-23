@@ -7,6 +7,7 @@ import { auth } from "@/auth";
 import { redirect } from "next/navigation";
 import { getPlatformSettingsForAdmin } from "@/services/PlatformSettingsService";
 import AdminPlatformSettingsClient from "@/components/admin/AdminPlatformSettingsClient";
+import { getAppLinkStats } from "@/services/AppLinkService";
 
 export default async function AdminPlatformSettingsPage({
   params,
@@ -24,7 +25,10 @@ export default async function AdminPlatformSettingsPage({
   const t = await getTranslations("Admin");
   const tCommon = await getTranslations("Common");
 
-  const { values, updatedAt } = await getPlatformSettingsForAdmin();
+  const [{ values, updatedAt }, appLinkStats] = await Promise.all([
+    getPlatformSettingsForAdmin(),
+    getAppLinkStats(30),
+  ]);
   const { platformHolidayDates, minAppVersion, latestAppVersion, ...rest } = values;
   const base = {
     ...rest,
@@ -65,6 +69,36 @@ export default async function AdminPlatformSettingsPage({
           initial={base}
           updatedAtLabel={updatedAtLabel}
         />
+
+        <section className="rounded-2xl border border-gray-100 bg-white p-6" aria-labelledby="app-link-stats">
+          <h2 id="app-link-stats" className="id-display text-lg text-gray-900 mb-4">
+            {t("appLinkStatsTitle")}
+          </h2>
+          {appLinkStats.length === 0 ? (
+            <p className="text-sm text-gray-500">{t("appLinkStatsEmpty")}</p>
+          ) : (
+            <table className="w-full text-sm" data-testid="app-link-stats">
+              <thead>
+                <tr className="text-left text-gray-500">
+                  <th className="py-2 pr-4">{t("appLinkStatsSource")}</th>
+                  <th className="py-2 pr-4">{t("appLinkStatsPlatform")}</th>
+                  <th className="py-2 pr-4">{t("appLinkStatsOutcome")}</th>
+                  <th className="py-2 text-right">{t("appLinkStatsCount")}</th>
+                </tr>
+              </thead>
+              <tbody>
+                {appLinkStats.map((r) => (
+                  <tr key={`${r.source}|${r.platform}|${r.outcome}`} className="border-t border-gray-100">
+                    <td className="py-2 pr-4 font-mono">{r.source}</td>
+                    <td className="py-2 pr-4">{r.platform}</td>
+                    <td className="py-2 pr-4">{r.outcome}</td>
+                    <td className="py-2 text-right font-bold">{r.count}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          )}
+        </section>
       </div>
     </div>
   );

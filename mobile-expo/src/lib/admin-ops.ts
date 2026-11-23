@@ -107,7 +107,11 @@ export function couponBody(f: CouponForm) {
 
 export type SettingsDraft = Record<keyof AdminPlatformSettingsValues, string>;
 
-const BOOL_FIELDS = new Set<keyof AdminPlatformSettingsValues>(["requireSealsOnCheckIn"]);
+const BOOL_FIELDS = new Set<keyof AdminPlatformSettingsValues>([
+  "requireSealsOnCheckIn",
+  "iosAppStoreLive",
+  "androidPlayLive",
+]);
 const TEXT_FIELDS = new Set<keyof AdminPlatformSettingsValues>(["minAppVersion", "latestAppVersion"]);
 
 export const SETTINGS_FIELDS: (keyof AdminPlatformSettingsValues)[] = [
@@ -128,6 +132,8 @@ export const SETTINGS_FIELDS: (keyof AdminPlatformSettingsValues)[] = [
   "platformHolidayDates",
   "minAppVersion",
   "latestAppVersion",
+  "iosAppStoreLive",
+  "androidPlayLive",
 ];
 
 export function isBoolSetting(f: keyof AdminPlatformSettingsValues) {

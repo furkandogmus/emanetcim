@@ -1614,13 +1614,17 @@
         "requireSealsOnCheckIn": "Seals required at drop-off",
         "platformHolidayDates": "Platform holidays",
         "minAppVersion": "Minimum app version",
-        "latestAppVersion": "Latest app version"
+        "latestAppVersion": "Latest app version",
+        "iosAppStoreLive": "iOS app is live on the App Store",
+        "androidPlayLive": "Android app is public on Google Play"
       },
       "on": "Required",
       "off": "Not required",
       "holidayHint": "One date per line: YYYY-MM-DD",
       "versionHint": "x.y.z; leave empty to turn off. The minimum cannot exceed the latest version.",
-      "noChanges": "No changes."
+      "noChanges": "No changes.",
+      "live": "Live",
+      "notLive": "Not live"
     },
     "flags": {
       "title": "Feature flags",
