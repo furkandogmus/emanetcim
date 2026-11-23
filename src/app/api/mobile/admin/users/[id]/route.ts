@@ -9,7 +9,7 @@ import { adminUserService } from "@/services/AdminUserService";
 /** Tek istekte tek bayrak: ikisinin kurali ve denetim kaydi ayri. */
 const PatchSchema = z.union([
   z.object({ isBanned: z.boolean() }).strict(),
-  z.object({ isTest: z.boolean() }).strict(),
+  z.object({ reviewSandbox: z.boolean() }).strict(),
 ]);
 
 /** Kullanici detayi: islem bolumu dogrulama/sifre/bekleyen rol durumuna gore acilir. */
@@ -27,7 +27,7 @@ export async function GET(req: NextRequest, { params }: { params: Promise<{ id: 
 
 /**
  * Yasakla / yasagi kaldir (`AdminUserService.setBanned`: token iptali, denetim kaydi)
- * ya da inceleme kum havuzu hesabi yap / geri al (`setTestAccount`).
+ * ya da inceleme (App Review) hesabi yap / geri al (`setReviewSandbox`).
  */
 export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   const auth = await requireMobileUser(req);
@@ -43,8 +43,8 @@ export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id
   const { id } = await params;
   const actor = { userId: auth.user.id, ip: clientIpFromRequest(req) };
   const result =
-    "isTest" in parsed.data
-      ? await adminUserService.setTestAccount(id, parsed.data.isTest, actor)
+    "reviewSandbox" in parsed.data
+      ? await adminUserService.setReviewSandbox(id, parsed.data.reviewSandbox, actor)
       : await adminUserService.setBanned(id, parsed.data.isBanned, actor);
   if (!result.ok) {
     return result.error === "not_found"

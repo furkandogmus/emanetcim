@@ -12,7 +12,8 @@ import { toDatetimeLocalValueInTimeZone } from "@/lib/datetime-local";
 import { nextOpening, snapStayToShopHours } from "@/lib/stay-days";
 import logger from "@/lib/logger";
 import { loadScheduleParts } from "@/services/ShopScheduleService";
-import { resolveMobileShopViewer } from "@/lib/mobile-auth";
+import { markAuthStale, resolveMobileShopViewer } from "@/lib/mobile-auth";
+import type { ShopViewer } from "@/lib/public-shop-filter";
 
 const MAX_RADIUS_M = 50_000;
 const MAX_LIMIT = 50;
@@ -44,6 +45,12 @@ const schema = z.object({
 });
 
 export async function GET(req: NextRequest) {
+  // Inceleme kum havuzu: `reviewSandbox` hesapta test dukkanlari da doner; anonim/gercek kullanicida degisiklik yok.
+  const { viewer, stale } = await resolveMobileShopViewer(req);
+  return markAuthStale(await search(req, viewer), stale);
+}
+
+async function search(req: NextRequest, viewer: ShopViewer) {
   const ip = await getClientIp(req);
   if (!(await rateLimit(`mobile_shops_nearby:${ip}`, 30, 60_000))) {
     return NextResponse.json({ error: "too_many_requests" }, { status: 429 });
@@ -59,8 +66,6 @@ export async function GET(req: NextRequest) {
   const mixTotal = mix ? mix.s + mix.m + mix.xl : 0;
 
   const radiusKm = r / 1000;
-  // Inceleme kum havuzu: `isTest` hesapta test dukkanlari da doner; anonim/gercek kullanicida degisiklik yok.
-  const viewer = await resolveMobileShopViewer(req);
 
   if (checkIn && checkOut) {
     const rules = await getPricingRules();

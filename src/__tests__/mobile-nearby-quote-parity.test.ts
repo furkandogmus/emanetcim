@@ -33,7 +33,8 @@ vi.mock("@/lib/rate-limit", () => ({ rateLimit: async () => true }));
 vi.mock("@/lib/get-ip", () => ({ getClientIp: async () => "1.1.1.1" }));
 vi.mock("@/lib/mobile-auth", () => ({
   requireMobileUser: async () => ({ user: { id: "u1" } }),
-  resolveMobileShopViewer: async () => null,
+  resolveMobileShopViewer: async () => ({ viewer: null, stale: false }),
+  markAuthStale: (res: Response) => res,
 }));
 vi.mock("@/services/ShopScheduleService", () => ({ loadScheduleParts: async () => new Map() }));
 vi.mock("@/lib/platform-settings", () => ({ getPricingRules: async () => RULES }));

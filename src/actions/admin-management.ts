@@ -6,6 +6,7 @@ import prisma from "@/lib/db";
 import { shopService, type AdminShopUpdate } from "@/services/ShopService";
 import { reviewService } from "@/services/ReviewService";
 import { adminUserService } from "@/services/AdminUserService";
+import { roleChangeData } from "@/lib/role-change-data";
 import { BookingStatus, Prisma, Role } from "@prisma/client";
 import { retryOnWriteConflict } from "@/lib/tx-retry";
 import { z } from "zod";
@@ -153,7 +154,7 @@ export async function approveAdminRoleChangeAction(
     // Rol degisikligi token'lari iptal eder -- gerekcesi `applyUserRoleChange`te.
     await tx.user.update({
       where: { id: user.id },
-      data: { role: reqRow.requestedRole, tokenVersion: { increment: 1 } },
+      data: roleChangeData(reqRow.requestedRole),
     });
     await tx.adminRoleChangeRequest.delete({ where: { id: requestId } });
     return { code: "ok" as const, targetId: user.id, newRole: reqRow.requestedRole };

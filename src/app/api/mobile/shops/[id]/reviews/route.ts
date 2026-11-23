@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
-import { resolveMobileShopViewer } from "@/lib/mobile-auth";
+import { markAuthStale, resolveMobileShopViewer } from "@/lib/mobile-auth";
+import type { ShopViewer } from "@/lib/public-shop-filter";
 import { ShopService } from "@/services/ShopService";
 import { reviewService } from "@/services/ReviewService";
 import { toMobileReview } from "@/lib/mobile-dto";
@@ -12,13 +13,17 @@ const shopService = new ShopService();
  * eski uygulama surumleri (0.3.0-0.3.3) icin eskisi gibi dizi doner.
  */
 export async function GET(req: Request, { params }: { params: Promise<{ id: string }> }) {
-  const { id } = await params;
+  const { viewer, stale } = await resolveMobileShopViewer(req);
+  return markAuthStale(await reviews(req, (await params).id, viewer), stale);
+}
+
+async function reviews(req: Request, id: string, viewer: ShopViewer) {
   /*
     `shops/[id]/route.ts` ile AYNI FILTRE: dukkan once genel goruculukten
     gecmeli, yoksa test/pasif bir dukkanin yorumlari kimligi bilen herkese
     aciliyor.
   */
-  const shop = await shopService.getPublicShopById(id, await resolveMobileShopViewer(req));
+  const shop = await shopService.getPublicShopById(id, viewer);
   if (!shop) return NextResponse.json({ error: "not_found" }, { status: 404 });
 
   const sp = new URL(req.url).searchParams;

@@ -23,6 +23,9 @@ model User {
   /// Test/ekip hesabı (maestro, ortaklar, kendi hesaplarımız). Admin kullanıcı
   /// listesinde "gerçek kullanıcı" sayısından ayrılır; hesabın davranışını değiştirmez.
   isTest                   Boolean                  @default(false)
+  /// Inceleme (App Review) hesabi: `Shop.isTest` dukkanlarini da gorur ve rezerve
+  /// eder. `isTest`ten AYRI: o el ile verilen etiket, davranisi degistirmez.
+  reviewSandbox            Boolean                  @default(false)
   createdAt                DateTime                 @default(now())
   updatedAt                DateTime                 @updatedAt
   /// Referans kodu: misafire ya da esnafa verilebilir. Misafirde yeni
