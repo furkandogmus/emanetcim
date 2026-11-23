@@ -37,6 +37,7 @@ vi.mock("@/lib/logger", () => ({ default: mockLogger }));
 import {
   fillMissingSlots,
   generateSlotsForShop,
+  occupyingBookingWhere,
   planSlotStarts,
   scheduleSlotGeneration,
   SLOT_HORIZON_DAYS,
@@ -143,7 +144,7 @@ describe("generateSlotsForShop", () => {
     expect((await generateSlotsForShop("yok", { now: NOW })).skipped).toBe("not_found");
   });
 
-  it("uzlastirma: rezervasyonlu slota DOKUNMAZ, takvim disi bos slotu pasife alir, kapasiteyi gunceller", async () => {
+  it("uzlastirma: rezervasyon satirina dokunmaz; takvim disi slot (rezervasyonlu da) yeni valiz almaz, kapasite hepsine yazilir", async () => {
     // Saat 09:00-20:00 -> plan. Mevcut: 07:00 (takvim disi, bos), 07:30 (takvim disi, REZERVASYONLU),
     // 09:00 (planda, eski kapasite 5), 09:30 (planda, rezervasyonlu, kapasite 5), 10:00 (planda, pasif).
     const at = (iso: string) => new Date(iso);
@@ -154,24 +155,41 @@ describe("generateSlotsForShop", () => {
       { id: "in-booked", startTime: at("2026-11-24T06:30:00Z"), capacity: 5, isActive: true },
       { id: "in-inactive", startTime: at("2026-11-24T07:00:00Z"), capacity: 10, isActive: false },
     ]);
-    tx.reservationSlot.findMany.mockResolvedValue([{ slotId: "off-booked" }, { slotId: "in-booked" }]);
+    tx.reservationSlot.findMany.mockResolvedValue([{ slotId: "off-booked" }]);
 
     const r = await generateSlotsForShop("shop-a", { now: NOW, horizonDays: 1 });
-    expect(r).toMatchObject({ deactivated: 1, reactivated: 1, capacityUpdated: 1 });
+    expect(r).toMatchObject({ deactivated: 2, deactivatedBooked: 1, reactivated: 1, capacityUpdated: 2 });
 
     const calls = tx.shopTimeSlot.updateMany.mock.calls.map((c) => c[0]);
-    expect(calls).toContainEqual({ where: { id: { in: ["off-free"] } }, data: { isActive: false } });
+    expect(calls).toContainEqual({ where: { id: { in: ["off-free", "off-booked"] } }, data: { isActive: false } });
     expect(calls).toContainEqual({ where: { id: { in: ["in-inactive"] } }, data: { isActive: true, capacity: 10 } });
-    expect(calls).toContainEqual({ where: { id: { in: ["in-resize"] } }, data: { capacity: 10 } });
-    const touched = calls.flatMap((c) => c.where.id.in);
-    expect(touched).not.toContain("off-booked");
-    expect(touched).not.toContain("in-booked");
+    expect(calls).toContainEqual({ where: { id: { in: ["in-resize", "in-booked"] } }, data: { capacity: 10 } });
 
-    // Gelecek slotlar kilit altinda okunuyor; ufuk penceresiyle sinirli.
+    // Rezervasyon defteri yalnizca okunur; yer kaplayan durum kumesi paylasilan tanimdan.
+    const look = tx.reservationSlot.findMany.mock.calls[0][0];
+    expect(look.where.slotId.in).toEqual(["off-free", "off-booked"]);
+    expect(look.where.booking).toEqual(occupyingBookingWhere(NOW));
+
+    // Gelecek slotlar kilit altinda, reserveSlots ile ayni sirada okunuyor.
     const sql = tx.$queryRaw.mock.calls[0][0].join("?");
-    expect(sql).toContain("FOR UPDATE");
+    expect(sql).toMatch(/ORDER BY "startTime" FOR UPDATE/);
     expect(sql).toContain('"startTime" >= ?');
     expect(sql).toContain('"startTime" < ?');
+  });
+
+  it("kilitlenmede (40P01) yeniden dener", async () => {
+    const { Prisma } = await import("@prisma/client");
+    const deadlock = new Prisma.PrismaClientKnownRequestError("deadlock", {
+      code: "P2010",
+      clientVersion: "x",
+      meta: { code: "40P01" },
+    });
+    mockPrisma.$transaction
+      .mockRejectedValueOnce(deadlock)
+      .mockImplementationOnce(async (fn: (t: typeof tx) => unknown) => fn(tx));
+    const r = await generateSlotsForShop("shop-a", { now: NOW, horizonDays: 1 });
+    expect(r.created).toBe(22);
+    expect(mockPrisma.$transaction).toHaveBeenCalledTimes(2);
   });
 
   it("fill modu (gece isi) mevcut slota dokunmaz", async () => {
@@ -186,6 +204,16 @@ describe("generateSlotsForShop", () => {
     const second = await generateSlotsForShop("shop-a", { now: NOW, horizonDays: 1 });
     expect(first.created).toBe(22);
     expect(second.created).toBe(0);
+  });
+});
+
+describe("occupyingBookingWhere", () => {
+  it("musaitlik, kilit ve uzlastirma ayni tanimi kullaniyor", async () => {
+    const fs = await import("node:fs");
+    const src = fs.readFileSync("src/services/SlotService.ts", "utf8");
+    // Durum listesi yalnizca yardimcinin icinde yaziliyor.
+    expect(src.match(/"PAID", "CHECKED_IN", "APPROVED"/g)).toHaveLength(1);
+    expect((src.match(/occupyingBookingWhere\(now\)/g) ?? []).length).toBeGreaterThanOrEqual(6);
   });
 });
 
@@ -216,13 +244,13 @@ describe("fillMissingSlots (gece isi)", () => {
     );
   });
 
-  it("isletilen dukkanlari fill moduyla dolasir", async () => {
+  it("isletilen dukkanlari uzlastirma moduyla dolasir (kaybolan ates-unut gece duzelir)", async () => {
     mockPrisma.shop.findMany.mockResolvedValue([{ id: "shop-a" }]);
     const n = await fillMissingSlots();
     expect(n).toBe(tx.shopTimeSlot.createMany.mock.calls[0][0].data.length);
     expect(mockPrisma.shop.findMany).toHaveBeenCalledWith(
       expect.objectContaining({ where: { isActive: true, isTest: false, isPrelaunch: false } }),
     );
-    expect(tx.$queryRaw).not.toHaveBeenCalled();
+    expect(tx.$queryRaw).toHaveBeenCalled();
   });
 });

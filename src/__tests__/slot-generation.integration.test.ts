@@ -79,12 +79,12 @@ describe.skipIf(!run)("dukkan basina slot uretimi (gercek DB)", () => {
     expect(await count(shopA)).toBe(before);
   });
 
-  it("saat daralinca rezervasyonsuz gelecek slot pasife alinir, rezervasyonlu korunur", async () => {
+  it("saat daralinca takvim disi slot yeni valiz almaz; rezervasyon satiri kalir, kapasite hepsine yazilir", async () => {
     const last = await prisma.shopTimeSlot.findFirst({
       where: { shopId: shopA, isActive: true },
       orderBy: { startTime: "desc" },
     });
-    // 19:30 slotunun bir rezervasyonu var; esnaf kapanisi 18:00'e cekiyor.
+    // 19:30 slotunun bir rezervasyonu var; esnaf kapanisi 18:00'e cekiyor, kapasiteyi 12 yapiyor.
     const booking = await prisma.booking.create({
       data: {
         shopId: shopA,
@@ -101,20 +101,23 @@ describe.skipIf(!run)("dukkan basina slot uretimi (gercek DB)", () => {
     const r = await generateSlotsForShop(shopA, { horizonDays: 3, now });
     expect(r.created).toBe(0);
     expect(r.deactivated).toBeGreaterThan(0);
+    expect(r.deactivatedBooked).toBe(1);
 
-    const kept = await prisma.shopTimeSlot.findUnique({ where: { id: last.id } });
-    expect(kept).toMatchObject({ isActive: true, capacity: 8 });
-    expect(await prisma.reservationSlot.count({ where: { slotId: last.id } })).toBe(1);
-    // Kalan acik slotlar yeni kapasitede; rezervasyonlu slot eski kapasitesinde.
-    expect(await count(shopA, { isActive: true, capacity: 12 })).toBe(
-      (await count(shopA, { isActive: true })) - 1,
-    );
+    const closed = await prisma.shopTimeSlot.findUnique({ where: { id: last.id } });
+    expect(closed).toMatchObject({ isActive: false, capacity: 12 });
+    expect(await prisma.reservationSlot.findFirst({ where: { slotId: last.id } })).toMatchObject({
+      bookingId: booking.id,
+      bagCount: 1,
+    });
+    // Penceredeki her gelecek slot yeni kapasitede.
+    expect(await count(shopA, { capacity: { not: 12 }, startTime: { gte: now } })).toBe(0);
 
-    // Saat geri genisleyince pasif slotlar yeniden acilir, yeni satir yazilmaz.
+    // Saat geri genisleyince pasif slotlar (rezervasyonlu dahil) yeniden acilir, yeni satir yazilmaz.
     await prisma.shop.update({ where: { id: shopA }, data: { closingTime: "20:00" } });
     const back = await generateSlotsForShop(shopA, { horizonDays: 3, now });
     expect(back.created).toBe(0);
     expect(back.reactivated).toBe(r.deactivated);
+    expect(await prisma.shopTimeSlot.findUnique({ where: { id: last.id } })).toMatchObject({ isActive: true });
   });
 
   it("pasif dukkana slot yazilmaz", async () => {

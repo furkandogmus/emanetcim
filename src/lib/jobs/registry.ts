@@ -58,7 +58,7 @@ export type JobDefinition = {
 export const JOB_REGISTRY: readonly JobDefinition[] = [
   {
     name: "generate-slots",
-    what: "Aktif dükkanlar için 30 gün ileriye zaman slotu üretir.",
+    what: "Aktif dükkanlar için 30 gün ileriye zaman slotu üretir; mevcut slotları takvime ve kapasiteye uzlaştırır.",
     ifItStops:
       "Saatlik ürün seçilemez hâle gelir (slot seçici boşalır) ve per-slot kapasite kontrolü yerini kaba, dükkan geneli bir kontrole bırakır. 2026-07-14'te oldu, 37 gün fark edilmedi.",
     method: "POST",

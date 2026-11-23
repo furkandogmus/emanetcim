@@ -1085,8 +1085,7 @@ export class ShopService implements IShopService {
       where: { id: shopId },
       data,
     });
-    // Saat ya da kapasite degisince gelecekteki rezervasyonsuz slotlar beklemeden
-    // yeni duzene cekilir (cron 04:17 yalnizca eksik slotu yazar, mevcuda dokunmaz).
+    // Saat ya da kapasite degisince gelecek slotlar gece isini (04:17) beklemeden yeni duzene cekilir.
     if ('open247' in data || 'openingTime' in data || 'closingTime' in data || 'capacity' in data) {
       scheduleSlotGeneration(shopId, 'update_shop');
     }

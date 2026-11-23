@@ -3,12 +3,31 @@ import { loadScheduleParts, type ShopScheduleParts } from "@/services/ShopSchedu
 import { slotCalendarDays } from "@/lib/slot-calendar";
 import prisma from "@/lib/db";
 import logger from "@/lib/logger";
+import { retryOnWriteConflict } from "@/lib/tx-retry";
 import { OPERATING_SHOP_FILTER } from "@/lib/public-shop-filter";
 import { parseDatetimeLocalInTimeZone } from "@/lib/datetime-local";
 import type { Prisma } from "@prisma/client";
 
 export const SLOT_MINUTES = 30;
 const MS_PER_SLOT = SLOT_MINUTES * 60 * 1000;
+
+/**
+ * Bir rezervasyonun slotta YER KAPLADIGI durumlar -- tek tanim.
+ *
+ * Musaitlik (`getSlotAvailability*`), rezervasyon kilidi (`reserveSlots`),
+ * valiz duzeltmesi (`updateReservedBags`) ve slot uzlastirmasi ayni soruyu
+ * soruyor; ayri listeler ayrisirsa bir yol dolu slotu bos sayar. Bekleyen
+ * odeme 24 saat yer tutar.
+ */
+export function occupyingBookingWhere(now: Date = new Date()): Prisma.BookingWhereInput {
+  const cutoff = new Date(now.getTime() - 24 * 3600000);
+  return {
+    OR: [
+      { status: { in: ["PAID", "CHECKED_IN", "APPROVED"] } },
+      { status: { in: ["WAITING_APPROVAL", "PENDING"] }, checkInTime: { gte: cutoff } },
+    ],
+  };
+}
 
 export function slotDuration(start: Date, end: Date): number {
   return Math.max(1, Math.ceil((end.getTime() - start.getTime()) / MS_PER_SLOT));
@@ -162,10 +181,9 @@ function addCalendarDays(ymd: string, n: number): string {
 }
 
 /**
- * - `fill`: yalnizca EKSIK slotu yazar, mevcut satira dokunmaz. Gece isinin
- *   davranisi (eskiden `upsert(update: {})`).
- * - `reconcile`: eksikleri yazar, ufuk icindeki REZERVASYONSUZ gelecek slotlari
- *   yeni takvime ve kapasiteye cekir. Saat/izin/kapasite degisince kullanilir.
+ * - `reconcile` (varsayilan; gece isi de bunu kullanir): eksikleri yazar, ufuktaki
+ *   gelecek slotlari yeni takvime ve kapasiteye ceker.
+ * - `fill`: yalnizca eksik slotu yazar, mevcut satira dokunmaz.
  */
 export type SlotGenerationMode = "fill" | "reconcile";
 
@@ -174,6 +192,8 @@ export type SlotGenerationResult = {
   reactivated: number;
   deactivated: number;
   capacityUpdated: number;
+  /** Takvim disina dusup pasife alinan ama yer kaplayan rezervasyonu olan slot. */
+  deactivatedBooked: number;
   /** Uretim yapilmadi: dukkan yok ya da isletilmiyor (pasif / test / talep testi). */
   skipped?: "not_found" | "not_operating";
 };
@@ -183,6 +203,7 @@ const EMPTY_RESULT: Omit<SlotGenerationResult, "skipped"> = {
   reactivated: 0,
   deactivated: 0,
   capacityUpdated: 0,
+  deactivatedBooked: 0,
 };
 
 /**
@@ -204,10 +225,13 @@ const EMPTY_RESULT: Omit<SlotGenerationResult, "skipped"> = {
  *   - Es zamanli guvenli: dukkan basina `pg_advisory_xact_lock`. Gece isi de ayni
  *     kilidi alir; takvim KILIT ALTINDA okunur, yani eski takvimle calisan bir tur
  *     yeni takvimin uzerine yazamaz.
- *   - Rezervasyonu olan slot SILINMEZ ve DEGISTIRILMEZ. Takvim disina dusen
- *     rezervasyonsuz slot silinmez, `isActive=false` olur: `ReservationSlot`
- *     slot silinince cascade ile silinir, yani yarista yeni alinmis bir
- *     rezervasyonun slot defteri sessizce kaybolabilirdi.
+ *   - Slot SILINMEZ, takvim disina duserse `isActive=false` olur (rezervasyonlu
+ *     olsa da: yeni valiz almaz). `ReservationSlot` satirina hic dokunulmaz;
+ *     slot silinseydi cascade ile o defter de silinirdi.
+ *   - Kapasite penceredeki TUM gelecek slotlara yazilir. Kapasite dusse bile
+ *     mevcut rezervasyon dusmez: fiziksel kapi `assertCapacityTx`, musaitlik
+ *     `available` sifirin altina inmez.
+ *   - Kilitlenme / serilestirme hatasinda (40P01, 40001) yeniden denenir.
  */
 export async function generateSlotsForShop(
   shopId: string,
@@ -217,7 +241,7 @@ export async function generateSlotsForShop(
   const mode = opts.mode ?? "reconcile";
   const now = opts.now ?? new Date();
 
-  return prisma.$transaction(
+  return retryOnWriteConflict(() => prisma.$transaction(
     async (tx) => {
       await tx.$executeRaw`SELECT pg_advisory_xact_lock(hashtext(${`shop-slots:${shopId}`})::bigint)`;
 
@@ -261,44 +285,35 @@ export async function generateSlotsForShop(
 
       if (mode === "fill" || !windowEnd) return { ...EMPTY_RESULT, created };
 
-      /*
-        Uzlastirma. Once ufuktaki gelecek slotlar KILITLENIR (rezervasyon akisi
-        `reserveSlots` ayni satirlari FOR UPDATE ile kilitliyor), sonra
-        rezervasyon defteri kilit ALTINDA okunur: READ COMMITTED'da her ifade
-        taze goruntu alir, yani kilidi bekledigimiz sirada islenen rezervasyon
-        burada gorunur ve o slota dokunulmaz.
-      */
+      // Ufuktaki gelecek slotlar `reserveSlots` ile ayni sirada (startTime) kilitlenir.
       const future = await tx.$queryRaw<
         Array<{ id: string; startTime: Date; capacity: number; isActive: boolean }>
       >`SELECT id, "startTime", capacity, "isActive" FROM "ShopTimeSlot"
          WHERE "shopId" = ${shopId} AND "startTime" >= ${now} AND "startTime" < ${windowEnd}
-         FOR UPDATE`;
+         ORDER BY "startTime" FOR UPDATE`;
       if (future.length === 0) return { ...EMPTY_RESULT, created };
 
-      const booked = new Set(
-        (
-          await tx.reservationSlot.findMany({
-            where: { slotId: { in: future.map((f) => f.id) } },
-            select: { slotId: true },
-            distinct: ["slotId"],
-          })
-        ).map((r) => r.slotId),
-      );
       const wanted = new Set(starts.map((d) => d.getTime()));
-
       const toDeactivate: string[] = [];
       const toReactivate: string[] = [];
       const toResize: string[] = [];
       for (const slot of future) {
-        if (booked.has(slot.id)) continue;
         const keep = wanted.has(new Date(slot.startTime).getTime());
-        if (!keep) {
-          if (slot.isActive) toDeactivate.push(slot.id);
-          continue;
-        }
-        if (!slot.isActive) toReactivate.push(slot.id);
+        if (!keep && slot.isActive) toDeactivate.push(slot.id);
+        if (keep && !slot.isActive) toReactivate.push(slot.id);
         else if (slot.capacity !== shop.capacity) toResize.push(slot.id);
       }
+
+      // Pasife alinan rezervasyonlu slot admin icin sinyal: misafir gelecek, takvim kapali.
+      const deactivatedBooked = toDeactivate.length
+        ? (
+            await tx.reservationSlot.findMany({
+              where: { slotId: { in: toDeactivate }, booking: occupyingBookingWhere(now) },
+              select: { slotId: true },
+              distinct: ["slotId"],
+            })
+          ).length
+        : 0;
 
       if (toDeactivate.length) {
         await tx.shopTimeSlot.updateMany({ where: { id: { in: toDeactivate } }, data: { isActive: false } });
@@ -318,11 +333,12 @@ export async function generateSlotsForShop(
         deactivated: toDeactivate.length,
         reactivated: toReactivate.length,
         capacityUpdated: toResize.length,
+        deactivatedBooked,
       };
     },
     // Ufukta en fazla ~1.440 satir (30 gun x 48); varsayilan 5 sn kisa kalabilir.
     { timeout: 30_000, maxWait: 10_000 },
-  );
+  ), { label: "generate_slots_for_shop" });
 }
 
 /**
@@ -335,13 +351,17 @@ export function scheduleSlotGeneration(shopId: string, reason: string): void {
   void generateSlotsForShop(shopId)
     .then((r) => {
       if (r.skipped) return;
+      if (r.deactivatedBooked > 0) {
+        logger.warn({ shopId, reason, deactivatedBooked: r.deactivatedBooked }, "slot_reconcile_booked_slot_closed");
+      }
       logger.info({ shopId, reason, ...r }, "shop_slot_generation_done");
     })
     .catch((err: unknown) => logger.warn({ err, shopId, reason }, "shop_slot_generation_failed"));
 }
 
 /**
- * Gece isi: isletilen her dukkan icin EKSIK slotlari uretir (`fill`).
+ * Gece isi: isletilen her dukkani uzlastirir (`reconcile`). Ates-unut bir
+ * uzlastirma kaybolursa (surec yeniden basladi, DB hatasi) ertesi gece duzelir.
  *
  * Bir dukkanin hatasi digerlerini durdurmaz -- eskiden ilk hata butun turu
  * kesiyordu ve listenin geri kalani o gece slot almiyordu. Hata varsa tur
@@ -358,7 +378,7 @@ export async function fillMissingSlots() {
   const failed: string[] = [];
   for (const s of shops) {
     try {
-      total += (await generateSlotsForShop(s.id, { mode: "fill" })).created;
+      total += (await generateSlotsForShop(s.id)).created;
     } catch (err) {
       failed.push(s.id);
       logger.error({ err, shopId: s.id }, "generate_slots_shop_failed");
@@ -421,18 +441,12 @@ export async function getSlotAvailability(
   const slotIds: string[] = slots.map((s: { id: string }) => s.id);
 
   const now = new Date();
-  const cutoff = new Date(now.getTime() - 24 * 3600000);
 
   const reservations = await prisma.reservationSlot.groupBy({
     by: ["slotId"],
     where: {
       slotId: { in: slotIds },
-      booking: {
-        OR: [
-          { status: { in: ["PAID", "CHECKED_IN", "APPROVED"] } },
-          { status: { in: ["WAITING_APPROVAL", "PENDING"] }, checkInTime: { gte: cutoff } },
-        ],
-      },
+      booking: occupyingBookingWhere(now),
     },
     _sum: { bagCount: true },
   });
@@ -462,13 +476,7 @@ export async function getSlotAvailability(
       reservationSlots: { none: {} },
       checkInTime: { lt: to },
       checkOutTime: { gt: from },
-      OR: [
-        { status: { in: ["PAID", "CHECKED_IN", "APPROVED"] } },
-        {
-          status: { in: ["WAITING_APPROVAL", "PENDING"] },
-          checkInTime: { gte: cutoff },
-        },
-      ],
+      ...occupyingBookingWhere(now),
     },
     select: {
       checkInTime: true,
@@ -555,19 +563,13 @@ export async function getSlotAvailabilityForShops(
   if (slots.length === 0) return result;
 
   const now = new Date();
-  const cutoff = new Date(now.getTime() - 24 * 3600000);
 
   const [reservations, legacyBookings] = await Promise.all([
     prisma.reservationSlot.groupBy({
       by: ["slotId"],
       where: {
         slotId: { in: slots.map((s) => s.id) },
-        booking: {
-          OR: [
-            { status: { in: ["PAID", "CHECKED_IN", "APPROVED"] } },
-            { status: { in: ["WAITING_APPROVAL", "PENDING"] }, checkInTime: { gte: cutoff } },
-          ],
-        },
+        booking: occupyingBookingWhere(now),
       },
       _sum: { bagCount: true },
     }),
@@ -577,13 +579,7 @@ export async function getSlotAvailabilityForShops(
         reservationSlots: { none: {} },
         checkInTime: { lt: to },
         checkOutTime: { gt: from },
-        OR: [
-          { status: { in: ["PAID", "CHECKED_IN", "APPROVED"] } },
-          {
-            status: { in: ["WAITING_APPROVAL", "PENDING"] },
-            checkInTime: { gte: cutoff },
-          },
-        ],
+        ...occupyingBookingWhere(now),
       },
       select: {
         shopId: true,
@@ -655,13 +651,13 @@ export async function reserveSlots(
 
   const slotIds: string[] = slots.map((s: { id: string }) => s.id);
   const now = new Date();
-  const cutoff = new Date(now.getTime() - 24 * 3600000);
 
   // Lock slots to prevent race conditions
   if (slots.length > 0) {
     const slotIds = slots.map((s: { id: string }) => s.id);
     await tx.$executeRawUnsafe(
-      `SELECT 1 FROM "ShopTimeSlot" WHERE id = ANY($1::text[]) FOR UPDATE`,
+      // Kilit sirasi uzlastirmayla AYNI (startTime): ters sirada kilitleyen iki islem kilitlenir.
+      `SELECT 1 FROM "ShopTimeSlot" WHERE id = ANY($1::text[]) ORDER BY "startTime" FOR UPDATE`,
       [slotIds],
     );
   }
@@ -670,12 +666,7 @@ export async function reserveSlots(
     by: ["slotId"],
     where: {
       slotId: { in: slotIds },
-      booking: {
-        OR: [
-          { status: { in: ["PAID", "CHECKED_IN", "APPROVED"] } },
-          { status: { in: ["WAITING_APPROVAL", "PENDING"] }, checkInTime: { gte: cutoff } },
-        ],
-      },
+      booking: occupyingBookingWhere(now),
     },
     _sum: { bagCount: true },
   });
@@ -745,7 +736,7 @@ export async function updateReservedBags(
   if (rows.length === 0) return { ok: true };
 
   const slotIds = rows.map((r) => r.slotId);
-  const cutoff = new Date(Date.now() - 24 * 3600000);
+  const now = new Date();
 
   const digerleri = await tx.reservationSlot.groupBy({
     by: ["slotId"],
@@ -753,12 +744,7 @@ export async function updateReservedBags(
       slotId: { in: slotIds },
       // KENDI payi haric: yoksa kendi valizlerini iki kez sayardik.
       bookingId: { not: bookingId },
-      booking: {
-        OR: [
-          { status: { in: ["PAID", "CHECKED_IN", "APPROVED"] } },
-          { status: { in: ["WAITING_APPROVAL", "PENDING"] }, checkInTime: { gte: cutoff } },
-        ],
-      },
+      booking: occupyingBookingWhere(now),
     },
     _sum: { bagCount: true },
   });
