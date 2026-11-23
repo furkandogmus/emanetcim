@@ -28,7 +28,7 @@ const TR: Record<GuestStaticSeoKey, { title: string; description: string }> = {
   faq: {
     title: "Sıkça Sorulan Sorular",
     description:
-      "Valiz emanet, iptal-iade, ödeme, mühürleme ve güvence hakkında SSS. BagajPark ile güvenli bagaj saklama.",
+      "Valiz emanet, iptal-iade, ödeme, teslim kaydı ve güvence hakkında SSS. BagajPark ile güvenli bagaj saklama.",
   },
   partners: {
     title: "Esnaf Ortaklığı",
@@ -43,7 +43,7 @@ const TR: Record<GuestStaticSeoKey, { title: string; description: string }> = {
   terms: {
     title: "Kullanım Koşulları",
     description:
-      "BagajPark platform kullanım şartları, sorumluluk, iptal ve mühürleme kuralları.",
+      "BagajPark platform kullanım şartları, sorumluluk, iptal ve teslim kuralları.",
   },
   kvkk: {
     title: "KVKK Aydınlatma Metni",
@@ -81,7 +81,7 @@ const EN: Record<GuestStaticSeoKey, { title: string; description: string }> = {
   faq: {
     title: "FAQ",
     description:
-      "Answers about luggage storage, cancellations, refunds, payments, sealing, and coverage. BagajPark guest FAQ.",
+      "Answers about luggage storage, cancellations, refunds, payments, hand-over records, and coverage. BagajPark guest FAQ.",
   },
   partners: {
     title: "Partner With Us",
@@ -96,7 +96,7 @@ const EN: Record<GuestStaticSeoKey, { title: string; description: string }> = {
   terms: {
     title: "Terms of Use",
     description:
-      "BagajPark platform terms, liability, cancellation rules, and sealing requirements.",
+      "BagajPark platform terms, liability, cancellation rules, and hand-over rules.",
   },
   kvkk: {
     title: "Privacy Notice (KVKK)",

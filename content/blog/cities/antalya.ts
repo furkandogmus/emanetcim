@@ -47,7 +47,7 @@ export const entry: CityBlogEntry = {
 
 <p>BagajPark bavulu terminale değil semte götürüyor: mahalledeki kafe, otel ve dükkanlarla anlaşıp emanet noktasına çeviriyoruz. Antalya'da Kaleiçi, Konyaaltı, Lara, Antalya Otogarı ve Yat Limanı çevresinde noktalar için hazırlık yapıyoruz — yani hem plaja inmeden hem otobüse binmeden önce bırakabileceğiniz yerler.</p>
 
-<p>İşleyiş şöyle: rezervasyonu telefondan yapıyorsunuz, bavulu bırakırken esnaf üzerine numaralı bir plastik mühür takıyor ve fotoğraflıyor. Mühür kırılmadan çanta açılmıyor; siz alırken numarayı karşılaştırıyorsunuz. Ücret bavul başına ve günlük — plajda "saatim doluyor" diye telaşlanmıyorsunuz.</p>
+<p>İşleyiş şöyle: rezervasyonu telefondan yapıyorsunuz, bavulu bırakırken esnaf rezervasyonun QR kodunu okutup teslim alıyor. Bırakma ve alma saatleri ile valiz sayısı rezervasyon kaydına yazılıyor; alırken QR kodunu yeniden gösteriyorsunuz. Ücret bavul başına ve günlük — plajda "saatim doluyor" diye telaşlanmıyorsunuz.</p>
 
 <p>Antalya noktaları henüz açılmadı. Aramada görüyorsanız sebebi bu: talebin hangi semtte olduğunu ölçüyoruz ve esnafla önce orada anlaşıyoruz. Açılınca haber almak isterseniz nokta sayfasından e-postanızı bırakın.</p>
       `.trim(),
@@ -96,7 +96,7 @@ export const entry: CityBlogEntry = {
 
 <p>BagajPark moves storage out of the terminal and into the neighbourhood: we partner with cafes, hotels and shops nearby and turn them into drop-off points. In Antalya we are preparing points around Kaleici, Konyaalti, Lara, the bus terminal and the marina — places you can use before heading down to the beach and before getting on a coach.</p>
 
-<p>It works like this. You book from your phone. When you hand the bag over, the shopkeeper fits a numbered plastic seal to it and photographs it. It cannot be opened without breaking that seal, and you check the number when you collect. Pricing is per bag and per day, so nobody is watching a clock while you are in the sea.</p>
+<p>It works like this. You book from your phone. When you hand the bag over, the shopkeeper scans your booking QR code and checks it in. The drop-off and pickup times and the bag count go into the booking record, and you show the QR code again when you collect. Pricing is per bag and per day, so nobody is watching a clock while you are in the sea.</p>
 
 <p>The Antalya points are not open yet. That is why you may see them in search results: we are measuring which districts the demand is actually in, and that is where we sign up shopkeepers first. Leave your email on a point's page and you will hear when it opens.</p>
       `.trim(),

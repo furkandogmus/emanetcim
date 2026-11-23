@@ -43,7 +43,7 @@ export const entry: CityBlogEntry = {
 
 <p>BagajPark bavulu terminale değil semte götürüyor: mahalledeki kafe, otel ve dükkanlarla anlaşıp emanet noktasına çeviriyoruz. Bodrum'da merkez, marina, Gümbet, Yalıkavak ve otogar çevresinde noktalar için hazırlık yapıyoruz — yani tekneye binmeden önce ve otobüse binmeden önce uğrayabileceğiniz yerler.</p>
 
-<p>İşleyiş basit: rezervasyonu telefondan yapıyorsunuz, bavulu bırakırken esnaf üzerine numaralı bir plastik mühür takıp fotoğraflıyor. Mühür kırılmadan çanta açılmıyor; siz alırken numarayı karşılaştırıyorsunuz. Ücret bavul başına ve günlük, yani tekne geç dönerse ek ücret çıkmıyor.</p>
+<p>İşleyiş basit: rezervasyonu telefondan yapıyorsunuz, bavulu bırakırken esnaf rezervasyonun QR kodunu okutup teslim alıyor. Bırakma ve alma saatleri ile valiz sayısı rezervasyon kaydına yazılıyor; alırken QR kodunu yeniden gösteriyorsunuz. Ücret bavul başına ve günlük, yani tekne geç dönerse ek ücret çıkmıyor.</p>
 
 <p>Bodrum noktaları henüz açılmadı. Aramada görüyorsanız sebebi bu: talebin hangi noktada olduğunu ölçüyoruz ve esnafla önce orada anlaşıyoruz. Açılınca haber almak isterseniz nokta sayfasından e-postanızı bırakın.</p>
       `.trim(),
@@ -88,7 +88,7 @@ export const entry: CityBlogEntry = {
 
 <p>BagajPark moves storage out of the terminal and into the neighbourhood: we partner with local cafes, hotels and shops and turn them into drop-off points. In Bodrum we are preparing points around the centre, the marina, Gumbet, Yalikavak and the bus terminal — places you can stop at before boarding a boat and before boarding a coach.</p>
 
-<p>It is simple. You book from your phone. When you hand the bag over, the shopkeeper fits a numbered plastic seal to it and photographs it. It cannot be opened without breaking the seal, and you check the number when you collect. Pricing is per bag and per day, so a boat that comes back late does not cost you extra.</p>
+<p>It is simple. You book from your phone. When you hand the bag over, the shopkeeper scans your booking QR code and checks it in. The drop-off and pickup times and the bag count go into the booking record, and you show the QR code again when you collect. Pricing is per bag and per day, so a boat that comes back late does not cost you extra.</p>
 
 <p>The Bodrum points are not open yet. That is why you may see them in search: we are measuring where the demand actually is, and that is where we sign up shopkeepers first. Leave your email on a point's page to hear when it opens.</p>
       `.trim(),

@@ -49,7 +49,7 @@ export const entry: CityBlogEntry = {
 
 <p>BagajPark bavulu gara değil semte götürüyor: mahalledeki kafe, otel ve dükkanlarla anlaşıp emanet noktasına çeviriyoruz. Sevilla'da Santa Justa ve Sevilla Katedrali çevresinde noktalar için hazırlık yapıyoruz — yani trenden indiğiniz yerde ve gezeceğiniz yerde.</p>
 
-<p>İşleyiş şöyle: rezervasyonu telefondan yapıyorsunuz, bavulu bırakırken esnaf üzerine numaralı bir plastik mühür takıp fotoğraflıyor. Mühür kırılmadan çanta açılmıyor; siz alırken numarayı karşılaştırıyorsunuz. Ücret bavul başına ve günlük — sıcak yüzünden bir kafede fazladan bir saat oturmanız bir şeye mal olmuyor.</p>
+<p>İşleyiş şöyle: rezervasyonu telefondan yapıyorsunuz, bavulu bırakırken esnaf rezervasyonun QR kodunu okutup teslim alıyor. Bırakma ve alma saatleri ile valiz sayısı rezervasyon kaydına yazılıyor; alırken QR kodunu yeniden gösteriyorsunuz. Ücret bavul başına ve günlük — sıcak yüzünden bir kafede fazladan bir saat oturmanız bir şeye mal olmuyor.</p>
 
 <p>Sevilla noktalarımız henüz açık değil. Aramada görüyorsanız sebebi bu: hangi semtte gerçekten talep olduğunu ölçüyoruz ve esnafla önce orada anlaşıyoruz. Açılınca haber almak isterseniz nokta sayfasından e-postanızı bırakın.</p>
       `.trim(),
@@ -100,7 +100,7 @@ export const entry: CityBlogEntry = {
 
 <p>BagajPark moves storage out of the station and into the neighbourhood: we partner with local cafes, hotels and shops and turn them into drop-off points. In Seville we are preparing points around Santa Justa and the cathedral — where you step off the train, and where you actually spend the day.</p>
 
-<p>It works like this. You book from your phone. When you hand the bag over, the shopkeeper fits a numbered plastic seal to it and photographs it. It cannot be opened without breaking the seal, and you check the number when you collect. Pricing is per bag and per day, so sitting out the heat in a cafe for an extra hour costs you nothing.</p>
+<p>It works like this. You book from your phone. When you hand the bag over, the shopkeeper scans your booking QR code and checks it in. The drop-off and pickup times and the bag count go into the booking record, and you show the QR code again when you collect. Pricing is per bag and per day, so sitting out the heat in a cafe for an extra hour costs you nothing.</p>
 
 <p>Our Seville points are not open yet. That is why you may see them in search: we are measuring which areas the demand is really in, and that is where we sign up shopkeepers first. Leave your email on a point's page to hear when it opens.</p>
       `.trim(),

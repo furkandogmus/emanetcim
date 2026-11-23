@@ -49,7 +49,7 @@ export const entry: CityBlogEntry = {
 
 <p>BagajPark bavulu otele değil semte götürüyor: mahalledeki dükkan ve işletmelerle anlaşıp emanet noktasına çeviriyoruz. Mekke'de Mescid-i Haram çevresi, Ecyad, Misfele, Aziziye ve Cebel-i Ömer için noktalar hazırlıyoruz.</p>
 
-<p>İşleyiş şöyle: rezervasyonu telefondan yapıyorsunuz, bavulu bırakırken esnaf üzerine numaralı bir plastik mühür takıp fotoğraflıyor. Mühür kırılmadan çanta açılmıyor; siz alırken numarayı karşılaştırıyorsunuz. Ücret bavul başına ve günlük — servisiniz gecikirse ek ücret çıkmıyor.</p>
+<p>İşleyiş şöyle: rezervasyonu telefondan yapıyorsunuz, bavulu bırakırken esnaf rezervasyonun QR kodunu okutup teslim alıyor. Bırakma ve alma saatleri ile valiz sayısı rezervasyon kaydına yazılıyor; alırken QR kodunu yeniden gösteriyorsunuz. Ücret bavul başına ve günlük — servisiniz gecikirse ek ücret çıkmıyor.</p>
 
 <p>Mekke noktalarımız henüz açık değil. Aramada görüyorsanız sebebi bu: hangi semtte gerçekten talep olduğunu ölçüyoruz ve esnafla önce orada anlaşıyoruz. Açılınca haber almak isterseniz nokta sayfasından e-postanızı bırakın.</p>
       `.trim(),
@@ -100,7 +100,7 @@ export const entry: CityBlogEntry = {
 
 <p>BagajPark moves storage out of the hotel and into the neighbourhood: we partner with local shops and businesses and turn them into drop-off points. In Mecca we are preparing points around the Masjid al-Haram, Ajyad, Misfalah, Aziziyah and Jabal Omar.</p>
 
-<p>It works like this. You book from your phone. When you hand the bag over, the shopkeeper fits a numbered plastic seal to it and photographs it. It cannot be opened without breaking the seal, and you check the number when you collect. Pricing is per bag and per day, so a delayed shuttle costs you nothing extra.</p>
+<p>It works like this. You book from your phone. When you hand the bag over, the shopkeeper scans your booking QR code and checks it in. The drop-off and pickup times and the bag count go into the booking record, and you show the QR code again when you collect. Pricing is per bag and per day, so a delayed shuttle costs you nothing extra.</p>
 
 <p>Our Mecca points are not open yet. That is why you may see them in search: we are measuring which areas the demand is really in, and that is where we sign up shopkeepers first. Leave your email on a point's page to hear when it opens.</p>
       `.trim(),

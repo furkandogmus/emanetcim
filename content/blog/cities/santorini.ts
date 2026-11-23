@@ -47,7 +47,7 @@ export const entry: CityBlogEntry = {
 
 <p>BagajPark bavulu limana değil köyün içine götürüyor: kafe, otel ve dükkanlarla anlaşıp emanet noktasına çeviriyoruz. Santorini'de Fira ve Oia için noktalar hazırlıyoruz — yani basamaklara inmeden önce bırakabileceğiniz yerler.</p>
 
-<p>İşleyiş şöyle: rezervasyonu telefondan yapıyorsunuz, bavulu bırakırken esnaf üzerine numaralı bir plastik mühür takıp fotoğraflıyor. Mühür kırılmadan çanta açılmıyor; siz alırken numarayı karşılaştırıyorsunuz. Ücret bavul başına ve günlük — feribot geç kalkarsa sayaç işlemiyor.</p>
+<p>İşleyiş şöyle: rezervasyonu telefondan yapıyorsunuz, bavulu bırakırken esnaf rezervasyonun QR kodunu okutup teslim alıyor. Bırakma ve alma saatleri ile valiz sayısı rezervasyon kaydına yazılıyor; alırken QR kodunu yeniden gösteriyorsunuz. Ücret bavul başına ve günlük — feribot geç kalkarsa sayaç işlemiyor.</p>
 
 <p>Santorini noktalarımız henüz açık değil. Aramada görüyorsanız sebebi bu: hangi köyde gerçekten talep olduğunu ölçüyoruz ve esnafla önce orada anlaşıyoruz. Açılınca haber almak isterseniz nokta sayfasından e-postanızı bırakın.</p>
       `.trim(),
@@ -96,7 +96,7 @@ export const entry: CityBlogEntry = {
 
 <p>BagajPark moves storage out of the port and into the village: we partner with cafes, hotels and shops and turn them into drop-off points. On Santorini we are preparing points in Fira and Oia — somewhere to leave the bag before you start down the steps.</p>
 
-<p>It works like this. You book from your phone. When you hand the bag over, the shopkeeper fits a numbered plastic seal to it and photographs it. It cannot be opened without breaking the seal, and you check the number when you collect. Pricing is per bag and per day, so a delayed ferry costs you nothing.</p>
+<p>It works like this. You book from your phone. When you hand the bag over, the shopkeeper scans your booking QR code and checks it in. The drop-off and pickup times and the bag count go into the booking record, and you show the QR code again when you collect. Pricing is per bag and per day, so a delayed ferry costs you nothing.</p>
 
 <p>Our Santorini points are not open yet. That is why you may see them in search: we are measuring which village the demand is really in, and that is where we sign up shopkeepers first. Leave your email on a point's page to hear when it opens.</p>
       `.trim(),
