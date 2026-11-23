@@ -76,6 +76,9 @@ next-env.d.ts
 infra/**/.terraform/
 infra/**/*.tfstate
 infra/**/*.tfstate.backup
+# Terraform'un zaman damgali yedekleri (terraform.tfstate.<epoch>.backup) ve workspace dizinleri
+*.tfstate.*
+**/terraform.tfstate.d/
 infra/**/*.tfvars
 
 # Yerel calisma artiklari: ekran goruntuleri, analiz dokumleri, test raporlari
