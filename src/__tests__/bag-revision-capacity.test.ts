@@ -65,9 +65,13 @@ describe("valiz duzeltmesi kapasiteyi koruyor", () => {
 
   it("defter ve rezervasyon ayni statu kumesini sayiyor", () => {
     // `reserveSlots` ile `updateReservedBags` ayni "yer kapliyor mu" sorusunu
-    // soruyor; ayri tanimlari olamaz.
+    // soruyor; ayri tanimlari olamaz. Kume tek yerde: `occupyingBookingWhere`.
     const kalip = /status:\s*\{\s*in:\s*\["PAID",\s*"CHECKED_IN",\s*"APPROVED"\]\s*\}/g;
-    expect((slotServisi.match(kalip) ?? []).length).toBeGreaterThanOrEqual(3);
+    expect((slotServisi.match(kalip) ?? []).length).toBe(1);
+    for (const fn of ["export async function reserveSlots", "export async function updateReservedBags"]) {
+      const govde = slotServisi.slice(slotServisi.indexOf(fn), slotServisi.indexOf(fn) + 2500);
+      expect(govde, fn).toContain("booking: occupyingBookingWhere(now)");
+    }
   });
 });
 
