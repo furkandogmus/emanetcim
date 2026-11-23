@@ -87,7 +87,36 @@ export async function unregisterPush(bearer?: string | DetachedSession): Promise
  * oldugu yerde one gelir, soguk acilista capa rota (`index.tsx`) role gore ana sayfayi acar.
  */
 export function openFromNotification(response: Notifications.NotificationResponse, role: Role | null) {
-  const bookingId = response.notification.request.content.data?.bookingId;
+  const data = response.notification.request.content.data;
+  if (role === "ADMIN") {
+    const path = adminPathFromPush(data);
+    if (path) router.push(path);
+    return;
+  }
+  const bookingId = data?.bookingId;
   if (typeof bookingId !== "string" || !role) return;
   router.push(role === "PARTNER" ? `/partner/${bookingId}` : `/bookings/${bookingId}`);
+}
+
+/**
+ * Yonetici bildirimi (`../src/lib/admin-push-copy.ts` `AdminPushData`) -> ekran. Sunucu serbest
+ * yol gondermez; tanimadigimiz deger hicbir yere gitmez.
+ */
+export function adminPathFromPush(
+  data: Record<string, unknown> | undefined,
+): "/admin/disputes" | `/admin/dispute/${string}` | "/admin/applications" | "/admin/partner-leads" | "/admin/affiliates" | null {
+  switch (data?.adminScreen) {
+    case "dispute":
+      return typeof data.disputeId === "string" && data.disputeId
+        ? `/admin/dispute/${data.disputeId}`
+        : "/admin/disputes";
+    case "applications":
+      return "/admin/applications";
+    case "partnerLeads":
+      return "/admin/partner-leads";
+    case "affiliates":
+      return "/admin/affiliates";
+    default:
+      return null;
+  }
 }
