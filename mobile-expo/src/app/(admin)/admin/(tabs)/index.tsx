@@ -3,7 +3,7 @@ import { Linking, Pressable, RefreshControl, ScrollView, StyleSheet, View } from
 import { SafeAreaView } from "react-native-safe-area-context";
 import { router } from "expo-router";
 import type { Href } from "expo-router";
-import { ChevronRight, ExternalLink, Megaphone, ScrollText, Store, User, Users, MessageSquareText, AlertTriangle, Flag, SlidersHorizontal, Ticket, Wallet } from "lucide-react-native";
+import { ChevronRight, ExternalLink, Megaphone, ScrollText, Store, User, Users, MessageSquareText, AlertTriangle, Flag, SlidersHorizontal, Ticket, Wallet, Handshake } from "lucide-react-native";
 import { useTranslation } from "react-i18next";
 
 import { LuggageTag, MapSnippet } from "@/components/Illustrations";
@@ -27,6 +27,7 @@ const WEB_SECTIONS = ["seals", "partners"] as const;
 const TOOL_SCREENS = [
   { key: "disputes", href: "/admin/disputes", Icon: AlertTriangle },
   { key: "coupons", href: "/admin/coupons", Icon: Ticket },
+  { key: "affiliates", href: "/admin/affiliates", Icon: Handshake },
   { key: "payments", href: "/admin/payments", Icon: Wallet },
   { key: "settings", href: "/admin/platform-settings", Icon: SlidersHorizontal },
   { key: "flags", href: "/admin/feature-flags", Icon: Flag },

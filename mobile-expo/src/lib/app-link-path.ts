@@ -1,3 +1,5 @@
+import { rememberReferral } from "./pending-referral";
+
 /**
  * Web baglantisini uygulama yoluna cevirir: https://bagajpark.com/tr/shop/abc -> /shop/abc.
  * Sunucu tarafi dogrulama dosyalari `src/lib/app-links.ts` (kok proje). Dil oneki atilir;
@@ -13,6 +15,8 @@ export function appPathFromLink(path: string): string {
     return path;
   }
   if (!/^https?:$/.test(url.protocol) || !WEB_HOSTS.has(url.hostname)) return path;
+  // Araci kodu (`?ref=`): odeme ekraninda "Referans kodu" olarak doldurulur.
+  rememberReferral(url.searchParams.get("ref"));
   const parts = url.pathname.split("/").filter(Boolean);
   // Yalnizca /<dil>/shop/<id> uygulamaya gelir (app.json intentFilters, AASA).
   const [, section, id] = parts;
