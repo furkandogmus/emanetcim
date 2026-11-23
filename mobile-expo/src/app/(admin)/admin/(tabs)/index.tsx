@@ -3,7 +3,7 @@ import { Linking, Pressable, RefreshControl, ScrollView, StyleSheet, View } from
 import { SafeAreaView } from "react-native-safe-area-context";
 import { router } from "expo-router";
 import type { Href } from "expo-router";
-import { ChevronRight, ExternalLink, Megaphone, ScrollText, User, Users, MessageSquareText, AlertTriangle, Flag, SlidersHorizontal, Ticket, Wallet } from "lucide-react-native";
+import { ChevronRight, ExternalLink, Megaphone, ScrollText, Store, User, Users, MessageSquareText, AlertTriangle, Flag, SlidersHorizontal, Ticket, Wallet } from "lucide-react-native";
 import { useTranslation } from "react-i18next";
 
 import { LuggageTag, MapSnippet } from "@/components/Illustrations";
@@ -168,6 +168,11 @@ function Dashboard({
             icon={<Users size={18} color={colors.inkSecondary} />}
             label={t("admin.users")}
             onPress={() => router.push("/admin/users")}
+          />
+          <LinkRow
+            icon={<Store size={18} color={colors.inkSecondary} />}
+            label={t("admin.partnerLeads")}
+            onPress={() => router.push("/admin/partner-leads")}
           />
           {/* Yonetim araclari burada (Kullanicilar'in yaninda): gelen kutusu bir okuma ekrani, duyuru bir eylem. */}
           <LinkRow
