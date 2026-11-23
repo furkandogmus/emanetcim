@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
 import { z } from "zod";
+import { clientIpFromRequest } from "@/lib/client-ip";
 import { forbidWhileImpersonating, requireMobileUser } from "@/lib/mobile-auth";
 import { MAX_REPORT_NOTE, REVIEW_REPORT_REASONS, reviewService } from "@/services/ReviewService";
 
@@ -26,6 +27,7 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ id:
     reporterId: auth.user.id,
     reason: parsed.data.reason,
     note: parsed.data.note,
+    ip: clientIpFromRequest(req),
   });
   if (!result.ok) return NextResponse.json({ error: result.reason }, { status: STATUS[result.reason] });
   return NextResponse.json({ ok: true, autoHidden: result.autoHidden });

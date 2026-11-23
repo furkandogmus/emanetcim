@@ -12,7 +12,8 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ id:
 
   const result = await reviewService.blockAuthor({ reviewId: (await params).id, viewerId: auth.user.id });
   if (!result.ok) {
-    return NextResponse.json({ error: result.reason }, { status: result.reason === "not_found" ? 404 : 409 });
+    const status = result.reason === "not_found" ? 404 : result.reason === "rate_limited" ? 429 : 409;
+    return NextResponse.json({ error: result.reason }, { status });
   }
   return NextResponse.json({ ok: true });
 }
