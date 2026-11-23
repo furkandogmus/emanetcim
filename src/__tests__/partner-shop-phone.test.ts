@@ -65,7 +65,7 @@ describe("mobil istemcinin okudugu alanlar sunucuda geciyor", () => {
     const alanlar = new Set([...tipler.matchAll(/^\s+([a-zA-Z][a-zA-Z0-9]*)\??:/gm)].map((m) => m[1]));
     expect(alanlar.size, "taranacak alan bulunamadi").toBeGreaterThan(50);
 
-    const sunucu = ["src/app/api/mobile", "src/lib/mobile-dto.ts", "src/services", "prisma/schema.prisma"]
+    const sunucu = ["src/app/api/mobile", "src/lib/mobile-dto", "src/services", "prisma/schema.prisma"]
       .map(oku)
       .join("\n");
 
