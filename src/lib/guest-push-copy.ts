@@ -26,7 +26,7 @@ export const GUEST_PUSH_COPY: Record<AppLocale, Copy> = {
   tr: {
     approved: (v) => ({ title: "Rezervasyonun onaylandı", body: `${v.shop} seni bekliyor. QR kodun uygulamada.` }),
     cancelled: (v) => ({ title: "Rezervasyonun iptal edildi", body: v.shop }),
-    checkIn: (v) => ({ title: "Valizin teslim alındı", body: `${v.shop} valizini mühürledi. Alırken QR kodunu göster.` }),
+    checkIn: (v) => ({ title: "Valizin teslim alındı", body: `${v.shop} valizini teslim aldı. Alırken QR kodunu göster.` }),
     checkOut: (v) => ({ title: "Valizini aldın", body: `${v.shop} ile işin bitti. Deneyimini puanlayabilirsin.` }),
     reminderCheckIn: (v) => ({ title: "Bırakma saatin yaklaşıyor", body: `${v.shop} · ${v.time ?? ""}` }),
     reminderCheckOut: (v) => ({ title: "Alma saatin yaklaşıyor", body: `${v.shop} · ${v.time ?? ""}` }),
@@ -40,7 +40,7 @@ export const GUEST_PUSH_COPY: Record<AppLocale, Copy> = {
   en: {
     approved: (v) => ({ title: "Your booking is confirmed", body: `${v.shop} is expecting you. Your QR code is in the app.` }),
     cancelled: (v) => ({ title: "Your booking was cancelled", body: v.shop }),
-    checkIn: (v) => ({ title: "Your bags are checked in", body: `${v.shop} sealed your bags. Show your QR code at pickup.` }),
+    checkIn: (v) => ({ title: "Your bags are checked in", body: `${v.shop} checked in your bags. Show your QR code at pickup.` }),
     checkOut: (v) => ({ title: "Bags picked up", body: `All done at ${v.shop}. You can rate your visit.` }),
     reminderCheckIn: (v) => ({ title: "Drop-off time is coming up", body: `${v.shop} · ${v.time ?? ""}` }),
     reminderCheckOut: (v) => ({ title: "Pickup time is coming up", body: `${v.shop} · ${v.time ?? ""}` }),
@@ -54,7 +54,7 @@ export const GUEST_PUSH_COPY: Record<AppLocale, Copy> = {
   de: {
     approved: (v) => ({ title: "Buchung bestätigt", body: `${v.shop} erwartet dich. Dein QR-Code ist in der App.` }),
     cancelled: (v) => ({ title: "Buchung storniert", body: v.shop }),
-    checkIn: (v) => ({ title: "Gepäck abgegeben", body: `${v.shop} hat dein Gepäck versiegelt. Zeig bei der Abholung deinen QR-Code.` }),
+    checkIn: (v) => ({ title: "Gepäck abgegeben", body: `${v.shop} hat dein Gepäck angenommen. Zeig bei der Abholung deinen QR-Code.` }),
     checkOut: (v) => ({ title: "Gepäck abgeholt", body: `Alles erledigt bei ${v.shop}. Du kannst deinen Besuch bewerten.` }),
     reminderCheckIn: (v) => ({ title: "Abgabezeit rückt näher", body: `${v.shop} · ${v.time ?? ""}` }),
     reminderCheckOut: (v) => ({ title: "Abholzeit rückt näher", body: `${v.shop} · ${v.time ?? ""}` }),
@@ -68,7 +68,7 @@ export const GUEST_PUSH_COPY: Record<AppLocale, Copy> = {
   fr: {
     approved: (v) => ({ title: "Réservation confirmée", body: `${v.shop} vous attend. Votre QR code est dans l'app.` }),
     cancelled: (v) => ({ title: "Réservation annulée", body: v.shop }),
-    checkIn: (v) => ({ title: "Bagages déposés", body: `${v.shop} a scellé vos bagages. Montrez votre QR code au retrait.` }),
+    checkIn: (v) => ({ title: "Bagages déposés", body: `${v.shop} a pris en charge vos bagages. Montrez votre QR code au retrait.` }),
     checkOut: (v) => ({ title: "Bagages récupérés", body: `C'est terminé chez ${v.shop}. Vous pouvez noter votre visite.` }),
     reminderCheckIn: (v) => ({ title: "L'heure du dépôt approche", body: `${v.shop} · ${v.time ?? ""}` }),
     reminderCheckOut: (v) => ({ title: "L'heure du retrait approche", body: `${v.shop} · ${v.time ?? ""}` }),
@@ -82,7 +82,7 @@ export const GUEST_PUSH_COPY: Record<AppLocale, Copy> = {
   ja: {
     approved: (v) => ({ title: "予約が確定しました", body: `${v.shop}がお待ちしています。QRコードはアプリにあります。` }),
     cancelled: (v) => ({ title: "予約がキャンセルされました", body: v.shop }),
-    checkIn: (v) => ({ title: "お荷物をお預かりしました", body: `${v.shop}がお荷物を封印しました。受け取り時にQRコードを提示してください。` }),
+    checkIn: (v) => ({ title: "お荷物をお預かりしました", body: `${v.shop}がお荷物をお預かりしました。受け取り時にQRコードを提示してください。` }),
     checkOut: (v) => ({ title: "お荷物を受け取りました", body: `${v.shop}でのご利用ありがとうございました。評価をお願いします。` }),
     reminderCheckIn: (v) => ({ title: "預け入れの時間が近づいています", body: `${v.shop} · ${v.time ?? ""}` }),
     reminderCheckOut: (v) => ({ title: "受け取りの時間が近づいています", body: `${v.shop} · ${v.time ?? ""}` }),
@@ -96,7 +96,7 @@ export const GUEST_PUSH_COPY: Record<AppLocale, Copy> = {
   fa: {
     approved: (v) => ({ title: "رزرو شما تأیید شد", body: `${v.shop} منتظر شماست. کد QR در برنامه است.` }),
     cancelled: (v) => ({ title: "رزرو شما لغو شد", body: v.shop }),
-    checkIn: (v) => ({ title: "چمدان شما تحویل گرفته شد", body: `${v.shop} چمدان شما را پلمب کرد. هنگام تحویل کد QR را نشان دهید.` }),
+    checkIn: (v) => ({ title: "چمدان شما تحویل گرفته شد", body: `${v.shop} چمدان شما را تحویل گرفت. هنگام تحویل کد QR را نشان دهید.` }),
     checkOut: (v) => ({ title: "چمدان خود را تحویل گرفتید", body: `کار شما در ${v.shop} تمام شد. می‌توانید امتیاز دهید.` }),
     reminderCheckIn: (v) => ({ title: "زمان تحویل دادن نزدیک است", body: `${v.shop} · ${v.time ?? ""}` }),
     reminderCheckOut: (v) => ({ title: "زمان تحویل گرفتن نزدیک است", body: `${v.shop} · ${v.time ?? ""}` }),
