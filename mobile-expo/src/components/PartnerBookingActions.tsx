@@ -15,6 +15,7 @@ import {
   PARTNER_CANCEL_REASONS,
   canPartnerCancel,
   isSameWallDay,
+  lateDropoffState,
   noShowState,
   partnerCancelBody,
 } from "@/lib/booking-actions";
@@ -22,7 +23,7 @@ import { errorMessage } from "@/lib/errors";
 import { buildCheckInBody, shouldOfferOutsideHours } from "@/lib/check-in-request";
 import { SEALS_ENABLED } from "@/lib/config";
 import { formatDayTime, formatMoney, formatTime } from "@/lib/format";
-import { usePartnerCancel, usePartnerNoShow, usePartnerShop } from "@/lib/queries";
+import { usePartnerCancel, usePartnerLateHold, usePartnerNoShow, usePartnerShop } from "@/lib/queries";
 import type { BookingDetail, PartnerCancelReason } from "@/lib/types";
 import { notify } from "@/lib/notify";
 import { colors, fonts, radius, space } from "@/theme/tokens";
@@ -389,7 +390,18 @@ function PartnerManageActions({ booking }: { booking: BookingDetail }) {
     ]);
   }
 
-  const busy = cancel.isPending || noShow.isPending;
+  const hold = usePartnerLateHold(booking.id);
+  const late = lateDropoffState(booking, now);
+  function submitHold() {
+    if (hold.isPending) return;
+    setError(null);
+    hold.mutate(undefined, {
+      onSuccess: () => notify(t("bookingActions.partner.lateHoldDoneTitle"), t("bookingActions.partner.lateHoldDoneBody")),
+      onError: (e) => setError(errorMessage(e, BOOKING_ACTIONS_NS)),
+    });
+  }
+
+  const busy = cancel.isPending || noShow.isPending || hold.isPending;
   const waitingLabel =
     state.kind === "waiting"
       ? t("bookingActions.partner.noShowAt", {
@@ -400,6 +412,33 @@ function PartnerManageActions({ booking }: { booking: BookingDetail }) {
   return (
     <View style={{ gap: space.sm }}>
       {error ? <Banner tone="danger" body={error} /> : null}
+      {late.kind === "late" ? (
+        <View style={{ gap: space.sm }}>
+          <Banner
+            tone="warning"
+            title={t("bookingActions.partner.lateTitle")}
+            body={[
+              t("bookingActions.partner.lateCloseAt", { time: formatTime(late.closeAt) }),
+              late.holdUntil ? t("bookingActions.partner.lateHoldActive", { time: formatTime(late.holdUntil) }) : null,
+              t("bookingActions.partner.lateHint"),
+            ]
+              .filter(Boolean)
+              .join("\n")}
+          />
+          <Button
+            variant="secondary"
+            title={t("bookingActions.partner.lateHold")}
+            disabled={!late.canHold || busy}
+            loading={hold.isPending}
+            onPress={submitHold}
+          />
+          {!late.canHold ? (
+            <AppText variant="caption" style={{ textAlign: "center" }}>
+              {t("bookingActions.partner.lateHoldLimit")}
+            </AppText>
+          ) : null}
+        </View>
+      ) : null}
       {state.kind !== "hidden" ? (
         <View style={{ gap: 4 }}>
           <Button

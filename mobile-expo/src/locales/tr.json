@@ -334,7 +334,9 @@
     "closeExpired": "Rezervasyonu kapat",
     "closeExpiredTitle": "Rezervasyon kapatılsın mı?",
     "closeExpiredBody": "Valizini bırakmadıysan bu rezervasyonu kapatabilirsin. Bu işlem geri alınamaz.",
-    "closeExpiredConfirm": "Evet, kapat"
+    "closeExpiredConfirm": "Evet, kapat",
+    "lateDropoff": "Bırakma saatin geçti. Rezervasyonun saat {{time}} itibarıyla otomatik kapanacak; geliyorsan dükkanı ara.",
+    "lateDropoffHold": "Dükkan seni bekliyor. Son saat: {{time}}."
   },
   "status": {
     "PENDING": "Bekliyor",
@@ -1223,7 +1225,15 @@
       "noShowConfirm": "Evet, kapat",
       "noShowDoneTitle": "Rezervasyon kapatıldı",
       "noShowDoneBody": "Ayrılan yer boşaltıldı.",
-      "noteRequiredHint": "“Diğer” seçildiğinde açıklama zorunlu."
+      "noteRequiredHint": "“Diğer” seçildiğinde açıklama zorunlu.",
+      "lateTitle": "Misafir gecikti",
+      "lateCloseAt": "Otomatik kapanış: {{time}}",
+      "lateHoldActive": "Misafiri bekliyorsun. Son saat: {{time}}",
+      "lateHint": "Valizi aldıysan teslim al. Misafir seni aradıysa bekleyebilirsin.",
+      "lateHold": "Misafiri bekle (+30 dk)",
+      "lateHoldDoneTitle": "Misafir bekleniyor",
+      "lateHoldDoneBody": "Rezervasyon 30 dakika daha açık kalacak.",
+      "lateHoldLimit": "Alma saatine ulaşıldı, daha fazla beklenemez."
     },
     "reasons": {
       "guest_request": "Misafir istedi",
@@ -1239,7 +1249,8 @@
       "invalid_reason": "Geçersiz iptal nedeni; listeden birini seç.",
       "too_early": "Bekleme süresi dolmadı; misafir henüz gelmedi olarak işaretlenemez.",
       "server_error": "Sunucuda bir sorun oluştu; birazdan tekrar dene.",
-      "http_404": "Bu işlem henüz kullanılamıyor; şimdilik web panelinden yapabilirsin."
+      "http_404": "Bu işlem henüz kullanılamıyor; şimdilik web panelinden yapabilirsin.",
+      "hold_limit": "Alma saatine ulaşıldı; rezervasyon daha fazla bekletilemez."
     }
   },
   "broadcast": {

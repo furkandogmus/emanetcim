@@ -334,7 +334,9 @@
     "closeExpired": "Close booking",
     "closeExpiredTitle": "Close this booking?",
     "closeExpiredBody": "If you didn't drop off your bags, you can close this booking. This can't be undone.",
-    "closeExpiredConfirm": "Yes, close"
+    "closeExpiredConfirm": "Yes, close",
+    "lateDropoff": "Your drop-off time has passed. Your booking closes automatically at {{time}}; if you are on your way, call the shop.",
+    "lateDropoffHold": "The shop is waiting for you until {{time}}."
   },
   "status": {
     "PENDING": "Pending",
@@ -1223,7 +1225,15 @@
       "noShowConfirm": "Yes, close",
       "noShowDoneTitle": "Booking closed",
       "noShowDoneBody": "The reserved space has been freed.",
-      "noteRequiredHint": "A note is required when “Other” is selected."
+      "noteRequiredHint": "A note is required when “Other” is selected.",
+      "lateTitle": "Guest is late",
+      "lateCloseAt": "Closes automatically: {{time}}",
+      "lateHoldActive": "You are waiting for the guest. Until: {{time}}",
+      "lateHint": "If you received the bags, check them in. If the guest called you, you can wait.",
+      "lateHold": "Wait for guest (+30 min)",
+      "lateHoldDoneTitle": "Waiting for the guest",
+      "lateHoldDoneBody": "The booking stays open for 30 more minutes.",
+      "lateHoldLimit": "Pick-up time reached; you cannot wait any longer."
     },
     "reasons": {
       "guest_request": "Guest asked",
@@ -1239,7 +1249,8 @@
       "invalid_reason": "Invalid cancellation reason; pick one from the list.",
       "too_early": "The waiting time isn't over yet; the guest can't be marked as a no-show.",
       "server_error": "Something went wrong on the server; try again shortly.",
-      "http_404": "This action isn't available yet; use the web panel for now."
+      "http_404": "This action isn't available yet; use the web panel for now.",
+      "hold_limit": "Pick-up time reached; the booking cannot be held any longer."
     }
   },
   "broadcast": {
