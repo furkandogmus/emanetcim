@@ -23,6 +23,8 @@ export type AccountDeletionRowVm = {
   email: string | null;
   activeBookings: number;
   pendingPayouts: number;
+  /** Iptalde yeniden acilacak dukkan adlari. */
+  reopenShops: string[];
 };
 
 type Pending = { row: AccountDeletionRowVm; action: "complete" | "cancel" } | null;
@@ -145,7 +147,13 @@ export default function AdminAccountDeletionsClient({
       <ConfirmDialog
         open={pending !== null}
         title={t(pending?.action === "cancel" ? "cancelTitle" : "completeTitle")}
-        message={t(pending?.action === "cancel" ? "cancelBody" : "completeBody")}
+        message={
+          pending?.action === "cancel"
+            ? pending.row.reopenShops.length > 0
+              ? t("cancelBodyShops", { shops: pending.row.reopenShops.join(", ") })
+              : t("cancelBodyNoShops")
+            : t("completeBody")
+        }
         confirmLabel={t(pending?.action === "cancel" ? "cancel" : "complete")}
         cancelLabel={tCommon("cancel")}
         onConfirm={run}

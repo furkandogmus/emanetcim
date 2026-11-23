@@ -69,7 +69,12 @@ export async function requestAccountDeletionAction(input?: {
   if (!result.ok) {
     return {
       success: false,
-      error: result.reason === "last_admin" ? "Errors.accountDeletionLastAdmin" : "Errors.unauthorized",
+      error:
+        result.reason === "last_admin"
+          ? "Errors.accountDeletionLastAdmin"
+          : result.reason === "guest_use_delete"
+            ? "Errors.accountDeletionGuest"
+            : "Errors.notFound",
     };
   }
   revalidatePathAllLocales("/account/privacy");

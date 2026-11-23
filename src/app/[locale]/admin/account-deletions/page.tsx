@@ -27,6 +27,7 @@ export default async function AdminAccountDeletionsPage({ params }: { params: Pr
         email: r.user.email,
         activeBookings: r.blockers.activeBookings,
         pendingPayouts: r.blockers.pendingPayouts,
+        reopenShops: r.reopenShops.map((s) => s.name),
       }))}
     />
   );

@@ -1902,7 +1902,8 @@
     "reviewReportRateLimited": "Trop de signalements ; réessayez un peu plus tard.",
     "reviewAlreadyHidden": "L’avis est déjà masqué.",
     "reviewNotHidden": "L’avis n’est pas masqué.",
-    "reviewReasonRequired": "Indiquez un motif pour le masquer."
+    "reviewReasonRequired": "Indiquez un motif pour le masquer.",
+    "accountDeletionGuest": "Vous pouvez fermer votre compte directement sur cette page."
   },
   "Emails": {
     "verificationSubject": "Vérifiez votre e-mail",
@@ -2214,7 +2215,9 @@
       "guestContactRequired": "Veuillez saisir un e-mail ou un numéro de téléphone.",
       "unauthorized": "Vous n’êtes pas autorisé à faire cela.",
       "generic": "Une erreur est survenue.",
-      "lastAdmin": "Vous êtes le seul administrateur ; ajoutez d’abord un autre administrateur."
+      "lastAdmin": "Vous êtes le seul administrateur ; ajoutez d’abord un autre administrateur.",
+      "guestUseDelete": "Vous pouvez fermer votre compte directement sur cette page.",
+      "notFound": "Compte introuvable."
     },
     "deleteTypeConfirmLabel": "Tapez {phrase} ci-dessous pour confirmer :",
     "deleteTypeConfirmPhrase": "SUPPRIMER MON COMPTE",
@@ -2696,9 +2699,10 @@
     "completed": "Compte supprimé.",
     "cancel": "Annuler la demande",
     "cancelTitle": "Annuler cette demande ?",
-    "cancelBody": "Les commerces fermés sont rouverts. Le motif est consigné dans le journal d’audit.",
     "cancelled": "Demande annulée.",
-    "reasonLabel": "Motif (au moins 5 caractères)"
+    "reasonLabel": "Motif (au moins 5 caractères)",
+    "cancelBodyShops": "Ces commerces seront rouverts : {shops}. Le motif est consigné dans le journal d’audit.",
+    "cancelBodyNoShops": "Aucun commerce ne sera rouvert (aucun, ou modifié pendant l’attente). Le motif est consigné dans le journal d’audit."
   },
   "AdminReviews": {
     "back": "Retour au tableau de bord",

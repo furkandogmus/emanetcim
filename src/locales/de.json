@@ -1902,7 +1902,8 @@
     "reviewReportRateLimited": "Zu viele Meldungen; versuchen Sie es später erneut.",
     "reviewAlreadyHidden": "Die Bewertung ist bereits ausgeblendet.",
     "reviewNotHidden": "Die Bewertung ist nicht ausgeblendet.",
-    "reviewReasonRequired": "Geben Sie zum Ausblenden einen Grund an."
+    "reviewReasonRequired": "Geben Sie zum Ausblenden einen Grund an.",
+    "accountDeletionGuest": "Sie können Ihr Konto direkt auf dieser Seite schließen."
   },
   "Emails": {
     "verificationSubject": "Bestätigen Sie Ihre E-Mail",
@@ -2214,7 +2215,9 @@
       "guestContactRequired": "Bitte E-Mail oder Telefonnummer eingeben.",
       "unauthorized": "Dazu sind Sie nicht berechtigt.",
       "generic": "Etwas ist schiefgelaufen.",
-      "lastAdmin": "Sie sind der einzige Admin; fügen Sie zuerst einen weiteren Admin hinzu."
+      "lastAdmin": "Sie sind der einzige Admin; fügen Sie zuerst einen weiteren Admin hinzu.",
+      "guestUseDelete": "Sie können Ihr Konto direkt auf dieser Seite schließen.",
+      "notFound": "Konto nicht gefunden."
     },
     "deleteTypeConfirmLabel": "Geben Sie zur Bestätigung unten {phrase} ein:",
     "deleteTypeConfirmPhrase": "KONTO LÖSCHEN",
@@ -2696,9 +2699,10 @@
     "completed": "Konto gelöscht.",
     "cancel": "Anfrage abbrechen",
     "cancelTitle": "Anfrage abbrechen?",
-    "cancelBody": "Geschlossene Geschäfte werden wieder geöffnet. Die Begründung wird protokolliert.",
     "cancelled": "Anfrage abgebrochen.",
-    "reasonLabel": "Begründung (mindestens 5 Zeichen)"
+    "reasonLabel": "Begründung (mindestens 5 Zeichen)",
+    "cancelBodyShops": "Diese Geschäfte werden wieder geöffnet: {shops}. Die Begründung wird protokolliert.",
+    "cancelBodyNoShops": "Kein Geschäft wird wieder geöffnet (keines vorhanden oder während der Wartezeit geändert). Die Begründung wird protokolliert."
   },
   "AdminReviews": {
     "back": "Zurück zum Dashboard",

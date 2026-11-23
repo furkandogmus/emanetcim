@@ -1902,7 +1902,8 @@
     "reviewReportRateLimited": "報告が多すぎます。しばらくしてからお試しください。",
     "reviewAlreadyHidden": "このレビューはすでに非表示です。",
     "reviewNotHidden": "このレビューは非表示ではありません。",
-    "reviewReasonRequired": "非表示にする理由を入力してください。"
+    "reviewReasonRequired": "非表示にする理由を入力してください。",
+    "accountDeletionGuest": "このページから直接アカウントを閉じられます。"
   },
   "Emails": {
     "verificationSubject": "メールアドレスを確認してください",
@@ -2214,7 +2215,9 @@
       "guestContactRequired": "メールアドレスまたは電話番号を入力してください。",
       "unauthorized": "この操作は許可されていません。",
       "generic": "エラーが発生しました。",
-      "lastAdmin": "管理者はあなただけです。先に別の管理者を追加してください。"
+      "lastAdmin": "管理者はあなただけです。先に別の管理者を追加してください。",
+      "guestUseDelete": "このページから直接アカウントを閉じられます。",
+      "notFound": "アカウントが見つかりません。"
     },
     "deleteTypeConfirmLabel": "確認のため、下に {phrase} と入力してください:",
     "deleteTypeConfirmPhrase": "アカウントを削除",
@@ -2696,9 +2699,10 @@
     "completed": "アカウントを削除しました。",
     "cancel": "リクエストを取り消す",
     "cancelTitle": "このリクエストを取り消しますか?",
-    "cancelBody": "停止した店舗は再開されます。理由は監査ログに記録されます。",
     "cancelled": "リクエストを取り消しました。",
-    "reasonLabel": "理由(5文字以上)"
+    "reasonLabel": "理由(5文字以上)",
+    "cancelBodyShops": "次の店舗が再開されます: {shops}。理由は監査ログに記録されます。",
+    "cancelBodyNoShops": "再開される店舗はありません(店舗がない、または保留中に変更された)。理由は監査ログに記録されます。"
   },
   "AdminReviews": {
     "back": "ダッシュボードに戻る",

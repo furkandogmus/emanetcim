@@ -1509,7 +1509,9 @@
       "unauthorized": "You are not allowed to do this.",
       "generic": "Something went wrong.",
       "guestContactRequired": "Please enter an email or phone number.",
-      "lastAdmin": "You are the only admin; add another admin first."
+      "lastAdmin": "You are the only admin; add another admin first.",
+      "guestUseDelete": "You can close your account directly on this page.",
+      "notFound": "Account not found."
     },
     "deleteConfirmTitle": "You are about to close your account",
     "deleteConfirmBody": "This cannot be undone. Your personal data will be anonymised and you will be signed out.",
@@ -1977,7 +1979,8 @@
     "reviewReportRateLimited": "Too many reports; try again a bit later.",
     "reviewAlreadyHidden": "The review is already hidden.",
     "reviewNotHidden": "The review is not hidden.",
-    "reviewReasonRequired": "Enter a reason to hide it."
+    "reviewReasonRequired": "Enter a reason to hide it.",
+    "accountDeletionGuest": "You can close your account directly on this page."
   },
   "Emails": {
     "verificationSubject": "Verify Your Email",
@@ -2854,9 +2857,10 @@
     "completed": "Account deleted.",
     "cancel": "Cancel request",
     "cancelTitle": "Cancel this request?",
-    "cancelBody": "Closed shops are reopened. The reason goes into the audit log.",
     "cancelled": "Request cancelled.",
-    "reasonLabel": "Reason (at least 5 characters)"
+    "reasonLabel": "Reason (at least 5 characters)",
+    "cancelBodyShops": "These shops will reopen: {shops}. The reason goes into the audit log.",
+    "cancelBodyNoShops": "No shops will reopen (none, or they changed while the request was pending). The reason goes into the audit log."
   },
   "AdminReviews": {
     "back": "Back to dashboard",

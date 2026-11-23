@@ -21,6 +21,7 @@ export type AdminDeletionRequest = {
   user: { id: string; name: string; email: string | null; phone: string | null };
   activeBookings: number;
   pendingPayouts: number;
+  reopenShops: { id: string; name: string }[];
 };
 
 export type AdminDeletionAction = "complete" | "cancel";

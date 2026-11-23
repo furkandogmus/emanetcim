@@ -36,6 +36,12 @@ const ERASED = new Set([
 ]);
 
 /**
+ * Kullaniciya DUKKAN uzerinden bagli kisisel veri (alan adi `shopId`, yukaridaki
+ * desene takilmaz). Esnaf silinince bunlar da silinmeli.
+ */
+const ERASED_VIA_SHOP = ["MerchantProfile"];
+
+/**
  * BİLEREK saklanan tablolar ve sebepleri.
  *
  * Saklamak da bir karardır ve gerekçesi yazılı olmalı — "unutulmuş" ile
@@ -97,11 +103,20 @@ describe("hesap anonimleştirmesi: kullanıcıya bağlı her tablo kararlı", ()
     const missing = [...ERASED]
       .filter((m) => m !== "User")
       .map((m) => m[0].toLowerCase() + m.slice(1))
-      .filter((prop) => !new RegExp(`prisma\\.${prop}\\.deleteMany`).test(service));
+      .filter((prop) => !new RegExp(`(prisma|tx)\\.${prop}\\.deleteMany`).test(service));
     expect(
       missing,
       "`AccountPrivacyService` bu tabloları silmiyor:\n" + missing.join("\n"),
     ).toEqual([]);
+  });
+
+  it("esnafin dukkan uzerinden bagli odeme/vergi kimligi de silinir", () => {
+    const service = fs.readFileSync(path.join(process.cwd(), "src/services/AccountPrivacyService.ts"), "utf8");
+    for (const model of ERASED_VIA_SHOP) {
+      const prop = model[0].toLowerCase() + model.slice(1);
+      expect(SCHEMA).toMatch(new RegExp(`model ${model} \\{[\\s\\S]*?shopId`));
+      expect(service).toMatch(new RegExp(`(prisma|tx)\\.${prop}\\.deleteMany\\(\\{ where: \\{ shop: \\{ ownerId: userId`));
+    }
   });
 
   it("anonimleştirme tokenVersion'ı artırır — hesap silindikten sonra eski oturumlar ölür", () => {
