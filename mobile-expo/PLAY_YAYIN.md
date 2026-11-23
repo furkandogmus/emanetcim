@@ -74,19 +74,19 @@ Kod tarafı hazır; aşağıdaki hesap adımları hesap sahibinin elinde.
 
 **Diğer zorunlu formlar:** İçerik derecelendirme anketi, hedef kitle (yetişkin; çocuklara
 yönelik değil), reklam içeriyor mu (hayır), uygulama erişimi (inceleme ekibi için bir
-test hesabı: OTP girişi e-postaya kod gönderdiği için Google'a erişebildiğiniz bir test
-e-postası verin).
+test hesabı: e-posta + şifreyle girer; kodla giriş için sunucuda `PLAY_REVIEW_EMAIL` +
+`PLAY_REVIEW_OTP` tanımlıysa o adrese sabit kod geçerlidir, `src/app/api/mobile/auth/otp`).
+Hesap test dükkanlarını görsün diye admin'den `reviewSandbox` açılır (`IOS_YAYIN.md`).
 
 **Mağaza girişi:** 512×512 ikon (`assets/icon.png`), 1024×500 öne çıkan görsel, en az iki
 telefon ekran görüntüsü (Türkçe arayüzden alınması önerilir).
 
 ## Bu sürümde bilerek olmayanlar
 
-Online ödeme (ödeme dükkanda), fiziksel mühür (henüz dağıtılmadı, `SEALS_ENABLED` kapalı),
-SMS ile giriş (telefon girişi yalnızca şifreyle) ve Apple ile giriş (`extra.appleSignIn`
-kapalı; iOS yayınından önce açılacak). Push bildirimi, QR okutma, check-in, esnaf kazanç
-ve takvim ekranları, Google ile giriş uygulamada vardır. Flutter uygulaması 2026-10-18'de
-kaldırıldı; tek istemci Expo.
+Online ödeme (ödeme dükkanda), fiziksel mühür (henüz dağıtılmadı, `SEALS_ENABLED` kapalı)
+ve SMS ile giriş (telefon girişi yalnızca şifreyle). Push bildirimi, QR okutma, check-in,
+esnaf kazanç ve takvim ekranları, yönetici ekranları ve Google ile giriş (Android)
+uygulamada vardır; Apple ile giriş iOS'ta açık (`IOS_YAYIN.md`). Tek istemci Expo.
 
 ## Hızlı yayın (2026-11-17'den beri)
 
@@ -102,8 +102,11 @@ EAS bulut kuyruğu ve `eas submit` kuyruğu ücretsiz planda saatlerce bekleyebi
   `ROLLOUT=10`; sonra `eas update:edit` ile yüzde artırılır). Aynı `version`'a sahip
   derlemeler bir sonraki açılışta alır (`runtimeVersion: appVersion`). İlk OTA,
   `expo-updates` içeren ilk derlemeden sonra çalışır.
-  Eski bir ikiliye (Play'de hâlâ kurulu önceki sürüm) aynı JS'i göndermek için başına
-  `OTA_RUNTIME=0.3.0` eklenir; yalnızca ikililer arasında yerel değişiklik yoksa güvenlidir.
+  Varsayılan runtime `app.json` → `version` (şu an `0.3.4`). Mağazada hâlâ kurulu eski
+  ikililere (bugün `0.3.0`–`0.3.3`) aynı JS'i göndermek için her biri ayrı çağrıyla
+  `OTA_RUNTIME=<sürüm>` ile yayınlanır; `verify` yalnızca ilk çağrıda koşar, sonrakiler
+  `OTA_SKIP_VERIFY=1` ile aynı HEAD'in kaydını kullanır (betiğin başlığındaki örnek). Yalnızca
+  ikililer arasında yerel değişiklik yoksa güvenlidir. Kanal ve runtime iOS ile ortaktır.
   **Doğrudan `eas update` çalıştırma:** `eas.json`'daki derleme `env`ini okumaz ve EAS'ta
   ortam değişkeni yok; 2026-11-18'de yayınlanan güncelleme API adresi olarak `10.0.2.2`
   taşıdı. Script değerleri `eas.json` production profilinden alır, eksikse durur.
@@ -114,8 +117,11 @@ EAS bulut kuyruğu ve `eas submit` kuyruğu ücretsiz planda saatlerce bekleyebi
   derleme çıkar, yoksa eski derlemeler uyumsuz JS alır.
 
 **Zorunlu güncelleme ve OTA bildirimi:** uygulama açılışta `/api/mobile/config`'i okur;
-yüklü derlemenin sürümü `minAppVersion`un altındaysa "Güncelleme gerekli" ekranı Play
-bağlantısıyla çıkar (admin panelinden `minAppVersion`u yükselt; ağ yoksa kapı açık kalır).
+yüklü ikilinin sürümü (`Updates.runtimeVersion`) `minAppVersion`un altındaysa "Güncelleme
+gerekli" ekranı Play bağlantısıyla çıkar (`src/lib/app-update.ts`; admin → Platform
+ayarları'ndan `minAppVersion`u yükselt; ağ yoksa kapı açık kalır). Bağlantı iOS'ta da Play'i
+açar, App Store bağlantısı yok: `minAppVersion`u iOS kullanıcılarını kilitleyecek şekilde
+yükseltme.
 Uygulama ön plana her dönüşte yeni OTA'yı indirir ve hazır olunca "Yeni sürüm hazır,
 yenile" şeridi gösterir; yeniden başlatma kullanıcının dokunuşuyla olur.
 
