@@ -165,6 +165,14 @@ describe("esnaf QR afisi: yetki", () => {
     expect(mockPrisma.shop.findUnique).not.toHaveBeenCalled();
   });
 
+  it("tekrarlanan ?shop= (dizi) 500 vermez, esnafin kendi dukkanina duser", async () => {
+    mockAuth.mockResolvedValue({ user: { id: "a1", role: "ADMIN" } });
+    mockPrisma.shop.findMany.mockResolvedValue([{ id: "own", name: "Kendi", isActive: true }]);
+    const el = await PartnerPosterPage({ params, searchParams: Promise.resolve({ shop: ["a", "b"] }) });
+    expect(mockPrisma.shop.findUnique).not.toHaveBeenCalled();
+    expect(JSON.stringify(el)).toContain("kaynak=afis-own");
+  });
+
   it("yonetici herhangi bir dukkanin afisini acar", async () => {
     mockAuth.mockResolvedValue({ user: { id: "a1", role: "ADMIN" } });
     mockPrisma.shop.findUnique.mockResolvedValue({ id: "any", name: "Herhangi" });
