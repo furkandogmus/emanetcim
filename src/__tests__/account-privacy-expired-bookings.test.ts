@@ -12,11 +12,12 @@ const m = vi.hoisted(() => {
       booking: { count: vi.fn() },
       session: { deleteMany: ok() },
       account: { deleteMany: ok() },
-      review: { deleteMany: ok() },
+      review: { deleteMany: ok(), updateMany: ok() },
       legalAcceptance: { deleteMany: ok() },
       pushSubscription: { deleteMany: ok() },
       mobilePushToken: { deleteMany: ok() },
-      reviewReport: { deleteMany: ok() },
+      reviewReport: { deleteMany: ok(), findMany: vi.fn().mockResolvedValue([]) },
+      merchantProfile: { deleteMany: ok() },
       reviewBlock: { deleteMany: ok() },
       mobileInstall: { deleteMany: ok() },
       user: { update: ok(), findUnique: vi.fn().mockResolvedValue({ email: "Ada@Example.com" }) },
@@ -25,12 +26,13 @@ const m = vi.hoisted(() => {
       $transaction: vi.fn().mockResolvedValue([]),
     },
     closeExpired: vi.fn(),
-    revoke: vi.fn().mockResolvedValue(0),
+    collect: vi.fn().mockResolvedValue([{ c: "com.bagajpark", r: "rt" }]),
+    revoke: vi.fn().mockResolvedValue(1),
   };
 });
 
 vi.mock("@/lib/db", () => ({ default: m.prisma }));
-vi.mock("@/services/AppleTokenService", () => ({ appleTokenService: { revokeForUser: m.revoke } }));
+vi.mock("@/services/AppleTokenService", () => ({ appleTokenService: { collectForUser: m.collect, revokeTokens: m.revoke } }));
 vi.mock("@/lib/audit-log", () => ({ writeAuditLog: vi.fn() }));
 vi.mock("@/services/booking/closure", () => ({ closeExpiredBookingsForGuest: m.closeExpired }));
 
@@ -39,6 +41,9 @@ import { accountPrivacyService } from "@/services/AccountPrivacyService";
 beforeEach(() => {
   vi.clearAllMocks();
   m.closeExpired.mockResolvedValue(1);
+  m.prisma.$transaction.mockImplementation(async (fn: unknown) =>
+    typeof fn === "function" ? (fn as (tx: typeof m.prisma) => unknown)(m.prisma) : [],
+  );
 });
 
 describe("hesap silme ve suresi dolmus rezervasyonlar", () => {
@@ -53,11 +58,14 @@ describe("hesap silme ve suresi dolmus rezervasyonlar", () => {
     expect(m.prisma.$transaction).toHaveBeenCalled();
   });
 
-  it("Apple yetkisi hesap satirlari silinmeden once iptal edilir (5.1.1(v))", async () => {
+  it("Apple token'lari satirlar silinmeden okunur, silme bitince iptal edilir (5.1.1(v))", async () => {
     m.prisma.booking.count.mockResolvedValue(0);
     await accountPrivacyService.anonymizeSelf({ userId: "g1", role: "GUEST", ip: null });
-    expect(m.revoke).toHaveBeenCalledWith("g1");
-    expect(m.revoke.mock.invocationCallOrder[0]).toBeLessThan(m.prisma.$transaction.mock.invocationCallOrder[0]);
+    expect(m.collect).toHaveBeenCalledWith("g1");
+    expect(m.revoke).toHaveBeenCalledWith("g1", [{ c: "com.bagajpark", r: "rt" }]);
+    const tx = m.prisma.$transaction.mock.invocationCallOrder[0];
+    expect(m.collect.mock.invocationCallOrder[0]).toBeLessThan(tx);
+    expect(m.revoke.mock.invocationCallOrder[0]).toBeGreaterThan(tx);
   });
 
   it("gercekten aktif rezervasyon varsa hicbir sey kapatilmaz", async () => {
@@ -75,5 +83,16 @@ describe("hesap silme ve suresi dolmus rezervasyonlar", () => {
     expect(m.prisma.verificationToken.deleteMany).toHaveBeenCalledWith({
       where: { identifier: { in: ["ada@example.com", "password-reset:ada@example.com"] } },
     });
+  });
+
+  it("kullanicinin acik bildirimleri yorumlarin kuyruk sayacindan duser", async () => {
+    m.prisma.booking.count.mockResolvedValue(0);
+    m.prisma.reviewReport.findMany.mockResolvedValueOnce([{ reviewId: "r1" }, { reviewId: "r2" }]);
+    await accountPrivacyService.anonymizeSelf({ userId: "g1", role: "GUEST", ip: null });
+    expect(m.prisma.review.updateMany).toHaveBeenCalledWith({
+      where: { id: { in: ["r1", "r2"] }, openReportCount: { gt: 0 } },
+      data: { openReportCount: { decrement: 1 } },
+    });
+    expect(m.prisma.reviewReport.deleteMany).toHaveBeenCalledWith({ where: { userId: "g1" } });
   });
 });

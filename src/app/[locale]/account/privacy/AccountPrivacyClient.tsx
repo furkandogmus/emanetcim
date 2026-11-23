@@ -220,7 +220,15 @@ function DeletionRequestCard({ initial }: { initial: DeletionRequestState }) {
       try {
         const r = await requestAccountDeletionAction({ locale });
         if (!r.success) {
-          setError(r.error === "Errors.accountDeletionLastAdmin" ? t("errors.lastAdmin") : t("errors.generic"));
+          setError(
+            r.error === "Errors.accountDeletionLastAdmin"
+              ? t("errors.lastAdmin")
+              : r.error === "Errors.accountDeletionGuest"
+                ? t("errors.guestUseDelete")
+                : r.error === "Errors.notFound"
+                  ? t("errors.notFound")
+                  : t("errors.generic"),
+          );
           return;
         }
         setState({ status: "PENDING", dueAtIso: r.dueAtIso });

@@ -1831,7 +1831,6 @@
     "failed": "İşlem tamamlanamadı",
     "cancel": "Talebi iptal et",
     "cancelTitle": "Talep iptal edilsin mi?",
-    "cancelBody": "Kapatılan dükkanlar yeniden açılır. Gerekçe denetim kaydına girer.",
     "cancelled": "Talep iptal edildi.",
     "dates": "Talep {{requested}} · son gün {{due}}",
     "blockers": "Tamamlanamaz: {{bookings}} aktif rezervasyon, {{payouts}} bekleyen hakediş.",
@@ -1846,7 +1845,10 @@
       "not_pending": "Talep artık beklemede değil.",
       "cannot_delete_self": "Kendi hesabının talebini tamamlayamazsın.",
       "invalid_reason": "Gerekçe en az 5 karakter olmalı.",
-      "not_found": "Talep bulunamadı."
-    }
+      "not_found": "Talep bulunamadı.",
+      "last_admin": "Tek yönetici kalırdı; önce başka bir yönetici ekle."
+    },
+    "cancelBodyShops": "Şu dükkanlar yeniden açılır: {{shops}}. Gerekçe denetim kaydına girer.",
+    "cancelBodyNoShops": "Yeniden açılacak dükkan yok. Gerekçe denetim kaydına girer."
   }
 }

@@ -1831,7 +1831,6 @@
     "failed": "Could not complete",
     "cancel": "Cancel request",
     "cancelTitle": "Cancel this request?",
-    "cancelBody": "Closed shops are reopened. The reason goes into the audit log.",
     "cancelled": "Request cancelled.",
     "dates": "Requested {{requested}} · due {{due}}",
     "blockers": "Cannot complete: {{bookings}} active bookings, {{payouts}} pending payouts.",
@@ -1846,7 +1845,10 @@
       "not_pending": "The request is no longer pending.",
       "cannot_delete_self": "You cannot complete your own request.",
       "invalid_reason": "The reason must be at least 5 characters.",
-      "not_found": "Request not found."
-    }
+      "not_found": "Request not found.",
+      "last_admin": "No admin would be left; add another admin first."
+    },
+    "cancelBodyShops": "These shops will reopen: {{shops}}. The reason goes into the audit log.",
+    "cancelBodyNoShops": "No shops will reopen. The reason goes into the audit log."
   }
 }

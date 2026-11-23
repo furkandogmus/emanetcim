@@ -125,7 +125,11 @@ export default function AdminAccountDeletionsScreen() {
         visible={cancelling !== null}
         onClose={() => setCancelling(null)}
         title={t("accountDeletions.cancelTitle")}
-        body={t("accountDeletions.cancelBody")}
+        body={
+          cancelling && cancelling.reopenShops.length > 0
+            ? t("accountDeletions.cancelBodyShops", { shops: cancelling.reopenShops.map((s) => s.name).join(", ") })
+            : t("accountDeletions.cancelBodyNoShops")
+        }
         note={reason}
         onNoteChange={setReason}
         noteLabel={t("adminShop.reasonLabel")}

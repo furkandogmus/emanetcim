@@ -18,11 +18,12 @@ const m = vi.hoisted(() => {
       booking: { count: vi.fn() },
       session: { deleteMany: ok() },
       account: { deleteMany: ok() },
-      review: { deleteMany: ok() },
+      review: { deleteMany: ok(), updateMany: ok() },
       legalAcceptance: { deleteMany: ok() },
       pushSubscription: { deleteMany: ok() },
       mobilePushToken: { deleteMany: ok() },
-      reviewReport: { deleteMany: ok() },
+      reviewReport: { deleteMany: ok(), findMany: vi.fn().mockResolvedValue([]) },
+      merchantProfile: { deleteMany: ok() },
       reviewBlock: { deleteMany: ok() },
       mobileInstall: { deleteMany: ok() },
       passwordResetCode: { deleteMany: ok() },
@@ -37,7 +38,9 @@ const m = vi.hoisted(() => {
 });
 
 vi.mock("@/lib/db", () => ({ default: m.prisma }));
-vi.mock("@/services/AppleTokenService", () => ({ appleTokenService: { revokeForUser: vi.fn().mockResolvedValue(0) } }));
+vi.mock("@/services/AppleTokenService", () => ({
+  appleTokenService: { collectForUser: vi.fn().mockResolvedValue([]), revokeTokens: vi.fn().mockResolvedValue(0) },
+}));
 vi.mock("@/lib/audit-log", () => ({ writeAuditLog: m.audit }));
 vi.mock("@/services/auth/password-reset", () => ({ requestPasswordReset: m.requestPasswordReset }));
 vi.mock("@/lib/mail", () => ({ sendVerificationEmail: m.sendVerificationEmail }));
@@ -53,6 +56,9 @@ const auditActions = () => m.audit.mock.calls.map((c) => c[0].action);
 
 beforeEach(() => {
   vi.clearAllMocks();
+  m.prisma.$transaction.mockImplementation(async (fn: unknown) =>
+    typeof fn === "function" ? (fn as (tx: typeof m.prisma) => unknown)(m.prisma) : [],
+  );
   m.prisma.user.count.mockResolvedValue(2);
   m.requestPasswordReset.mockResolvedValue(undefined);
   m.sendVerificationEmail.mockResolvedValue(undefined);

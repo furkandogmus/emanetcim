@@ -1509,7 +1509,9 @@
       "guestContactRequired": "Lütfen e-posta veya telefon girin",
       "unauthorized": "Bu işlem için yetkiniz yok.",
       "generic": "İşlem tamamlanamadı.",
-      "lastAdmin": "Tek yönetici sizsiniz; önce başka bir yönetici ekleyin."
+      "lastAdmin": "Tek yönetici sizsiniz; önce başka bir yönetici ekleyin.",
+      "guestUseDelete": "Hesabınızı bu sayfadan doğrudan kapatabilirsiniz.",
+      "notFound": "Hesap bulunamadı."
     },
     "deleteConfirmTitle": "Hesabınızı kapatmak üzeresiniz",
     "deleteConfirmBody": "Bu işlem geri alınamaz. Kişisel verileriniz anonimleştirilir ve oturumunuz kapatılır.",
@@ -1977,7 +1979,8 @@
     "reviewReportRateLimited": "Çok fazla bildirim gönderdiniz; biraz sonra tekrar deneyin.",
     "reviewAlreadyHidden": "Yorum zaten gizli.",
     "reviewNotHidden": "Yorum gizli değil.",
-    "reviewReasonRequired": "Gizlemek için gerekçe yazın."
+    "reviewReasonRequired": "Gizlemek için gerekçe yazın.",
+    "accountDeletionGuest": "Hesabınızı bu sayfadan doğrudan kapatabilirsiniz."
   },
   "Emails": {
     "verificationSubject": "E-postanızı Doğrulayın",
@@ -2841,9 +2844,10 @@
     "completed": "Hesap silindi.",
     "cancel": "Talebi iptal et",
     "cancelTitle": "Talep iptal edilsin mi?",
-    "cancelBody": "Kapatılan dükkanlar yeniden açılır. Gerekçe denetim kaydına girer.",
     "cancelled": "Talep iptal edildi.",
-    "reasonLabel": "Gerekçe (en az 5 karakter)"
+    "reasonLabel": "Gerekçe (en az 5 karakter)",
+    "cancelBodyShops": "Şu dükkanlar yeniden açılır: {shops}. Gerekçe denetim kaydına girer.",
+    "cancelBodyNoShops": "Yeniden açılacak dükkan yok (dükkan yoksa ya da bekleme süresinde değiştiyse). Gerekçe denetim kaydına girer."
   },
   "AdminReviews": {
     "back": "Panele dön",

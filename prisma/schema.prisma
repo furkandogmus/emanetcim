@@ -529,17 +529,20 @@ model Review {
 /// Yorum sikayeti (App Review 1.2, 2026-11-23). Kullanici basina yorum basina
 /// tek satir; ayni yorumu ikinci kez bildirmek yeni satir acmaz.
 model ReviewReport {
-  id         String             @id @default(cuid())
-  reviewId   String
+  id                   String             @id @default(cuid())
+  reviewId             String
   /// Bildiren hesap.
-  userId     String
-  reason     ReviewReportReason
-  note       String?
-  createdAt  DateTime           @default(now())
+  userId               String
+  reason               ReviewReportReason
+  /// Otomatik gizleme esigine sayilir mi. Dukkan sahibi, yonetici ve yeni/tek
+  /// rezervasyonsuz hesaplarin bildirimi kaydedilir ama yorumu tek basina gizleyemez.
+  countsTowardAutoHide Boolean            @default(true)
+  note                 String?
+  createdAt            DateTime           @default(now())
   /// Yonetici yorum hakkinda karar verince dolar.
-  resolvedAt DateTime?
-  review     Review             @relation(fields: [reviewId], references: [id], onDelete: Cascade)
-  user       User               @relation(fields: [userId], references: [id], onDelete: Cascade)
+  resolvedAt           DateTime?
+  review               Review             @relation(fields: [reviewId], references: [id], onDelete: Cascade)
+  user                 User               @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@unique([reviewId, userId])
   @@index([userId, createdAt])
@@ -1031,23 +1034,25 @@ enum Role {
 /// rezervasyon ve bekleyen hakedis kalmadiginda ayni anonimlestirme yoluyla
 /// tamamlar. Kullanici basina tek satir: iptal edilen talep yeniden acilabilir.
 model AccountDeletionRequest {
-  id                 String                @id @default(cuid())
-  userId             String                @unique
-  role               Role
-  status             AccountDeletionStatus @default(PENDING)
+  id               String                @id @default(cuid())
+  userId           String                @unique
+  role             Role
+  status           AccountDeletionStatus @default(PENDING)
   /// Tamamlandi e-postasinin adresi (anonimlestirme hesabin e-postasini siler).
   /// E-posta gonderilince bosaltilir.
-  contactEmail       String?
-  contactLocale      String?
-  note               String?
-  /// Talep aninda yeni rezervasyona kapatilan dukkanlar; iptalde geri acilir.
-  deactivatedShopIds String[]              @default([])
-  requestedAt        DateTime              @default(now())
+  contactEmail     String?
+  contactLocale    String?
+  note             String?
+  /// Talep aninda bu talebin kapattigi dukkanlar: `[{ id, updatedAt }]`. Iptalde yalnizca
+  /// hala kapali ve o andan beri degismemis olanlar acilir; yonetici arada kendisi
+  /// kapattiysa (ya da duzenlediyse) dokunulmaz.
+  deactivatedShops Json                  @default("[]")
+  requestedAt      DateTime              @default(now())
   /// Taahhut edilen son gun (talep + `ACCOUNT_DELETION_SLA_DAYS`).
-  dueAt              DateTime
-  resolvedAt         DateTime?
-  resolvedById       String?
-  user               User                  @relation(fields: [userId], references: [id], onDelete: Cascade)
+  dueAt            DateTime
+  resolvedAt       DateTime?
+  resolvedById     String?
+  user             User                  @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@index([status, requestedAt])
 }

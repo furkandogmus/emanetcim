@@ -1831,7 +1831,6 @@
     "failed": "Nicht abgeschlossen",
     "cancel": "Anfrage abbrechen",
     "cancelTitle": "Anfrage abbrechen?",
-    "cancelBody": "Geschlossene Geschäfte werden wieder geöffnet. Die Begründung wird protokolliert.",
     "cancelled": "Anfrage abgebrochen.",
     "dates": "Angefragt {{requested}} · fällig {{due}}",
     "blockers": "Nicht möglich: {{bookings}} aktive Buchungen, {{payouts}} offene Auszahlungen.",
@@ -1846,7 +1845,10 @@
       "not_pending": "Die Anfrage ist nicht mehr offen.",
       "cannot_delete_self": "Du kannst deine eigene Anfrage nicht abschließen.",
       "invalid_reason": "Die Begründung braucht mindestens 5 Zeichen.",
-      "not_found": "Anfrage nicht gefunden."
-    }
+      "not_found": "Anfrage nicht gefunden.",
+      "last_admin": "Es bliebe kein Admin übrig; füge zuerst einen weiteren hinzu."
+    },
+    "cancelBodyShops": "Diese Geschäfte werden wieder geöffnet: {{shops}}. Die Begründung wird protokolliert.",
+    "cancelBodyNoShops": "Kein Geschäft wird wieder geöffnet. Die Begründung wird protokolliert."
   }
 }

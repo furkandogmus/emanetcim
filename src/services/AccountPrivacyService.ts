@@ -1,6 +1,7 @@
 import prisma from "@/lib/db";
 import { PASSWORD_RESET_IDENTIFIER_PREFIX } from "@/lib/password-reset-token";
-import { BookingStatus, Role } from "@prisma/client";
+import { BookingStatus, Prisma, Role } from "@prisma/client";
+import { getPaymentProvider } from "@/lib/payments";
 import { writeAuditLog } from "@/lib/audit-log";
 import { ANONYMIZED_EMAIL_DOMAIN, isAnonymizedEmail } from "@/lib/anonymized-account";
 import { NOT_DROPPED_STATUSES } from "@/lib/booking-closure";
@@ -75,10 +76,29 @@ export type CompleteDeletionResult =
   | { ok: true }
   | {
       ok: false;
-      reason: "not_found" | "not_pending" | "cannot_delete_self" | "active_bookings" | "pending_payouts";
+      reason: "not_found" | "not_pending" | "cannot_delete_self" | "active_bookings" | "pending_payouts" | "last_admin";
     };
 
 export type CancelDeletionResult = { ok: true } | { ok: false; reason: "not_found" | "not_pending" | "invalid_reason" };
+
+type Db = Prisma.TransactionClient | typeof prisma;
+export type DeactivatedShop = { id: string; updatedAt: string };
+
+function parseDeactivated(raw: Prisma.JsonValue): DeactivatedShop[] {
+  if (!Array.isArray(raw)) return [];
+  return raw.flatMap((x) =>
+    x && typeof x === "object" && !Array.isArray(x) && typeof x.id === "string" && typeof x.updatedAt === "string"
+      ? [{ id: x.id, updatedAt: x.updatedAt }]
+      : [],
+  );
+}
+
+class AlreadyPending extends Error {}
+class CompletionAbort extends Error {
+  constructor(readonly reason: "not_pending" | "active_bookings" | "pending_payouts" | "last_admin") {
+    super(reason);
+  }
+}
 
 /** Yoneticinin silme gerekcesi: denetim kaydina girer, bos ya da anlamsiz olamaz. */
 export const ADMIN_ERASURE_REASON_MIN = 5;
@@ -196,6 +216,7 @@ class AccountPrivacyService {
    *
    * Talep aninda esnafin acik dukkanlari yeni rezervasyona kapanir (pasif).
    * Giris acik kalir: esnaf elindeki rezervasyonlari teslim edebilmeli.
+   * Bekleyen talep varken ikinci istek hicbir seyi ezmez, yeniden bildirim gondermez.
    */
   async requestDeletion(params: {
     userId: string;
@@ -208,17 +229,12 @@ class AccountPrivacyService {
     const { userId, role, ip } = params;
     if (role === Role.GUEST) return { ok: false, reason: "guest_use_delete" };
 
-    const user = await prisma.user.findUnique({
-      where: { id: userId },
-      select: { id: true, name: true, email: true, accountDeletionRequest: { select: { status: true, dueAt: true } } },
-    });
+    const user = await prisma.user.findUnique({ where: { id: userId }, select: { id: true, name: true, email: true } });
     if (!user || isAnonymizedEmail(user.email)) return { ok: false, reason: "not_found" };
 
-    const existing = user.accountDeletionRequest;
-    if (existing?.status === "PENDING") {
-      return { ok: true, alreadyPending: true, dueAt: existing.dueAt, slaDays: ACCOUNT_DELETION_SLA_DAYS };
-    }
-    if (role === Role.ADMIN && (await this.otherActiveAdminCount(userId)) === 0) {
+    const pending = await this.pendingView(userId);
+    if (pending) return pending;
+    if (role === Role.ADMIN && (await this.otherActiveAdminCount(prisma, userId)) === 0) {
       return { ok: false, reason: "last_admin" };
     }
 
@@ -227,25 +243,43 @@ class AccountPrivacyService {
     const note = params.note?.trim().slice(0, DELETION_NOTE_MAX) || null;
     const locale = params.locale?.trim().slice(0, 8) || null;
 
-    const deactivated = await prisma.$transaction(async (tx) => {
-      const shops = await tx.shop.findMany({ where: { ownerId: userId, isActive: true }, select: { id: true } });
-      const ids = shops.map((s) => s.id);
-      if (ids.length > 0) await tx.shop.updateMany({ where: { id: { in: ids } }, data: { isActive: false } });
-      const data = {
-        role,
-        status: "PENDING" as const,
-        contactEmail: user.email,
-        contactLocale: locale,
-        note,
-        deactivatedShopIds: ids,
-        requestedAt: now,
-        dueAt,
-        resolvedAt: null,
-        resolvedById: null,
-      };
-      await tx.accountDeletionRequest.upsert({ where: { userId }, create: { userId, ...data }, update: data });
-      return ids;
-    });
+    let deactivated: DeactivatedShop[];
+    try {
+      deactivated = await prisma.$transaction(async (tx) => {
+        const base = { role, status: "PENDING" as const, contactEmail: user.email, contactLocale: locale, note, requestedAt: now, dueAt, resolvedAt: null, resolvedById: null };
+        /*
+          Talep once SAHIPLENIR: yeni satir ya da bitmis bir satirin kosullu yeniden
+          acilmasi. Esanli ikinci istek ya benzersiz anahtarda (P2002) ya da kosulda
+          (count 0) duser; dukkan listesi ve bildirim yalnizca bir kez olur.
+        */
+        const reopened = await tx.accountDeletionRequest.updateMany({
+          where: { userId, status: { not: "PENDING" } },
+          data: { ...base, deactivatedShops: [] },
+        });
+        if (reopened.count === 0) {
+          const exists = await tx.accountDeletionRequest.findUnique({ where: { userId }, select: { id: true } });
+          if (exists) throw new AlreadyPending();
+          await tx.accountDeletionRequest.create({ data: { userId, ...base, deactivatedShops: [] } });
+        }
+        const shops = await tx.shop.findMany({ where: { ownerId: userId, isActive: true }, select: { id: true } });
+        if (shops.length === 0) return [];
+        await tx.shop.updateMany({ where: { id: { in: shops.map((s) => s.id) } }, data: { isActive: false } });
+        // Iptalde "bu talepten beri degismedi mi" sorusu icin her dukkanin yeni damgasi.
+        const stamped = await tx.shop.findMany({
+          where: { id: { in: shops.map((s) => s.id) } },
+          select: { id: true, updatedAt: true },
+        });
+        const marks = stamped.map((s) => ({ id: s.id, updatedAt: s.updatedAt.toISOString() }));
+        await tx.accountDeletionRequest.update({ where: { userId }, data: { deactivatedShops: marks } });
+        return marks;
+      });
+    } catch (e) {
+      if (e instanceof AlreadyPending || (e instanceof Prisma.PrismaClientKnownRequestError && e.code === "P2002")) {
+        const again = await this.pendingView(userId);
+        if (again) return again;
+      }
+      throw e;
+    }
 
     writeAuditLog({
       actorUserId: userId,
@@ -263,6 +297,13 @@ class AccountPrivacyService {
     return { ok: true, alreadyPending: false, dueAt, slaDays: ACCOUNT_DELETION_SLA_DAYS };
   }
 
+  private async pendingView(userId: string): Promise<RequestDeletionResult | null> {
+    const r = await prisma.accountDeletionRequest.findUnique({ where: { userId }, select: { status: true, dueAt: true } });
+    return r?.status === "PENDING"
+      ? { ok: true, alreadyPending: true, dueAt: r.dueAt, slaDays: ACCOUNT_DELETION_SLA_DAYS }
+      : null;
+  }
+
   async getDeletionRequest(userId: string): Promise<DeletionRequestView | null> {
     return prisma.accountDeletionRequest.findUnique({
       where: { userId },
@@ -270,7 +311,10 @@ class AccountPrivacyService {
     });
   }
 
-  /** Yonetici kuyrugu: bekleyenler once, her satirda tamamlamayi engelleyen durum. */
+  /**
+   * Yonetici kuyrugu: bekleyenler once, her satirda tamamlamayi engelleyen durum ve
+   * iptalde yeniden acilacak dukkanlar (iptal onayinda gosterilir).
+   */
   async listDeletionRequests() {
     const rows = await prisma.accountDeletionRequest.findMany({
       orderBy: [{ status: "asc" }, { requestedAt: "asc" }],
@@ -279,16 +323,22 @@ class AccountPrivacyService {
     });
     const now = new Date();
     return Promise.all(
-      rows.map(async (r) => ({
-        ...r,
-        blockers: r.status === "PENDING" ? await this.completionBlockers(r.userId, now) : { activeBookings: 0, pendingPayouts: 0 },
-      })),
+      rows.map(async (r) => {
+        const pending = r.status === "PENDING";
+        return {
+          ...r,
+          blockers: pending ? await this.completionBlockers(prisma, r.userId, now) : { activeBookings: 0, pendingPayouts: 0 },
+          reopenShops: pending ? await this.reopenableShops(prisma, r.userId, parseDeactivated(r.deactivatedShops)) : [],
+        };
+      }),
     );
   }
 
   /**
-   * Yonetici tamamlar: AYNI anonimlestirme govdesi (`erase`). Misafir olarak ya
-   * da dukkaninda aktif rezervasyon, ya da bekleyen hakedis varken olmaz.
+   * Yonetici tamamlar. Talep, dukkanlarin kapatilmasi, engel kontrolu ve silme TEK
+   * islemde: talep satiri kosulla sahiplenilir (esanli iptal ya da ikinci tamamlama
+   * 0 satir gorup duser), engeller o kilit altinda yeniden sayilir. Islem geri
+   * alinirsa hicbir sey degismez; denetim kaydi ve e-posta yalnizca basarida.
    */
   async completeDeletionRequest(params: {
     requestId: string;
@@ -300,17 +350,33 @@ class AccountPrivacyService {
     if (req.userId === params.actor.userId) return { ok: false, reason: "cannot_delete_self" };
 
     const now = new Date();
-    const blockers = await this.completionBlockers(req.userId, now);
-    if (blockers.activeBookings > 0) return { ok: false, reason: "active_bookings" };
-    if (blockers.pendingPayouts > 0) return { ok: false, reason: "pending_payouts" };
+    // Kapanacak suresi dolmus misafir kayitlari ve Apple token'lari islemden ONCE okunur.
+    await closeExpiredBookingsForGuest(req.userId, now);
+    const appleTokens = await appleTokenService.collectForUser(req.userId);
 
-    await this.erase(req.userId, now);
-    // Kosullu: iki yonetici ayni anda tamamlarsa ikinci e-posta gitmez.
-    const { count } = await prisma.accountDeletionRequest.updateMany({
-      where: { id: req.id, status: "PENDING" },
-      data: { status: "COMPLETED", resolvedAt: now, resolvedById: params.actor.userId, contactEmail: null },
-    });
+    try {
+      await prisma.$transaction(async (tx) => {
+        const claimed = await tx.accountDeletionRequest.updateMany({
+          where: { id: req.id, status: "PENDING" },
+          data: { status: "COMPLETED", resolvedAt: now, resolvedById: params.actor.userId, contactEmail: null },
+        });
+        if (claimed.count === 0) throw new CompletionAbort("not_pending");
+        // Yonetici arada dukkani yeniden actiysa da yeni rezervasyon alamaz; sayim bundan sonra.
+        await tx.shop.updateMany({ where: { ownerId: req.userId, isActive: true }, data: { isActive: false } });
+        const blockers = await this.completionBlockers(tx, req.userId, now);
+        if (blockers.activeBookings > 0) throw new CompletionAbort("active_bookings");
+        if (blockers.pendingPayouts > 0) throw new CompletionAbort("pending_payouts");
+        if (req.role === Role.ADMIN && (await this.otherActiveAdminCount(tx, req.userId)) === 0) {
+          throw new CompletionAbort("last_admin");
+        }
+        await this.eraseWithinTx(tx, req.userId);
+      });
+    } catch (e) {
+      if (e instanceof CompletionAbort) return { ok: false, reason: e.reason };
+      throw e;
+    }
 
+    await appleTokenService.revokeTokens(req.userId, appleTokens);
     writeAuditLog({
       actorUserId: params.actor.userId,
       actorRole: "ADMIN",
@@ -320,7 +386,7 @@ class AccountPrivacyService {
       metadata: { requestId: req.id, role: req.role },
       ip: params.actor.ip,
     });
-    if (count > 0 && req.contactEmail) {
+    if (req.contactEmail) {
       void notificationService
         .sendAccountDeletionCompleted(req.contactEmail, req.contactLocale ?? "tr")
         .catch((err) => logger.error({ err, requestId: req.id }, "account_deletion_completed_email_failed"));
@@ -328,7 +394,11 @@ class AccountPrivacyService {
     return { ok: true };
   }
 
-  /** Yonetici talebi iptal eder (ornegin kullanici vazgecti); kapatilan dukkanlar geri acilir. */
+  /**
+   * Yonetici talebi iptal eder (ornegin kullanici vazgecti). Yalnizca BU talebin
+   * kapattigi ve o andan beri degismemis dukkanlar acilir: yonetici bekleme
+   * suresinde bir dukkani kendisi kapattiysa iptal onu geri acmaz.
+   */
   async cancelDeletionRequest(params: {
     requestId: string;
     reason: string;
@@ -342,21 +412,19 @@ class AccountPrivacyService {
     if (!req) return { ok: false, reason: "not_found" };
     if (req.status !== "PENDING") return { ok: false, reason: "not_pending" };
 
-    const done = await prisma.$transaction(async (tx) => {
+    const reopened = await prisma.$transaction(async (tx) => {
       const { count } = await tx.accountDeletionRequest.updateMany({
         where: { id: req.id, status: "PENDING" },
         data: { status: "CANCELLED", resolvedAt: new Date(), resolvedById: params.actor.userId },
       });
-      if (count === 0) return false;
-      if (req.deactivatedShopIds.length > 0) {
-        await tx.shop.updateMany({
-          where: { id: { in: req.deactivatedShopIds }, ownerId: req.userId },
-          data: { isActive: true },
-        });
+      if (count === 0) return null;
+      const shops = await this.reopenableShops(tx, req.userId, parseDeactivated(req.deactivatedShops));
+      if (shops.length > 0) {
+        await tx.shop.updateMany({ where: { id: { in: shops.map((s) => s.id) } }, data: { isActive: true } });
       }
-      return true;
+      return shops.map((s) => s.id);
     });
-    if (!done) return { ok: false, reason: "not_pending" };
+    if (!reopened) return { ok: false, reason: "not_pending" };
 
     writeAuditLog({
       actorUserId: params.actor.userId,
@@ -364,14 +432,25 @@ class AccountPrivacyService {
       action: "account.deletion_cancelled",
       entityType: "User",
       entityId: req.userId,
-      metadata: { requestId: req.id, reason },
+      metadata: { requestId: req.id, reason, reopenedShops: reopened },
       ip: params.actor.ip,
     });
     return { ok: true };
   }
 
-  private async otherActiveAdminCount(userId: string): Promise<number> {
-    return prisma.user.count({
+  /** Talebin kapattigi, hala kapali ve o damgadan beri degismemis dukkanlar. */
+  private async reopenableShops(db: Db, ownerId: string, marks: DeactivatedShop[]) {
+    if (marks.length === 0) return [];
+    const shops = await db.shop.findMany({
+      where: { id: { in: marks.map((m) => m.id) }, ownerId, isActive: false },
+      select: { id: true, name: true, updatedAt: true },
+    });
+    const stamp = new Map(marks.map((m) => [m.id, m.updatedAt]));
+    return shops.filter((s) => stamp.get(s.id) === s.updatedAt.toISOString()).map((s) => ({ id: s.id, name: s.name }));
+  }
+
+  private async otherActiveAdminCount(db: Db, userId: string): Promise<number> {
+    return db.user.count({
       where: {
         role: Role.ADMIN,
         isBanned: false,
@@ -382,19 +461,33 @@ class AccountPrivacyService {
     });
   }
 
-  private async completionBlockers(userId: string, now: Date) {
+  /*
+    Bekleyen hakedis yalnizca para platformdan geciyorsa engeldir. Elle tahsilatta
+    (`capturesOnline: false`) para zaten esnafta; PaymentSplit PENDING hic SETTLED
+    olmuyor ve sayilsaydi hicbir esnaf silinemezdi.
+  */
+  private async completionBlockers(db: Db, userId: string, now: Date) {
+    const capturesOnline = getPaymentProvider().capabilities.capturesOnline;
     const [asGuest, atShops, pendingPayouts] = await Promise.all([
-      this.hasBlockingBookings(userId, now),
-      prisma.booking.count({
+      db.booking.count({
+        where: {
+          guestId: userId,
+          status: { in: ACTIVE_BOOKING_STATUSES },
+          NOT: { status: { in: [...NOT_DROPPED_STATUSES] }, checkOutTime: { lt: now } },
+        },
+      }),
+      db.booking.count({
         where: {
           shop: { ownerId: userId },
           status: { in: ACTIVE_BOOKING_STATUSES },
           NOT: { status: { in: [...NOT_DROPPED_STATUSES] }, checkOutTime: { lt: now } },
         },
       }),
-      prisma.paymentSplit.count({ where: { shop: { ownerId: userId }, status: "PENDING" } }),
+      capturesOnline
+        ? db.paymentSplit.count({ where: { shop: { ownerId: userId }, status: "PENDING" } })
+        : Promise.resolve(0),
     ]);
-    return { activeBookings: atShops + (asGuest ? 1 : 0), pendingPayouts };
+    return { activeBookings: atShops + asGuest, pendingPayouts };
   }
 
   /*
@@ -413,70 +506,69 @@ class AccountPrivacyService {
     return activeCount > 0;
   }
 
-  /** Silme govdesi -- kendi silmesi ve yonetici silmesi AYNI listeyi kullanir. */
+  /** Misafir silmesi: suresi dolmuslari kapat, sil, Apple yetkisini islem basarili olunca iptal et. */
   private async erase(userId: string, now: Date): Promise<void> {
     await closeExpiredBookingsForGuest(userId, now);
-    // Apple yetkisi hesap satirlari silinmeden ONCE iptal edilir (5.1.1(v)); hata silmeyi durdurmaz.
-    await appleTokenService.revokeForUser(userId);
+    const appleTokens = await appleTokenService.collectForUser(userId);
+    await prisma.$transaction((tx) => this.eraseWithinTx(tx, userId));
+    await appleTokenService.revokeTokens(userId, appleTokens);
+  }
 
+  /** Silme govdesi -- kendi silmesi, yonetici silmesi ve talep tamamlama AYNI listeyi kullanir. */
+  private async eraseWithinTx(tx: Prisma.TransactionClient, userId: string): Promise<void> {
     const anonEmail = `gdpr_${userId.replace(/-/g, "").slice(0, 20)}${ANONYMIZED_EMAIL_DOMAIN}`;
     // E-postaya bagli (userId'siz) satirlar: sifirlama kodu, sifirlama/dogrulama token'lari.
-    const current = await prisma.user.findUnique({ where: { id: userId }, select: { email: true } });
+    const current = await tx.user.findUnique({ where: { id: userId }, select: { email: true, role: true } });
     const email = current?.email?.trim().toLowerCase();
 
-    await prisma.$transaction([
-      ...(email
-        ? [
-            prisma.passwordResetCode.deleteMany({ where: { email } }),
-            prisma.verificationToken.deleteMany({
-              where: { identifier: { in: [email, `${PASSWORD_RESET_IDENTIFIER_PREFIX}${email}`] } },
-            }),
-          ]
-        : []),
-      prisma.session.deleteMany({ where: { userId } }),
-      prisma.account.deleteMany({ where: { userId } }),
-      prisma.review.deleteMany({ where: { guestId: userId } }),
-      prisma.reviewReport.deleteMany({ where: { userId } }),
-      prisma.reviewBlock.deleteMany({ where: { OR: [{ userId }, { blockedUserId: userId }] } }),
-      prisma.legalAcceptance.deleteMany({ where: { userId } }),
-      prisma.pushSubscription.deleteMany({ where: { userId } }),
-      /*
-        MOBIL CIHAZ TOKEN'I. Bu satir 2026-09-01'e kadar IKI TASIYICIDA DA
-        YOKTU -- `pushSubscription` siliniyordu, yani niyet acikti; bu tablo
-        sonradan eklenmis ve silme yolu guncellenmemisti.
-      */
-      prisma.mobilePushToken.deleteMany({ where: { userId } }),
-      prisma.mobileInstall.deleteMany({ where: { userId } }),
-      /*
-        Satir SILINMIYOR, alanlari bosaltiliyor: rezervasyon gecmisi ve esnafin
-        hakedis defteri bu id'ye bagli. Bu yuzden `onDelete: Cascade` bagli
-        tablolarda ATESLENMEZ -- silinmesi gerekenler yukarida ACIKCA yaziliyor.
-      */
-      prisma.user.update({
-        where: { id: userId },
-        data: {
-          email: anonEmail,
-          phone: null,
-          name: null,
-          image: null,
-          passwordHash: null,
-          /*
-            TOKENVERSION ARTIRILIR (2026-09-10'da bulundu). `prisma.session`
-            silme, Auth.js'in JWT-stratejili web oturumunu DUSURMEZ (bu proje
-            DB session'i degil, cerezdeki JWT'yi kullaniyor) ve mobil access/
-            refresh token'lari da stateless -- ikisi de gecerliligi yalniz
-            `tokenVersion` karsilastirmasina bagliyor (auth.ts jwt callback'i,
-            requireMobileUser). Bu satir olmadan "hesabimi sil" isleyen bir
-            kullanicinin ONCEDEN acik oturumlari (web cerezi 60 saniyede bir
-            yeniden dogrulanana/30 gun boyunca, mobil access token kendi
-            omrunce) anonimlestirilmis satira karsi calismaya devam ediyordu --
-            `toggleUserBanAction`/sifre sifirlama/`revokeAllUserSessions`
-            projede kurulu ayni desen burada atlanmisti.
-          */
-          tokenVersion: { increment: 1 },
-        },
-      }),
-    ]);
+    if (email) {
+      await tx.passwordResetCode.deleteMany({ where: { email } });
+      await tx.verificationToken.deleteMany({
+        where: { identifier: { in: [email, `${PASSWORD_RESET_IDENTIFIER_PREFIX}${email}`] } },
+      });
+    }
+    // Bu kullanicinin acik bildirimleri kuyruk sayacindan duser, sonra satirlar silinir.
+    const openReports = await tx.reviewReport.findMany({ where: { userId, resolvedAt: null }, select: { reviewId: true } });
+    if (openReports.length > 0) {
+      await tx.review.updateMany({
+        where: { id: { in: openReports.map((r) => r.reviewId) }, openReportCount: { gt: 0 } },
+        data: { openReportCount: { decrement: 1 } },
+      });
+    }
+    await tx.session.deleteMany({ where: { userId } });
+    await tx.account.deleteMany({ where: { userId } });
+    await tx.review.deleteMany({ where: { guestId: userId } });
+    await tx.reviewReport.deleteMany({ where: { userId } });
+    await tx.reviewBlock.deleteMany({ where: { OR: [{ userId }, { blockedUserId: userId }] } });
+    await tx.legalAcceptance.deleteMany({ where: { userId } });
+    await tx.pushSubscription.deleteMany({ where: { userId } });
+    // Mobil cihaz token'i anonimlestirmeden sag cikan tek tanimlayici olurdu (2026-09-01).
+    await tx.mobilePushToken.deleteMany({ where: { userId } });
+    await tx.mobileInstall.deleteMany({ where: { userId } });
+    /*
+      Esnafin odeme/vergi kimligi (TCKN/VKN, IBAN, unvan, adres, iletisim). Elle
+      tahsilatta platform esnafa fatura kesmez ve hakedis odemez; bu alanlari
+      saklamayi gerektiren bir defter yok. Dukkan ve rezervasyon kayitlari kalir.
+    */
+    await tx.merchantProfile.deleteMany({ where: { shop: { ownerId: userId } } });
+    /*
+      Satir SILINMIYOR, alanlari bosaltiliyor: rezervasyon gecmisi ve esnafin
+      hakedis defteri bu id'ye bagli, `onDelete: Cascade` ATESLENMEZ.
+      `tokenVersion` artisi acik web/mobil oturumlarini dusurur (JWT, 2026-09-10).
+      Yonetici misafire indirilir: anonim satir yetki tasimamali.
+    */
+    await tx.user.update({
+      where: { id: userId },
+      data: {
+        email: anonEmail,
+        phone: null,
+        name: null,
+        image: null,
+        passwordHash: null,
+        tokenVersion: { increment: 1 },
+        ...(current?.role === Role.ADMIN ? { role: Role.GUEST } : {}),
+      },
+    });
   }
 }
 

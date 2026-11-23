@@ -12,6 +12,7 @@ const ERROR_KEY: Record<string, string> = {
   active_bookings: "Errors.accountDeleteActiveBookings",
   pending_payouts: "Errors.accountDeletionPendingPayouts",
   invalid_reason: "Errors.accountDeletionReason",
+  last_admin: "Errors.accountDeletionLastAdmin",
 };
 
 /** Yonetici: silme talebini tamamla (anonimlestir). Mobil `admin/account-deletions/:id/complete` ile ayni servis. */
