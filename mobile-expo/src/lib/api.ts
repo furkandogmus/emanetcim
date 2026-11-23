@@ -173,8 +173,36 @@ const REQUEST_TIMEOUT_MS = 12_000;
 const REFRESH_RETRY_TIMEOUT_MS = 30_000;
 const UPLOAD_TIMEOUT_MS = 60_000;
 
-/** `fetch` ve XHR yanitlarinin ortak, kullandigimiz kadarlik yuzu. */
-type HttpResponse = { status: number; ok: boolean; text(): Promise<string>; json(): Promise<unknown> };
+/** `fetch` ve XHR yanitlarinin ortak, kullandigimiz kadarlik yuzu. XHR (yukleme) baslik tasimaz. */
+type HttpResponse = {
+  status: number;
+  ok: boolean;
+  headers?: { get(name: string): string | null };
+  text(): Promise<string>;
+  json(): Promise<unknown>;
+};
+
+/** Sunucu: Bearer geldi ama reddedildi, yanit anonim (`resolveMobileShopViewer`). */
+const AUTH_STALE_HEADER = "X-Auth-Stale";
+/** Suresi bu kadar icinde dolacak token istekten ONCE yenilenir (saat kaymasi payi). */
+const EXPIRY_SKEW_SEC = 30;
+
+/**
+ * JWT `exp`i `skewSec` icinde doluyor (ya da dolmus) mu? Okunamayan token `false`:
+ * karar sunucunun, istek eskisi gibi gider ve 401 yolu calisir.
+ */
+export function accessTokenExpiring(token: string, nowMs = Date.now(), skewSec = EXPIRY_SKEW_SEC): boolean {
+  const part = token.split(".")[1];
+  const decode = (globalThis as { atob?: (s: string) => string }).atob;
+  if (!part || !decode) return false;
+  try {
+    const b64 = part.replace(/-/g, "+").replace(/_/g, "/").padEnd(Math.ceil(part.length / 4) * 4, "=");
+    const exp = (JSON.parse(decode(b64)) as { exp?: unknown }).exp;
+    return typeof exp === "number" && exp * 1000 <= nowMs + skewSec * 1000;
+  } catch {
+    return false;
+  }
+}
 
 /**
  * Dosya yuklemesi XHR ile: Expo'nun genel `fetch`i (expo/fetch) React Native'in
@@ -289,11 +317,34 @@ type RequestOptions = {
   headers?: Record<string, string>;
   /** Iptal edilirse istek kesilir (React Query `signal`). */
   signal?: AbortSignal;
+  /**
+   * Oturumsuz da calisan uc (arama, dukkan detayi, yorumlar): token yenilenemezse
+   * istek ANONIM gider ve oturum kapatilmaz. Sunucu `X-Auth-Stale` derse bir kez
+   * yenileyip tekrarlar. Inceleme hesabi bayat token'la anonime dusup gercek
+   * dukkana rezervasyon acmasin diye (2026-11-23).
+   */
+  optionalAuth?: boolean;
 };
 
 export async function api<T>(path: string, opts: RequestOptions = {}): Promise<T> {
-  const { method = "GET", body, bearer: explicitBearer, headers: extraHeaders, signal } = opts;
+  const { method = "GET", body, bearer: explicitBearer, headers: extraHeaders, signal, optionalAuth = false } = opts;
   const auth = explicitBearer ? false : (opts.auth ?? true);
+  /** Token'siz gonder: yalnizca `optionalAuth` uclarinda, yenileme tutmadiysa. */
+  let anonymous = false;
+  /** Bu istek icin yenileme reddedildi: 401 yolu ayni refresh token'i IKINCI kez yakmasin. */
+  let refreshRejected = false;
+
+  /*
+    SURESI DOLAN TOKEN ONCEDEN YENILENIR. Yenileme `refreshOnce` ile tek ucusta
+    (sunucu refresh token tekrarini aileyi iptal ederek cezalandiriyor). Goruntuleme
+    token'i yenilenmez, ona dokunulmaz. Burada OTURUM KAPATILMAZ: zorunlu uclarda
+    karar eskisi gibi 401 yolunda, istege bagli uclarda istek anonim gider.
+  */
+  if (auth && !impersonationToken && accessToken && refreshToken && accessTokenExpiring(accessToken)) {
+    const outcome = await refreshOnce();
+    if (outcome === "rejected") refreshRejected = true;
+    if (outcome !== "ok" && optionalAuth) anonymous = true;
+  }
 
   const send = () => {
     const headers: Record<string, string> = {
@@ -307,7 +358,7 @@ export async function api<T>(path: string, opts: RequestOptions = {}): Promise<T
     const bearer =
       typeof explicitBearer === "string"
         ? explicitBearer
-        : (explicitBearer?.accessToken ?? (auth ? (impersonationToken ?? accessToken) : null));
+        : (explicitBearer?.accessToken ?? (auth && !anonymous ? (impersonationToken ?? accessToken) : null));
     if (bearer) headers.Authorization = `Bearer ${bearer}`;
     if (isForm) return uploadWithXhr(`${API_BASE_URL}${path}`, { method, headers, body }, UPLOAD_TIMEOUT_MS);
     return fetchWithTimeout(
@@ -340,7 +391,7 @@ export async function api<T>(path: string, opts: RequestOptions = {}): Promise<T
     onImpersonationEnded?.();
     throw new ApiError(401, "impersonation_ended");
   } else if (res.status === 401 && auth && refreshToken) {
-    const outcome = await refreshOnce();
+    const outcome = refreshRejected ? "rejected" : await refreshOnce();
     if (outcome === "ok") {
       res = await send();
     } else if (outcome === "network") {
@@ -356,6 +407,24 @@ export async function api<T>(path: string, opts: RequestOptions = {}): Promise<T
     await clearTokens();
     onSessionExpired?.();
     throw new ApiError(401, "session_expired");
+  }
+
+  // Istege bagli uc bayat token'i anonim yanitladi: bir kez yenile ve tekrarla; olmazsa anonim yanit kalir.
+  if (
+    optionalAuth &&
+    auth &&
+    !anonymous &&
+    !impersonationToken &&
+    refreshToken &&
+    res.headers?.get(AUTH_STALE_HEADER) === "1" &&
+    !refreshRejected &&
+    (await refreshOnce()) === "ok"
+  ) {
+    try {
+      res = await send();
+    } catch {
+      throw new ApiError(0, "network");
+    }
   }
 
   const text = await res.text();
