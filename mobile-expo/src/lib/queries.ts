@@ -113,14 +113,18 @@ export function useBooking(id: string, opts: { saveOffline?: boolean } = {}) {
 }
 
 export function useShop(id: string) {
-  return useQuery({ queryKey: keys.shop(id), queryFn: () => api<ShopDetail>(`/shops/${id}`, { auth: false }) });
+  /*
+    Token gider (2026-11-23): inceleme kum havuzu hesabi test dukkanini da gorur.
+    Sunucu bu uclarda token gecersizse anonim sayar, 401 DONMEZ; yani oturum dusmez.
+  */
+  return useQuery({ queryKey: keys.shop(id), queryFn: () => api<ShopDetail>(`/shops/${id}`) });
 }
 
 /** Dukkan ekranindaki ozet: ilk 5 yorum ve gercek toplam (dizi ucu 50'de kesip toplam vermiyordu). */
 export function useShopReviews(id: string) {
   return useQuery({
     queryKey: ["shops", id, "reviews", "summary"],
-    queryFn: () => api<ShopReviewsPage>(`/shops/${id}/reviews?paged=1&limit=5`, { auth: false }),
+    queryFn: () => api<ShopReviewsPage>(`/shops/${id}/reviews?paged=1&limit=5`),
   });
 }
 
@@ -132,7 +136,6 @@ export function useShopReviewsInfinite(id: string) {
     queryFn: ({ pageParam }) =>
       api<ShopReviewsPage>(
         `/shops/${id}/reviews?paged=1&limit=20${pageParam ? `&cursor=${encodeURIComponent(pageParam)}` : ""}`,
-        { auth: false },
       ),
     getNextPageParam: nextCursorOf,
   });
@@ -167,7 +170,8 @@ export function useNearbyShops(p: NearbyParams | null) {
         // Saate oturmayan dukkanlar da gelsin (bookable:false); eski istemci bunu gondermez.
         includeClosed: "1",
       });
-      return api<NearbyShop[]>(`/shops/nearby?${q}`, { auth: false });
+      // Token gider: kum havuzu hesabi test dukkanlarini da gorur (bkz. `useShop`).
+      return api<NearbyShop[]>(`/shops/nearby?${q}`);
     },
   });
 }

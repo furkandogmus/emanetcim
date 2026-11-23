@@ -48,6 +48,10 @@ export const resendUserVerification = (id: string, locale: string) =>
 export const setUserPassword = (id: string, password: string) =>
   api<{ ok: true }>(path(id, "password"), { method: "POST", body: { password } });
 
+/** Inceleme kum havuzu hesabi: test dukkanlarini gorur ve rezervasyon yapabilir. */
+export const setUserTestAccount = (id: string, isTest: boolean) =>
+  api<{ ok: true }>(`/admin/users/${encodeURIComponent(id)}`, { method: "PATCH", body: { isTest } });
+
 export const anonymizeUser = (id: string, confirm: string, reason: string) =>
   api<{ ok: true }>(path(id, "anonymize"), { method: "POST", body: { confirm, reason } });
 
