@@ -322,7 +322,8 @@ export class AffiliateService {
       guestDiscountRate: moneyToNumber(affiliate.guestDiscountRate),
       stats: stats.get(affiliate.id)!,
       bookings: recent.map((b) => ({
-        date: b.checkInTime.toISOString(),
+        // Yalnizca GUN (Turkiye takvimi): saat misafirin hareketini ele verir.
+        day: istanbulDay(b.checkInTime),
         shopName: b.shop.name,
         amount: moneyToNumber(b.totalPrice),
         completed: b.status === "CHECKED_OUT",

@@ -522,6 +522,9 @@ describe("araci paneli misafir verisi gostermez", () => {
     const select = m.prisma.booking.findMany.mock.calls[0][0].select;
     expect(Object.keys(select).sort()).toEqual(["affiliateCommission", "checkInTime", "shop", "status", "totalPrice"]);
     expect(JSON.stringify(panel!.bookings)).not.toMatch(/guest|email|phone|qrCode|"id"/i);
+    // Gun var, saat yok.
+    expect(panel!.bookings[0]).toMatchObject({ day: "2026-11-10" });
+    expect(JSON.stringify(panel!.bookings)).not.toMatch(/T\d{2}:\d{2}/);
   });
 });
 
