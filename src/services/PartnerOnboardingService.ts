@@ -188,7 +188,12 @@ class PartnerOnboardingService {
         // Rol koşulu yarışa karşı: iki admin aynı anda çevirirse ikincisi düşer.
         const updated = await tx.user.updateMany({
           where: { id: user.id, role: Role.GUEST },
-          data: { role: Role.PARTNER, phone, tokenVersion: { increment: 1 } },
+          data: {
+            role: Role.PARTNER,
+            phone,
+            tokenVersion: { increment: 1 },
+            ...(input.name?.trim() ? { name: input.name.trim() } : {}),
+          },
         });
         if (updated.count === 0) throw new Error("not_guest");
         const shop = await tx.shop.create({
@@ -223,6 +228,8 @@ class PartnerOnboardingService {
 
 export type ConvertGuestInput = {
   userId: string;
+  /** Verilirse hesabin adi da guncellenir (on kayittan cevirmede admin'in duzelttigi ad). */
+  name?: string;
   phone: string;
   shopName: string;
   shopAddress: string;
