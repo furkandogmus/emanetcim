@@ -84,7 +84,7 @@ export default async function AffiliatePanelPage({ params }: { params: Promise<{
             {panel.bookings.map((b, i) => (
               <li key={i} className="flex flex-wrap justify-between gap-2 py-3 text-sm">
                 <span className="text-gray-900">
-                  {formatInstant(b.date, dateLocale, { day: "2-digit", month: "short", year: "numeric" })} · {b.shopName}
+                  {formatInstant(`${b.day}T12:00:00.000Z`, dateLocale, { day: "2-digit", month: "short", year: "numeric" })} · {b.shopName}
                 </span>
                 <span className="text-gray-600">
                   <Money amount={b.amount} /> ·{" "}
