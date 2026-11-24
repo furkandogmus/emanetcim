@@ -2791,7 +2791,8 @@
     "error_not_found": "Utilisateur introuvable.",
     "error_cannot_impersonate_admin": "Impossible de voir en tant qu'administrateur.",
     "error_user_banned": "Impossible de voir en tant qu'utilisateur banni.",
-    "error_unavailable": "La vue utilisateur n'est pas disponible pour le moment."
+    "error_unavailable": "La vue utilisateur n'est pas disponible pour le moment.",
+    "staleBanner": "La vue utilisateur n'est plus valide (le compte a changé ou a été fermé). Quittez-la pour revenir à votre compte administrateur."
   },
   "AdminBroadcast": {
     "back": "Retour au tableau de bord",

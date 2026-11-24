@@ -1,10 +1,10 @@
 "use server";
 
+import { asImpersonationRead } from "@/lib/impersonation-read-scope";
 import { cookies } from "next/headers";
 import { z } from "zod";
-import { auth } from "@/auth";
 import prisma from "@/lib/db";
-import { assertAdmin } from "@/lib/action-auth";
+import { assertAdmin, actionSession } from "@/lib/action-auth";
 import { getClientIp, getClientIpOrNull } from "@/lib/client-ip";
 import { rateLimit } from "@/lib/rate-limit";
 import { revalidatePathAllLocales } from "@/lib/revalidate-locales";
@@ -57,7 +57,7 @@ export type AffiliateApplyState =
 export async function applyAffiliateAction(_prev: AffiliateApplyState, formData: FormData): Promise<AffiliateApplyState> {
   // Bal kupu: dolduran bottur, basari gibi gorunur.
   if (String(formData.get("website") ?? "").length > 0) return { status: "success" };
-  const session = await auth();
+  const session = await actionSession();
   try {
     const result = await affiliateService.apply(
       {
@@ -103,7 +103,7 @@ const previewSchema = z.object({
  * "Referans indirimi" satiri buradan gelir (mobil `checkout/quote` ile ayni
  * servis). Cerez yoksa `null`: ekran eski davranisini surdurur.
  */
-export async function previewAffiliateCheckoutAction(input: unknown) {
+async function previewAffiliateCheckoutActionImpl(input: unknown) {
   const code = (await cookies()).get(AFFILIATE_COOKIE)?.value;
   if (!code) return null;
   const parsed = previewSchema.safeParse(input);
@@ -123,7 +123,7 @@ export async function previewAffiliateCheckoutAction(input: unknown) {
     d.checkOutTime,
     await getPricingRules(),
   );
-  const session = await auth();
+  const session = await actionSession();
   const q = await checkoutDiscountService.preview({
     subtotal: totals.subtotalBeforeCoupon,
     // Web'de kupon ve davet kodu ayri alanlar: `claim` ile ayni girdiler.
@@ -140,4 +140,9 @@ export async function previewAffiliateCheckoutAction(input: unknown) {
     affiliateApplied: q.affiliate.status === "applied",
     affiliatePct: q.affiliate.ratePct,
   };
+}
+
+/** Goruntuleme oturumunda da hedefin gozuyle calisan salt okuma action'i. */
+export async function previewAffiliateCheckoutAction(...args: Parameters<typeof previewAffiliateCheckoutActionImpl>) {
+  return asImpersonationRead(() => previewAffiliateCheckoutActionImpl(...args));
 }

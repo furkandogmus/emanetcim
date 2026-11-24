@@ -1,10 +1,10 @@
 "use server";
 
+import { asImpersonationRead } from "@/lib/impersonation-read-scope";
 import { getClientIp } from "@/lib/client-ip";
 
-import { auth } from "@/auth";
 import { referralService, type ReferralRejection } from "@/services/ReferralService";
-import { requireUser } from "@/lib/action-auth";
+import { requireUser, actionSession } from "@/lib/action-auth";
 import { rateLimit } from "@/lib/rate-limit";
 
 /**
@@ -30,7 +30,7 @@ export async function getOrCreateReferralCodeAction(): Promise<
  * Referans kodu geçerliliğini kontrol eder (booking formunda önizleme için).
  * Kendi kodunu kullanamazsın.
  */
-export async function validateReferralCodeAction(
+async function validateReferralCodeActionImpl(
   code: string,
 ): Promise<{ valid: boolean; discountPct: number; reason?: ReferralRejection }> {
   if (typeof code !== "string" || !code.trim() || code.length > 32) {
@@ -52,8 +52,13 @@ export async function validateReferralCodeAction(
     return { valid: false, discountPct: 0 };
   }
 
-  const session = await auth();
+  const session = await actionSession();
   const check = await referralService.check(code, { userId: session?.user?.id });
   if (!check.ok) return { valid: false, discountPct: 0, reason: check.reason };
   return { valid: true, discountPct: check.discountPct };
+}
+
+/** Goruntuleme oturumunda da hedefin gozuyle calisan salt okuma action'i. */
+export async function validateReferralCodeAction(...args: Parameters<typeof validateReferralCodeActionImpl>) {
+  return asImpersonationRead(() => validateReferralCodeActionImpl(...args));
 }

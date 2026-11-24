@@ -196,7 +196,7 @@ export class AdminUserService {
     "Bu kullanici olarak gir" (destek). Kural burada, token'i uc imzalar.
     ADMIN hedef reddedilir: bir yonetici digerinin yetkisini devralmamali.
   */
-  async startImpersonation(targetId: string, actor: AdminActor) {
+  async startImpersonation(targetId: string, actor: AdminActor, channel: "web" | "mobile" = "mobile") {
     const target = await prisma.user.findUnique({
       where: { id: targetId },
       select: {
@@ -212,7 +212,8 @@ export class AdminUserService {
         tokenVersion: true,
       },
     });
-    if (!target) return { ok: false, error: "not_found" } as const;
+    // Silinmis (anonim) hesap yok sayilir: mobilde de "bulunamadi" olarak doner.
+    if (!target || isAnonymizedEmail(target.email)) return { ok: false, error: "not_found" } as const;
     if (target.role === "ADMIN") return { ok: false, error: "cannot_impersonate_admin" } as const;
     if (target.isBanned) return { ok: false, error: "user_banned" } as const;
 
@@ -222,6 +223,7 @@ export class AdminUserService {
       action: "admin.impersonate.start",
       entityType: "User",
       entityId: target.id,
+      metadata: { channel },
       ip: actor.ip,
     });
     return { ok: true, target } as const;

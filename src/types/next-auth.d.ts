@@ -12,8 +12,11 @@ declare module "next-auth" {
       role: Role;
       emailVerified: Date | null;
     } & DefaultSession["user"];
-    /** Yalniz yonetici "olarak goruntule" oturumunda; `user` o an hedef kullanicidir. */
-    impersonation?: { adminId: string; expiresAt: string };
+    /**
+     * Yonetici "olarak goruntule" oturumunda; `user` o an hedeftir. `stale`: cerez duruyor
+     * ama hedef artik gecersiz, oturum adminin ve serit yalniz "Cik" gosterir.
+     */
+    impersonation?: { adminId: string; expiresAt: string; stale?: undefined } | { stale: true; expiresAt: string | null };
   }
 
   interface User {

@@ -2936,7 +2936,8 @@
     "error_not_found": "Kullanıcı bulunamadı.",
     "error_cannot_impersonate_admin": "Yönetici olarak görüntüleme yapılamaz.",
     "error_user_banned": "Yasaklı kullanıcı olarak görüntüleme yapılamaz.",
-    "error_unavailable": "Görüntüleme şu an kullanılamıyor."
+    "error_unavailable": "Görüntüleme şu an kullanılamıyor.",
+    "staleBanner": "Kullanıcı görünümü artık geçerli değil (hesap değişti ya da kapatıldı). Yönetici hesabınıza dönmek için çıkın."
   },
   "AdminBroadcast": {
     "back": "Panele dön",

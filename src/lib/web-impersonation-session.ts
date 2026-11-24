@@ -2,36 +2,45 @@ import type { Role } from "@prisma/client";
 import prisma from "@/lib/db";
 import logger from "@/lib/logger";
 import { isAnonymizedEmail } from "@/lib/anonymized-account";
-import { WEB_IMPERSONATION_COOKIE, verifyWebImpersonation } from "@/lib/web-impersonation";
+import { inImpersonationReadScope } from "@/lib/impersonation-read-scope";
+import {
+  WEB_IMPERSONATION_COOKIE,
+  WEB_IMPERSONATION_STAMP_HEADER,
+  stampMatches,
+  verifyWebImpersonation,
+} from "@/lib/web-impersonation";
 
-export type WebImpersonationView = {
-  adminId: string;
-  expiresAt: Date;
-  target: {
-    id: string;
-    role: Role;
-    name: string | null;
-    email: string | null;
-    image: string | null;
-    emailVerified: Date | null;
-  };
+export type WebImpersonationTarget = {
+  id: string;
+  role: Role;
+  name: string | null;
+  email: string | null;
+  image: string | null;
+  emailVerified: Date | null;
 };
 
 /**
- * Oturum callback'inin karari. Yalnizca su durumda goruntuleme gecerli:
- * oturum sahibi (jwt callback'inde 60 sn'de bir yeniden dogrulanan) ADMIN, cerez ona
- * basilmis ve suresi dolmamis, adminin ve hedefin `tokenVersion`i degismemis, hedef
- * hala ADMIN degil, yasakli ya da silinmis degil. Aksi her durumda `null`: oturum adminin kendisi.
+ * `active`: oturum hedefe doner. `stale`: proxy cerezi dogruladi ama hedef artik
+ * gecersiz (yasak, tokenVersion, silinme, ADMIN'e yukselme) ya da admin degisti:
+ * oturum adminde kalir, serit yalniz "Cik" gosterir. Proxy yazmayi kestigi icin
+ * admin aksi halde 30 dk dugmesiz kilitli kalirdi.
  */
+export type WebImpersonationState =
+  | { kind: "active"; adminId: string; expiresAt: Date; target: WebImpersonationTarget }
+  | { kind: "stale"; expiresAt: Date | null };
+
+type TokenLike = { sub?: string | null; role?: Role | null; tv?: unknown };
+
 export async function resolveWebImpersonation(
-  token: { sub?: string | null; role?: Role | null; tv?: unknown },
-  cookieValue: string | null | undefined,
+  token: TokenLike,
+  cookieValue: string,
   now: Date = new Date(),
-): Promise<WebImpersonationView | null> {
-  if (!cookieValue || !token.sub || token.role !== "ADMIN") return null;
+): Promise<WebImpersonationState> {
+  if (!token.sub || token.role !== "ADMIN") return { kind: "stale", expiresAt: null };
   const claims = await verifyWebImpersonation(cookieValue, { adminId: token.sub, now });
-  if (!claims) return null;
-  if (typeof token.tv === "number" && token.tv !== claims.adminTv) return null;
+  if (!claims) return { kind: "stale", expiresAt: null };
+  const stale = { kind: "stale" as const, expiresAt: claims.expiresAt };
+  if (typeof token.tv === "number" && token.tv !== claims.adminTv) return stale;
 
   const target = await prisma.user.findUnique({
     where: { id: claims.targetId },
@@ -46,10 +55,11 @@ export async function resolveWebImpersonation(
       tokenVersion: true,
     },
   });
-  if (!target || target.isBanned || target.role === "ADMIN" || isAnonymizedEmail(target.email)) return null;
-  if (target.tokenVersion !== claims.targetTv) return null;
+  if (!target || target.isBanned || target.role === "ADMIN" || isAnonymizedEmail(target.email)) return stale;
+  if (target.tokenVersion !== claims.targetTv) return stale;
 
   return {
+    kind: "active",
     adminId: claims.adminId,
     expiresAt: claims.expiresAt,
     target: {
@@ -63,25 +73,42 @@ export async function resolveWebImpersonation(
   };
 }
 
-/** `auth()` istek disinda (build, betik) cagrilirsa `cookies()` firlatir: goruntuleme yok sayilir. */
-export async function readWebImpersonation(token: {
-  sub?: string | null;
-  role?: Role | null;
-  tv?: unknown;
-}): Promise<WebImpersonationView | null> {
-  if (token.role !== "ADMIN") return null;
-  let value: string | undefined;
+export type SessionImpersonation =
+  | { mode: "target"; adminId: string; expiresAt: Date; target: WebImpersonationTarget }
+  /** Okuma kapsami disindaki server action: goruntuleme var ama kimlik yok. */
+  | { mode: "anonymous"; adminId: string; expiresAt: Date }
+  | { mode: "stale"; expiresAt: Date | null };
+
+/**
+ * Oturum callback'inin girdisi. Cerez yoksa ya da proxy damgasi yok/eslesmiyorsa `null`
+ * (oturum adminin). `auth()` istek disinda cagrilirsa `headers()` firlatir: yine `null`.
+ */
+export async function readWebImpersonation(token: TokenLike): Promise<SessionImpersonation | null> {
+  let cookie: string | undefined;
+  let stamp: string | null = null;
+  let isAction = false;
   try {
-    const { cookies } = await import("next/headers");
-    value = (await cookies()).get(WEB_IMPERSONATION_COOKIE)?.value;
+    const { cookies, headers } = await import("next/headers");
+    cookie = (await cookies()).get(WEB_IMPERSONATION_COOKIE)?.value;
+    if (!cookie) return null;
+    const h = await headers();
+    stamp = h.get(WEB_IMPERSONATION_STAMP_HEADER);
+    isAction = h.has("next-action");
   } catch {
     return null;
   }
-  if (!value) return null;
+  if (!(await stampMatches(stamp, cookie))) return null;
+
+  let state: WebImpersonationState;
   try {
-    return await resolveWebImpersonation(token, value);
+    state = await resolveWebImpersonation(token, cookie);
   } catch (err) {
     logger.warn({ err }, "web_impersonation_resolve_failed");
-    return null;
+    state = { kind: "stale", expiresAt: null };
   }
+  if (state.kind === "stale") return { mode: "stale", expiresAt: state.expiresAt };
+  if (isAction && !inImpersonationReadScope()) {
+    return { mode: "anonymous", adminId: state.adminId, expiresAt: state.expiresAt };
+  }
+  return { mode: "target", adminId: state.adminId, expiresAt: state.expiresAt, target: state.target };
 }

@@ -1,6 +1,7 @@
 "use server";
 
-import { auth } from "@/auth";
+import { actionSession } from "@/lib/action-auth";
+
 import { generateVerificationToken } from "@/lib/tokens";
 import { sendVerificationEmail } from "@/lib/mail";
 import { getLocale } from "next-intl/server";
@@ -9,7 +10,7 @@ import { getLocale } from "next-intl/server";
  * Oturumu açık olan ama e-postası doğrulanmamış kullanıcıya tekrar link gönderir.
  */
 export async function resendVerificationAction() {
-  const session = await auth();
+  const session = await actionSession();
 
   if (!session?.user?.email) {
     return { success: false, error: "Errors.authRequired" };

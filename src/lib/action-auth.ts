@@ -1,5 +1,6 @@
 import { Role } from "@prisma/client";
 import { auth } from "@/auth";
+import { inImpersonationReadScope } from "@/lib/impersonation-read-scope";
 
 /**
  * Server action YETKİ KAPISI — tek yer.
@@ -64,9 +65,9 @@ async function resolveActor<R extends Role>(
     `authRequired` ile karşılıyordu, yani yetkisiz bir kullanıcıya tekrar giriş
     yapmasını söylüyordu.
   */
+  // Web "olarak goruntule" salt okunur: rol kapili action hic calismaz (stale dahil).
+  if (session?.impersonation) return { ok: false, error: "Errors.unauthorized" };
   if (!session?.user?.id) return { ok: false, error: "Errors.authRequired" };
-  // Web "olarak goruntule" salt okunur; proxy zaten yazmayi keser, bu ikinci kilit.
-  if (session.impersonation) return { ok: false, error: "Errors.unauthorized" };
   const role = session.user.role;
   if (!(allowed as readonly Role[]).includes(role)) return { ok: false, error: denied };
   return { ok: true, actor: { id: session.user.id, role: role as R } };
@@ -105,4 +106,17 @@ export function assertAdmin(): Promise<Actor<typeof Role.ADMIN>> {
 
 export function assertPartner(): Promise<Actor<(typeof PARTNER_ROLES)[number]>> {
   return assertRole(PARTNER_ROLES, "Errors.notAuthorizedPartner");
+}
+
+/**
+ * Rol kapisi olmayan action'larin oturum okumasi (`auth()` yerine; mandal
+ * `impersonation-action-guard.test.ts`). Web "olarak goruntule" oturumunda `null`:
+ * salt okuma action'i bile olsa yalniz `asImpersonationRead` kapsaminda hedefi gorur.
+ */
+export async function actionSession() {
+  const session = await auth();
+  if (session?.impersonation && !(inImpersonationReadScope() && !session.impersonation.stale && session.user?.id)) {
+    return null;
+  }
+  return session;
 }

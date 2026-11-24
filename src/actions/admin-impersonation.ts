@@ -35,7 +35,7 @@ export async function startImpersonationAction(rawUserId: unknown): Promise<Star
   const result = await adminUserService.startImpersonation(parsed.data, {
     userId: auth.actor.id,
     ip: await getClientIpOrNull(),
-  });
+  }, "web");
   if (!result.ok) return { ok: false, error: result.error };
 
   const signed = await signWebImpersonation({

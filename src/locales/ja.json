@@ -2791,7 +2791,8 @@
     "error_not_found": "ユーザーが見つかりません。",
     "error_cannot_impersonate_admin": "管理者として表示することはできません。",
     "error_user_banned": "利用停止中のユーザーとして表示することはできません。",
-    "error_unavailable": "現在ユーザー表示は利用できません。"
+    "error_unavailable": "現在ユーザー表示は利用できません。",
+    "staleBanner": "ユーザー表示は無効になりました（アカウントが変更または閉鎖されました）。終了して管理者アカウントに戻ってください。"
   },
   "AdminBroadcast": {
     "back": "ダッシュボードに戻る",

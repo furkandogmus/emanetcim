@@ -1,6 +1,7 @@
 "use server";
 
-import { auth } from "@/auth";
+import { actionSession } from "@/lib/action-auth";
+
 import { reviewService } from "@/services/ReviewService";
 import { revalidatePathAllLocales } from "@/lib/revalidate-locales";
 import prisma from "@/lib/db";
@@ -15,7 +16,7 @@ export async function addReviewAction(data: {
   rating: number;
   comment?: string;
 }) {
-  const session = await auth();
+  const session = await actionSession();
 
   if (!session?.user?.id || session.user.id !== data.guestId) {
     throw new Error("Errors.unauthorized");

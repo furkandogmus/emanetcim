@@ -1,6 +1,5 @@
 "use server";
 
-import { auth } from "@/auth";
 import { bookingService } from "@/services/BookingService";
 import {
   BookingRejectedError,
@@ -27,7 +26,7 @@ import logger from "@/lib/logger";
 import { couponService } from "@/services/CouponService";
 import { checkoutDiscountService } from "@/services/CheckoutDiscountService";
 import { AFFILIATE_COOKIE } from "@/services/AffiliateService";
-import { requireUser } from "@/lib/action-auth";
+import { requireUser, actionSession } from "@/lib/action-auth";
 import { canGuestSelfCancel } from "@/services/booking/access";
 import { guestCancelOptions } from "@/lib/booking-closure";
 import type {
@@ -70,7 +69,7 @@ export async function createBookingAction(data: CreateBookingInput) {
     ONCE; asil kapi serviste (`LOGIN_REQUIRED`). `code` istemcinin giris
     penceresini acmasi icin sabit.
   */
-  const session = await auth();
+  const session = await actionSession();
   const userId = session?.user?.id;
   if (!userId) {
     return { success: false as const, error: "Errors.loginRequired", code: "login_required" as const };

@@ -176,7 +176,8 @@ export const authConfig: NextAuthConfig = {
     },
     async session({ session, token }) {
       if (token && session.user) {
-        session.user.id = token.id as string;
+        // Gercek token'da `id` yok (`auth.ts` jwt callback'i yalniz `sub` yazar); proxy kimligi bundan okur.
+        session.user.id = (token.id ?? token.sub) as string;
         session.user.role = token.role as Role;
         session.user.emailVerified = token.emailVerified as Date | null;
       }

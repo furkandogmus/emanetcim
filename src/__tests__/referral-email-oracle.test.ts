@@ -7,7 +7,7 @@ import { describe, it, expect, vi, beforeEach } from "vitest";
  */
 const m = vi.hoisted(() => ({ check: vi.fn(), preview: vi.fn(), auth: vi.fn(), cookie: vi.fn() }));
 vi.mock("@/auth", () => ({ auth: m.auth }));
-vi.mock("@/lib/action-auth", () => ({ requireUser: vi.fn(), assertAdmin: vi.fn() }));
+vi.mock("@/lib/action-auth", () => ({ requireUser: vi.fn(), assertAdmin: vi.fn(), actionSession: () => m.auth() }));
 vi.mock("@/lib/revalidate-locales", () => ({ revalidatePathAllLocales: vi.fn() }));
 vi.mock("@/lib/logger", () => ({ default: { error: vi.fn(), warn: vi.fn(), info: vi.fn() } }));
 vi.mock("@/lib/rate-limit", () => ({ rateLimit: vi.fn().mockResolvedValue(true) }));

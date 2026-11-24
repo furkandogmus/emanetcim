@@ -2791,7 +2791,8 @@
     "error_not_found": "Nutzer nicht gefunden.",
     "error_cannot_impersonate_admin": "Die Ansicht als Administrator ist nicht möglich.",
     "error_user_banned": "Die Ansicht als gesperrter Nutzer ist nicht möglich.",
-    "error_unavailable": "Die Nutzeransicht ist derzeit nicht verfügbar."
+    "error_unavailable": "Die Nutzeransicht ist derzeit nicht verfügbar.",
+    "staleBanner": "Die Nutzeransicht ist nicht mehr gültig (das Konto wurde geändert oder geschlossen). Beenden Sie sie, um zu Ihrem Admin-Konto zurückzukehren."
   },
   "AdminBroadcast": {
     "back": "Zurück zum Dashboard",
