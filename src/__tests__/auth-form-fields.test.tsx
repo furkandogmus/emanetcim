@@ -80,10 +80,13 @@ describe("LoginClient", () => {
     fireEvent.change(identity, { target: { value: "a@b.co" } });
     fireEvent.change(screen.getByLabelText("password"), { target: { value: "x" } });
     fireEvent.submit(identity.closest("form")!);
-    await waitFor(() => expect(identity).toHaveAttribute("aria-invalid", "true"));
+    // Odak da beklenir: signIn cozulduktan sonraki commit, kontrolden sonra gelebilir.
+    await waitFor(() => {
+      expect(identity).toHaveAttribute("aria-invalid", "true");
+      expect(document.activeElement).toBe(identity);
+    });
     expect(screen.getByRole("alert")).toHaveTextContent("invalidCredentials");
     expect(identity).toHaveAccessibleDescription("invalidCredentials");
-    expect(document.activeElement).toBe(identity);
   });
   it.each([
     ["tooManyRequests", "tooManyAttempts"],
@@ -118,12 +121,14 @@ describe("RegisterClient", () => {
     fireEvent.change(email, { target: { value: "a@b.co" } });
     fireEvent.change(screen.getByLabelText("password"), { target: { value: "longpassword1" } });
     fireEvent.submit(email.closest("form")!);
-    await waitFor(() => expect(email).toHaveAttribute("aria-invalid", "true"));
+    await waitFor(() => {
+      expect(email).toHaveAttribute("aria-invalid", "true");
+      expect(document.activeElement).toBe(email);
+    });
     expect(email).toHaveAccessibleDescription("emailAlreadyRegistered");
     // Metin bir kez (alanın altında); özet kısa yönlendirme.
     expect(screen.getByRole("alert")).toHaveTextContent("fixHighlightedField");
     expect(screen.getAllByText("emailAlreadyRegistered")).toHaveLength(1);
-    expect(document.activeElement).toBe(email);
   });
 });
 

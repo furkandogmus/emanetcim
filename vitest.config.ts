@@ -12,6 +12,7 @@ export default defineConfig({
     environment: "node",
     globals: true,
     setupFiles: ["src/__tests__/setup.tsx"],
+    globalSetup: ["vitest.global-setup.ts"],
     // Unit + integration only; exclude Playwright e2e (tests/e2e, *.spec.ts)
     include: ["src/**/*.test.{ts,tsx}"],
     exclude: [

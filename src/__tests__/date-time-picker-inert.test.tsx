@@ -13,6 +13,18 @@ vi.mock("next-intl", () => ({
   useLocale: () => "tr",
 }));
 
+/*
+  Takvim `next/dynamic` ile tembel yuklenir; ilk acilista `react-day-picker`
+  (date-fns ile) bu isci icinde ilk kez donusturulup yukleniyor. Tam paket
+  yukunde bu tek basina saniyeleri buluyor ve `waitFor`in 1 sn'sini, testin
+  5 sn'sini yiyordu. Modul burada onceden yuklenir; dinamik import ayni modul
+  grafiginden hazir doner, test yalnizca davranisi olcer. Sure bu kanca icin
+  yukseltildi: is gercekten yavas bir ilk import, bekleme degil.
+*/
+beforeAll(async () => {
+  await import("react-day-picker");
+}, 30_000);
+
 beforeAll(() => {
   // Masaüstü: açılır takvim (mobilde BottomSheet).
   Object.defineProperty(window, "matchMedia", {

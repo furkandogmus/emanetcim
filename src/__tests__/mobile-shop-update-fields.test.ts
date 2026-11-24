@@ -2,6 +2,7 @@ import { describe, it, expect } from "vitest";
 import { readFileSync, readdirSync, statSync } from "node:fs";
 import { join } from "node:path";
 import { stripComments } from "./helpers/strip-comments";
+import { readSourceTree } from "./helpers/source-snapshot";
 
 /**
  * ISTEMCININ GONDERDIGI ALAN SUNUCUDA YOKSA SESSIZCE ATILIR.
@@ -53,16 +54,6 @@ describe("partner/shop guncelleme alanlari", () => {
  */
 describe("mobil istemcinin gonderdigi alanlar sunucuda taniniyor", () => {
   const KOK = join(process.cwd(), "src/app/api/mobile");
-
-  function tsDosyalari(dir: string, out: string[] = []): string[] {
-    for (const ad of readdirSync(dir)) {
-      const tam = join(dir, ad);
-      if (statSync(tam).isDirectory()) {
-        if (ad !== "__tests__") tsDosyalari(tam, out);
-      } else if (/\.tsx?$/.test(ad)) out.push(tam);
-    }
-    return out;
-  }
 
   /**
    * `/admin/reviews/${id}/${action}` -> `admin/reviews/[id]/[action]/route.ts`. `${...}`
@@ -132,7 +123,7 @@ describe("mobil istemcinin gonderdigi alanlar sunucuda taniniyor", () => {
 
   function cagrilar(): Cagri[] {
     const kaynaklar = new Map(
-      tsDosyalari(join(process.cwd(), "mobile-expo/src")).map((f) => [f, readFileSync(f, "utf-8")] as const),
+      readSourceTree("mobile-expo/src", { skipDirs: ["__tests__"] }).map((f) => [f.path, f.text] as const),
     );
     const out: Cagri[] = [];
     for (const [f, src] of kaynaklar) {
@@ -149,10 +140,12 @@ describe("mobil istemcinin gonderdigi alanlar sunucuda taniniyor", () => {
     return out;
   }
 
+  // Iki test ayni taramayi kullanir; bir kez kurulur.
+  let tarananOnbellek: Array<Cagri & { hedef: string }> | null = null;
   const taranan = () =>
-    cagrilar()
+    (tarananOnbellek ??= cagrilar()
       .map((c) => ({ ...c, hedef: ucDosyasi(c.uc) }))
-      .filter((c): c is Cagri & { hedef: string } => c.hedef !== null);
+      .filter((c): c is Cagri & { hedef: string } => c.hedef !== null));
 
   it("gonderilen her alan hedef ucta geciyor", () => {
     const ihlaller: string[] = [];

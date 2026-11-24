@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useLayoutEffect, useRef, useState } from "react";
 
 export type FieldErrors<F extends string> = Partial<Record<F, string>>;
 
@@ -30,7 +30,12 @@ export function useFieldErrors<F extends string>(formId: string) {
   const [errors, setErrorsState] = useState<FieldErrors<F>>({});
   const [focusRequest, setFocusRequest] = useState(0);
 
-  useEffect(() => {
+  /*
+    Layout effect: odak, aria-invalid'i yazan commit'le AYNI anda gelir. Pasif
+    efektte araya bir gorev giriyordu; alan "gecersiz" ama odak hala body'de
+    oluyordu (yuk altinda testte olculdu) ve ekran okuyucu hatayi kacirabiliyordu.
+  */
+  useLayoutEffect(() => {
     if (focusRequest === 0) return;
     const first = formNode.current?.querySelector<HTMLElement>('[aria-invalid="true"]');
     first?.focus();

@@ -1,7 +1,6 @@
 import { describe, it, expect, afterEach } from "vitest";
-import fs from "node:fs";
-import path from "node:path";
 import { guestLookupSecret } from "@/lib/guest-lookup-token";
+import { readSourceTree } from "./helpers/source-snapshot";
 
 /**
  * P2-6: misafir rezervasyon token'ı repoda YAZILI bir sırra düşüyordu.
@@ -25,15 +24,6 @@ afterEach(() => {
   else process.env.NEXTAUTH_SECRET = ORIGINAL_NEXTAUTH;
 });
 
-function walk(dir: string, out: string[] = []): string[] {
-  for (const entry of fs.readdirSync(dir, { withFileTypes: true })) {
-    const full = path.join(dir, entry.name);
-    if (entry.isDirectory()) walk(full, out);
-    else if (/\.(ts|tsx)$/.test(entry.name)) out.push(full);
-  }
-  return out;
-}
-
 describe("misafir token sırrı", () => {
   it("sır yoksa atar; sabit bir değere düşmez", () => {
     delete process.env.AUTH_SECRET;
@@ -48,17 +38,17 @@ describe("misafir token sırrı", () => {
   });
 
   it("repoda yazılı fallback sır yok", () => {
-    const offenders = walk("src")
-      .filter((f) => !f.endsWith("guest-token-secret.test.ts"))
+    const offenders = readSourceTree("src")
+      .filter((f) => !f.path.endsWith("guest-token-secret.test.ts"))
       .filter((f) => {
         // Yorumlar sayılmaz: hatanın kendisini yorumda ANLATAN dosyalar var.
-        const src = fs
-          .readFileSync(f, "utf8")
+        const src = f.text
           .replace(/\/\*[\s\S]*?\*\//g, "")
           .replace(/^\s*\/\/.*$/gm, "");
         // "AUTH_SECRET || <dize>" kalıbı: eksik sırrın sabit bir değere düşmesi.
         return /AUTH_SECRET\s*(\|\||\?\?)\s*["'`]/.test(src);
-      });
+      })
+      .map((f) => f.path);
     expect(offenders).toEqual([]);
   });
 });

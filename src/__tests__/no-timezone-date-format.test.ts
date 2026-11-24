@@ -105,13 +105,23 @@ const COMPILER_OPTIONS: ts.CompilerOptions = {
   paths: { "@/*": ["./src/*"] },
 };
 
+/*
+  lib.dom/lib.esnext .d.ts'leri her parcacikta yeniden ayristirmak (~MB'larca)
+  her `analyzeSnippet`i yuzlerce ms yapiyordu; paralel tam kosuda testler 5 sn
+  sinirini asiyordu. Degismeyen dosyalar programlar arasinda paylasilir.
+*/
+const libSourceFiles = new Map<string, ts.SourceFile | undefined>();
+
 /** Bellekteki tek dosyalık program: kalıp testleri için. */
 function analyzeSnippet(code: string): number[] {
   const fileName = join(process.cwd(), "__snippet__.ts");
   const host = ts.createCompilerHost(COMPILER_OPTIONS);
   const base = { getSourceFile: host.getSourceFile, fileExists: host.fileExists, readFile: host.readFile };
-  host.getSourceFile = (f, lang, ...rest) =>
-    f === fileName ? ts.createSourceFile(f, code, lang, true) : base.getSourceFile(f, lang, ...rest);
+  host.getSourceFile = (f, lang, ...rest) => {
+    if (f === fileName) return ts.createSourceFile(f, code, lang, true);
+    if (!libSourceFiles.has(f)) libSourceFiles.set(f, base.getSourceFile(f, lang, ...rest));
+    return libSourceFiles.get(f);
+  };
   host.fileExists = (f) => f === fileName || base.fileExists(f);
   host.readFile = (f) => (f === fileName ? code : base.readFile(f));
   const program = ts.createProgram([fileName], COMPILER_OPTIONS, host);
@@ -152,6 +162,11 @@ describe("src altında timeZone'suz tarih biçimlendirmesi yok (mandal)", () => 
 });
 
 describe("findUnzonedDateFormats kalıbı", () => {
+  // lib .d.ts'lerin tek seferlik ayristirmasi ilk teste yazilmasin; gercekten yavas bir ilk yukleme.
+  beforeAll(() => {
+    analyzeSnippet("export {};");
+  }, 60_000);
+
   it("dilimsiz Date.toLocaleString (seçenekli, seçeneksiz, değişken üzerinde) yakalanır", () => {
     expect(analyzeSnippet(`const d = new Date(); d.toLocaleString("tr", { hour: "2-digit" });`)).toEqual([1]);
     expect(analyzeSnippet(`const d = new Date(); d.toLocaleString("tr");`)).toEqual([1]);
