@@ -5,10 +5,12 @@ import { NextRequest } from "next/server";
  * `GET /api/mobile/geocode`: mobil arama sihirbazinin serbest metin araması.
  * Gövde `geocodePlaces` (Türkiye, beş sonuç); burada yalnizca taşıyıcı ölçülür.
  */
-const { mockGeocode, mockRateLimit } = vi.hoisted(() => ({
+const { mockGeocode, mockRateLimit, mockViewer } = vi.hoisted(() => ({
   mockGeocode: vi.fn(),
   mockRateLimit: vi.fn(),
+  mockViewer: vi.fn(),
 }));
+vi.mock("@/lib/mobile-auth", () => ({ resolveMobileShopViewer: mockViewer }));
 vi.mock("@/lib/geocode", async (orig) => ({
   ...(await orig<typeof import("@/lib/geocode")>()),
   geocodePlaces: mockGeocode,
@@ -28,6 +30,7 @@ const req = (q: string | null, headers: Record<string, string> = {}) =>
 beforeEach(async () => {
   vi.clearAllMocks();
   mockRateLimit.mockResolvedValue(true);
+  mockViewer.mockResolvedValue({ viewer: null, stale: false });
   await resetGeocodeCacheForTests();
 });
 
@@ -102,7 +105,8 @@ describe("GET /api/mobile/geocode", () => {
     expect(mockGeocode).toHaveBeenCalledTimes(1);
     const keys = mockRateLimit.mock.calls.map((c) => [c[0].replace(/:.*$/, ""), c[1]]);
     expect(keys).toEqual([
-      ["mobile_geocode", 20],
+      ["mobile_geocode", 10],
+      ["mobile_geocode_upstream_anon", 30],
       ["mobile_geocode_upstream", 60],
       ["mobile_geocode_hit", 120],
     ]);
@@ -132,5 +136,32 @@ describe("GET /api/mobile/geocode", () => {
     const res = await GET(req("Kadıköy"));
     expect(res.status).toBe(429);
     expect(mockGeocode).not.toHaveBeenCalled();
+  });
+
+  it("anonim pay dolunca anonim 429 alir, oturumlu kullanici genel kovadan gecer", async () => {
+    mockGeocode.mockResolvedValue({ ok: true, places: [{ lat: 1, lng: 2, label: "x" }] });
+    mockRateLimit.mockImplementation(async (key: string) => key !== "mobile_geocode_upstream_anon");
+    expect((await GET(req("rastgele-1"))).status).toBe(429);
+    expect(mockGeocode).not.toHaveBeenCalled();
+    // Anonim pay reddedilince genel kova hic sayilmaz.
+    expect(mockRateLimit.mock.calls.map((c) => c[0])).not.toContain("mobile_geocode_upstream");
+
+    mockRateLimit.mockClear();
+    mockViewer.mockResolvedValue({ viewer: { id: "u1", reviewSandbox: false }, stale: false });
+    const res = await GET(req("rastgele-2", { authorization: "Bearer t" }));
+    expect(res.status).toBe(200);
+    const keys = mockRateLimit.mock.calls.map((c) => [c[0], c[1]]);
+    expect(keys).toEqual([
+      ["mobile_geocode_user:u1", 20],
+      ["mobile_geocode_upstream", 60],
+    ]);
+  });
+
+  it("anonim pay genel siniri asagida tutar: oturumlulara en az yarisi kalir", async () => {
+    mockGeocode.mockResolvedValue({ ok: true, places: [{ lat: 1, lng: 2, label: "x" }] });
+    await GET(req("Kadikoy"));
+    const limits = Object.fromEntries(mockRateLimit.mock.calls.map((c) => [String(c[0]).replace(/:.*$/, ""), c[1]]));
+    expect(limits.mobile_geocode_upstream_anon * 2).toBeLessThanOrEqual(limits.mobile_geocode_upstream);
+    expect(limits.mobile_geocode).toBeLessThan(20);
   });
 });

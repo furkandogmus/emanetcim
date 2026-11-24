@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
 import { geocodePlaces, GEOCODE_MIN_QUERY_LENGTH } from "@/lib/geocode";
 import { rateLimit } from "@/lib/rate-limit";
+import { resolveMobileShopViewer } from "@/lib/mobile-auth";
 import { getClientIp } from "@/lib/get-ip";
 import { resolveRequestLocale } from "@/lib/request-locale";
 import { toMobileGeocodeResult } from "@/lib/mobile-dto";
@@ -13,13 +14,16 @@ const MAX_QUERY_LENGTH = 200;
  * Arama sihirbazinda serbest metinle yer arama; govde web ile ortak
  * (`geocodePlaces`). Oturum istemez: sihirbaz giristen once de acilir.
  *
- * Onbellek isabeti Nominatim'e gitmez: IP basina 120/dk. Kacirma IP basina 20/dk
- * (istemci 450 ms geciktirmeyle soruyor) ve tum sunucuda 60/dk: Nominatim'in
- * saniyede bir istek politikasi tum turistlerin toplamina uygulanir. Ayni IP'yi
- * paylasan otel/havalimani agi eskiden 20/dk'yi aninda tuketiyordu.
+ * Onbellek isabeti Nominatim'e gitmez: IP basina 120/dk. Kacirma tum sunucuda
+ * 60/dk (Nominatim'in saniyede bir istek politikasi herkesin toplamina uygulanir).
+ * Oturumlu kullanici kendi kovasini kullanir (otel/havalimani NAT'i paylasmaz).
+ * Anonim kacirma IP basina 10/dk ve TOPLAMDA 30/dk: rastgele sorgulu anonim
+ * trafik genel kovayi bosaltip oturumlu kullaniciyi kilitleyemez (2026-11-24).
  */
 const HIT_PER_IP = 120;
-const MISS_PER_IP = 20;
+const MISS_PER_USER = 20;
+const MISS_PER_ANON_IP = 10;
+const UPSTREAM_ANON_SHARE = 30;
 const UPSTREAM_GLOBAL = 60;
 
 export async function GET(req: NextRequest) {
@@ -37,7 +41,13 @@ export async function GET(req: NextRequest) {
   if (places) {
     if (!(await rateLimit(`mobile_geocode_hit:${ip}`, HIT_PER_IP, 60_000))) return tooMany();
   } else {
-    if (!(await rateLimit(`mobile_geocode:${ip}`, MISS_PER_IP, 60_000))) return tooMany();
+    const { viewer } = await resolveMobileShopViewer(req);
+    if (viewer) {
+      if (!(await rateLimit(`mobile_geocode_user:${viewer.id}`, MISS_PER_USER, 60_000))) return tooMany();
+    } else {
+      if (!(await rateLimit(`mobile_geocode:${ip}`, MISS_PER_ANON_IP, 60_000))) return tooMany();
+      if (!(await rateLimit("mobile_geocode_upstream_anon", UPSTREAM_ANON_SHARE, 60_000))) return tooMany();
+    }
     if (!(await rateLimit("mobile_geocode_upstream", UPSTREAM_GLOBAL, 60_000))) return tooMany();
     const result = await geocodePlaces(q, locale, { countryCodes: "tr", limit: 5 });
     if (!result.ok) return NextResponse.json({ error: "geocode_unavailable" }, { status: 503 });
