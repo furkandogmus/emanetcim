@@ -3,7 +3,7 @@
     "name": "BagajPark",
     "slug": "bagajpark",
     "scheme": "bagajpark",
-    "version": "0.3.4",
+    "version": "0.3.5",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
     "userInterfaceStyle": "light",
@@ -81,6 +81,21 @@
               "scheme": "https",
               "host": "bagajpark.com",
               "pathPattern": "/.*/shop/.*"
+            },
+            {
+              "scheme": "https",
+              "host": "bagajpark.com",
+              "pathPattern": "/.*/bookings/........-....-....-....-............"
+            },
+            {
+              "scheme": "https",
+              "host": "bagajpark.com",
+              "pathPattern": "/.*/partner/bookings/........-....-....-....-............"
+            },
+            {
+              "scheme": "https",
+              "host": "bagajpark.com",
+              "pathPattern": "/.*/account/affiliate"
             }
           ],
           "category": [
@@ -118,7 +133,10 @@
             "tr",
             "en",
             "de",
-            "ru"
+            "ru",
+            "fr",
+            "ja",
+            "fa"
           ]
         }
       ],
@@ -193,7 +211,10 @@
       "tr": "./ios-locales/tr.json",
       "en": "./ios-locales/en.json",
       "de": "./ios-locales/de.json",
-      "ru": "./ios-locales/ru.json"
+      "ru": "./ios-locales/ru.json",
+      "fr": "./ios-locales/fr.json",
+      "ja": "./ios-locales/ja.json",
+      "fa": "./ios-locales/fa.json"
     }
   }
 }

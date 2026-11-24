@@ -3,7 +3,7 @@
 // Cogul ekleri (_one/_few/_many/_other) dile gore degisir: taban adla karsilastirilir.
 import { readFileSync } from "node:fs";
 
-const LANGS = ["tr", "en", "de", "fr", "ja", "ru"];
+const LANGS = ["tr", "en", "de", "fr", "ja", "ru", "fa"];
 const load = (l) => JSON.parse(readFileSync(new URL(`../src/locales/${l}.json`, import.meta.url), "utf8"));
 const keys = (o, p = "") =>
   Object.entries(o).flatMap(([k, v]) =>

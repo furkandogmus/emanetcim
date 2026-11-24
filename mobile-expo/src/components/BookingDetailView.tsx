@@ -31,6 +31,7 @@ import { loadOfflineTicket, saveOfflineTicket, type OfflineTicket } from "@/lib/
 import { colors, radius, space } from "@/theme/tokens";
 import { StaleQueryBanner } from "@/components/StaleQueryBanner";
 import { WalletPassButton } from "@/components/WalletPassButton";
+import { flipInRtl } from "@/lib/rtl";
 
 /** Misafirin iptal edebildigi durumlar: valiz henuz dukkana teslim edilmemis. */
 const CANCELLABLE = BEFORE_DROP_OFF;
@@ -155,7 +156,7 @@ export function BookingDetailView({ id, mode }: { id: string; mode: "guest" | "p
     <SafeAreaView style={styles.safe} edges={["top"]}>
       <View style={styles.header}>
         <IconButton label={t("common.back")} onPress={() => router.back()}>
-          <ArrowLeft size={20} color={colors.ink} />
+          <ArrowLeft size={20} color={colors.ink} style={flipInRtl} />
         </IconButton>
       </View>
       <ScrollView contentContainerStyle={styles.content}>
@@ -174,7 +175,7 @@ export function BookingDetailView({ id, mode }: { id: string; mode: "guest" | "p
       <SafeAreaView style={styles.safe} edges={["top"]}>
         <View style={styles.header}>
           <IconButton label={t("common.back")} onPress={() => router.back()}>
-            <ArrowLeft size={20} color={colors.ink} />
+            <ArrowLeft size={20} color={colors.ink} style={flipInRtl} />
           </IconButton>
         </View>
         <Loading />
@@ -249,7 +250,7 @@ export function BookingDetailView({ id, mode }: { id: string; mode: "guest" | "p
     <SafeAreaView style={styles.safe} edges={["top"]}>
       <View style={styles.header}>
         <IconButton label={t("common.back")} onPress={() => router.back()}>
-          <ArrowLeft size={20} color={colors.ink} />
+          <ArrowLeft size={20} color={colors.ink} style={flipInRtl} />
         </IconButton>
       </View>
 

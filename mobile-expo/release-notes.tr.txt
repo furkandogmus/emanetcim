@@ -1,1 +1,1 @@
-Açılış daha akıcı: logo beklemeden doğrudan animasyonla başlıyor. Yeni slogan: "Valizini bırak, keyfine bak." Bırakma saatine gecikmede bilgilendirme. Yönetici için yeni yönetim ekranları ve aramada ilçe seçimi.
+Farsça dil desteği (sağdan sola düzen). Rezervasyon, esnaf rezervasyonu ve aracı paneli bağlantıları artık doğrudan uygulamada açılıyor. Uygulama güncellemeleri imzalı geliyor.

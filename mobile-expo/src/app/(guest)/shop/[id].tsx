@@ -22,6 +22,7 @@ import { useShop, useShopReviews } from "@/lib/queries";
 import { totalBags, useSearch } from "@/lib/search";
 import { isoWeekdayIndex, wallParts } from "@/lib/time";
 import { colors, fonts, radius, shadow, space } from "@/theme/tokens";
+import { flipInRtl } from "@/lib/rtl";
 
 export default function ShopDetailScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
@@ -54,7 +55,7 @@ export default function ShopDetailScreen() {
       <View style={{ flex: 1, backgroundColor: colors.bg }}>
         <View style={{ position: "absolute", top: insets.top + space.sm, left: space.lg, zIndex: 1 }}>
           <IconButton label={t("common.back")} onPress={goBackOr}>
-            <ArrowLeft size={20} color={colors.ink} />
+            <ArrowLeft size={20} color={colors.ink} style={flipInRtl} />
           </IconButton>
         </View>
         <Loading />
@@ -104,7 +105,7 @@ export default function ShopDetailScreen() {
             onPress={goBackOr}
             style={[styles.back, { top: insets.top + space.sm }, shadow.card]}
           >
-            <ArrowLeft size={20} color={colors.ink} />
+            <ArrowLeft size={20} color={colors.ink} style={flipInRtl} />
           </IconButton>
           <View style={[styles.favorite, { top: insets.top + space.sm }]}>
             <FavoriteButton shopId={shop.id} size={20} floating />

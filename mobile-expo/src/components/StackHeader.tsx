@@ -6,6 +6,7 @@ import { useTranslation } from "react-i18next";
 
 import { AppText, IconButton } from "@/components/ui";
 import { colors, space } from "@/theme/tokens";
+import { flipInRtl } from "@/lib/rtl";
 
 /**
  * Ust uste acilan ekranlarin tek basligi: geri dugmesi, ortada baslik (+ istege bagli alt
@@ -29,7 +30,7 @@ export function StackHeader({
   return (
     <View style={styles.header}>
       <IconButton label={t("common.back")} onPress={back}>
-        <ArrowLeft size={20} color={colors.ink} />
+        <ArrowLeft size={20} color={colors.ink} style={flipInRtl} />
       </IconButton>
       <View style={styles.title}>
         {title ? (

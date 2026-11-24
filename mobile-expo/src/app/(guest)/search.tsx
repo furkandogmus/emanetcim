@@ -21,6 +21,7 @@ import { totalBags, useSearch } from "@/lib/search";
 import type { Place } from "@/lib/search";
 import type { CityCoverage, DistrictCoverage } from "@/lib/types";
 import { colors, radius, space } from "@/theme/tokens";
+import { flipInRtl } from "@/lib/rtl";
 
 const STEPS = 3;
 
@@ -149,11 +150,11 @@ export default function SearchWizard() {
       <View style={styles.topBar}>
         {districtStep && step === 0 ? (
           <IconButton label={t("common.back")} onPress={() => setDistrictStep(null)}>
-            <ArrowLeft size={20} color={colors.ink} />
+            <ArrowLeft size={20} color={colors.ink} style={flipInRtl} />
           </IconButton>
         ) : (editing ? step === 2 || (step === 0 && !!search.place) : step > 0) ? (
           <IconButton label={t("common.back")} onPress={() => setStep(editing ? 1 : step - 1)}>
-            <ArrowLeft size={20} color={colors.ink} />
+            <ArrowLeft size={20} color={colors.ink} style={flipInRtl} />
           </IconButton>
         ) : (
           <View style={{ width: 44 }} />
@@ -188,7 +189,7 @@ export default function SearchWizard() {
                   {t("search.cityCenterHint")}
                 </AppText>
               </View>
-              <ChevronRight size={18} color={colors.borderStrong} />
+              <ChevronRight size={18} color={colors.borderStrong} style={flipInRtl} />
             </Pressable>
             {districtStep.districts.map((d) => (
               <Pressable
@@ -208,7 +209,7 @@ export default function SearchWizard() {
                     {t("home.citySpots", { count: d.shopCount })}
                   </AppText>
                 </View>
-                <ChevronRight size={18} color={colors.borderStrong} />
+                <ChevronRight size={18} color={colors.borderStrong} style={flipInRtl} />
               </Pressable>
             ))}
           </View>
@@ -288,7 +289,7 @@ export default function SearchWizard() {
                       {loadingCity === c.name ? (
                         <ActivityIndicator color={colors.accent} accessibilityLabel={t("search.districtsLoading")} />
                       ) : (
-                        <ChevronRight size={18} color={colors.borderStrong} />
+                        <ChevronRight size={18} color={colors.borderStrong} style={flipInRtl} />
                       )}
                     </Pressable>
                   );

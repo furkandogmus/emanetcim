@@ -6,6 +6,7 @@ import { ChevronLeft, ChevronRight } from "lucide-react-native";
 import { useTranslation } from "react-i18next";
 
 import { colors, radius } from "@/theme/tokens";
+import { flipInRtl } from "@/lib/rtl";
 
 /**
  * Yatay seritler (saat secimi, sehir kartlari) kaydirilabildigi her zaman anlasilmiyordu.
@@ -42,10 +43,10 @@ export function ScrollArrows({ state }: { state: ReturnType<typeof useScrollArro
   return (
     <View style={styles.row}>
       <Arrow label={t("common.scrollBack")} enabled={state.canBack} onPress={() => state.page(-1)}>
-        <ChevronLeft size={16} color={state.canBack ? colors.ink : colors.borderStrong} />
+        <ChevronLeft size={16} color={state.canBack ? colors.ink : colors.borderStrong} style={flipInRtl} />
       </Arrow>
       <Arrow label={t("common.scrollForward")} enabled={state.canForward} onPress={() => state.page(1)}>
-        <ChevronRight size={16} color={state.canForward ? colors.ink : colors.borderStrong} />
+        <ChevronRight size={16} color={state.canForward ? colors.ink : colors.borderStrong} style={flipInRtl} />
       </Arrow>
     </View>
   );

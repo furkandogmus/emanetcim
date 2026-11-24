@@ -9,6 +9,7 @@ import { installedBinaryVersion } from "@/lib/app-update";
 import { systemHeadline } from "@/lib/admin-system";
 import { useAdminSystem } from "@/lib/queries";
 import { colors, radius, space } from "@/theme/tokens";
+import { flipInRtl } from "@/lib/rtl";
 
 const LEVEL_TONE = { ok: "ok", warning: "warning", error: "danger" } as const;
 
@@ -49,7 +50,7 @@ export function AdminSystemCard() {
           </AppText>
         ) : null}
       </View>
-      <ChevronRight size={18} color={colors.inkMuted} />
+      <ChevronRight size={18} color={colors.inkMuted} style={flipInRtl} />
     </Pressable>
   );
 }

@@ -125,5 +125,19 @@ yükseltme.
 Uygulama ön plana her dönüşte yeni OTA'yı indirir ve hazır olunca "Yeni sürüm hazır,
 yenile" şeridi gösterir; yeniden başlatma kullanıcının dokunuşuyla olur.
 
+**OTA kod imzası (0.3.5+):** `app.json` → `updates.codeSigningCertificate`
+(`certs/certificate.pem`, açık sertifika, repoda) ve `codeSigningMetadata`
+(`keyid: main`, `alg: rsa-v1_5-sha256`). Özel anahtar repoda değil:
+`~/Documents/personal/bagajpark-ota-signing/keys/private-key.pem` (yedeği parola
+yöneticisinde tutulmalı). `npm run update:production` onu `--private-key-path` ile geçirir;
+başka yerdeyse `OTA_SIGNING_KEY=/yol/private-key.pem`. Anahtarsız yayın durur.
+- 0.3.5+ ikililer sertifikayı gömülü taşır ve imzasız ya da başka anahtarla imzalı
+  güncellemeyi reddeder (gömülü JS'te kalır).
+- 0.3.0–0.3.4 ikililerde sertifika yok; imza istemezler (`expo-expect-signature` başlığı
+  göndermezler) ve EAS onlara güncellemeyi imza başlığı olmadan sunar. Aynı script
+  `OTA_RUNTIME=0.3.4` ile de imzalı yayınlar, eski ikili imzayı yok sayar.
+- Anahtar kaybolursa 0.3.5+ ikililere OTA gönderilemez; yeni sertifikalı bir native sürüm
+  gerekir. Sertifika 2036-11-24'te dolar.
+
 `eas update:configure` çalıştırma: `app.json`'daki izin listesini çözülmüş yapılandırmayla
 ezip mikrofon, arka plan konumu, depolama gibi izinler ekliyor (2026-11-17'de görüldü).

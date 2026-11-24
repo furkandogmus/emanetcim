@@ -320,7 +320,8 @@ function Letter({ ch, index, progress }: { ch: string; index: number; progress: 
 const styles = StyleSheet.create({
   wrap: { backgroundColor: colors.bg, zIndex: 1000, elevation: 1000 },
   center: { flex: 1, alignItems: "center", justifyContent: "center" },
-  logoBox: { width: BOX, height: BOX },
+  // Halka/golge konumlari SVG koordinatinda; RTL'de `left` aynalanip SVG aynalanmazdi.
+  logoBox: { width: BOX, height: BOX, direction: "ltr" },
   ring: {
     position: "absolute",
     left: PIN_CORE.x - RING_R,

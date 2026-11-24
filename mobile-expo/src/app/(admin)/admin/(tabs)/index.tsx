@@ -21,6 +21,7 @@ import { useAdminOverview } from "@/lib/queries";
 import type { AdminBookingFilter, AdminOverview } from "@/lib/types";
 import { colors, fonts, radius, space } from "@/theme/tokens";
 import { StaleQueryBanner } from "@/components/StaleQueryBanner";
+import { flipInRtl } from "@/lib/rtl";
 
 /** Son 7 gun ile onceki 7 gunun cirosu; karsilastirma her zaman neye gore oldugunu soyler. */
 function weekChange(series: AdminOverview["series"]) {
@@ -367,7 +368,7 @@ function AttentionRow({
           {value}
         </AppText>
       </View>
-      {external ? <ExternalLink size={16} color={colors.inkMuted} /> : <ChevronRight size={18} color={colors.inkMuted} />}
+      {external ? <ExternalLink size={16} color={colors.inkMuted} /> : <ChevronRight size={18} color={colors.inkMuted} style={flipInRtl} />}
     </Pressable>
   );
 }

@@ -40,3 +40,16 @@ describe("fr/ja cogul", () => {
     expect(ja("common.day", { count: 3 })).toContain("3");
   });
 });
+
+describe("fa", () => {
+  it("Farsca telefon Farsca acilir; site ve tarih fa", () => {
+    expect(deviceLanguage(["fa"])).toBe("fa");
+    expect(languageInfo("fa")).toMatchObject({ intl: "fa-IR", site: "fa", label: "فارسی" });
+  });
+
+  it("cogul one/other ve sayi metinde", () => {
+    const fa = i18n.getFixedT("fa");
+    expect(fa("common.day", { count: 3 })).toContain("3");
+    expect(fa("common.day", { count: 3 })).not.toContain("common.day");
+  });
+});

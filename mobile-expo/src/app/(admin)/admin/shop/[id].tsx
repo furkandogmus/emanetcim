@@ -25,6 +25,7 @@ import { keys, useAdminShop } from "@/lib/queries";
 import type { AdminShopDetail, AdminShopPatch } from "@/lib/types";
 import { colors, radius, space } from "@/theme/tokens";
 import { StaleQueryBanner } from "@/components/StaleQueryBanner";
+import { flipInRtl } from "@/lib/rtl";
 
 const open = (url: string) => void Linking.openURL(url).catch(() => undefined);
 
@@ -394,7 +395,7 @@ function Detail({ shop: s }: { shop: AdminShopDetail }) {
                     </AppText>
                   </View>
                   <StatusBadge status={b.status} cancelReason={b.cancelReason} />
-                  <ChevronRight size={16} color={colors.inkMuted} />
+                  <ChevronRight size={16} color={colors.inkMuted} style={flipInRtl} />
                 </Pressable>
               ))}
             </View>

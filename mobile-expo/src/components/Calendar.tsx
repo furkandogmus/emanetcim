@@ -9,6 +9,7 @@ import { nextRange, type Picking } from "@/lib/date-range";
 import { cellOf } from "@/lib/time";
 import { colors, fonts, radius, space } from "@/theme/tokens";
 import { languageInfo } from "@/lib/languages";
+import { flipInRtl } from "@/lib/rtl";
 
 function startOfDay(d: Date) {
   const x = new Date(d);
@@ -75,14 +76,14 @@ export function RangeCalendar({
           onPress={() => canGoBack && setMonth(new Date(month.getFullYear(), month.getMonth() - 1, 1))}
           style={!canGoBack && { opacity: 0.3 }}
         >
-          <ChevronLeft size={20} color={colors.ink} />
+          <ChevronLeft size={20} color={colors.ink} style={flipInRtl} />
         </IconButton>
         <Text style={styles.month}>{formatMonth(month)}</Text>
         <IconButton
           label={t("search.nextMonth")}
           onPress={() => setMonth(new Date(month.getFullYear(), month.getMonth() + 1, 1))}
         >
-          <ChevronRight size={20} color={colors.ink} />
+          <ChevronRight size={20} color={colors.ink} style={flipInRtl} />
         </IconButton>
       </View>
 

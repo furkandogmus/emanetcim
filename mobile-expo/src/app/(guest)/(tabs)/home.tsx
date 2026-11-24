@@ -25,6 +25,7 @@ import { useOfflineTickets } from "@/lib/offline-tickets";
 import { useFavorites } from "@/lib/favorites";
 import type { BookingSummary } from "@/lib/types";
 import { colors, fonts, radius, shadow, space } from "@/theme/tokens";
+import { flipInRtl } from "@/lib/rtl";
 
 export default function HomeScreen() {
   const { t } = useTranslation();
@@ -168,7 +169,7 @@ export default function HomeScreen() {
               <AppText variant="bodyMedium">{t("guestParity.favoritesTitle")}</AppText>
               <AppText variant="caption">{t("guestParity.favoritesCount", { count: favorites.ids.length })}</AppText>
             </View>
-            <ChevronRight size={18} color={colors.borderStrong} />
+            <ChevronRight size={18} color={colors.borderStrong} style={flipInRtl} />
           </Pressable>
         ) : null}
 
@@ -266,7 +267,7 @@ export default function HomeScreen() {
                     <AppText variant="caption">{t(`home.step${step.n}Body`)}</AppText>
                   )}
                 </View>
-                <ChevronRight size={18} color={colors.borderStrong} />
+                <ChevronRight size={18} color={colors.borderStrong} style={flipInRtl} />
               </Pressable>
             ))}
           </View>
