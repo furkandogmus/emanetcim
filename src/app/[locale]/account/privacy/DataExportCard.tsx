@@ -58,11 +58,13 @@ export default function DataExportCard({ fileStem }: { fileStem: string }) {
       const message =
         body.error === "rate_limited" && body.retryAt
           ? t("errors.rateLimited", { time: formatInstant(body.retryAt, locale, { dateStyle: "medium", timeStyle: "short" }) })
-          : body.error === "no_verified_email"
-            ? t("errors.noVerifiedEmail")
-            : body.error === "mail_failed"
-              ? t("errors.mailFailed")
-              : t("errors.generic");
+          : body.error === "in_progress"
+            ? t("errors.inProgress")
+            : body.error === "no_verified_email"
+              ? t("errors.noVerifiedEmail")
+              : body.error === "mail_failed"
+                ? t("errors.mailFailed")
+                : t("errors.generic");
       setEmailState({ kind: "error", message });
     } catch {
       setEmailState({ kind: "error", message: t("errors.generic") });

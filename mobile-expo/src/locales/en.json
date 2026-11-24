@@ -2134,15 +2134,15 @@
     "insurance": "Luggage protection",
     "about": "About us",
     "blog": "Blog",
-    "checkoutCancellationFree": "You can cancel for free until you drop off your luggage.",
-    "checkoutCancellationOnline": "Cancellation and refund terms depend on how long is left before drop-off.",
+    "checkoutCancellation": "You can cancel for free until you drop off your bags, with a full refund.",
     "checkoutCancellationLink": "Cancellation policy",
     "errors": {
       "rate_limited": "An export was already sent in the last 24 hours.",
       "rate_limited_until": "An export was already sent in the last 24 hours. You can request another after {{time}}.",
       "no_verified_email": "Your account has no verified email. Add and verify an email in your profile, then try again.",
       "mail_failed": "The email could not be sent right now. Please try again later.",
-      "not_allowed_while_impersonating": "This is not available while viewing as another user."
+      "not_allowed_while_impersonating": "This is not available while viewing as another user.",
+      "in_progress": "Your export is being prepared right now. Check your email in a few minutes."
     }
   },
   "affiliate": {

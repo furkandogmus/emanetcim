@@ -2134,15 +2134,15 @@
     "insurance": "Valiz güvencesi",
     "about": "Hakkımızda",
     "blog": "Blog",
-    "checkoutCancellationFree": "Valizini bırakana kadar ücretsiz iptal edebilirsin.",
-    "checkoutCancellationOnline": "İptal ve iade koşulları bırakma saatine kalan süreye göre değişir.",
+    "checkoutCancellation": "Valizini bırakana kadar ücretsiz iptal edebilirsin, ödediğin tutarın tamamı iade edilir.",
     "checkoutCancellationLink": "İptal koşulları",
     "errors": {
       "rate_limited": "Son 24 saatte zaten bir dışa aktarım gönderildi.",
       "rate_limited_until": "Son 24 saatte bir dışa aktarım gönderildi. {{time}} sonrasında yeniden isteyebilirsin.",
       "no_verified_email": "Hesabında doğrulanmış bir e-posta yok. Profilinden e-posta ekleyip doğruladıktan sonra tekrar dene.",
       "mail_failed": "E-posta şu an gönderilemedi. Biraz sonra tekrar dene.",
-      "not_allowed_while_impersonating": "Görüntüleme oturumunda bu işlem yapılamaz."
+      "not_allowed_while_impersonating": "Görüntüleme oturumunda bu işlem yapılamaz.",
+      "in_progress": "Dışa aktarımın şu an hazırlanıyor. Birkaç dakika içinde e-postanı kontrol et."
     }
   },
   "affiliate": {

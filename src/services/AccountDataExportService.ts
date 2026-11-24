@@ -3,7 +3,6 @@ import prisma from "@/lib/db";
 import logger from "@/lib/logger";
 import { isAnonymizedEmail } from "@/lib/anonymized-account";
 import { sendDataExportEmail } from "@/lib/mail";
-import { rateLimit } from "@/lib/rate-limit";
 
 /**
  * KVKK md. 11 / GDPR md. 15 veri dışa aktarma — web indirme, web e-posta ve
@@ -20,10 +19,13 @@ import { rateLimit } from "@/lib/rate-limit";
 /** E-posta yolu: hesap başına 24 saatte bir. */
 export const DATA_EXPORT_EMAIL_WINDOW_MS = 24 * 60 * 60 * 1000;
 const EMAIL_AUDIT_ACTION = "account.data_export_emailed";
+const FAILED_AUDIT_ACTION = "account.data_export_failed";
+/** Bu sureden eski "sending" satiri cokmus bir gonderimdir: hak yanmis sayilir. */
+const IN_PROGRESS_MS = 5 * 60 * 1000;
 
 export type DataExportEmailResult =
   | { ok: true; email: string }
-  | { ok: false; reason: "not_found" | "no_verified_email" | "mail_failed" }
+  | { ok: false; reason: "not_found" | "no_verified_email" | "mail_failed" | "in_progress" }
   | { ok: false; reason: "rate_limited"; retryAt: Date };
 
 function maskTail(value: string | null | undefined): string | null {
@@ -149,8 +151,11 @@ class AccountDataExportService {
 
   /**
    * Dışa aktarımı hesabın doğrulanmış adresine gönderir. Sınır denetim kaydından
-   * okunur (bellek içi sınır 5 dakikadan uzun pencere tutmuyor); kayıt yalnız
-   * gönderim başarılıysa yazılır, yani düşen gönderim hakkı yakmaz.
+   * okunur (bellek içi sınır 5 dakikadan uzun pencere tutmuyor). Kayıt gönderimden
+   * ÖNCE, kullanıcı başına kilit altında sahiplenilir: eşzamanlı ikinci istek
+   * `in_progress` alır, kayıt yazılamazsa hiç gönderilmez. Düşen gönderimde satır
+   * `..._failed` olur ve hak yanmaz; o güncelleme de düşerse satır kalır ve 24 saat
+   * kilitli kalır (sınırın sessizce kaybolmasından iyidir).
    */
   async emailExport(params: {
     userId: string;
@@ -170,51 +175,80 @@ class AccountDataExportService {
       return { ok: false, reason: "no_verified_email" };
     }
 
-    const last = await prisma.auditLog.findFirst({
-      where: {
-        action: EMAIL_AUDIT_ACTION,
-        entityType: "User",
-        entityId: user.id,
-        createdAt: { gt: new Date(now.getTime() - DATA_EXPORT_EMAIL_WINDOW_MS) },
-      },
-      orderBy: { createdAt: "desc" },
-      select: { createdAt: true },
-    });
-    if (last) {
-      return { ok: false, reason: "rate_limited", retryAt: new Date(last.createdAt.getTime() + DATA_EXPORT_EMAIL_WINDOW_MS) };
-    }
-    // Eşzamanlı çift dokunuşa karşı kısa kilit: kayıt gönderimden sonra yazıldığı için.
-    if (!(await rateLimit(`data-export-email:${user.id}`, 1, 60_000))) {
-      return { ok: false, reason: "rate_limited", retryAt: new Date(now.getTime() + 60_000) };
-    }
-
-    const data = await this.buildExport(user.id, now);
-    if (!data) return { ok: false, reason: "not_found" };
-    const sent = await sendDataExportEmail({
-      email: user.email,
-      locale: params.locale ?? "tr",
-      filename: `bagajpark-data-${user.id.slice(0, 8)}.json`,
-      json: JSON.stringify(data, null, 2),
-    });
-    if (!sent) return { ok: false, reason: "mail_failed" };
-
-    try {
-      await prisma.auditLog.create({
+    const claim = await prisma.$transaction(async (tx) => {
+      await tx.$executeRaw`SELECT pg_advisory_xact_lock(hashtext(${`data-export-email:${user.id}`})::bigint)`;
+      const last = await tx.auditLog.findFirst({
+        where: {
+          action: EMAIL_AUDIT_ACTION,
+          entityType: "User",
+          entityId: user.id,
+          createdAt: { gt: new Date(now.getTime() - DATA_EXPORT_EMAIL_WINDOW_MS) },
+        },
+        orderBy: { createdAt: "desc" },
+        select: { createdAt: true, metadata: true },
+      });
+      if (last) return { taken: last, id: null } as const;
+      const row = await tx.auditLog.create({
         data: {
           actorUserId: user.id,
           actorRole: params.role,
           action: EMAIL_AUDIT_ACTION,
           entityType: "User",
           entityId: user.id,
-          metadata: { channel: params.channel },
+          metadata: { channel: params.channel, status: "sending" },
           ip: params.ip,
         },
+        select: { id: true },
+      });
+      return { taken: null, id: row.id } as const;
+    });
+
+    if (claim.taken) {
+      const { taken } = claim;
+      const sending = metadataStatus(taken.metadata) === "sending";
+      if (sending && now.getTime() - taken.createdAt.getTime() < IN_PROGRESS_MS) {
+        return { ok: false, reason: "in_progress" };
+      }
+      return {
+        ok: false,
+        reason: "rate_limited",
+        retryAt: new Date(taken.createdAt.getTime() + DATA_EXPORT_EMAIL_WINDOW_MS),
+      };
+    }
+
+    let sent = false;
+    try {
+      const data = await this.buildExport(user.id, now);
+      sent =
+        !!data &&
+        (await sendDataExportEmail({
+          email: user.email,
+          locale: params.locale ?? "tr",
+          filename: `bagajpark-data-${user.id.slice(0, 8)}.json`,
+          json: JSON.stringify(data, null, 2),
+        }));
+    } catch (err) {
+      logger.error({ err, userId: user.id }, "data_export_email_build_failed");
+    }
+
+    try {
+      await prisma.auditLog.update({
+        where: { id: claim.id },
+        data: sent
+          ? { metadata: { channel: params.channel, status: "sent" } }
+          : { action: FAILED_AUDIT_ACTION, metadata: { channel: params.channel, status: "failed" } },
       });
     } catch (err) {
-      logger.error({ err, userId: user.id }, "data_export_audit_failed");
+      logger.error({ err, userId: user.id, sent }, "data_export_audit_update_failed");
     }
-    return { ok: true, email: user.email };
+    return sent ? { ok: true, email: user.email } : { ok: false, reason: "mail_failed" };
   }
+}
+
+function metadataStatus(raw: unknown): string | null {
+  return raw && typeof raw === "object" && !Array.isArray(raw) && typeof (raw as { status?: unknown }).status === "string"
+    ? (raw as { status: string }).status
+    : null;
 }
 
 export const accountDataExportService = new AccountDataExportService();

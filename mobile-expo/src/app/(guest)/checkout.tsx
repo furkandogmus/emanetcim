@@ -486,14 +486,14 @@ export default function CheckoutScreen() {
           </View>
         )}
 
-        {/* Iptal kurali onaydan once gorunsun; online kipte iade kademeleri sayfada. */}
+        {/* Iptal kurali onaydan once gorunsun. Kademe yok: valiz birakilana kadar tam iade (`cancelBooking`). */}
         <Pressable
           accessibilityRole="link"
           onPress={() => openSitePage("cancellation", i18n.language)}
           style={styles.payNote}
         >
           <AppText variant="body" style={{ flex: 1, color: colors.inkSecondary }}>
-            {onlinePayments ? t("accountParity.checkoutCancellationOnline") : t("accountParity.checkoutCancellationFree")}{" "}
+            {t("accountParity.checkoutCancellation")}{" "}
             <AppText variant="body" style={{ color: colors.accent }}>
               {t("accountParity.checkoutCancellationLink")}
             </AppText>
