@@ -1,1 +1,1 @@
-Farsça dil desteği (sağdan sola düzen). Rezervasyon, esnaf rezervasyonu ve aracı paneli bağlantıları artık doğrudan uygulamada açılıyor.
+Esnaf ve yönetici hesapları için Face ID / parmak izi ile uygulama kilidi. Rezervasyonu tek dokunuşla telefonun takvimine ekle (bırakma ve alma, 30 dakika önce hatırlatma). Hata raporlama ile daha kararlı uygulama.

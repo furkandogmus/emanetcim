@@ -2537,5 +2537,31 @@
       "unsupported_type": "Ce fichier n'est pas une photo JPEG.",
       "dimensions_too_large": "La résolution de la photo est trop élevée."
     }
+  },
+  "appLock": {
+    "title": "BagajPark est verrouillé",
+    "body": "Confirmez votre identité pour continuer.",
+    "unlock": "Déverrouiller",
+    "signOut": "Se déconnecter",
+    "prompt": "Déverrouiller BagajPark",
+    "confirmPrompt": "Confirmez pour modifier le verrouillage",
+    "cancel": "Annuler",
+    "settingLabel": "Verrouillage de l'app",
+    "settingHint": "Demande Face ID, l'empreinte ou le code de l'appareil à l'ouverture et après plus de 5 minutes d'absence."
+  },
+  "calendarSync": {
+    "dropOffTitle": "Dépôt des bagages : {{shop}}",
+    "pickUpTitle": "Retrait des bagages : {{shop}}",
+    "added": "Dépôt et retrait ajoutés à votre calendrier",
+    "alreadyTitle": "Déjà dans votre calendrier",
+    "alreadyBody": "Vous avez déjà ajouté cette réservation à votre calendrier. L'ajouter à nouveau ?",
+    "addAgain": "Ajouter à nouveau",
+    "ok": "OK",
+    "deniedTitle": "Accès au calendrier désactivé",
+    "deniedBody": "Pour ajouter des événements, autorisez BagajPark à accéder au calendrier dans Réglages.",
+    "openSettings": "Ouvrir les Réglages",
+    "cancel": "Annuler",
+    "failed": "Ajout au calendrier impossible",
+    "noCalendar": "Aucun calendrier de cet appareil n'accepte de nouveaux événements."
   }
 }

@@ -1,6 +1,9 @@
 {
   "ios": {
     "NSLocationWhenInUseUsageDescription": "Yakınındaki emanet noktalarını göstermek için konumunu kullanıyoruz.",
-    "NSCameraUsageDescription": "Misafirin rezervasyon QR kodunu okutmak ve teslimde valizlerin durumunu fotoğraflamak için kamerayı kullanıyoruz."
+    "NSCameraUsageDescription": "Misafirin rezervasyon QR kodunu okutmak ve teslimde valizlerin durumunu fotoğraflamak için kamerayı kullanıyoruz.",
+    "NSFaceIDUsageDescription": "Uygulama kilidini Face ID ile açmak için kullanıyoruz.",
+    "NSCalendarsUsageDescription": "Rezervasyonunun bırakma ve alma saatlerini takvimine eklemek için kullanıyoruz.",
+    "NSCalendarsWriteOnlyAccessUsageDescription": "Rezervasyonunun bırakma ve alma saatlerini takvimine eklemek için kullanıyoruz."
   }
 }

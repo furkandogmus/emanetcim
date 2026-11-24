@@ -2503,5 +2503,31 @@
       "unsupported_type": "This file isn't a JPEG photo.",
       "dimensions_too_large": "The photo's resolution is too high."
     }
+  },
+  "appLock": {
+    "title": "BagajPark is locked",
+    "body": "Verify it's you to continue.",
+    "unlock": "Unlock",
+    "signOut": "Sign out",
+    "prompt": "Unlock BagajPark",
+    "confirmPrompt": "Verify to change the app lock",
+    "cancel": "Cancel",
+    "settingLabel": "App lock",
+    "settingHint": "Asks for Face ID, fingerprint or your device passcode on launch and after more than 5 minutes away."
+  },
+  "calendarSync": {
+    "dropOffTitle": "Luggage drop-off: {{shop}}",
+    "pickUpTitle": "Luggage pick-up: {{shop}}",
+    "added": "Drop-off and pick-up added to your calendar",
+    "alreadyTitle": "Already in your calendar",
+    "alreadyBody": "You already added this booking to your calendar. Add it again?",
+    "addAgain": "Add again",
+    "ok": "OK",
+    "deniedTitle": "Calendar access is off",
+    "deniedBody": "To add events, allow BagajPark to access your calendar in Settings.",
+    "openSettings": "Open Settings",
+    "cancel": "Cancel",
+    "failed": "Couldn't add to calendar",
+    "noCalendar": "No calendar on this device accepts new events."
   }
 }

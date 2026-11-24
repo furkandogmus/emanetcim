@@ -60,6 +60,16 @@ API adresi derleme anında: `EXPO_PUBLIC_API_BASE_URL` (varsayılan emülatör i
   yükler. `expo-localization` `supportsRTL` bilerek kapalı (iOS her açılışta cihaz yönüne
   döndürüyor). Yöne bağlı ikon `style={flipInRtl}`. `left`/`right` stilleri ve `textAlign` RTL'de iki
   platformda da (Fabric) çevrilir: `"right"` RTL'de sola hizalar, elle ters çevirme.
+- **0.3.6 yerel modülleri** (Sentry, `expo-local-authentication`, `expo-calendar`) eski ikilide
+  yok: JS onları `requireOptionalNativeModule` ile sezer, yoksa özellik kapalı ya da eski yola
+  düşer (takvim → Google Takvim bağlantısı). Doğrudan üst düzey `import` eski ikiliye giden
+  OTA'yı açılışta düşürür.
+- **Sentry** (`src/lib/sentry.ts`): `EXPO_PUBLIC_SENTRY_DSN` yoksa tamamen kapalı. Olay
+  `sentry-scrub.ts`'ten geçer (e-posta/telefon/jeton/gövde). Kaynak haritası yüklemesi ve
+  eklenti yalnız `SENTRY_AUTH_TOKEN` olan derlemede (`app.config.js`).
+- **Uygulama kilidi** (`components/AppLockGate.tsx`): yönetici varsayılan açık, esnaf
+  isteğe bağlı, misafir hiç; soğuk açılış ve 5 dk+ arka plan. Cihazda biyometri/kod yoksa
+  kilit yok. Kilit ekranında her zaman "çıkış yap" var.
 - Tema token'ları `src/theme/tokens.ts` — web `globals.css` kimliğinden elle aktarıldı.
 - `android/` ve `ios/` üretilir (CNG), elle düzenlenmez, git'e girmez.
 - **Kabul kriteri: Google Play'e yüklenebilir build.** İzin listesi, hesap silme ve

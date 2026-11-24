@@ -2468,5 +2468,31 @@
       "unsupported_type": "このファイルはJPEG写真ではありません。",
       "dimensions_too_large": "写真の解像度が高すぎます。"
     }
+  },
+  "appLock": {
+    "title": "BagajPark はロック中です",
+    "body": "続けるには本人確認をしてください。",
+    "unlock": "ロックを解除",
+    "signOut": "ログアウト",
+    "prompt": "BagajPark のロックを解除",
+    "confirmPrompt": "アプリロックを変更するには確認してください",
+    "cancel": "キャンセル",
+    "settingLabel": "アプリロック",
+    "settingHint": "起動時と5分以上離れた後に、Face ID・指紋・端末のパスコードを求めます。"
+  },
+  "calendarSync": {
+    "dropOffTitle": "荷物の預け入れ：{{shop}}",
+    "pickUpTitle": "荷物の受け取り：{{shop}}",
+    "added": "預け入れと受け取りをカレンダーに追加しました",
+    "alreadyTitle": "すでにカレンダーにあります",
+    "alreadyBody": "この予約はすでにカレンダーに追加されています。もう一度追加しますか？",
+    "addAgain": "もう一度追加",
+    "ok": "OK",
+    "deniedTitle": "カレンダーへのアクセスがオフです",
+    "deniedBody": "予定を追加するには、設定で BagajPark にカレンダーへのアクセスを許可してください。",
+    "openSettings": "設定を開く",
+    "cancel": "キャンセル",
+    "failed": "カレンダーに追加できませんでした",
+    "noCalendar": "この端末に予定を追加できるカレンダーがありません。"
   }
 }

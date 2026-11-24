@@ -1,6 +1,9 @@
 {
   "ios": {
     "NSLocationWhenInUseUsageDescription": "Nous utilisons votre position pour afficher les consignes à bagages proches de vous.",
-    "NSCameraUsageDescription": "Nous utilisons l'appareil photo pour scanner le code QR de réservation du client et photographier l'état des bagages lors du dépôt."
+    "NSCameraUsageDescription": "Nous utilisons l'appareil photo pour scanner le code QR de réservation du client et photographier l'état des bagages lors du dépôt.",
+    "NSFaceIDUsageDescription": "Nous utilisons Face ID pour déverrouiller l'app.",
+    "NSCalendarsUsageDescription": "Nous ajoutons les heures de dépôt et de retrait de votre réservation à votre calendrier.",
+    "NSCalendarsWriteOnlyAccessUsageDescription": "Nous ajoutons les heures de dépôt et de retrait de votre réservation à votre calendrier."
   }
 }

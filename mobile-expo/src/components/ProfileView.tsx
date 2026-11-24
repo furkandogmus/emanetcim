@@ -10,6 +10,8 @@ import { ChevronRight, ExternalLink, X } from "lucide-react-native";
 import { useTranslation } from "react-i18next";
 
 import { Avatar } from "@/components/Avatar";
+import { useAppLock } from "@/components/AppLockGate";
+import { ToggleRow } from "@/components/ToggleRow";
 import { ChoiceSheet } from "@/components/ChoiceSheet";
 import { LANGUAGES } from "@/components/LanguageButton";
 import { isAppLanguage, languageInfo } from "@/lib/languages";
@@ -58,6 +60,7 @@ export function ProfileView({ asTab = false, embedded = false }: { asTab?: boole
   const deletionQuery = useMyDeletionRequest(signedInRole !== null && signedInRole !== "GUEST" && !impersonating);
   const requestDeletion = useRequestAccountDeletion();
   const dataExport = useRequestDataExport();
+  const appLock = useAppLock();
   const affiliateQuery = useMyAffiliate(state.status === "signedIn" ? state.user.id : null);
   if (state.status !== "signedIn") return null;
   const { user } = state;
@@ -190,6 +193,17 @@ export function ProfileView({ asTab = false, embedded = false }: { asTab?: boole
           value={languageInfo(i18n.language).label}
           onPress={() => setLangOpen(true)}
         />
+        {appLock.available && !impersonating ? (
+          <View style={{ paddingHorizontal: space.lg }}>
+            <ToggleRow
+              label={t("appLock.settingLabel")}
+              hint={t("appLock.settingHint")}
+              value={appLock.enabled}
+              onChange={(on) => void appLock.setEnabled(on)}
+              last
+            />
+          </View>
+        ) : null}
         {/* Goruntulemede sunucu da 403 doner: verisi baskasinin. */}
         {impersonating ? null : (
           <SettingsRow

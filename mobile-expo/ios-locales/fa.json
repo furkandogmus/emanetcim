@@ -1,6 +1,9 @@
 {
   "ios": {
     "NSLocationWhenInUseUsageDescription": "برای نمایش نقاط نگهداری چمدان نزدیک شما از موقعیت مکانی‌تان استفاده می‌کنیم.",
-    "NSCameraUsageDescription": "برای اسکن کد QR رزرو مهمان و عکس گرفتن از وضعیت چمدان‌ها هنگام تحویل از دوربین استفاده می‌کنیم."
+    "NSCameraUsageDescription": "برای اسکن کد QR رزرو مهمان و عکس گرفتن از وضعیت چمدان‌ها هنگام تحویل از دوربین استفاده می‌کنیم.",
+    "NSFaceIDUsageDescription": "برای باز کردن قفل برنامه از Face ID استفاده می‌کنیم.",
+    "NSCalendarsUsageDescription": "زمان تحویل و دریافت چمدان رزرو شما را به تقویمتان اضافه می‌کنیم.",
+    "NSCalendarsWriteOnlyAccessUsageDescription": "زمان تحویل و دریافت چمدان رزرو شما را به تقویمتان اضافه می‌کنیم."
   }
 }
