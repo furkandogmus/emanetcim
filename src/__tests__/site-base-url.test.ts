@@ -1,6 +1,6 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
-import fs from "node:fs";
 import path from "node:path";
+import { readSourceTree } from "./helpers/source-snapshot";
 
 /**
  * SITENIN KOK ADRESI TEK YERDEN COZULUR.
@@ -33,27 +33,18 @@ function stripComments(src: string): string {
   return src.replace(/\/\*[\s\S]*?\*\//g, "").replace(/^\s*\/\/.*$/gm, "");
 }
 
-function walk(dir: string, out: string[] = []): string[] {
-  if (!fs.existsSync(dir)) return out;
-  for (const e of fs.readdirSync(dir, { withFileTypes: true })) {
-    const p = path.join(dir, e.name);
-    if (e.isDirectory()) {
-      if (e.name === "__tests__") continue;
-      walk(p, out);
-    } else if (/\.tsx?$/.test(e.name)) {
-      out.push(p);
-    }
-  }
-  return out;
-}
+/** `src` (testler haric), yorumlari ayiklanmis. */
+const sources = () =>
+  readSourceTree("src", { skipDirs: ["__tests__"] }).map((f) => ({
+    rel: path.relative(ROOT, f.path),
+    src: stripComments(f.text),
+  }));
 
 describe("kok adres tek yerden cozulur", () => {
   it("yardimci disinda hicbir dosya kok adres degiskenini okumuyor", () => {
     const offenders: string[] = [];
-    for (const file of walk(path.join(ROOT, "src"))) {
-      const rel = path.relative(ROOT, file);
+    for (const { rel, src } of sources()) {
       if (rel === HELPER) continue;
-      const src = stripComments(fs.readFileSync(file, "utf8"));
       for (const m of src.matchAll(
         /process\.env\.NEXT_PUBLIC_(?:BASE|APP)_URL/g,
       )) {
@@ -76,10 +67,9 @@ describe("kok adres tek yerden cozulur", () => {
       ve hata hicbir yere yansimaz, cunku URL "dogru gorunur".
     */
     const offenders: string[] = [];
-    for (const file of walk(path.join(ROOT, "src"))) {
-      const src = stripComments(fs.readFileSync(file, "utf8"));
+    for (const { rel, src } of sources()) {
       for (const m of src.matchAll(/\|\|\s*['"]https:\/\/bagajpark\.com['"]/g)) {
-        offenders.push(`${path.relative(ROOT, file)}: ${m[0].trim()}`);
+        offenders.push(`${rel}: ${m[0].trim()}`);
       }
     }
     expect(offenders).toEqual([]);
