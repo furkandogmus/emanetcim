@@ -3,7 +3,7 @@ import i18n from "@/lib/i18n";
 
 import { useEffect, useState } from "react";
 import { AppState, Pressable, StyleSheet, Text, View } from "react-native";
-import { Stack, router } from "expo-router";
+import { Stack } from "expo-router";
 import * as Updates from "expo-updates";
 import type { ErrorBoundaryProps } from "expo-router";
 import * as SplashScreen from "expo-splash-screen";
@@ -23,7 +23,7 @@ import { Geist_400Regular, Geist_500Medium, Geist_600SemiBold } from "@expo-goog
 import { ApiError } from "@/lib/api";
 import { pingAppOpen } from "@/lib/app-ping";
 import { AuthProvider, useAuth } from "@/lib/auth";
-import { deepLinkHref, takePendingLink } from "@/lib/deep-link-target";
+import { usePendingLinkResume } from "@/lib/use-pending-link";
 import { openFromNotification, registerForPush } from "@/lib/push";
 import { ForcedUpdateScreen, OtaReadyBanner, useUpdateRequired } from "@/components/AppUpdate";
 import { ImpersonationFrame } from "@/components/ImpersonationBanner";
@@ -116,15 +116,7 @@ function RootNavigator() {
     };
   }, [state.status, role, viewingAs]);
 
-  // Girissiz acilan web baglantisi (`/link`) giristen sonra kaldigi yerden devam eder.
-  // Korumali yigin once kendi yonlendirmesini yapsin diye bir tur sonra.
-  useEffect(() => {
-    if (state.status !== "signedIn" || viewingAs) return;
-    const link = takePendingLink();
-    if (!link) return;
-    // Temizlenmez: baglanti alindi, iptal edilen zamanlayici onu kaybederdi.
-    setTimeout(() => router.replace(deepLinkHref(link)), 0);
-  }, [state.status, userId, viewingAs]);
+  usePendingLinkResume(state.status, viewingAs);
 
   /*
     Arama durumu kullaniciya ait: hesap degisince sifirlanir. AMA girissiz gezip

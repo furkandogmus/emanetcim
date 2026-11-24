@@ -42,6 +42,10 @@ describe("appPathFromLink", () => {
     ["https://bagajpark.com/tr/auth/new-password?token=x", "/"],
     ["https://bagajpark.com/tr/auth/verify-email?token=x", "/"],
     ["https://bagajpark.com/tr/account", "/"],
+    // Rezervasyon kimligi UUID olmali: rota adlari ekran acmaz.
+    ["https://bagajpark.com/tr/bookings/settings", "/"],
+    ["https://bagajpark.com/tr/bookings/modify", "/"],
+    ["https://bagajpark.com/tr/partner/bookings/earnings", "/"],
   ])("%s -> %s", (link, path) => {
     expect(appPathFromLink(link)).toBe(path);
   });

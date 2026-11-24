@@ -15,13 +15,15 @@ export type DeepLinkOutcome =
 
 const KINDS: readonly DeepLinkKind[] = ["booking", "partner-booking", "affiliate", "register", "partner-invite"];
 const ID = /^[A-Za-z0-9_-]{1,64}$/;
+// Rezervasyon kimligi UUID (e-posta ve push da boyle): `settings`, `modify` gibi rota adlari gecmesin.
+export const BOOKING_ID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 
 export function parseDeepLink(params: { kind?: unknown; id?: unknown }): DeepLink | null {
   const kind = typeof params.kind === "string" ? (params.kind as DeepLinkKind) : null;
   if (!kind || !KINDS.includes(kind)) return null;
   const id = typeof params.id === "string" && params.id ? params.id : undefined;
   if (id !== undefined && !ID.test(id)) return null;
-  if ((kind === "booking" || kind === "partner-booking") && !id) return null;
+  if ((kind === "booking" || kind === "partner-booking") && !(id && BOOKING_ID.test(id))) return null;
   return { kind, id };
 }
 
@@ -63,6 +65,10 @@ let pending: { link: DeepLink; savedAt: number } | null = null;
 
 export function savePendingLink(link: DeepLink, now = Date.now()): void {
   pending = { link, savedAt: now };
+}
+
+export function clearPendingLink(): void {
+  pending = null;
 }
 
 export function takePendingLink(now = Date.now()): DeepLink | null {
