@@ -22,6 +22,8 @@ type Props = {
   marketPrice: number;
   /** Sıkışık varyant (panel sekmesi) */
   compact?: boolean;
+  /** Dükkan adı; verilmezse alan çizilmez (eski çağıranlar). */
+  initialName?: string;
   /** Netgsm: yeni rezervasyon SMS — dükkan sahibi GSM */
   initialPhone?: string;
   /** Adres bilgileri */
@@ -38,6 +40,7 @@ export default function PartnerShopSettingsForm({
   initialPricePerDay,
   marketPrice,
   compact = false,
+  initialName,
   initialPhone = "",
   initialAddress = "",
   initialCity = "",
@@ -48,12 +51,15 @@ export default function PartnerShopSettingsForm({
   const t = useTranslations("Partner");
   const tErrors = useTranslations("Errors");
   const tSchedule = useTranslations("Partner.schedule");
+  const tParity = useTranslations("PartnerParity");
   const locale = useLocale();
   const errorText = useActionErrorText();
   const router = useRouter();
   const [capacity, setCapacity] = useState(initialCapacity);
   const [pricePerDay, setPricePerDay] = useState(initialPricePerDay);
   const [partnerPhone, setPartnerPhone] = useState(initialPhone);
+  const [shopName, setShopName] = useState(initialName ?? "");
+  const [nameError, setNameError] = useState<string | null>(null);
   /**
    * Ayar değişikliğinin MEVCUT rezervasyonlara etkisi (`ShopSettingsImpact`).
    * Kayıt başarılı olsa bile gösterilir: saat daraltmak zaten kabul edilmiş
@@ -111,6 +117,12 @@ export default function PartnerShopSettingsForm({
       setCapacityError(t("capacityOutOfRange", { min: minCapacity, max: maxCapacity }));
       return;
     }
+    const trimmedName = shopName.trim();
+    if (initialName !== undefined && (trimmedName.length < 2 || trimmedName.length > 200)) {
+      setNameError(tParity("shopNameInvalid"));
+      return;
+    }
+    setNameError(null);
     setIsUpdating(true);
     setSaved(false);
     setPhoneError(null);
@@ -120,14 +132,21 @@ export default function PartnerShopSettingsForm({
       return;
     }
     try {
+      /*
+        Pin yalnizca DEGISTIYSE gider. Panel sekmesindeki sikisik form konum
+        almadan cagriliyor (`initialLatitude` null); koşulsuz gonderim orada
+        kaydet'e her basista dukkanin pinini SILIYORDU.
+      */
+      const pinChanged =
+        location.latitude !== initialLatitude || location.longitude !== initialLongitude;
       const shopRes = await updateShopSettingsAction(shopId, {
+        ...(initialName !== undefined && trimmedName !== initialName ? { name: trimmedName } : {}),
         capacity,
         pricePerDay,
         address: location.address || undefined,
         city: location.city || undefined,
         district: location.district || undefined,
-        latitude: location.latitude,
-        longitude: location.longitude,
+        ...(pinChanged ? { latitude: location.latitude, longitude: location.longitude } : {}),
       });
       if (!shopRes.success) {
         // `shopRes.error` bir "Errors.x" anahtaridir, ham metin degil --
@@ -181,6 +200,28 @@ export default function PartnerShopSettingsForm({
 
       <div className={wrap}>
         <div className="flex flex-col gap-4">
+          {initialName !== undefined ? (
+            <div>
+              <label htmlFor="partner-shop-name" className="ui-kicker mb-2 block">
+                {tParity("shopNameLabel")}
+              </label>
+              <input
+                id="partner-shop-name"
+                type="text"
+                data-testid="partner-settings-name"
+                value={shopName}
+                maxLength={200}
+                onChange={(e) => setShopName(e.target.value)}
+                className={`ui-field w-full rounded-2xl ${nameError ? "border-red-400 bg-red-50" : ""}`}
+              />
+              {nameError ? (
+                <p className="ui-state ui-state-error mt-1.5">{nameError}</p>
+              ) : (
+                <p className="ui-body-sm mt-1.5">{tParity("shopNameHint")}</p>
+              )}
+            </div>
+          ) : null}
+
           {/* Kapasite */}
           <div>
             <label className="ui-kicker mb-2 block">

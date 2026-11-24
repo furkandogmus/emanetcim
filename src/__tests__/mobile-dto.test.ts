@@ -338,7 +338,7 @@ describe("esnaf dükkan gövdesi", () => {
   it("açık alan listesi: ownerId, isTest, timezone SIZMAZ", () => {
     const body = toMobilePartnerShop(FULL) as Record<string, unknown>;
     expect(Object.keys(body).sort()).toEqual(
-      ["address", "capacity", "city", "closingTime", "district", "id", "image", "name", "open247", "openingTime", "pricePerDay"].sort(),
+      ["address", "capacity", "city", "closingTime", "district", "id", "image", "latitude", "longitude", "name", "open247", "openingTime", "pricePerDay"].sort(),
     );
   });
   it("Decimal fiyat sayı olur", () => {

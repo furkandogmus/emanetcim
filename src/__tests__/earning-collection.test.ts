@@ -16,6 +16,7 @@ const { mockPrisma, mockRequireMobileUser } = vi.hoisted(() => ({
   mockPrisma: {
     booking: { count: vi.fn(), aggregate: vi.fn(), findMany: vi.fn() },
     shop: { findMany: vi.fn() },
+    $queryRaw: vi.fn(),
   },
   mockRequireMobileUser: vi.fn(),
 }));
@@ -38,6 +39,7 @@ beforeEach(() => {
     _sum: { totalPrice: 0, bagCountS: 0, bagCountM: 0, bagCountXl: 0 },
   });
   mockPrisma.booking.findMany.mockResolvedValue([]);
+  mockPrisma.$queryRaw.mockResolvedValue([]);
 });
 
 describe("collectedEarningsWhere", () => {
@@ -119,5 +121,9 @@ describe("mobil kazanc ekrani", () => {
       createdAt: "2026-11-21T15:00:00.000Z",
       amount: 150,
     });
+    // Grafikler web kazanc sayfasiyla ayni ozetten; bos dukkanda sifir dolu.
+    expect(body.insights.months).toHaveLength(6);
+    expect(body.insights.peakHours).toHaveLength(24);
+    expect(body.insights.conversionPct).toBe(0);
   });
 });
