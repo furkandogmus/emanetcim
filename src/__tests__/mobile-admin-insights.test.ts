@@ -87,6 +87,15 @@ describe("analitik", () => {
     const bogus = await json(await analyticsRoute.GET(req("/analytics?days=365")));
     expect(bogus.body.days).toBe(30);
   });
+
+  it("tekil oturumu veritabaninda COUNT(DISTINCT) ile sayar, satirlari cekmez", async () => {
+    mockPrisma.$queryRaw.mockImplementation((strings: TemplateStringsArray) =>
+      Promise.resolve(strings.join("?").includes("COUNT(DISTINCT") ? [{ count: BigInt(42) }] : []),
+    );
+    const r = await json(await analyticsRoute.GET(req("/analytics?days=90")));
+    expect(r.body.uniqueSessions).toBe(42);
+    expect(mockPrisma.analyticsEvent.findMany).not.toHaveBeenCalled();
+  });
 });
 
 describe("sistem", () => {
