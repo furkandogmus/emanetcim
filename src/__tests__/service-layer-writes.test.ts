@@ -87,9 +87,8 @@ const SERVICE_ONLY_MODELS = [
 const CEILINGS: Record<string, number> = {
   account: 1,
   analyticsEvent: 1,
-  blockedIp: 1,
   blogPost: 4,
-  contactMessage: 8,
+  contactMessage: 3,
   jobRun: 2,
   mobilePushToken: 2,
   notificationLog: 1,
@@ -104,10 +103,16 @@ const CEILINGS: Record<string, number> = {
   /*
     22 -> 20 -> 18 (2026-09-01): telefon guncelleme `PartnerProfileService`e,
     hesap anonimlestirme `AccountPrivacyService`e tasindi.
+    17 -> 16 (2026-11-24): kalici silme `AdminUserService.deleteUser`a tasindi.
   */
-  user: 17,
+  user: 16,
   verificationToken: 7,
 };
+
+/*
+  KALDIRILAN GIRDILER (2026-11-24): `blockedIp` (`AdminUserService.blockIp`).
+  `contactMessage` 8 -> 3: okundu/sil/toplu sil `AdminInboxService`e tasindi (web + mobil).
+*/
 
 /*
   KALDIRILAN GIRDILER (2026-11-23): `dispute`, `featureFlag`, `platformSettings`.
@@ -124,7 +129,7 @@ const CEILINGS: Record<string, number> = {
 */
 
 /** Toplam tavan — yeni bir MODELİN sessizce eklenmesini de yakalar. */
-const TOTAL_CEILING = 57;
+const TOTAL_CEILING = 50;
 
 /**
  * Yorumlar ayıklanır: bu dosyaların çoğunda "eskiden burada ham

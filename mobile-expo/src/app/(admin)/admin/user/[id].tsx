@@ -5,8 +5,10 @@ import { router, useLocalSearchParams } from "expo-router";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useTranslation } from "react-i18next";
 
+import { AdminConvertPartnerSheet } from "@/components/AdminConvertPartnerSheet";
 import { ChoiceSheet } from "@/components/ChoiceSheet";
 import { Field } from "@/components/Field";
+import { ReasonSheet } from "@/components/ReasonSheet";
 import { Sheet } from "@/components/Sheet";
 import { StackHeader } from "@/components/StackHeader";
 import { StaleQueryBanner } from "@/components/StaleQueryBanner";
@@ -14,7 +16,13 @@ import { ToggleRow } from "@/components/ToggleRow";
 import { AppText, Banner, Button, Card, CenterMessage, Loading } from "@/components/ui";
 import {
   anonymizeUser,
+  blockUserIp,
+  canBlockIp,
+  canConvertToPartner,
   canErase,
+  canHardDelete,
+  deleteUser,
+  DESTRUCTIVE_REASON_MIN,
   canSubmitErasure,
   changeUserRole,
   ERASURE_REASON_MIN,
@@ -40,7 +48,8 @@ const fail = (e: unknown) => notify(i18n.t("admin.actionFailed"), errorMessage(e
 
 /**
  * Admin kullanici karti ve islemleri (webden tasindi): rol, sifirlama/dogrulama
- * e-postasi, sifre belirleme, hesap silme ve kisinin denetim kaydi. Her kural
+ * e-postasi, sifre belirleme, esnafa cevirme, IP engeli, KVKK silmesi (anonim),
+ * kalici silme ve kisinin denetim kaydi. Her kural
  * sunucuda; ekran yalnizca onay kapilarini kurar.
  */
 export default function AdminUserScreen() {
@@ -55,6 +64,10 @@ export default function AdminUserScreen() {
   const [roleSheet, setRoleSheet] = useState(false);
   const [pwSheet, setPwSheet] = useState(false);
   const [eraseSheet, setEraseSheet] = useState(false);
+  const [convertSheet, setConvertSheet] = useState(false);
+  // Kalici silme ve IP engeli ayni gerekce panelini kullanir.
+  const [danger, setDanger] = useState<"delete" | "blockIp" | null>(null);
+  const [dangerReason, setDangerReason] = useState("");
 
   const role = useMutation({
     mutationFn: (r: Role) => changeUserRole(id, r),
@@ -78,6 +91,34 @@ export default function AdminUserScreen() {
     onError: fail,
     onSettled: refresh,
   });
+
+  const remove = useMutation({
+    mutationFn: (reason: string) => deleteUser(id, reason),
+    onSuccess: () => {
+      closeDanger();
+      refresh();
+      notify(t("adminParityD1.users.deleteDone"));
+      router.back();
+    },
+  });
+  const blockIp = useMutation({
+    mutationFn: (reason: string) => blockUserIp(id, reason),
+    onSuccess: (res) => {
+      closeDanger();
+      notify(t("adminParityD1.users.blockIpDone", { ip: res.ip }));
+    },
+  });
+  const dangerMutation = danger === "delete" ? remove : blockIp;
+  function openDanger(kind: "delete" | "blockIp") {
+    remove.reset();
+    blockIp.reset();
+    setDangerReason("");
+    setDanger(kind);
+  }
+  function closeDanger() {
+    setDanger(null);
+    setDangerReason("");
+  }
 
   const u = query.data;
   const label = !u ? "" : u.isAnonymized ? t("adminUsers.anonymizedLabel") : u.name || u.email || u.phone;
@@ -130,6 +171,9 @@ export default function AdminUserScreen() {
             <AppText variant="bodyMedium">{label}</AppText>
             {u.email && !u.isAnonymized ? <AppText variant="caption">{u.email}</AppText> : null}
             {u.phone ? <AppText variant="caption">{formatPhone(u.phone)}</AppText> : null}
+            {u.lastIp ? (
+              <AppText variant="caption">{t("adminParityD1.users.lastIp", { ip: u.lastIp })}</AppText>
+            ) : null}
             <AppText variant="caption">
               {[
                 t(`admin.role.${u.role}`),
@@ -193,10 +237,24 @@ export default function AdminUserScreen() {
               title={t("adminUsers.auditLog")}
               onPress={() => router.push({ pathname: "/admin/audit-log", params: { userId: u.id, name: label } })}
             />
+            {canConvertToPartner(u) ? (
+              <Button variant="secondary" title={t("adminParityD1.users.convert")} onPress={() => setConvertSheet(true)} />
+            ) : null}
+            {canBlockIp(u, myId) ? (
+              <Button variant="secondary" title={t("adminParityD1.users.blockIp")} onPress={() => openDanger("blockIp")} />
+            ) : null}
             {canErase(u, myId) ? (
               <Button variant="danger" title={t("adminUsers.erase")} onPress={() => setEraseSheet(true)} />
             ) : u.id !== myId && !u.isAnonymized ? (
               <AppText variant="caption">{t("adminUsers.eraseNotGuest")}</AppText>
+            ) : null}
+            {canHardDelete(u, myId) ? (
+              <Button
+                variant="ghost"
+                textColor={colors.danger}
+                title={t("adminParityD1.users.delete")}
+                onPress={() => openDanger("delete")}
+              />
             ) : null}
           </View>
         </ScrollView>
@@ -211,6 +269,33 @@ export default function AdminUserScreen() {
             choices={ROLES.map((r) => ({ value: r, label: t(`admin.role.${r}`) }))}
             selected={u.role}
             onSelect={(v) => confirmRole(v as Role)}
+          />
+          <AdminConvertPartnerSheet
+            visible={convertSheet}
+            onClose={() => setConvertSheet(false)}
+            user={u}
+            label={label}
+            onDone={refresh}
+          />
+          <ReasonSheet
+            visible={danger != null}
+            onClose={closeDanger}
+            title={
+              danger === "delete"
+                ? t("adminParityD1.users.deleteTitle", { name: label })
+                : t("adminParityD1.users.blockIpTitle", { ip: u.lastIp ?? "" })
+            }
+            body={danger === "delete" ? t("adminParityD1.users.deleteBody") : t("adminParityD1.users.blockIpBody")}
+            note={dangerReason}
+            onNoteChange={setDangerReason}
+            noteLabel={t("adminParityD1.users.reasonLabel")}
+            notePlaceholder={t("adminParityD1.users.reasonPlaceholder")}
+            noteHint={t("adminParityD1.users.reasonHint", { min: DESTRUCTIVE_REASON_MIN })}
+            confirmLabel={danger === "delete" ? t("adminParityD1.users.deleteConfirm") : t("adminParityD1.users.blockIpConfirm")}
+            canSubmit={dangerReason.trim().length >= DESTRUCTIVE_REASON_MIN && !dangerMutation.isPending}
+            loading={dangerMutation.isPending}
+            error={dangerMutation.error ? errorMessage(dangerMutation.error, "adminParityD1.users") : null}
+            onConfirm={() => dangerMutation.mutate(dangerReason.trim())}
           />
           <SetPasswordSheet visible={pwSheet} onClose={() => setPwSheet(false)} user={u} label={label} />
           <EraseSheet

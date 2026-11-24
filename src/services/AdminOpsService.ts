@@ -205,7 +205,7 @@ export class AdminOpsService {
             },
           },
           seals: { select: { sealNumber: true, bagIndex: true, bagSize: true }, orderBy: { bagIndex: "asc" } },
-          dispute: { select: { status: true } },
+          dispute: { select: { id: true, status: true } },
           paymentLog: { select: { status: true } },
         },
       }),
@@ -218,6 +218,21 @@ export class AdminOpsService {
       }),
     ]);
     return booking ? { booking, events } : null;
+  }
+
+  /**
+   * Rezervasyonun bildirim kaydi (web `/admin/bookings/[id]` "Bildirimler" bolumu):
+   * e-posta/SMS/push denemeleri, alici ve hata. Icerik govdesi tasinmaz. `null`: rezervasyon yok.
+   */
+  async bookingNotifications(bookingId: string, take = 100) {
+    const exists = await prisma.booking.findUnique({ where: { id: bookingId }, select: { id: true } });
+    if (!exists) return null;
+    return prisma.notificationLog.findMany({
+      where: { bookingId },
+      orderBy: { createdAt: "desc" },
+      select: { id: true, type: true, recipient: true, status: true, error: true, createdAt: true },
+      take,
+    });
   }
 
   /** Aktif dukkanlar, su an icerideki valizle doluluk sirasina gore. */

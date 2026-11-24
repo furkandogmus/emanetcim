@@ -2,6 +2,8 @@ import { NextResponse } from "next/server";
 import { auth } from "@/auth";
 import prisma from "@/lib/db";
 import { getMobileSession } from "@/lib/mobile-auth";
+import { clientIpFromRequest } from "@/lib/client-ip";
+import { adminInboxService } from "@/services/AdminInboxService";
 import { CONTACT_MESSAGE_LIST_SELECT, CONTACT_MESSAGE_LIST_TAKE } from "@/lib/contact-message-list";
 
 export const dynamic = 'force-dynamic';
@@ -59,6 +61,9 @@ export async function DELETE(req: Request) {
     return NextResponse.json({ error: "No messages selected" }, { status: 400 });
   }
 
-  const result = await prisma.contactMessage.deleteMany({ where: { id: { in: ids } } });
-  return NextResponse.json({ ok: true, deleted: result.count });
+  const deleted = await adminInboxService.removeMany(ids, {
+    userId: session.user.id ?? null,
+    ip: clientIpFromRequest(req),
+  });
+  return NextResponse.json({ ok: true, deleted });
 }

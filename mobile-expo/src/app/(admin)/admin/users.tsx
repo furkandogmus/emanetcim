@@ -1,15 +1,16 @@
 import { useState } from "react";
-import { Alert, FlatList, Linking, RefreshControl, StyleSheet, View } from "react-native";
+import { Alert, FlatList, Linking, RefreshControl, ScrollView, StyleSheet, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { router } from "expo-router";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { Mail, MessageCircle, Phone } from "lucide-react-native";
 import { useTranslation } from "react-i18next";
 
+import { ChoiceSheet } from "@/components/ChoiceSheet";
 import { LoadMoreFooter } from "@/components/LoadMoreFooter";
 import { SearchBox } from "@/components/SearchBox";
 import { StackHeader } from "@/components/StackHeader";
-import { AppText, Button, CenterMessage, IconButton, Loading } from "@/components/ui";
+import { AppText, Button, CenterMessage, Chip, IconButton, Loading } from "@/components/ui";
 import { api } from "@/lib/api";
 import { useAuth } from "@/lib/auth";
 import { telUrl, waUrl } from "@/lib/phone";
@@ -18,8 +19,8 @@ import { errorMessage } from "@/lib/errors";
 import { formatDay } from "@/lib/format";
 import { notify } from "@/lib/notify";
 import { flattenPages } from "@/lib/paging";
-import { keys, useAdminUsers } from "@/lib/queries";
-import type { AdminUser } from "@/lib/types";
+import { keys, NO_USER_FILTERS, useAdminUsers } from "@/lib/queries";
+import type { AdminUser, AdminUserFilters } from "@/lib/types";
 import { colors, radius, space } from "@/theme/tokens";
 import { isBlockingError } from "@/lib/query-view";
 import { StaleQueryBanner } from "@/components/StaleQueryBanner";
@@ -28,7 +29,8 @@ const open = (url: string) => void Linking.openURL(url).catch(() => undefined);
 
 /**
  * Kullanici arama ve yasaklama. Yasak sunucuda token surumunu artirir: kisinin acik
- * oturumlari aninda duser. Rol, sifre, e-posta ve silme islemleri kullanici kartinda (`user/[id]`).
+ * oturumlari aninda duser. Rol/durum/tur suzgecleri sunucuda (web ile ayni). Rol, sifre,
+ * e-posta, silme, IP engeli ve esnafa cevirme kullanici kartinda (`user/[id]`).
  */
 export default function AdminUsersScreen() {
   const { t } = useTranslation();
@@ -36,7 +38,8 @@ export default function AdminUsersScreen() {
   const { state } = useAuth();
   const myId = state.status === "signedIn" ? state.user.id : null;
   const [q, setQ] = useState("");
-  const query = useAdminUsers(q);
+  const [filters, setFilters] = useState<AdminUserFilters>(NO_USER_FILTERS);
+  const query = useAdminUsers(q, filters);
   const users = flattenPages(query.data, (p) => p.users);
 
   const ban = useMutation({
@@ -68,6 +71,7 @@ export default function AdminUsersScreen() {
       <View style={styles.search}>
         <SearchBox placeholder={t("admin.userSearchPlaceholder")} onSearch={setQ} />
       </View>
+      <UserFilterBar value={filters} onChange={setFilters} />
       <StaleQueryBanner query={query} />
       {query.isLoading ? (
         <Loading />
@@ -184,6 +188,61 @@ export default function AdminUsersScreen() {
   );
 }
 
+const ROLE_FILTERS = ["GUEST", "PARTNER", "ADMIN"] as const;
+const STATUS_FILTERS = ["ACTIVE", "BANNED", "UNVERIFIED"] as const;
+const TYPE_FILTERS = ["REAL", "TEST"] as const;
+const ALL = "ALL";
+
+type FilterKey = keyof AdminUserFilters;
+
+/** Web `/admin/users` ile ayni uc suzgec; her cip kendi secim panelini acar. */
+function UserFilterBar({ value, onChange }: { value: AdminUserFilters; onChange: (f: AdminUserFilters) => void }) {
+  const { t } = useTranslation();
+  const [open, setOpen] = useState<FilterKey | null>(null);
+  const labelOf = (key: FilterKey, v: string) =>
+    key === "role" ? t(`admin.role.${v}`) : t(`adminParityD1.users.${key}.${v}`);
+  const options: Record<FilterKey, readonly string[]> = { role: ROLE_FILTERS, status: STATUS_FILTERS, type: TYPE_FILTERS };
+  const titles: Record<FilterKey, string> = {
+    role: t("adminParityD1.users.filterRole"),
+    status: t("adminParityD1.users.filterStatus"),
+    type: t("adminParityD1.users.filterType"),
+  };
+  const active = value.role != null || value.status != null || value.type != null;
+
+  return (
+    <>
+      <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.chips} style={{ flexGrow: 0 }}>
+        {(Object.keys(options) as FilterKey[]).map((key) => {
+          const v = value[key];
+          return (
+            <Chip
+              key={key}
+              soft
+              selected={v != null}
+              label={v ? `${titles[key]}: ${labelOf(key, v)}` : titles[key]}
+              onPress={() => setOpen(key)}
+            />
+          );
+        })}
+        {active ? <Chip soft label={t("adminParityD1.users.filterClear")} onPress={() => onChange(NO_USER_FILTERS)} /> : null}
+      </ScrollView>
+      {open ? (
+        <ChoiceSheet
+          visible
+          onClose={() => setOpen(null)}
+          title={titles[open]}
+          choices={[
+            { value: ALL, label: t("adminParityD1.users.filterAll") },
+            ...options[open].map((v) => ({ value: v, label: labelOf(open, v) })),
+          ]}
+          selected={value[open] ?? ALL}
+          onSelect={(v) => onChange({ ...value, [open]: v === ALL ? null : v })}
+        />
+      ) : null}
+    </>
+  );
+}
+
 function Tag({ label, warn }: { label: string; warn?: boolean }) {
   return (
     <View style={[styles.tag, warn && { borderColor: colors.brand, backgroundColor: colors.brandSoft }]}>
@@ -197,6 +256,7 @@ function Tag({ label, warn }: { label: string; warn?: boolean }) {
 const styles = StyleSheet.create({
   safe: { flex: 1, backgroundColor: colors.bg },
   search: { paddingHorizontal: space.xl, paddingBottom: space.md },
+  chips: { paddingHorizontal: space.xl, gap: space.sm, paddingBottom: space.md },
   list: { paddingHorizontal: space.xl, paddingBottom: space.xxl, gap: space.md },
   card: {
     gap: space.md,

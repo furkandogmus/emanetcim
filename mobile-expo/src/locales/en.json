@@ -2258,5 +2258,100 @@
       "no_shop": "You need a shop first.",
       "coordinates_required": "A live shop's pin cannot be removed; you can move it instead."
     }
+  },
+  "adminParityD1": {
+    "users": {
+      "filterRole": "Role",
+      "filterStatus": "Status",
+      "filterType": "Type",
+      "filterAll": "All",
+      "filterClear": "Clear",
+      "status": {
+        "ACTIVE": "Active",
+        "BANNED": "Banned",
+        "UNVERIFIED": "Unverified"
+      },
+      "type": {
+        "REAL": "Real",
+        "TEST": "Test"
+      },
+      "lastIp": "Last IP: {{ip}}",
+      "convert": "Convert to partner",
+      "convertTitle": "Convert {{name}} to a partner account",
+      "convertBody": "The account becomes a partner and the shop opens as an application awaiting approval. The phone becomes the partner's sign-in number.",
+      "convertSubmit": "Convert to partner",
+      "blockIp": "Block IP address",
+      "blockIpTitle": "Block {{ip}}?",
+      "blockIpBody": "The IP address the user last signed in from is added to the block list. Other people on the same network may be affected.",
+      "blockIpConfirm": "Block",
+      "blockIpDone": "{{ip}} added to the block list.",
+      "delete": "Delete account and all records",
+      "deleteTitle": "Permanently delete {{name}}?",
+      "deleteBody": "The account and all linked records are deleted. This cannot be undone. Accounts with open bookings are not deleted. For a data erasure request, use \"Delete account\".",
+      "deleteConfirm": "Delete everything",
+      "deleteDone": "Account deleted.",
+      "reasonLabel": "Reason",
+      "reasonPlaceholder": "Why are you doing this?",
+      "reasonHint": "At least {{min}} characters. Written to the audit log.",
+      "errors": {
+        "cannot_delete_self": "You can't delete your own account.",
+        "has_active_booking": "The account has an open booking. Close the booking first.",
+        "blocked_by_relations": "Linked records prevent deleting this account.",
+        "no_ip": "No IP address is recorded for this user.",
+        "invalid_ip": "The recorded IP address is invalid.",
+        "own_ip": "You can't block the IP address you're using right now.",
+        "not_found": "User not found.",
+        "invalid_data": "Check the fields.",
+        "location_required": "Enter a valid location (latitude, longitude or a map link).",
+        "invalid_tr_phone": "Enter a valid Turkish mobile number.",
+        "phone_already_registered": "This phone is registered to another partner or admin account.",
+        "not_guest": "Only a guest account can be converted to a partner."
+      }
+    },
+    "messages": {
+      "select": "Select",
+      "searchPlaceholder": "Search sender, subject or text",
+      "all": "All",
+      "unread": "Unread",
+      "category": {
+        "SUPPORT": "Support",
+        "BULK": "Bulk",
+        "AUTOMATED": "Automated",
+        "ALL": "Everything"
+      },
+      "selectAll": "Select visible",
+      "clearSelection": "Clear selection",
+      "deleteSelected": "Delete selected ({{count}})",
+      "bulkDeleteTitle": "Delete the selected messages? ({{count}})",
+      "bulkDeleteBody": "The messages and their reply history are deleted permanently.",
+      "bulkDeleted": "Messages deleted: {{count}}"
+    },
+    "applications": {
+      "searchPlaceholder": "Search shop, address, owner or phone",
+      "noMatch": "No applications match your search."
+    },
+    "leads": {
+      "markContacted": "Mark as contacted",
+      "undoContacted": "Undo contacted",
+      "contactedTag": "Contacted",
+      "errors": {
+        "not_found": "Lead not found or already converted."
+      }
+    },
+    "shop": {
+      "info": "Shop details",
+      "name": "Shop name",
+      "address": "Address",
+      "nameRequired": "At least 2 characters."
+    },
+    "booking": {
+      "openDispute": "Open dispute",
+      "notifications": "Notification log",
+      "notificationsEmpty": "No notifications were sent for this booking."
+    },
+    "affiliates": {
+      "shareCsv": "Share unpaid commissions (CSV)",
+      "shareCsvHint": "With no month, all unpaid commissions are included. Send the text by email or to Drive from the share menu."
+    }
   }
 }

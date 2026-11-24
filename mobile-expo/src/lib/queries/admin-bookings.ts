@@ -1,7 +1,13 @@
 import { useInfiniteQuery, useQuery } from "@tanstack/react-query";
 import { api } from "../api";
 import { nextCursorOf } from "../paging";
-import type { AdminBookingFilter, AdminBookingCounts, AdminBookingsResponse, AdminBookingDetail } from "../types";
+import type {
+  AdminBookingFilter,
+  AdminBookingCounts,
+  AdminBookingsResponse,
+  AdminBookingDetail,
+  AdminBookingNotification,
+} from "../types";
 import { keys } from "./keys";
 
 /**
@@ -35,5 +41,18 @@ export function useAdminBooking(id: string) {
   return useQuery({
     queryKey: [...keys.admin, "booking", id],
     queryFn: () => api<AdminBookingDetail>(`/admin/bookings/${encodeURIComponent(id)}`),
+  });
+}
+
+/** Bildirim kaydi ayri istek: detay acilisini yavaslatmaz, eski sunucuda 404 olur ve bolum gizlenir. */
+export function useAdminBookingNotifications(id: string) {
+  return useQuery({
+    queryKey: [...keys.admin, "booking", id, "notifications"],
+    queryFn: () =>
+      api<{ notifications: AdminBookingNotification[] }>(`/admin/bookings/${encodeURIComponent(id)}/notifications`).then(
+        (r) => r.notifications,
+      ),
+    enabled: !!id,
+    retry: false,
   });
 }

@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { auth } from "@/auth";
-import prisma from "@/lib/db";
+import { adminInboxService } from "@/services/AdminInboxService";
 
 function assertOrigin(req: Request): boolean {
   const origin = req.headers.get("origin") ?? req.headers.get("referer") ?? "";
@@ -30,12 +30,7 @@ export async function PATCH(
 
   const { id } = await context.params;
 
-  // `update` olmayan kayitta P2025 firlatip 500 veriyordu; sayi kontrolu 404.
-  const { count } = await prisma.contactMessage.updateMany({
-    where: { id },
-    data: { isRead: true },
-  });
-  if (count === 0) return NextResponse.json({ error: "not_found" }, { status: 404 });
+  if (!(await adminInboxService.markRead(id))) return NextResponse.json({ error: "not_found" }, { status: 404 });
   return NextResponse.json({ ok: true });
 }
 
@@ -53,7 +48,6 @@ export async function DELETE(
 
   const { id } = await context.params;
 
-  const { count } = await prisma.contactMessage.deleteMany({ where: { id } });
-  if (count === 0) return NextResponse.json({ error: "not_found" }, { status: 404 });
+  if (!(await adminInboxService.remove(id))) return NextResponse.json({ error: "not_found" }, { status: 404 });
   return NextResponse.json({ ok: true });
 }

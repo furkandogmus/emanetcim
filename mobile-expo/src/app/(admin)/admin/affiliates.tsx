@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { View } from "react-native";
+import { Share, View } from "react-native";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useTranslation } from "react-i18next";
 
@@ -69,7 +69,7 @@ function body(f: Form, notes?: string | null) {
 
 const affiliateError = (e: unknown) => errorMessage(e, "adminOps.affiliates");
 
-/** Araci listesi, olusturma/duzenleme/onay ve ay sonu odeme isareti. CSV web panelinde. */
+/** Araci listesi, olusturma/duzenleme/onay, ay sonu odeme isareti ve odenmemis komisyon CSV'si. */
 export default function AdminAffiliatesScreen() {
   const { t } = useTranslation();
   const qc = useQueryClient();
@@ -102,6 +102,16 @@ export default function AdminAffiliatesScreen() {
     onSettled: () => void qc.invalidateQueries({ queryKey: adminOpsKeys.affiliates }),
   });
 
+  // Mobil dosya indirmez: CSV metni paylasim menusune gider (e-posta, Drive, mesaj).
+  const csv = useMutation({
+    mutationFn: () =>
+      api<{ csv: string; filename: string }>(
+        `/admin/affiliates/commissions${month ? `?month=${encodeURIComponent(month)}` : ""}`,
+      ),
+    onSuccess: (r) => void Share.share({ title: r.filename, message: r.csv }).catch(() => undefined),
+    onError: (e) => notify(t("adminParityD1.affiliates.shareCsv"), affiliateError(e)),
+  });
+
   return (
     <AdminOpsScreen title={t("adminOps.affiliates.title")} query={query}>
       {canMutate ? (
@@ -115,7 +125,14 @@ export default function AdminAffiliatesScreen() {
             disabled={!/^\d{4}-\d{2}$/.test(month) || reference.trim().length < 2}
             onPress={() => payout.mutate()}
           />
-          <AppText variant="caption">{t("adminOps.affiliates.csvOnWeb")}</AppText>
+          <Button
+            variant="secondary"
+            title={t("adminParityD1.affiliates.shareCsv")}
+            loading={csv.isPending}
+            disabled={month !== "" && !/^\d{4}-\d{2}$/.test(month)}
+            onPress={() => csv.mutate()}
+          />
+          <AppText variant="caption">{t("adminParityD1.affiliates.shareCsvHint")}</AppText>
         </Card>
       ) : null}
 

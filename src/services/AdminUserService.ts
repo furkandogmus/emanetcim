@@ -1,4 +1,4 @@
-import { Prisma, Role } from "@prisma/client";
+import { Prisma, Role, type BookingStatus } from "@prisma/client";
 import { z } from "zod";
 import prisma from "@/lib/db";
 import { writeAuditLog } from "@/lib/audit-log";
@@ -11,6 +11,8 @@ import { sendVerificationEmail } from "@/lib/mail";
 import { requestPasswordReset } from "@/services/auth/password-reset";
 import { roleChangeData } from "@/lib/role-change-data";
 import { retryOnWriteConflict } from "@/lib/tx-retry";
+import logger from "@/lib/logger";
+import { isPrismaForeignKeyViolation } from "@/lib/prisma-errors";
 
 export type AdminActor = { userId: string | null; ip: string | null };
 
@@ -30,6 +32,19 @@ export type CancelRoleChangeResult = { ok: true } | { ok: false; error: "not_fou
 export type AdminMailResult =
   | { ok: true }
   | { ok: false; error: "not_found" | "no_email" | "invalid_email" | "already_verified" };
+
+export type DeleteUserResult =
+  | { ok: true }
+  | { ok: false; error: "cannot_delete_self" | "has_active_booking" | "blocked_by_relations" };
+
+export type BlockIpResult =
+  | { ok: true; ip: string }
+  | { ok: false; error: "invalid_ip" | "own_ip" | "not_found" | "no_ip" };
+
+/** Silmeyi engelleyen acik rezervasyon durumlari. */
+const DELETE_BLOCKING_STATUSES: BookingStatus[] = ["WAITING_APPROVAL", "APPROVED", "PENDING", "PAID", "CHECKED_IN"];
+
+const ipSchema = z.string().trim().min(7).max(45).regex(/^[a-fA-F0-9:.]+$/);
 
 /** Anonimlestirilmis hesabin e-postasi (`gdpr_...@invalid.local`) gercek bir adres degil. */
 function usableEmail(email: string | null): string | null {
@@ -51,18 +66,34 @@ const LIST_SELECT = {
   _count: { select: { bookings: true, shops: true } },
 } as const satisfies Prisma.UserSelect;
 
-function userSearchWhere(q: string): Prisma.UserWhereInput | undefined {
+/** Web `/admin/users` suzgecleriyle ayni anlam; mobil liste sunucuda suzer. */
+export type AdminUserFilters = {
+  role?: Role | null;
+  status?: "ACTIVE" | "BANNED" | "UNVERIFIED" | null;
+  type?: "REAL" | "TEST" | null;
+};
+
+function userSearchWhere(q: string, filters: AdminUserFilters = {}): Prisma.UserWhereInput | undefined {
+  const and: Prisma.UserWhereInput[] = [];
   const term = q.trim();
-  if (!term) return undefined;
-  // Telefon: bosluk/tire/+90/0 onekleri ne olursa olsun saklanan bicimle eslesir.
-  const digits = phoneSearchDigits(term, 4);
-  return {
-    OR: [
-      { name: { contains: term, mode: "insensitive" } },
-      { email: { contains: term, mode: "insensitive" } },
-      ...(digits ? [{ phone: { contains: digits } }] : []),
-    ],
-  };
+  if (term) {
+    // Telefon: bosluk/tire/+90/0 onekleri ne olursa olsun saklanan bicimle eslesir.
+    const digits = phoneSearchDigits(term, 4);
+    and.push({
+      OR: [
+        { name: { contains: term, mode: "insensitive" } },
+        { email: { contains: term, mode: "insensitive" } },
+        ...(digits ? [{ phone: { contains: digits } }] : []),
+      ],
+    });
+  }
+  if (filters.role) and.push({ role: filters.role });
+  if (filters.status === "BANNED") and.push({ isBanned: true });
+  else if (filters.status === "UNVERIFIED") and.push({ isBanned: false, emailVerified: null });
+  else if (filters.status === "ACTIVE") and.push({ isBanned: false, emailVerified: { not: null } });
+  if (filters.type) and.push({ isTest: filters.type === "TEST" });
+  if (and.length === 0) return undefined;
+  return and.length === 1 ? and[0] : { AND: and };
 }
 
 export class AdminUserService {
@@ -77,10 +108,10 @@ export class AdminUserService {
   }
 
   /** `search`'un sayfali hali: bos sorgu en yeni 50'de bitiyor, devamina ulasilamiyordu. */
-  async searchPage(q: string, opts: { cursor?: string | null; take?: number } = {}) {
+  async searchPage(q: string, opts: { cursor?: string | null; take?: number; filters?: AdminUserFilters } = {}) {
     const take = Math.min(Math.max(1, opts.take ?? 50), 100);
     const rows = await prisma.user.findMany({
-      where: userSearchWhere(q),
+      where: userSearchWhere(q, opts.filters),
       orderBy: [{ createdAt: "desc" }, { id: "desc" }],
       ...cursorArgs(opts.cursor ?? null, take),
       select: LIST_SELECT,
@@ -202,6 +233,7 @@ export class AdminUserService {
         ...LIST_SELECT,
         emailVerified: true,
         passwordHash: true,
+        lastIp: true,
         adminRoleChangeTargets: { select: { requestedRole: true } },
       },
     });
@@ -455,6 +487,105 @@ export class AdminUserService {
     const email = usableEmail(user.email);
     if (!email) return { ok: false, error: "no_email" };
     return this.resendVerificationEmail(email, actor, locale);
+  }
+
+  /*
+    KULLANICIYI TAMAMEN SIL -- govde 2026-11-24'te `deleteUserAction`tan tasindi;
+    mobil admin ucu da bunu cagirir. Kurallar:
+      - kendini silemezsin,
+      - normal hesapta acik rezervasyon (misafir ya da dukkan sahibi olarak) varsa
+        silinmez,
+      - yasakli hesapta acik rezervasyonlar `cancelBooking` yoluyla (iade + slot
+        temizligi) zorla iptal edilir; kapatilamayan kalirsa (CHECKED_IN: valiz
+        rafta) silinmez -- esnaf valizi kime verecegini bilemezdi.
+    Zaten yoksa basari: islem tekrarlanabilir.
+  */
+  async deleteUser(userId: string, actor: AdminActor & { reason?: string | null }): Promise<DeleteUserResult> {
+    if (actor.userId != null && actor.userId === userId) return { ok: false, error: "cannot_delete_self" };
+
+    const target = await prisma.user.findUnique({ where: { id: userId }, select: { isBanned: true, role: true } });
+    if (!target) return { ok: true };
+
+    if (target.isBanned) {
+      // Gec yukleme: iptal zinciri bildirim servisini getirir; servisin diger cagiranlari onu tasimasin.
+      const { forceCancelOpenBookingsForUser } = await import("@/services/booking/partner-review");
+      const summary = await forceCancelOpenBookingsForUser(userId, DELETE_BLOCKING_STATUSES);
+      if (summary.failed > 0) {
+        logger.warn({ userId, ...summary }, "admin_delete_user_blocked_uncancellable_booking");
+        return { ok: false, error: "has_active_booking" };
+      }
+    } else {
+      const activeBooking = await prisma.booking.findFirst({
+        where: {
+          status: { in: DELETE_BLOCKING_STATUSES },
+          OR: [{ guestId: userId }, { shop: { ownerId: userId } }],
+        },
+        select: { id: true },
+      });
+      if (activeBooking) {
+        logger.warn({ userId, bookingId: activeBooking.id }, "admin_delete_user_blocked_active_booking");
+        return { ok: false, error: "has_active_booking" };
+      }
+    }
+
+    try {
+      await prisma.user.delete({ where: { id: userId } });
+    } catch (e) {
+      if (isPrismaForeignKeyViolation(e)) {
+        logger.warn({ userId, err: e }, "admin_delete_user_fk_blocked");
+        return { ok: false, error: "blocked_by_relations" };
+      }
+      throw e;
+    }
+
+    writeAuditLog({
+      actorUserId: actor.userId,
+      actorRole: "ADMIN",
+      action: "user.delete",
+      entityType: "User",
+      entityId: userId,
+      metadata: { targetRole: target.role, ...(actor.reason?.trim() ? { reason: actor.reason.trim() } : {}) },
+      ip: actor.ip,
+    });
+    return { ok: true };
+  }
+
+  /*
+    IP ENGELLE -- govde `blockIpAction`tan tasindi. Yoneticinin kendi IP'si
+    reddedilir: ayni agdaki (ofis, CGNAT) misafiri engellerken kendini kilitlemesin.
+    Tekrar engellemek gerekceyi gunceller.
+  */
+  async blockIp(
+    rawIp: string,
+    reason: string | null,
+    actor: AdminActor,
+    opts: { userId?: string } = {},
+  ): Promise<BlockIpResult> {
+    const parsed = ipSchema.safeParse(rawIp ?? "");
+    if (!parsed.success) return { ok: false, error: "invalid_ip" };
+    const ip = parsed.data;
+    if (actor.ip && actor.ip.trim() === ip) return { ok: false, error: "own_ip" };
+
+    const note = reason?.trim().slice(0, 500) || null;
+    await prisma.blockedIp.upsert({ where: { ip }, update: { reason: note }, create: { ip, reason: note } });
+    writeAuditLog({
+      actorUserId: actor.userId,
+      actorRole: "ADMIN",
+      action: "ip.block",
+      entityType: opts.userId ? "User" : "BlockedIp",
+      entityId: opts.userId ?? ip,
+      metadata: { ip, ...(note ? { reason: note } : {}) },
+      ip: actor.ip,
+    });
+    return { ok: true, ip };
+  }
+
+  /** Kullanicinin son giris IP'sini engeller (mobil uc IP'yi govdede almaz, kayittan okur). */
+  async blockUserIp(userId: string, reason: string | null, actor: AdminActor): Promise<BlockIpResult> {
+    const user = await prisma.user.findUnique({ where: { id: userId }, select: { lastIp: true } });
+    if (!user) return { ok: false, error: "not_found" };
+    if (!user.lastIp) return { ok: false, error: "no_ip" };
+    return this.blockIp(user.lastIp, reason, actor, { userId });
   }
 }
 

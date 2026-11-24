@@ -15,6 +15,7 @@ import { AppText, Banner, Button, Card, CenterMessage, IconButton, Loading } fro
 import { api } from "@/lib/api";
 import { errorMessage } from "@/lib/errors";
 import { formatDay } from "@/lib/format";
+import { notify } from "@/lib/notify";
 import { telUrl } from "@/lib/phone";
 import { keys, useAdminPartnerLeads } from "@/lib/queries";
 import { isBlockingError } from "@/lib/query-view";
@@ -40,7 +41,8 @@ function draftOf(lead: AdminPartnerLead): Form {
 }
 
 /**
- * Esnaf on kayitlari: web `/admin/partner-leads` ile ayni liste. "Esnaf hesabina
+ * Esnaf on kayitlari: web `/admin/partner-leads` ile ayni liste ve "iletisime gecildi"
+ * isareti (`PartnerLeadService.setContacted`). "Esnaf hesabina
  * cevir" paneli on kayittan dolar; kural sunucuda (`PartnerLeadService.convertToPartner`).
  */
 export default function AdminPartnerLeadsScreen() {
@@ -64,6 +66,16 @@ export default function AdminPartnerLeadsScreen() {
         void queryClient.invalidateQueries({ queryKey: [...keys.admin, k] });
       }
     },
+  });
+
+  const contacted = useMutation({
+    mutationFn: (vars: { id: string; contacted: boolean }) =>
+      api<{ ok: true }>(`/admin/partner-leads/${encodeURIComponent(vars.id)}`, {
+        method: "PATCH",
+        body: { contacted: vars.contacted },
+      }),
+    onSuccess: () => void queryClient.invalidateQueries({ queryKey: [...keys.admin, "partner-leads"] }),
+    onError: (e) => notify(t("admin.actionFailed"), errorMessage(e, "adminParityD1.leads")),
   });
 
   function open(l: AdminPartnerLead) {
@@ -112,6 +124,11 @@ export default function AdminPartnerLeadsScreen() {
                     {formatDay(item.createdAt)}
                   </AppText>
                   <AppText variant="caption">{item.address}</AppText>
+                  {item.contacted && !item.converted ? (
+                    <AppText variant="caption" style={{ color: colors.accent }}>
+                      {t("adminParityD1.leads.contactedTag")}
+                    </AppText>
+                  ) : null}
                 </View>
                 <IconButton
                   label={t("admin.call")}
@@ -128,7 +145,16 @@ export default function AdminPartnerLeadsScreen() {
                   onPress={() => item.convertedShopId && router.push(`/admin/shop/${item.convertedShopId}`)}
                 />
               ) : (
-                <Button title={t("admin.partnerLeadsConvert")} onPress={() => open(item)} />
+                <>
+                  <Button
+                    variant="secondary"
+                    title={item.contacted ? t("adminParityD1.leads.undoContacted") : t("adminParityD1.leads.markContacted")}
+                    loading={contacted.isPending && contacted.variables?.id === item.id}
+                    disabled={contacted.isPending}
+                    onPress={() => contacted.mutate({ id: item.id, contacted: !item.contacted })}
+                  />
+                  <Button title={t("admin.partnerLeadsConvert")} onPress={() => open(item)} />
+                </>
               )}
             </Card>
           )}

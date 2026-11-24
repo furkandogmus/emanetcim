@@ -79,6 +79,9 @@ function Detail({ shop: s }: { shop: AdminShopDetail }) {
   const [lat, setLat] = useState(s.latitude == null ? "" : String(s.latitude));
   const [lng, setLng] = useState(s.longitude == null ? "" : String(s.longitude));
   const [locSaved, setLocSaved] = useState(false);
+  const [name, setName] = useState(s.name);
+  const [address, setAddress] = useState(s.address ?? "");
+  const [infoSaved, setInfoSaved] = useState(false);
   // Basari penceresi yerine dugme "Kaydedildi" der: Android'de bos govdeli Alert kocaman kaliyordu.
   const [saved, setSaved] = useState(false);
 
@@ -90,10 +93,14 @@ function Detail({ shop: s }: { shop: AdminShopDetail }) {
       for (const k of ["shops", "overview", "applications"]) void queryClient.invalidateQueries({ queryKey: [...keys.admin, k] });
       if (patch.pricePerDay !== undefined) setSaved(true);
       if (patch.latitude !== undefined) setLocSaved(true);
+      if (patch.name !== undefined) setInfoSaved(true);
     },
     onError: (e) => notify(t("admin.actionFailed"), errorMessage(e, "admin")),
   });
 
+  // Sunucu `adminUpdateShop`: bos ad reddedilir; adres en fazla 300 karakter.
+  const nameValid = name.trim().length >= 2;
+  const infoDirty = name.trim() !== s.name || address.trim() !== (s.address ?? "");
   const priceNum = Number(price.replace(",", "."));
   const capNum = Number(capacity);
   const priceValid = Number.isFinite(priceNum) && priceNum >= 1;
@@ -191,6 +198,38 @@ function Detail({ shop: s }: { shop: AdminShopDetail }) {
             </View>
           </Block>
         ) : null}
+
+        <Block title={t("adminParityD1.shop.info")}>
+          <Card style={{ gap: space.lg }}>
+            <Field
+              label={t("adminParityD1.shop.name")}
+              value={name}
+              onChangeText={(v) => {
+                setName(v);
+                setInfoSaved(false);
+              }}
+              maxLength={120}
+              hint={nameValid ? undefined : t("adminParityD1.shop.nameRequired")}
+            />
+            <Field
+              label={t("adminParityD1.shop.address")}
+              value={address}
+              onChangeText={(v) => {
+                setAddress(v);
+                setInfoSaved(false);
+              }}
+              multiline
+              maxLength={300}
+              inputStyle={{ maxHeight: 120 }}
+            />
+            <Button
+              title={infoSaved && !infoDirty ? t("admin.shopSaved") : t("admin.save")}
+              disabled={!infoDirty || !nameValid}
+              loading={update.isPending && update.variables?.name !== undefined}
+              onPress={() => update.mutate({ name: name.trim(), address: address.trim() })}
+            />
+          </Card>
+        </Block>
 
         <Block title={t("admin.pricing")}>
           <Card style={{ gap: space.lg }}>

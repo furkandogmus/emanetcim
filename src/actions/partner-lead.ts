@@ -82,7 +82,10 @@ export async function setPartnerLeadContactedAction(input: unknown) {
   if (!parsed.success) return { success: false as const, error: "Errors.invalidInput" };
 
   try {
-    await partnerLeadService.setContacted(parsed.data.id, parsed.data.contacted);
+    await partnerLeadService.setContacted(parsed.data.id, parsed.data.contacted, {
+      userId: auth.actor.id,
+      ip: await getClientIpOrNull(),
+    });
   } catch (err) {
     logger.error({ err }, "partner_lead_contacted_failed");
     return { success: false as const, error: "Errors.generic" };

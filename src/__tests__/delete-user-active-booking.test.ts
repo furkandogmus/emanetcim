@@ -26,13 +26,17 @@ import { stripComments } from "./helpers/strip-comments";
  * Yasaklamak, valizi dukkandan kaldirmiyor.
  */
 
+// Govde 2026-11-24'te `deleteUserAction`tan `AdminUserService.deleteUser`a tasindi (mobil uc da cagirir).
 const kaynak = stripComments(
+  readFileSync(join(process.cwd(), "src/services/AdminUserService.ts"), "utf-8"),
+);
+const action = stripComments(
   readFileSync(join(process.cwd(), "src/actions/admin-management.ts"), "utf-8"),
 );
 
 /** Yasakli dalinin govdesi. */
 function yasakliDali(): string {
-  const bas = kaynak.indexOf("if (userToDelete.isBanned)");
+  const bas = kaynak.indexOf("if (target.isBanned)");
   expect(bas, "yasakli dali bulunamadi").toBeGreaterThan(-1);
   return kaynak.slice(bas, kaynak.indexOf("} else {", bas));
 }
@@ -42,12 +46,13 @@ describe("hesap silme aktif rezervasyonu koruyor", () => {
     const dal = yasakliDali();
     expect(dal).toContain("summary.failed > 0");
     // Uyari yetmez: silme akisindan CIKILMALI.
-    expect(dal).toMatch(/return \{ ok: false, error: DELETE_USER_HAS_ACTIVE_BOOKING_CODE \}/);
+    expect(dal).toMatch(/return \{ ok: false, error: "has_active_booking" \}/);
   });
 
   it("normal dalindaki koruma yerinde duruyor", () => {
     expect(kaynak).toContain("admin_delete_user_blocked_active_booking");
-    expect(kaynak).toContain("DELETE_USER_HAS_ACTIVE_BOOKING_CODE");
+    // Web action'i servis kodunu web arayuzunun bildigi koda cevirir.
+    expect(action).toMatch(/has_active_booking:\s*DELETE_USER_HAS_ACTIVE_BOOKING_CODE/);
   });
 
   it("iki dal AYNI sonucu donduruyor", () => {
@@ -56,9 +61,9 @@ describe("hesap silme aktif rezervasyonu koruyor", () => {
       donseydi, admin arayuzu birinde anlamli mesaj, digerinde genel hata
       gosterirdi.
     */
-    const adet = (kaynak.match(/DELETE_USER_HAS_ACTIVE_BOOKING_CODE/g) ?? []).length;
-    // tanim + normal dal + yasakli dal
-    expect(adet).toBeGreaterThanOrEqual(3);
+    const adet = (kaynak.match(/error: "has_active_booking"/g) ?? []).length;
+    // normal dal + yasakli dal
+    expect(adet).toBeGreaterThanOrEqual(2);
   });
 
   it("CHECKED_IN hala iptal edilemez -- korumanin dayanagi bu", () => {
