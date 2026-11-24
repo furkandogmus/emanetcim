@@ -99,3 +99,19 @@ describe("uyuşmazlık açma", () => {
     expect(res).toEqual({ ok: true, id: "d1" });
   });
 });
+
+describe("itiraz suresi (teslimden 14 gun)", () => {
+  it("teslimden 14 gun sonrasi misafir itirazi window_closed; once acilir; valiz dukkandayken sinir yok", async () => {
+    const { disputeService } = await import("@/services/DisputeService");
+    const out = new Date("2026-11-01T10:00:00Z");
+    mockPrisma.booking.findUnique.mockResolvedValue({ id: "b1", guestId: "g1", status: "CHECKED_OUT", checkedOutAt: out });
+    const base = { bookingId: "b1", guestId: "g1", reason: "DAMAGE" as const, description: "Tekerlek kirik geldi" };
+    expect(await disputeService.create({ ...base, now: new Date("2026-11-15T10:00:01Z") })).toEqual({ ok: false, reason: "window_closed" });
+
+    mockPrisma.dispute.findUnique.mockResolvedValue({ id: "var" });
+    expect(await disputeService.create({ ...base, now: new Date("2026-11-15T09:59:00Z") })).toEqual({ ok: false, reason: "duplicate" });
+
+    mockPrisma.booking.findUnique.mockResolvedValue({ id: "b1", guestId: "g1", status: "CHECKED_IN", checkedOutAt: null });
+    expect(await disputeService.create({ ...base, now: new Date("2027-06-01T00:00:00Z") })).toEqual({ ok: false, reason: "duplicate" });
+  });
+});

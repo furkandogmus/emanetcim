@@ -1014,7 +1014,8 @@
       "booking_not_ready": "You can report a problem once your bag has been dropped off at the shop.",
       "duplicate_dispute": "You've already reported a problem for this booking; our team is reviewing it.",
       "not_found": "Booking not found.",
-      "not_owner": "You can't report a problem for this booking."
+      "not_owner": "You can't report a problem for this booking.",
+      "window_closed": "Damage or loss reports can be made within 14 days after your bag is picked up. This period has ended; please contact us for help."
     },
     "statusText": {
       "reviewing": "Your report is in; our team is reviewing it.",

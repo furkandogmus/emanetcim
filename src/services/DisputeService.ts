@@ -6,6 +6,7 @@ import { notificationService } from "@/services/NotificationService";
 import { bookingEventService } from "@/services/BookingEventService";
 import { presignStoredImage } from "@/lib/storage/private-read";
 import type { Prisma } from "@prisma/client";
+import { disputeWindowOpen } from "@/lib/dispute-window";
 
 /**
  * Uyuşmazlık (hasar / hırsızlık / diğer) açma — iki taşıyıcının ORTAK gövdesi.
@@ -32,11 +33,12 @@ export type CreateDisputeInput = {
   guestId: string;
   reason: "DAMAGE" | "THEFT" | "OTHER";
   description: string;
+  now?: Date;
 };
 
 export type CreateDisputeResult =
   | { ok: true; id: string }
-  | { ok: false; reason: "not_found" | "not_owner" | "booking_not_ready" | "duplicate" };
+  | { ok: false; reason: "not_found" | "not_owner" | "booking_not_ready" | "window_closed" | "duplicate" };
 
 /** Uyuşmazlık ancak valiz teslim alındıktan SONRA açılabilir. */
 const DISPUTABLE_STATUSES = ["CHECKED_IN", "CHECKED_OUT"];
@@ -152,7 +154,7 @@ class DisputeService {
 
     const booking = await prisma.booking.findUnique({
       where: { id: bookingId },
-      select: { id: true, guestId: true, status: true },
+      select: { id: true, guestId: true, status: true, checkedOutAt: true },
     });
     if (!booking) return { ok: false, reason: "not_found" };
     /*
@@ -163,6 +165,7 @@ class DisputeService {
     if (!DISPUTABLE_STATUSES.includes(booking.status)) {
       return { ok: false, reason: "booking_not_ready" };
     }
+    if (!disputeWindowOpen(booking, input.now ?? new Date())) return { ok: false, reason: "window_closed" };
 
     const existing = await prisma.dispute.findUnique({ where: { bookingId } });
     if (existing) return { ok: false, reason: "duplicate" };

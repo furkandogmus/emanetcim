@@ -1905,7 +1905,8 @@
     "reviewNotHidden": "Die Bewertung ist nicht ausgeblendet.",
     "reviewReasonRequired": "Geben Sie zum Ausblenden einen Grund an.",
     "accountDeletionGuest": "Sie können Ihr Konto direkt auf dieser Seite schließen.",
-    "coordinatesRequired": "Der Standort-Pin eines aktiven Geschäfts kann nicht entfernt werden; Sie können ihn verschieben."
+    "coordinatesRequired": "Der Standort-Pin eines aktiven Geschäfts kann nicht entfernt werden; Sie können ihn verschieben.",
+    "disputeWindowClosed": "Schäden oder Verluste können innerhalb von 14 Tagen nach der Abholung gemeldet werden. Diese Frist ist abgelaufen; bitte kontaktiere uns."
   },
   "Emails": {
     "verificationSubject": "Bestätigen Sie Ihre E-Mail",
