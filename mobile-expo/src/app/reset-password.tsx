@@ -47,7 +47,7 @@ export default function ResetPasswordScreen() {
   const close = () => (router.canGoBack() ? router.back() : router.replace("/login"));
 
   // Sunucu hesap var/yok ayrimini gizlemek icin her zaman { ok: true } doner.
-  // Sunucu tr/en/de bilir; ru e-postasi Ingilizce gider (languageInfo.site).
+  // Sunucu web dillerini bilir; ru e-postasi Ingilizce gider (languageInfo.site).
   const sendRequest = (value: string) =>
     api("/auth/password-reset/request", {
       method: "POST",

@@ -88,7 +88,7 @@ describe("cancelReasonOf / cancelReasonKey", () => {
 
   it("her neden her dilde iki bicimde de cevrili", () => {
     const reasons: CancelReason[] = ["guest_cancel", "partner_cancel", "no_show", "admin_cancel", "expired_no_dropoff"];
-    for (const lng of ["tr", "en", "de", "ru"]) {
+    for (const lng of ["tr", "en", "de", "fr", "ja", "ru"]) {
       for (const r of reasons) {
         for (const v of ["short", "long"] as const) {
           expect(i18n.exists(cancelReasonKey(r, v)!, { lng })).toBe(true);

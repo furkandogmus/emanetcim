@@ -189,7 +189,7 @@ describe("kurallar ve hata kodlari", () => {
       "unsupported_type", "dimensions_too_large", "storage_unavailable", "schedule_conflict", "invalid_input",
       "schedule_save_failed", "reason_required", "already_hidden", "not_hidden", "invalid_action", "invalid_data",
     ];
-    for (const lng of ["tr", "en", "de", "ru"]) {
+    for (const lng of ["tr", "en", "de", "fr", "ja", "ru"]) {
       await i18n.changeLanguage(lng);
       const generic = i18n.t("common.genericError");
       for (const code of codes) expect([lng, code, errorMessage(new ApiError(400, code), "adminShop")]).not.toEqual([lng, code, generic]);
