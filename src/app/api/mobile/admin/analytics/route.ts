@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
 import { requireMobileUser, requireRole } from "@/lib/mobile-auth";
 import { toMobileAdminAnalytics } from "@/lib/mobile-dto";
+import { bookingSourceService } from "@/services/BookingSourceService";
 import { analyticsService } from "@/services/AnalyticsService";
 
 /** Ekranin sundugu araliklar; baska deger 30'a duser (web sabit 30 gun). */
@@ -18,6 +19,10 @@ export async function GET(req: NextRequest) {
   if ("error" in auth) return auth.error;
   const forbid = requireRole(auth.user, ["ADMIN"]);
   if (forbid) return forbid;
-  const summary = await analyticsService.getDashboardSummary(parseDays(req.nextUrl.searchParams.get("days")));
-  return NextResponse.json(toMobileAdminAnalytics(summary));
+  const days = parseDays(req.nextUrl.searchParams.get("days"));
+  const [summary, sources] = await Promise.all([
+    analyticsService.getDashboardSummary(days),
+    bookingSourceService.breakdown(days),
+  ]);
+  return NextResponse.json(toMobileAdminAnalytics(summary, sources));
 }

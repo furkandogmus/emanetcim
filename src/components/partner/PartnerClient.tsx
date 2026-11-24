@@ -12,6 +12,7 @@ import {
   ShieldCheck,
   QrCode,
   Users,
+  UserPlus,
 } from "lucide-react";
 
 import { Link } from "@/i18n/routing";
@@ -26,6 +27,8 @@ import PartnerReferralCard from "@/components/partner/PartnerReferralCard";
 import WebPushOptIn from "@/components/WebPushOptIn";
 import PartnerPulse, { type PulseProps } from "@/components/partner/PartnerPulse";
 import PartnerOnboardingChecklist from "@/components/partner/PartnerOnboardingChecklist";
+import WalkInDialog from "@/components/partner/WalkInDialog";
+import type { ShopSourceStats } from "@/services/BookingSourceService";
 import { formatTryCurrency } from "@/lib/currency";
 import ConfirmDialog from "@/components/common/ConfirmDialog";
 import {
@@ -108,6 +111,8 @@ interface PartnerClientProps {
    * afis, ayarlar, onboarding ve davet karti cizilmez; sunucu ayrica reddeder.
    */
   canManage?: boolean;
+  /** Afisten / kapidan gelen rezervasyon sayilari (personel de gorur: tutar yok). */
+  sourceStats?: ShopSourceStats | null;
 }
 
 export default function PartnerClient({
@@ -133,8 +138,11 @@ export default function PartnerClient({
   hasShopImage = false,
   hasShopLocation = false,
   canManage = true,
+  sourceStats = null,
 }: PartnerClientProps) {
   const t = useTranslations("Partner");
+  const tWalkIn = useTranslations("walkIn");
+  const [walkInOpen, setWalkInOpen] = useState(false);
   const tStaff = useTranslations("shopStaff");
   const errorText = useActionErrorText();
   const tCommon = useTranslations("Common");
@@ -425,6 +433,23 @@ export default function PartnerClient({
         />
       )}
 
+      {walkInOpen && (
+        <WalkInDialog
+          shopId={shopId}
+          onClose={() => setWalkInOpen(false)}
+          onDone={() => {
+            setWalkInOpen(false);
+            showSuccessBanner(tWalkIn("doneTitle"));
+            router.refresh();
+          }}
+          onNeedsCheckIn={(bookingId) => {
+            setWalkInOpen(false);
+            router.refresh();
+            void applyPreviewForCheckIn(bookingId, false);
+          }}
+        />
+      )}
+
       {checkoutSeals && (
         <CheckoutSealsDialog
           bookingId={checkoutSeals.bookingId}
@@ -576,6 +601,7 @@ export default function PartnerClient({
             </span>
           </button>
 
+
           {/*
             KART SADELESTIRILDI (2026-09-01). Ustteki gunluk durum blogu
             eklenince bu izgara ONUN KOPYASI haline gelmisti ve iki sayi yan
@@ -591,6 +617,32 @@ export default function PartnerClient({
             Fazla gosterge, gostergesizlikten kotudur.
           */}
           <div className="grid w-full grid-cols-1 gap-3 md:gap-6">
+            <button
+              type="button"
+              onClick={() => setWalkInOpen(true)}
+              className="ui-card flex items-center gap-3 p-5 text-left font-bold text-gray-900 hover:bg-gray-50 md:rounded-4xl md:p-6"
+              data-testid="walk-in-open"
+            >
+              <UserPlus size={22} aria-hidden className="shrink-0 text-orange-600" />
+              <span className="flex flex-col">
+                <span>{tWalkIn("open")}</span>
+                <span className="text-xs font-bold text-gray-400">{tWalkIn("openHint")}</span>
+              </span>
+            </button>
+            {sourceStats ? (
+              <div className="ui-card grid grid-cols-2 gap-3 p-5 md:rounded-4xl md:p-6" data-testid="source-stats">
+                {([
+                  ["statPoster", sourceStats.thisMonth.poster, sourceStats.lastMonth.poster],
+                  ["statWalkIn", sourceStats.thisMonth.walkIn, sourceStats.lastMonth.walkIn],
+                ] as const).map(([key, now, prev]) => (
+                  <div key={key}>
+                    <p className="id-eyebrow text-gray-400">{tWalkIn(key)}</p>
+                    <p className="id-display mt-1 text-2xl text-gray-900">{now}</p>
+                    <p className="text-xs font-bold text-gray-400">{tWalkIn("lastMonth", { count: prev })}</p>
+                  </div>
+                ))}
+              </div>
+            ) : null}
             {canManage && (
             <>
             <div className="ui-card flex items-center justify-between gap-2 p-5 md:rounded-4xl md:p-6">

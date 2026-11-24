@@ -71,6 +71,10 @@ describe("kaynak etiketi", () => {
     expect(normalizeAppLinkSource("random-campaign", null)).toBe("other");
     expect(normalizeAppLinkSource("web-" + "x".repeat(200), null)).toBe("other");
     expect(normalizeAppLinkSource("afis-x", null)).toBe("other");
+    // Dukkan kimligi UUID: tireli bicim de afis kaynagidir.
+    expect(normalizeAppLinkSource("afis-0b7e3c1a-2f4d-4c8e-9a1b-3d5e7f9a1b2c", null)).toBe(
+      "afis-0b7e3c1a-2f4d-4c8e-9a1b-3d5e7f9a1b2c",
+    );
   });
 });
 

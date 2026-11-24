@@ -84,7 +84,8 @@ const SOURCE_ALLOWLIST = new Set([
   "airbnb",
   "direct",
 ]);
-const SOURCE_SHAPES = [/^web-[a-z0-9-]{1,24}$/, /^email-[a-z0-9-]{1,24}$/, /^afis-[a-z0-9]{8,40}$/];
+// `afis-` kimligi UUID (tireli): eski kalip tireyi reddediyor, her afis isabeti `other`a dusuyordu.
+const SOURCE_SHAPES = [/^web-[a-z0-9-]{1,24}$/, /^email-[a-z0-9-]{1,24}$/, /^afis-[a-z0-9-]{8,40}$/];
 
 /**
  * Kaynak etiketini normallestirir. Defter yalnizca BILINEN bicimleri tutar:

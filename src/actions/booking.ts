@@ -27,6 +27,8 @@ import logger from "@/lib/logger";
 import { couponService } from "@/services/CouponService";
 import { checkoutDiscountService } from "@/services/CheckoutDiscountService";
 import { AFFILIATE_COOKIE } from "@/services/AffiliateService";
+import { POSTER_COOKIE, verifyPosterAttribution } from "@/lib/booking-source";
+import { bookingSourceService } from "@/services/BookingSourceService";
 import { requireUser, actionSession } from "@/lib/action-auth";
 import { canGuestSelfCancel } from "@/services/booking/access";
 import { guestCancelOptions } from "@/lib/booking-closure";
@@ -154,7 +156,12 @@ export async function createBookingAction(data: CreateBookingInput) {
     basarisiz olursa asagidaki `catch` geri verir. Araci kodu `/r/<kod>`
     linkinin biraktigi cerezden okunur; atfi servis yeniden dogrular.
   */
-  const affiliateCode = (await cookies()).get(AFFILIATE_COOKIE)?.value ?? null;
+  const cookieStore = await cookies();
+  const affiliateCode = cookieStore.get(AFFILIATE_COOKIE)?.value ?? null;
+  // Afis atfi yalnizca istatistik; imza + pencere + dukkan dogrulanir, fiyati etkilemez.
+  const posterShopId = await bookingSourceService.resolvePosterShop(
+    verifyPosterAttribution(cookieStore.get(POSTER_COOKIE)?.value),
+  );
   const discounts = await checkoutDiscountService.claim({
     subtotal: authTotals.subtotalBeforeCoupon,
     couponCode: data.couponCode,
@@ -208,6 +215,8 @@ export async function createBookingAction(data: CreateBookingInput) {
         Durum artık yaratılışla aynı transaction'da; denetim izini de servis yazar.
       */
       initialStatus: BookingStatus.APPROVED,
+      source: posterShopId ? "poster" : "web",
+      sourceShopId: posterShopId,
     });
 
     // Misafire onay e-postası (hesabin e-postasi; telefonla acilmis hesapta yok)

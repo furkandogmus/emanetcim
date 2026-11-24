@@ -140,6 +140,24 @@ APPROVED ──check-in (tahsilat)──> PAID ──> CHECKED_IN ──check-ou
 - **Misafirle iletişim:** WhatsApp tıkla-yaz bağlantısı (`src/lib/whatsapp.ts`); otomatik
   WhatsApp mesajı gönderilmez.
 
+- **Kapıdan gelen misafir** (2026-11-25, web panel ve mobil esnaf, sahip + personel): uygulaması
+  olmayan gezgine tezgahta rezervasyon açılır (ad, isteğe bağlı telefon/e-posta, valiz, alma
+  saati). Rezervasyon "şimdi" başlar, normal fiyat/kapasite/saat/tatil kuralları geçerli, indirim
+  yok, `source = walk_in`; hesapsızdır (`guestId` boş). Mühür kapalıysa hemen teslim alınır,
+  açıksa normal teslim ekranı açılır. E-posta verildiyse onay yönetim bağıyla gider (misafir
+  sonra o e-postayla hesap açınca rezervasyon bağlanır); yoksa QR ve kod ekrandan fotoğraflanır
+  (misafire SMS yok). Operatör "misafir şartları kabul etti" beyanını işaretler; beyan, metin
+  sürümleriyle `CREATED` olayına yazılır. Sınır: operatör başına 10/10 dk, dükkan başına 30/saat.
+  `WalkInBookingService`.
+- **Afiş atfı:** afiş QR'ı (`/app?kaynak=afis-<dükkan>`) 30 dakikalık imzalı çerez bırakır
+  (son dokunuş); mağaza kapalıyken okutan kişi doğrudan dükkanın sayfasına iner. Uygulama
+  `/shop/<id>?kaynak=afis-<id>` bağlantısıyla açıldıysa aynı pencereyle checkout'a ekler. Bu
+  pencerede başlayan rezervasyon `source = poster`, `sourceShopId` afişin dükkanı. Mağazadan
+  yeni kurulan uygulamaya atıf taşınmaz (ertelenmiş derin bağlantı native SDK ister).
+- **Kanal istatistiği:** yalnız sayı; bonus/komisyon yok (sahip kararı). Esnaf panelinde bu ay
+  ve geçen ay "Afişinizden gelen" ve "Kapıdan gelen" (personel de görür, tutar yok); yönetici
+  analitiğinde app / web / walk-in / afiş / bilinmiyor dağılımı. İptaller sayılmaz.
+
 ### Tezgahta adımlar (personel için)
 
 1. Misafirin QR'ını okut ya da rezervasyon kodunu ara.

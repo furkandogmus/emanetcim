@@ -11,6 +11,7 @@ import {
   UserPlus,
 } from "lucide-react";
 import { analyticsService } from "@/services/AnalyticsService";
+import { bookingSourceService } from "@/services/BookingSourceService";
 
 const RANGE_DAYS = 30;
 
@@ -28,7 +29,18 @@ export default async function AdminAnalyticsPage({
   }
 
   const t = await getTranslations("AdminAnalytics");
-  const summary = await analyticsService.getDashboardSummary(RANGE_DAYS);
+  const tSource = await getTranslations("walkIn");
+  const [summary, sources] = await Promise.all([
+    analyticsService.getDashboardSummary(RANGE_DAYS),
+    bookingSourceService.breakdown(RANGE_DAYS),
+  ]);
+  const sourceRows = [
+    { key: "app", label: tSource("sourceApp"), value: sources.app },
+    { key: "web", label: tSource("sourceWeb"), value: sources.web },
+    { key: "walk_in", label: tSource("sourceWalkIn"), value: sources.walk_in },
+    { key: "poster", label: tSource("sourcePoster"), value: sources.poster },
+    { key: "unknown", label: tSource("sourceUnknown"), value: sources.unknown },
+  ];
 
   const cards = [
     { title: t("uniqueSessions"), value: summary.uniqueSessions, icon: <Users size={22} /> },
@@ -77,6 +89,21 @@ export default async function AdminAnalyticsPage({
           </div>
         ))}
       </div>
+
+      <section
+        className="mb-10 rounded-4xl border border-gray-100 bg-white p-6 shadow-sm sm:p-8"
+        data-testid="admin-booking-sources"
+      >
+        <h3 className="mb-6 text-sm id-eyebrow text-gray-400">{tSource("sourcesTitle", { days: RANGE_DAYS })}</h3>
+        <ul className="grid grid-cols-2 gap-3 sm:grid-cols-5">
+          {sourceRows.map((r) => (
+            <li key={r.key} className="rounded-2xl bg-gray-50 px-4 py-3">
+              <p className="id-display text-2xl text-gray-900">{r.value.toLocaleString(locale)}</p>
+              <p className="id-eyebrow text-gray-400">{r.label}</p>
+            </li>
+          ))}
+        </ul>
+      </section>
 
       <div className="grid grid-cols-1 gap-8 lg:grid-cols-2">
         <div className="rounded-4xl border border-gray-100 bg-white p-6 shadow-sm sm:p-8">
