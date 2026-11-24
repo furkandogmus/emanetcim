@@ -2410,5 +2410,10 @@
       "conflict": "Gleichzeitig wurde eine andere Teamänderung vorgenommen, versuchen Sie es erneut."
     },
     "closedAskOwner": "Das Geschäft scheint gerade geschlossen. Nur der Inhaber kann eine Übergabe außerhalb der Öffnungszeiten freigeben."
+  },
+  "wallet": {
+    "addApple": "Zu Apple Wallet hinzufügen",
+    "addGoogle": "Zu Google Wallet hinzufügen",
+    "openFailed": "Der Wallet-Link konnte nicht geöffnet werden. Bitte versuchen Sie es erneut."
   }
 }

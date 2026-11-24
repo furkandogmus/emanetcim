@@ -2410,5 +2410,10 @@
       "conflict": "Another team change happened at the same time, try again."
     },
     "closedAskOwner": "The shop looks closed right now. Only the shop owner can approve an out-of-hours handover."
+  },
+  "wallet": {
+    "addApple": "Add to Apple Wallet",
+    "addGoogle": "Add to Google Wallet",
+    "openFailed": "Could not open the wallet link. Please try again."
   }
 }

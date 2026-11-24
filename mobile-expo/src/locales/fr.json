@@ -2444,5 +2444,10 @@
       "conflict": "Une autre modification d'équipe a eu lieu en même temps, réessayez."
     },
     "closedAskOwner": "Le commerce semble fermé. Seul le propriétaire peut autoriser une remise hors horaires."
+  },
+  "wallet": {
+    "addApple": "Ajouter à Apple Wallet",
+    "addGoogle": "Ajouter à Google Wallet",
+    "openFailed": "Impossible d'ouvrir le lien du portefeuille. Veuillez réessayer."
   }
 }
