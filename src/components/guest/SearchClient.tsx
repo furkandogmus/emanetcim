@@ -44,7 +44,7 @@ import {
   readGeoPermission,
 } from "@/lib/geolocation";
 import { STORAGE_CITIES } from "@/lib/storage-cities";
-import { matchesSearchFilters, type SearchQueryKind } from "@/lib/search-filter";
+import { compareShopsBy, isSearchSort, matchesSearchFilters, type SearchQueryKind } from "@/lib/search-filter";
 import {
   PLAUSIBLE_EVENTS,
   trackPlausibleEvent,
@@ -556,22 +556,9 @@ export default function SearchClient({
   };
 
   const sortedShops = useMemo(() => {
+    // Mobil `shops/nearby` ile ayni karsilastirici (`compareShopsBy`).
     const list = [...filteredShops];
-    switch (sortBy) {
-      case "price_asc":
-        list.sort((a, b) => (a.pricePerDay ?? 0) - (b.pricePerDay ?? 0));
-        break;
-      case "price_desc":
-        list.sort((a, b) => (b.pricePerDay ?? 0) - (a.pricePerDay ?? 0));
-        break;
-      case "rating":
-        list.sort((a, b) => (b.rating ?? 0) - (a.rating ?? 0));
-        break;
-      case "distance":
-      default:
-        list.sort((a, b) => (a.distanceKm ?? 9999) - (b.distanceKm ?? 9999));
-        break;
-    }
+    list.sort(compareShopsBy(isSearchSort(sortBy) ? sortBy : "distance"));
     return list;
   }, [filteredShops, sortBy]);
 

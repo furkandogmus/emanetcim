@@ -1,6 +1,7 @@
 import { moneyToNumber } from "@/lib/money";
 import { isBagRevisableStatus } from "@/lib/bag-revision-status";
-import { noShowAvailableAt } from "@/lib/booking-closure";
+import { isBookingExpired, noShowAvailableAt } from "@/lib/booking-closure";
+import { toWhatsAppNumber } from "@/lib/whatsapp";
 import { lateCloseAt } from "@/lib/late-dropoff";
 import { DISPUTE_STATUSES, type DisputeStatus } from "@/lib/dispute-status";
 import { fullAddress } from "./address";
@@ -39,18 +40,8 @@ type BookingSummarySource = {
   cancelReason?: string | null;
 };
 
-/** Valiz hic birakilmamis durumlar: alma saati gecince rezervasyon bosa dusmustur. */
-const NEVER_DROPPED_STATUSES: readonly string[] = ["PENDING", "WAITING_APPROVAL", "APPROVED", "PAID"];
-
-/**
- * Suresi dolmus (gelinmemis) rezervasyon: bekleyen/onayli/odenmis, valiz hic teslim
- * edilmemis ve alma saati gecmis. Kural SUNUCUDA: web ve mobil ayni cevabi gorur,
- * cihaz saati yanlis olan turist bos bir QR gostermez. Durum bilerek degismez
- * (sure asimi taramasi yalnizca isaretler), bu yuzden bu bir turetilmis alandir.
- */
-export function isBookingExpired(b: { status: string; checkOutTime: Date }, now: Date = new Date()): boolean {
-  return NEVER_DROPPED_STATUSES.includes(b.status) && b.checkOutTime.getTime() < now.getTime();
-}
+// Kural `@/lib/booking-closure`ta: web misafir sayfasi da ayni cevabi okur.
+export { isBookingExpired };
 
 export function toMobileBookingSummary(b: BookingSummarySource) {
   return {
@@ -132,6 +123,8 @@ export function toMobileBookingDetail(b: BookingDetailSource, opts: { operator?:
     latitude: b.shop.latitude,
     longitude: b.shop.longitude,
     shopPhone: b.shop.owner.phone ?? "",
+    // Web `BookingDetailActions` ile ayni cevrim; cevrilemeyen numarada WhatsApp dugmesi cizilmez.
+    shopWhatsapp: toWhatsAppNumber(b.shop.owner.phone),
     // Turist taksiciye gosterebilsin; koordinatsiz dukkanda yol tarifi de buradan.
     shopAddress: fullAddress(b.shop.address, b.shop.district, b.shop.city),
     seals: b.seals.map((s) => ({

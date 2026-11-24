@@ -59,6 +59,9 @@ const SHOP = {
   closingTime: "20:00",
   open247: false,
   hasRestroom: true,
+  hasCctv: true,
+  hasClimateControl: false,
+  acceptsLargeItems: true,
   isActive: true,
   isVerified: true,
 };
@@ -105,6 +108,10 @@ describe("mobil kullanıcı gövdesi", () => {
 describe("mobil dükkan gövdesi", () => {
   it("`isVerified` HER yanıtta bulunur", () => {
     expect(toMobileShop(SHOP).isVerified).toBe(true);
+  });
+
+  it("olanak alanları (rozet + süzgeç) taşınır", () => {
+    expect(toMobileShop(SHOP)).toMatchObject({ hasCctv: true, hasClimateControl: false, acceptsLargeItems: true });
   });
 
   it("`Decimal` fiyatı sayıya çevirir", () => {

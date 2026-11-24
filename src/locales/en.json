@@ -2890,5 +2890,21 @@
     "confirmTitle_delete": "Delete this review?",
     "confirmBody_delete": "The review is deleted permanently.",
     "done_delete": "Review deleted."
+  },
+  "GuestBookingParity": {
+    "expiredTitle": "Expired",
+    "expiredBody": "The pick-up time has passed and your bags were not dropped off. This booking can no longer be used.",
+    "rebook": "Book again",
+    "closeExpired": "Close booking",
+    "closeExpiredTitle": "Close this booking?",
+    "closeExpiredBody": "If you didn't drop off your bags, you can close this booking. This can't be undone.",
+    "closeExpiredConfirm": "Yes, close",
+    "closeExpiredKeep": "Keep it",
+    "closeExpiredDone": "Booking closed.",
+    "closeExpiredFailed": "The booking could not be closed.",
+    "lateTitle": "Your drop-off time has passed",
+    "lateDropoff": "Your booking closes automatically at {time}. If you are on your way, call the shop.",
+    "partnerWaitingTitle": "The shop is waiting for you",
+    "lateDropoffHold": "The shop is holding your booking until {time}."
   }
 }

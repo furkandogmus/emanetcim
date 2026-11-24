@@ -2732,5 +2732,21 @@
     "confirmTitle_delete": "این نظر حذف شود؟",
     "confirmBody_delete": "نظر برای همیشه حذف می‌شود.",
     "done_delete": "نظر حذف شد."
+  },
+  "GuestBookingParity": {
+    "expiredTitle": "منقضی شده",
+    "expiredBody": "زمان تحویل گرفتن گذشته و چمدان‌ها تحویل داده نشده‌اند. این رزرو دیگر قابل استفاده نیست.",
+    "rebook": "رزرو دوباره",
+    "closeExpired": "بستن رزرو",
+    "closeExpiredTitle": "این رزرو بسته شود؟",
+    "closeExpiredBody": "اگر چمدان‌هایتان را تحویل نداده‌اید، می‌توانید این رزرو را ببندید. این کار برگشت‌پذیر نیست.",
+    "closeExpiredConfirm": "بله، ببند",
+    "closeExpiredKeep": "نگه دار",
+    "closeExpiredDone": "رزرو بسته شد.",
+    "closeExpiredFailed": "رزرو بسته نشد.",
+    "lateTitle": "زمان تحویل چمدان شما گذشته است",
+    "lateDropoff": "رزرو شما ساعت {time} به‌طور خودکار بسته می‌شود. اگر در راه هستید، با مغازه تماس بگیرید.",
+    "partnerWaitingTitle": "مغازه منتظر شماست",
+    "lateDropoffHold": "مغازه رزرو شما را تا ساعت {time} نگه می‌دارد."
   }
 }

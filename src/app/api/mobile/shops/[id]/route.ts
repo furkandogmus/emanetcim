@@ -7,6 +7,7 @@ import { shopGalleryService } from "@/services/ShopGalleryService";
 import { getPricingRules } from "@/lib/platform-settings";
 import { todayInZone } from "@/lib/stay-days";
 import { loadScheduleParts } from "@/services/ShopScheduleService";
+import { prelaunchInterestService } from "@/services/PrelaunchInterestService";
 
 const shopService = new ShopService();
 
@@ -37,10 +38,12 @@ async function detail(id: string, viewer: ShopViewer) {
     `pricing` yalnizca detayda: odeme ekrani bu uctan okuyor ve tahmini tutari
     sunucunun kurallariyla hesapliyor (bkz. `toMobilePricing`).
   */
-  const [rules, scheduleParts, images] = await Promise.all([
+  const [rules, scheduleParts, images, wantCount] = await Promise.all([
     getPricingRules(),
     loadScheduleParts([s.id], todayInZone()),
     shopGalleryService.list(s.id),
+    // Talep testi noktasinda "N kisi istedi" (web detay sayfasiyla ayni sayi); sayac hatasi detayi dusurmez.
+    s.isPrelaunch ? prelaunchInterestService.wantCount(s.id).catch(() => 0) : Promise.resolve(null),
   ]);
   const parts = scheduleParts.get(s.id);
   return NextResponse.json({
@@ -50,5 +53,6 @@ async function detail(id: string, viewer: ShopViewer) {
     priceBySize: toMobilePriceBySize(s.pricePerDay, rules),
     // Kapak `image`da; galeri onun ardindan kaydirilir.
     gallery: toMobilePublicGallery(images),
+    prelaunchWantCount: wantCount,
   });
 }
