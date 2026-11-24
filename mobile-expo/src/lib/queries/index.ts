@@ -24,3 +24,4 @@ export * from "./account-deletion";
 export * from "./admin-insights";
 export * from "./admin-campaigns";
 export * from "./affiliate";
+export * from "./partner-parity";

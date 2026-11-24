@@ -1,5 +1,6 @@
 import { useState } from "react";
-import { KeyboardAvoidingView, ScrollView, StyleSheet, View } from "react-native";
+import { Alert, KeyboardAvoidingView, ScrollView, StyleSheet, View } from "react-native";
+import { router } from "expo-router";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useTranslation } from "react-i18next";
@@ -10,16 +11,20 @@ import { AppText, Banner, Button, CenterMessage, Loading } from "@/components/ui
 import { api } from "@/lib/api";
 import { usePartnerShopSelection, withShop } from "@/lib/partner-shop";
 import { errorMessage } from "@/lib/errors";
-import { keys, usePartnerShopSettings } from "@/lib/queries";
+import { keys, savePartnerPhone, usePartnerShopSettings } from "@/lib/queries";
 import type { PartnerShopSettings, PartnerShopUpdateResult } from "@/lib/types";
 import { notify } from "@/lib/notify";
 import { colors, fonts, space } from "@/theme/tokens";
 import { StaleQueryBanner } from "@/components/StaleQueryBanner";
+import { LinkGroup, LinkRow } from "@/components/LinkRow";
+import { useAuth } from "@/lib/auth";
+import { hasPin, phoneChange } from "@/lib/partner-parity";
 
 /**
- * Dukkan temel bilgileri.
- * Telefon BURADA YOK: o alan hesabin giris numarasi; silinirse ya da yanlis yazilirsa
- * esnaf kendi hesabindan kilitlenir. Numara profil ekranindan degisir.
+ * Dukkan temel bilgileri, konum pini ve SMS bildirim numarasi.
+ * SMS numarasi hesabin giris numarasiyla AYNI alan (`User.phone`): ayri bir
+ * dugmeyle ve kayitli numarayi degistirirken/silerken onayla kaydedilir; sunucu
+ * baska giris yolu olmayan hesapta degisikligi zaten reddeder.
  * Calisma saatleri burada degil,
  * `schedule` ekraninda: web formu da ayni ayrimi yapiyor ve gun bazli saat
  * kaydedilince `Shop.openingTime/closingTime` oradan yaziliyor.
@@ -58,6 +63,38 @@ function SettingsForm({ shop }: { shop: PartnerShopSettings }) {
   const [city, setCity] = useState(shop.city ?? "");
   const [district, setDistrict] = useState(shop.district ?? "");
   const [formError, setFormError] = useState<string | null>(null);
+  const { impersonating } = useAuth();
+  // Yonetici goruntuleme oturumunda giris numarasi sunucuda da 403: alan salt okunur.
+  const phoneLocked = impersonating !== null;
+  const [phone, setPhone] = useState(shop.phone ?? "");
+  const [phoneError, setPhoneError] = useState<string | null>(null);
+
+  const savePhone = useMutation({
+    mutationFn: (value: string | null) => savePartnerPhone(value),
+    onSuccess: (res) => {
+      setPhone(res.phone ?? "");
+      void queryClient.invalidateQueries({ queryKey: keys.partnerShop });
+      notify(t("partnerParity.smsPhoneSaved"));
+    },
+    onError: (e) => setPhoneError(errorMessage(e, "partnerParity")),
+  });
+
+  function submitPhone() {
+    const change = phoneChange(shop.phone, phone);
+    if (change.kind === "invalid") return setPhoneError(t("partnerParity.errors.invalid_tr_phone"));
+    setPhoneError(null);
+    if (change.kind === "none") return;
+    if (!change.confirm) return savePhone.mutate(change.phone);
+    const clearing = change.confirm === "clear";
+    Alert.alert(
+      t(clearing ? "partnerParity.smsPhoneClearTitle" : "partnerParity.smsPhoneChangeTitle"),
+      t(clearing ? "partnerParity.smsPhoneClearBody" : "partnerParity.smsPhoneChangeBody"),
+      [
+        { text: t("common.cancel"), style: "cancel" },
+        { text: t("common.continue"), style: clearing ? "destructive" : "default", onPress: () => savePhone.mutate(change.phone) },
+      ],
+    );
+  }
 
   const save = useMutation({
     mutationFn: async (body: { name: string; capacity: number; pricePerDay: number }) => {
@@ -142,6 +179,43 @@ function SettingsForm({ shop }: { shop: PartnerShopSettings }) {
           <Field style={{ flex: 1 }} label={t("shopSettings.city")} value={city} onChangeText={setCity} maxLength={100} />
         </View>
         <AppText variant="caption">{t("shopSettings.addressHint")}</AppText>
+
+        <AppText variant="label" style={styles.section}>
+          {t("partnerParity.locationSection")}
+        </AppText>
+        <AppText variant="caption">
+          {hasPin(shop) ? t("partnerParity.locationSet") : t("partnerParity.locationMissing")}
+        </AppText>
+        <LinkGroup>
+          <LinkRow
+            label={hasPin(shop) ? t("partnerParity.locationEdit") : t("partnerParity.locationAdd")}
+            onPress={() => router.push("/partner/location")}
+          />
+        </LinkGroup>
+
+        <AppText variant="label" style={styles.section}>
+          {t("partnerParity.smsPhoneSection")}
+        </AppText>
+        <Field
+          label={t("partnerParity.smsPhoneLabel")}
+          value={phone}
+          onChangeText={setPhone}
+          keyboardType="phone-pad"
+          autoComplete="tel"
+          placeholder={t("partnerParity.smsPhonePlaceholder")}
+          maxLength={20}
+          editable={!phoneLocked}
+          hint={phoneLocked ? t("partnerParity.smsPhoneLocked") : t("partnerParity.smsPhoneHint")}
+        />
+        {phoneError ? <Banner tone="danger" body={phoneError} /> : null}
+        {!phoneLocked ? (
+          <Button
+            variant="secondary"
+            title={t("partnerParity.smsPhoneSave")}
+            loading={savePhone.isPending}
+            onPress={submitPhone}
+          />
+        ) : null}
 
         {formError ? <Banner tone="danger" body={formError} /> : null}
       </ScrollView>
