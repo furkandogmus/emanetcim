@@ -22,7 +22,6 @@ const serverSchema = z.object({
    * gönderim `SKIPPED` kalır, bkz. `NotificationService.sendMobilePush`.
    */
   FIREBASE_SERVICE_ACCOUNT_JSON: z.string().optional(),
-  ENABLE_HSTS_HEADERS: z.string().optional(),
   DATABASE_SSL: z.string().optional(),
   PG_POOL_MAX: z.string().optional(),
   LOG_LEVEL: z.string().optional(),

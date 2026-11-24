@@ -9,6 +9,8 @@
 #   BACKUP_DIR=/var/backups/emanetci   Yedek dizini (varsayılan: <ROOT>/backups)
 #   INCLUDE_PUBLIC=1                   public/ klasörünü de tar.gz ile ekle
 #   COMPOSE_ENV=docker-compose.env     --env-file adı
+#
+# Yerel dump düz kalır; S3'e giden kopyanın age şifrelemesi backup-s3.sh'ta.
 
 set -euo pipefail
 

@@ -41,6 +41,26 @@ resource "aws_s3_bucket_lifecycle_configuration" "backups" {
       noncurrent_days = var.backup_bucket_lifecycle_days
     }
   }
+
+  # pg_dump'lar her 6 saatte yeni adla yazilir, ustune yazilmaz: yukaridaki kural
+  # onlari hic silmiyordu. Yalniz `backups/` (deploy-config oneki etkilenmez).
+  # Versiyonlu bucket: suresi dolan surum noncurrent olur, 7 gun sonra gercekten silinir.
+  rule {
+    id     = "expire-db-backups"
+    status = "Enabled"
+
+    filter {
+      prefix = "backups/"
+    }
+
+    expiration {
+      days = var.db_backup_retention_days
+    }
+
+    noncurrent_version_expiration {
+      noncurrent_days = 7
+    }
+  }
 }
 
 resource "aws_s3_bucket_server_side_encryption_configuration" "backups" {

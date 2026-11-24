@@ -127,3 +127,22 @@ describe("nginx kimlik dogrulama kovalari", () => {
     expect(jobs?.zone).toBe("api_health");
   });
 });
+
+describe("HSTS nginx'te", () => {
+  /*
+    Next `headers()` build aninda donar; CI imaji bayraksiz kurdugu icin baslik
+    hic gitmiyordu. Kendi add_header'i olan location server seviyesini miras
+    almaz: o bloklar da basligi tasimali.
+  */
+  it("her 443 server blogu ve add_header tasiyan her location HSTS gonderir", () => {
+    const src = fs.readFileSync(CONF, "utf-8");
+    const hsts = 'add_header Strict-Transport-Security "max-age=15552000; includeSubDomains" always;';
+    const servers443 = src.split(/\nserver \{/).filter((b) => /listen 443/.test(b));
+    expect(servers443.length).toBe(2);
+    for (const b of servers443) expect(b).toContain(hsts);
+    for (const loc of src.split(/\n\s+location /).slice(1)) {
+      const body = loc.slice(0, loc.indexOf("\n    }"));
+      if (/add_header /.test(body)) expect(body).toContain(hsts);
+    }
+  });
+});

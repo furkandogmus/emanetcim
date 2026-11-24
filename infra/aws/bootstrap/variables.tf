@@ -26,9 +26,15 @@ variable "aws_profile" {
 }
 
 variable "backup_bucket_lifecycle_days" {
-  description = "Eski (noncurrent) obje versiyonlarının kaç gün sonra silineceği. Güncel/aktif yedekler ASLA otomatik silinmez."
+  description = "Eski (noncurrent) obje versiyonlarının kaç gün sonra silineceği (`backups/` dışı; o önek kendi kuralında 7 gün)."
   type        = number
   default     = 90
+}
+
+variable "db_backup_retention_days" {
+  description = "`backups/` önekindeki pg_dump'ların güncel sürümünün kaç gün sonra süresinin dolacağı."
+  type        = number
+  default     = 35
 }
 
 # --- TLS materyali (Cloudflare Origin Certificate) ---

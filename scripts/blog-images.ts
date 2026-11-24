@@ -152,8 +152,14 @@ type RawPage = {
   }>;
 };
 
+/**
+ * Wikimedia `extmetadata` HTML'i duz metne. Etiket silme tek basina yetmez
+ * (`<scr<b>ipt>` silindikten sonra `<script>` kalir; CodeQL
+ * js/incomplete-multi-character-sanitization): artakalan her `<`/`>` de atilir.
+ * Kunye metninde bu iki karakterin mesru kullanimi yok.
+ */
 function stripHtml(s: string): string {
-  return s.replace(/<[^>]*>/g, "").replace(/\s+/g, " ").trim();
+  return s.replace(/<[^>]*>/g, "").replace(/[<>]/g, "").replace(/\s+/g, " ").trim();
 }
 
 /**
