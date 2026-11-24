@@ -65,10 +65,11 @@ export default function PrelaunchDemandPanel({
     });
   }
 
-  function handleSubmit(e: React.FormEvent) {
+  function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
+    const website = String(new FormData(e.currentTarget).get("website") ?? "");
     startTransition(async () => {
-      const res = await registerPrelaunchInterestAction({ shopId, email });
+      const res = await registerPrelaunchInterestAction({ shopId, email, website });
       if (!res.success) {
         toast.error(errorText(res.error));
         return;
@@ -126,6 +127,11 @@ export default function PrelaunchDemandPanel({
           </p>
         ) : (
           <form onSubmit={handleSubmit} className="flex flex-col sm:flex-row gap-2">
+            {/* Bal kupu: yalnizca botlar doldurur. */}
+            <div aria-hidden="true" className="absolute -left-[9999px] h-0 w-0 overflow-hidden">
+              <label htmlFor="prelaunch-panel-website">Website</label>
+              <input id="prelaunch-panel-website" name="website" type="text" tabIndex={-1} autoComplete="off" />
+            </div>
             <label htmlFor="prelaunch-email" className="sr-only">
               {t("prelaunchEmailLabel")}
             </label>

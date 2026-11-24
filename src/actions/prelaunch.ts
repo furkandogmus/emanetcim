@@ -5,6 +5,8 @@ import { getLocale } from "next-intl/server";
 import { prelaunchInterestService } from "@/services/PrelaunchInterestService";
 import { analyticsService } from "@/services/AnalyticsService";
 import { ensureAnonVisitorId } from "@/lib/anon-visitor";
+import { rateLimit } from "@/lib/rate-limit";
+import { getClientIp } from "@/lib/get-ip";
 import logger from "@/lib/logger";
 
 /**
@@ -19,12 +21,27 @@ const schema = z.object({
   shopId: z.string().uuid(),
   email: z.string().email().max(200),
   sessionId: z.string().min(1).max(100).optional(),
+  /** Bal kupu: formdaki gizli alan; yalnizca botlar doldurur. */
+  website: z.string().max(200).optional(),
 });
 
 export async function registerPrelaunchInterestAction(data: unknown) {
   const parsed = schema.safeParse(data);
   if (!parsed.success) {
     return { success: false as const, error: "Errors.invalidEmail" };
+  }
+  // Bota basari gibi gorunur: hangi kontrolun yakaladigini ogrenmesin.
+  if (parsed.data.website) {
+    return { success: true as const, alreadyRegistered: false };
+  }
+  /*
+    Girissiz ve her kayit bir teyit e-postasi atar: sinirsiz birakmak Resend
+    hesabini kisitlatir ve parola sifirlama/rezervasyon e-postalari da durur.
+    E-posta basina tavan serviste (mobil de ayni yoldan gecer).
+  */
+  const ip = await getClientIp();
+  if (!(await rateLimit(`prelaunch_interest_ip:${ip}`, 5, 10 * 60_000))) {
+    return { success: false as const, error: "Errors.tooManyRequests" };
   }
 
   const locale = await getLocale();
@@ -110,6 +127,17 @@ export async function registerPrelaunchWantAction(data: unknown) {
   } catch (err) {
     logger.error({ err }, "prelaunch_want_action_failed");
     return { success: false as const, error: "Errors.generic" };
+  }
+
+  /*
+    Cerez silinerek sayac sisirilebiliyordu: IP + nokta basina gunde bir sayim.
+    Asan istek hata degil "zaten sayildi" gorur; ayni NAT'taki ikinci misafir
+    kilitlenmez, yalniz sayaci ikinci kez artiramaz.
+  */
+  const ip = await getClientIp();
+  if (!(await rateLimit(`prelaunch_want_ip:${ip}:${parsed.data.shopId}`, 1, 24 * 60 * 60_000))) {
+    const count = await prelaunchInterestService.wantCount(parsed.data.shopId).catch(() => 0);
+    return { success: true as const, alreadyCounted: true, count };
   }
 
   // Govde serviste (`registerWant`): mobil `prelaunch/want` ucu da onu cagirir.
