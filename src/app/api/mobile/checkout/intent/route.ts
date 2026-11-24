@@ -10,7 +10,7 @@ import type { NextRequest } from "next/server";
 import { z } from "zod";
 import { requireMobileUser } from "@/lib/mobile-auth";
 import { bookingService } from "@/services/BookingService";
-import { computeAuthoritativeCheckoutTotals } from "@/lib/booking-server-price";
+import { bagCountsFitRules, computeAuthoritativeCheckoutTotals } from "@/lib/booking-server-price";
 import { getPricingRules } from "@/lib/platform-settings";
 import { moneyToNumber } from "@/lib/money";
 import {
@@ -178,6 +178,10 @@ export async function POST(req: NextRequest) {
   const checkInTime = snapped.checkIn;
   const checkOutTime = snapped.checkOut;
   const rules = await getPricingRules();
+  // Zod tavani (20) platform sinirindan buyuk olabilir; kirpilacak istek fiyatlanmaz.
+  if (!bagCountsFitRules(parsed.data, rules.maxBagsPerSlot)) {
+    return NextResponse.json({ error: "invalid_data" }, { status: 400 });
+  }
   const totals = computeAuthoritativeCheckoutTotals(
     moneyToNumber(shop.pricePerDay),
     bagCountS,

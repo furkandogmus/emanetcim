@@ -97,6 +97,17 @@ function assertBookingInput(data: CreateInitialBookingInput): void {
 }
 
 /**
+ * Ust sinir: her boy en fazla `maxBagsPerSlot`. Fiyat `clampBagCount` ile bu
+ * sinira kirpilarak hesaplaniyor; ham sayi yazilirsa misafir 80 valiz birakip
+ * 50'sini oder (2026-11-24). Kural kumesi gerektigi icin ayri ve sonra calisir.
+ */
+function assertBagCountsWithinLimit(data: CreateInitialBookingInput, maxBagsPerSlot: number): void {
+  if ([data.bagCountS, data.bagCountM, data.bagCountXl].some((n) => n > maxBagsPerSlot)) {
+    throw new BookingInputInvalidError('Valiz sayısı platform sınırını aşıyor.');
+  }
+}
+
+/**
  * Oturum kapisi: yeni rezervasyon yalnizca hesapla acilir (2026-11-23).
  *
  * Tip `guestId: string` diyor ama cagiran `as` ile ya da bos dizeyle gecebilir;
@@ -151,6 +162,7 @@ async function createInitialBookingOnce(data: CreateInitialBookingInput): Promis
     if (existing) throw new BookingIdempotentReplayError(existing);
   }
   const rules = await getPricingRules();
+  assertBagCountsWithinLimit(data, rules.maxBagsPerSlot);
   const initialStatus = data.initialStatus ?? DEFAULT_INITIAL_STATUS;
 
   /*

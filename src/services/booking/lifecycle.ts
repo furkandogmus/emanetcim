@@ -400,7 +400,11 @@ export async function modifyBooking(
     `newBags`.
   */
   const rawBagCounts = [input.bagCountS, input.bagCountM, input.bagCountXl];
-  if (rawBagCounts.some((n) => !Number.isFinite(n) || !Number.isInteger(n) || n < 0)) {
+  if (
+    rawBagCounts.some(
+      (n) => !Number.isFinite(n) || !Number.isInteger(n) || n < 0 || n > rules.maxBagsPerSlot,
+    )
+  ) {
     return {
       ok: false,
       code: 'INVALID_STATUS',
