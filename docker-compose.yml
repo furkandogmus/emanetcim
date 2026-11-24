@@ -114,6 +114,17 @@ services:
       PLAY_REVIEW_EMAIL: ${PLAY_REVIEW_EMAIL:-}
       PLAY_REVIEW_OTP: ${PLAY_REVIEW_OTP:-}
       FIREBASE_SERVICE_ACCOUNT_JSON: ${FIREBASE_SERVICE_ACCOUNT_JSON:-}
+      # Apple / Google Wallet kartlari (src/lib/wallet/config.ts). Bir tarafin tek
+      # degiskeni bossa o taraf tamamen kapali: dugme gizli, uclar 404. PEM'ler base64.
+      # Apple tarafi Team ID olarak yukaridaki APPLE_TEAM_ID'yi kullanir.
+      WALLET_APPLE_PASS_TYPE_ID: ${WALLET_APPLE_PASS_TYPE_ID:-}
+      WALLET_APPLE_SIGNER_CERT_B64: ${WALLET_APPLE_SIGNER_CERT_B64:-}
+      WALLET_APPLE_SIGNER_KEY_B64: ${WALLET_APPLE_SIGNER_KEY_B64:-}
+      WALLET_APPLE_SIGNER_KEY_PASSPHRASE: ${WALLET_APPLE_SIGNER_KEY_PASSPHRASE:-}
+      WALLET_APPLE_WWDR_CERT_B64: ${WALLET_APPLE_WWDR_CERT_B64:-}
+      WALLET_GOOGLE_ISSUER_ID: ${WALLET_GOOGLE_ISSUER_ID:-}
+      WALLET_GOOGLE_SA_EMAIL: ${WALLET_GOOGLE_SA_EMAIL:-}
+      WALLET_GOOGLE_SA_KEY_B64: ${WALLET_GOOGLE_SA_KEY_B64:-}
       # Dukkan fotograflari (src/lib/storage). Anahtarlar bos kalabilir: o zaman
       # EC2 rolu kullanilir. Bu satirlar yokken SSM'deki deger konteynere
       # ulasmiyor, web'deki fotograf dugmesi gizli kaliyordu (2026-10-18).

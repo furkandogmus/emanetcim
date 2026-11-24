@@ -5,6 +5,9 @@ type AppConfigSource = {
   requireSealsOnCheckIn?: boolean;
   /** Odeme metinlerinin kipi: "onsite" dukkanda tahsilat, "online" kartli. Bilinmiyorsa "onsite". */
   paymentMode?: "online" | "onsite";
+  /** Wallet kartlari: yalnizca o tarafin tum sertifika/anahtar degiskenleri doluysa true. */
+  walletApple?: boolean;
+  walletGoogle?: boolean;
 };
 
 /**
@@ -26,6 +29,8 @@ export function toMobileAppConfig(c: AppConfigSource) {
     requireSealsOnCheckIn: c.requireSealsOnCheckIn === true,
     // Gercek olan varsayilandir: bilinmeyen kip kartli odeme vaat etmez.
     paymentMode: c.paymentMode === "online" ? ("online" as const) : ("onsite" as const),
+    walletApple: c.walletApple === true,
+    walletGoogle: c.walletGoogle === true,
   };
 }
 

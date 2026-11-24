@@ -1,5 +1,7 @@
 import prisma from "@/lib/db";
 import type { Role, Prisma } from "@prisma/client";
+import logger from "@/lib/logger";
+import { walletPassService } from "@/services/WalletPassService";
 
 export type BookingEventType =
   | "CREATED"
@@ -33,6 +35,17 @@ export type BookingEventType =
   /** Esnaf/yonetici "Misafiri bekle": `metadata.until` yeni kapanis ani. */
   | "LATE_HOLD";
 
+/** Wallet kartinin gosterdigi bir seyi (saat, valiz, durum) degistiren olaylar. */
+const WALLET_EVENTS: ReadonlySet<BookingEventType> = new Set([
+  "PAID",
+  "APPROVED",
+  "CHECKED_IN",
+  "CHECKED_OUT",
+  "CANCELLED",
+  "MODIFIED",
+  "BAGS_MODIFIED",
+]);
+
 export class BookingEventService {
   async record(params: {
     bookingId: string;
@@ -61,6 +74,12 @@ export class BookingEventService {
         metadata: metadata as Prisma.InputJsonValue,
       },
     });
+    // Her gecis buradan geciyor; kart guncellemesi ayri ayri servislere yazilmaz.
+    if (WALLET_EVENTS.has(params.event)) {
+      void walletPassService.notifyBookingChanged(params.bookingId).catch((err) => {
+        logger.warn({ err, bookingId: params.bookingId }, "wallet_pass_update_failed");
+      });
+    }
   }
 
   async getByBookingId(bookingId: string) {

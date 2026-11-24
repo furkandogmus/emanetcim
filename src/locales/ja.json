@@ -3072,5 +3072,18 @@
     "errorConflict": "同時に別のチーム変更が行われました。もう一度お試しください。",
     "inviteEmailUnverified": "招待を承諾するには、まずメールアドレスを確認してください。",
     "closedAskOwner": "店舗は現在閉店中のようです。営業時間外の受け取りを承認できるのは店舗オーナーだけです。"
+  },
+  "Wallet": {
+    "shop": "預かり場所",
+    "dropOff": "預け入れ",
+    "pickUp": "受け取り",
+    "bags": "荷物",
+    "code": "コード",
+    "address": "住所",
+    "cancelled": "キャンセル済み",
+    "nearShop": "{shop}の近くにいます：チケットの準備ができています。",
+    "addApple": "Apple Walletに追加",
+    "addGoogle": "Google ウォレットに追加",
+    "hint": "チケットをウォレットに追加すると、店舗の近くでロック画面に表示されます。"
   }
 }

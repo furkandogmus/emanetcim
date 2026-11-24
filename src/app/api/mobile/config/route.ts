@@ -3,6 +3,7 @@ import { getAppVersionGate } from "@/lib/app-version";
 import { toMobileAppConfig } from "@/lib/mobile-dto";
 import { getPaymentCopyMode } from "@/lib/payment-copy";
 import { getPricingRules } from "@/lib/platform-settings";
+import { walletCapabilities } from "@/lib/wallet/config";
 
 /**
  * Kimlik doğrulama ÖNCESİ (splash ekranı) çağrılabilmesi gerekir — zorunlu
@@ -28,5 +29,5 @@ export async function GET() {
   } catch {
     paymentMode = "onsite";
   }
-  return NextResponse.json(toMobileAppConfig({ ...gate, requireSealsOnCheckIn, paymentMode }));
+  return NextResponse.json(toMobileAppConfig({ ...gate, requireSealsOnCheckIn, paymentMode, ...walletCapabilities() }));
 }

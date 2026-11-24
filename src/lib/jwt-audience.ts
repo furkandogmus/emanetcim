@@ -42,6 +42,8 @@ export const JWT_AUDIENCE = {
   poster: "bagajpark:poster",
   /** Web "olarak goruntule" cerezi (`web-impersonation.ts`): ayri turetilmis anahtar, `aud` zorunlu. */
   webImpersonation: "bagajpark:web-impersonation",
+  /** Wallet karti indirme / kaydetme bagi (`wallet/link-token.ts`), `aud` zorunlu. */
+  wallet: "bagajpark:wallet",
 } as const;
 
 export type JwtAudience = (typeof JWT_AUDIENCE)[keyof typeof JWT_AUDIENCE];
