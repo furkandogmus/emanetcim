@@ -29,8 +29,20 @@ export type AdminBookingDetail = AdminBookingRow & {
   checkedOutAt: string | null;
   couponCode: string | null;
   disputeStatus: string | null;
+  /** Itiraz ekraninin kimligi; eski sunucu gondermez. */
+  disputeId?: string | null;
   paymentStatus: string | null;
   events: { event: string; actorRole: string | null; createdAt: string }[];
   /** Esnaf detayindaki alanla ayni anlam; eski sunucu gondermez. */
   noShowAvailableAt?: string | null;
+};
+
+/** `GET /admin/bookings/[id]/notifications` satiri (sunucu `toMobileAdminBookingNotification`). */
+export type AdminBookingNotification = {
+  id: string;
+  type: string;
+  recipient: string;
+  status: string;
+  error: string | null;
+  createdAt: string;
 };

@@ -11,7 +11,7 @@ export function bookingCode(id: string): string {
  * "alı" yapardi ve kayitli "Ali" ("ali") bulunamazdi. Turistlerin adlari (Maria, Smith)
  * icin de ayni. Dil bagimsiz kucultme kullanilir.
  */
-function squash(v: string): string {
+export function squash(v: string): string {
   return v
     .replace(/[İıI]/g, "i")
     .toLowerCase()

@@ -1,5 +1,6 @@
 import prisma from "@/lib/db";
 import logger from "@/lib/logger";
+import { writeAuditLog } from "@/lib/audit-log";
 import { parseCoordinates } from "@/lib/coordinates";
 import { isDisposableEmail } from "@/lib/disposable-emails";
 import { normalizeTrGsm10 } from "@/lib/netgsm";
@@ -81,14 +82,33 @@ export class PartnerLeadService {
     });
   }
 
-  async setContacted(id: string, contacted: boolean) {
+  /**
+   * "Iletisime gecildi" / geri al; web action'i ve mobil admin ucu bunu cagirir.
+   * `false`: kayit yok ya da cevrilmis (degismedi).
+   */
+  async setContacted(
+    id: string,
+    contacted: boolean,
+    actor?: { userId: string | null; ip: string | null },
+  ): Promise<boolean> {
     // Cevrilmis kayit "aranacak"a geri dusmesin: CONVERTED durumu kalicidir.
-    await prisma.partnerLead.updateMany({
+    const { count } = await prisma.partnerLead.updateMany({
       where: { id, convertedAt: null },
       data: contacted
         ? { status: "CONTACTED", contactedAt: new Date() }
         : { status: "NEW", contactedAt: null },
     });
+    if (count > 0 && actor) {
+      writeAuditLog({
+        actorUserId: actor.userId,
+        actorRole: "ADMIN",
+        action: contacted ? "partner_lead.contacted" : "partner_lead.contact_undone",
+        entityType: "PartnerLead",
+        entityId: id,
+        ip: actor.ip,
+      });
+    }
+    return count > 0;
   }
 
   /**

@@ -51,7 +51,26 @@ export function toMobileAdminBookingDetail({ booking: b, events }: AdminBookingD
     checkedOutAt: b.checkedOutAt?.toISOString() ?? null,
     couponCode: b.couponCode,
     disputeStatus: b.dispute?.status ?? null,
+    // Itiraz ekrani (`admin/dispute/[id]`) itiraz kimligiyle acilir.
+    disputeId: b.dispute?.id ?? null,
     paymentStatus: b.paymentLog?.status ?? null,
     events: events.map((e) => ({ event: e.event, actorRole: e.actorRole, createdAt: e.createdAt.toISOString() })),
+  };
+}
+
+type AdminBookingNotificationSource = NonNullable<Awaited<ReturnType<AdminOps["bookingNotifications"]>>>[number];
+
+/** Saglayici hata metni uzun olabilir; mobilde ozet yeter. */
+const NOTIFICATION_ERROR_MAX = 300;
+
+/** `admin/bookings/[id]/notifications` satiri: tur, alici, durum, hata ozeti. */
+export function toMobileAdminBookingNotification(n: AdminBookingNotificationSource) {
+  return {
+    id: n.id,
+    type: n.type,
+    recipient: n.recipient,
+    status: n.status,
+    error: n.error && n.error.length > NOTIFICATION_ERROR_MAX ? `${n.error.slice(0, NOTIFICATION_ERROR_MAX)}…` : n.error,
+    createdAt: n.createdAt.toISOString(),
   };
 }

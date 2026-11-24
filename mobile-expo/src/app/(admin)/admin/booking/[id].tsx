@@ -15,7 +15,7 @@ import { SITE_ORIGIN } from "@/lib/images";
 import { languageInfo } from "@/lib/languages";
 import { telUrl, waUrl, formatPhone } from "@/lib/phone";
 import { useViewAs } from "@/lib/use-view-as";
-import { useAdminBooking } from "@/lib/queries";
+import { useAdminBooking, useAdminBookingNotifications } from "@/lib/queries";
 import type { AdminBookingDetail } from "@/lib/types";
 import { colors, radius, space } from "@/theme/tokens";
 import { StaleQueryBanner } from "@/components/StaleQueryBanner";
@@ -26,7 +26,7 @@ const open = (url: string) => void Linking.openURL(url).catch(() => undefined);
 
 /**
  * Destek hattinda bir rezervasyonun tamami: bilet, kime ve nereye ulasilir, muhurler,
- * odeme ve olay gecmisi. Iptal ve zorla teslim burada; iade ve itiraz web panelinde.
+ * odeme, olay gecmisi ve bildirim kaydi. Iptal, zorla teslim ve itiraz uygulamada; iade web panelinde.
  */
 export default function AdminBookingScreen() {
   const { t, i18n } = useTranslation();
@@ -59,8 +59,7 @@ export default function AdminBookingScreen() {
 }
 
 function Detail({ b, onWeb }: { b: AdminBookingDetail; onWeb: () => void }) {
-  const { t, i18n } = useTranslation();
-  const lang = languageInfo(i18n.language).site;
+  const { t } = useTranslation();
   const viewAs = useViewAs();
   const [now] = useState(() => Date.now());
   const lateDays = b.status === "CHECKED_IN" ? Math.floor((now - new Date(b.checkOutTime).getTime()) / DAY) : 0;
@@ -81,7 +80,12 @@ function Detail({ b, onWeb }: { b: AdminBookingDetail; onWeb: () => void }) {
       {disputeOpen ? (
         <View style={{ gap: space.sm }}>
           <Banner tone="warning" body={t("admin.disputeOpen")} />
-          <Button variant="secondary" title={t("admin.openDisputeWeb")} onPress={() => open(`${SITE_ORIGIN}/${lang}/admin/disputes`)} />
+          {/* Itiraz ekrani uygulamada; eski sunucu kimligi gondermezse liste acilir. */}
+          <Button
+            variant="secondary"
+            title={t("adminParityD1.booking.openDispute")}
+            onPress={() => router.push(b.disputeId ? `/admin/dispute/${b.disputeId}` : "/admin/disputes")}
+          />
         </View>
       ) : null}
 
@@ -213,8 +217,56 @@ function Detail({ b, onWeb }: { b: AdminBookingDetail; onWeb: () => void }) {
         </Block>
       ) : null}
 
+      <NotificationLogBlock bookingId={b.id} />
+
       <Button variant="ghost" title={t("admin.openInWeb")} onPress={onWeb} />
     </ScrollView>
+  );
+}
+
+/** Web detayindaki "Bildirimler": tur, alici, durum; basarisiz satir hata ozetini tasir. */
+function NotificationLogBlock({ bookingId }: { bookingId: string }) {
+  const { t } = useTranslation();
+  const query = useAdminBookingNotifications(bookingId);
+  // Eski sunucuda uc yok (404): bolum hic cizilmez.
+  if (query.isError && !query.data) return null;
+  const rows = query.data;
+  return (
+    <Block title={t("adminParityD1.booking.notifications")}>
+      <Card style={{ gap: space.md }}>
+        {!rows ? (
+          <AppText variant="caption">{t("common.loading")}</AppText>
+        ) : rows.length === 0 ? (
+          <AppText variant="caption">{t("adminParityD1.booking.notificationsEmpty")}</AppText>
+        ) : (
+          rows.map((n) => {
+            const ok = n.status === "SENT" || n.status === "DELIVERED";
+            // SKIPPED bir hata degil (kanal kapali, alici yok): notr renk.
+            const tone = ok ? colors.success : n.status === "SKIPPED" ? colors.inkSecondary : colors.danger;
+            return (
+              <View key={n.id} style={{ gap: 2 }}>
+                <View style={styles.fact}>
+                  <AppText variant="bodyMedium" style={{ flex: 1 }} numberOfLines={1}>
+                    {n.type}
+                  </AppText>
+                  <AppText variant="caption" style={{ color: tone }}>
+                    {n.status}
+                  </AppText>
+                </View>
+                <AppText variant="caption" numberOfLines={1}>
+                  {`${n.recipient} · ${formatDayTime(n.createdAt)}`}
+                </AppText>
+                {n.error ? (
+                  <AppText variant="caption" style={{ color: colors.danger }} numberOfLines={3}>
+                    {n.error}
+                  </AppText>
+                ) : null}
+              </View>
+            );
+          })
+        )}
+      </Card>
+    </Block>
   );
 }
 

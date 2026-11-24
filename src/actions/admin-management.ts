@@ -2,18 +2,13 @@
 
 import { getClientIpOrNull } from "@/lib/client-ip";
 
-import prisma from "@/lib/db";
 import { shopService, type AdminShopUpdate } from "@/services/ShopService";
 import { reviewService } from "@/services/ReviewService";
 import { adminUserService } from "@/services/AdminUserService";
-import { BookingStatus, Role } from "@prisma/client";
-import { z } from "zod";
+import { Role } from "@prisma/client";
 import { revalidatePathAllLocales } from "@/lib/revalidate-locales";
 import logger from "@/lib/logger";
-import { bookingService } from "@/services/BookingService";
 import { getLocale } from "next-intl/server";
-import { writeAuditLog } from "@/lib/audit-log";
-import { isPrismaForeignKeyViolation } from "@/lib/prisma-errors";
 import {
   DELETE_USER_BLOCKED_CODE,
   DELETE_USER_HAS_ACTIVE_BOOKING_CODE,
@@ -150,108 +145,26 @@ export type DeleteUserActionResult =
     };
 
 /**
- * Kullanıcıyı tamamen sil. Tüm ilişkiler Cascade delete ile silinir.
- * Aktif bir rezervasyon (WAITING_APPROVAL, PENDING, PAID, vb.) var ise silinemez.
- * Dönüş değeri kullanılır; beklenen hatalar için throw edilmez (server action digest önlenir).
+ * Kullanıcıyı tamamen sil. Kurallar (kendisi değil, açık rezervasyon, yasaklıda
+ * zorla iptal) `AdminUserService.deleteUser`ta; mobil admin ucu da onu çağırır.
+ * Beklenen hatalar için throw edilmez (server action digest önlenir).
  */
 export async function deleteUserAction(
   userId: string,
 ): Promise<DeleteUserActionResult> {
   const session = await ensureAdmin();
-
-  if (session?.user?.id === userId) {
-    return { ok: false, error: "unauthorized" };
-  }
-
-  // Kullanıcıyı bul
-  const userToDelete = await prisma.user.findUnique({
-    where: { id: userId },
-    select: { isBanned: true }
-  });
-
-  if (!userToDelete) {
-    return { ok: true }; // Zaten yok
-  }
-
-  const activeStatuses: BookingStatus[] = ["WAITING_APPROVAL", "APPROVED", "PENDING", "PAID", "CHECKED_IN"];
-
-  if (userToDelete.isBanned) {
-    /*
-      Banlıysa: açık rezervasyonları zorla iptal et, sonra sil.
-
-      Eskiden burada ham `prisma.booking.updateMany({ status: "CANCELLED" })` vardı.
-      Mobil "reddet" ucundaki hatanın aynısı: iade/ödeme niyeti kapatılmıyor,
-      `ReservationSlot` satırları SİLİNMİYOR ve sadakat puanı geri alınmıyordu —
-      yani yasaklanan bir esnafın dükkanı silinse bile o dükkanın slotları dolu
-      görünmeye devam ediyordu. Artık her rezervasyon `cancelBooking`'den geçer.
-    */
-    const summary = await bookingService.forceCancelOpenBookingsForUser(
-      userId,
-      activeStatuses,
-    );
-    /*
-      KAPATILAMAYAN REZERVASYON KALDIYSA SILME YAPILMAZ.
-
-      Onceki hali yalnizca UYARI yaziyor ve silmeye devam ediyordu. Ama
-      `cancelBooking` `CHECKED_IN` durumunu bilerek REDDEDIYOR -- valiz o anda
-      fiziksel olarak dukkanin rafinda ve iptal onu ortadan kaldirmaz. Yani
-      zorla iptal tam olarak bu durumda basarisiz oluyor ve hesap yine de
-      siliniyordu:
-
-        esnafin rafinda valiz var, sahibi kayitta yok
-        `Booking.guestId` bosalir, `guest` iliskisi kaybolur
-        hesapli misafirde `guestEmail`/`guestPhone` zaten null
-        -> esnaf valizi kime teslim edecegini, kime haber verecegini bilemez
-
-      Ayni koruma NORMAL kullanicida zaten vardi (asagidaki dal): aktif
-      rezervasyonu olan hesap silinmiyor. Yasakli hesapta yoktu -- yasaklamak,
-      valizi dukkandan kaldirmiyor.
-    */
-    if (summary.failed > 0) {
-      logger.warn(
-        { userId, ...summary },
-        "admin_delete_user_blocked_uncancellable_booking",
-      );
-      return { ok: false, error: DELETE_USER_HAS_ACTIVE_BOOKING_CODE };
-    }
-  } else {
-    // Normal kullanıcı: Aktif rezervasyon kontrolü (silmeyi engelle)
-    const activeBooking = await prisma.booking.findFirst({
-      where: {
-        status: { in: activeStatuses },
-        OR: [
-          { guestId: userId },
-          { shop: { ownerId: userId } }
-        ]
-      }
-    });
-
-    if (activeBooking) {
-      logger.warn({ userId, bookingId: activeBooking.id }, "admin_delete_user_blocked_active_booking");
-      return { ok: false, error: DELETE_USER_HAS_ACTIVE_BOOKING_CODE };
-    }
-  }
-
-  try {
-    await prisma.user.delete({
-      where: { id: userId },
-    });
-  } catch (e) {
-    if (isPrismaForeignKeyViolation(e)) {
-      logger.warn({ userId, err: e }, "admin_delete_user_fk_blocked");
-      return { ok: false, error: DELETE_USER_BLOCKED_CODE };
-    }
-    throw e;
-  }
-
-  writeAuditLog({
-    actorUserId: session.user.id ?? null,
-    actorRole: "ADMIN",
-    action: "user.delete",
-    entityType: "User",
-    entityId: userId,
+  const result = await adminUserService.deleteUser(userId, {
+    userId: session.user.id ?? null,
     ip: await getClientIpOrNull(),
   });
+  if (!result.ok) {
+    const error = {
+      cannot_delete_self: "unauthorized",
+      has_active_booking: DELETE_USER_HAS_ACTIVE_BOOKING_CODE,
+      blocked_by_relations: DELETE_USER_BLOCKED_CODE,
+    } as const;
+    return { ok: false, error: error[result.error] };
+  }
 
   revalidatePathAllLocales("/admin/users");
   revalidatePathAllLocales("/admin/partners");
@@ -401,23 +314,18 @@ export async function deleteReviewAction(reviewId: string) {
 }
 
 /**
- * IP blokla
+ * IP blokla. Biçim doğrulaması, kendi IP'ni engelleme kapısı ve denetim kaydı
+ * `AdminUserService.blockIp`te.
  */
 export async function blockIpAction(ip: string, reason?: string) {
-  await ensureAdmin();
-
-  // BUG-18: IP formatı doğrulanmalıdır (Zod uyumluluğu için regex kullanıldı)
-  const ipSchema = z.string().min(7).max(45).regex(/^[a-fA-F0-9:.]+$/);
-  const ipParsed = ipSchema.safeParse(ip?.trim());
-  if (!ipParsed.success) {
-    return { success: false, error: "invalid_ip_format" };
-  }
-
-  await prisma.blockedIp.upsert({
-    where: { ip: ipParsed.data },
-    update: { reason: reason?.trim() || null },
-    create: { ip: ipParsed.data, reason: reason?.trim() || null },
+  const session = await ensureAdmin();
+  const result = await adminUserService.blockIp(ip, reason ?? null, {
+    userId: session.user.id ?? null,
+    ip: await getClientIpOrNull(),
   });
+  if (!result.ok) {
+    return { success: false, error: result.error === "invalid_ip" ? "invalid_ip_format" : result.error };
+  }
 
   revalidatePathAllLocales("/admin/settings");
   return { success: true };

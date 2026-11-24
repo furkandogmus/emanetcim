@@ -74,6 +74,7 @@ const partnerBooking = {
 };
 jest.mock("@/lib/queries", () => ({
   useAdminBooking: () => ({ isLoading: false, data: booking }),
+  useAdminBookingNotifications: () => ({ isError: false, data: [] }),
   useAdminBookingAction: () => ({ mutate: mockMutate, isPending: false }),
   useBooking: () => ({ isLoading: false, isRefetching: false, data: partnerBooking, refetch: jest.fn() }),
   useOnlinePayments: () => false,

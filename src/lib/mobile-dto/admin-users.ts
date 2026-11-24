@@ -40,6 +40,8 @@ export function toMobileAdminUserDetail(u: AdminUserDetailSource) {
     ...toMobileAdminUser(u),
     emailVerified: u.emailVerified != null,
     hasPassword: u.passwordHash != null,
+    // "IP engelle" neyi engelledigini gostersin; yalniz admin detayinda.
+    lastIp: u.lastIp ?? null,
     // Ikinci admin onayini bekleyen rol istegi (web `/admin/role-approvals`).
     pendingRole: u.adminRoleChangeTargets?.requestedRole ?? null,
     // Silinmis hesap: e-posta `gdpr_...@invalid.local`, e-posta/silme islemleri anlamsiz.

@@ -2258,5 +2258,100 @@
       "no_shop": "Sie brauchen zuerst ein Geschäft.",
       "coordinates_required": "Der Pin eines aktiven Geschäfts kann nicht entfernt werden; Sie können ihn verschieben."
     }
+  },
+  "adminParityD1": {
+    "users": {
+      "filterRole": "Rolle",
+      "filterStatus": "Status",
+      "filterType": "Typ",
+      "filterAll": "Alle",
+      "filterClear": "Zurücksetzen",
+      "status": {
+        "ACTIVE": "Aktiv",
+        "BANNED": "Gesperrt",
+        "UNVERIFIED": "Nicht bestätigt"
+      },
+      "type": {
+        "REAL": "Echt",
+        "TEST": "Test"
+      },
+      "lastIp": "Letzte IP: {{ip}}",
+      "convert": "In Partner umwandeln",
+      "convertTitle": "{{name}} in ein Partnerkonto umwandeln",
+      "convertBody": "Das Konto wird zum Partner, und der Laden wird als Bewerbung angelegt, die auf Freigabe wartet. Die Telefonnummer wird zur Anmeldenummer des Partners.",
+      "convertSubmit": "In Partner umwandeln",
+      "blockIp": "IP-Adresse sperren",
+      "blockIpTitle": "{{ip}} sperren?",
+      "blockIpBody": "Die IP-Adresse der letzten Anmeldung wird auf die Sperrliste gesetzt. Andere Personen im selben Netz können betroffen sein.",
+      "blockIpConfirm": "Sperren",
+      "blockIpDone": "{{ip}} wurde auf die Sperrliste gesetzt.",
+      "delete": "Konto mit allen Daten löschen",
+      "deleteTitle": "{{name}} endgültig löschen?",
+      "deleteBody": "Das Konto und alle verknüpften Datensätze werden gelöscht. Das lässt sich nicht rückgängig machen. Konten mit offenen Buchungen werden nicht gelöscht. Für einen Löschantrag nach Datenschutzrecht „Konto löschen“ verwenden.",
+      "deleteConfirm": "Alles löschen",
+      "deleteDone": "Konto gelöscht.",
+      "reasonLabel": "Begründung",
+      "reasonPlaceholder": "Warum tun Sie das?",
+      "reasonHint": "Mindestens {{min}} Zeichen. Wird im Prüfprotokoll gespeichert.",
+      "errors": {
+        "cannot_delete_self": "Sie können Ihr eigenes Konto nicht löschen.",
+        "has_active_booking": "Das Konto hat eine offene Buchung. Schließen Sie zuerst die Buchung.",
+        "blocked_by_relations": "Verknüpfte Datensätze verhindern das Löschen.",
+        "no_ip": "Für diesen Nutzer ist keine IP-Adresse gespeichert.",
+        "invalid_ip": "Die gespeicherte IP-Adresse ist ungültig.",
+        "own_ip": "Sie können die IP-Adresse, die Sie gerade nutzen, nicht sperren.",
+        "not_found": "Nutzer nicht gefunden.",
+        "invalid_data": "Bitte prüfen Sie die Felder.",
+        "location_required": "Geben Sie einen gültigen Standort ein (Breite, Länge oder Kartenlink).",
+        "invalid_tr_phone": "Geben Sie eine gültige türkische Mobilnummer ein.",
+        "phone_already_registered": "Diese Nummer gehört zu einem anderen Partner- oder Adminkonto.",
+        "not_guest": "Nur ein Gastkonto kann in einen Partner umgewandelt werden."
+      }
+    },
+    "messages": {
+      "select": "Auswählen",
+      "searchPlaceholder": "Absender, Betreff oder Text suchen",
+      "all": "Alle",
+      "unread": "Ungelesen",
+      "category": {
+        "SUPPORT": "Support",
+        "BULK": "Massenmails",
+        "AUTOMATED": "Automatisch",
+        "ALL": "Alles"
+      },
+      "selectAll": "Sichtbare auswählen",
+      "clearSelection": "Auswahl aufheben",
+      "deleteSelected": "Auswahl löschen ({{count}})",
+      "bulkDeleteTitle": "Ausgewählte Nachrichten löschen? ({{count}})",
+      "bulkDeleteBody": "Die Nachrichten und ihr Antwortverlauf werden endgültig gelöscht.",
+      "bulkDeleted": "Gelöschte Nachrichten: {{count}}"
+    },
+    "applications": {
+      "searchPlaceholder": "Laden, Adresse, Inhaber oder Telefon suchen",
+      "noMatch": "Keine Bewerbung passt zur Suche."
+    },
+    "leads": {
+      "markContacted": "Als kontaktiert markieren",
+      "undoContacted": "Kontakt zurücknehmen",
+      "contactedTag": "Kontaktiert",
+      "errors": {
+        "not_found": "Voranmeldung nicht gefunden oder bereits umgewandelt."
+      }
+    },
+    "shop": {
+      "info": "Ladendaten",
+      "name": "Name des Ladens",
+      "address": "Adresse",
+      "nameRequired": "Mindestens 2 Zeichen."
+    },
+    "booking": {
+      "openDispute": "Reklamation öffnen",
+      "notifications": "Benachrichtigungsprotokoll",
+      "notificationsEmpty": "Für diese Buchung wurden keine Benachrichtigungen gesendet."
+    },
+    "affiliates": {
+      "shareCsv": "Offene Provisionen teilen (CSV)",
+      "shareCsvHint": "Ohne Monat werden alle offenen Provisionen ausgegeben. Den Text über das Teilen-Menü per E-Mail oder an Drive senden."
+    }
   }
 }

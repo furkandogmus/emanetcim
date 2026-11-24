@@ -1,6 +1,12 @@
 import { api } from "./api";
 import { normalizeTrGsm10 } from "./phone";
-import type { AdminRoleChangeResponse, AdminUserDetail, Role } from "./types";
+import type {
+  AdminConvertPartnerInput,
+  AdminConvertPartnerResponse,
+  AdminRoleChangeResponse,
+  AdminUserDetail,
+  Role,
+} from "./types";
 
 /**
  * Admin kullanici islemleri: istekler ve ekranin onay kapilari. Kararlar sunucuda
@@ -54,6 +60,53 @@ export const setUserReviewSandbox = (id: string, reviewSandbox: boolean) =>
 
 export const anonymizeUser = (id: string, confirm: string, reason: string) =>
   api<{ ok: true }>(path(id, "anonymize"), { method: "POST", body: { confirm, reason } });
+
+/** Kalici silme ve IP engelinde gerekce alt siniri (sunucu semasi ile ayni). */
+export const DESTRUCTIVE_REASON_MIN = 3;
+
+/** Kalici silme: kendisi degil, anonim hesap degil (web "sil" ile ayni kapi; kurallar sunucuda). */
+export function canHardDelete(user: Pick<AdminUserDetail, "id" | "isAnonymized">, myId: string | null): boolean {
+  return user.id !== myId && !user.isAnonymized;
+}
+
+/** IP engeli: kayitli son IP varsa ve kendisi degilse. */
+export function canBlockIp(user: Pick<AdminUserDetail, "id" | "lastIp">, myId: string | null): boolean {
+  return user.id !== myId && !!user.lastIp;
+}
+
+/** Esnafa cevirme yalniz misafir hesapta (sunucu `not_guest`). */
+export function canConvertToPartner(user: Pick<AdminUserDetail, "role" | "isAnonymized" | "isBanned">): boolean {
+  return user.role === "GUEST" && !user.isAnonymized && !user.isBanned;
+}
+
+/** Sunucu semasinin istemci yansimasi: dugme ancak alanlar gecerliyken acilir. */
+export function isConvertFormValid(f: AdminConvertPartnerInput): boolean {
+  return (
+    normalizeTrGsm10(f.phone) != null &&
+    f.shopName.trim().length >= 2 &&
+    f.shopAddress.trim().length >= 5 &&
+    f.location.trim().length >= 3
+  );
+}
+
+export const deleteUser = (id: string, reason: string) =>
+  api<{ ok: true }>(`/admin/users/${encodeURIComponent(id)}`, { method: "DELETE", body: { reason } });
+
+export const blockUserIp = (id: string, reason: string) =>
+  api<{ ok: true; ip: string }>(path(id, "block-ip"), { method: "POST", body: { reason } });
+
+export const convertUserToPartner = (id: string, input: AdminConvertPartnerInput) =>
+  api<AdminConvertPartnerResponse>(path(id, "convert-partner"), {
+    method: "POST",
+    body: {
+      phone: input.phone.trim(),
+      shopName: input.shopName.trim(),
+      shopAddress: input.shopAddress.trim(),
+      ...(input.city?.trim() ? { city: input.city.trim() } : {}),
+      ...(input.district?.trim() ? { district: input.district.trim() } : {}),
+      location: input.location.trim(),
+    },
+  });
 
 // Karistirilabilecek karakterler (0/O, 1/l/I) yok: sifre WhatsApp'tan okunup elle yaziliyor (web ile ayni).
 const ALPHABET = "abcdefghjkmnpqrstuvwxyzABCDEFGHJKLMNPQRSTUVWXYZ23456789";

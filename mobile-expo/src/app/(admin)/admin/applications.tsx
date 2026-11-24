@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { Alert, FlatList, Linking, RefreshControl, StyleSheet, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { router } from "expo-router";
@@ -6,9 +7,11 @@ import { Phone } from "lucide-react-native";
 import { useTranslation } from "react-i18next";
 
 import { MapSnippet } from "@/components/Illustrations";
+import { SearchBox } from "@/components/SearchBox";
 import { StackHeader } from "@/components/StackHeader";
 import { AppText, Banner, Button, Card, CenterMessage, IconButton, Loading } from "@/components/ui";
 import { api } from "@/lib/api";
+import { searchApplications } from "@/lib/admin-search";
 import { errorMessage } from "@/lib/errors";
 import { telUrl } from "@/lib/phone";
 import { formatDay, formatMoney, initial } from "@/lib/format";
@@ -23,6 +26,9 @@ export default function AdminApplicationsScreen() {
   const { t } = useTranslation();
   const queryClient = useQueryClient();
   const query = useAdminApplications();
+  const [q, setQ] = useState("");
+  const all = query.data ?? [];
+  const apps = searchApplications(all, q);
 
   const decide = useMutation({
     mutationFn: ({ id, action }: { id: string; action: "approve" | "reject" }) =>
@@ -58,6 +64,11 @@ export default function AdminApplicationsScreen() {
   return (
     <SafeAreaView style={styles.safe} edges={["top"]}>
       <StackHeader title={t("admin.applications")} />
+      {all.length > 0 || q ? (
+        <View style={styles.search}>
+          <SearchBox placeholder={t("adminParityD1.applications.searchPlaceholder")} onSearch={setQ} />
+        </View>
+      ) : null}
 
       <StaleQueryBanner query={query} />
 
@@ -70,13 +81,20 @@ export default function AdminApplicationsScreen() {
         />
       ) : (
         <FlatList
-          data={query.data ?? []}
+          data={apps}
           keyExtractor={(a) => a.id}
-          contentContainerStyle={[styles.list, !query.data?.length && { flex: 1 }]}
+          keyboardShouldPersistTaps="handled"
+          contentContainerStyle={[styles.list, !apps.length && { flex: 1 }]}
           refreshControl={
             <RefreshControl refreshing={query.isRefetching} onRefresh={() => query.refetch()} tintColor={colors.accent} />
           }
-          ListEmptyComponent={<CenterMessage art={<MapSnippet width={112} />} title={t("admin.noApplications")} />}
+          ListEmptyComponent={
+            all.length > 0 ? (
+              <CenterMessage title={t("adminParityD1.applications.noMatch")} />
+            ) : (
+              <CenterMessage art={<MapSnippet width={112} />} title={t("admin.noApplications")} />
+            )
+          }
           renderItem={({ item }) => {
             const busy = decide.isPending && decide.variables?.id === item.id;
             const place = [item.address, item.district, item.city].filter(Boolean).join(", ");
@@ -171,6 +189,7 @@ function Fact({ label, value }: { label: string; value: string }) {
 
 const styles = StyleSheet.create({
   safe: { flex: 1, backgroundColor: colors.bg },
+  search: { paddingHorizontal: space.xl, paddingBottom: space.md },
   header: {
     flexDirection: "row",
     alignItems: "center",
