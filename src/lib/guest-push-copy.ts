@@ -1,7 +1,7 @@
 import type { AppLocale } from "@/i18n/locales";
 
 /**
- * Misafire giden mobil push metinleri. Her olay e-postasinin kisa esi; `Record<AppLocale>`
+ * Misafire giden push metinleri (mobil ve web push ayni metni alir). Her olay e-postasinin kisa esi; `Record<AppLocale>`
  * oldugu icin yeni bir dil eklendiginde burasi derlenmez.
  */
 export type GuestPushEvent =
@@ -16,7 +16,10 @@ export type GuestPushEvent =
   | "noShow"
   | "lateDropoff"
   | "lateHold"
-  | "lateClosed";
+  | "lateClosed"
+  | "disputeInReview"
+  | "disputeResolved"
+  | "disputeClosed";
 
 export type GuestPushVars = { shop: string; time?: string; total?: string; phone?: string };
 
@@ -36,6 +39,9 @@ export const GUEST_PUSH_COPY: Record<AppLocale, Copy> = {
     lateDropoff: (v) => ({ title: "Bırakma saatin geçti", body: `${v.shop} rezervasyonun saat ${v.time ?? ""} itibarıyla otomatik kapanacak. Geliyorsan dükkanı ara${v.phone ? ` (${v.phone})` : ""}; gelemiyorsan yeni bir rezervasyon yap.` }),
     lateHold: (v) => ({ title: "Dükkan seni bekliyor", body: `${v.shop} rezervasyonunu senin için açık tutuyor. Son saat: ${v.time ?? ""}.` }),
     lateClosed: (v) => ({ title: "Rezervasyonun kapandı", body: `Bırakma saatin geçtiği için ${v.shop} rezervasyonun kapandı. Yeni bir rezervasyon yapabilirsin.` }),
+    disputeInReview: (v) => ({ title: "Şikayetin inceleniyor", body: `${v.shop} rezervasyonundaki şikayetini ekibimiz inceliyor.` }),
+    disputeResolved: (v) => ({ title: "Şikayetin sonuçlandı", body: `${v.shop} rezervasyonundaki şikayetin çözüldü. Ayrıntılar rezervasyonunda.` }),
+    disputeClosed: (v) => ({ title: "Şikayetin kapatıldı", body: `${v.shop} rezervasyonundaki şikayetin kapatıldı. Ayrıntılar rezervasyonunda.` }),
   },
   en: {
     approved: (v) => ({ title: "Your booking is confirmed", body: `${v.shop} is expecting you. Your QR code is in the app.` }),
@@ -50,6 +56,9 @@ export const GUEST_PUSH_COPY: Record<AppLocale, Copy> = {
     lateDropoff: (v) => ({ title: "Your drop-off time has passed", body: `Your booking at ${v.shop} closes automatically at ${v.time ?? ""}. If you are on your way, call the shop${v.phone ? ` (${v.phone})` : ""}; otherwise make a new booking.` }),
     lateHold: (v) => ({ title: "The shop is waiting for you", body: `${v.shop} is holding your booking until ${v.time ?? ""}.` }),
     lateClosed: (v) => ({ title: "Your booking was closed", body: `Your booking at ${v.shop} was closed because the drop-off time passed. You can make a new booking.` }),
+    disputeInReview: (v) => ({ title: "Your dispute is under review", body: `Our team is reviewing your dispute about ${v.shop}.` }),
+    disputeResolved: (v) => ({ title: "Your dispute was resolved", body: `Your dispute about ${v.shop} was resolved. See your booking for details.` }),
+    disputeClosed: (v) => ({ title: "Your dispute was closed", body: `Your dispute about ${v.shop} was closed. See your booking for details.` }),
   },
   de: {
     approved: (v) => ({ title: "Buchung bestätigt", body: `${v.shop} erwartet dich. Dein QR-Code ist in der App.` }),
@@ -64,6 +73,9 @@ export const GUEST_PUSH_COPY: Record<AppLocale, Copy> = {
     lateDropoff: (v) => ({ title: "Deine Abgabezeit ist vorbei", body: `Deine Buchung bei ${v.shop} wird um ${v.time ?? ""} automatisch geschlossen. Wenn du unterwegs bist, ruf den Laden an${v.phone ? ` (${v.phone})` : ""}; sonst buche neu.` }),
     lateHold: (v) => ({ title: "Der Laden wartet auf dich", body: `${v.shop} hält deine Buchung bis ${v.time ?? ""} offen.` }),
     lateClosed: (v) => ({ title: "Deine Buchung wurde geschlossen", body: `Deine Buchung bei ${v.shop} wurde geschlossen, weil die Abgabezeit überschritten wurde. Du kannst neu buchen.` }),
+    disputeInReview: (v) => ({ title: "Deine Beschwerde wird geprüft", body: `Unser Team prüft deine Beschwerde zu ${v.shop}.` }),
+    disputeResolved: (v) => ({ title: "Deine Beschwerde wurde gelöst", body: `Deine Beschwerde zu ${v.shop} wurde gelöst. Details findest du in deiner Buchung.` }),
+    disputeClosed: (v) => ({ title: "Deine Beschwerde wurde geschlossen", body: `Deine Beschwerde zu ${v.shop} wurde geschlossen. Details findest du in deiner Buchung.` }),
   },
   fr: {
     approved: (v) => ({ title: "Réservation confirmée", body: `${v.shop} vous attend. Votre QR code est dans l'app.` }),
@@ -78,6 +90,9 @@ export const GUEST_PUSH_COPY: Record<AppLocale, Copy> = {
     lateDropoff: (v) => ({ title: "L'heure de dépôt est passée", body: `Votre réservation chez ${v.shop} sera clôturée automatiquement à ${v.time ?? ""}. Si vous arrivez, appelez le commerce${v.phone ? ` (${v.phone})` : ""} ; sinon, faites une nouvelle réservation.` }),
     lateHold: (v) => ({ title: "Le commerce vous attend", body: `${v.shop} garde votre réservation jusqu'à ${v.time ?? ""}.` }),
     lateClosed: (v) => ({ title: "Votre réservation a été clôturée", body: `Votre réservation chez ${v.shop} a été clôturée car l'heure de dépôt est dépassée. Vous pouvez réserver à nouveau.` }),
+    disputeInReview: (v) => ({ title: "Votre réclamation est en cours d'examen", body: `Notre équipe examine votre réclamation concernant ${v.shop}.` }),
+    disputeResolved: (v) => ({ title: "Votre réclamation a été résolue", body: `Votre réclamation concernant ${v.shop} a été résolue. Les détails sont dans votre réservation.` }),
+    disputeClosed: (v) => ({ title: "Votre réclamation a été clôturée", body: `Votre réclamation concernant ${v.shop} a été clôturée. Les détails sont dans votre réservation.` }),
   },
   ja: {
     approved: (v) => ({ title: "予約が確定しました", body: `${v.shop}がお待ちしています。QRコードはアプリにあります。` }),
@@ -92,6 +107,9 @@ export const GUEST_PUSH_COPY: Record<AppLocale, Copy> = {
     lateDropoff: (v) => ({ title: "預け入れ時間を過ぎました", body: `${v.shop}のご予約は${v.time ?? ""}に自動で終了します。向かっている場合は店舗にお電話ください${v.phone ? `（${v.phone}）` : ""}。難しい場合は新しくご予約ください。` }),
     lateHold: (v) => ({ title: "店舗がお待ちしています", body: `${v.shop}は${v.time ?? ""}までご予約を保持しています。` }),
     lateClosed: (v) => ({ title: "ご予約が終了しました", body: `預け入れ時間を過ぎたため、${v.shop}のご予約は終了しました。新しくご予約いただけます。` }),
+    disputeInReview: (v) => ({ title: "お申し立てを確認しています", body: `${v.shop}に関するお申し立てを担当チームが確認しています。` }),
+    disputeResolved: (v) => ({ title: "お申し立てが解決しました", body: `${v.shop}に関するお申し立てが解決しました。詳細はご予約をご確認ください。` }),
+    disputeClosed: (v) => ({ title: "お申し立てが終了しました", body: `${v.shop}に関するお申し立てが終了しました。詳細はご予約をご確認ください。` }),
   },
   fa: {
     approved: (v) => ({ title: "رزرو شما تأیید شد", body: `${v.shop} منتظر شماست. کد QR در برنامه است.` }),
@@ -106,5 +124,19 @@ export const GUEST_PUSH_COPY: Record<AppLocale, Copy> = {
     lateDropoff: (v) => ({ title: "زمان تحویل دادن گذشته است", body: `رزرو شما در ${v.shop} ساعت ${v.time ?? ""} به‌طور خودکار بسته می‌شود. اگر در راه هستید با فروشگاه تماس بگیرید${v.phone ? ` (${v.phone})` : ""}؛ وگرنه رزرو جدیدی ثبت کنید.` }),
     lateHold: (v) => ({ title: "فروشگاه منتظر شماست", body: `${v.shop} رزرو شما را تا ساعت ${v.time ?? ""} نگه می‌دارد.` }),
     lateClosed: (v) => ({ title: "رزرو شما بسته شد", body: `چون زمان تحویل دادن گذشت، رزرو شما در ${v.shop} بسته شد. می‌توانید دوباره رزرو کنید.` }),
+    disputeInReview: (v) => ({ title: "شکایت شما در حال بررسی است", body: `تیم ما در حال بررسی شکایت شما درباره ${v.shop} است.` }),
+    disputeResolved: (v) => ({ title: "شکایت شما حل شد", body: `شکایت شما درباره ${v.shop} حل شد. جزئیات در رزرو شماست.` }),
+    disputeClosed: (v) => ({ title: "شکایت شما بسته شد", body: `شکایت شما درباره ${v.shop} بسته شد. جزئیات در رزرو شماست.` }),
   },
 };
+
+/** Uyusmazlik olaylari; web push'a dokununca uyusmazlik sayfasi acilir. */
+const DISPUTE_EVENTS: ReadonlySet<GuestPushEvent> = new Set(["disputeInReview", "disputeResolved", "disputeClosed"]);
+
+/**
+ * Web push tiklama hedefi (dil oneksiz; `src/proxy.ts` dile yonlendirir). `undefined`
+ * ise worker `bookingId`den rezervasyon sayfasini kurar (`public/push-sw.js`).
+ */
+export function guestPushWebPath(event: GuestPushEvent, bookingId: string): string | undefined {
+  return DISPUTE_EVENTS.has(event) ? `/bookings/${bookingId}/dispute` : undefined;
+}

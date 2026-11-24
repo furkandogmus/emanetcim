@@ -8,6 +8,7 @@ import type { Resend } from "resend";
 import { Resend as ResendCtor } from "resend";
 import { normalizeInboundSubjectLine } from "@/lib/reply-subject";
 import { classifyInboxMessage } from "@/lib/inbox-classifier";
+import { notificationService } from "@/services/NotificationService";
 import logger from "@/lib/logger";
 import { rateLimit } from "@/lib/rate-limit";
 import { clientIpFromRequest } from "@/lib/client-ip";
@@ -377,6 +378,11 @@ export async function POST(req: Request) {
         categoryReason: classification.reason,
       },
     });
+    if (classification.category === "SUPPORT") {
+      void notificationService
+        .notifyAdminsForContactMessage()
+        .catch((err) => logger.warn({ err }, "notify_admins_contact_failed"));
+    }
 
     return NextResponse.json({ success: true }, { status: 201 });
   } catch (error: unknown) {

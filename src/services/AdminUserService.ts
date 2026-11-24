@@ -12,6 +12,7 @@ import { requestPasswordReset } from "@/services/auth/password-reset";
 import { roleChangeData } from "@/lib/role-change-data";
 import { retryOnWriteConflict } from "@/lib/tx-retry";
 import logger from "@/lib/logger";
+import { notificationService } from "@/services/NotificationService";
 import { isPrismaForeignKeyViolation } from "@/lib/prisma-errors";
 
 export type AdminActor = { userId: string | null; ip: string | null };
@@ -257,7 +258,7 @@ export class AdminUserService {
 
     const target = await prisma.user.findUnique({
       where: { id: targetUserId },
-      select: { id: true, role: true },
+      select: { id: true, role: true, name: true },
     });
     if (!target) return { ok: false, error: "not_found" };
     if (target.role === newRole) return { ok: false, error: "same_role" };
@@ -301,6 +302,14 @@ export class AdminUserService {
       metadata: { previousRole: target.role, requestedRole: newRole },
       ip: actor.ip,
     });
+    void notificationService
+      .notifyAdminsForPendingRoleChange({
+        requestedByUserId: actor.userId,
+        targetName: target.name,
+        previousRole: target.role,
+        requestedRole: newRole,
+      })
+      .catch((err) => logger.error({ err, targetUserId }, "notify_admins_role_change_failed"));
     return { ok: true, status: "pending_approval" };
   }
 

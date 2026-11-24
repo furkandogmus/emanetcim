@@ -1,5 +1,5 @@
 import logger from "../lib/logger";
-import { GUEST_PUSH_COPY, type GuestPushEvent, type GuestPushVars } from "@/lib/guest-push-copy";
+import { GUEST_PUSH_COPY, guestPushWebPath, type GuestPushEvent, type GuestPushVars } from "@/lib/guest-push-copy";
 import { formatPhoneForDisplay } from "@/lib/phone-format";
 import prisma from "../lib/db";
 import { formatTryCurrency } from "@/lib/currency";
@@ -27,6 +27,9 @@ import { bookingShortCode } from "@/lib/booking-code";
 import { getSiteBaseUrl } from "@/lib/site-base-url";
 import { signGuestManageLinkToken } from "@/lib/guest-lookup-token";
 import { bookingNotificationEmail } from "@/services/booking/guest-contact";
+import { DEFAULT_NOTIFICATION_LOCALE } from "@/lib/request-locale";
+import { rateLimitLocalMemory } from "@/lib/rate-limit";
+import type { DisputeStatus } from "@/lib/dispute-status";
 import { APP_STORE_BADGE, GOOGLE_PLAY_BADGE, appLinkHref, getAppStoreFlags } from "@/lib/app-stores";
 import type { EmailAppBadges } from "@/lib/email-template";
 
@@ -76,6 +79,12 @@ async function bookingEmailAppBadges(
   }
   return badges.length > 0 ? { label: copy.appRow, badges } : undefined;
 }
+
+/** `excludeUserIds`: push'u tetikleyen yonetici kendi istegini bildirim olarak almaz. */
+type AdminPushOptions = { excludeUserIds?: string[] };
+
+/** Iletisim mesaji push'u en fazla bu aralikta bir kez gider; arada gelenler sayida toplanir. */
+export const CONTACT_PUSH_COALESCE_MS = 10 * 60_000;
 
 /**
  * UI dili -> para birimi bicimlendirme locale'i.
@@ -235,7 +244,14 @@ export class NotificationService implements INotificationService {
   /**
    * Push bildirim gönderimi
    */
-  async sendPush(userId: string, title: string, message: string, bookingId?: string): Promise<boolean> {
+  /** `opts.url`: tiklama hedefi (dil oneksiz); yoksa worker `bookingId`den kurar. */
+  async sendPush(
+    userId: string,
+    title: string,
+    message: string,
+    bookingId?: string,
+    opts: { url?: string } = {},
+  ): Promise<boolean> {
     // Public anahtar tek kaynaktan: imaja gomulen NEXT_PUBLIC_ degeri (istemci
     // aboneligi de onunla yapiyor). VAPID_PUBLIC_KEY yalnizca eski kurulumlar icin.
     const publicKey = (process.env.VAPID_PUBLIC_KEY || process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY)?.trim();
@@ -251,7 +267,7 @@ export class NotificationService implements INotificationService {
       if (publicKey && privateKey && subs.length > 0) {
         const webpush = (await import("web-push")).default;
         webpush.setVapidDetails(contact, publicKey, privateKey);
-        const payload = JSON.stringify({ title, body: message, bookingId });
+        const payload = JSON.stringify({ title, body: message, bookingId, ...(opts.url ? { url: opts.url } : {}) });
         let anyOk = false;
         for (const s of subs) {
           try {
@@ -345,7 +361,16 @@ export class NotificationService implements INotificationService {
     );
   }
 
-  /** `pushGuest`in beklenebilir hali: en az bir cihaza gittiyse `true`. */
+  /**
+   * `pushGuest`in beklenebilir hali. Ayni metin mobil push'a VE misafirin web push
+   * aboneliklerine gider (G37, 2026-11-24): `WebPushOptIn` misafirden abonelik
+   * aliyordu ama misafir olaylari yalnizca mobile gidiyordu. Esnafla ayni kural:
+   * uygulamasi ve tarayicisi olan ikisinden de alir. Abonelik yoksa ya da tarayici
+   * izni geri alinmissa (404/410 aboneligi siler) web push gitmez.
+   *
+   * Donus degeri YALNIZCA mobil sonuc: gec birakma bildirimi push gittiyse e-postayi
+   * atliyor; aylar once acilmis bir tarayici aboneligi o e-postayi yutmamali.
+   */
   private async pushGuestNow(
     bookingId: string,
     event: GuestPushEvent,
@@ -358,7 +383,11 @@ export class NotificationService implements INotificationService {
     });
     if (!booking?.guestId) return false;
     const { title, body } = pickLocale(GUEST_PUSH_COPY, locale)[event]({ shop: booking.shop.name, ...vars });
-    return this.sendMobilePush(booking.guestId, title, body, bookingId);
+    const [mobile] = await Promise.all([
+      this.sendMobilePush(booking.guestId, title, body, bookingId),
+      this.sendPush(booking.guestId, title, body, bookingId, { url: guestPushWebPath(event, bookingId) }),
+    ]);
+    return mobile;
   }
 
   /**
@@ -525,16 +554,23 @@ export class NotificationService implements INotificationService {
    * `audienceUserWhere` ile ayni kural). Cihaz dili `tr` ise Turkce, degilse Ingilizce.
    * Ateşle-unut cagrilir: e-posta/SMS akisini hicbir durumda bekletmez ya da dusurmez.
    */
-  pushAdmins(event: AdminPushEvent, vars: AdminPushVars, data: AdminPushData): void {
-    void this.pushAdminsNow(event, vars, data).catch((err) =>
+  pushAdmins(event: AdminPushEvent, vars: AdminPushVars, data: AdminPushData, opts: AdminPushOptions = {}): void {
+    void this.pushAdminsNow(event, vars, data, opts).catch((err) =>
       logger.warn({ err, event }, "admin_push_failed"),
     );
   }
 
   /** `pushAdmins`in beklenebilir hali; gonderilen cihaz sayisini dondurur. */
-  async pushAdminsNow(event: AdminPushEvent, vars: AdminPushVars, data: AdminPushData): Promise<number> {
+  async pushAdminsNow(
+    event: AdminPushEvent,
+    vars: AdminPushVars,
+    data: AdminPushData,
+    opts: AdminPushOptions = {},
+  ): Promise<number> {
+    const exclude = opts.excludeUserIds?.filter(Boolean) ?? [];
     const tokens = await prisma.mobilePushToken.findMany({
       where: {
+        ...(exclude.length > 0 ? { userId: { notIn: exclude } } : {}),
         user: {
           role: "ADMIN",
           isBanned: false,
@@ -1685,6 +1721,131 @@ export class NotificationService implements INotificationService {
   }
 
   /**
+   * Uyusmazlik sonucu -> MISAFIR (G34, 2026-11-24): e-posta + mobil push + web push.
+   * Eskiden yonetici durumu degistirdiginde misafire hicbir kanaldan haber gitmiyordu.
+   *
+   * Yonetici notu GONDERILMEZ: `Dispute.adminNote` tek alan ve misafir ekraninda
+   * gosterilmiyor, yani ic not. Misafire yalnizca durum gider; ayrinti sayfada.
+   */
+  async notifyGuestDisputeOutcome(params: {
+    bookingId: string;
+    status: Exclude<DisputeStatus, "OPEN">;
+  }): Promise<void> {
+    const { bookingId, status } = params;
+    const b = await prisma.booking.findUnique({
+      where: { id: bookingId },
+      select: { locale: true, guestEmail: true, guest: { select: { email: true } }, shop: { select: { name: true } } },
+    });
+    if (!b) return;
+    const locale = b.locale ?? DEFAULT_NOTIFICATION_LOCALE;
+    const event: GuestPushEvent =
+      status === "IN_REVIEW" ? "disputeInReview" : status === "RESOLVED" ? "disputeResolved" : "disputeClosed";
+    this.pushGuest(bookingId, event, locale);
+
+    const email = bookingNotificationEmail(b);
+    if (!email) return;
+
+    const shop = b.shop.name;
+    const shopHtml = escapeEmailHtml(shop);
+    const shortId = bookingShortCode(bookingId);
+    const link = `${getSiteBaseUrl()}/${locale}/bookings/${bookingId}/dispute`;
+
+    const c = pickLocale({
+      tr: {
+        subject: { IN_REVIEW: "BagajPark: Şikayetin inceleniyor", RESOLVED: "BagajPark: Şikayetin sonuçlandı", CLOSED: "BagajPark: Şikayetin kapatıldı" },
+        heading: { IN_REVIEW: "Şikayetin inceleniyor", RESOLVED: "Şikayetin sonuçlandı", CLOSED: "Şikayetin kapatıldı" },
+        body: {
+          IN_REVIEW: `${shopHtml} rezervasyonun için açtığın şikayeti ekibimiz inceliyor. Sonuçlandığında sana yine haber vereceğiz.`,
+          RESOLVED: `${shopHtml} rezervasyonun için açtığın şikayet çözüldü olarak işaretlendi.`,
+          CLOSED: `${shopHtml} rezervasyonun için açtığın şikayet kapatıldı.`,
+        },
+        statusLabel: "Durum",
+        status: { IN_REVIEW: "İnceleniyor", RESOLVED: "Çözüldü", CLOSED: "Kapatıldı" },
+        cta: "Şikayeti görüntüle",
+        footer: `Rezervasyon Kodu: ${shortId}`,
+      },
+      en: {
+        subject: { IN_REVIEW: "BagajPark: Your dispute is under review", RESOLVED: "BagajPark: Your dispute was resolved", CLOSED: "BagajPark: Your dispute was closed" },
+        heading: { IN_REVIEW: "Your dispute is under review", RESOLVED: "Your dispute was resolved", CLOSED: "Your dispute was closed" },
+        body: {
+          IN_REVIEW: `Our team is reviewing the dispute you opened for your booking at ${shopHtml}. We will let you know when it is settled.`,
+          RESOLVED: `The dispute you opened for your booking at ${shopHtml} has been marked as resolved.`,
+          CLOSED: `The dispute you opened for your booking at ${shopHtml} has been closed.`,
+        },
+        statusLabel: "Status",
+        status: { IN_REVIEW: "Under review", RESOLVED: "Resolved", CLOSED: "Closed" },
+        cta: "View dispute",
+        footer: `Booking code: ${shortId}`,
+      },
+      de: {
+        subject: { IN_REVIEW: "BagajPark: Deine Beschwerde wird geprüft", RESOLVED: "BagajPark: Deine Beschwerde wurde gelöst", CLOSED: "BagajPark: Deine Beschwerde wurde geschlossen" },
+        heading: { IN_REVIEW: "Deine Beschwerde wird geprüft", RESOLVED: "Deine Beschwerde wurde gelöst", CLOSED: "Deine Beschwerde wurde geschlossen" },
+        body: {
+          IN_REVIEW: `Unser Team prüft die Beschwerde zu deiner Buchung bei ${shopHtml}. Wir melden uns, sobald sie abgeschlossen ist.`,
+          RESOLVED: `Die Beschwerde zu deiner Buchung bei ${shopHtml} wurde als gelöst markiert.`,
+          CLOSED: `Die Beschwerde zu deiner Buchung bei ${shopHtml} wurde geschlossen.`,
+        },
+        statusLabel: "Status",
+        status: { IN_REVIEW: "In Prüfung", RESOLVED: "Gelöst", CLOSED: "Geschlossen" },
+        cta: "Beschwerde ansehen",
+        footer: `Buchungscode: ${shortId}`,
+      },
+      fr: {
+        subject: { IN_REVIEW: "BagajPark : Votre réclamation est en cours d'examen", RESOLVED: "BagajPark : Votre réclamation a été résolue", CLOSED: "BagajPark : Votre réclamation a été clôturée" },
+        heading: { IN_REVIEW: "Votre réclamation est en cours d'examen", RESOLVED: "Votre réclamation a été résolue", CLOSED: "Votre réclamation a été clôturée" },
+        body: {
+          IN_REVIEW: `Notre équipe examine la réclamation ouverte pour votre réservation chez ${shopHtml}. Nous vous informerons dès qu'elle sera traitée.`,
+          RESOLVED: `La réclamation ouverte pour votre réservation chez ${shopHtml} a été marquée comme résolue.`,
+          CLOSED: `La réclamation ouverte pour votre réservation chez ${shopHtml} a été clôturée.`,
+        },
+        statusLabel: "Statut",
+        status: { IN_REVIEW: "En cours d'examen", RESOLVED: "Résolue", CLOSED: "Clôturée" },
+        cta: "Voir la réclamation",
+        footer: `Code de réservation : ${shortId}`,
+      },
+      ja: {
+        subject: { IN_REVIEW: "BagajPark: お申し立てを確認しています", RESOLVED: "BagajPark: お申し立てが解決しました", CLOSED: "BagajPark: お申し立てが終了しました" },
+        heading: { IN_REVIEW: "お申し立てを確認しています", RESOLVED: "お申し立てが解決しました", CLOSED: "お申し立てが終了しました" },
+        body: {
+          IN_REVIEW: `${shopHtml}のご予約に関するお申し立てを担当チームが確認しています。結果が出ましたら改めてお知らせします。`,
+          RESOLVED: `${shopHtml}のご予約に関するお申し立ては解決済みになりました。`,
+          CLOSED: `${shopHtml}のご予約に関するお申し立ては終了しました。`,
+        },
+        statusLabel: "状況",
+        status: { IN_REVIEW: "確認中", RESOLVED: "解決済み", CLOSED: "終了" },
+        cta: "お申し立てを見る",
+        footer: `予約コード: ${shortId}`,
+      },
+      fa: {
+        subject: { IN_REVIEW: "BagajPark: شکایت شما در حال بررسی است", RESOLVED: "BagajPark: شکایت شما حل شد", CLOSED: "BagajPark: شکایت شما بسته شد" },
+        heading: { IN_REVIEW: "شکایت شما در حال بررسی است", RESOLVED: "شکایت شما حل شد", CLOSED: "شکایت شما بسته شد" },
+        body: {
+          IN_REVIEW: `تیم ما در حال بررسی شکایتی است که برای رزرو خود در ${shopHtml} ثبت کردید. پس از نتیجه به شما اطلاع می‌دهیم.`,
+          RESOLVED: `شکایتی که برای رزرو خود در ${shopHtml} ثبت کردید حل‌شده علامت خورد.`,
+          CLOSED: `شکایتی که برای رزرو خود در ${shopHtml} ثبت کردید بسته شد.`,
+        },
+        statusLabel: "وضعیت",
+        status: { IN_REVIEW: "در حال بررسی", RESOLVED: "حل‌شده", CLOSED: "بسته‌شده" },
+        cta: "مشاهده شکایت",
+        footer: `کد رزرو: ${shortId}`,
+      },
+    }, locale);
+
+    const bodyHtml = c.body[status];
+    const text = `${bodyHtml.split(shopHtml).join(shop)}\n\n${c.statusLabel}: ${c.status[status]}\n\n${link}`;
+    const html = renderEmailHtml({
+      locale,
+      tone: status === "RESOLVED" ? "success" : status === "CLOSED" ? "muted" : undefined,
+      heading: c.heading[status],
+      paragraphs: [bodyHtml],
+      rows: [{ label: c.statusLabel, value: c.status[status], emphasized: true }],
+      cta: { href: link, label: c.cta, variant: "button" },
+      footer: c.footer,
+    });
+    await this.sendEmail(email, c.subject[status], text, bookingId, html);
+  }
+
+  /**
    * Yeni kullanıcı kaydında admin e-postalarına bilgilendirme gönderir.
    * Esnaf başvurusu ayrıca admin GSM listesine SMS de alır — onay bekleyen bir
    * işlem olduğu için booking/dispute ile aynı aciliyet sınıfında. Misafir
@@ -2594,6 +2755,91 @@ export class NotificationService implements INotificationService {
         });
       }
     }
+  }
+
+  /**
+   * Ikinci onay bekleyen rol degisikligi -> ISTEYEN DISINDAKI yoneticiler: mobil push +
+   * e-posta (2026-11-24). Onayi verecek ikinci yonetici istegin acildigini bilmiyordu.
+   *
+   * Alici veritabanindaki ADMIN hesaplari (yasakli/anonimlestirilmis disarida), env'deki
+   * `ADMIN_EMAILS` DEGIL: onayi ancak bir yonetici hesabi verebilir.
+   */
+  async notifyAdminsForPendingRoleChange(params: {
+    requestedByUserId: string;
+    targetName: string | null;
+    previousRole: string;
+    requestedRole: string;
+  }): Promise<void> {
+    const { requestedByUserId, previousRole, requestedRole } = params;
+    const name = params.targetName?.trim() || undefined;
+    this.pushAdmins(
+      "roleApproval",
+      { name, role: requestedRole },
+      { adminScreen: "roleApprovals" },
+      { excludeUserIds: [requestedByUserId] },
+    );
+
+    const admins = await prisma.user.findMany({
+      where: {
+        role: "ADMIN",
+        isBanned: false,
+        id: { not: requestedByUserId },
+        email: { not: null },
+        NOT: { email: { endsWith: ANONYMIZED_EMAIL_DOMAIN } },
+      },
+      select: { email: true },
+    });
+    const label = name ?? "—";
+    const link = `${getSiteBaseUrl()}/tr/admin/role-approvals`;
+    const subject = `[Admin] BagajPark: Rol değişikliği onayınızı bekliyor (${label})`;
+    const body = `Bir rol değişikliği ikinci yönetici onayı bekliyor.\n\nKullanıcı: ${label}\nMevcut rol: ${previousRole}\nİstenen rol: ${requestedRole}\n\n${link}`;
+    const html = renderEmailHtml({
+      locale: "tr",
+      tone: "alert",
+      heading: "Rol değişikliği onay bekliyor",
+      paragraphs: ["Başka bir yönetici bu rol değişikliğini istedi. İsteği açan kendisi onaylayamaz; onay ya da iptal sizden bekleniyor."],
+      rows: [
+        { label: "Kullanıcı", value: escapeEmailHtml(label) },
+        { label: "Mevcut rol", value: escapeEmailHtml(previousRole) },
+        { label: "İstenen rol", value: escapeEmailHtml(requestedRole), emphasized: true },
+      ],
+      cta: { href: link, label: "Rol onaylarına git", variant: "button" },
+      footer: "BagajPark — Yönetim Masası",
+    });
+    for (const a of admins) {
+      if (a.email?.includes("@")) {
+        void this.sendEmail(a.email, subject, body, undefined, html).catch((e) => {
+          logger.error({ err: e }, "notifyAdminsForPendingRoleChange_email_failed");
+        });
+      }
+    }
+  }
+
+  /**
+   * Yeni destek mesaji -> yoneticilerin mobil push'u (Mesajlar sekmesi). Bir spam
+   * dalgasi telefonlari bogmasin diye en fazla `CONTACT_PUSH_COALESCE_MS`de bir push;
+   * govdedeki sayi okunmamis destek mesajlari, yani arada gelenler kaybolmaz.
+   *
+   * Aralik NotificationLog'dan okunur (sureclerden bagimsiz); ayni surecte es zamanli
+   * iki mesaj icin bellek ici kilit ikinci push'u keser. Yalnizca `SUPPORT` siniflanan
+   * mesaj tetikler: toplu/otomatik posta push uretmez.
+   */
+  async notifyAdminsForContactMessage(now: Date = new Date()): Promise<boolean> {
+    if (!rateLimitLocalMemory("admin-push:contact", 1, CONTACT_PUSH_COALESCE_MS)) return false;
+    const titles = [ADMIN_PUSH_COPY.tr.contactMessage({}).title, ADMIN_PUSH_COPY.en.contactMessage({}).title];
+    const recent = await prisma.notificationLog.findFirst({
+      where: {
+        type: "MOBILE_PUSH",
+        recipient: { startsWith: "admins:" },
+        subject: { in: titles },
+        createdAt: { gte: new Date(now.getTime() - CONTACT_PUSH_COALESCE_MS) },
+      },
+      select: { id: true },
+    });
+    if (recent) return false;
+    const count = await prisma.contactMessage.count({ where: { category: "SUPPORT", isRead: false } });
+    await this.pushAdminsNow("contactMessage", { count: Math.max(count, 1) }, { adminScreen: "messages" });
+    return true;
   }
 
   /** Hesap silme tamamlandi: talep anindaki adrese, talep dilinde. */
