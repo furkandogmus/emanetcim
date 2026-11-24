@@ -65,5 +65,5 @@ API adresi derleme anında: `EXPO_PUBLIC_API_BASE_URL` (varsayılan emülatör i
 - **Kabul kriteri: Google Play'e yüklenebilir build.** İzin listesi, hesap silme ve
   production profili bu yüzden var; değiştirmeden önce `PLAY_YAYIN.md`'yi oku.
 - **iOS yayını** `IOS_YAYIN.md`: hesap, build/submit adımları, App Review notları.
-- **OTA** imzalı (0.3.5+, anahtar repo dışında; `PLAY_YAYIN.md` § OTA kod imzası), yalnızca `npm run update:production` ile (doğrudan `eas update` değil); varsayılan
+- **OTA** yalnızca `npm run update:production` ile (doğrudan `eas update` değil); varsayılan
   runtime `app.json` `version`'ı, eski ikililer `OTA_RUNTIME` ile. `PLAY_YAYIN.md` § Hızlı yayın.
