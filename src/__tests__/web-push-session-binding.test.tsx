@@ -12,11 +12,12 @@ import { render, waitFor } from "@testing-library/react";
 const m = vi.hoisted(() => ({
   signOut: vi.fn(),
   useSession: vi.fn(),
+  getSession: vi.fn(),
   auth: vi.fn(),
   prisma: { pushSubscription: { upsert: vi.fn(), deleteMany: vi.fn() } },
 }));
 
-vi.mock("next-auth/react", () => ({ signOut: m.signOut, useSession: m.useSession }));
+vi.mock("next-auth/react", () => ({ signOut: m.signOut, useSession: m.useSession, getSession: m.getSession }));
 vi.mock("@/auth", () => ({ auth: m.auth }));
 vi.mock("@/lib/db", () => ({ default: m.prisma }));
 
@@ -44,6 +45,7 @@ beforeEach(() => {
   vi.clearAllMocks();
   global.fetch = fetchMock as unknown as typeof fetch;
   fetchMock.mockResolvedValue({ ok: true });
+  m.getSession.mockResolvedValue(null);
   installSubscription(SUB);
 });
 
@@ -73,6 +75,33 @@ describe("istemci", () => {
     expect(calls()).toEqual([{ method: "DELETE", body: { endpoint: SUB.endpoint } }]);
     expect(order).toEqual(["delete", "signOut"]);
     expect(m.signOut).toHaveBeenCalledWith({ redirectTo: "/login" });
+  });
+
+  it("goruntuleme acikken once durdurulur, sonra abonelik silinir, sonra cikis", async () => {
+    m.getSession.mockResolvedValue({ user: { id: "target" }, impersonation: { adminId: "a", expiresAt: "" } });
+    const order: string[] = [];
+    fetchMock.mockImplementation(async (url: string, init: RequestInit) => {
+      order.push(`${init.method} ${url}`);
+      return { ok: true };
+    });
+    m.signOut.mockImplementation(async () => {
+      order.push("signOut");
+    });
+    await signOutWithPush();
+    expect(order).toEqual(["POST /api/impersonation/stop", "DELETE /api/push/subscribe", "signOut"]);
+  });
+
+  it("goruntuleme durdurma ya da oturum okuma basarisiz olsa da abonelik silinir ve cikis yapilir", async () => {
+    m.getSession.mockResolvedValue({ user: { id: "target" }, impersonation: { stale: true, expiresAt: null } });
+    fetchMock.mockImplementationOnce(async () => {
+      throw new Error("offline");
+    });
+    await signOutWithPush();
+    expect(fetchMock).toHaveBeenCalledTimes(2);
+    expect(m.signOut).toHaveBeenCalledTimes(1);
+    m.getSession.mockRejectedValueOnce(new Error("offline"));
+    await signOutWithPush();
+    expect(m.signOut).toHaveBeenCalledTimes(2);
   });
 
   it("silme basarisiz olsa da cikis yapilir", async () => {

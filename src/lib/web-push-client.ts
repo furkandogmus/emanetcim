@@ -1,6 +1,7 @@
 "use client";
 
-import { signOut, type SignOutParams } from "next-auth/react";
+import { getSession, signOut, type SignOutParams } from "next-auth/react";
+import { WEB_IMPERSONATION_STOP_PATH } from "@/lib/web-impersonation-paths";
 
 /**
  * Tarayici web push aboneligi ile oturum sahibini eslestirir. Abonelik tarayiciya
@@ -49,8 +50,26 @@ export async function unbindBrowserPush(): Promise<boolean> {
   return sendSubscription("DELETE", { endpoint: sub.endpoint });
 }
 
-/** `signOut` yerine: once abonelik ayrilir; hata ya da zaman asimi cikisi engellemez. */
+/*
+  "Olarak goruntule" acikken oturum hedefin ve sunucu abonelik silmeyi reddeder: once
+  goruntuleme durdurulur, DELETE geri gelen admin oturumuyla gider. Yoksa abonelik
+  cikistan sonra da adminin hesabina bagli kalirdi.
+*/
+async function stopImpersonationIfActive(): Promise<void> {
+  const session = await getSession();
+  if (!session?.impersonation) return;
+  const ctrl = new AbortController();
+  const timer = setTimeout(() => ctrl.abort(), REQUEST_TIMEOUT_MS);
+  try {
+    await fetch(WEB_IMPERSONATION_STOP_PATH, { method: "POST", signal: ctrl.signal });
+  } finally {
+    clearTimeout(timer);
+  }
+}
+
+/** `signOut` yerine: once (varsa) goruntuleme biter, sonra abonelik ayrilir; hata ya da zaman asimi cikisi engellemez. */
 export async function signOutWithPush(params?: SignOutParams<true>): Promise<void> {
+  await stopImpersonationIfActive().catch(() => undefined);
   await unbindBrowserPush().catch(() => false);
   await signOut(params);
 }
