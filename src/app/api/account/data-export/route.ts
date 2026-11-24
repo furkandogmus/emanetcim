@@ -1,35 +1,26 @@
 import { NextResponse } from "next/server";
+import { z } from "zod";
 import { auth } from "@/auth";
-import prisma from "@/lib/db";
 import { rateLimit } from "@/lib/rate-limit";
 import { getClientIp } from "@/lib/get-ip";
+import { accountDataExportService } from "@/services/AccountDataExportService";
+import { dataExportEmailResponse } from "@/lib/data-export-response";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
 
 /**
- * KVKK veri dışa aktarma (oturum açık kullanıcı).
+ * KVKK veri dışa aktarma (oturum açık kullanıcı, her rol). GET dosyayı indirir,
+ * POST aynı içeriği doğrulanmış adrese e-postalar (mobil de POST'un servisini kullanır).
  */
 export async function GET() {
   const session = await auth();
   if (!session?.user?.id) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
-
   const userId = session.user.id;
 
-  /*
-    HIZ SINIRI (2026-09-02'de eklendi). Bu uc TEK istekte kullanicinin butun
-    gecmisini topluyor -- dort ayri sorgu, hicbirinde `take` yok. Kimlik
-    dogrulamasi var, yani veri sizmiyor; sinirsiz olan sey MALIYET: ayni oturum
-    ucu istedigi kadar cagirabiliyordu ve her cagri veritabanina dort tam tarama
-    demek.
-
-    Kod tabanindaki butun hassas/agir uclar (auth, OTP, parola sifirlama, arama
-    yenileme) zaten bu kapidan geciyor; burasi atlanmisti. Sinir kullanici
-    basina: KVKK ihracati insan hizinda bir istek, dakikada birden fazlasinin
-    mesru karsiligi yok.
-  */
+  // Tek istekte kullanicinin butun gecmisi okunuyor: sinir maliyet icin (2026-09-02).
   const ip = await getClientIp();
   if (!(await rateLimit(`data-export:${userId}`, 5, 60 * 60 * 1000))) {
     return NextResponse.json({ error: "Too many requests" }, { status: 429 });
@@ -38,59 +29,8 @@ export async function GET() {
     return NextResponse.json({ error: "Too many requests" }, { status: 429 });
   }
 
-  const [user, bookings, reviews, legalAcceptances] = await Promise.all([
-    prisma.user.findUnique({
-      where: { id: userId },
-      select: {
-        id: true,
-        role: true,
-        email: true,
-        emailVerified: true,
-        phone: true,
-        name: true,
-        createdAt: true,
-        updatedAt: true,
-      },
-    }),
-    prisma.booking.findMany({
-      where: { guestId: userId },
-      select: {
-        id: true,
-        status: true,
-        shopId: true,
-        checkInTime: true,
-        checkOutTime: true,
-        totalPrice: true,
-        createdAt: true,
-      },
-    }),
-    prisma.review.findMany({
-      where: { guestId: userId },
-      select: {
-        id: true,
-        bookingId: true,
-        rating: true,
-        comment: true,
-        createdAt: true,
-      },
-    }),
-    prisma.legalAcceptance.findMany({
-      where: { userId },
-      select: {
-        documentKey: true,
-        version: true,
-        acceptedAt: true,
-      },
-    }),
-  ]);
-
-  const payload = {
-    exportedAt: new Date().toISOString(),
-    user,
-    bookings,
-    reviews,
-    legalAcceptances,
-  };
+  const payload = await accountDataExportService.buildExport(userId);
+  if (!payload) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
   return new NextResponse(JSON.stringify(payload, null, 2), {
     status: 200,
@@ -99,4 +39,24 @@ export async function GET() {
       "Content-Disposition": `attachment; filename="bagajpark-data-${userId.slice(0, 8)}.json"`,
     },
   });
+}
+
+const EmailBody = z.object({ locale: z.string().max(8).optional() });
+
+export async function POST(req: Request) {
+  const session = await auth();
+  if (!session?.user?.id) {
+    return NextResponse.json({ error: "unauthorized" }, { status: 401 });
+  }
+  const parsed = EmailBody.safeParse((await req.json().catch(() => ({}))) ?? {});
+  if (!parsed.success) return NextResponse.json({ error: "invalid_data" }, { status: 400 });
+
+  const result = await accountDataExportService.emailExport({
+    userId: session.user.id,
+    role: session.user.role,
+    locale: parsed.data.locale,
+    ip: await getClientIp(),
+    channel: "web",
+  });
+  return dataExportEmailResponse(result);
 }

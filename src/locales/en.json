@@ -2908,5 +2908,20 @@
     "lateDropoffHold": "The shop is holding your booking until {time}.",
     "prelaunchDeviceWants": "from the app: {count}",
     "prelaunchDeviceWantsHint": "One-tap requests sent with an app device id (generated in the app, easier to inflate than the web cookie)"
+  },
+  "AccountDataExport": {
+    "title": "Export my data",
+    "desc": "Get the personal data linked to your account (profile, bookings, reviews, accepted documents and, where relevant, shop and affiliate details) as a JSON file.",
+    "downloadButton": "Download",
+    "emailButton": "Email it to me",
+    "emailNote": "The email goes only to your account's verified address and can be requested once every 24 hours.",
+    "emailSent": "The file was sent to {email}. If it does not arrive within a few minutes, check your spam folder.",
+    "errors": {
+      "generic": "Something went wrong. Please try again.",
+      "tooManyDownloads": "Too many download requests. Please try again later.",
+      "rateLimited": "An export was already sent in the last 24 hours. You can request another after {time}.",
+      "noVerifiedEmail": "Your account has no verified email. You can download the file or verify your email first.",
+      "mailFailed": "The email could not be sent right now. Please try again later."
+    }
   }
 }

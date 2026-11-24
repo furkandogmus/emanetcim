@@ -57,13 +57,9 @@ export type AffiliateApplyState =
 export async function applyAffiliateAction(_prev: AffiliateApplyState, formData: FormData): Promise<AffiliateApplyState> {
   // Bal kupu: dolduran bottur, basari gibi gorunur.
   if (String(formData.get("website") ?? "").length > 0) return { status: "success" };
-  const ip = await getClientIp();
-  if (!(await rateLimit(`affiliate-apply:${ip}`, 5, 10 * 60_000))) {
-    return { status: "error", error: "Errors.tooManyRequests" };
-  }
   const session = await auth();
   try {
-    const result = await affiliateService.submitApplication(
+    const result = await affiliateService.apply(
       {
         displayName: formData.get("displayName") ?? "",
         type: formData.get("type") ?? "",
@@ -71,10 +67,18 @@ export async function applyAffiliateAction(_prev: AffiliateApplyState, formData:
         contactPhone: formData.get("contactPhone") ?? undefined,
         applicationNote: formData.get("applicationNote") ?? undefined,
       },
-      { userId: session?.user?.id ?? null },
+      { userId: session?.user?.id ?? null, ip: await getClientIp() },
     );
     if (!result.ok) {
-      return { status: "error", error: result.reason === "already_applied" ? "Errors.affiliateAlreadyApplied" : "Errors.invalidInput" };
+      return {
+        status: "error",
+        error:
+          result.reason === "rate_limited"
+            ? "Errors.tooManyRequests"
+            : result.reason === "already_applied"
+              ? "Errors.affiliateAlreadyApplied"
+              : "Errors.invalidInput",
+      };
     }
     return { status: "success" };
   } catch (err) {

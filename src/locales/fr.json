@@ -2750,5 +2750,20 @@
     "lateDropoffHold": "La boutique garde votre réservation jusqu'à {time}.",
     "prelaunchDeviceWants": "depuis l'app : {count}",
     "prelaunchDeviceWantsHint": "Demandes en un clic envoyées avec un identifiant d'appareil de l'app (généré dans l'app, plus facile à gonfler que le cookie web)"
+  },
+  "AccountDataExport": {
+    "title": "Exporter mes données",
+    "desc": "Recevez les données personnelles liées à votre compte (profil, réservations, avis, documents acceptés et, le cas échéant, informations de commerce et d'affiliation) dans un fichier JSON.",
+    "downloadButton": "Télécharger",
+    "emailButton": "Me l'envoyer par e-mail",
+    "emailNote": "L'e-mail est envoyé uniquement à l'adresse vérifiée de votre compte et peut être demandé une fois toutes les 24 heures.",
+    "emailSent": "Le fichier a été envoyé à {email}. S'il n'arrive pas d'ici quelques minutes, vérifiez vos spams.",
+    "errors": {
+      "generic": "Une erreur s'est produite. Veuillez réessayer.",
+      "tooManyDownloads": "Trop de demandes de téléchargement. Veuillez réessayer plus tard.",
+      "rateLimited": "Un export a déjà été envoyé ces dernières 24 heures. Vous pourrez en demander un autre après {time}.",
+      "noVerifiedEmail": "Votre compte n'a pas d'e-mail vérifié. Vous pouvez télécharger le fichier ou vérifier d'abord votre e-mail.",
+      "mailFailed": "L'e-mail n'a pas pu être envoyé pour le moment. Veuillez réessayer plus tard."
+    }
   }
 }
