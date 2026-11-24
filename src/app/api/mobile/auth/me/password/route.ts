@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
 import { z } from "zod";
-import { requireMobileUser, signAccessToken, signRefreshToken } from "@/lib/mobile-auth";
+import { forbidWhileImpersonating, requireMobileUser, signAccessToken, signRefreshToken } from "@/lib/mobile-auth";
 import { rateLimit } from "@/lib/rate-limit";
 import { setOwnPassword } from "@/services/auth/set-own-password";
 import { sendPasswordSetNotice } from "@/lib/mail";
@@ -15,12 +15,14 @@ const schema = z.object({
 
 /**
  * Sifre belirle / degistir. Sifresiz hesapta (kod ya da Google ile acilmis)
- * mevcut sifre istenmez; sifreliyse zorunlu. Degisimde oturumlar yenilenir:
- * yanitta yeni token cifti doner (`rotated: true`), istemci onu saklar.
+ * mevcut sifre istenmez; sifreliyse zorunlu. Her iki durumda oturumlar duser ve
+ * yanitta yeni token cifti doner; istemci onu saklar. Goruntuleme oturumunda kapali.
  */
 export async function POST(req: NextRequest) {
   const auth = await requireMobileUser(req);
   if ("error" in auth) return auth.error;
+  const blocked = forbidWhileImpersonating(auth.user);
+  if (blocked) return blocked;
 
   if (!(await rateLimit(`mobile_pwd_change:${auth.user.id}`, 5, 15 * 60_000))) {
     return NextResponse.json({ error: "too_many_attempts" }, { status: 429 });
@@ -35,24 +37,16 @@ export async function POST(req: NextRequest) {
     userId: auth.user.id,
     currentPassword: parsed.data.currentPassword,
     newPassword: parsed.data.newPassword,
-    impersonatedBy: auth.user.impersonatedBy,
   });
   if (!result.ok) {
     const status = result.reason === "invalid_current_password" ? 403 : result.reason === "not_found" ? 404 : 400;
     return NextResponse.json({ error: result.reason }, { status });
   }
-  if (!result.rotated) {
-    /*
-      Sifresiz hesapta ilk sifre: calinmis bir token ile sahibin haberi olmadan
-      kalici kimlik bilgisi koyulmasin diye hesap sahibine e-posta gider.
-      Goruntuleme oturumunda (destek) gitmez. Ateşle-unut: hata isteği dusurmez.
-    */
-    if (auth.user.impersonatedBy === undefined && auth.user.email) {
-      void sendPasswordSetNotice(auth.user.email, resolveRequestLocale(req.headers.get("accept-language"))).catch(
-        (err) => logger.error({ err, userId: auth.user.id }, "password_set_notice_failed"),
-      );
-    }
-    return NextResponse.json({ ok: true });
+  // Ilk sifre: calinmis bir token ile sahibin haberi olmadan kimlik bilgisi koyulmasin.
+  if (result.firstPassword && auth.user.email) {
+    void sendPasswordSetNotice(auth.user.email, resolveRequestLocale(req.headers.get("accept-language"))).catch(
+      (err) => logger.error({ err, userId: auth.user.id }, "password_set_notice_failed"),
+    );
   }
 
   return NextResponse.json({

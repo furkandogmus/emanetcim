@@ -1,5 +1,4 @@
 import prisma from "@/lib/db";
-import { writeAuditLog } from "@/lib/audit-log";
 import {
   hashPassword,
   verifyPassword,
@@ -10,18 +9,16 @@ import {
 /**
  * Kullanicinin kendi sifresini belirlemesi / degistirmesi (profil ekrani).
  *
- * Neden var: esnafin bir kismi e-postasiz, SMS yok, "sifremi unuttum" e-posta
- * istiyor. Yonetici "kullanici olarak goruntule" ile esnafin profiline girip bu
- * ekrandan sifre koyar; OTP/Google ile acilmis (sifresiz) hesaplar da ayni
- * yoldan sifre kazanir.
- *
- * - Mevcut sifre VARSA dogrulanir; yoksa istenmez.
- * - Sifre degisimi `tokenVersion`i artirir (eski oturumlar duser) ve cagiran
- *   yeni token ciftini kullanir. Goruntuleme oturumunda artirilmaz: yonetici
- *   oturumu kaybetmesin; sifresiz hesapta zaten dusurulecek oturum yok.
+ * - Mevcut sifre VARSA dogrulanir; yoksa istenmez (OTP/Google ile acilmis hesap).
+ * - Ilk sifre de degisim gibi `tokenVersion`i artirir: calinmis bir oturum
+ *   sessizce kalici kimlik bilgisi koyup ayakta kalamasin (2026-11-24 guvenlik
+ *   incelemesi). Cagiran yeni token ciftini kullanir; ilk sifrede sahibine
+ *   `sendPasswordSetNotice` gider.
+ * - Yonetici goruntuleme oturumunda cagrilmaz (mobil uc 403 doner); sifresiz
+ *   esnafa erisim icin yonetici sifirlama bagini (72 saat) uretir.
  */
 export type SetOwnPasswordResult =
-  | { ok: true; tokenVersion: number; rotated: boolean }
+  | { ok: true; tokenVersion: number; firstPassword: boolean }
   | {
       ok: false;
       reason: "invalid_password" | "current_password_required" | "invalid_current_password" | "not_found";
@@ -31,11 +28,8 @@ export async function setOwnPassword(params: {
   userId: string;
   currentPassword?: string;
   newPassword: string;
-  /** Goruntuleme oturumunu baslatan yoneticinin id'si; doluysa sifre islemi denetim kaydina yazilir. */
-  impersonatedBy?: string;
 }): Promise<SetOwnPasswordResult> {
-  const { userId, currentPassword, newPassword, impersonatedBy } = params;
-  const impersonating = impersonatedBy !== undefined;
+  const { userId, currentPassword, newPassword } = params;
   if (
     typeof newPassword !== "string" ||
     newPassword.trim().length < MIN_PASSWORD_LENGTH ||
@@ -52,31 +46,16 @@ export async function setOwnPassword(params: {
 
   if (user.passwordHash) {
     if (!currentPassword) return { ok: false, reason: "current_password_required" };
-    // Goruntuleme oturumunda mevcut sifreyi yonetici bilemez; kural yine de ayni:
-    // sifreli hesapta mevcut sifre sart (yonetici sifresizse koyar, sifreliyse kullanici degistirir).
     if (!(await verifyPassword(currentPassword, user.passwordHash))) {
       return { ok: false, reason: "invalid_current_password" };
     }
   }
 
   const passwordHash = await hashPassword(newPassword);
-  const hadPassword = user.passwordHash !== null;
-  const rotate = !impersonating && hadPassword;
   const updated = await prisma.user.update({
     where: { id: user.id },
-    data: rotate ? { passwordHash, tokenVersion: { increment: 1 } } : { passwordHash },
+    data: { passwordHash, tokenVersion: { increment: 1 } },
     select: { tokenVersion: true },
   });
-  if (impersonatedBy) {
-    // Destek kullanim senaryosu icin izin var ama iz birakir: kimin, kimin sifresini, ne zaman.
-    writeAuditLog({
-      actorUserId: impersonatedBy,
-      actorRole: "ADMIN",
-      action: "admin.impersonate.password_set",
-      entityType: "User",
-      entityId: user.id,
-      metadata: { hadPassword },
-    });
-  }
-  return { ok: true, tokenVersion: updated.tokenVersion, rotated: rotate };
+  return { ok: true, tokenVersion: updated.tokenVersion, firstPassword: user.passwordHash === null };
 }

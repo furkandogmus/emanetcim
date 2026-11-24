@@ -78,10 +78,10 @@ describe("web profil action'lari", () => {
     });
     expect(setOwnPassword).toHaveBeenCalledWith({ userId: "u1", currentPassword: "x", newPassword: "y".repeat(10) });
 
-    setOwnPassword.mockResolvedValue({ ok: true, tokenVersion: 4, rotated: true });
+    setOwnPassword.mockResolvedValue({ ok: true, tokenVersion: 4, firstPassword: false });
     expect(await changePasswordAction({ currentPassword: "x", newPassword: "y".repeat(10) })).toEqual({
       ok: true,
-      rotated: true,
+      firstPassword: false,
     });
   });
 
