@@ -22,6 +22,7 @@ const m = vi.hoisted(() => {
       mobileInstall: { deleteMany: ok() },
       user: { update: ok(), findUnique: vi.fn().mockResolvedValue({ email: "Ada@Example.com" }) },
       passwordResetCode: { deleteMany: ok() },
+      mobileLoginCode: { deleteMany: ok() },
       verificationToken: { deleteMany: ok() },
       $transaction: vi.fn().mockResolvedValue([]),
     },
@@ -80,6 +81,7 @@ describe("hesap silme ve suresi dolmus rezervasyonlar", () => {
     m.prisma.booking.count.mockResolvedValue(0);
     await accountPrivacyService.anonymizeSelf({ userId: "g1", role: "GUEST", ip: null });
     expect(m.prisma.passwordResetCode.deleteMany).toHaveBeenCalledWith({ where: { email: "ada@example.com" } });
+    expect(m.prisma.mobileLoginCode.deleteMany).toHaveBeenCalledWith({ where: { identity: "ada@example.com" } });
     expect(m.prisma.verificationToken.deleteMany).toHaveBeenCalledWith({
       where: { identifier: { in: ["ada@example.com", "password-reset:ada@example.com"] } },
     });

@@ -27,6 +27,7 @@ const m = vi.hoisted(() => {
       reviewBlock: { deleteMany: ok() },
       mobileInstall: { deleteMany: ok() },
       passwordResetCode: { deleteMany: ok() },
+      mobileLoginCode: { deleteMany: ok() },
       verificationToken: { deleteMany: ok() },
       $transaction: vi.fn().mockResolvedValue([]),
     },

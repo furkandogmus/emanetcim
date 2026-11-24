@@ -3,9 +3,8 @@ import { describe, it, expect, vi, beforeEach } from "vitest";
 const { mockPrisma } = vi.hoisted(() => ({
   mockPrisma: {
     verificationToken: {
-      findFirst: vi.fn(),
+      deleteMany: vi.fn(),
       create: vi.fn(),
-      delete: vi.fn(),
     },
   },
 }));
@@ -23,7 +22,7 @@ import { createPartnerResetLink } from "../lib/partner-reset-link";
 describe("sifre sifirlama baginin omru", () => {
   beforeEach(() => {
     vi.clearAllMocks();
-    mockPrisma.verificationToken.findFirst.mockResolvedValue(null);
+    mockPrisma.verificationToken.deleteMany.mockResolvedValue({ count: 0 });
     mockPrisma.verificationToken.create.mockImplementation(async ({ data }) => data);
   });
 

@@ -34,14 +34,8 @@ async function createToken(identifier: string, ttlMs: number = PASSWORD_RESET_TT
   const token = crypto.randomUUID();
   const expires = new Date(Date.now() + ttlMs);
 
-  const existing = await prisma.verificationToken.findFirst({
-    where: { identifier },
-  });
-  if (existing) {
-    await prisma.verificationToken.delete({
-      where: { token: existing.token },
-    });
-  }
+  // Tek aktif token: findFirst+delete yarista ikinci satiri birakabiliyordu.
+  await prisma.verificationToken.deleteMany({ where: { identifier } });
 
   return prisma.verificationToken.create({
     data: { identifier, token, expires },

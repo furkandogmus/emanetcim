@@ -7,10 +7,7 @@ import AmbientBackdrop from "@/components/common/AmbientBackdrop";
 
 /** Servis kodunun `Auth` sözlüğündeki karşılığı. */
 const VERIFY_ERROR_KEY: Record<VerifyEmailErrorCode, string> = {
-  INVALID_TOKEN: "verifyEmailInvalidToken",
-  TOKEN_NOT_FOUND: "verifyEmailTokenNotFound",
-  TOKEN_EXPIRED: "verifyEmailTokenExpired",
-  USER_NOT_FOUND: "verifyEmailUserNotFound",
+  INVALID_TOKEN: "verifyEmailLinkInvalid",
   UNKNOWN: "verifyEmailErrorTitle",
 };
 

@@ -133,6 +133,24 @@ model PasswordResetCode {
   @@index([expires])
 }
 
+/// Mobil kodla GIRIS (e-posta ya da SMS OTP). `PasswordResetCode` ile ayni model:
+/// kimlik basina tek aktif kod, yalnizca HMAC'i saklanir, kod ve pencere sayaci tasir.
+/// Eskiden kod `VerificationToken`da duz yaziliyordu ve her istek yeni satir aciyordu.
+model MobileLoginCode {
+  /// Normallestirilmis kimlik: kucuk harf e-posta ya da 10 haneli GSM.
+  identity        String   @id
+  /// HMAC-SHA256(AUTH_SECRET, mobile-login:kimlik:kod), hex.
+  codeHash        String
+  attempts        Int      @default(0)
+  /// Kimlik basina 24 saatlik pencere: yeni kod istemek bunlari SIFIRLAMAZ.
+  windowStartedAt DateTime @default(now())
+  windowFailures  Int      @default(0)
+  expires         DateTime
+  createdAt       DateTime @default(now())
+
+  @@index([expires])
+}
+
 model Shop {
   id                  String              @id @default(uuid())
   ownerId             String

@@ -11,15 +11,8 @@ export const generateVerificationToken = async (email: string) => {
   const token = crypto.randomUUID();
   const expires = new Date(new Date().getTime() + 3600 * 1000); // 1 saat geçerli
 
-  const existingToken = await prisma.verificationToken.findFirst({
-    where: { identifier: email },
-  });
-
-  if (existingToken) {
-    await prisma.verificationToken.delete({
-      where: { token: existingToken.token },
-    });
-  }
+  // Tek aktif token: findFirst+delete yarista ikinci satiri birakabiliyordu.
+  await prisma.verificationToken.deleteMany({ where: { identifier: email } });
 
   const verificationToken = await prisma.verificationToken.create({
     data: {

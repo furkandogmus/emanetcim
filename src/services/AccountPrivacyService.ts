@@ -523,6 +523,7 @@ class AccountPrivacyService {
 
     if (email) {
       await tx.passwordResetCode.deleteMany({ where: { email } });
+      await tx.mobileLoginCode.deleteMany({ where: { identity: email } });
       await tx.verificationToken.deleteMany({
         where: { identifier: { in: [email, `${PASSWORD_RESET_IDENTIFIER_PREFIX}${email}`] } },
       });

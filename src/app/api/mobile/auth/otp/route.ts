@@ -1,7 +1,6 @@
 import { NextResponse } from "next/server";
 import { z } from "zod";
 import prisma from "@/lib/db";
-import { randomInt } from "crypto";
 import logger from "@/lib/logger";
 import { sendMobileOtp } from "@/lib/mail";
 import { isNetgsmConfigured, normalizeTrGsm10, sendNetgsmRestSms } from "@/lib/netgsm";
@@ -10,19 +9,12 @@ import { clientIpFromHeaders } from "@/lib/client-ip";
 import { resolveRequestLocale } from "@/lib/request-locale";
 import { isBlockedSignupEmail } from "@/lib/disposable-emails";
 import { smsLoginEnabled } from "@/lib/sms-login";
+import { issueMobileLoginCode } from "@/services/auth/mobile-login-code";
 
 const schema = z.union([
   z.object({ email: z.string().email() }),
   z.object({ phone: z.string().min(10) }),
 ]);
-
-/* Google Play inceleme ekibi e-postaya erisemez; bu tek hesap sabit kodla girer. */
-function playReviewLogin(identity: string): string | null {
-  const email = process.env.PLAY_REVIEW_EMAIL?.trim().toLowerCase();
-  const code = process.env.PLAY_REVIEW_OTP?.trim();
-  if (!email || !code || !/^\d{6}$/.test(code)) return null;
-  return identity === email ? code : null;
-}
 
 export async function POST(req: Request) {
   const body = await req.json().catch(() => null);
@@ -72,30 +64,14 @@ export async function POST(req: Request) {
     }
   }
 
-  const review = playReviewLogin(normalizedIdentity);
-  const code = review ?? String(randomInt(100000, 999999));
-  const identifier = `mobile:${normalizedIdentity}`;
-
-  await prisma.verificationToken.upsert({
-    where: { identifier_token: { identifier, token: code } },
-    update: { expires: new Date(Date.now() + 5 * 60_000) },
-    create: {
-      identifier,
-      token: code,
-      expires: new Date(Date.now() + 5 * 60_000),
-    },
-  });
-
-  if (review) {
-    logger.info("mobile_otp_play_review_login");
-  } else if (isEmail) {
-    await sendMobileOtp(
-      normalizedIdentity,
-      code,
-      resolveRequestLocale(req.headers.get("accept-language")),
-    );
-  } else {
-    if (isNetgsmConfigured()) {
+  // Tek aktif kod, hash'li saklama, ADMIN reddi ve Play inceleme kodu: `mobile-login-code.ts`.
+  const issued = await issueMobileLoginCode(normalizedIdentity, isEmail ? "email" : "phone");
+  // Inceleme hesabi ve ADMIN: gonderim yok, yanit ayni.
+  if (issued.kind === "deliver") {
+    const { code } = issued;
+    if (isEmail) {
+      await sendMobileOtp(normalizedIdentity, code, resolveRequestLocale(req.headers.get("accept-language")));
+    } else if (isNetgsmConfigured()) {
       const smsResult = await sendNetgsmRestSms({
         to10: normalizedIdentity,
         message: `BagajPark giris kodunuz: ${code}. Kod 5 dakika gecerlidir.`,
@@ -106,11 +82,9 @@ export async function POST(req: Request) {
     } else {
       logger.warn({ phone: normalizedIdentity }, "mobile_otp_sms_skipped_no_netgsm");
     }
-  }
-
-  // Dev mode log
-  if (process.env.NODE_ENV !== "production") {
-    console.log(`[mobile-otp] ${normalizedIdentity} => ${code}`);
+    if (process.env.NODE_ENV !== "production") {
+      console.log(`[mobile-otp] ${normalizedIdentity} => ${code}`);
+    }
   }
 
   return NextResponse.json({ ok: true });

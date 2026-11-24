@@ -1474,7 +1474,8 @@
     "newPasswordInvalid": "Passwort konnte nicht gespeichert werden. Bitte prüfen Sie Ihre Eingabe.",
     "contactSupportHelp": "Falls die E-Mail immer noch nicht angekommen ist, kontaktieren Sie uns unter info@bagajpark.com.",
     "tooManyAttempts": "Zu viele Versuche. Bitte in einer Stunde erneut versuchen.",
-    "registerShopLocation": "Standort des Geschäfts"
+    "registerShopLocation": "Standort des Geschäfts",
+    "verifyEmailLinkInvalid": "Dieser Bestätigungslink ist ungültig oder abgelaufen. Fordere einen neuen an."
   },
   "UserNav": {
     "signIn": "anmelden",
