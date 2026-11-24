@@ -3095,7 +3095,7 @@
     "guestName": "Nom du client",
     "guestPhone": "Téléphone (facultatif)",
     "guestEmail": "E-mail (facultatif)",
-    "contactHint": "Avec un e-mail, la confirmation et le QR sont envoyés par e-mail. Sinon, le client photographie le QR à l'écran.",
+    "contactHint": "Avec un e-mail, le client reçoit un lien de gestion de la réservation. Sinon, il photographie le QR à l'écran.",
     "bagCount": "Nombre de bagages",
     "pickupAt": "Heure de retrait",
     "termsConfirm": "Le client a confirmé avoir lu et accepté les Conditions d'utilisation et la Notice de confidentialité.",
@@ -3132,7 +3132,9 @@
       "SHOP_CLOSED_ON_DATE": "La boutique est fermée à l'heure de retrait. Choisissez une autre heure.",
       "SHOP_PRELAUNCH": "Ce point n'est pas encore ouvert.",
       "AUTH": "Votre session a expiré, reconnectez-vous.",
-      "generic": "Une erreur s'est produite, réessayez."
-    }
+      "generic": "Une erreur s'est produite, réessayez.",
+      "IN_PROGRESS": "Ce formulaire est déjà en cours d'envoi, patientez quelques secondes."
+    },
+    "pickupNameCheck": "Vérifiez le nom avant de rendre les bagages : {name}"
   }
 }

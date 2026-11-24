@@ -13,6 +13,7 @@ const m = vi.hoisted(() => ({
   create: vi.fn(),
   release: vi.fn(),
   cookie: vi.fn(),
+  cookieDelete: vi.fn(),
   auth: vi.fn(),
 }));
 
@@ -79,7 +80,7 @@ vi.mock("@/lib/analytics-server", () => ({ resolveServerSessionId: vi.fn().mockR
 vi.mock("@/lib/revalidate-locales", () => ({ revalidatePathAllLocales: vi.fn() }));
 vi.mock("next/headers", () => ({
   headers: vi.fn().mockResolvedValue({ get: () => "127.0.0.1" }),
-  cookies: vi.fn(async () => ({ get: m.cookie, has: (k: string) => !!m.cookie(k) })),
+  cookies: vi.fn(async () => ({ get: m.cookie, has: (k: string) => !!m.cookie(k), delete: m.cookieDelete })),
 }));
 vi.mock("next-intl/server", () => ({ getLocale: vi.fn().mockResolvedValue("tr") }));
 
@@ -229,8 +230,12 @@ describe("kanal: afis atfi", () => {
     m.cookie.mockImplementation((k: string) => (k === "bp_poster" ? { value: signPosterAttribution(SHOP) } : undefined));
     await createBookingAction(input);
     expect(m.create).toHaveBeenLastCalledWith(expect.objectContaining({ source: "poster", sourceShopId: SHOP }));
+    // Bir okutma bir rezervasyon: basarili rezervasyondan sonra cerez silinir.
+    expect(m.cookieDelete).toHaveBeenCalledWith("bp_poster");
+    m.cookieDelete.mockClear();
     m.cookie.mockImplementation((k: string) => (k === "bp_poster" ? { value: `${SHOP}.${Date.now()}.forged` } : undefined));
     await createBookingAction(input);
     expect(m.create).toHaveBeenLastCalledWith(expect.objectContaining({ source: "web", sourceShopId: null }));
+    expect(m.cookieDelete).not.toHaveBeenCalled();
   });
 });

@@ -2424,7 +2424,7 @@
     "guestName": "Guest name",
     "guestPhone": "Phone (optional)",
     "guestEmail": "Email (optional)",
-    "contactHint": "With an email, the confirmation and QR are emailed. Without one, the guest should photograph the QR on screen.",
+    "contactHint": "With an email, the guest receives a booking management link. Without one, the guest should photograph the QR on screen.",
     "bagCount": "Number of bags",
     "pickupIn": "Picking up in how many hours?",
     "termsConfirm": "The guest confirmed they have read and accept the Terms of Use and the Privacy Notice.",
@@ -2461,7 +2461,9 @@
       "shop_closed_at_time": "The shop is closed at the pick-up time. Choose another time.",
       "insufficient_capacity": "Not enough space at the shop for this period.",
       "too_many_requests": "Too many walk-in bookings. Wait a moment and try again.",
-      "generic": "Something went wrong, please try again."
-    }
+      "generic": "Something went wrong, please try again.",
+      "request_in_progress": "This form is already being submitted, wait a few seconds."
+    },
+    "pickupNameCheck": "Check the name before handing over: {{name}}"
   }
 }

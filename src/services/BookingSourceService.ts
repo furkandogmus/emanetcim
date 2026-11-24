@@ -13,7 +13,8 @@ const COUNTED = { status: { not: "CANCELLED" as const } };
 
 /**
  * Kanal istatistigi ve afis atfinin dukkan dogrulamasi. Sayimlar yalnizca gosterge;
- * bonus/komisyon yok (sahip karari 2026-11-25).
+ * bonus/komisyon yok (sahip karari 2026-11-25). Afis sayisi GUVENILMEZ bir gostergedir
+ * (uygulama atfi imzasiz, cerez kopyalanabilir): paraya baglanacaksa once sunucu nonce'u.
  */
 export class BookingSourceService {
   /**
@@ -25,9 +26,9 @@ export class BookingSourceService {
     try {
       const shop = await prisma.shop.findUnique({
         where: { id: shopId },
-        select: { id: true, isActive: true, isTest: true },
+        select: { id: true, isActive: true, isTest: true, isPrelaunch: true },
       });
-      return shop && shop.isActive && !shop.isTest ? shop.id : null;
+      return shop && shop.isActive && !shop.isTest && !shop.isPrelaunch ? shop.id : null;
     } catch (err) {
       logger.warn({ err }, "poster_attribution_lookup_failed");
       return null;

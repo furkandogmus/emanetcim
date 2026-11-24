@@ -91,6 +91,8 @@ describe("uygulama atfi (imzasiz, dogrulanir)", () => {
     expect(await bookingSourceService.resolvePosterShop(SHOP)).toBeNull();
     h.prisma.shop.findUnique.mockResolvedValueOnce({ id: SHOP, isActive: true, isTest: true });
     expect(await bookingSourceService.resolvePosterShop(SHOP)).toBeNull();
+    h.prisma.shop.findUnique.mockResolvedValueOnce({ id: SHOP, isActive: true, isTest: false, isPrelaunch: true });
+    expect(await bookingSourceService.resolvePosterShop(SHOP)).toBeNull();
     expect(await bookingSourceService.resolvePosterShop(null)).toBeNull();
   });
 });

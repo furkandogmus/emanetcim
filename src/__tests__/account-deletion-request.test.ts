@@ -7,7 +7,7 @@ const m = vi.hoisted(() => {
   const ok = () => vi.fn().mockResolvedValue({});
   const db = {
     user: { findUnique: vi.fn(), count: vi.fn(), update: ok() },
-    booking: { count: vi.fn() },
+    booking: { count: vi.fn(), updateMany: ok() },
     paymentSplit: { count: vi.fn() },
     shop: { findMany: vi.fn(), updateMany: ok() },
     accountDeletionRequest: { findUnique: vi.fn(), findMany: vi.fn(), create: ok(), update: ok(), updateMany: vi.fn() },
@@ -183,6 +183,11 @@ describe("completeDeletionRequest", () => {
     });
     expect(m.db.shop.updateMany).toHaveBeenCalledWith({ where: { ownerId: "p1", isActive: true }, data: { isActive: false } });
     expect(m.db.merchantProfile.deleteMany).toHaveBeenCalledWith({ where: { shop: { ownerId: "p1" } } });
+    // Hesaba bagli rezervasyonlarda tezgahta yazilmis iletisim de silinir.
+    expect(m.db.booking.updateMany).toHaveBeenCalledWith({
+      where: { guestId: "p1" },
+      data: { guestName: null, guestEmail: null, guestPhone: null },
+    });
     expect(m.db.user.update).toHaveBeenCalledWith(
       expect.objectContaining({ where: { id: "p1" }, data: expect.objectContaining({ tokenVersion: { increment: 1 } }) }),
     );

@@ -21,6 +21,7 @@ const KNOWN_ERRORS = new Set([
   "SHOP_CLOSED_ON_DATE",
   "SHOP_PRELAUNCH",
   "AUTH",
+  "IN_PROGRESS",
 ]);
 
 type Success = Extract<WalkInActionResult, { ok: true }>;
@@ -59,6 +60,8 @@ export default function WalkInDialog({
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [done, setDone] = useState<Success | null>(null);
+  // Diyalog basina tek anahtar: ag tekrari ya da cift tiklama ikinci rezervasyon acmaz.
+  const [idempotencyKey] = useState(() => crypto.randomUUID());
 
   async function submit(e: React.FormEvent) {
     e.preventDefault();
@@ -82,6 +85,7 @@ export default function WalkInDialog({
         bagCount: bags,
         pickupAt: pickupDate.toISOString(),
         termsConfirmed: true,
+        idempotencyKey,
       });
       if (!res.ok) {
         setError(t(`errors.${KNOWN_ERRORS.has(res.code) ? res.code : "generic"}`));

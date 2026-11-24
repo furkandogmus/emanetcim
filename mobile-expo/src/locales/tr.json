@@ -2424,7 +2424,7 @@
     "guestName": "Misafirin adı",
     "guestPhone": "Telefon (isteğe bağlı)",
     "guestEmail": "E-posta (isteğe bağlı)",
-    "contactHint": "E-posta verilirse onay ve QR e-postayla gider. Verilmezse QR'ı ekrandan fotoğraflasın.",
+    "contactHint": "E-posta verilirse misafire rezervasyon yönetim bağlantısı gönderilir. Verilmezse QR'ı ekrandan fotoğraflasın.",
     "bagCount": "Valiz sayısı",
     "pickupIn": "Kaç saat sonra alacak?",
     "termsConfirm": "Misafir Kullanım Şartları'nı ve KVKK Aydınlatma Metni'ni okuduğunu ve kabul ettiğini onayladı.",
@@ -2461,7 +2461,9 @@
       "shop_closed_at_time": "Dükkan teslim alma saatinde kapalı. Başka bir saat seç.",
       "insufficient_capacity": "Dükkanda bu süre için yeterli yer yok.",
       "too_many_requests": "Çok fazla kapıdan rezervasyon açıldı. Biraz bekleyip tekrar dene.",
-      "generic": "İşlem tamamlanamadı, tekrar dene."
-    }
+      "generic": "İşlem tamamlanamadı, tekrar dene.",
+      "request_in_progress": "Bu form zaten gönderiliyor, birkaç saniye bekle."
+    },
+    "pickupNameCheck": "Teslim etmeden önce adı kontrol et: {{name}}"
   }
 }

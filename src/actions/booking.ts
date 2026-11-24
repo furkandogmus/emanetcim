@@ -244,6 +244,8 @@ export async function createBookingAction(data: CreateBookingInput) {
 
     revalidatePathAllLocales("/bookings");
     revalidatePathAllLocales("/search");
+    // Bir okutma bir rezervasyon: atif sonraki rezervasyona tasinmaz.
+    if (posterShopId) cookieStore.delete(POSTER_COOKIE);
 
     analyticsService.track({
       name: "booking_created",

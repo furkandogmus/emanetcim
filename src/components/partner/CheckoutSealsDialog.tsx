@@ -13,6 +13,8 @@ interface CheckoutSealsDialogProps {
   busy: boolean;
   onClose: () => void;
   onConfirm: (bookingId: string) => void;
+  /** Teslimde karsilastirilacak ad. */
+  guestName?: string | null;
 }
 
 /**
@@ -28,8 +30,10 @@ export default function CheckoutSealsDialog({
   busy,
   onClose,
   onConfirm,
+  guestName,
 }: CheckoutSealsDialogProps) {
   const t = useTranslations("Partner");
+  const tWalkIn = useTranslations("walkIn");
   const modalRef = useRef<HTMLDivElement>(null);
   useModalBehavior({ open: true, onClose, ref: modalRef });
   const [confirmed, setConfirmed] = useState<number[]>([]);
@@ -63,6 +67,9 @@ export default function CheckoutSealsDialog({
             >
               {t("checkoutSealConfirmEach")}
             </p>
+            {guestName ? (
+              <p className="text-xs font-bold text-amber-700">{tWalkIn("pickupNameCheck", { name: guestName })}</p>
+            ) : null}
           </div>
           <button
             type="button"

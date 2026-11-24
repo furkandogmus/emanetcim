@@ -6,6 +6,7 @@ import { authorizeCron } from "@/lib/internal-api-guard";
 import { purgeOldAppLinkHits } from "@/services/AppLinkService";
 import { purgeStaleMobileLoginCodes } from "@/services/auth/mobile-login-code";
 import { purgeFinishedWalletRecords } from "@/services/WalletPassService";
+import { walkInBookingService } from "@/services/WalkInBookingService";
 
 // Yerel `authorize()` kopyası kaldırıldı (2026-08-22): sır karşılaştırmasını `===`
 // ile yapıyordu, yani sabit zamanlı değildi ve dört uçtaki kopyalardan biriydi.
@@ -54,6 +55,8 @@ async function runCleanup(req: NextRequest): Promise<NextResponse> {
     const deletedAppLinkHits = await purgeOldAppLinkHits(now);
     const deletedLoginCodes = await purgeStaleMobileLoginCodes(now);
     const deletedWalletRecords = await purgeFinishedWalletRecords(now);
+    // KVKK saklama: baglanmamis walk-in satirinda iletisim 180 gun (WalkInBookingService).
+    const purgedWalkInContacts = await walkInBookingService.purgeExpiredGuestContact(now);
 
     logger.info(
       {
@@ -63,6 +66,7 @@ async function runCleanup(req: NextRequest): Promise<NextResponse> {
         deletedAppLinkHits,
         deletedLoginCodes,
         deletedWalletRecords,
+        purgedWalkInContacts,
       },
       "database_cleanup_success"
     );
@@ -76,6 +80,7 @@ async function runCleanup(req: NextRequest): Promise<NextResponse> {
         deletedAppLinkHits,
         deletedLoginCodes,
         deletedWalletRecords,
+        purgedWalkInContacts,
       },
     };
   });

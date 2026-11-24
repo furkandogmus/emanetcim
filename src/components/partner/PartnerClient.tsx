@@ -213,6 +213,7 @@ export default function PartnerClient({
   const [previewLoading, setPreviewLoading] = useState(false);
   const [checkingOutId, setCheckingOutId] = useState<string | null>(null);
   const [checkoutSeals, setCheckoutSeals] = useState<{
+    guestName?: string | null;
     bookingId: string;
     seals: CheckoutSeal[];
   } | null>(null);
@@ -326,14 +327,16 @@ export default function PartnerClient({
       */
       const res = await getPartnerBookingSealsAction(bookingId).catch(() => null);
       if (res?.success && res.seals.length > 0) {
-        setCheckoutSeals({ bookingId, seals: res.seals });
+        setCheckoutSeals({ bookingId, seals: res.seals, guestName: res.guestName });
         return;
       }
-      askConfirm(t("confirmCheckout"), async () => {
+      const name = res?.success ? res.guestName : null;
+      const message = name ? `${t("confirmCheckout")} ${tWalkIn("pickupNameCheck", { name })}` : t("confirmCheckout");
+      askConfirm(message, async () => {
         await executeCheckout(bookingId);
       });
     },
-    [askConfirm, executeCheckout, t]
+    [askConfirm, executeCheckout, t, tWalkIn]
   );
 
   const runCheckoutFromUrl = useCallback(
@@ -454,6 +457,7 @@ export default function PartnerClient({
         <CheckoutSealsDialog
           bookingId={checkoutSeals.bookingId}
           seals={checkoutSeals.seals}
+          guestName={checkoutSeals.guestName}
           busy={checkingOutId === checkoutSeals.bookingId}
           onClose={closeCheckoutSeals}
           onConfirm={(id) => {

@@ -9,7 +9,9 @@ const h = vi.hoisted(() => ({
   prisma: {
     shop: { findUnique: vi.fn() },
     shopMember: { findUnique: vi.fn() },
+    booking: { findFirst: vi.fn(), updateMany: vi.fn() },
   },
+  claimOnce: vi.fn(),
   rateLimit: vi.fn(),
   rules: { maxBagsPerSlot: 50, insuranceFeeTry: 0, defaultPricePerDay: 250, bagMultipliers: { S: 1, M: 1, XL: 1 }, requireSealsOnCheckIn: false },
   create: vi.fn(),
@@ -19,21 +21,26 @@ const h = vi.hoisted(() => ({
 }));
 
 vi.mock("@/lib/db", () => ({ default: h.prisma }));
-vi.mock("@/lib/rate-limit", () => ({ rateLimit: h.rateLimit }));
+vi.mock("@/lib/rate-limit", () => ({ rateLimit: h.rateLimit, claimOnce: h.claimOnce }));
 vi.mock("@/lib/platform-settings", async () => {
   const { DEFAULT_PRICING_RULES } = await import("@/lib/pricing-rules");
   return { getPricingRules: vi.fn(async () => ({ ...DEFAULT_PRICING_RULES, ...h.rules })) };
 });
 vi.mock("@/services/booking/create", () => ({ createWalkInBooking: h.create }));
 vi.mock("@/services/BookingService", () => ({ bookingService: { checkIn: h.checkIn } }));
-vi.mock("@/services/NotificationService", () => ({ notificationService: { notifyBookingSuccess: h.notify } }));
+vi.mock("@/services/NotificationService", () => ({ notificationService: { notifyWalkInBookingCreated: h.notify } }));
 vi.mock("@/lib/logger", () => ({ default: { warn: vi.fn(), error: vi.fn(), info: vi.fn() } }));
 vi.mock("@/lib/mobile-auth", async (orig) => ({
   ...(await orig<typeof import("@/lib/mobile-auth")>()),
   requireMobileUser: h.requireMobileUser,
 }));
 
-import { walkInBookingService, WALK_IN_OPERATOR_LIMIT, WALK_IN_SHOP_LIMIT } from "@/services/WalkInBookingService";
+import {
+  walkInBookingService,
+  WALK_IN_EMAIL_LIMIT,
+  WALK_IN_OPERATOR_LIMIT,
+  WALK_IN_SHOP_LIMIT,
+} from "@/services/WalkInBookingService";
 import { BookingCapacityExceededError, BookingShopClosedError } from "@/services/booking/errors";
 import { POST } from "@/app/api/mobile/partner/walk-in/route";
 
@@ -61,6 +68,8 @@ beforeEach(() => {
   vi.clearAllMocks();
   h.rules.requireSealsOnCheckIn = false;
   h.rateLimit.mockResolvedValue(true);
+  h.claimOnce.mockResolvedValue(true);
+  h.prisma.booking.findFirst.mockResolvedValue(null);
   h.prisma.shop.findUnique.mockImplementation(async ({ select }: { select: Record<string, boolean> }) =>
     select.isActive
       ? { id: SHOP_ID, isActive: true, isPrelaunch: false, pricePerDay: 250 }
@@ -187,15 +196,23 @@ describe("teslim alma ve bildirim", () => {
     expect(r).toMatchObject({ ok: true, emailQueued: true });
     // Onceki testin atesle-unut gonderimi gec dusebilir; bu cagri dile gore aranir.
     await vi.waitFor(() =>
-      expect(h.notify).toHaveBeenCalledWith(
-        "misafir@example.com",
-        expect.any(String),
-        500,
-        "en",
-        { ticketUrl: expect.stringMatching(/\/en\/bookings\/manage\//) },
-      ),
+      expect(h.notify).toHaveBeenCalledWith({
+        email: "misafir@example.com",
+        bookingId: expect.any(String),
+        totalPrice: 500,
+        locale: "en",
+        manageUrl: expect.stringMatching(/\/en\/bookings\/manage\//),
+      }),
     );
     expect(h.create.mock.calls[0][1].guestEmail).toBe("misafir@example.com");
+  });
+
+  it("ayni adrese gunluk e-posta siniri: rezervasyon acilir, e-posta atlanir", async () => {
+    h.rateLimit.mockImplementation(async (k: string) => !k.startsWith("walkin_email:"));
+    const r = await walkInBookingService.create(OWNER, input({ guestEmail: "spam@example.com" }));
+    expect(r).toMatchObject({ ok: true, emailQueued: false, qrCodeToken: "qr-token" });
+    expect(h.create).toHaveBeenCalled();
+    expect(h.rateLimit).toHaveBeenCalledWith("walkin_email:spam@example.com", WALK_IN_EMAIL_LIMIT.max, WALK_IN_EMAIL_LIMIT.windowMs);
   });
 
   it("iletisimsiz misafir: e-posta yok, kod ve QR doner", async () => {
@@ -231,5 +248,62 @@ describe("mobil uc", () => {
     h.requireMobileUser.mockResolvedValue({ user: OWNER });
     h.rateLimit.mockResolvedValue(false);
     expect((await POST(req(input())))!.status).toBe(429);
+  });
+});
+
+describe("tekrar (idempotency)", () => {
+  const KEY = "form-0123456789";
+
+  it("ayni anahtar kayitli rezervasyonu doner, ikinci kez yazmaz ve sinir tuketmez", async () => {
+    h.prisma.booking.findFirst.mockResolvedValue({
+      id: "b0b0b0b0-1111-2222-3333-444455556666",
+      status: "CHECKED_IN",
+      qrCodeToken: "qr-token",
+      totalPrice: 500,
+      checkInTime: new Date(),
+      checkOutTime: new Date(Date.now() + 3600_000),
+    });
+    const r = await walkInBookingService.create(STAFF, input({ idempotencyKey: KEY }));
+    expect(r).toMatchObject({ ok: true, checkedIn: true, needsCheckIn: false, emailQueued: false });
+    expect(h.create).not.toHaveBeenCalled();
+    expect(h.rateLimit).not.toHaveBeenCalled();
+    expect(h.prisma.booking.findFirst.mock.calls[0][0].where).toEqual({ shopId: SHOP_ID, source: "walk_in", idempotencyKey: KEY });
+  });
+
+  it("esanli ikinci istek: kilit alinamaz, kayit yoksa IN_PROGRESS (409)", async () => {
+    h.claimOnce.mockResolvedValue(false);
+    expect(await walkInBookingService.create(STAFF, input({ idempotencyKey: KEY }))).toEqual({ ok: false, code: "IN_PROGRESS" });
+    h.requireMobileUser.mockResolvedValue({ user: STAFF });
+    const res = (await POST(
+      new NextRequest("https://bagajpark.com/api/mobile/partner/walk-in", {
+        method: "POST",
+        headers: { authorization: "Bearer t", "content-type": "application/json", "idempotency-key": KEY },
+        body: JSON.stringify(input()),
+      }),
+    ))!;
+    expect(res.status).toBe(409);
+    expect(h.claimOnce).toHaveBeenLastCalledWith(`walkin_idem:${SHOP_ID}:${KEY}`, expect.any(Number));
+  });
+
+  it("ilk istek anahtari rezervasyona yazar", async () => {
+    await walkInBookingService.create(STAFF, input({ idempotencyKey: KEY }));
+    expect(h.create.mock.calls[0][0].idempotencyKey).toBe(KEY);
+  });
+
+  it("bozuk anahtar reddedilir", async () => {
+    expect(await walkInBookingService.create(STAFF, input({ idempotencyKey: "x" }))).toEqual({ ok: false, code: "INVALID_INPUT" });
+  });
+});
+
+describe("saklama (KVKK)", () => {
+  it("baglanmamis walk-in satirinda iletisim 180 gun sonra bosaltilir", async () => {
+    h.prisma.booking.updateMany.mockResolvedValue({ count: 2 });
+    const now = new Date("2026-11-25T00:00:00Z");
+    expect(await walkInBookingService.purgeExpiredGuestContact(now)).toBe(2);
+    const arg = h.prisma.booking.updateMany.mock.calls[0][0];
+    expect(arg.data).toEqual({ guestName: null, guestEmail: null, guestPhone: null });
+    expect(arg.where).toMatchObject({ source: "walk_in", guestId: null });
+    const cutoff = arg.where.AND[0].OR[0].checkedOutAt.lt as Date;
+    expect(cutoff.toISOString()).toBe("2026-05-29T00:00:00.000Z");
   });
 });

@@ -720,8 +720,6 @@ export class NotificationService implements INotificationService {
     bookingId: string,
     totalPrice: number,
     locale: string = "tr",
-    /** Hesapsiz (kapidan gelen) misafir: oturumlu bilet yerine yonetim bagi. */
-    opts: { ticketUrl?: string } = {},
   ): Promise<void> {
     /*
       KOK ADRES ORTAK YARDIMCIDAN (2026-08-31). Burasi yedek olarak URETIM alan
@@ -731,7 +729,7 @@ export class NotificationService implements INotificationService {
     */
     const domain = getSiteBaseUrl();
     // Yeni rezervasyon hep hesapli (2026-11-23): bilet sayfasi oturumla acilir.
-    const bookingUrl = opts.ticketUrl ?? `${domain}/${locale}/bookings/${bookingId}`;
+    const bookingUrl = `${domain}/${locale}/bookings/${bookingId}`;
     const shortId = bookingShortCode(bookingId);
     /* Eskiden ALTI dilin tutari da her gonderimde hesaplaniyordu; besi bosa. */
     const price = formatTryCurrency(Number(totalPrice), bcp47ForUiLocale(locale));
@@ -847,6 +845,88 @@ export class NotificationService implements INotificationService {
     if (emailOrPlaceholder.includes("@")) {
       await this.sendEmail(emailOrPlaceholder, content.subject, content.body, bookingId, html);
     }
+  }
+
+  /**
+   * Kapidan gelen misafirin onayi (2026-11-25). Normal onaydan farki: misafir zaten
+   * dukkanda ("gelince odersiniz" yanlis olur) ve hesabi yok; bag yonetim baglantisidir.
+   * Bag teslim icin yetmez: operator teslimde adi karsilastirir.
+   */
+  async notifyWalkInBookingCreated(params: {
+    email: string;
+    bookingId: string;
+    totalPrice: number;
+    manageUrl: string;
+    locale?: string;
+  }): Promise<void> {
+    const locale = params.locale ?? "tr";
+    const shortId = bookingShortCode(params.bookingId);
+    const price = formatTryCurrency(Number(params.totalPrice), bcp47ForUiLocale(locale));
+    const url = params.manageUrl;
+    const content = pickLocale({
+      tr: {
+        subject: `BagajPark: Valiziniz teslim alındı 🎒`,
+        heading: `Valiziniz teslim alındı`,
+        p1: `Rezervasyonunuz dükkanda açıldı. Ödeme, anlaştığınız gibi dükkan tezgahında yapılır. Rezervasyonunuzu aşağıdaki bağlantıdan görüntüleyebilirsiniz; teslim alırken adınız kontrol edilir.`,
+        row1: `Rezervasyon Kodu`, row2: `Toplam Tutar`, cta: `Rezervasyonu Yönet`,
+        footer: `BagajPark — Güvenli Bagaj Emaneti`,
+      },
+      en: {
+        subject: `BagajPark: Your bags are checked in 🎒`,
+        heading: `Your bags are checked in`,
+        p1: `Your booking was created at the shop. Payment is made at the shop counter as agreed. You can view your booking with the link below; your name is checked at pick-up.`,
+        row1: `Booking code`, row2: `Total`, cta: `Manage booking`,
+        footer: `BagajPark — Secure Luggage Storage`,
+      },
+      de: {
+        subject: `BagajPark: Ihr Gepäck wurde angenommen 🎒`,
+        heading: `Ihr Gepäck wurde angenommen`,
+        p1: `Ihre Buchung wurde im Geschäft angelegt. Bezahlt wird wie vereinbart am Tresen des Geschäfts. Über den Link unten sehen Sie Ihre Buchung; bei der Abholung wird Ihr Name geprüft.`,
+        row1: `Buchungscode`, row2: `Gesamtbetrag`, cta: `Buchung verwalten`,
+        footer: `BagajPark — Sichere Gepäckaufbewahrung`,
+      },
+      fr: {
+        subject: `BagajPark : vos bagages sont pris en charge 🎒`,
+        heading: `Vos bagages sont pris en charge`,
+        p1: `Votre réservation a été créée à la boutique. Le paiement se fait au comptoir de la boutique, comme convenu. Le lien ci-dessous affiche votre réservation ; votre nom est vérifié au retrait.`,
+        row1: `Code de réservation`, row2: `Montant total`, cta: `Gérer la réservation`,
+        footer: `BagajPark — Consigne à bagages sécurisée`,
+      },
+      ja: {
+        subject: `BagajPark: お荷物をお預かりしました 🎒`,
+        heading: `お荷物をお預かりしました`,
+        p1: `店舗でご予約を作成しました。お支払いはお約束どおり店舗のカウンターで行います。下のリンクから予約を確認できます。受け取り時にお名前を確認します。`,
+        row1: `予約コード`, row2: `合計金額`, cta: `予約を管理`,
+        footer: `BagajPark — 安全な荷物預かりサービス`,
+      },
+      fa: {
+        subject: `BagajPark: چمدان شما تحویل گرفته شد 🎒`,
+        heading: `چمدان شما تحویل گرفته شد`,
+        p1: `رزرو شما در فروشگاه ثبت شد. پرداخت طبق توافق در پیشخوان فروشگاه انجام می‌شود. رزرو خود را از پیوند زیر ببینید؛ هنگام تحویل، نام شما بررسی می‌شود.`,
+        row1: `کد رزرو`, row2: `مبلغ کل`, cta: `مدیریت رزرو`,
+        footer: `BagajPark — نگهداری امن چمدان`,
+      },
+      ru: {
+        subject: `BagajPark: ваш багаж принят 🎒`,
+        heading: `Ваш багаж принят`,
+        p1: `Бронь оформлена в магазине. Оплата производится у стойки магазина, как договорились. Бронь можно посмотреть по ссылке ниже; при выдаче проверяется ваше имя.`,
+        row1: `Код брони`, row2: `Итого`, cta: `Управлять бронью`,
+        footer: `BagajPark — надёжное хранение багажа`,
+      },
+    }, locale);
+    const body = `${content.heading}\n\n${content.p1}\n\n${content.row1}: ${shortId}\n${content.row2}: ${price}\n\n${url}`;
+    const html = renderEmailHtml({
+      locale,
+      heading: content.heading,
+      paragraphs: [content.p1],
+      rows: [
+        { label: content.row1, value: shortId },
+        { label: content.row2, value: price },
+      ],
+      cta: { href: url, label: content.cta, variant: "button" },
+      footer: content.footer,
+    });
+    await this.sendEmail(params.email, content.subject, body, params.bookingId, html);
   }
 
   /** Partner rezervasyonu onayladığında misafire onay e-postası gönderir. */

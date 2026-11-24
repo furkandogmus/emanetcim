@@ -188,7 +188,10 @@ export function PartnerBookingActions({ booking }: { booking: BookingDetail }) {
     );
   }
   function confirmCheckOut() {
-    Alert.alert(t("partner.confirmCheckOutTitle"), t("partner.confirmCheckOutBody", { count: bagCount }), [
+    // Teslimde ad karsilastirilir: yonetim bagi ya da QR fotografi tek basina kimlik degil.
+    const body = t("partner.confirmCheckOutBody", { count: bagCount });
+    const nameCheck = booking.guestName ? `\n\n${t("walkIn.pickupNameCheck", { name: booking.guestName })}` : "";
+    Alert.alert(t("partner.confirmCheckOutTitle"), body + nameCheck, [
       { text: t("common.cancel"), style: "cancel" },
       { text: t("partner.confirmYes"), onPress: () => checkOut.mutate() },
     ]);
@@ -262,6 +265,7 @@ export function PartnerBookingActions({ booking }: { booking: BookingDetail }) {
         <AppText variant="caption">
           {seals.length ? t("partner.checkOutSealsHint") : t("partner.checkOutHint")}
         </AppText>
+        {booking.guestName ? <Banner tone="warning" body={t("walkIn.pickupNameCheck", { name: booking.guestName })} /> : null}
         {seals.map((s) => {
           const state = sealState[s.sealNumber];
           const on = state === "intact";
