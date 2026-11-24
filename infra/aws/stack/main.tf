@@ -454,9 +454,15 @@ resource "aws_iam_role_policy" "app_media_write" {
     Version = "2012-10-17"
     Statement = [
       {
-        Effect   = "Allow"
-        Action   = ["s3:PutObject", "s3:DeleteObject"]
-        Resource = "${aws_s3_bucket.media.arn}/shops/*"
+        Effect = "Allow"
+        Action = ["s3:PutObject", "s3:DeleteObject"]
+        # seals/ (muhur fotografi) ve team-issues/ (ekip sorunu) kodda vardi ama yetkisizdi.
+        # Ikisi de herkese acik adresle okunur; kova politikasi yalniz shops/*'i acar.
+        Resource = [
+          "${aws_s3_bucket.media.arn}/shops/*",
+          "${aws_s3_bucket.media.arn}/seals/*",
+          "${aws_s3_bucket.media.arn}/team-issues/*",
+        ]
       },
       {
         # Valiz durumu fotograflari OZEL: kova politikasi bu oneki acmaz, okuma yalniz
@@ -470,8 +476,8 @@ resource "aws_iam_role_policy" "app_media_write" {
   })
 }
 
-# Saklama isi (`bag-photo-retention`) 30 gunde siler; bu kural is durursa ya da satiri
-# silinmis yetim nesne kalirsa emniyet agi. Acik itirazin kaniti en fazla ~120 gun tutulur.
+# Asil silme gunluk `bag-photo-retention` isi (acik itirazda saklar). Bu kural yalniz is
+# durursa ya da satiri silinmis yetim nesne kalirsa emniyet agi; 365 gunden uzun acik itiraz kanitini da siler.
 resource "aws_s3_bucket_lifecycle_configuration" "media" {
   bucket = aws_s3_bucket.media.id
 
@@ -482,7 +488,7 @@ resource "aws_s3_bucket_lifecycle_configuration" "media" {
       prefix = "bag-photos/"
     }
     expiration {
-      days = 120
+      days = 365
     }
     abort_incomplete_multipart_upload {
       days_after_initiation = 1
