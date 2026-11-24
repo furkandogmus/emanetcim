@@ -22,6 +22,7 @@ type ForeignCurrency = keyof typeof DISPLAY_FX_TRY_PER_UNIT;
 const FOREIGN_CURRENCY_BY_LOCALE: Record<string, ForeignCurrency> = {
   de: "EUR",
   fr: "EUR",
+  ru: "EUR",
   en: "USD",
   ja: "USD",
   fa: "USD",

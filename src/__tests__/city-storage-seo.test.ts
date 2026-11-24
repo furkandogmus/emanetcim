@@ -59,7 +59,7 @@ describe("sehir sayfasi dizin kurali", () => {
 describe("kaldirilan dil yonlendirmesi", () => {
   it("eski dil onekini /en karsiligina cevirir", () => {
     expect(retiredLocaleRedirectPath("/ko/luggage-storage/berlin")).toBe("/en/luggage-storage/berlin");
-    expect(retiredLocaleRedirectPath("/ru")).toBe("/en");
+    expect(retiredLocaleRedirectPath("/pl")).toBe("/en");
     expect(retiredLocaleRedirectPath("/es/blog/istanbul-valiz-emanet-rehberi")).toBe(
       "/en/blog/istanbul-valiz-emanet-rehberi",
     );

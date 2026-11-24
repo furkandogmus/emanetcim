@@ -79,6 +79,6 @@ describe("araci basvurusu", () => {
 describe("sitePage", () => {
   it("kullanicinin dili; sitede olmayan dil Ingilizceye duser", () => {
     expect(sitePage("cancellation", "de")).toBe(`${SITE_ORIGIN}/de/cancellation`);
-    expect(sitePage("esnaf", "ru")).toBe(`${SITE_ORIGIN}/en/esnaf`);
+    expect(sitePage("esnaf", "ru")).toBe(`${SITE_ORIGIN}/ru/esnaf`);
   });
 });

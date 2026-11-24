@@ -127,6 +127,7 @@ export default async function GuestPage({ params }: { params: Promise<{ locale: 
     fr: "fr-FR",
     ja: "ja-JP",
     fa: "fa-IR",
+    ru: "ru-RU",
   };
   const nf = new Intl.NumberFormat(nfLocale[locale] ?? "en-US");
   const faqItems = [

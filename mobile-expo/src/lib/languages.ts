@@ -8,8 +8,7 @@ export const APP_LANGUAGES = [
   { value: "tr", label: "Türkçe", intl: "tr-TR", site: "tr" },
   { value: "en", label: "English", intl: "en-GB", site: "en" },
   { value: "de", label: "Deutsch", intl: "de-DE", site: "de" },
-  // Web ve e-posta Rusca tasimiyor: site baglantilari ve sunucu Ingilizceye duser.
-  { value: "ru", label: "Русский", intl: "ru-RU", site: "en" },
+  { value: "ru", label: "Русский", intl: "ru-RU", site: "ru" },
 ] as const;
 
 export type AppLanguage = (typeof APP_LANGUAGES)[number]["value"];

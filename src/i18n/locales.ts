@@ -11,7 +11,7 @@
  * ihtiyacı olan sunucu kodu doğrudan buradan okur. Tek kaynak korunur,
  * navigasyon bağımlılığı yayılmaz.
  */
-export const APP_LOCALES = ["tr", "en", "de", "fr", "ja", "fa"] as const;
+export const APP_LOCALES = ["tr", "en", "de", "fr", "ja", "fa", "ru"] as const;
 
 export type AppLocale = (typeof APP_LOCALES)[number];
 

@@ -10,6 +10,7 @@ const UI_LOCALES = [
   "fr",
   "ja",
   "fa",
+  "ru",
 ] as const;
 
 type UiLocale = (typeof UI_LOCALES)[number];

@@ -26,6 +26,7 @@ const UI_LOCALE_TO_BCP47: Record<string, string> = {
   fr: "fr-FR",
   fa: "fa-IR",
   ja: "ja-JP",
+  ru: "ru-RU",
 };
 
 export function bcp47ForUiLocale(locale: string): string {

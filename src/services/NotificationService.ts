@@ -785,6 +785,19 @@ export class NotificationService implements INotificationService {
         playAlt: `دریافت از Google Play`,
         footer: `BagajPark — نگهداری امن چمدان`,
       },
+      ru: {
+        subject: `BagajPark: бронирование подтверждено! 🎒`,
+        body: `Здравствуйте!\n\nВаше бронирование создано.\n\nКод бронирования: ${shortId}\nИтого: ${price}\n\nОплатить можно в магазине по прибытии.\n\nВаш билет: ${bookingUrl}`,
+        heading: `Бронирование подтверждено! 🎒`,
+        p1: `Ваше бронирование создано. Оплатить можно в магазине по прибытии.`,
+        row1: `Код бронирования`,
+        row2: `Итого`,
+        cta: `Открыть билет`,
+        appRow: `Скачайте приложение`,
+        appStoreAlt: `Загрузите в App Store`,
+        playAlt: `Доступно в Google Play`,
+        footer: `BagajPark — надёжное хранение багажа`,
+      },
     }, locale);
 
     const html = renderEmailHtml({
@@ -895,6 +908,15 @@ export class NotificationService implements INotificationService {
         cta: `دیدن نقطه`,
         footer: `BagajPark — نگهداری امن چمدان`,
       },
+      ru: {
+        subject: `Мы сообщим вам, когда ${shopName} откроется 🎒`,
+        body: `Здравствуйте!\n\nМы получили вашу просьбу сообщить об открытии ${shopName}. Вы узнаете об этом в день запуска.\n\nПункт: ${shopUrl}`,
+        heading: `Запрос получен 🎒`,
+        p1: `Мы сохранили вашу просьбу сообщить об открытии ${shopNameHtml}.`,
+        p2: `Этот пункт пока не принимает бронирования. Вы первыми узнаете о его открытии, больше ничего делать не нужно.`,
+        cta: `Посмотреть пункт`,
+        footer: `BagajPark — надёжное хранение багажа`,
+      },
     }, locale);
 
     const html = renderEmailHtml({
@@ -994,6 +1016,15 @@ export class NotificationService implements INotificationService {
         cta: `رزرو کنید`,
         footer: `BagajPark — نگهداری امن چمدان`,
       },
+      ru: {
+        subject: `${shopName} открыт: можно оставить багаж 🎒`,
+        body: `Здравствуйте!\n\n${shopName} начал работу. Вы просили сообщить в день открытия, и вот этот день настал.\n\nЗабронировать: ${shopUrl}`,
+        heading: `${shopNameHtml} открыт 🎒`,
+        p1: `В этом пункте начался приём багажа на хранение. Некоторое время назад вы просили сообщить об открытии, и вот этот день настал.`,
+        p2: `Теперь вы можете забронировать сдачу багажа.`,
+        cta: `Забронировать`,
+        footer: `BagajPark — надёжное хранение багажа`,
+      },
     }, locale);
 
     const html = renderEmailHtml({
@@ -1071,6 +1102,14 @@ export class NotificationService implements INotificationService {
         p1: `<strong>${shopNameHtml}</strong> درخواست رزرو شما را تأیید کرد.`,
         cta: `مشاهده رزرو`,
         footer: `کد رزرو: ${shortId}`,
+      },
+      ru: {
+        subject: `BagajPark: запрос одобрен 🎒`,
+        body: `Здравствуйте!\n\n${shopName} одобрил ваш запрос на бронирование.\n\nПодробности бронирования: ${bookingUrl}\n\nКод бронирования: ${shortId}`,
+        heading: `Запрос одобрен! 🎒`,
+        p1: `<strong>${shopNameHtml}</strong> одобрил ваш запрос на бронирование.`,
+        cta: `Открыть бронирование`,
+        footer: `Код бронирования: ${shortId}`,
       },
     }, locale);
 
@@ -1155,6 +1194,15 @@ export class NotificationService implements INotificationService {
         p2: `سایر فروشگاه‌ها را {link} مشاهده کنید.`,
         p2Link: `اینجا`,
         footer: `کد رزرو: ${shortId}`,
+      },
+      ru: {
+        subject: `BagajPark: запрос на бронирование отклонён`,
+        body: `Здравствуйте!\n\nК сожалению, ваш запрос на бронирование в ${shopName} (код бронирования: ${shortId}) отклонён.\n\nДругие пункты хранения можно найти на bagajpark.com.`,
+        heading: `Запрос на бронирование отклонён`,
+        p1: `К сожалению, ваш запрос в <strong>${shopNameHtml}</strong> отклонён.`,
+        p2: `Другие пункты хранения можно найти {link}.`,
+        p2Link: `здесь`,
+        footer: `Код бронирования: ${shortId}`,
       },
     }, locale);
 
@@ -1297,6 +1345,20 @@ export class NotificationService implements INotificationService {
         cta: "یافتن مکان دیگر",
         footer: `کد رزرو: ${shortId}`,
       },
+      ru: {
+        subject: "BagajPark: ваше бронирование отменено",
+        heading: "Ваше бронирование отменено",
+        noShowSubject: "BagajPark: мы вас не дождались",
+        noShowHeading: "Мы вас не дождались",
+        guest: `Вы отменили бронирование в ${shopHtml}. Если вы уже оплатили, возврат оформлен.`,
+        partner: `${shopHtml} отменил ваше бронирование.`,
+        admin: `Ваше бронирование в ${shopHtml} отменено службой поддержки BagajPark. Если вы уже оплатили, возврат оформлен.`,
+        noShow: `Ваше бронирование в ${shopHtml} закрыто, так как вы не пришли в забронированное время. Если планы изменились, ничего страшного: вы можете забронировать снова в любое время.`,
+        reasonLabel: "Причина",
+        reasons: { guest_request: "По вашей просьбе", shop_closed: "В это время магазин закрыт", capacity: "В магазине не осталось мест", other: "Другое" },
+        cta: "Найти другой пункт",
+        footer: `Код бронирования: ${shortId}`,
+      },
     }, locale);
 
     // HTML ve duz metin ayri kurulur: duz metni HTML'den etiket silerek uretmek
@@ -1398,6 +1460,14 @@ export class NotificationService implements INotificationService {
         checkoutP: `رزرو ${shortId} توسط مدیر BagajPark به عنوان تحویل‌شده بسته شد. هزینه تأخیر دریافت نشد.`,
         noteLabel: "توضیح",
         footer: `کد رزرو: ${shortId}`,
+      },
+      ru: {
+        cancelledTitle: "Бронирование отменено администратором",
+        checkoutTitle: "Выдача по бронированию оформлена администратором",
+        cancelledP: `Бронирование ${shortId} отменено администратором BagajPark; места освобождены.`,
+        checkoutP: `Бронирование ${shortId} закрыто администратором BagajPark как выданное. Плата за опоздание не начислялась.`,
+        noteLabel: "Примечание",
+        footer: `Код бронирования: ${shortId}`,
       },
     }, "tr");
 
@@ -1834,6 +1904,19 @@ export class NotificationService implements INotificationService {
         cta: "مشاهده شکایت",
         footer: `کد رزرو: ${shortId}`,
       },
+      ru: {
+        subject: { IN_REVIEW: "BagajPark: ваша претензия на рассмотрении", RESOLVED: "BagajPark: ваша претензия урегулирована", CLOSED: "BagajPark: ваша претензия закрыта" },
+        heading: { IN_REVIEW: "Ваша претензия на рассмотрении", RESOLVED: "Ваша претензия урегулирована", CLOSED: "Ваша претензия закрыта" },
+        body: {
+          IN_REVIEW: `Наша команда рассматривает претензию, поданную вами по бронированию в ${shopHtml}. Мы сообщим, когда она будет урегулирована.`,
+          RESOLVED: `Претензия, поданная вами по бронированию в ${shopHtml}, отмечена как урегулированная.`,
+          CLOSED: `Претензия, поданная вами по бронированию в ${shopHtml}, закрыта.`,
+        },
+        statusLabel: "Статус",
+        status: { IN_REVIEW: "На рассмотрении", RESOLVED: "Урегулирована", CLOSED: "Закрыта" },
+        cta: "Открыть претензию",
+        footer: `Код бронирования: ${shortId}`,
+      },
     }, locale);
 
     const bodyHtml = c.body[status];
@@ -2026,6 +2109,7 @@ export class NotificationService implements INotificationService {
         fr: { subject: "Vos bagages sont en sécurité ! 🔒", body: "Vos bagages ont été déposés." },
         ja: { subject: "お荷物は安全です！🔒", body: "お荷物をお預かりしました。" },
         fa: { subject: "چمدان شما امن است! 🔒", body: "چمدان شما تحویل گرفته شد." },
+        ru: { subject: "Ваш багаж в безопасности! 🔒", body: "Ваш багаж принят на хранение." },
       }[locale] ?? { subject: "Valiziniz Güvende! 🔒", body: "Valiziniz teslim alındı." };
 
     const sealCopy =
@@ -2065,6 +2149,12 @@ export class NotificationService implements INotificationService {
           sealWord: "مهر",
           intro: "شماره‌های سریال مهر اختصاص‌یافته:",
           outro: "هنگام تحویل ثبت شد. هنگام تحویل‌گیری با چمدان‌های خود مطابقت دهید.",
+        },
+        ru: {
+          bagLabel: (i: number, size: string) => `Место ${i} (${size})`,
+          sealWord: "пломба",
+          intro: "Присвоенные серийные номера пломб:",
+          outro: "Записано при сдаче багажа. Сверьте их со своим багажом при получении.",
         },
       }[locale] ?? {
         bagLabel: (i: number, size: string) => `Bag ${i} (${size})`,
@@ -2117,6 +2207,7 @@ export class NotificationService implements INotificationService {
       fr: { subject: "Bon voyage ! 👋", body: "Vos bagages vous ont été remis." },
       ja: { subject: "良い旅を！👋", body: "お荷物をお渡ししました。" },
       fa: { subject: "سفر خوبی داشته باشید! 👋", body: "چمدان شما به شما تحویل داده شد." },
+      ru: { subject: "Счастливого пути! 👋", body: "Ваш багаж выдан вам." },
     }[locale] ?? { subject: "İyi Yolculuklar! 👋", body: "Valiziniz size teslim edildi." };
 
     if (email.includes("@")) {
@@ -2254,6 +2345,21 @@ export class NotificationService implements INotificationService {
               p1: `زمان دریافت چمدان شما از __SHOP__ نزدیک است. دریافت با تأخیر ممکن است هزینه اضافی داشته باشد.`,
               row1: "مکان",
               row2: "دریافت",
+            },
+        ru: girisMi
+          ? {
+              subject: "BagajPark: скоро время сдачи багажа 🎒",
+              heading: "Скоро время сдачи багажа 🎒",
+              p1: `Скоро пора сдать багаж в __SHOP__. Не забудьте показать QR-код.`,
+              row1: "Пункт",
+              row2: "Сдача",
+            }
+          : {
+              subject: "BagajPark: скоро время забрать багаж 🔔",
+              heading: "Скоро время забрать багаж 🔔",
+              p1: `Скоро пора забрать багаж из __SHOP__. За позднее получение может взиматься дополнительная плата.`,
+              row1: "Пункт",
+              row2: "Получение",
             },
       },
       locale,
@@ -2413,6 +2519,17 @@ export class NotificationService implements INotificationService {
           rowPlanned: "زمان تحویل برنامه‌ریزی‌شده",
           open247: "شبانه‌روزی",
           cta: "مشاهده رزرو",
+        },
+        ru: {
+          subject: "BagajPark: ваш багаж всё ещё в магазине 🧳",
+          heading: "Ваш багаж ждёт вас 🧳",
+          p1: `Ваш багаж по-прежнему в безопасности в __SHOP__. Заберите его, когда вам удобно. Телефон и WhatsApp магазина указаны на странице бронирования.`,
+          rowShop: "Пункт",
+          rowAddress: "Адрес",
+          rowHours: "Часы работы",
+          rowPlanned: "Плановое получение",
+          open247: "Круглосуточно",
+          cta: "Открыть бронирование",
         },
       },
       locale,
@@ -2577,6 +2694,19 @@ export class NotificationService implements INotificationService {
           ctaBooking: "مشاهده رزرو",
           ctaSearch: "رزرو جدید",
         },
+        ru: {
+          reminderSubject: "BagajPark: время сдачи багажа прошло",
+          reminderHeading: "Время сдачи багажа прошло",
+          reminder: "Ваше бронирование в __SHOP__ автоматически закроется в __TIME__. Если вы уже в пути, позвоните в магазин__PHONE__; в противном случае оформите новое бронирование.",
+          holdSubject: "BagajPark: магазин ждёт вас",
+          holdHeading: "Магазин ждёт вас",
+          hold: "__SHOP__ сохраняет ваше бронирование до __TIME__.",
+          closedSubject: "BagajPark: ваше бронирование закрыто",
+          closedHeading: "Ваше бронирование закрыто",
+          closed: "Ваше бронирование в __SHOP__ закрыто, так как время сдачи багажа прошло. Вы можете оформить новое бронирование.",
+          ctaBooking: "Открыть бронирование",
+          ctaSearch: "Оформить новое бронирование",
+        },
       },
       locale,
     );
@@ -2700,6 +2830,13 @@ export class NotificationService implements INotificationService {
           p1: `تعداد چمدان شما در __SHOP__ اصلاح شد و مبلغ شما __EXTRA__ افزایش یافت. لطفاً مبلغ جدید را تأیید یا رد کنید.`,
           row1: "مکان",
           row2: "مبلغ جدید",
+        },
+        ru: {
+          subject: "BagajPark: количество мест изменилось, нужно ваше подтверждение 🧳",
+          heading: "Количество мест изменилось, нужно ваше подтверждение 🧳",
+          p1: `Количество мест багажа в __SHOP__ было исправлено, и итоговая сумма выросла на __EXTRA__. Подтвердите или отклоните новую сумму.`,
+          row1: "Пункт",
+          row2: "Новая сумма",
         },
       },
       locale,
@@ -2946,6 +3083,13 @@ export class NotificationService implements INotificationService {
         heading: "حساب شما حذف شد",
         p1: "درخواست حذف حساب شما انجام شد. نام، ایمیل، شماره تلفن، عکس و برای فروشگاه‌ها اطلاعات تسویه و مالیاتی (IBAN، شناسهٔ مالیاتی، نام حقوقی، نشانی) حذف شد و دیگر نمی‌توان با این حساب وارد شد.",
         p2: "سوابق رزروهای گذشته بدون هویت شما در مدت نگهداری قانونی حفظ می‌شود.",
+        footer: "BagajPark",
+      },
+      ru: {
+        subject: "BagajPark: ваш аккаунт удалён",
+        heading: "Ваш аккаунт удалён",
+        p1: "Ваш запрос на удаление аккаунта выполнен. Ваше имя, адрес электронной почты, номер телефона, фото, а для магазинов также платёжные и налоговые данные (IBAN, налоговый номер, юридическое название, адрес) удалены, и войти в этот аккаунт больше нельзя.",
+        p2: "Записи о прошлых бронированиях хранятся без ваших персональных данных в течение срока, установленного законом.",
         footer: "BagajPark",
       },
     }, locale);

@@ -42,7 +42,7 @@ describe("password-reset/request dil", () => {
   });
 
   it("taninmayan dil istegi dusurmez, Accept-Language'e duser", async () => {
-    await POST(req({ email: "gast@example.com", locale: "ru" }, { "accept-language": "en" }));
+    await POST(req({ email: "gast@example.com", locale: "ko" }, { "accept-language": "en" }));
     await new Promise((r) => setTimeout(r, 0));
     expect(sendMail).toHaveBeenCalledWith("gast@example.com", "tok", "en", expect.stringMatching(/^\d{6}$/));
   });
