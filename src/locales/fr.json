@@ -2957,10 +2957,10 @@
         "gettingThere": "La ligne de métro M4 va de l'aéroport à Kadıköy, et les cars Havabus le relient à Kadıköy et à Taksim."
       },
       "esenler-bus-terminal": {
-        "name": "Gare routière d'Esenler",
-        "near": "près de la gare routière d'Esenler",
-        "intro": "La grande gare routière d'Istanbul, à Esenler, est le principal pôle des cars longue distance sur la rive européenne.",
-        "gettingThere": "Le métro M1 a une station Otogar à la gare routière et va jusqu'à Aksaray et Zeytinburnu, où vous pouvez prendre le tramway T1."
+        "name": "Grande gare routière d'Istanbul",
+        "near": "près de la grande gare routière d'Istanbul",
+        "intro": "La grande gare routière d'Istanbul, à Bayrampaşa, souvent appelée Esenler Otogarı, est le principal pôle des cars longue distance sur la rive européenne.",
+        "gettingThere": "Le métro M1 dessert la gare routière à la station Otogar. Ses deux branches vont jusqu'à Yenikapı (correspondance Marmaray et M2) ; sur la branche M1A, prenez le tramway T1 à Zeytinburnu."
       },
       "sogutlucesme": {
         "name": "Gare de Söğütlüçeşme",
@@ -2978,7 +2978,7 @@
         "name": "Taksim",
         "near": "près de Taksim",
         "intro": "La place Taksim se trouve en haut de l'avenue İstiklal, au cœur des boutiques, hôtels et de la vie nocturne de Beyoğlu.",
-        "gettingThere": "Le métro M2 s'arrête à Taksim, et le funiculaire F1 descend à Kabataş pour le tramway T1 et les ferries."
+        "gettingThere": "Le métro M2 s'arrête à Taksim, et le funiculaire F1 descend à Kabataş pour le tramway T1 et les ferries. La station Taksim du M2 et le funiculaire F1 sont parfois fermés temporairement ; consultez les avis de Metro İstanbul avant de partir."
       },
       "sultanahmet": {
         "name": "Sultanahmet",
@@ -3014,7 +3014,7 @@
         "name": "Galata",
         "near": "près de Galata",
         "intro": "Le quartier de la tour de Galata est un dédale de rues en pente entre Karaköy et l'avenue İstiklal.",
-        "gettingThere": "Les arrêts les plus proches sont Şişhane sur le métro M2 et Karaköy sur le tramway T1 ; le funiculaire Tünel est également proche."
+        "gettingThere": "Les arrêts les plus proches sont Şişhane sur le métro M2 et Karaköy sur le tramway T1 ; le funiculaire Tünel est également proche. Les stations du M2 sont parfois fermées temporairement ; consultez les avis de Metro İstanbul avant de partir."
       }
     }
   }

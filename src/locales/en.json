@@ -3115,10 +3115,10 @@
         "gettingThere": "The M4 metro line runs from the airport to Kadıköy, and Havabus coaches connect it with Kadıköy and Taksim."
       },
       "esenler-bus-terminal": {
-        "name": "Esenler Bus Terminal",
-        "near": "near Esenler Bus Terminal",
-        "intro": "The Great Istanbul Bus Terminal in Esenler is the main hub for long-distance coaches on the European side.",
-        "gettingThere": "The M1 metro has an Otogar station at the terminal and runs to Aksaray and Zeytinburnu, where you can change to the T1 tram."
+        "name": "Great Istanbul Bus Terminal",
+        "near": "near the Great Istanbul Bus Terminal",
+        "intro": "The Great Istanbul Bus Terminal in Bayrampaşa, widely known as Esenler Otogar, is the main hub for long-distance coaches on the European side.",
+        "gettingThere": "The M1 metro has an Otogar station at the terminal. Both branches run to Yenikapı (Marmaray and M2); on the M1A branch, change to the T1 tram at Zeytinburnu."
       },
       "sogutlucesme": {
         "name": "Söğütlüçeşme Station",
@@ -3136,7 +3136,7 @@
         "name": "Taksim",
         "near": "near Taksim",
         "intro": "Taksim Square sits at the top of İstiklal Avenue, at the centre of Beyoğlu's shops, hotels and nightlife.",
-        "gettingThere": "The M2 metro stops at Taksim, and the F1 funicular runs down to Kabataş for the T1 tram and ferries."
+        "gettingThere": "The M2 metro stops at Taksim, and the F1 funicular runs down to Kabataş for the T1 tram and ferries. Taksim station on the M2 and the F1 funicular are occasionally closed temporarily; check Metro İstanbul announcements before you travel."
       },
       "sultanahmet": {
         "name": "Sultanahmet",
@@ -3172,7 +3172,7 @@
         "name": "Galata",
         "near": "near Galata",
         "intro": "The Galata Tower area is a maze of steep streets between Karaköy and İstiklal Avenue.",
-        "gettingThere": "The nearest stops are Şişhane on the M2 metro and Karaköy on the T1 tram; the Tünel funicular is also close."
+        "gettingThere": "The nearest stops are Şişhane on the M2 metro and Karaköy on the T1 tram; the Tünel funicular is also close. M2 stations are occasionally closed temporarily; check Metro İstanbul announcements before you travel."
       }
     }
   }

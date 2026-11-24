@@ -40,7 +40,7 @@ export async function generateMetadata({ params }: { params: Params }): Promise<
   const t = await getTranslations({ locale, namespace: "TransitHubs" });
   const tCity = await getTranslations({ locale, namespace: "CityStorage" });
   const near = t(`hubs.${hub.slug}.near`);
-  const indexable = isHubIndexable(result);
+  const indexable = isHubIndexable(hub, result);
   const title = t("metaTitle", { near });
   const description = indexable
     ? t("metaDescription", { near, city: tCity(`${hub.city}.label`) })

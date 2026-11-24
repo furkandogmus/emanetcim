@@ -3076,14 +3076,14 @@
       "rail_station": {
         "tip1": "Trenler arasında valizlerinizi bırakın, şehri onlarsız gezin.",
         "tip2": "Bırakma ve teslim alma dükkân açıkken yapılır; aşağıdan bugünkü saatlere bakın.",
-        "tip3": "Valizleriniz bırakırken plastik mühürle mühürlenir.",
+        "tip3": "Bıraktığınız valizler plastik mühürle mühürlenir.",
         "faqQ": "Noktayı nasıl bulurum?",
         "faqA": "Adres ve yol tarifi bağlantısı için noktanın sayfasını açın."
       },
       "district": {
         "tip1": "Valizlerinizi bırakın, çevreyi elleriniz serbest gezin.",
         "tip2": "Bırakma ve teslim alma dükkân açıkken yapılır; aşağıdan bugünkü saatlere bakın.",
-        "tip3": "Valizleriniz bırakırken plastik mühürle mühürlenir.",
+        "tip3": "Bıraktığınız valizler plastik mühürle mühürlenir.",
         "faqQ": "Noktayı nasıl bulurum?",
         "faqA": "Adres ve yol tarifi bağlantısı için noktanın sayfasını açın."
       }
@@ -3102,10 +3102,10 @@
         "gettingThere": "M4 metro hattı havalimanından Kadıköy'e uzanır; Havabüs otobüsleri Kadıköy ve Taksim'e gider."
       },
       "esenler-bus-terminal": {
-        "name": "Esenler Otogarı",
-        "near": "Esenler Otogarı yakınında",
-        "intro": "Esenler'deki Büyük İstanbul Otogarı, Avrupa yakasında şehirlerarası otobüslerin ana merkezidir.",
-        "gettingThere": "M1 metrosunun otogarda Otogar durağı vardır; hat Aksaray ve Zeytinburnu'na gider, Zeytinburnu'nda T1 tramvayına aktarma yapılır."
+        "name": "Büyük İstanbul Otogarı",
+        "near": "Büyük İstanbul Otogarı yakınında",
+        "intro": "Bayrampaşa'daki Büyük İstanbul Otogarı (halk arasında Esenler Otogarı), Avrupa yakasında şehirlerarası otobüslerin ana merkezidir.",
+        "gettingThere": "M1 metrosunun otogarda Otogar istasyonu vardır. İki kol da Yenikapı'ya gider (Marmaray ve M2 aktarması); M1A kolunda Zeytinburnu'nda T1 tramvayına aktarma yapılır."
       },
       "sogutlucesme": {
         "name": "Söğütlüçeşme",
@@ -3123,7 +3123,7 @@
         "name": "Taksim",
         "near": "Taksim yakınında",
         "intro": "Taksim Meydanı, İstiklal Caddesi'nin başında, Beyoğlu'nun mağaza, otel ve eğlence hayatının merkezindedir.",
-        "gettingThere": "M2 metrosu Taksim'de durur; F1 füniküleri T1 tramvayı ve vapurlar için Kabataş'a iner."
+        "gettingThere": "M2 metrosu Taksim'de durur; F1 füniküleri T1 tramvayı ve vapurlar için Kabataş'a iner. M2 Taksim istasyonu ve F1 füniküleri zaman zaman geçici olarak kapatılabilir; yola çıkmadan Metro İstanbul duyurularına bakın."
       },
       "sultanahmet": {
         "name": "Sultanahmet",
@@ -3159,7 +3159,7 @@
         "name": "Galata",
         "near": "Galata yakınında",
         "intro": "Galata Kulesi çevresi, Karaköy ile İstiklal Caddesi arasında dik ve dar sokaklardan oluşur.",
-        "gettingThere": "En yakın duraklar M2 metrosunda Şişhane ve T1 tramvayında Karaköy'dür; Tünel füniküleri de yakındır."
+        "gettingThere": "En yakın duraklar M2 metrosunda Şişhane ve T1 tramvayında Karaköy'dür; Tünel füniküleri de yakındır. M2 istasyonları zaman zaman geçici olarak kapatılabilir; yola çıkmadan Metro İstanbul duyurularına bakın."
       }
     }
   }

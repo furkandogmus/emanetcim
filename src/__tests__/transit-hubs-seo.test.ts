@@ -32,7 +32,7 @@ import {
 } from "@/lib/transit-hubs";
 import { STORAGE_CITIES } from "@/lib/storage-cities";
 import { distanceKm } from "@/lib/geo";
-import { getHubShops, hubsWithOperatingShop, isHubIndexable } from "@/lib/transit-hub-shops";
+import { getHubShops, isHubIndexable } from "@/lib/transit-hub-shops";
 import { getActiveShopsOrderedByDistanceKm } from "@/lib/shop-distance-postgis";
 import { APP_LOCALES } from "@/i18n/locales";
 import sitemap from "@/app/sitemap";
@@ -81,6 +81,20 @@ describe("yer verisi", () => {
     }
   });
 
+  // Esik 0,5 km: Eminonu-Karakoy (~0,7 km) Halic'in iki yakasi, ikisi de dizinde kalir.
+  it("yarim kilometreden yakin iki yerden yalniz biri dizine aday (kapi sayfasi)", () => {
+    const blocked = new Set<string>();
+    for (const a of TRANSIT_HUBS) {
+      for (const b of TRANSIT_HUBS) {
+        if (a.slug >= b.slug || distanceKm(a.lat, a.lng, b.lat, b.lng) >= 0.5) continue;
+        const flagged = [a, b].filter((h) => "indexable" in h && h.indexable === false).length;
+        expect(flagged, `${a.slug}~${b.slug}`).toBe(1);
+        blocked.add([a, b].find((h) => "indexable" in h)!.slug);
+      }
+    }
+    expect([...blocked].sort()).toEqual(["galata", "sirkeci"]);
+  });
+
   it("her yerin ve her turun metni her dilde var", () => {
     for (const [loc, msgs] of LOCALES) {
       const ns = msgs.TransitHubs;
@@ -127,12 +141,12 @@ describe("ince icerik kapisi (noindex)", () => {
     ] as never);
     const res = await getHubShops(taksim, new Date("2026-11-24T10:00:00Z"));
     expect(getActiveShopsOrderedByDistanceKm).toHaveBeenCalledWith(
-      expect.objectContaining({ centerLat: taksim.lat, centerLng: taksim.lng, radiusKm: hubRadiusKm(taksim) }),
+      expect.objectContaining({ centerLat: taksim.lat, centerLng: taksim.lng, radiusKm: hubRadiusKm(taksim), take: 12 }),
     );
     expect(res.shops.map((s) => s.id)).toEqual(["acik"]);
     expect(res.shops[0]).toMatchObject({ openNow: true, distanceKm: 0.8 });
     expect(res.prelaunch).toBeNull();
-    expect(isHubIndexable(res)).toBe(true);
+    expect(isHubIndexable(taksim, res)).toBe(true);
   });
 
   it("acik/kapali durumu dukkanin saatine gore", async () => {
@@ -151,14 +165,20 @@ describe("ince icerik kapisi (noindex)", () => {
     ] as never);
     const res = await getHubShops(taksim);
     expect(res).toEqual({ shops: [], prelaunch: { id: "yakinda", name: "yakinda", wantCount: 4 } });
-    expect(isHubIndexable(res)).toBe(false);
+    expect(isHubIndexable(taksim, res)).toBe(false);
+  });
+
+  it("komsusunun kopyasi olan yer dukkan olsa da dizine girmez", () => {
+    const galata = getTransitHub("istanbul", "galata")!;
+    expect(isHubIndexable(galata, { shops: [{}] })).toBe(false);
+    expect(isHubIndexable(getTransitHub("istanbul", "karakoy")!, { shops: [{}] })).toBe(true);
   });
 
   it("hic nokta yoksa liste ve form bos", async () => {
     vi.mocked(getActiveShopsOrderedByDistanceKm).mockResolvedValueOnce([] as never);
     const res = await getHubShops(taksim);
     expect(res).toEqual({ shops: [], prelaunch: null });
-    expect(isHubIndexable(res)).toBe(false);
+    expect(isHubIndexable(taksim, res)).toBe(false);
   });
 
   it("veritabani hatasi yutulmaz (sahte noindex yerine ISR eski surumu sunar)", async () => {
@@ -168,7 +188,7 @@ describe("ince icerik kapisi (noindex)", () => {
 
   it("sayfa dizin disi karari isHubIndexable'a bagli", () => {
     const src = fs.readFileSync("src/app/[locale]/luggage-storage/[slug]/[hub]/page.tsx", "utf8");
-    expect(src).toContain("isHubIndexable(result)");
+    expect(src).toContain("isHubIndexable(hub, result)");
     expect(src).toMatch(/robots:\s*\{\s*index:\s*false,\s*follow:\s*true\s*\}/);
     expect(src).toContain("PrelaunchDemandPanel");
   });
@@ -176,38 +196,42 @@ describe("ince icerik kapisi (noindex)", () => {
 
 describe("site haritasi", () => {
   const kadikoy = getTransitHub("istanbul", "kadikoy")!;
-  const nearKadikoy = { latitude: kadikoy.lat + 0.005, longitude: kadikoy.lng };
+  const operating = { shop: shop("acik"), distanceKm: 0.3 };
 
   beforeEach(() => {
-    shopFindMany.mockReset();
+    shopFindMany.mockReset().mockResolvedValue([]);
     blogFindMany.mockReset().mockResolvedValue([]);
+    vi.mocked(getActiveShopsOrderedByDistanceKm).mockReset();
   });
 
-  it("hubsWithOperatingShop yaricapa gore suzer", () => {
-    expect(hubsWithOperatingShop(TRANSIT_HUBS, [nearKadikoy]).map((h) => h.slug)).toEqual([
-      // Söğütlüçeşme istasyonu Kadıköy iskelesine ~1,3 km: ayni dukkan ikisini de besler.
-      "sogutlucesme",
-      "kadikoy",
-    ]);
-    expect(hubsWithOperatingShop(TRANSIT_HUBS, [])).toEqual([]);
-  });
+  const hubUrls = async () =>
+    (await sitemap()).map((e) => e.url).filter((u) => /\/luggage-storage\/[^/]+\/[^/]+$/.test(u));
 
-  it("isleyen dukkani olan yer her dilde var, olmayan yok", async () => {
-    shopFindMany.mockImplementation(async (args: { select: Record<string, boolean> }) =>
-      args.select.latitude ? [nearKadikoy] : [],
+  it("isleyen dukkani olan yer her dilde var, olmayan yok (sayfayla ayni sorgu)", async () => {
+    vi.mocked(getActiveShopsOrderedByDistanceKm).mockImplementation(async (o) =>
+      (o.centerLat === kadikoy.lat ? [operating] : [{ ...operating, shop: shop("p", { isPrelaunch: true }) }]) as never,
     );
-    const urls = (await sitemap()).map((e) => e.url);
+    const urls = await hubUrls();
+    expect(urls).toHaveLength(APP_LOCALES.length);
     for (const loc of APP_LOCALES) {
-      expect(urls.some((u) => u.endsWith(`/${loc}/luggage-storage/istanbul/kadikoy`))).toBe(true);
+      expect(urls.some((u) => u.endsWith(`/${loc}/luggage-storage/istanbul/kadikoy`)), loc).toBe(true);
     }
-    expect(urls.some((u) => u.includes("/luggage-storage/istanbul/taksim"))).toBe(false);
-    expect(urls.some((u) => u.includes("/luggage-storage/istanbul/istanbul-airport"))).toBe(false);
+  });
+
+  it("kopya olarak isaretli yer (Galata, Sirkeci) dukkan olsa da yok", async () => {
+    vi.mocked(getActiveShopsOrderedByDistanceKm).mockResolvedValue([operating] as never);
+    const slugs = new Set((await hubUrls()).map((u) => u.split("/").pop()));
+    expect(slugs.has("galata")).toBe(false);
+    expect(slugs.has("sirkeci")).toBe(false);
+    expect(slugs.has("karakoy")).toBe(true);
+    expect(slugs.has("eminonu")).toBe(true);
+    expect(slugs.size).toBe(TRANSIT_HUBS.length - 2);
   });
 
   it("veritabani yoksa yer girdisi yok, site haritasi yine uretilir", async () => {
+    vi.mocked(getActiveShopsOrderedByDistanceKm).mockRejectedValue(new Error("no db"));
     shopFindMany.mockRejectedValue(new Error("no db"));
-    const urls = (await sitemap()).map((e) => e.url);
-    expect(urls.some((u) => u.includes("/luggage-storage/istanbul/kadikoy"))).toBe(false);
-    expect(urls.some((u) => u.endsWith("/tr/luggage-storage/istanbul"))).toBe(true);
+    expect(await hubUrls()).toEqual([]);
+    expect((await sitemap()).some((e) => e.url.endsWith("/tr/luggage-storage/istanbul"))).toBe(true);
   });
 });
