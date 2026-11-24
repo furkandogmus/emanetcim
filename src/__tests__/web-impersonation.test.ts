@@ -357,6 +357,7 @@ describe("web olarak goruntule", () => {
     });
 
     it("/api'ye sahte Next-Action basligiyla yazma kesilir", () => {
+      expect(impersonationProxyDecision({ ...base, method: "DELETE", pathname: "/api/push/subscribe" })).toBe("block");
       for (const p of ["/api/push/subscribe", "/api/account/data-export", "/api"]) {
         expect(impersonationProxyDecision({ ...base, isServerAction: true, method: "POST", pathname: p }), p).toBe("block");
       }

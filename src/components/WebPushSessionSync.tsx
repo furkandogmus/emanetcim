@@ -10,7 +10,8 @@ import { rebindBrowserPush } from "@/lib/web-push-client";
  */
 export default function WebPushSessionSync() {
   const { data: session, status } = useSession();
-  const userId = status === "authenticated" ? session?.user?.id : undefined;
+  // "Olarak goruntule"de oturum hedefin: abonelik ona baglanmamali (sunucu da 403 doner).
+  const userId = status === "authenticated" && !session?.impersonation ? session?.user?.id : undefined;
   const boundFor = useRef<string | null>(null);
 
   useEffect(() => {
