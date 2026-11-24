@@ -13,7 +13,8 @@ import type { Role } from "./types";
   (`getDevicePushTokenAsync`: Android'de FCM) kaydedilir. iOS'ta yerel token APNs'indir
   ve FCM onu almaz: orada Expo push token'i kaydedilir, sunucu onu Expo servisine
   gonderir (`src/lib/expo-push.ts`), Expo da EAS'taki APNs anahtariyla iletir. Esnafa yeni rezervasyon,
-  misafire onay/check-in/hatirlatma/valiz duzeltmesi gider; veride `bookingId` gelir.
+  misafire onay/check-in/hatirlatma/valiz duzeltmesi/sikayet sonucu gider; veride `bookingId`
+  gelir (sikayet sonucu da rezervasyon ekranina, oradaki sikayet kartina acilir).
 */
 
 Notifications.setNotificationHandler({
@@ -114,6 +115,8 @@ export function adminPathFromPush(
   | "/admin/affiliates"
   | "/admin/account-deletions"
   | "/admin/reviews"
+  | "/admin/role-approvals"
+  | "/admin/messages"
   | null {
   switch (data?.adminScreen) {
     case "dispute":
@@ -131,6 +134,10 @@ export function adminPathFromPush(
       return "/admin/account-deletions";
     case "reviews":
       return "/admin/reviews";
+    case "roleApprovals":
+      return "/admin/role-approvals";
+    case "messages":
+      return "/admin/messages";
     default:
       return null;
   }

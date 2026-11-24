@@ -22,6 +22,8 @@ describe("adminPathFromPush", () => {
     expect(adminPathFromPush({ adminScreen: "applications" })).toBe("/admin/applications");
     expect(adminPathFromPush({ adminScreen: "partnerLeads" })).toBe("/admin/partner-leads");
     expect(adminPathFromPush({ adminScreen: "affiliates" })).toBe("/admin/affiliates");
+    expect(adminPathFromPush({ adminScreen: "roleApprovals" })).toBe("/admin/role-approvals");
+    expect(adminPathFromPush({ adminScreen: "messages" })).toBe("/admin/messages");
   });
 
   it("ignores unknown values", () => {
@@ -40,6 +42,16 @@ describe("openFromNotification for admins", () => {
   it("opens the dispute for an admin", () => {
     openFromNotification(response({ adminScreen: "dispute", disputeId: "3f2b8c1e-9a4d-4e2f-8b1a-0c9d7e6f5a41" }), "ADMIN");
     expect(router.push).toHaveBeenCalledWith("/admin/dispute/3f2b8c1e-9a4d-4e2f-8b1a-0c9d7e6f5a41");
+  });
+
+  it("opens role approvals for an admin", () => {
+    openFromNotification(response({ adminScreen: "roleApprovals" }), "ADMIN");
+    expect(router.push).toHaveBeenCalledWith("/admin/role-approvals");
+  });
+
+  it("opens the booking (with its dispute card) for a guest dispute outcome", () => {
+    openFromNotification(response({ bookingId: "b1" }), "GUEST");
+    expect(router.push).toHaveBeenCalledWith("/bookings/b1");
   });
 
   it("does not route a guest to an admin screen", () => {
