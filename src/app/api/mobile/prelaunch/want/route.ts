@@ -48,7 +48,18 @@ export async function POST(req: NextRequest) {
     user = { id: auth.user.id, email: auth.user.email };
   }
   const anonId = `device:${deviceId}`;
-  const want = await prelaunchInterestService.registerWant({ shopId, anonId, locale, source: "mobile" });
+  /*
+    Sayim web ile AYNI kovada: IP + nokta basina gunde bir. Cihaz kimligi istemcide
+    uretildigi icin yenisiyle sayac sisirilebiliyordu. Asan istek "zaten sayildi" alir.
+  */
+  const countable = await rateLimit(`prelaunch_want_ip:${ip}:${shopId}`, 1, 24 * 60 * 60_000);
+  const want = countable
+    ? await prelaunchInterestService.registerWant({ shopId, anonId, locale, source: "mobile" })
+    : {
+        ok: true as const,
+        alreadyCounted: true,
+        count: await prelaunchInterestService.wantCount(shopId).catch(() => 0),
+      };
   if (!want.ok) {
     return want.code === "shop_not_prelaunch"
       ? NextResponse.json({ error: "shop_now_open" }, { status: 409 })

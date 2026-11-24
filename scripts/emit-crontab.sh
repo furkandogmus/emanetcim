@@ -97,7 +97,8 @@ function main() {
       const appDir = process.env.APP_DIR;
       const logDir = process.env.LOG_DIR;
       const onlyEnforced = process.env.ONLY_ENFORCED === 'true';
-      const jobs = JOB_REGISTRY.filter(j => !onlyEnforced || j.enforced);
+      // hostTriggered: sunucu betigi tetikler (ops/crontab.prod 2. bolum), satir uretilmez.
+      const jobs = JOB_REGISTRY.filter(j => (!onlyEnforced || j.enforced) && !('hostTriggered' in j && j.hostTriggered));
       console.log('# BagajPark zamanlanmis isler');
       console.log('# URETILDI: scripts/emit-crontab.sh -- ELLE DUZENLEMEYIN.');
       console.log('# Kaynak: src/lib/jobs/registry.ts');

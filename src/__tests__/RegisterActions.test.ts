@@ -48,7 +48,8 @@ vi.mock("@/lib/auth-password", () => ({
   MIN_PASSWORD_LENGTH: 8,
   MAX_PASSWORD_LENGTH: 128,
 }));
-vi.mock("@/lib/disposable-emails", () => ({
+vi.mock("@/lib/disposable-emails", async (orig) => ({
+  mailboxQuotaKey: (await orig<typeof import("@/lib/disposable-emails")>()).mailboxQuotaKey,
   isDisposableEmail: vi.fn((email) => email.endsWith("@tempmail.com")),
   isBlockedSignupEmail: vi.fn((email) => email.endsWith("@tempmail.com") || /^[a-z.]{4,}\d{5}@gmail\.com$/.test(email)),
 }));
@@ -98,10 +99,11 @@ describe("Register Actions", () => {
         name: "Test",
         password: "password123",
       });
+      await new Promise((r) => setTimeout(r, 0));
       expect(result).toEqual({ success: true });
       expect(mockPrisma.user.create).not.toHaveBeenCalled();
       expect(mockMail).not.toHaveBeenCalled();
-      expect(mockExistingNotice).toHaveBeenCalledWith("exists@test.com", "tr");
+      expect(mockExistingNotice).toHaveBeenCalledWith("exists@test.com", "tr", "guest");
       expect(mockRateLimit).toHaveBeenCalledWith("register_existing_notice:exists@test.com", 3, 24 * 60 * 60 * 1000);
     });
 
@@ -113,6 +115,7 @@ describe("Register Actions", () => {
         name: "Test",
         password: "password123",
       });
+      await new Promise((r) => setTimeout(r, 0));
       expect(result).toEqual({ success: true });
       expect(mockExistingNotice).not.toHaveBeenCalled();
     });
@@ -157,35 +160,41 @@ describe("Register Actions", () => {
       expect(result.error).toBe("Errors.invalidData");
     });
 
-    it("should normalize and check duplicate phone", async () => {
-      // Input: 0555 555 55 55 (matches regex in register.ts)
-      // Normalized: 5555555555
-      mockPrisma.user.findUnique.mockResolvedValue({ id: "existing-phone" });
+    const partnerInput = {
+      name: "Partner",
+      phone: "0555 555 55 55",
+      password: "password123",
+      shopName: "Shop",
+      shopAddress: "Address",
+      shopLatitude: 41.0431,
+      shopLongitude: 29.0083,
+    };
 
-      const result = await registerPartnerApplicationAction({
-        name: "Partner",
-        phone: "0555 555 55 55",
-        password: "password123",
-        shopName: "Shop",
-        shopAddress: "Address",
-      });
-
-      expect(result.success).toBe(false);
-      expect(result.error).toBe("Errors.phoneAlreadyRegistered");
+    it("kayitli telefon yeni basvuruyla ayni basariyi alir; hesap/dukkan yaratilmaz, sahibine e-posta", async () => {
+      mockPrisma.user.findUnique.mockResolvedValue({ email: "owner@example.com" });
+      const result = await registerPartnerApplicationAction(partnerInput);
+      await new Promise((r) => setTimeout(r, 0));
+      expect(result).toEqual({ success: true });
+      expect(mockPrisma.$transaction).not.toHaveBeenCalled();
+      expect(mockPrisma.shop.create).not.toHaveBeenCalled();
+      expect(mockExistingNotice).toHaveBeenCalledWith("owner@example.com", "tr", "partner");
     });
 
-    it("kayitli yaniti gunluk tavani asinca tooManyRequests (tarama siniri)", async () => {
-      mockPrisma.user.findUnique.mockResolvedValue({ id: "existing-phone" });
-      // 1: basvuru IP kovasi, 2: "kayitli" IP kovasi
-      mockRateLimit.mockResolvedValueOnce(true).mockResolvedValueOnce(false);
-      const result = await registerPartnerApplicationAction({
-        name: "Partner",
-        phone: "0555 555 55 55",
-        password: "password123",
-        shopName: "Shop",
-        shopAddress: "Address",
-      });
-      expect(result).toEqual({ success: false, error: "Errors.tooManyRequests" });
+    it("kayitli e-posta: ayni basari, kutu anahtari kanonik", async () => {
+      mockPrisma.user.findUnique.mockResolvedValueOnce({ email: "owner@gmail.com" });
+      const result = await registerPartnerApplicationAction({ ...partnerInput, email: "O.wner+x@gmail.com" });
+      await new Promise((r) => setTimeout(r, 0));
+      expect(result).toEqual({ success: true });
+      expect(mockPrisma.$transaction).not.toHaveBeenCalled();
+      expect(mockRateLimit).toHaveBeenCalledWith("register_existing_notice:owner@gmail.com", 3, 24 * 60 * 60 * 1000);
+    });
+
+    it("e-postasiz hesapla telefon cakismasi: yalniz genel basari", async () => {
+      mockPrisma.user.findUnique.mockResolvedValue({ email: null });
+      const result = await registerPartnerApplicationAction(partnerInput);
+      expect(result).toEqual({ success: true });
+      expect(mockExistingNotice).not.toHaveBeenCalled();
+      expect(mockPrisma.$transaction).not.toHaveBeenCalled();
     });
 
     it("koordinatsız kaydı reddeder (DEFECT_BACKLOG D9)", async () => {

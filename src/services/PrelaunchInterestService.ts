@@ -4,7 +4,7 @@ import logger from "@/lib/logger";
 import { Prisma } from "@prisma/client";
 import { notificationService } from "@/services/NotificationService";
 import { analyticsService } from "@/services/AnalyticsService";
-import { isBlockedSignupEmail } from "@/lib/disposable-emails";
+import { isBlockedSignupEmail, mailboxQuotaKey } from "@/lib/disposable-emails";
 import { rateLimit } from "@/lib/rate-limit";
 
 /** Ayni adrese gunde en fazla bu kadar teyit e-postasi (farkli noktalar dahil). */
@@ -182,7 +182,7 @@ class PrelaunchInterestService {
         Adres basina gunluk tavan: kayit yine yazilir (talep sinyali kaybolmaz),
         yalniz e-posta atlanir. Kurban adres cok noktaya yazilarak bombalanamaz.
       */
-      void rateLimit(`prelaunch_confirm_email:${email}`, CONFIRM_EMAILS_PER_ADDRESS_PER_DAY, 24 * 60 * 60_000)
+      void rateLimit(`prelaunch_confirm_email:${mailboxQuotaKey(email)}`, CONFIRM_EMAILS_PER_ADDRESS_PER_DAY, 24 * 60 * 60_000)
         .then((allowed) => {
           if (!allowed) {
             logger.warn({ shopId: input.shopId }, "prelaunch_interest_confirm_rate_limited");

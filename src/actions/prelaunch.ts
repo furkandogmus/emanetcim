@@ -21,8 +21,8 @@ const schema = z.object({
   shopId: z.string().uuid(),
   email: z.string().email().max(200),
   sessionId: z.string().min(1).max(100).optional(),
-  /** Bal kupu: formdaki gizli alan; yalnizca botlar doldurur. */
-  website: z.string().max(200).optional(),
+  /** Bal kupu: formdaki gizli alan; yalnizca botlar doldurur. Adi bilerek anlamsiz (parola yoneticisi doldurmasin). */
+  hp_field: z.string().max(200).optional(),
 });
 
 export async function registerPrelaunchInterestAction(data: unknown) {
@@ -31,7 +31,8 @@ export async function registerPrelaunchInterestAction(data: unknown) {
     return { success: false as const, error: "Errors.invalidEmail" };
   }
   // Bota basari gibi gorunur: hangi kontrolun yakaladigini ogrenmesin.
-  if (parsed.data.website) {
+  if (parsed.data.hp_field) {
+    logger.info({ shopId: parsed.data.shopId }, "prelaunch_interest_honeypot_hit");
     return { success: true as const, alreadyRegistered: false };
   }
   /*

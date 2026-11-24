@@ -53,6 +53,12 @@ export type JobDefinition = {
   readonly enforced: boolean;
   /** Varsa ince sarmalayıcı script. */
   readonly script?: string;
+  /**
+   * Sunucu betigi tetikler (`ops/crontab.prod` 2. bolum); uc yalniz basari
+   * kalp atisini deftere yazar. `emit-crontab.sh` bunun icin satir URETMEZ:
+   * uretseydi ucu dogrudan cagiran satir isi calismadan "taze" gosterirdi.
+   */
+  readonly hostTriggered?: true;
 };
 
 export const JOB_REGISTRY: readonly JobDefinition[] = [
@@ -183,6 +189,17 @@ export const JOB_REGISTRY: readonly JobDefinition[] = [
     cron: "53 2 * * *",
     maxStaleHours: 72,
     enforced: true,
+  },
+  {
+    name: "backup-heartbeat",
+    what: "Postgres yedegi S3'e yuklendiginde backup-s3.sh bu uca basari kaydi yazar.",
+    ifItStops:
+      "Yedek sessizce durur: sifreleme ayari eksik, age kurulu degil, S3 yetkisi ya da disk sorunu. Sunucu kaybinda geri donulecek yedek eski kalir.",
+    method: "POST",
+    cron: "7 */6 * * *",
+    maxStaleHours: 13,
+    enforced: true,
+    hostTriggered: true,
   },
 ] as const;
 

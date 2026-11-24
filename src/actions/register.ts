@@ -13,7 +13,7 @@ import { z } from "zod";
 import { rateLimit } from "@/lib/rate-limit";
 import { generateVerificationToken } from "@/lib/tokens";
 import { sendVerificationEmail } from "@/lib/mail";
-import { isBlockedSignupEmail } from "@/lib/disposable-emails";
+import { isBlockedSignupEmail, mailboxQuotaKey } from "@/lib/disposable-emails";
 import { getLocale } from "next-intl/server";
 import { normalizeTrGsm10 } from "@/lib/netgsm";
 import {
@@ -82,15 +82,11 @@ export async function registerGuestAction(data: unknown) {
   /*
     Kayitli adres yeni kayitla AYNI basariyi alir (2026-11-24): "bu e-posta
     kayitli" yaniti hesap varligini sizdiriyordu. Sahibine giris/sifirlama
-    e-postasi gider; adres basina gunluk tavan kurbani bombalamayi onler.
+    e-postasi gider. Iki yolda da e-posta atesle-unut: yanit suresi esit kalir.
   */
   const exists = await prisma.user.findUnique({ where: { email }, select: { id: true } });
   if (exists) {
-    if (await rateLimit(`register_existing_notice:${email}`, 3, 24 * 60 * 60 * 1000)) {
-      await notificationService
-        .notifyExistingAccountSignupAttempt(email, locale)
-        .catch((err) => logger.error({ err }, "notify_existing_account_signup_failed"));
-    }
+    notifyExistingAccount(email, locale, "guest");
     return { success: true as const };
   }
 
@@ -120,7 +116,10 @@ export async function registerGuestAction(data: unknown) {
 
   // Verify Email (sadece e-posta ile kayıt/login flowu için)
   const verificationToken = await generateVerificationToken(user.email!);
-  await sendVerificationEmail(user.email!, verificationToken.token, locale);
+  // Atesle-unut: kayitli adres yolu ile ayni yanit suresi (hesap varligi sizmasin).
+  void sendVerificationEmail(user.email!, verificationToken.token, locale).catch((err) =>
+    logger.error({ err, userId: user.id }, "send_verification_email_failed"),
+  );
 
   void notificationService
     .notifyAdminsForNewUser({
@@ -142,17 +141,16 @@ export async function registerGuestAction(data: unknown) {
   return { success: true as const };
 }
 
-/*
-  Esnaf basvurusunda "kayitli" yaniti KALIR: basvuru dukkan da yaratiyor ve
-  sessiz basari basvuruyu kaybettirirdi (telefon icin e-posta yolu da yok).
-  Sizinti yerine tarama sinirlanir: IP ve tanimlayici basina gunde 3 "kayitli" yaniti.
-*/
-async function partnerTakenAnswerAllowed(ip: string, identifier: string): Promise<boolean> {
-  const day = 24 * 60 * 60 * 1000;
-  return (
-    (await rateLimit(`register_partner_taken_ip:${ip}`, 3, day)) &&
-    (await rateLimit(`register_partner_taken_id:${identifier}`, 3, day))
-  );
+/**
+ * Kayitli hesabin sahibine "hesabin zaten var" e-postasi; kutu basina gunde 3.
+ * Atesle-unut: cagiran yolun suresi e-posta gonderimine bagli olmasin.
+ */
+function notifyExistingAccount(email: string, locale: string, kind: "guest" | "partner"): void {
+  void rateLimit(`register_existing_notice:${mailboxQuotaKey(email)}`, 3, 24 * 60 * 60 * 1000)
+    .then((allowed) =>
+      allowed ? notificationService.notifyExistingAccountSignupAttempt(email, locale, kind) : undefined,
+    )
+    .catch((err) => logger.error({ err }, "notify_existing_account_signup_failed"));
 }
 
 export async function registerPartnerApplicationAction(data: unknown) {
@@ -169,31 +167,13 @@ export async function registerPartnerApplicationAction(data: unknown) {
   }
 
   const email = parsed.data.email?.trim().toLowerCase() || null;
-  if (email) {
-    if (isBlockedSignupEmail(email)) {
-      return { success: false as const, error: "Errors.invalidEmail" };
-    }
-    const exists = await prisma.user.findUnique({ where: { email } });
-    if (exists) {
-      if (!(await partnerTakenAnswerAllowed(ip, email))) {
-        return { success: false as const, error: "Errors.tooManyRequests" };
-      }
-      return { success: false as const, error: "Errors.emailAlreadyRegistered" };
-    }
+  if (email && isBlockedSignupEmail(email)) {
+    return { success: false as const, error: "Errors.invalidEmail" };
   }
-
   const phoneNorm = normalizeTrGsm10(parsed.data.phone);
   if (!phoneNorm) {
     return { success: false as const, error: "Errors.invalidTrPhone" };
   }
-  const phoneExists = await prisma.user.findUnique({ where: { phone: phoneNorm } });
-  if (phoneExists) {
-    if (!(await partnerTakenAnswerAllowed(ip, phoneNorm))) {
-      return { success: false as const, error: "Errors.tooManyRequests" };
-    }
-    return { success: false as const, error: "Errors.phoneAlreadyRegistered" };
-  }
-
   /*
     DEFECT_BACKLOG D9: koordinatsız kayıt sessiz bir tuzaktı — dükkan
     oluşuyor, aramada hiç görünmüyor, admin onay ekranına gelene kadar kimse
@@ -205,7 +185,22 @@ export async function registerPartnerApplicationAction(data: unknown) {
     return { success: false as const, error: "Errors.shopLocationRequired" };
   }
 
+  // Hash once: kayitli hesap yolu da ayni sureyi harcar.
   const passwordHash = await hashPassword(parsed.data.password);
+  const locale = await getLocale();
+
+  /*
+    Kayitli e-posta/telefon yeni basvuruyla AYNI basariyi alir (2026-11-24):
+    "kayitli" yaniti hesap varligini sizdiriyordu. Hesap ve dukkan yaratilmaz;
+    hesabin e-postasi varsa sahibine "giris yap, bize yaz" e-postasi gider.
+  */
+  const existing =
+    (email ? await prisma.user.findUnique({ where: { email }, select: { email: true } }) : null) ??
+    (await prisma.user.findUnique({ where: { phone: phoneNorm }, select: { email: true } }));
+  if (existing) {
+    if (existing.email) notifyExistingAccount(existing.email, locale, "partner");
+    return { success: true as const };
+  }
 
   // Yalnızca ESNAF hesabından üretilmiş bir kod kabul edilir — misafir
   // indirim kodlarıyla aynı alanı (`User.referralCode`) paylaşıyor ama

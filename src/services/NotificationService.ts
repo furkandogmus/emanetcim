@@ -836,87 +836,115 @@ export class NotificationService implements INotificationService {
    * çalışmıyorsa bu HEMEN belli oluyor.
    */
   /**
-   * Kayit formuna zaten kayitli bir adres girildi (2026-11-24). Form artik yeni
-   * kayitla AYNI yaniti veriyor (hesap varligi sizdirilmaz); gercek sahibi
-   * durumu bu e-postadan ogrenir.
+   * Kayit ya da esnaf basvurusu zaten kayitli bir adres/telefonla geldi
+   * (2026-11-24). Form yeni kayitla AYNI yaniti veriyor (hesap varligi
+   * sizdirilmaz); gercek sahibi durumu bu e-postadan ogrenir.
    */
-  async notifyExistingAccountSignupAttempt(email: string, locale: string = "tr"): Promise<void> {
+  async notifyExistingAccountSignupAttempt(
+    email: string,
+    locale: string = "tr",
+    kind: "guest" | "partner" = "guest",
+  ): Promise<void> {
     if (!email.includes("@")) return;
     const domain = getSiteBaseUrl();
     const loginUrl = `${domain}/${locale}/login`;
     const resetUrl = `${domain}/${locale}/auth/forgot-password`;
+    const contactUrl = `${domain}/${locale}/contact`;
 
     const content = pickLocale({
       tr: {
         subject: "BagajPark hesabın zaten var",
-        heading: "Bu adresle zaten bir hesabın var",
-        p1: "Biri (muhtemelen sen) bu e-posta adresiyle yeniden kayıt olmayı denedi. Yeni hesap açılmadı; mevcut hesabın olduğu gibi duruyor.",
-        p2: "Giriş yapabilir ya da şifreni hatırlamıyorsan sıfırlayabilirsin.",
+        heading: "Bu bilgilerle zaten bir hesabın var",
+        guest: "Biri (muhtemelen sen) bu e-posta adresiyle yeniden kayıt olmayı denedi. Yeni hesap açılmadı; mevcut hesabın olduğu gibi duruyor.",
+        partner: "Biri (muhtemelen sen) hesabındaki bilgilerle esnaf başvurusu yapmayı denedi. Yeni hesap ve başvuru açılmadı. Esnaf olmak için mevcut hesabınla giriş yap ve bize yaz; başvurunu hesabına bağlayalım.",
+        p2: "Şifreni hatırlamıyorsan sıfırlayabilirsin.",
         cta: "Giriş yap",
         resetLabel: "Şifremi unuttum",
+        contactLabel: "Bize yaz",
         footer: "Bu sen değilsen bu e-postayı yok sayabilirsin; hesabında bir değişiklik yapılmadı.",
       },
       en: {
         subject: "You already have a BagajPark account",
-        heading: "This address already has an account",
-        p1: "Someone (probably you) tried to sign up again with this email address. No new account was created; your existing account is unchanged.",
-        p2: "You can sign in, or reset your password if you have forgotten it.",
+        heading: "You already have an account with these details",
+        guest: "Someone (probably you) tried to sign up again with this email address. No new account was created; your existing account is unchanged.",
+        partner: "Someone (probably you) tried to apply as a partner with details that belong to your account. No new account or application was created. To become a partner, sign in with your existing account and contact us so we can link your application to it.",
+        p2: "If you have forgotten your password, you can reset it.",
         cta: "Sign in",
         resetLabel: "Forgot password",
+        contactLabel: "Contact us",
         footer: "If this was not you, you can ignore this email; nothing on your account was changed.",
       },
       de: {
         subject: "Sie haben bereits ein BagajPark-Konto",
-        heading: "Für diese Adresse gibt es bereits ein Konto",
-        p1: "Jemand (vermutlich Sie) hat versucht, sich mit dieser E-Mail-Adresse erneut zu registrieren. Es wurde kein neues Konto angelegt; Ihr bestehendes Konto ist unverändert.",
-        p2: "Sie können sich anmelden oder Ihr Passwort zurücksetzen, falls Sie es vergessen haben.",
+        heading: "Mit diesen Angaben gibt es bereits ein Konto",
+        guest: "Jemand (vermutlich Sie) hat versucht, sich mit dieser E-Mail-Adresse erneut zu registrieren. Es wurde kein neues Konto angelegt; Ihr bestehendes Konto ist unverändert.",
+        partner: "Jemand (vermutlich Sie) hat versucht, sich mit Angaben Ihres Kontos als Partner zu bewerben. Es wurde weder ein neues Konto noch eine Bewerbung angelegt. Um Partner zu werden, melden Sie sich mit Ihrem bestehenden Konto an und schreiben Sie uns; wir verknüpfen Ihre Bewerbung mit dem Konto.",
+        p2: "Falls Sie Ihr Passwort vergessen haben, können Sie es zurücksetzen.",
         cta: "Anmelden",
         resetLabel: "Passwort vergessen",
+        contactLabel: "Kontakt",
         footer: "Wenn Sie das nicht waren, können Sie diese E-Mail ignorieren; an Ihrem Konto wurde nichts geändert.",
       },
       fr: {
         subject: "Vous avez déjà un compte BagajPark",
-        heading: "Cette adresse a déjà un compte",
-        p1: "Quelqu'un (probablement vous) a essayé de s'inscrire à nouveau avec cette adresse e-mail. Aucun nouveau compte n'a été créé ; votre compte existant est inchangé.",
-        p2: "Vous pouvez vous connecter, ou réinitialiser votre mot de passe si vous l'avez oublié.",
+        heading: "Un compte existe déjà avec ces informations",
+        guest: "Quelqu'un (probablement vous) a essayé de s'inscrire à nouveau avec cette adresse e-mail. Aucun nouveau compte n'a été créé ; votre compte existant est inchangé.",
+        partner: "Quelqu'un (probablement vous) a essayé de postuler comme partenaire avec des informations liées à votre compte. Aucun compte ni aucune candidature n'a été créé. Pour devenir partenaire, connectez-vous avec votre compte existant et écrivez-nous ; nous rattacherons votre candidature à ce compte.",
+        p2: "Si vous avez oublié votre mot de passe, vous pouvez le réinitialiser.",
         cta: "Se connecter",
         resetLabel: "Mot de passe oublié",
+        contactLabel: "Nous contacter",
         footer: "Si ce n'était pas vous, ignorez cet e-mail ; rien n'a été modifié sur votre compte.",
       },
       ja: {
         subject: "BagajParkのアカウントはすでにあります",
-        heading: "このメールアドレスのアカウントはすでに存在します",
-        p1: "このメールアドレスで再度登録しようとする操作がありました（おそらくご本人です）。新しいアカウントは作成されず、既存のアカウントはそのままです。",
-        p2: "ログインするか、パスワードをお忘れの場合は再設定してください。",
+        heading: "この情報のアカウントはすでに存在します",
+        guest: "このメールアドレスで再度登録しようとする操作がありました（おそらくご本人です）。新しいアカウントは作成されず、既存のアカウントはそのままです。",
+        partner: "お客様のアカウントの情報でパートナー申請をしようとする操作がありました（おそらくご本人です）。新しいアカウントや申請は作成されていません。パートナーになるには、既存のアカウントでログインしてお問い合わせください。申請をアカウントに紐づけます。",
+        p2: "パスワードをお忘れの場合は再設定できます。",
         cta: "ログイン",
         resetLabel: "パスワードを忘れた場合",
+        contactLabel: "お問い合わせ",
         footer: "心当たりがない場合は、このメールを無視してください。アカウントには何も変更されていません。",
       },
       fa: {
         subject: "شما از قبل حساب BagajPark دارید",
-        heading: "این نشانی از قبل حساب دارد",
-        p1: "کسی (احتمالاً خود شما) تلاش کرد با این نشانی ایمیل دوباره ثبت‌نام کند. حساب جدیدی ساخته نشد و حساب فعلی شما بدون تغییر است.",
-        p2: "می‌توانید وارد شوید یا اگر رمز عبور را فراموش کرده‌اید آن را بازنشانی کنید.",
+        heading: "با این اطلاعات از قبل حسابی وجود دارد",
+        guest: "کسی (احتمالاً خود شما) تلاش کرد با این نشانی ایمیل دوباره ثبت‌نام کند. حساب جدیدی ساخته نشد و حساب فعلی شما بدون تغییر است.",
+        partner: "کسی (احتمالاً خود شما) تلاش کرد با اطلاعات حساب شما درخواست همکاری بدهد. حساب یا درخواست جدیدی ساخته نشد. برای همکار شدن، با حساب فعلی خود وارد شوید و با ما تماس بگیرید تا درخواست را به حساب شما وصل کنیم.",
+        p2: "اگر رمز عبور را فراموش کرده‌اید، می‌توانید آن را بازنشانی کنید.",
         cta: "ورود",
         resetLabel: "فراموشی رمز عبور",
+        contactLabel: "تماس با ما",
         footer: "اگر این کار را شما انجام نداده‌اید، این ایمیل را نادیده بگیرید؛ هیچ تغییری در حساب شما داده نشد.",
       },
       ru: {
         subject: "У вас уже есть аккаунт BagajPark",
-        heading: "Для этого адреса уже есть аккаунт",
-        p1: "Кто-то (вероятно, вы) попытался снова зарегистрироваться с этим адресом электронной почты. Новый аккаунт не создан, ваш текущий аккаунт не изменился.",
-        p2: "Вы можете войти или сбросить пароль, если забыли его.",
+        heading: "С этими данными уже есть аккаунт",
+        guest: "Кто-то (вероятно, вы) попытался снова зарегистрироваться с этим адресом электронной почты. Новый аккаунт не создан, ваш текущий аккаунт не изменился.",
+        partner: "Кто-то (вероятно, вы) попытался подать заявку партнёра с данными вашего аккаунта. Новый аккаунт и заявка не созданы. Чтобы стать партнёром, войдите в свой аккаунт и напишите нам: мы привяжем заявку к нему.",
+        p2: "Если вы забыли пароль, его можно сбросить.",
         cta: "Войти",
         resetLabel: "Забыли пароль?",
+        contactLabel: "Написать нам",
         footer: "Если это были не вы, просто проигнорируйте это письмо: в вашем аккаунте ничего не изменилось.",
       },
     }, locale);
 
-    const body = `${content.heading}\n\n${content.p1}\n\n${content.p2}\n\n${content.cta}: ${loginUrl}\n${content.resetLabel}: ${resetUrl}\n\n${content.footer}`;
+    const p1 = kind === "partner" ? content.partner : content.guest;
+    const extra =
+      kind === "partner"
+        ? `${content.contactLabel}: ${contactUrl}\n${content.resetLabel}: ${resetUrl}`
+        : `${content.resetLabel}: ${resetUrl}`;
+    const body = `${content.heading}\n\n${p1}\n\n${content.p2}\n\n${content.cta}: ${loginUrl}\n${extra}\n\n${content.footer}`;
+    const links =
+      kind === "partner"
+        ? `<a href="${contactUrl}">${content.contactLabel}</a> · <a href="${resetUrl}">${content.resetLabel}</a>`
+        : `<a href="${resetUrl}">${content.resetLabel}</a>`;
     const html = renderEmailHtml({
       locale,
       heading: content.heading,
-      paragraphs: [content.p1, content.p2, `<a href="${resetUrl}">${content.resetLabel}</a>`],
+      paragraphs: [p1, content.p2, links],
       cta: { href: loginUrl, label: content.cta, variant: "button" },
       footer: content.footer,
     });

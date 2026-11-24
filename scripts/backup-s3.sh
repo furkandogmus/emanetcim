@@ -7,10 +7,12 @@
 #
 # SIFRELEME: `BACKUP_AGE_RECIPIENT` (age genel anahtari, `age1...`) ortamda ya da
 # <app-dir>/docker-compose.env icinde (SSM'den uretilir) tanimliysa dump S3'e
-# `age -r` ile sifrelenip `.dump.age` olarak gider. Tanimliyken sifreleme
-# basarisizsa YUKLEME YAPILMAZ (duz metne dusulmez). Tanimsizsa yuksek sesle
-# uyarir ve eskisi gibi duz yukler. Ozel anahtar sunucuda TUTULMAZ; geri yukleme
-# ops/README.md § Yedek ve geri yukleme.
+# `age -r` ile sifrelenip `.dump.age` olarak gider. Sifreleme basarisizsa YUKLEME
+# YAPILMAZ. Alici tanimsizsa da yuklenmez: duz yukleme yalniz bilincli
+# `BACKUP_ALLOW_PLAINTEXT=1` ile (alici sonradan silinirse sessizce duz metne
+# dusulmesin). Basaridan sonra /api/internal/backup-heartbeat cagrilir;
+# /api/health/jobs duran yedegi `stale` gosterir. Ozel anahtar sunucuda TUTULMAZ;
+# geri yukleme ops/README.md § Yedek ve geri yukleme.
 set -e
 export PATH=$PATH:/usr/local/bin:/usr/bin:/bin
 
@@ -54,15 +56,16 @@ function assert_is_installed() {
   fi
 }
 
-# Ortam > docker-compose.env. Dosya `source` edilmez: yalniz bu satir okunur.
-function resolve_age_recipient() {
-  local -r app_dir="$1"
-  if [ -n "${BACKUP_AGE_RECIPIENT:-}" ]; then
-    echo "$BACKUP_AGE_RECIPIENT"; return
+# Ortam > docker-compose.env. Dosya `source` edilmez: yalniz o anahtarin satiri okunur.
+function read_setting() {
+  local -r key="$1" app_dir="$2"
+  local -r from_env="${!key:-}"
+  if [ -n "$from_env" ]; then
+    echo "$from_env"; return
   fi
   local -r env_file="$app_dir/docker-compose.env"
   if [ -r "$env_file" ]; then
-    grep -E '^BACKUP_AGE_RECIPIENT=' "$env_file" | tail -1 | cut -d= -f2- | tr -d '"' || true
+    grep -E "^${key}=" "$env_file" | tail -1 | cut -d= -f2- | tr -d '"' || true
   fi
 }
 
@@ -98,19 +101,23 @@ function main() {
   latest=$(ls -t "$backup_dir"/emanetci_*.dump 2>/dev/null | head -1)
   assert_not_empty "son dump" "$latest"
 
-  local recipient upload="$latest"
-  recipient=$(resolve_age_recipient "$app_dir")
+  local recipient upload="$latest" encrypted="false"
+  recipient=$(read_setting BACKUP_AGE_RECIPIENT "$app_dir")
   if [ -n "$recipient" ]; then
     if ! command -v age >/dev/null 2>&1; then
-      log_error "BACKUP_AGE_RECIPIENT tanimli ama 'age' kurulu degil -- duz metin YUKLENMEDI."; exit 1
+      log_error "BACKUP_AGE_RECIPIENT tanimli ama 'age' kurulu degil -- YUKLENMEDI."; exit 1
     fi
     upload="$latest.age"
     if ! age -r "$recipient" -o "$upload" "$latest"; then
       rm -f "$upload"
-      log_error "age sifrelemesi basarisiz -- duz metin YUKLENMEDI."; exit 1
+      log_error "age sifrelemesi basarisiz -- YUKLENMEDI."; exit 1
     fi
+    encrypted="true"
+  elif [ "$(read_setting BACKUP_ALLOW_PLAINTEXT "$app_dir")" = "1" ]; then
+    log_warn "!!! BACKUP_ALLOW_PLAINTEXT=1: yedek S3'e SIFRESIZ gidiyor (yalniz SSE-S3). !!!"
   else
-    log_warn "!!! BACKUP_AGE_RECIPIENT tanimsiz: yedek S3'e SIFRESIZ gidiyor (yalniz SSE-S3). !!!"
+    log_error "BACKUP_AGE_RECIPIENT tanimsiz ve BACKUP_ALLOW_PLAINTEXT=1 degil -- YUKLENMEDI. ops/README.md § Yedek."
+    exit 1
   fi
 
   log_info "S3'e kopyalaniyor: s3://$bucket/$prefix/$(basename "$upload")"
@@ -119,6 +126,11 @@ function main() {
   fi
   # Sifreli kopya yalniz yukleme icindi; yerelde duz dump kalir (restore.sh onu okur).
   if [ "$upload" != "$latest" ]; then rm -f "$upload"; fi
+
+  # Kalp atisi: gelmezse /api/health/jobs `backup-heartbeat` isini stale gosterir.
+  if ! "$app_dir/scripts/call-internal-job.sh" --job backup-heartbeat --method POST --app-dir "$app_dir"; then
+    log_warn "yedek yuklendi ama kalp atisi yazilamadi (encrypted=$encrypted)"
+  fi
 
   local removed
   removed=$(find "$backup_dir" -name 'emanetci_*.dump' -mtime +"$keep_days" -print -delete | wc -l | tr -d ' ')

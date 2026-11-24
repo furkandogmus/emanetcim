@@ -61,6 +61,21 @@ resource "aws_s3_bucket_lifecycle_configuration" "backups" {
       noncurrent_days = 7
     }
   }
+
+  # Suresi dolan surumlerin geride biraktigi yalniz silme isaretlerini temizler.
+  # Gunlu `expiration` ile ayni kurala yazilamaz (S3 kabul etmez), bu yuzden ayri.
+  rule {
+    id     = "expire-db-backup-delete-markers"
+    status = "Enabled"
+
+    filter {
+      prefix = "backups/"
+    }
+
+    expiration {
+      expired_object_delete_marker = true
+    }
+  }
 }
 
 resource "aws_s3_bucket_server_side_encryption_configuration" "backups" {
