@@ -12,6 +12,9 @@ const m = vi.hoisted(() => ({
   cookieSet: vi.fn(),
   userFindUnique: vi.fn(),
   startImpersonation: vi.fn(),
+  cookieGet: vi.fn(),
+  headerGet: vi.fn(),
+  headerHas: vi.fn(),
 }));
 
 vi.mock("@/auth", () => ({ auth: m.auth }));
@@ -20,7 +23,10 @@ vi.mock("@/lib/client-ip", () => ({
   getClientIpOrNull: vi.fn().mockResolvedValue("203.0.113.7"),
   clientIpFromRequest: vi.fn(() => "203.0.113.7"),
 }));
-vi.mock("next/headers", () => ({ cookies: vi.fn(async () => ({ set: m.cookieSet, get: vi.fn() })) }));
+vi.mock("next/headers", () => ({
+  cookies: vi.fn(async () => ({ set: m.cookieSet, get: m.cookieGet })),
+  headers: vi.fn(async () => ({ get: m.headerGet, has: m.headerHas })),
+}));
 vi.mock("@/lib/db", () => ({ default: { user: { findUnique: m.userFindUnique } } }));
 vi.mock("@/services/AdminUserService", () => ({
   adminUserService: { startImpersonation: m.startImpersonation },
@@ -29,15 +35,20 @@ vi.mock("@/services/AdminUserService", () => ({
 import {
   WEB_IMPERSONATION_COOKIE,
   WEB_IMPERSONATION_TTL_SECONDS,
+  WEB_IMPERSONATION_STAMP_HEADER,
+  impersonationGate,
   impersonationProxyDecision,
+  impersonationStamp,
   signWebImpersonation,
   verifyWebImpersonation,
 } from "@/lib/web-impersonation";
-import { resolveWebImpersonation } from "@/lib/web-impersonation-session";
+import { readWebImpersonation, resolveWebImpersonation } from "@/lib/web-impersonation-session";
+import { asImpersonationRead } from "@/lib/impersonation-read-scope";
+import { authConfig } from "@/auth.config";
 import { IMPERSONATION_TTL_SECONDS } from "@/lib/mobile-auth";
 import { startImpersonationAction } from "@/actions/admin-impersonation";
 import { POST as stopRoute } from "@/app/api/impersonation/stop/route";
-import { requireUser } from "@/lib/action-auth";
+import { actionSession, requireUser } from "@/lib/action-auth";
 
 const ADMIN = "11111111-1111-4111-8111-111111111111";
 const TARGET = "22222222-2222-4222-8222-222222222222";
@@ -115,7 +126,7 @@ describe("web olarak goruntule", () => {
       m.startImpersonation.mockResolvedValue({ ok: true, target: { id: TARGET, tokenVersion: 3 } });
       const r = await startImpersonationAction(TARGET);
       expect(r.ok).toBe(true);
-      expect(m.startImpersonation).toHaveBeenCalledWith(TARGET, { userId: ADMIN, ip: "203.0.113.7" });
+      expect(m.startImpersonation).toHaveBeenCalledWith(TARGET, { userId: ADMIN, ip: "203.0.113.7" }, "web");
       const [name, token, opts] = m.cookieSet.mock.calls[0];
       expect(name).toBe(WEB_IMPERSONATION_COOKIE);
       expect(opts).toMatchObject({ httpOnly: true, sameSite: "strict", path: "/" });
@@ -128,46 +139,51 @@ describe("web olarak goruntule", () => {
   });
 
   describe("oturum cozumu", () => {
-    it("gecerli cerez + ADMIN oturumu: oturum hedefe doner", async () => {
+    const at = new Date(T0.getTime() + 60_000);
+
+    it("gecerli cerez + ADMIN oturumu: hedef", async () => {
       m.userFindUnique.mockResolvedValue(targetRow);
-      const v = await resolveWebImpersonation(adminToken, await cookieFor(), new Date(T0.getTime() + 60_000));
-      expect(v?.target).toMatchObject({ id: TARGET, role: "GUEST" });
-      expect(v?.adminId).toBe(ADMIN);
+      const v = await resolveWebImpersonation(adminToken, await cookieFor(), at);
+      expect(v.kind).toBe("active");
+      if (v.kind === "active") {
+        expect(v.target).toMatchObject({ id: TARGET, role: "GUEST" });
+        expect(v.adminId).toBe(ADMIN);
+      }
     });
 
-    it("30 dakika dolunca cerez yok sayilir: oturum yeniden adminin", async () => {
+    it("30 dakika dolunca gecersiz", async () => {
       m.userFindUnique.mockResolvedValue(targetRow);
       const later = new Date(T0.getTime() + (WEB_IMPERSONATION_TTL_SECONDS + 1) * 1000);
-      expect(await resolveWebImpersonation(adminToken, await cookieFor(), later)).toBeNull();
+      expect((await resolveWebImpersonation(adminToken, await cookieFor(), later)).kind).toBe("stale");
     });
 
-    it("cerez baska admine basildiysa ya da oturum artik ADMIN degilse gecmez", async () => {
+    it("baska admine basilmis cerez ya da ADMIN olmayan oturum: hedef yok", async () => {
       m.userFindUnique.mockResolvedValue(targetRow);
       const c = await cookieFor();
-      const at = new Date(T0.getTime() + 1000);
-      expect(await resolveWebImpersonation({ sub: "33333333-3333-4333-8333-333333333333", role: "ADMIN" }, c, at)).toBeNull();
-      expect(await resolveWebImpersonation({ sub: ADMIN, role: "PARTNER" }, c, at)).toBeNull();
+      expect((await resolveWebImpersonation({ sub: "33333333-3333-4333-8333-333333333333", role: "ADMIN" }, c, at)).kind).toBe("stale");
+      expect((await resolveWebImpersonation({ sub: ADMIN, role: "PARTNER" }, c, at)).kind).toBe("stale");
     });
 
-    it("hedef bu arada ADMIN olduysa, yasaklandiysa ya da tokenVersion degistiyse gecmez", async () => {
+    it("hedef ADMIN oldu, yasaklandi, silindi ya da tokenVersion degisti: stale (serit yalniz Cik)", async () => {
       const c = await cookieFor();
-      const at = new Date(T0.getTime() + 1000);
       for (const row of [
         { ...targetRow, role: "ADMIN" },
         { ...targetRow, isBanned: true },
         { ...targetRow, tokenVersion: 4 },
+        { ...targetRow, email: "deleted-x@invalid.local" },
+        null,
       ]) {
         m.userFindUnique.mockResolvedValueOnce(row);
-        expect(await resolveWebImpersonation(adminToken, c, at)).toBeNull();
+        expect((await resolveWebImpersonation(adminToken, c, at)).kind).toBe("stale");
       }
     });
 
-    it("admin her yerden cikis yaptiysa (tokenVersion) gecmez", async () => {
+    it("admin her yerden cikis yaptiysa (tokenVersion) stale", async () => {
       m.userFindUnique.mockResolvedValue(targetRow);
-      expect(await resolveWebImpersonation({ ...adminToken, tv: 2 }, await cookieFor(), new Date(T0.getTime() + 1000))).toBeNull();
+      expect((await resolveWebImpersonation({ ...adminToken, tv: 2 }, await cookieFor(), at)).kind).toBe("stale");
     });
 
-    it("sahte imza ya da baska aile token'i gecmez", async () => {
+    it("sahte imza ya da baska sir: gecmez", async () => {
       const c = await cookieFor();
       const tampered = c.slice(0, -2) + (c.endsWith("A") ? "BB" : "AA");
       expect(await verifyWebImpersonation(tampered, { now: T0 })).toBeNull();
@@ -176,11 +192,104 @@ describe("web olarak goruntule", () => {
     });
   });
 
+  describe("proxy kapisi (gercek token bicimi)", () => {
+    // `auth.ts` jwt callback'i `id` yazmaz, yalniz `sub`: proxy kimligi oradan okumali.
+    async function proxyUser(token: Record<string, unknown>) {
+      const session = await authConfig.callbacks!.session!({
+        session: { user: {}, expires: "" },
+        token,
+      } as never);
+      return (session as { user: { id?: string; role?: string } }).user;
+    }
+
+    it("sub'lu ADMIN token'inda gecerli cerez damgalanir", async () => {
+      const live = await signWebImpersonation({ targetId: TARGET, targetTv: 3, adminId: ADMIN, adminTv: 1 });
+      const authUser = await proxyUser({ sub: ADMIN, role: "ADMIN", tv: 1, rv: 0 });
+      expect(authUser.id).toBe(ADMIN);
+      const gate = await impersonationGate({
+        cookie: live!.token,
+        authUser,
+        method: "GET",
+        pathname: "/tr/bookings",
+        isServerAction: false,
+        isAdminPath: false,
+      });
+      expect(gate.decision).toBe("pass");
+      expect(gate.stamp).toBe(await impersonationStamp(live!.token));
+    });
+
+    it("gecerli goruntulemede route handler yazmasi kesilir, server action damgayla gecer", async () => {
+      const live = await signWebImpersonation({ targetId: TARGET, targetTv: 3, adminId: ADMIN, adminTv: 1 });
+      const authUser = await proxyUser({ sub: ADMIN, role: "ADMIN" });
+      const common = { cookie: live!.token, authUser, isAdminPath: false };
+      expect((await impersonationGate({ ...common, method: "POST", pathname: "/api/push/subscribe", isServerAction: false })).decision).toBe("block");
+      expect((await impersonationGate({ ...common, method: "POST", pathname: "/tr/account", isServerAction: false })).decision).toBe("block");
+      const action = await impersonationGate({ ...common, method: "POST", pathname: "/tr/search", isServerAction: true });
+      expect(action.decision).toBe("pass");
+      expect(action.stamp).not.toBeNull();
+    });
+
+    it("baska kullanicinin oturumunda cerez temizlenir, damga yok", async () => {
+      const live = await signWebImpersonation({ targetId: TARGET, targetTv: 3, adminId: ADMIN, adminTv: 1 });
+      const authUser = await proxyUser({ sub: "33333333-3333-4333-8333-333333333333", role: "ADMIN" });
+      const gate = await impersonationGate({
+        cookie: live!.token,
+        authUser,
+        method: "POST",
+        pathname: "/tr",
+        isServerAction: true,
+        isAdminPath: false,
+      });
+      expect(gate).toEqual({ decision: "clear_cookie", stamp: null });
+    });
+  });
+
+  describe("oturum callback damgasi", () => {
+    async function setRequest(cookie: string | null, stamp: string | null, isAction = false) {
+      m.cookieGet.mockImplementation((n: string) => (cookie && n === WEB_IMPERSONATION_COOKIE ? { value: cookie } : undefined));
+      m.headerGet.mockImplementation((n: string) => (n === WEB_IMPERSONATION_STAMP_HEADER ? stamp : null));
+      m.headerHas.mockImplementation((n: string) => n === "next-action" && isAction);
+    }
+
+    it("damgasiz istek (proxy'yi atlayan yol) goruntulemeyi onurlandirmaz", async () => {
+      const live = await signWebImpersonation({ targetId: TARGET, targetTv: 3, adminId: ADMIN, adminTv: 1 });
+      m.userFindUnique.mockResolvedValue(targetRow);
+      await setRequest(live!.token, null);
+      expect(await readWebImpersonation(adminToken)).toBeNull();
+      await setRequest(live!.token, "f".repeat(64));
+      expect(await readWebImpersonation(adminToken)).toBeNull();
+    });
+
+    it("damgali sayfa isteginde hedef; server action'da kimliksiz; okuma kapsaminda hedef", async () => {
+      const live = await signWebImpersonation({ targetId: TARGET, targetTv: 3, adminId: ADMIN, adminTv: 1 });
+      const stamp = await impersonationStamp(live!.token);
+      m.userFindUnique.mockResolvedValue(targetRow);
+      await setRequest(live!.token, stamp);
+      expect((await readWebImpersonation(adminToken))?.mode).toBe("target");
+      await setRequest(live!.token, stamp, true);
+      expect((await readWebImpersonation(adminToken))?.mode).toBe("anonymous");
+      expect((await asImpersonationRead(() => readWebImpersonation(adminToken)))?.mode).toBe("target");
+    });
+
+    it("damgali ama hedef gecersiz: stale", async () => {
+      const live = await signWebImpersonation({ targetId: TARGET, targetTv: 3, adminId: ADMIN, adminTv: 1 });
+      m.userFindUnique.mockResolvedValue({ ...targetRow, isBanned: true });
+      await setRequest(live!.token, await impersonationStamp(live!.token));
+      expect((await readWebImpersonation(adminToken))?.mode).toBe("stale");
+    });
+
+    it("cerez yoksa (durdurulduysa) oturum adminin kendisi", async () => {
+      await setRequest(null, null);
+      expect(await readWebImpersonation(adminToken)).toBeNull();
+      expect(m.userFindUnique).not.toHaveBeenCalled();
+    });
+  });
+
   describe("durdurma", () => {
-    function req(cookie?: string) {
+    function req(cookie?: string, h: Record<string, string> = { "sec-fetch-site": "same-origin", origin: "https://example.test", host: "example.test" }) {
       return {
         cookies: { get: (n: string) => (cookie && n === WEB_IMPERSONATION_COOKIE ? { value: cookie } : undefined) },
-        headers: new Headers(),
+        headers: new Headers(h),
       } as unknown as Parameters<typeof stopRoute>[0];
     }
 
@@ -188,21 +297,23 @@ describe("web olarak goruntule", () => {
       const live = await signWebImpersonation({ targetId: TARGET, targetTv: 3, adminId: ADMIN, adminTv: 1 });
       const res = await stopRoute(req(live!.token));
       expect(res.status).toBe(200);
-      const setCookie = res.headers.get("set-cookie") ?? "";
-      expect(setCookie).toContain(`${WEB_IMPERSONATION_COOKIE}=;`);
+      expect(res.headers.get("set-cookie") ?? "").toContain(`${WEB_IMPERSONATION_COOKIE}=;`);
       expect(m.audit).toHaveBeenCalledWith(
         expect.objectContaining({
           actorUserId: ADMIN,
           action: "admin.impersonate.stop",
           entityType: "User",
           entityId: TARGET,
+          metadata: { channel: "web" },
         }),
       );
     });
 
-    it("durduktan sonra (cerez yok) oturum adminin kendisi", async () => {
-      expect(await resolveWebImpersonation(adminToken, undefined)).toBeNull();
-      expect(m.userFindUnique).not.toHaveBeenCalled();
+    it("baska siteden gelen istek reddedilir, kayit yazilmaz", async () => {
+      const live = await signWebImpersonation({ targetId: TARGET, targetTv: 3, adminId: ADMIN, adminTv: 1 });
+      expect((await stopRoute(req(live!.token, { "sec-fetch-site": "cross-site", origin: "https://evil.example" }))).status).toBe(403);
+      expect((await stopRoute(req(live!.token, { origin: "https://evil.example", host: "example.test" }))).status).toBe(403);
+      expect(m.audit).not.toHaveBeenCalled();
     });
 
     it("gecersiz cerezde de cerezi siler ama denetim kaydi yazmaz", async () => {
@@ -213,34 +324,34 @@ describe("web olarak goruntule", () => {
   });
 
   describe("salt okunur", () => {
-    const base = { valid: true, isAdminPath: false };
-    it("yazma istekleri (server action dahil) kesilir, durdurma ve cikis acik", () => {
+    const base = { valid: true, isAdminPath: false, isServerAction: false };
+    it("route handler yazmalari ve JS'siz form POST'u kesilir; durdurma acik; cikis cerezi siler", () => {
       expect(impersonationProxyDecision({ ...base, method: "POST", pathname: "/tr/account" })).toBe("block");
       expect(impersonationProxyDecision({ ...base, method: "DELETE", pathname: "/api/x" })).toBe("block");
       expect(impersonationProxyDecision({ ...base, method: "POST", pathname: "/api/impersonation/stop" })).toBe("pass");
-      expect(impersonationProxyDecision({ ...base, method: "POST", pathname: "/api/auth/signout" })).toBe("pass");
+      expect(impersonationProxyDecision({ ...base, method: "POST", pathname: "/api/auth/signout" })).toBe("clear_cookie");
+      expect(impersonationProxyDecision({ ...base, isServerAction: true, method: "POST", pathname: "/tr/search" })).toBe("pass");
     });
 
     it("okuma gecer; veri disa aktarimi kapali; yonetici paneli ana sayfaya", () => {
       expect(impersonationProxyDecision({ ...base, method: "GET", pathname: "/tr/bookings" })).toBe("pass");
       expect(impersonationProxyDecision({ ...base, method: "GET", pathname: "/api/account/data-export" })).toBe("block");
-      expect(impersonationProxyDecision({ valid: true, isAdminPath: true, method: "GET", pathname: "/tr/admin" })).toBe(
-        "redirect_home",
-      );
+      expect(impersonationProxyDecision({ ...base, isAdminPath: true, method: "GET", pathname: "/tr/admin" })).toBe("redirect_home");
     });
 
-    it("gecersiz cerez temizlenir, istek normal akar", () => {
-      expect(impersonationProxyDecision({ valid: false, isAdminPath: false, method: "POST", pathname: "/tr" })).toBe(
-        "clear_cookie",
-      );
+    it("gecersiz cerez temizlenir", () => {
+      expect(impersonationProxyDecision({ ...base, valid: false, method: "POST", pathname: "/tr" })).toBe("clear_cookie");
     });
 
-    it("action kapisi goruntuleme oturumunu reddeder", async () => {
-      m.auth.mockResolvedValue({
-        user: { id: TARGET, role: "GUEST" },
-        impersonation: { adminId: ADMIN, expiresAt: T0.toISOString() },
-      });
+    it("action kapilari: rol kapisi her zaman, actionSession okuma kapsami disinda reddeder", async () => {
+      const imp = { adminId: ADMIN, expiresAt: T0.toISOString() };
+      m.auth.mockResolvedValue({ user: { id: TARGET, role: "GUEST" }, impersonation: imp });
       expect((await requireUser()).ok).toBe(false);
+      expect(await actionSession()).toBeNull();
+      expect((await asImpersonationRead(() => actionSession()))?.user.id).toBe(TARGET);
+      m.auth.mockResolvedValue({ user: { id: ADMIN, role: "ADMIN" }, impersonation: { stale: true, expiresAt: null } });
+      expect((await requireUser()).ok).toBe(false);
+      expect(await asImpersonationRead(() => actionSession())).toBeNull();
     });
   });
 });

@@ -112,32 +112,96 @@ export function webImpersonationCookieOptions(expiresAt: Date) {
   };
 }
 
-/** Durdurma ucu: proxy goruntuleme sirasinda yalniz buna ve cikisa yazma izni verir. */
+/** Durdurma ucu: proxy goruntuleme sirasinda yazmaya yalniz buna ve cikisa izin verir. */
 export const WEB_IMPERSONATION_STOP_PATH = "/api/impersonation/stop";
+export const WEB_SIGNOUT_PATH = "/api/auth/signout";
+
+/**
+ * Proxy'nin "bu istegi dogruladim" damgasi. Oturum callback'i goruntulemeyi YALNIZ bu
+ * baslik cerezin HMAC'iyle eslesirse onurlandirir: matcher'in atladigi yollar (nokta
+ * iceren yol) ve proxy'yi bypass eden her istek adminin kendi oturumuyla kalir.
+ * Gelen istekteki ayni adli baslik proxy'de her zaman silinir.
+ */
+export const WEB_IMPERSONATION_STAMP_HEADER = "x-bp-imp-ok";
+
+async function stampKey(): Promise<CryptoKey | null> {
+  const s = authSecret();
+  if (!s) return null;
+  return crypto.subtle.importKey(
+    "raw",
+    new TextEncoder().encode(`bagajpark.web-impersonation-stamp.v1:${s}`),
+    { name: "HMAC", hash: "SHA-256" },
+    false,
+    ["sign"],
+  );
+}
+
+export async function impersonationStamp(cookieValue: string): Promise<string | null> {
+  const key = await stampKey();
+  if (!key) return null;
+  const sig = new Uint8Array(await crypto.subtle.sign("HMAC", key, new TextEncoder().encode(cookieValue)));
+  let hex = "";
+  for (const b of sig) hex += b.toString(16).padStart(2, "0");
+  return hex;
+}
+
+export async function stampMatches(stamp: string | null | undefined, cookieValue: string): Promise<boolean> {
+  if (!stamp) return false;
+  const expected = await impersonationStamp(cookieValue);
+  if (!expected || expected.length !== stamp.length) return false;
+  let diff = 0;
+  for (let i = 0; i < expected.length; i++) diff |= expected.charCodeAt(i) ^ stamp.charCodeAt(i);
+  return diff === 0;
+}
 
 const SAFE_METHODS = new Set(["GET", "HEAD", "OPTIONS"]);
-const WRITE_ALLOWLIST = new Set([WEB_IMPERSONATION_STOP_PATH, "/api/auth/signout"]);
 /** GET olsa da goruntulemede kapali: hedefin tum kisisel verisini indirir. */
 const READ_BLOCKLIST = new Set(["/api/account/data-export"]);
 
 export type ImpersonationProxyDecision = "pass" | "clear_cookie" | "block" | "redirect_home";
 
 /**
- * Goruntuleme SALT OKUNUR: web'de ~50 yazma girisi (server action, route handler) var ve
- * hepsinde ortak bir goruntuleme kapisi yok; tek guvenli kapi proxy. Server action'lar da
- * POST oldugu icin buradan gecer.
+ * Goruntuleme salt okunur. Route handler yazmalari burada kesilir. Server action'lar
+ * (`Next-Action` baslikli POST) gecer: kesilirse istemci hata sinirina duser ve aramanin
+ * otomatik action'lari sayfayi kirar. Onlarin kilidi oturum callback'inde: okuma kapsami
+ * disindaki her action'da kimlik bostur (`impersonation-read-scope.ts`).
+ * JS'siz form POST'u (`Next-Action` basliksiz) da kesilir.
  */
 export function impersonationProxyDecision(input: {
   valid: boolean;
   method: string;
   pathname: string;
+  isServerAction: boolean;
   /** Dil oneki atilmis yolun yonetici paneli olup olmadigi. */
   isAdminPath: boolean;
 }): ImpersonationProxyDecision {
   if (!input.valid) return "clear_cookie";
-  if (WRITE_ALLOWLIST.has(input.pathname)) return "pass";
-  if (!SAFE_METHODS.has(input.method.toUpperCase())) return "block";
+  if (input.pathname === WEB_SIGNOUT_PATH) return "clear_cookie";
+  if (input.pathname === WEB_IMPERSONATION_STOP_PATH) return "pass";
+  const method = input.method.toUpperCase();
+  if (!SAFE_METHODS.has(method)) return method === "POST" && input.isServerAction ? "pass" : "block";
   if (READ_BLOCKLIST.has(input.pathname)) return "block";
   if (input.isAdminPath) return "redirect_home";
   return "pass";
+}
+
+/**
+ * Proxy kapisi. `authUser` proxy'nin Auth.js oturumudur (`auth.config.ts`); kimlik `id`
+ * yoksa `sub`'dan gelir (gercek token'da `id` yok). Gecerli cerezde damga doner.
+ */
+export async function impersonationGate(input: {
+  cookie: string | undefined;
+  authUser: { id?: string | null; role?: string | null } | null | undefined;
+  method: string;
+  pathname: string;
+  isServerAction: boolean;
+  isAdminPath: boolean;
+  now?: Date;
+}): Promise<{ decision: ImpersonationProxyDecision | "none"; stamp: string | null }> {
+  if (!input.cookie) return { decision: "none", stamp: null };
+  const adminId = input.authUser?.role === "ADMIN" && input.authUser.id ? input.authUser.id : null;
+  const valid = adminId ? (await verifyWebImpersonation(input.cookie, { adminId, now: input.now })) !== null : false;
+  const decision = impersonationProxyDecision({ ...input, valid });
+  const stamp = valid && decision !== "clear_cookie" ? await impersonationStamp(input.cookie) : null;
+  return { decision, stamp };
 }

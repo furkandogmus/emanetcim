@@ -28,7 +28,7 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ id:
   const result = await adminUserService.startImpersonation(id, {
     userId: auth.user.id,
     ip: clientIpFromRequest(req),
-  });
+  }, "mobile");
   if (!result.ok) {
     if (result.error === "not_found") return NextResponse.json({ error: "not_found" }, { status: 404 });
     return NextResponse.json({ error: result.error }, { status: 403 });

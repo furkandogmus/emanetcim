@@ -14,6 +14,7 @@ import { getClientIpOrNull } from "@/lib/client-ip";
 import { linkGuestBookingsToVerifiedUser } from "@/services/booking/guest-link";
 import { appleTokenService } from "@/services/AppleTokenService";
 import { readWebImpersonation } from "@/lib/web-impersonation-session";
+import { WEB_IMPERSONATION_COOKIE } from "@/lib/web-impersonation";
 
 /**
  * Auth.js (v5) - Merkezi Kimlik Doğrulama Konfigürasyonu
@@ -62,6 +63,15 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
   */
   debug: process.env.NODE_ENV !== "production",
   events: {
+    async signOut() {
+      // Cikista goruntuleme cerezi de gider (proxy de siler; bu, sunucu tarafi signOut icin).
+      try {
+        const { cookies } = await import("next/headers");
+        (await cookies()).delete({ name: WEB_IMPERSONATION_COOKIE, path: "/" });
+      } catch {
+        // istek baglami yok
+      }
+    },
     async signIn({ account }) {
       const clientId = process.env.APPLE_ID?.trim();
       if (account?.provider === "apple" && account.refresh_token && clientId) {
@@ -119,9 +129,9 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
         session.user.id = token.sub || "";
         // JWT serileştirmesinde Tarih stringleşebilir, istemci tarafı için Date nesnesi olduğundan emin oluyoruz.
         session.user.emailVerified = token.emailVerified ? new Date(token.emailVerified as unknown as string) : null;
-        // "Olarak goruntule": adminin token'i degismez, yalniz bu istegin oturumu hedefe doner.
+        // "Olarak goruntule": adminin token'i degismez, yalniz bu istegin oturumu degisir.
         const imp = await readWebImpersonation(token);
-        if (imp) {
+        if (imp?.mode === "target") {
           session.user = {
             ...session.user,
             id: imp.target.id,
@@ -132,6 +142,12 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
             emailVerified: imp.target.emailVerified,
           };
           session.impersonation = { adminId: imp.adminId, expiresAt: imp.expiresAt.toISOString() };
+        } else if (imp?.mode === "anonymous") {
+          // Okuma kapsami disindaki action: ne hedefin ne adminin kimligi.
+          session.user = { ...session.user, id: "", role: Role.GUEST, name: null, email: "", image: null, emailVerified: null };
+          session.impersonation = { adminId: imp.adminId, expiresAt: imp.expiresAt.toISOString() };
+        } else if (imp?.mode === "stale") {
+          session.impersonation = { stale: true, expiresAt: imp.expiresAt?.toISOString() ?? null };
         }
       }
       return session;

@@ -2949,7 +2949,8 @@
     "error_not_found": "User not found.",
     "error_cannot_impersonate_admin": "You can't view as an administrator.",
     "error_user_banned": "You can't view as a banned user.",
-    "error_unavailable": "Viewing as a user is not available right now."
+    "error_unavailable": "Viewing as a user is not available right now.",
+    "staleBanner": "The user view is no longer valid (the account changed or was closed). Exit to return to your admin account."
   },
   "AdminBroadcast": {
     "back": "Back to dashboard",

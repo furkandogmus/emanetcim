@@ -1,15 +1,14 @@
 import NextAuth from "next-auth";
 import { authConfig } from "./auth.config";
 import createMiddleware from 'next-intl/middleware';
-import { NextResponse } from 'next/server';
-import type { NextRequest } from 'next/server';
+import { NextRequest, NextResponse } from 'next/server';
 import { routing } from './i18n/routing';
 import { isAdminPath as matchesAdminPath, isPartnerPath as matchesPartnerPath } from './lib/route-protection';
 import { retiredLocaleRedirectPath } from './lib/retired-locales';
 import {
   WEB_IMPERSONATION_COOKIE,
-  impersonationProxyDecision,
-  verifyWebImpersonation,
+  WEB_IMPERSONATION_STAMP_HEADER,
+  impersonationGate,
 } from './lib/web-impersonation';
 import type { NextAuthRequest } from 'next-auth';
 
@@ -46,30 +45,35 @@ function stripLocalePrefix(pathname: string): { locale: string; barePath: string
  */
 const authProxy = auth(async (req) => {
   const cookie = req.cookies.get(WEB_IMPERSONATION_COOKIE)?.value;
-  if (!cookie) return routeRequest(req);
+  const forgedStamp = req.headers.has(WEB_IMPERSONATION_STAMP_HEADER);
+  if (!cookie && !forgedStamp) return routeRequest(req, null);
 
-  // Gecerlilik oturum callback'iyle ayni temel: cerez bu admine basilmis ve suresi dolmamis.
-  const adminId = req.auth?.user?.role === "ADMIN" ? req.auth.user.id : null;
-  const valid = adminId ? (await verifyWebImpersonation(cookie, { adminId })) !== null : false;
   const { locale, barePath } = stripLocalePrefix(req.nextUrl.pathname);
-  const decision = impersonationProxyDecision({
-    valid,
+  const gate = await impersonationGate({
+    cookie,
+    authUser: req.auth?.user,
     method: req.method,
     pathname: req.nextUrl.pathname,
+    isServerAction: req.headers.has("next-action"),
     isAdminPath: matchesAdminPath(barePath),
   });
-  if (decision === "block") {
+  if (gate.decision === "block") {
     return NextResponse.json({ error: "not_allowed_while_impersonating" }, { status: 403 });
   }
-  if (decision === "redirect_home") {
+  if (gate.decision === "redirect_home") {
     return NextResponse.redirect(new URL(`/${locale}`, req.nextUrl));
   }
-  const res = routeRequest(req);
-  if (decision === "clear_cookie") res.cookies.delete({ name: WEB_IMPERSONATION_COOKIE, path: "/" });
+  // Damga yalniz burada, dogrulanmis istekte konur; istemcinin gonderdigi her zaman silinir.
+  const headers = new Headers(req.headers);
+  headers.delete(WEB_IMPERSONATION_STAMP_HEADER);
+  if (gate.stamp) headers.set(WEB_IMPERSONATION_STAMP_HEADER, gate.stamp);
+  const res = routeRequest(req, headers);
+  if (gate.decision === "clear_cookie") res.cookies.delete({ name: WEB_IMPERSONATION_COOKIE, path: "/" });
   return res;
 });
 
-function routeRequest(req: NextAuthRequest): NextResponse {
+/** `overrideHeaders`: uygulamaya iletilecek istek basliklari (null = degismez). */
+function routeRequest(req: NextAuthRequest, overrideHeaders: Headers | null): NextResponse {
   const { nextUrl } = req;
   const { pathname } = nextUrl;
   const isLoggedIn = !!req.auth;
@@ -110,7 +114,7 @@ function routeRequest(req: NextAuthRequest): NextResponse {
   if (pathname.startsWith('/api/')) {
     const requestId =
       req.headers.get('x-request-id') || crypto.randomUUID();
-    const requestHeaders = new Headers(req.headers);
+    const requestHeaders = new Headers(overrideHeaders ?? req.headers);
     requestHeaders.set('x-request-id', requestId);
     const res = NextResponse.next({ request: { headers: requestHeaders } });
     res.headers.set('x-request-id', requestId);
@@ -127,7 +131,14 @@ function routeRequest(req: NextAuthRequest): NextResponse {
   }
 
   // 2. I18n Middleware (Handles locale prefixing and redirects)
-  const response = intlMiddleware(req);
+  /*
+    next-intl ileriye `new Headers(request.headers)` gecirir; baslik degisikligi ona
+    verilen istekten gecmeli. Govde kopyalanmaz (action govdesi bozulmasin), intl yalniz
+    URL, baslik ve cerez okur.
+  */
+  const response = intlMiddleware(
+    overrideHeaders ? new NextRequest(req.nextUrl.href, { headers: overrideHeaders }) : req,
+  );
   
   // Eğer intlMiddleware bir yönlendirme yapıyorsa (örn: /tr ekliyorsa), doğrudan o cevabı dönelim.
   // Bu, sonsuz yönlendirme döngülerini (redirect loops) önler.

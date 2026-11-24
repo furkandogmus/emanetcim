@@ -1,5 +1,8 @@
 "use server";
 
+import { asImpersonationRead } from "@/lib/impersonation-read-scope";
+import { actionSession } from "@/lib/action-auth";
+
 import { shopService } from "@/services/ShopService";
 import { validateBookingStayWindow } from "@/lib/booking-server-price";
 import { getPricingRules } from "@/lib/platform-settings";
@@ -13,10 +16,9 @@ import { getClientIp } from "@/lib/get-ip";
 import { roundedSlotPrices } from "@/lib/bag-pricing";
 import { analyticsService } from "@/services/AnalyticsService";
 import { resolveServerSessionId } from "@/lib/analytics-server";
-import { auth } from "@/auth";
 import { searchWindowForDays } from "@/lib/stay-days";
 
-export async function refreshSearchShopsAction(input: {
+async function refreshSearchShopsActionImpl(input: {
   /** `YYYY-MM-DD` — gun bazli arama. */
   dropDate: string;
   pickupDate: string;
@@ -78,7 +80,7 @@ export async function refreshSearchShopsAction(input: {
       slotPrices: roundedSlotPrices(h.pricePerDay, rules),
     }));
 
-  const session = await auth();
+  const session = await actionSession();
   analyticsService.track({
     name: "search_performed",
     sessionId: await resolveServerSessionId(session?.user?.id),
@@ -91,4 +93,9 @@ export async function refreshSearchShopsAction(input: {
     nearby: JSON.parse(JSON.stringify(withSlots(nearby))) as unknown[],
     all: JSON.parse(JSON.stringify(withSlots(all))) as unknown[],
   };
+}
+
+/** Goruntuleme oturumunda da hedefin gozuyle calisan salt okuma action'i. */
+export async function refreshSearchShopsAction(...args: Parameters<typeof refreshSearchShopsActionImpl>) {
+  return asImpersonationRead(() => refreshSearchShopsActionImpl(...args));
 }
