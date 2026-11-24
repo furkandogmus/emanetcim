@@ -1031,7 +1031,8 @@
       "booking_not_ready": "Vous pourrez signaler un problème une fois votre bagage déposé au commerce.",
       "duplicate_dispute": "Vous avez déjà signalé un problème pour cette réservation ; notre équipe l’examine.",
       "not_found": "Réservation introuvable.",
-      "not_owner": "Vous ne pouvez pas signaler de problème pour cette réservation."
+      "not_owner": "Vous ne pouvez pas signaler de problème pour cette réservation.",
+      "window_closed": "Les dommages ou pertes peuvent être signalés dans les 14 jours suivant le retrait du bagage. Ce délai est dépassé ; contactez-nous pour obtenir de l’aide."
     },
     "statusText": {
       "reviewing": "Votre signalement a été reçu ; notre équipe l’examine.",

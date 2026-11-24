@@ -1014,7 +1014,8 @@
       "booking_not_ready": "Du kannst ein Problem melden, sobald dein Gepäck im Laden abgegeben wurde.",
       "duplicate_dispute": "Du hast für diese Buchung bereits ein Problem gemeldet; unser Team prüft es.",
       "not_found": "Buchung nicht gefunden.",
-      "not_owner": "Du kannst für diese Buchung kein Problem melden."
+      "not_owner": "Du kannst für diese Buchung kein Problem melden.",
+      "window_closed": "Schäden oder Verluste können innerhalb von 14 Tagen nach der Abholung gemeldet werden. Diese Frist ist abgelaufen; bitte kontaktiere uns."
     },
     "statusText": {
       "reviewing": "Deine Meldung ist eingegangen; unser Team prüft sie.",

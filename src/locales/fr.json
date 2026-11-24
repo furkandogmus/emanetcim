@@ -1905,7 +1905,8 @@
     "reviewNotHidden": "L’avis n’est pas masqué.",
     "reviewReasonRequired": "Indiquez un motif pour le masquer.",
     "accountDeletionGuest": "Vous pouvez fermer votre compte directement sur cette page.",
-    "coordinatesRequired": "Le repère d'une boutique en ligne ne peut pas être supprimé ; vous pouvez le déplacer."
+    "coordinatesRequired": "Le repère d'une boutique en ligne ne peut pas être supprimé ; vous pouvez le déplacer.",
+    "disputeWindowClosed": "Les dommages ou pertes peuvent être signalés dans les 14 jours suivant le retrait du bagage. Ce délai est dépassé ; contactez-nous pour obtenir de l’aide."
   },
   "Emails": {
     "verificationSubject": "Vérifiez votre e-mail",

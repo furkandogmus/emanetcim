@@ -9,6 +9,7 @@ const KNOWN_ERROR_KEYS = new Set([
   "authRequired",
   "unauthorized",
   "disputeNotReady",
+  "disputeWindowClosed",
   "duplicateDispute",
 ]);
 

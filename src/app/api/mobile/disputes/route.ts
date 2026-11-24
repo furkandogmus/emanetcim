@@ -40,6 +40,7 @@ export async function POST(req: NextRequest) {
       not_found: 404,
       not_owner: 403,
       booking_not_ready: 400,
+      window_closed: 409,
       duplicate: 409,
     } as const;
     return NextResponse.json(

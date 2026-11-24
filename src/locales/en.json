@@ -1982,7 +1982,8 @@
     "reviewNotHidden": "The review is not hidden.",
     "reviewReasonRequired": "Enter a reason to hide it.",
     "accountDeletionGuest": "You can close your account directly on this page.",
-    "coordinatesRequired": "A live shop's location pin cannot be removed; you can move it instead."
+    "coordinatesRequired": "A live shop's location pin cannot be removed; you can move it instead.",
+    "disputeWindowClosed": "Damage or loss reports can be made within 14 days after your bag is picked up. This period has ended; please contact us for help."
   },
   "Emails": {
     "verificationSubject": "Verify Your Email",

@@ -1982,7 +1982,8 @@
     "reviewNotHidden": "Yorum gizli değil.",
     "reviewReasonRequired": "Gizlemek için gerekçe yazın.",
     "accountDeletionGuest": "Hesabınızı bu sayfadan doğrudan kapatabilirsiniz.",
-    "coordinatesRequired": "Yayındaki dükkanın konum pini silinemez; pini taşıyabilirsiniz."
+    "coordinatesRequired": "Yayındaki dükkanın konum pini silinemez; pini taşıyabilirsiniz.",
+    "disputeWindowClosed": "Hasar veya kayıp bildirimi, valizini geri aldıktan sonraki 14 gün içinde yapılabilir. Bu süre doldu; yardım için bizimle iletişime geç."
   },
   "Emails": {
     "verificationSubject": "E-postanızı Doğrulayın",

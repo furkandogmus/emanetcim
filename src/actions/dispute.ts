@@ -43,6 +43,7 @@ export async function createDisputeAction(input: {
       not_found: "Errors.unauthorized",
       not_owner: "Errors.unauthorized",
       booking_not_ready: "Errors.disputeNotReady",
+      window_closed: "Errors.disputeWindowClosed",
       duplicate: "Errors.duplicateDispute",
     } as const;
     return { success: false as const, error: ERROR_KEYS[result.reason] };
