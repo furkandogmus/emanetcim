@@ -12,6 +12,8 @@ declare module "next-auth" {
       role: Role;
       emailVerified: Date | null;
     } & DefaultSession["user"];
+    /** Yalniz yonetici "olarak goruntule" oturumunda; `user` o an hedef kullanicidir. */
+    impersonation?: { adminId: string; expiresAt: string };
   }
 
   interface User {
@@ -24,5 +26,6 @@ declare module "next-auth/jwt" {
   interface JWT {
     role?: Role;
     emailVerified?: Date | null;
+    tv?: number;
   }
 }

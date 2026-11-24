@@ -20,6 +20,7 @@ import ConsentAwareAnalytics from "@/components/ConsentAwareAnalytics";
 import AnalyticsPageView from "@/components/AnalyticsPageView";
 import CrispChat from "@/components/CrispChat";
 import VerificationBanner from "@/components/layout/VerificationBanner";
+import ImpersonationBanner from "@/components/layout/ImpersonationBanner";
 import { config } from "@/lib/config";
 import { resolveCommerceContext } from "@/lib/commerce-context";
 import { CommerceProvider } from "@/components/providers/CommerceProvider";
@@ -316,6 +317,7 @@ export default async function RootLayout({
               artik burada, tek yerde.
             */}
             <div className="sticky top-0 z-50">
+              <ImpersonationBanner />
               <VerificationBanner />
               <Header />
             </div>

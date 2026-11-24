@@ -32,10 +32,14 @@ export default function AdminReviewsClient({
   rows,
   filter,
   total,
+  nextCursor,
+  isFirstPage,
 }: {
   rows: AdminReviewRowVm[];
   filter: string;
   total: number;
+  nextCursor: string | null;
+  isFirstPage: boolean;
 }) {
   const t = useTranslations("AdminReviews");
   const tReview = useTranslations("Review");
@@ -158,6 +162,24 @@ export default function AdminReviewsClient({
           ))}
         </ul>
       )}
+
+      {nextCursor || !isFirstPage ? (
+        <nav className="mt-6 flex justify-center gap-4">
+          {!isFirstPage ? (
+            <Link href={`/admin/reviews?filter=${filter}`} className="btn-ui btn-ui-md btn-ui-ghost">
+              {t("firstPage")}
+            </Link>
+          ) : null}
+          {nextCursor ? (
+            <Link
+              href={`/admin/reviews?filter=${filter}&cursor=${encodeURIComponent(nextCursor)}`}
+              className="btn-ui btn-ui-md btn-ui-ghost"
+            >
+              {tCommon("next")}
+            </Link>
+          ) : null}
+        </nav>
+      ) : null}
 
       <ConfirmDialog
         open={pending !== null}

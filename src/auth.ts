@@ -13,6 +13,7 @@ import logger from "@/lib/logger";
 import { getClientIpOrNull } from "@/lib/client-ip";
 import { linkGuestBookingsToVerifiedUser } from "@/services/booking/guest-link";
 import { appleTokenService } from "@/services/AppleTokenService";
+import { readWebImpersonation } from "@/lib/web-impersonation-session";
 
 /**
  * Auth.js (v5) - Merkezi Kimlik Doğrulama Konfigürasyonu
@@ -118,6 +119,20 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
         session.user.id = token.sub || "";
         // JWT serileştirmesinde Tarih stringleşebilir, istemci tarafı için Date nesnesi olduğundan emin oluyoruz.
         session.user.emailVerified = token.emailVerified ? new Date(token.emailVerified as unknown as string) : null;
+        // "Olarak goruntule": adminin token'i degismez, yalniz bu istegin oturumu hedefe doner.
+        const imp = await readWebImpersonation(token);
+        if (imp) {
+          session.user = {
+            ...session.user,
+            id: imp.target.id,
+            role: imp.target.role,
+            name: imp.target.name,
+            email: imp.target.email ?? "",
+            image: imp.target.image,
+            emailVerified: imp.target.emailVerified,
+          };
+          session.impersonation = { adminId: imp.adminId, expiresAt: imp.expiresAt.toISOString() };
+        }
       }
       return session;
     },

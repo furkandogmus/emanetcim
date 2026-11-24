@@ -6,6 +6,12 @@ import type { NextRequest } from 'next/server';
 import { routing } from './i18n/routing';
 import { isAdminPath as matchesAdminPath, isPartnerPath as matchesPartnerPath } from './lib/route-protection';
 import { retiredLocaleRedirectPath } from './lib/retired-locales';
+import {
+  WEB_IMPERSONATION_COOKIE,
+  impersonationProxyDecision,
+  verifyWebImpersonation,
+} from './lib/web-impersonation';
+import type { NextAuthRequest } from 'next-auth';
 
 const { auth } = NextAuth({
   ...authConfig,
@@ -38,7 +44,32 @@ function stripLocalePrefix(pathname: string): { locale: string; barePath: string
  * basliklar iki yerde set ediliyordu ve biri (`X-XSS-Protection`) artik
  * tarayicilarin yok saydigi, OWASP'in "koymayin" dedigi bir baslikti.
  */
-const authProxy = auth((req) => {
+const authProxy = auth(async (req) => {
+  const cookie = req.cookies.get(WEB_IMPERSONATION_COOKIE)?.value;
+  if (!cookie) return routeRequest(req);
+
+  // Gecerlilik oturum callback'iyle ayni temel: cerez bu admine basilmis ve suresi dolmamis.
+  const adminId = req.auth?.user?.role === "ADMIN" ? req.auth.user.id : null;
+  const valid = adminId ? (await verifyWebImpersonation(cookie, { adminId })) !== null : false;
+  const { locale, barePath } = stripLocalePrefix(req.nextUrl.pathname);
+  const decision = impersonationProxyDecision({
+    valid,
+    method: req.method,
+    pathname: req.nextUrl.pathname,
+    isAdminPath: matchesAdminPath(barePath),
+  });
+  if (decision === "block") {
+    return NextResponse.json({ error: "not_allowed_while_impersonating" }, { status: 403 });
+  }
+  if (decision === "redirect_home") {
+    return NextResponse.redirect(new URL(`/${locale}`, req.nextUrl));
+  }
+  const res = routeRequest(req);
+  if (decision === "clear_cookie") res.cookies.delete({ name: WEB_IMPERSONATION_COOKIE, path: "/" });
+  return res;
+});
+
+function routeRequest(req: NextAuthRequest): NextResponse {
   const { nextUrl } = req;
   const { pathname } = nextUrl;
   const isLoggedIn = !!req.auth;
@@ -149,8 +180,7 @@ const authProxy = auth((req) => {
     koymayabilir.
   */
   return response;
-
-});
+}
 
 export function proxy(request: NextRequest) {
   return (authProxy as (r: NextRequest) => ReturnType<typeof authProxy>)(request);

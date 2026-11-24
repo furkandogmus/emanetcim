@@ -16,6 +16,7 @@ import {
   Store,
   User as UserIcon,
   KeyRound,
+  UserCog,
 } from "lucide-react";
 import { Link } from "@/i18n/routing";
 import { motion, AnimatePresence } from "framer-motion";
@@ -35,6 +36,8 @@ import { Role } from "@prisma/client";
 import ConfirmDialog from "@/components/common/ConfirmDialog";
 import { actionErrorKey } from "@/lib/action-error";
 import AdminSetPasswordDialog, { type SetPasswordTarget } from "@/components/admin/AdminSetPasswordDialog";
+import AdminUserAccountDialog from "@/components/admin/AdminUserAccountDialog";
+import { isAnonymizedEmail } from "@/lib/anonymized-account";
 
 const PAGE_SIZE = 25;
 
@@ -49,6 +52,7 @@ interface User {
   isTest: boolean;
   emailVerified: Date | null;
   createdAt: Date;
+  reviewSandbox: boolean;
 }
 
 interface AdminUsersClientProps {
@@ -82,6 +86,7 @@ export default function AdminUsersClient({
   const t = useTranslations("Admin");
   const tCommon = useTranslations("Common");
   const tErrors = useTranslations("Errors");
+  const tAccount = useTranslations("AdminUserAccount");
   const [users, setUsers] = useState<User[]>(initialUsers);
   const [search, setSearch] = useState("");
   const [roleFilter, setRoleFilter] = useState("ALL");
@@ -96,6 +101,7 @@ export default function AdminUsersClient({
     onConfirm: null | (() => void | Promise<void>);
   }>({ open: false, message: "", confirmLabel: "", onConfirm: null });
   const [setPasswordTarget, setSetPasswordTarget] = useState<SetPasswordTarget | null>(null);
+  const [accountTarget, setAccountTarget] = useState<User | null>(null);
   const iconBtnBase = "btn-ui btn-ui-md btn-ui-icon";
 
   const filteredUsers = users.filter(u => {
@@ -556,6 +562,15 @@ export default function AdminUsersClient({
                           {user.isBanned ? <UserCheck size={18} /> : <ShieldAlert size={18} />}
                         </button>
                         <button
+                          type="button"
+                          onClick={() => setAccountTarget(user)}
+                          className={`${iconBtnBase} bg-gray-50 hover:bg-gray-100 text-gray-600`}
+                          title={tAccount("open")}
+                          aria-label={tAccount("open")}
+                        >
+                          <UserCog size={18} />
+                        </button>
+                        <button
                           onClick={() => handleDelete(user.id)}
                           disabled={loadingId === user.id}
                           className={`${iconBtnBase} bg-gray-50 hover:bg-red-50 text-gray-400 hover:text-red-600`}
@@ -725,6 +740,15 @@ export default function AdminUsersClient({
                 </button>
                 <button
                   type="button"
+                  onClick={() => setAccountTarget(user)}
+                  className={`${iconBtnBase} bg-gray-50 hover:bg-gray-100 text-gray-600`}
+                  title={tAccount("open")}
+                  aria-label={tAccount("open")}
+                >
+                  <UserCog size={18} />
+                </button>
+                <button
+                  type="button"
                   onClick={() => handleDelete(user.id)}
                   disabled={loadingId === user.id}
                   className={`${iconBtnBase} bg-gray-50 hover:bg-red-50 text-gray-400 hover:text-red-600`}
@@ -781,6 +805,19 @@ export default function AdminUsersClient({
       }}
     />
     <AdminSetPasswordDialog target={setPasswordTarget} onClose={() => setSetPasswordTarget(null)} />
+    <AdminUserAccountDialog
+      target={
+        accountTarget
+          ? { ...accountTarget, isAnonymized: isAnonymizedEmail(accountTarget.email) }
+          : null
+      }
+      currentAdminId={currentAdminId}
+      onClose={() => setAccountTarget(null)}
+      onSandboxChanged={(id, reviewSandbox) => {
+        setUsers((prev) => prev.map((u) => (u.id === id ? { ...u, reviewSandbox } : u)));
+        setAccountTarget((prev) => (prev && prev.id === id ? { ...prev, reviewSandbox } : prev));
+      }}
+    />
     </>
   );
 }
