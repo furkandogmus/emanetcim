@@ -96,7 +96,9 @@ describe("PricingService", () => {
         actualOut,
         mockRules
       );
-      expect(refund).toBe(85);
+      // 2026-11-24: iade odenen orana gore olceklenir (85 / 450 liste); tavan yine odenen hizmet.
+      expect(refund).toBe(60.44);
+      expect(refund).toBeLessThanOrEqual(85);
     });
   });
 });

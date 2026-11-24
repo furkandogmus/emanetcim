@@ -19,6 +19,7 @@ import logger from '@/lib/logger';
 import { totalBagCount } from '@/lib/bag-pricing';
 import { getPricingRules } from '@/lib/platform-settings';
 import { toPricingSnapshot } from '@/lib/pricing-snapshot';
+import type { PricingRules } from '@/lib/pricing-rules';
 import { moneyToNumber } from '@/lib/money';
 import { reserveSlots } from '@/services/SlotService';
 import { validateBookingStayWindow } from '@/lib/booking-server-price';
@@ -56,6 +57,12 @@ async function affiliateFields(data: CreateInitialBookingInput) {
     affiliateGuestDiscountRate: r.attribution.guestDiscountRate,
     affiliateDiscountAmount,
   };
+}
+
+/** Web rezervasyonunun kopyasi oran tasimaz (0): kayitta "o gun uygulanan oran" okunur, canli ayar degil. */
+function snapshotRules(rules: PricingRules, data: CreateInitialBookingInput): PricingRules {
+  const applied = nonNegativeAmount(data.appDiscountAmount) > 0 ? nonNegativeAmount(data.appDiscountPct) : 0;
+  return { ...rules, appBookingDiscountPct: applied };
 }
 
 function nonNegativeAmount(v: unknown): number {
@@ -288,7 +295,7 @@ async function createInitialBookingOnce(data: CreateInitialBookingInput): Promis
           checkInTime: data.checkInTime,
           checkOutTime: data.checkOutTime,
           unitPrice,
-          pricingSnapshot: toPricingSnapshot(rules),
+          pricingSnapshot: toPricingSnapshot(snapshotRules(rules, data)),
           qrCodeToken: `temp_${crypto.randomUUID()}`,
           idempotencyKey: data.idempotencyKey ?? null,
           status: initialStatus,
@@ -460,7 +467,7 @@ export async function createSlotBooking(
           checkInTime,
           checkOutTime,
           unitPrice,
-          pricingSnapshot: toPricingSnapshot(rules),
+          pricingSnapshot: toPricingSnapshot(snapshotRules(rules, data)),
           qrCodeToken: `temp_${crypto.randomUUID()}`,
           idempotencyKey: data.idempotencyKey ?? null,
           status: initialStatus,

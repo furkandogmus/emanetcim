@@ -206,6 +206,7 @@ async function search(req: NextRequest, viewer: ShopViewer) {
                   snapped.checkOut,
                   rules,
                 ),
+                rules.appBookingDiscountPct,
               ),
             }
           : {}),

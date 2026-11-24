@@ -103,9 +103,15 @@ APPROVED ──check-in (tahsilat)──> PAID ──> CHECKED_IN ──check-ou
   değişmeden) **kalan tutara** uygulanır. Kuponun asgari tutar şartı da kalan tutara bakar.
   Örnek: 250 TL → %10 uygulama → 225 TL → %20 kupon → 180 TL.
 - **Yuvarlama:** kuruşa, yarım kuruş yukarı (`applyAppDiscount`).
-- **Defter:** `Booking.appDiscountAmount`; oran `pricingSnapshot` içinde. Esnaf kazancı, yönetici
-  ciro özeti ve e-postalar indirimli `totalPrice`ı kullanır. Düzenleme ve valiz revizyonunda
-  tutar kupon gibi kilitli kalır (`lockedBookingDiscount`).
+- **Defter:** doğruluk kaynağı `Booking.appDiscountAmount` (TRY). `pricingSnapshot.appBookingDiscountPct`
+  yalnızca uygulama rezervasyonunda uygulanan oranı taşır; web rezervasyonunda 0'dır, canlı
+  ayar değildir. Esnaf kazancı, yönetici ciro özeti ve e-postalar indirimli `totalPrice`ı kullanır.
+  Düzenleme ve valiz revizyonunda tutar kupon gibi kilitli kalır (`lockedBookingDiscount`).
+- **Erken teslim iadesi** ödenen fiyattan: kalan günlerin liste tutarı, ödenen hizmet / liste
+  hizmet oranıyla çarpılır (uygulama, kupon, davet, aracı indirimi hepsi düşer; oran 1'i aşmaz).
+- **Arama kartı:** mobil tarihli aramada `stayQuote.total` uygulama fiyatıdır (ödeme ekranıyla
+  aynı sayı), `fullTotal` üstü çizili gösterim içindir.
+- **Oran** iki ondalığa yuvarlanır (`Decimal(5,2)`), denetim kaydı saklanan değeri yazar.
 - **Bedel:** komisyon bugün 0 olduğu için indirimi esnaf karşılar (sahip kararı). Oran değişikliği
   bu yüzden riskli alandır (onay ifadesi) ve denetim kaydına eski → yeni yazılır.
 - **Gösterim:** mobil dükkan detayı ve ödeme ekranında üstü çizili fiyat + "Uygulama fiyatı"

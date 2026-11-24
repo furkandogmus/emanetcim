@@ -54,7 +54,13 @@ export const platformSettingsUpdateSchema = z.object({
   iosAppStoreLive: z.boolean().optional(),
   androidPlayLive: z.boolean().optional(),
   // Eski mobil yonetici gondermez: gelmezse mevcut oran korunur (sifirlanmaz).
-  appBookingDiscountPct: z.number().min(0).max(APP_DISCOUNT_MAX_PCT).optional(),
+  // DB `Decimal(5,2)`: iki haneye yuvarlanir ki denetim kaydi saklanan degerle ayni olsun.
+  appBookingDiscountPct: z
+    .number()
+    .min(0)
+    .max(APP_DISCOUNT_MAX_PCT)
+    .transform((v) => Math.round(v * 100) / 100)
+    .optional(),
 })
   /*
     KILITLENME KAPISI: en yeni yayindaki surumun ustunde bir `minAppVersion`

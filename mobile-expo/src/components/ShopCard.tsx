@@ -180,6 +180,9 @@ export const ShopCard = memo(function ShopCard({
         ) : shop.stayQuote ? (
           // Aranan kalisin toplami one cikar; gunluk fiyat karsilastirma icin ikincil.
           <>
+            {shop.stayQuote.fullTotal != null && shop.stayQuote.fullTotal > shop.stayQuote.total ? (
+              <Text style={styles.struck}>{formatMoney(shop.stayQuote.fullTotal)}</Text>
+            ) : null}
             <Text style={styles.price}>{formatMoney(shop.stayQuote.total)}</Text>
             <Text style={styles.perDay}>{stayLabel(shop.stayQuote, t)}</Text>
             <Text style={styles.daily}>{t("map.perDayMediumPrice", { price: formatMoney(mediumDaily(shop)) })}</Text>
@@ -223,6 +226,7 @@ const styles = StyleSheet.create({
   ratingText: { fontFamily: fonts.bodySemibold, fontSize: 13, color: colors.ink },
   dot: { fontFamily: fonts.body, fontSize: 13, color: colors.inkMuted },
   right: { alignItems: "flex-end", alignSelf: "flex-start", paddingTop: 2, maxWidth: 112 },
+  struck: { fontSize: 12, color: colors.inkSecondary, textDecorationLine: "line-through", fontVariant: ["tabular-nums"] },
   price: { fontFamily: fonts.display, fontSize: 18, lineHeight: 22, color: colors.ink, fontVariant: ["tabular-nums"] },
   perDay: { fontFamily: fonts.body, fontSize: 12, color: colors.inkMuted, textAlign: "right" },
   daily: { fontFamily: fonts.body, fontSize: 11, color: colors.inkMuted, textAlign: "right", marginTop: 2 },
