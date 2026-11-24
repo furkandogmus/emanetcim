@@ -98,7 +98,7 @@ export async function POST(req: NextRequest) {
     }
 
     // Tek aktif kod, kod basina ve kimlik basina deneme siniri: `mobile-login-code.ts`.
-    const verified = await verifyMobileLoginCode(normalizedIdentity, isEmail ? "email" : "phone", code);
+    const verified = await verifyMobileLoginCode(normalizedIdentity, isEmail ? "email" : "phone", code, ip);
     if (!verified.ok) {
       if (verified.code === "TOO_MANY_ATTEMPTS") {
         return NextResponse.json({ error: "too_many_attempts" }, { status: 429 });
