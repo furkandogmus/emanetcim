@@ -5,6 +5,7 @@ import { auth } from "@/auth";
 import { redirect } from "next/navigation";
 import prisma from "@/lib/db";
 import { moneyToNumber } from "@/lib/money";
+import { campaignService } from "@/services/CampaignService";
 import AdminCampaignsClient from "@/components/admin/AdminCampaignsClient";
 
 /**
@@ -26,21 +27,10 @@ export default async function AdminCampaignsPage({
   const t = await getTranslations("Admin");
   const tCommon = await getTranslations("Common");
 
-  const campaigns = await prisma.campaign.findMany({
-    orderBy: { createdAt: "desc" },
-    take: 50,
-  });
-
-  const activeCount = await prisma.campaign.count({ where: { isActive: true } });
-
-  const activeCampaigns = await prisma.campaign.findMany({
-    where: { isActive: true },
-    select: { discountPercent: true },
-  });
-  const maxDiscount = activeCampaigns.reduce(
-    (m, c) => Math.max(m, moneyToNumber(c.discountPercent ?? 0)),
-    0
-  );
+  const [campaigns, { activeCount, maxActiveDiscount: maxDiscount }] = await Promise.all([
+    campaignService.listForAdmin(),
+    campaignService.activeSummary(),
+  ]);
   const activeDiscountLabel =
     maxDiscount > 0 ? `${maxDiscount}%` : t("trendNone");
 

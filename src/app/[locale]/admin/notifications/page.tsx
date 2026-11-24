@@ -1,8 +1,7 @@
 import { setRequestLocale } from "next-intl/server";
 import { auth } from "@/auth";
 import { redirect } from "next/navigation";
-import prisma from "@/lib/db";
-import type { Prisma } from "@prisma/client";
+import { notificationLogService } from "@/services/NotificationLogService";
 import AdminNotificationsClient from "@/components/admin/AdminNotificationsClient";
 
 /**
@@ -38,27 +37,11 @@ export default async function AdminNotificationsPage({
 
   const { status = "ALL", type = "ALL", q = "" } = await searchParams;
 
-  const filters: Prisma.NotificationLogWhereInput[] = [];
-  if (status !== "ALL") filters.push({ status });
-  if (type !== "ALL") filters.push({ type });
-  if (q.trim()) {
-    filters.push({ recipient: { contains: q.trim(), mode: "insensitive" } });
-  }
-
-  const [logs, typeGroups, statusGroups, failedCount] = await Promise.all([
-    prisma.notificationLog.findMany({
-      where: filters.length ? { AND: filters } : undefined,
-      orderBy: { createdAt: "desc" },
-      take: NOTIFICATION_PAGE_SIZE,
-    }),
-    prisma.notificationLog.groupBy({ by: ["type"], _count: true, orderBy: { type: "asc" } }),
-    prisma.notificationLog.groupBy({
-      by: ["status"],
-      _count: true,
-      orderBy: { status: "asc" },
-    }),
-    prisma.notificationLog.count({ where: { status: { not: "SENT" } } }),
+  const [page, facets] = await Promise.all([
+    notificationLogService.listPage({ status, type, q }, { take: NOTIFICATION_PAGE_SIZE }),
+    notificationLogService.facets(),
   ]);
+  const logs = page.items;
 
   return (
     <AdminNotificationsClient
@@ -73,9 +56,9 @@ export default async function AdminNotificationsPage({
         error: l.error,
         createdAt: l.createdAt.toISOString(),
       }))}
-      types={typeGroups.map((g) => g.type)}
-      statuses={statusGroups.map((g) => g.status)}
-      failedCount={failedCount}
+      types={facets.types}
+      statuses={facets.statuses}
+      failedCount={facets.failedCount}
       filter={{ status, type, q }}
     />
   );

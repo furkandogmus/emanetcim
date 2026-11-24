@@ -2,12 +2,11 @@
 
 import { getClientIpOrNull } from "@/lib/client-ip";
 
-import prisma from "@/lib/db";
 import { revalidatePathAllLocales } from "@/lib/revalidate-locales";
-import { z } from "zod";
 import { sealService } from "@/services/SealService";
 import { updatePlatformSettings } from "@/services/PlatformSettingsService";
 import { assertAdmin } from "@/lib/action-auth";
+import { campaignService } from "@/services/CampaignService";
 
 export async function updatePlatformSettingsAction(data: unknown) {
   const actor = await assertAdmin();
@@ -46,22 +45,7 @@ export async function assignSealsToShopAction(
   }
 }
 
-const createCampaignSchema = z.object({
-  name: z.string().min(1).max(200).trim(),
-  message: z.string().max(1000).optional(),
-  discountPercent: z.number().min(0).max(100).optional(),
-  isActive: z.boolean().optional(),
-  endsAt: z.date().nullable().optional(),
-});
-
-const updateCampaignSchema = z.object({
-  name: z.string().min(1).max(200).trim().optional(),
-  message: z.string().max(1000).nullable().optional(),
-  discountPercent: z.number().min(0).max(100).nullable().optional(),
-  isActive: z.boolean().optional(),
-  endsAt: z.date().nullable().optional(),
-});
-
+// Kampanya govdesi (sema + denetim kaydi) `CampaignService`te; mobil yonetici ucu da onu cagirir.
 export async function createCampaignAction(data: {
   name: string;
   message?: string;
@@ -69,23 +53,9 @@ export async function createCampaignAction(data: {
   isActive?: boolean;
   endsAt?: Date | null;
 }) {
-  await assertAdmin();
-
-  const parsed = createCampaignSchema.safeParse(data);
-  if (!parsed.success) {
-    return { success: false as const, error: "invalid_data" as const };
-  }
-  const d = parsed.data;
-
-  await prisma.campaign.create({
-    data: {
-      name: d.name,
-      message: d.message?.trim() || null,
-      discountPercent: d.discountPercent ?? null,
-      isActive: d.isActive ?? true,
-      endsAt: d.endsAt ?? null,
-    },
-  });
+  const actor = await assertAdmin();
+  const result = await campaignService.create(actor, data, { ip: await getClientIpOrNull() });
+  if (!result.ok) return { success: false as const, error: "invalid_data" as const };
   revalidatePathAllLocales("/admin/campaigns");
   return { success: true as const };
 }
@@ -100,36 +70,27 @@ export async function updateCampaignAction(
     endsAt?: Date | null;
   }
 ) {
-  await assertAdmin();
-
-  const parsed = updateCampaignSchema.safeParse(data);
-  if (!parsed.success) {
-    return { success: false as const, error: "invalid_data" as const };
-  }
-
-  await prisma.campaign.update({
-    where: { id },
-    data: parsed.data,
-  });
+  const actor = await assertAdmin();
+  const result = await campaignService.update(actor, id, data, { ip: await getClientIpOrNull() });
+  if (!result.ok) return { success: false as const, error: result.reason };
   revalidatePathAllLocales("/admin/campaigns");
   return { success: true as const };
 }
 
+/** Basarisizlikta FIRLATIR: istemci try/catch ile bekliyor (AdminCampaignsClient). */
 export async function deleteCampaignAction(id: string) {
-  await assertAdmin();
-
-  await prisma.campaign.delete({ where: { id } });
+  const actor = await assertAdmin();
+  const result = await campaignService.remove(actor, id, { ip: await getClientIpOrNull() });
+  if (!result.ok) throw new Error(result.reason);
   revalidatePathAllLocales("/admin/campaigns");
   return { success: true as const };
 }
 
+/** Basarisizlikta FIRLATIR (istemci try/catch ile bekliyor). */
 export async function toggleCampaignActiveAction(id: string, isActive: boolean) {
-  await assertAdmin();
-
-  await prisma.campaign.update({
-    where: { id },
-    data: { isActive },
-  });
+  const actor = await assertAdmin();
+  const result = await campaignService.setActive(actor, id, isActive, { ip: await getClientIpOrNull() });
+  if (!result.ok) throw new Error(result.reason);
   revalidatePathAllLocales("/admin/campaigns");
   return { success: true as const };
 }

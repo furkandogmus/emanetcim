@@ -1,7 +1,6 @@
 import { setRequestLocale } from "next-intl/server";
 import { auth } from "@/auth";
 import { redirect } from "next/navigation";
-import prisma from "@/lib/db";
 import { jobHealthService } from "@/services/JobHealthService";
 import { JOB_REGISTRY } from "@/lib/jobs/registry";
 import AdminJobsClient from "@/components/admin/AdminJobsClient";
@@ -38,19 +37,7 @@ export default async function AdminJobsPage({
 
   const [report, recentRuns] = await Promise.all([
     jobHealthService.check(),
-    prisma.jobRun.findMany({
-      orderBy: { startedAt: "desc" },
-      take: 50,
-      select: {
-        id: true,
-        job: true,
-        status: true,
-        startedAt: true,
-        finishedAt: true,
-        durationMs: true,
-        detail: true,
-      },
-    }),
+    jobHealthService.recentRuns(50),
   ]);
 
   /** Kayıt defterindeki açıklamalar — sağlık raporunda taşınmıyor. */

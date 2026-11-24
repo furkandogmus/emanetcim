@@ -1,9 +1,7 @@
-import prisma from "@/lib/db";
 import { setRequestLocale, getTranslations } from "next-intl/server";
 import { auth } from "@/auth";
 import { redirect } from "next/navigation";
-import nextPackage from "next/package.json";
-import { isNetgsmConfigured } from "@/lib/netgsm";
+import { systemStatusService } from "@/services/SystemStatusService";
 import { Server, Database, Mail, Smartphone, Cpu, CheckCircle2, XCircle, AlertCircle } from "lucide-react";
 
 
@@ -18,37 +16,27 @@ export default async function AdminStatusPage({ params }: { params: Promise<{ lo
 
   const t = await getTranslations("AdminStatus");
 
-  // Checks
-  const dbHealth = await prisma.$queryRaw`SELECT 1`.then(() => true).catch(() => false);
-  
+  // Kontroller ve skor kurali serviste: mobil "Sistem" ekrani ayni anlik goruntuyu okur.
+  const snap = await systemStatusService.snapshot();
+  const dbHealth = snap.checks.database === "ok";
   const envStatus = {
-    resend: !!process.env.RESEND_API_KEY,
-    // SMS gonderimiyle AYNI kontrol. Burada eskiden `NETGSM_USER`/`NETGSM_PASS`
-    // okunuyordu; gonderim `NETGSM_USERNAME`/`NETGSM_PASSWORD` okuyor ve compose
-    // da onlari veriyor -- yani SMS calisirken bu satir hep "yok" diyordu.
-    netgsm: isNetgsmConfigured(),
-    auth: !!process.env.AUTH_SECRET,
-    db: !!process.env.DATABASE_URL,
-    production: process.env.NODE_ENV === 'production'
+    resend: snap.checks.email === "ok",
+    netgsm: snap.checks.sms === "ok",
+    auth: snap.checks.authSecret === "ok",
+    db: snap.checks.database !== "missing",
+    production: snap.runtime.production,
   };
-
   const systemInfo = {
-    node: process.version,
-    next: nextPackage.version,
-    os: process.platform,
-    memory: `${Math.round(process.memoryUsage().heapUsed / 1024 / 1024)}MB / ${Math.round(process.memoryUsage().heapTotal / 1024 / 1024)}MB`
+    node: snap.runtime.node,
+    next: snap.runtime.next,
+    os: snap.runtime.platform,
+    memory: `${snap.runtime.heapUsedMb}MB / ${snap.runtime.heapTotalMb}MB`,
   };
-  const checks = [
-    { ok: dbHealth && envStatus.db, weight: 35 },
-    { ok: envStatus.auth, weight: 25 },
-    { ok: envStatus.resend, weight: 20 },
-    { ok: envStatus.netgsm, weight: 20 },
-  ];
-  const healthScore = checks.reduce((score, check) => score + (check.ok ? check.weight : 0), 0);
+  const healthScore = snap.healthScore;
   const healthTone =
-    healthScore >= 90
+    snap.healthLevel === "ok"
       ? { text: "text-green-600", bg: "bg-green-50", label: t("noCriticalError"), Icon: CheckCircle2 }
-      : healthScore >= 60
+      : snap.healthLevel === "warning"
         ? { text: "text-orange-600", bg: "bg-orange-50", label: t("warning"), Icon: AlertCircle }
         : { text: "text-red-600", bg: "bg-red-50", label: t("error"), Icon: XCircle };
   const HealthIcon = healthTone.Icon;
@@ -77,7 +65,7 @@ export default async function AdminStatusPage({ params }: { params: Promise<{ lo
           subtitle="Resend API"
           icon={<Mail size={24} />}
           status={envStatus.resend ? 'success' : 'error'}
-          details={[`API Key: ${envStatus.resend ? t("available") : t("undefined")}`, `From: ${process.env.RESEND_FROM || 'Default'}`]}
+          details={[`API Key: ${envStatus.resend ? t("available") : t("undefined")}`, `From: ${snap.emailFrom || 'Default'}`]}
           tLabels={{ online: t("online"), error: t("error"), warning: t("warning") }}
         />
 
