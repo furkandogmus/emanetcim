@@ -2134,15 +2134,15 @@
     "insurance": "Gepäckschutz",
     "about": "Über uns",
     "blog": "Blog",
-    "checkoutCancellationFree": "Du kannst kostenlos stornieren, bis du dein Gepäck abgibst.",
-    "checkoutCancellationOnline": "Storno- und Erstattungsbedingungen hängen von der verbleibenden Zeit bis zur Abgabe ab.",
+    "checkoutCancellation": "Du kannst bis zur Gepäckabgabe kostenlos stornieren und bekommst den vollen Betrag zurück.",
     "checkoutCancellationLink": "Stornobedingungen",
     "errors": {
       "rate_limited": "In den letzten 24 Stunden wurde bereits ein Export gesendet.",
       "rate_limited_until": "In den letzten 24 Stunden wurde bereits ein Export gesendet. Ab {{time}} kannst du einen neuen anfordern.",
       "no_verified_email": "Dein Konto hat keine bestätigte E-Mail-Adresse. Füge im Profil eine E-Mail hinzu, bestätige sie und versuche es erneut.",
       "mail_failed": "Die E-Mail konnte gerade nicht gesendet werden. Bitte versuche es später erneut.",
-      "not_allowed_while_impersonating": "In der Ansicht als anderer Nutzer nicht möglich."
+      "not_allowed_while_impersonating": "In der Ansicht als anderer Nutzer nicht möglich.",
+      "in_progress": "Dein Export wird gerade vorbereitet. Sieh in ein paar Minuten in dein E-Mail-Postfach."
     }
   },
   "affiliate": {

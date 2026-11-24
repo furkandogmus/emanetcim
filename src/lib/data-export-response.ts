@@ -9,6 +9,8 @@ export function dataExportEmailResponse(result: DataExportEmailResult) {
       return NextResponse.json({ error: "rate_limited", retryAt: result.retryAt.toISOString() }, { status: 429 });
     case "no_verified_email":
       return NextResponse.json({ error: "no_verified_email" }, { status: 409 });
+    case "in_progress":
+      return NextResponse.json({ error: "in_progress" }, { status: 409 });
     case "not_found":
       return NextResponse.json({ error: "not_found" }, { status: 404 });
     case "mail_failed":
