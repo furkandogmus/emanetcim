@@ -65,6 +65,14 @@ export function PartnerPulseCard() {
           <Stat value={d.bagsInStorage} label={t("pulse.inStorage")} emphasis={d.bagsInStorage > 0} />
         </View>
 
+        {d.sourceStats ? (
+          <View style={styles.month} accessible accessibilityLabel={`${t("walkIn.statPoster")}: ${d.sourceStats.thisMonth.poster}. ${t("walkIn.statWalkIn")}: ${d.sourceStats.thisMonth.walkIn}`}>
+            <SourceStat label={t("walkIn.statPoster")} value={d.sourceStats.thisMonth.poster} prev={t("walkIn.lastMonth", { count: d.sourceStats.lastMonth.poster })} />
+            <View style={styles.statRule} />
+            <SourceStat label={t("walkIn.statWalkIn")} value={d.sourceStats.thisMonth.walkIn} prev={t("walkIn.lastMonth", { count: d.sourceStats.lastMonth.walkIn })} />
+          </View>
+        ) : null}
+
         {staff ? null : (
         <View style={styles.month}>
           <View style={{ flex: 1 }}>
@@ -84,6 +92,21 @@ export function PartnerPulseCard() {
         )}
       </View>
     </Card>
+  );
+}
+
+/** Bu ay sayisi + gecen ay satiri; tutar yok (personel de gorur). */
+function SourceStat({ label, value, prev }: { label: string; value: number; prev: string }) {
+  return (
+    <View style={{ flex: 1, gap: 2, paddingHorizontal: space.xs }}>
+      <AppText variant="caption" numberOfLines={2} style={{ fontSize: 12 }}>
+        {label}
+      </AppText>
+      <AppText style={styles.monthValue}>{value}</AppText>
+      <AppText variant="caption" style={{ fontSize: 12 }}>
+        {prev}
+      </AppText>
+    </View>
   );
 }
 

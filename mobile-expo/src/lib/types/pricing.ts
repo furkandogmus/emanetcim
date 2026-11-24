@@ -14,6 +14,8 @@ export type CheckoutRequest = {
   affiliateCode?: string;
   /** Ekranda gosterilen toplam: sunucu farkli hesaplarsa 409 `price_changed` doner. */
   expectedTotal?: number;
+  /** Afis atfi (`pending-poster.ts`); yalniz istatistik, eski sunucu yok sayar. */
+  posterAttribution?: { shopId: string; capturedAt: string };
 };
 
 /** `POST checkout/quote`: indirim kodu onizlemesi. Baglayici degil. */

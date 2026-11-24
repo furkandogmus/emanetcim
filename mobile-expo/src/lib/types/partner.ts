@@ -1,3 +1,4 @@
+import type { ShopSourceStats } from "./walk-in";
 import type { PartnerEarningsInsights } from "./partner-parity";
 import type { BookingSummary } from "./booking";
 
@@ -132,6 +133,8 @@ export type PartnerDashboard = {
   prevMonthNet: number;
   /** Gecen ay 0 ise `null`; "%∞" yazilmaz. */
   monthChangePct: number | null;
+  /** Eski sunucuda yok: yoksa satir cizilmez. */
+  sourceStats?: ShopSourceStats;
 };
 
 /** `PUT partner/shop` yaniti: kaydin etkisi (acik rezervasyon / raf kapasitesi). */

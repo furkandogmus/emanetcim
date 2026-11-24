@@ -1,5 +1,6 @@
 import { BOOKING_ID, deepLinkHref } from "./deep-link-target";
 import { rememberInvite, rememberReferral } from "./pending-referral";
+import { rememberPosterSource } from "./pending-poster";
 
 /**
  * Web baglantisini uygulama yoluna cevirir: https://bagajpark.com/tr/shop/abc -> /shop/abc.
@@ -22,6 +23,8 @@ export function appPathFromLink(path: string): string {
   if (!/^https?:$/.test(url.protocol) || !WEB_HOSTS.has(url.hostname)) return path;
   // Araci kodu (`?aff=`, `/r/<kod>` ekler): odeme ekraninda "Referans kodu"na dolar.
   rememberReferral(url.searchParams.get("aff"));
+  // Dukkan afisinin QR'i (`kaynak=afis-<dukkanId>`): 30 dk icindeki rezervasyon afisten sayilir.
+  rememberPosterSource(url.searchParams.get("kaynak"));
   const [, ...rest] = url.pathname.split("/").filter(Boolean);
   const route = rest.join("/");
 

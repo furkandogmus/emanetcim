@@ -152,6 +152,12 @@ export default function PartnerBookingsScreen() {
             <StaleQueryBanner query={query} />
             <ShopSetupCard />
             <PartnerPulseCard />
+            <Button
+              variant="secondary"
+              title={t("walkIn.open")}
+              accessibilityHint={t("walkIn.openHint")}
+              onPress={() => router.push("/partner/walk-in")}
+            />
             <Input
               accessibilityLabel={t("partner.searchPlaceholder")}
               value={search}

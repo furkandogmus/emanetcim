@@ -66,6 +66,21 @@ function Body({ data }: { data: AdminAnalytics }) {
         </View>
       </Card>
 
+      {data.bookingSources ? (
+        <Card style={{ gap: space.md }}>
+          <SectionTitle>{t("walkIn.sourcesTitle", { days: data.days })}</SectionTitle>
+          <BarList
+            items={[
+              { key: "app", label: t("walkIn.sourceApp"), value: data.bookingSources.app },
+              { key: "web", label: t("walkIn.sourceWeb"), value: data.bookingSources.web },
+              { key: "walkIn", label: t("walkIn.sourceWalkIn"), value: data.bookingSources.walkIn },
+              { key: "poster", label: t("walkIn.sourcePoster"), value: data.bookingSources.poster },
+              { key: "unknown", label: t("walkIn.sourceUnknown"), value: data.bookingSources.unknown },
+            ]}
+          />
+        </Card>
+      ) : null}
+
       <Card style={{ gap: space.md }}>
         <SectionTitle>{t("adminAnalytics.topPages")}</SectionTitle>
         {data.topPaths.length === 0 ? (
