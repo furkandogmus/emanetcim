@@ -10,6 +10,7 @@ import prisma from "@/lib/db";
 import { actionErrorKey } from "@/lib/action-error";
 import { revalidatePathAllLocales } from "@/lib/revalidate-locales";
 import {
+  bagCountsFitRules,
   computeAuthoritativeCheckoutTotals,
   validateBookingStayWindow,
 } from "@/lib/booking-server-price";
@@ -126,6 +127,11 @@ export async function createBookingAction(data: CreateBookingInput) {
     burada vardı — mobil uç tatilde rezervasyona izin veriyordu.
   */
 
+  // Kirpilacak sayi (negatif, kesirli, sinir ustu) reddedilir: fiyatlanan = yazilan.
+  if (!bagCountsFitRules(data, pricingRules.maxBagsPerSlot)) {
+    return { success: false as const, error: "Errors.invalidData" };
+  }
+
   const authTotals = computeAuthoritativeCheckoutTotals(
     moneyToNumber(shop.pricePerDay),
     data.bagCountS,
@@ -179,9 +185,9 @@ export async function createBookingAction(data: CreateBookingInput) {
       guestId: userId,
       shopId: data.shopId,
       totalPrice,
-      bagCountS: data.bagCountS,
-      bagCountM: data.bagCountM,
-      bagCountXl: data.bagCountXl,
+      bagCountS: authTotals.bagCountS,
+      bagCountM: authTotals.bagCountM,
+      bagCountXl: authTotals.bagCountXl,
       checkInTime: data.checkInTime,
       checkOutTime: data.checkOutTime,
       unitPrice: authTotals.unitPrice,

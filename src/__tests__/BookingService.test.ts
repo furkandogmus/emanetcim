@@ -441,6 +441,30 @@ describe("BookingService Deep Logic", () => {
       expect((result as any).code).toBe("PRICE_INCREASE");
     });
 
+    it("platform sinirinin ustundeki valiz kirpilmaz, reddedilir", async () => {
+      mockPrisma.booking.findUnique.mockResolvedValue({
+        id: "b1",
+        status: "APPROVED",
+        guestId: "g1",
+        totalPrice: 100,
+        bagCountS: 1, bagCountM: 0, bagCountXl: 0,
+        shop: { pricePerDay: 50 },
+      } as any);
+      mockPrisma.$transaction.mockClear();
+
+      const result = await service.modifyBooking("b1", "g1", {
+        checkInTime: new Date(),
+        checkOutTime: new Date(Date.now() + 24 * 60 * 60 * 1000),
+        bagCountS: 0,
+        bagCountM: 0,
+        bagCountXl: 80,
+      });
+
+      expect(result.ok).toBe(false);
+      expect((result as any).message).toBe("Valiz sayısı geçersiz.");
+      expect(mockPrisma.$transaction).not.toHaveBeenCalled();
+    });
+
     it("onizleme (dryRun) ayni hesabi YAZMADAN doner; odenmisse degisimin engelli oldugunu soyler", async () => {
       mockPrisma.booking.findUnique.mockResolvedValue({
         id: "b1",

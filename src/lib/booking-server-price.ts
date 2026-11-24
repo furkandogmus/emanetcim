@@ -16,6 +16,20 @@ export function clampBagCount(n: unknown, maxBagsPerSlot: number): number {
 }
 
 /**
+ * Istenen sayilar `clampBagCount`tan DEGISMEDEN geciyor mu? Gecmiyorsa
+ * fiyatlanan ile yazilacak valiz sayisi ayrisir (2026-11-24: 80 XL istenip
+ * 50 XL fiyatlaniyordu); tasiyici istegi reddeder, sessizce kirpmaz.
+ */
+export function bagCountsFitRules(
+  counts: { bagCountS: unknown; bagCountM: unknown; bagCountXl: unknown },
+  maxBagsPerSlot: number,
+): boolean {
+  return [counts.bagCountS, counts.bagCountM, counts.bagCountXl].every(
+    (n) => clampBagCount(n, maxBagsPerSlot) === n,
+  );
+}
+
+/**
  * Rezervasyon penceresinin iş kurallarına uygunluğu (fiyat hesaplamadan önce).
  */
 export function validateBookingStayWindow(

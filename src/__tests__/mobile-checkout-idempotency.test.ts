@@ -52,6 +52,7 @@ vi.mock("@/lib/stay-days", () => ({
 }));
 vi.mock("@/lib/platform-settings", () => ({ getPricingRules: vi.fn().mockResolvedValue({}) }));
 vi.mock("@/lib/booking-server-price", () => ({
+  bagCountsFitRules: () => true,
   computeAuthoritativeCheckoutTotals: () => ({
     subtotalBeforeCoupon: 300,
     unitPrice: 100,
