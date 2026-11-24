@@ -1,5 +1,6 @@
 import { randomUUID } from "crypto";
 import prisma from "@/lib/db";
+import { presignStoredImage } from "@/lib/storage/private-read";
 import {
   buildObjectKey,
   getStorage,
@@ -113,25 +114,26 @@ export class TeamIssueService {
       },
     });
 
-    return rows.map((issue) => ({
+    // `team-issues/` herkese acik degil: kayitli adres yalniz yonetici yollarinda imzalanir.
+    return Promise.all(rows.map(async (issue) => ({
       id: issue.id,
       title: issue.title,
       description: issue.description,
       status: issue.status,
       created_by: issue.createdBy,
       created_at: issue.createdAt.toISOString(),
-      photos: issue.photos.map((p) => ({
+      photos: await Promise.all(issue.photos.map(async (p) => ({
         id: p.id,
-        image_path: p.imageUrl,
+        image_path: (await presignStoredImage(p.imageUrl, "team-issues/")) ?? "",
         uploaded_by: p.uploadedBy,
         created_at: p.createdAt.toISOString(),
-      })),
+      }))),
       events: issue.events.map((e) => ({
         user_name: e.userName,
         action: e.action,
         created_at: e.createdAt.toISOString(),
       })),
-    }));
+    })));
   }
 
   async createIssue(
