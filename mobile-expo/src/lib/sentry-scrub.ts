@@ -6,20 +6,27 @@ import type { Breadcrumb, ErrorEvent } from "@sentry/react-native";
  * breadcrumb icindeki serbest metni gormez; asil sizinti oradan olur (API hata metni
  * e-postayi geri yansitabiliyor).
  */
-const PATTERNS: [RegExp, string][] = [
+const PATTERNS: [RegExp, string | ((m: string) => string)][] = [
   [/\beyJ[A-Za-z0-9_-]+\.[A-Za-z0-9_-]+\.[A-Za-z0-9_-]+/g, "[jwt]"],
   [/\b(Bearer|Basic)\s+[A-Za-z0-9._~+/=-]+/gi, "$1 [token]"],
   [/[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}/g, "[email]"],
-  [/((?:token|code|password|secret|otp|refresh|access_token|key)=)[^&\s#]+/gi, "$1[redacted]"],
-  // TR/uluslararasi telefon (0532 123 45 67, +90 532 1234567); ISO tarih ve UUID eslesmez.
-  [/(?<![\w:-])(?:\+?\d{1,3}[\s.-]?)?\(?0?\d{3}\)?[\s.-]?\d{3}[\s.-]?\d{2}[\s.-]?\d{2}(?![\w:-])/g, "[phone]"],
+  [/((?:token|code|password|secret|otp|refresh|access_token|key|email|phone)=)[^&\s#]+/gi, "$1[redacted]"],
+  // Uluslararasi (+ ile) ya da ayiricili numara, 9-15 rakam. Ayiricisiz rakam dizisi (ms
+  // zaman damgasi, sayac) dokunulmaz; ISO tarih 8 rakamla esige takilmaz.
+  [/(?<![\w:.\/-])(?:\+\d[\d\s().-]{7,20}\d|\(?\d{2,4}\)?(?:[\s.-]\(?\d{2,4}\)?){2,5})(?![\w:\/-])/g, (m) => {
+    const digits = m.replace(/\D/g, "").length;
+    return digits >= 9 && digits <= 15 ? "[phone]" : m;
+  }],
+  // Ayiricisiz TR cep numarasi (05xx / 5xx); 13 haneli ms zaman damgasi 1 ile baslar, eslesmez.
+  [/(?<!\d)0?5\d{9}(?!\d)/g, "[phone]"],
 ];
 
 export function scrubString(s: string): string {
-  return PATTERNS.reduce((acc, [re, rep]) => acc.replace(re, rep), s);
+  return PATTERNS.reduce((acc, [re, rep]) => acc.replace(re, rep as string), s);
 }
 
-const SECRET_KEY = /^(password|pass|token|access_?token|refresh_?token|id_?token|secret|authorization|cookie|email|phone|otp|code|iban)$/i;
+// Anahtar adinda gecerse deger hic gonderilmez (shopName, guestPhone, refresh_token...).
+const SECRET_KEY = /phone|e-?mail|name|address|token|secret|passw|authorization|cookie|iban|otp/i;
 
 export function scrubValue(v: unknown, depth = 0): unknown {
   if (typeof v === "string") return scrubString(v);
@@ -27,7 +34,7 @@ export function scrubValue(v: unknown, depth = 0): unknown {
   if (Array.isArray(v)) return v.map((x) => scrubValue(x, depth + 1));
   const out: Record<string, unknown> = {};
   for (const [k, x] of Object.entries(v as Record<string, unknown>)) {
-    out[k] = SECRET_KEY.test(k) && typeof x !== "object" ? "[redacted]" : scrubValue(x, depth + 1);
+    out[k] = SECRET_KEY.test(k) && (x === null || typeof x !== "object") ? "[redacted]" : scrubValue(x, depth + 1);
   }
   return out;
 }
@@ -71,6 +78,15 @@ export function scrubEvent(e: ErrorEvent): ErrorEvent | null {
     delete out.request.query_string;
   }
   if (out.user) out.user = out.user.id ? { id: out.user.id } : undefined;
+  if (out.logentry) {
+    out.logentry = {
+      ...out.logentry,
+      message: out.logentry.message ? scrubString(out.logentry.message) : out.logentry.message,
+      params: out.logentry.params ? (scrubValue(out.logentry.params) as unknown[]) : out.logentry.params,
+    };
+  }
+  if (out.fingerprint) out.fingerprint = out.fingerprint.map((f) => scrubString(f));
+  if (out.tags) out.tags = scrubValue(out.tags) as ErrorEvent["tags"];
   if (out.breadcrumbs) out.breadcrumbs = out.breadcrumbs.map((b) => scrubBreadcrumb(b)).filter((b): b is Breadcrumb => !!b);
   if (out.extra) out.extra = scrubValue(out.extra) as ErrorEvent["extra"];
   if (out.contexts) out.contexts = scrubValue(out.contexts) as ErrorEvent["contexts"];

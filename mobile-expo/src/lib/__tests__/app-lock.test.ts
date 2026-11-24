@@ -2,7 +2,7 @@ import { describe, expect, it, jest } from "@jest/globals";
 
 jest.mock("expo", () => ({ requireOptionalNativeModule: jest.fn(() => ({})) }));
 const mockEnrolled = jest.fn<() => Promise<number>>();
-const mockAuth = jest.fn<() => Promise<{ success: boolean }>>();
+const mockAuth = jest.fn<() => Promise<{ success: boolean; error?: string }>>();
 jest.mock("expo-local-authentication", () => ({
   SecurityLevel: { NONE: 0, SECRET: 1, BIOMETRIC_WEAK: 2, BIOMETRIC_STRONG: 3 },
   getEnrolledLevelAsync: () => mockEnrolled(),
@@ -36,13 +36,17 @@ describe("app-lock", () => {
     await expect(deviceCanLock()).resolves.toBe(false);
   });
 
-  it("iptal ve hata kilidi acmaz", async () => {
-    mockAuth.mockResolvedValueOnce({ success: false });
-    await expect(authenticate("p", "c")).resolves.toBe(false);
+  it("iptal ve hata kilidi acmaz; kayit/donanim yoksa unavailable", async () => {
+    mockAuth.mockResolvedValueOnce({ success: false, error: "user_cancel" });
+    await expect(authenticate("p", "c")).resolves.toBe("cancel");
+    mockAuth.mockResolvedValueOnce({ success: false, error: "lockout" });
+    await expect(authenticate("p", "c")).resolves.toBe("cancel");
+    mockAuth.mockResolvedValueOnce({ success: false, error: "not_enrolled" });
+    await expect(authenticate("p", "c")).resolves.toBe("unavailable");
     mockAuth.mockRejectedValueOnce(new Error("x"));
-    await expect(authenticate("p", "c")).resolves.toBe(false);
+    await expect(authenticate("p", "c")).resolves.toBe("cancel");
     mockAuth.mockResolvedValueOnce({ success: true });
-    await expect(authenticate("p", "c")).resolves.toBe(true);
+    await expect(authenticate("p", "c")).resolves.toBe("ok");
   });
 
   it("yerel modul yoksa (eski ikili) kilit yok", async () => {

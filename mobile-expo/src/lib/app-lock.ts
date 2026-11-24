@@ -57,14 +57,20 @@ export async function deviceCanLock(): Promise<boolean> {
   }
 }
 
-/** Biyometri, olmazsa cihaz kodu. Iptal ya da hata `false`. */
-export async function authenticate(prompt: string, cancelLabel: string): Promise<boolean> {
+export type AuthOutcome = "ok" | "cancel" | "unavailable";
+
+// Kayit kaldirildi ya da donanim yok: kullaniciyi kilitte birakmanin anlami yok.
+const UNAVAILABLE = new Set(["not_enrolled", "not_available", "passcode_not_set"]);
+
+/** Biyometri, olmazsa cihaz kodu. Iptal ya da gecici hata (lockout dahil) `cancel`. */
+export async function authenticate(prompt: string, cancelLabel: string): Promise<AuthOutcome> {
   const la = localAuth();
-  if (!la) return true;
+  if (!la) return "ok";
   try {
     const r = await la.authenticateAsync({ promptMessage: prompt, cancelLabel, disableDeviceFallback: false });
-    return r.success;
+    if (r.success) return "ok";
+    return UNAVAILABLE.has(r.error) ? "unavailable" : "cancel";
   } catch {
-    return false;
+    return "cancel";
   }
 }
