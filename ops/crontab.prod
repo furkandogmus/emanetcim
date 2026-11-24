@@ -78,7 +78,8 @@
 # ---------------------------------------------------------------------------
 
 # Postgres yedeği + S3 kopyası. Yedekler yalnızca sunucu diskinde kalmasın diye.
-0 */6 * * * /opt/emanetci/scripts/backup-s3.sh --bucket bagajpark-backups-7bec61c6 >> /opt/emanetci/logs/backup.log 2>&1
+# Başarıda `backup-heartbeat` kaydı yazar (registry.ts, hostTriggered); dakika oradakiyle aynı.
+7 */6 * * * /opt/emanetci/scripts/backup-s3.sh --bucket bagajpark-backups-7bec61c6 >> /opt/emanetci/logs/backup.log 2>&1
 
 # Günlük AWS maliyet raporu (dünkü harcama, ay toplamı, kalan free tier kredisi)
 # e-postayla. Alıcı SSM /bagajpark/env/app/COST_REPORT_TO. 06:05 UTC = 09:05 TR;

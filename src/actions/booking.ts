@@ -127,8 +127,14 @@ export async function createBookingAction(data: CreateBookingInput) {
     burada vardı — mobil uç tatilde rezervasyona izin veriyordu.
   */
 
-  // Kirpilacak sayi (negatif, kesirli, sinir ustu) reddedilir: fiyatlanan = yazilan.
-  if (!bagCountsFitRules(data, pricingRules.maxBagsPerSlot)) {
+  /*
+    Kirpilacak sayi (negatif, kesirli, sinir ustu) ve sifir valiz kupon alinmadan
+    reddedilir: kupon hakki almak geri verilmezse `maxUses` tukenir.
+  */
+  if (
+    !bagCountsFitRules(data, pricingRules.maxBagsPerSlot) ||
+    data.bagCountS + data.bagCountM + data.bagCountXl < 1
+  ) {
     return { success: false as const, error: "Errors.invalidData" };
   }
 
@@ -167,12 +173,6 @@ export async function createBookingAction(data: CreateBookingInput) {
   if (data.expectedTotal !== undefined && Math.abs(data.expectedTotal - totalPrice) > 0.005) {
     if (appliedCouponId) await couponService.release(appliedCouponId);
     return { success: false as const, error: "Errors.priceChanged" };
-  }
-
-  // Sıfır valizle rezervasyon oluşturulamaz
-  const totalBags = authTotals.bagCountS + authTotals.bagCountM + authTotals.bagCountXl;
-  if (totalBags < 1) {
-    return { success: false as const, error: "Errors.invalidData" };
   }
 
   /*

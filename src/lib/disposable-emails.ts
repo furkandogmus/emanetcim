@@ -96,3 +96,17 @@ export function isBotPatternEmail(email: string): boolean {
 export function isBlockedSignupEmail(email: string): boolean {
   return isDisposableEmail(email) || isBotPatternEmail(email);
 }
+
+/**
+ * Kota anahtari icin kanonik kutu: `+etiket` atilir, gmail/googlemail'de noktalar
+ * da (ayni kutuya gider). Saklanan adres DEGISMEZ; yalniz sayac bunu kullanir,
+ * yoksa ayni kurban `a+1@`, `a+2@` ile sinirsiz e-posta alirdi.
+ */
+export function mailboxQuotaKey(email: string): string {
+  const [rawLocal, rawDomain] = email.trim().toLowerCase().split("@");
+  if (!rawLocal || !rawDomain) return email.trim().toLowerCase();
+  const domain = rawDomain === "googlemail.com" ? "gmail.com" : rawDomain;
+  let local = rawLocal.split("+")[0];
+  if (GMAIL_DOMAINS.has(domain)) local = local.replace(/\./g, "");
+  return `${local}@${domain}`;
+}

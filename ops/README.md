@@ -56,14 +56,42 @@ eski dump'ları siler. Yetki EC2 rolünden gelir (statik anahtar yok). Güncel b
 `infra/aws/stack/variables.tf` → `deploy_config_bucket` (Terraform çıktısı
 `backup_bucket_name`). Log: `/opt/emanetci/logs/backup.log`.
 
-**Şifreleme (age):** SSM'de `BACKUP_AGE_RECIPIENT` (age genel anahtarı, `age1...`) varsa
-`backup-s3.sh` dump'ı `age -r` ile şifreleyip `backups/<dosya>.dump.age` olarak yükler;
-değer tanımlıyken `age` yoksa ya da şifreleme düşerse **hiç yüklemez** (düz metne düşmez,
-log'da `ERROR`). Tanımsızsa her koşuda `WARN` basar ve düz yükler. Sunucuda `age` kurulu
-olmalı. Özel anahtar sunucuda **tutulmaz**: anahtar çifti sunucu dışında üretilir
-(`age-keygen -o bagajpark-backup.key`), yalnız genel anahtar SSM'e yazılır, özel anahtar
-parola yöneticisinde/çevrimdışı saklanır. S3'te `backups/` öneki 35 günde süresi dolar
-(`infra/aws/bootstrap` yaşam döngüsü kuralı).
+**Şifreleme (age), fail-closed:** `backup-s3.sh` dump'ı yalnız şu iki durumda S3'e yükler:
+SSM'de `BACKUP_AGE_RECIPIENT` (age genel anahtarı, `age1...`) varsa `age -r` ile şifreleyip
+`backups/<dosya>.dump.age` olarak; yoksa yalnız `BACKUP_ALLOW_PLAINTEXT=1` bilinçli olarak
+tanımlıysa düz. İkisi de yoksa, `age` kurulu değilse ya da şifreleme düşerse **yüklemez** ve
+`ERROR` ile çıkar. Değerler ortamdan, yoksa `docker-compose.env`'den (SSM'den üretilir) okunur.
+
+Sahibin adımları (sırayla; bu sürüm deploy edildiği an ikisi de yoksa yedek durur):
+
+1. Sunucu DIŞINDA anahtar üret: `age-keygen -o bagajpark-backup.key`. Özel anahtar parola
+   yöneticisinde/çevrimdışı kalır, sunucuya hiç gitmez.
+2. Çıktıdaki `age1...` genel anahtarı SSM'e `BACKUP_AGE_RECIPIENT` olarak yaz.
+3. Sunucuya `age` kur ve `command -v age` ile doğrula.
+4. Env dosyasını yeniden üret (`scripts/secrets-render.sh`) ya da bir sonraki deploy'u bekle.
+5. O zamana kadar yedek sürsün istiyorsan SSM'e bilinçli olarak `BACKUP_ALLOW_PLAINTEXT=1`
+   yaz; 3. adımdan sonra sil.
+
+**İzleme:** başarılı her yüklemeden sonra betik `/api/internal/backup-heartbeat`'i çağırır
+(`call-internal-job.sh`, `CRON_SECRET`). `src/lib/jobs/registry.ts` içindeki `backup-heartbeat`
+işi `maxStaleHours: 13`; 13 saattir başarı yoksa `GET /api/health/jobs` onu `stale` gösterir
+ve 503 döner. Yani şifreleme ayarı eksik, `age` yok ya da S3 hatası, en geç iki kaçırılmış
+koşuda görünür olur. Bu iş `hostTriggered`: `emit-crontab.sh` onun için satır üretmez, cron
+satırı `ops/crontab.prod`'un sunucuya özgü bölümünde.
+
+**Saklama:** `infra/aws/bootstrap` yaşam döngüsü kuralı `backups/` önekindeki dump'ların
+güncel sürümünü 35 günde sona erdirir, noncurrent sürümleri 7 gün sonra siler, artakalan silme
+işaretlerini temizler. **İlk apply'dan ÖNCE:** kural 35 günden eski BÜTÜN dump'ları siler.
+Önce en eskileri listele ve saklanacakları başka bir öneke kopyala:
+
+```bash
+aws s3api list-objects-v2 --bucket <yedek-bucket> --prefix backups/ \
+  --query 'sort_by(Contents,&LastModified)[:20].[Key,LastModified,Size]' --output table
+aws s3 cp s3://<yedek-bucket>/backups/<dosya> s3://<yedek-bucket>/archive/<dosya>
+```
+
+`archive/` öneki kuralın kapsamı dışında; instance rolü oraya yazamaz, kopyayı yetkili
+profille sen yaparsın.
 
 **Elle yedek** (sunucuda, onarım betiklerinden önce zorunlu):
 

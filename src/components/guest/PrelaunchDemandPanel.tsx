@@ -67,9 +67,9 @@ export default function PrelaunchDemandPanel({
 
   function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
-    const website = String(new FormData(e.currentTarget).get("website") ?? "");
+    const hp_field = String(new FormData(e.currentTarget).get("hp_field") ?? "");
     startTransition(async () => {
-      const res = await registerPrelaunchInterestAction({ shopId, email, website });
+      const res = await registerPrelaunchInterestAction({ shopId, email, hp_field });
       if (!res.success) {
         toast.error(errorText(res.error));
         return;
@@ -129,8 +129,8 @@ export default function PrelaunchDemandPanel({
           <form onSubmit={handleSubmit} className="flex flex-col sm:flex-row gap-2">
             {/* Bal kupu: yalnizca botlar doldurur. */}
             <div aria-hidden="true" className="absolute -left-[9999px] h-0 w-0 overflow-hidden">
-              <label htmlFor="prelaunch-panel-website">Website</label>
-              <input id="prelaunch-panel-website" name="website" type="text" tabIndex={-1} autoComplete="off" />
+              <label htmlFor="prelaunch-panel-hp">hp</label>
+              <input id="prelaunch-panel-hp" name="hp_field" type="text" tabIndex={-1} autoComplete="off" />
             </div>
             <label htmlFor="prelaunch-email" className="sr-only">
               {t("prelaunchEmailLabel")}

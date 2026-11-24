@@ -9,7 +9,7 @@ const { mockRegister, mockRecord, mockRateLimit, mockAuth } = vi.hoisted(() => (
   mockAuth: vi.fn(),
 }));
 vi.mock("@/services/PrelaunchInterestService", () => ({
-  prelaunchInterestService: { registerWant: mockRegister, record: mockRecord },
+  prelaunchInterestService: { registerWant: mockRegister, record: mockRecord, wantCount: async () => 9 },
 }));
 vi.mock("@/lib/rate-limit", () => ({ rateLimit: mockRateLimit }));
 vi.mock("@/lib/get-ip", () => ({ getClientIp: async () => "1.1.1.1" }));
@@ -77,6 +77,14 @@ describe("POST /api/mobile/prelaunch/want", () => {
   it("hiz siniri IP + nokta basina", async () => {
     await POST(req({ shopId: SHOP, deviceId: DEVICE }));
     expect(mockRateLimit).toHaveBeenCalledWith(`mobile_prelaunch_want:1.1.1.1:${SHOP}`, 10, 600_000);
+  });
+
+  it("sayim web ile ayni IP+nokta kovasinda; asan istek sayilmaz ama hata da almaz", async () => {
+    mockRateLimit.mockImplementation(async (key: string) => !key.startsWith("prelaunch_want_ip:"));
+    const res = await POST(req({ shopId: SHOP, deviceId: DEVICE, notify: true }, true));
+    expect(mockRateLimit).toHaveBeenCalledWith(`prelaunch_want_ip:1.1.1.1:${SHOP}`, 1, 24 * 60 * 60_000);
+    expect(mockRegister).not.toHaveBeenCalled();
+    expect(await res.json()).toEqual({ count: 9, alreadyCounted: true, subscribed: "new" });
   });
 
   it("reddedilen token anonime dusmez: 401", async () => {

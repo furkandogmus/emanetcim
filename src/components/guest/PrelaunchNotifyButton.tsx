@@ -84,9 +84,9 @@ export default function PrelaunchNotifyButton({
 
   function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
-    const website = String(new FormData(e.currentTarget).get("website") ?? "");
+    const hp_field = String(new FormData(e.currentTarget).get("hp_field") ?? "");
     startTransition(async () => {
-      const res = await registerPrelaunchInterestAction({ shopId, email, website });
+      const res = await registerPrelaunchInterestAction({ shopId, email, hp_field });
       if (!res.success) {
         toast.error(errorText(res.error));
         return;
@@ -157,8 +157,8 @@ export default function PrelaunchNotifyButton({
                 </div>
                 {/* Bal kupu: yalnizca botlar doldurur. */}
                 <div aria-hidden="true" className="absolute -left-[9999px] h-0 w-0 overflow-hidden">
-                  <label htmlFor="prelaunch-modal-website">Website</label>
-                  <input id="prelaunch-modal-website" name="website" type="text" tabIndex={-1} autoComplete="off" />
+                  <label htmlFor="prelaunch-modal-hp">hp</label>
+                  <input id="prelaunch-modal-hp" name="hp_field" type="text" tabIndex={-1} autoComplete="off" />
                 </div>
                 <div className="flex gap-3">
                   <button

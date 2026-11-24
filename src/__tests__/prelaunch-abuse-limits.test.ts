@@ -56,7 +56,7 @@ describe("registerPrelaunchInterestAction", () => {
     const res = await registerPrelaunchInterestAction({
       shopId: SHOP,
       email: "misafir@example.com",
-      website: "http://spam.invalid",
+      hp_field: "http://spam.invalid",
     });
     expect(res).toEqual({ success: true, alreadyRegistered: false });
     expect(m.interestCreate).not.toHaveBeenCalled();
@@ -80,7 +80,7 @@ describe("registerPrelaunchInterestAction", () => {
 
 describe("PrelaunchInterestService.record: adres basina e-posta tavani", () => {
   it("tavan icinde teyit gonderilir", async () => {
-    await prelaunchInterestService.record({ shopId: SHOP, email: "Misafir@Example.com" });
+    await prelaunchInterestService.record({ shopId: SHOP, email: "Misafir+tag@Example.com" });
     await flush();
     expect(m.rateLimit).toHaveBeenCalledWith("prelaunch_confirm_email:misafir@example.com", 3, 24 * 60 * 60_000);
     expect(m.notify).toHaveBeenCalledOnce();
@@ -93,6 +93,15 @@ describe("PrelaunchInterestService.record: adres basina e-posta tavani", () => {
     expect(res).toEqual({ ok: true, alreadyRegistered: false });
     expect(m.interestCreate).toHaveBeenCalledOnce();
     expect(m.notify).not.toHaveBeenCalled();
+  });
+});
+
+describe("mailboxQuotaKey", () => {
+  it("+etiket atilir; gmail/googlemail noktalari da", async () => {
+    const { mailboxQuotaKey } = await import("@/lib/disposable-emails");
+    expect(mailboxQuotaKey("A.b+x@Example.com")).toBe("a.b@example.com");
+    expect(mailboxQuotaKey("a.b.c+1@gmail.com")).toBe("abc@gmail.com");
+    expect(mailboxQuotaKey("a.b.c@googlemail.com")).toBe("abc@gmail.com");
   });
 });
 

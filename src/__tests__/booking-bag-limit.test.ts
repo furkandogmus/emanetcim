@@ -125,6 +125,26 @@ describe("web createBookingAction", () => {
     expect(m.create).not.toHaveBeenCalled();
   });
 
+  it("sifir valiz kupon hakki almadan reddedilir (maxUses tukenmez)", async () => {
+    const res = await createBookingAction({ ...input, bagCountXl: 0, couponCode: "YAZ10" });
+    expect(res).toEqual({ success: false, error: "Errors.invalidData" });
+    expect(m.claim).not.toHaveBeenCalled();
+    expect(m.create).not.toHaveBeenCalled();
+  });
+
+  it("kupon alindiktan sonraki erken donus hakki geri verir", async () => {
+    m.claim.mockResolvedValueOnce({
+      totalPrice: 1,
+      couponId: "c1",
+      couponDiscountAmount: 0,
+      referralDiscountAmount: 0,
+      affiliateDiscountAmount: 0,
+    });
+    const res = await createBookingAction({ ...input, couponCode: "YAZ10", expectedTotal: 999 });
+    expect(res).toEqual({ success: false, error: "Errors.priceChanged" });
+    expect(m.release).toHaveBeenCalledWith("c1");
+  });
+
   it("servise fiyatlanan sayilar gider", async () => {
     const res = await createBookingAction(input);
     expect(res).toMatchObject({ success: true });
