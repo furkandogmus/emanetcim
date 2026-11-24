@@ -17,18 +17,16 @@ const m = vi.hoisted(() => ({
   },
   sendNotification: vi.fn(),
   sendEachForMulticast: vi.fn(),
-  localLimit: vi.fn(),
 }));
 
 vi.mock("@/lib/db", () => ({ default: m.prisma }));
 vi.mock("web-push", () => ({ default: { setVapidDetails: vi.fn(), sendNotification: m.sendNotification } }));
 vi.mock("firebase-admin/app", () => ({ initializeApp: vi.fn(), getApps: vi.fn().mockReturnValue([]), cert: vi.fn((v) => v) }));
 vi.mock("firebase-admin/messaging", () => ({ getMessaging: vi.fn(() => ({ sendEachForMulticast: m.sendEachForMulticast })) }));
-vi.mock("@/lib/rate-limit", () => ({ rateLimitLocalMemory: m.localLimit }));
 
 import { NotificationService, CONTACT_PUSH_COALESCE_MS } from "@/services/NotificationService";
 
-const service = new NotificationService();
+let service = new NotificationService();
 const fetchMock = vi.fn();
 global.fetch = fetchMock as unknown as typeof fetch;
 
@@ -46,6 +44,8 @@ const webPayloads = () => m.sendNotification.mock.calls.map((c) => JSON.parse(c[
 
 beforeEach(() => {
   vi.clearAllMocks();
+  // Birlestirme durumu ornekte tutulur; her test temiz baslar.
+  service = new NotificationService();
   process.env.RESEND_API_KEY = "test_key";
   process.env.VAPID_PUBLIC_KEY = "pub";
   process.env.VAPID_PRIVATE_KEY = "priv";
@@ -56,7 +56,6 @@ beforeEach(() => {
   m.prisma.pushSubscription.findMany.mockResolvedValue([{ id: "s1", endpoint: "https://push.example/1", p256dh: "k", auth: "a" }]);
   m.sendNotification.mockResolvedValue({});
   m.sendEachForMulticast.mockResolvedValue({ successCount: 1, responses: [{ success: true }] });
-  m.localLimit.mockReturnValue(true);
 });
 
 describe("misafir olaylari web push'a da gider (G37)", () => {
@@ -177,16 +176,104 @@ describe("destek mesaji -> yonetici push'u (birlestirilmis)", () => {
     );
   });
 
-  it("aralik icinde ikinci push gitmez (kayit defterinden)", async () => {
-    m.prisma.notificationLog.findFirst.mockResolvedValue({ id: "log-1" });
-    await expect(service.notifyAdminsForContactMessage()).resolves.toBe(false);
-    expect(m.sendEachForMulticast).not.toHaveBeenCalled();
+  it("baska surecin gonderimi (kayit defteri) pencereyi acar; pencere sonunda takip push'u", async () => {
+    vi.useFakeTimers();
+    try {
+      const now = new Date("2026-11-24T12:00:00Z");
+      vi.setSystemTime(now);
+      m.prisma.notificationLog.findFirst.mockResolvedValue({ createdAt: new Date(now.getTime() - 60_000) });
+      m.prisma.contactMessage.count.mockResolvedValue(2);
+      await expect(service.notifyAdminsForContactMessage(now)).resolves.toBe(false);
+      expect(m.sendEachForMulticast).not.toHaveBeenCalled();
+
+      await vi.advanceTimersByTimeAsync(CONTACT_PUSH_COALESCE_MS - 60_000 - 1);
+      expect(m.sendEachForMulticast).not.toHaveBeenCalled();
+      await vi.advanceTimersByTimeAsync(1);
+      await vi.waitFor(() =>
+        expect(m.sendEachForMulticast).toHaveBeenCalledWith(
+          expect.objectContaining({ notification: { title: "Yeni destek mesajı", body: "2 okunmamış mesaj var." } }),
+        ),
+      );
+    } finally {
+      vi.useRealTimers();
+    }
   });
 
-  it("ayni surecte es zamanli ikinci cagri veritabanina bile gitmez", async () => {
-    m.localLimit.mockReturnValue(false);
-    await expect(service.notifyAdminsForContactMessage()).resolves.toBe(false);
-    expect(m.prisma.notificationLog.findFirst).not.toHaveBeenCalled();
+  it("pencere icinde gelen mesajlar tek takip push'unda toplanir", async () => {
+    vi.useFakeTimers();
+    try {
+      m.prisma.notificationLog.findFirst.mockResolvedValue(null);
+      m.prisma.contactMessage.count.mockResolvedValue(1);
+      const t0 = new Date("2026-11-24T12:00:00Z");
+      vi.setSystemTime(t0);
+      await expect(service.notifyAdminsForContactMessage(t0)).resolves.toBe(true);
+      expect(m.sendEachForMulticast).toHaveBeenCalledTimes(1);
+
+      m.prisma.contactMessage.count.mockResolvedValue(4);
+      await service.notifyAdminsForContactMessage(new Date(t0.getTime() + 60_000));
+      await service.notifyAdminsForContactMessage(new Date(t0.getTime() + 120_000));
+      expect(m.sendEachForMulticast).toHaveBeenCalledTimes(1);
+
+      await vi.advanceTimersByTimeAsync(CONTACT_PUSH_COALESCE_MS);
+      await vi.waitFor(() => expect(m.sendEachForMulticast).toHaveBeenCalledTimes(2));
+      expect(m.sendEachForMulticast).toHaveBeenLastCalledWith(
+        expect.objectContaining({ notification: expect.objectContaining({ body: "4 okunmamış mesaj var." }) }),
+      );
+    } finally {
+      vi.useRealTimers();
+    }
+  });
+
+  it("takip aninda okunmamis kalmadiysa push gitmez", async () => {
+    vi.useFakeTimers();
+    try {
+      m.prisma.notificationLog.findFirst.mockResolvedValue(null);
+      m.prisma.contactMessage.count.mockResolvedValue(1);
+      const t0 = new Date();
+      await service.notifyAdminsForContactMessage(t0);
+      await service.notifyAdminsForContactMessage(new Date(t0.getTime() + 1_000));
+      m.prisma.contactMessage.count.mockResolvedValue(0);
+      await vi.advanceTimersByTimeAsync(CONTACT_PUSH_COALESCE_MS);
+      expect(m.sendEachForMulticast).toHaveBeenCalledTimes(1);
+    } finally {
+      vi.useRealTimers();
+    }
+  });
+
+  it("gonderim hatasi pencereyi baslatmaz; sonraki mesaj hemen push'lanir", async () => {
+    m.prisma.notificationLog.findFirst.mockResolvedValue(null);
+    m.prisma.contactMessage.count.mockRejectedValueOnce(new Error("db down")).mockResolvedValue(1);
+    await expect(service.notifyAdminsForContactMessage()).rejects.toThrow("db down");
+    await expect(service.notifyAdminsForContactMessage()).resolves.toBe(true);
+    expect(m.sendEachForMulticast).toHaveBeenCalledTimes(1);
+  });
+});
+
+describe("misafir web push'u: abonelik yoksa kayit satiri yazilmaz", () => {
+  it("SKIPPED no_subscriptions satiri yok, mobil satiri var", async () => {
+    m.prisma.pushSubscription.findMany.mockResolvedValue([]);
+    service.pushGuestOnly("b1", "checkOut", "tr");
+    await vi.waitFor(() => expect(m.prisma.notificationLog.create).toHaveBeenCalled());
+    const types = m.prisma.notificationLog.create.mock.calls.map((c) => c[0].data.type);
+    expect(types).toEqual(["MOBILE_PUSH"]);
+  });
+
+  it("gercek web push hatasi yine kaydedilir", async () => {
+    m.sendNotification.mockRejectedValue(Object.assign(new Error("boom"), { statusCode: 500 }));
+    service.pushGuestOnly("b1", "checkOut", "tr");
+    await vi.waitFor(() =>
+      expect(m.prisma.notificationLog.create).toHaveBeenCalledWith(
+        expect.objectContaining({ data: expect.objectContaining({ type: "PUSH", status: "FAILED" }) }),
+      ),
+    );
+  });
+
+  it("dogrudan sendPush cagrisi (esnaf) SKIPPED yazmaya devam eder", async () => {
+    m.prisma.pushSubscription.findMany.mockResolvedValue([]);
+    await service.sendPush("partner-1", "t", "b");
+    expect(m.prisma.notificationLog.create).toHaveBeenCalledWith(
+      expect.objectContaining({ data: expect.objectContaining({ type: "PUSH", status: "SKIPPED", error: "no_subscriptions" }) }),
+    );
   });
 });
 

@@ -28,7 +28,6 @@ import { getSiteBaseUrl } from "@/lib/site-base-url";
 import { signGuestManageLinkToken } from "@/lib/guest-lookup-token";
 import { bookingNotificationEmail } from "@/services/booking/guest-contact";
 import { DEFAULT_NOTIFICATION_LOCALE } from "@/lib/request-locale";
-import { rateLimitLocalMemory } from "@/lib/rate-limit";
 import type { DisputeStatus } from "@/lib/dispute-status";
 import { APP_STORE_BADGE, GOOGLE_PLAY_BADGE, appLinkHref, getAppStoreFlags } from "@/lib/app-stores";
 import type { EmailAppBadges } from "@/lib/email-template";
@@ -83,7 +82,7 @@ async function bookingEmailAppBadges(
 /** `excludeUserIds`: push'u tetikleyen yonetici kendi istegini bildirim olarak almaz. */
 type AdminPushOptions = { excludeUserIds?: string[] };
 
-/** Iletisim mesaji push'u en fazla bu aralikta bir kez gider; arada gelenler sayida toplanir. */
+/** Iletisim mesaji push'u bu aralikta en fazla bir kez; arada gelenler pencere sonunda tek push'ta. */
 export const CONTACT_PUSH_COALESCE_MS = 10 * 60_000;
 
 /**
@@ -244,13 +243,16 @@ export class NotificationService implements INotificationService {
   /**
    * Push bildirim gönderimi
    */
-  /** `opts.url`: tiklama hedefi (dil oneksiz); yoksa worker `bookingId`den kurar. */
+  /**
+   * `opts.url`: tiklama hedefi (dil oneksiz); yoksa worker `bookingId`den kurar.
+   * `opts.logSkip: false`: abonelik yoksa NotificationLog'a SKIPPED yazilmaz.
+   */
   async sendPush(
     userId: string,
     title: string,
     message: string,
     bookingId?: string,
-    opts: { url?: string } = {},
+    opts: { url?: string; logSkip?: boolean } = {},
   ): Promise<boolean> {
     // Public anahtar tek kaynaktan: imaja gomulen NEXT_PUBLIC_ degeri (istemci
     // aboneligi de onunla yapiyor). VAPID_PUBLIC_KEY yalnizca eski kurulumlar icin.
@@ -313,6 +315,9 @@ export class NotificationService implements INotificationService {
         { userId, title, skipReason },
         "notification_push_skipped",
       );
+      // Misafir olaylari web push'u ek kanal olarak dener; aboneligi olmayan
+      // misafir icin her olayda SKIPPED satiri yonetici sayacini sisiriyordu.
+      if (opts.logSkip === false && skipReason === "no_subscriptions") return false;
 
       await prisma.notificationLog.create({
         data: {
@@ -385,7 +390,7 @@ export class NotificationService implements INotificationService {
     const { title, body } = pickLocale(GUEST_PUSH_COPY, locale)[event]({ shop: booking.shop.name, ...vars });
     const [mobile] = await Promise.all([
       this.sendMobilePush(booking.guestId, title, body, bookingId),
-      this.sendPush(booking.guestId, title, body, bookingId, { url: guestPushWebPath(event, bookingId) }),
+      this.sendPush(booking.guestId, title, body, bookingId, { url: guestPushWebPath(event, bookingId), logSkip: false }),
     ]);
     return mobile;
   }
@@ -2815,31 +2820,86 @@ export class NotificationService implements INotificationService {
     }
   }
 
+  /** Destek push'u birlestirme durumu (surec ici). */
+  private contactPush: {
+    lastSentAt: number;
+    inFlight: boolean;
+    pending: boolean;
+    timer: ReturnType<typeof setTimeout> | null;
+  } = { lastSentAt: 0, inFlight: false, pending: false, timer: null };
+
   /**
-   * Yeni destek mesaji -> yoneticilerin mobil push'u (Mesajlar sekmesi). Bir spam
-   * dalgasi telefonlari bogmasin diye en fazla `CONTACT_PUSH_COALESCE_MS`de bir push;
-   * govdedeki sayi okunmamis destek mesajlari, yani arada gelenler kaybolmaz.
+   * Yeni destek mesaji -> yoneticilerin mobil push'u (Mesajlar sekmesi). Spam dalgasi
+   * telefonlari bogmasin diye `CONTACT_PUSH_COALESCE_MS` icinde en fazla bir push: pencere
+   * icinde gelen mesaj pencere sonunda tek bir takip push'u dogurur. Govdedeki sayi
+   * okunmamis destek mesajlari. Pencere yalnizca basarili gonderimle baslar; DB/push
+   * hatasi sonraki mesajin push'unu susturmaz.
    *
-   * Aralik NotificationLog'dan okunur (sureclerden bagimsiz); ayni surecte es zamanli
-   * iki mesaj icin bellek ici kilit ikinci push'u keser. Yalnizca `SUPPORT` siniflanan
-   * mesaj tetikler: toplu/otomatik posta push uretmez.
+   * Pencere hem bellekten hem NotificationLog'dan okunur (baska surecin gonderimi de
+   * sayilir); takip zamanlayicisi surec icidir. `false`: push ertelendi.
    */
   async notifyAdminsForContactMessage(now: Date = new Date()): Promise<boolean> {
-    if (!rateLimitLocalMemory("admin-push:contact", 1, CONTACT_PUSH_COALESCE_MS)) return false;
+    const st = this.contactPush;
+    if (st.inFlight) {
+      st.pending = true;
+      return false;
+    }
+    const windowEnd = await this.contactPushWindowEnd(now);
+    if (windowEnd !== null) {
+      this.deferContactPush(windowEnd - now.getTime());
+      return false;
+    }
+    return this.sendContactPush(now, false);
+  }
+
+  private async contactPushWindowEnd(now: Date): Promise<number | null> {
     const titles = [ADMIN_PUSH_COPY.tr.contactMessage({}).title, ADMIN_PUSH_COPY.en.contactMessage({}).title];
     const recent = await prisma.notificationLog.findFirst({
       where: {
         type: "MOBILE_PUSH",
         recipient: { startsWith: "admins:" },
         subject: { in: titles },
+        status: "SENT",
         createdAt: { gte: new Date(now.getTime() - CONTACT_PUSH_COALESCE_MS) },
       },
-      select: { id: true },
+      orderBy: { createdAt: "desc" },
+      select: { createdAt: true },
     });
-    if (recent) return false;
-    const count = await prisma.contactMessage.count({ where: { category: "SUPPORT", isRead: false } });
-    await this.pushAdminsNow("contactMessage", { count: Math.max(count, 1) }, { adminScreen: "messages" });
-    return true;
+    const last = Math.max(this.contactPush.lastSentAt, recent?.createdAt.getTime() ?? 0);
+    const end = last + CONTACT_PUSH_COALESCE_MS;
+    return last > 0 && end > now.getTime() ? end : null;
+  }
+
+  /** `trailing`: pencere sonu takibi; okunmamis kalmadiysa push gitmez. */
+  private async sendContactPush(now: Date, trailing: boolean): Promise<boolean> {
+    const st = this.contactPush;
+    st.inFlight = true;
+    st.pending = false;
+    try {
+      const count = await prisma.contactMessage.count({ where: { category: "SUPPORT", isRead: false } });
+      if (trailing && count === 0) return false;
+      await this.pushAdminsNow("contactMessage", { count: Math.max(count, 1) }, { adminScreen: "messages" });
+      st.lastSentAt = now.getTime();
+      return true;
+    } finally {
+      st.inFlight = false;
+      // Gonderim surerken gelen mesaj bir sonraki pencere sonunda bildirilir.
+      if (st.pending) this.deferContactPush(CONTACT_PUSH_COALESCE_MS);
+    }
+  }
+
+  private deferContactPush(delayMs: number): void {
+    const st = this.contactPush;
+    st.pending = true;
+    if (st.timer) return;
+    st.timer = setTimeout(() => {
+      st.timer = null;
+      if (!st.pending) return;
+      void this.sendContactPush(new Date(), true).catch((err) =>
+        logger.warn({ err }, "admin_contact_trailing_push_failed"),
+      );
+    }, Math.max(delayMs, 0));
+    st.timer.unref?.();
   }
 
   /** Hesap silme tamamlandi: talep anindaki adrese, talep dilinde. */

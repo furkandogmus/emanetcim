@@ -1,7 +1,8 @@
 "use client";
 
 import { useState, useTransition } from "react";
-import { signOut, useSession } from "next-auth/react";
+import { useSession } from "next-auth/react";
+import { signOutWithPush } from "@/lib/web-push-client";
 import { useLocale, useTranslations } from "next-intl";
 import { UserX } from "lucide-react";
 import { anonymizeGuestAccountAction, requestAccountDeletionAction } from "@/actions/account-privacy";
@@ -43,7 +44,7 @@ export default function AccountPrivacyClient({ deletionRequest = null }: { delet
           }
           return;
         }
-        await signOut({ callbackUrl: "/" });
+        await signOutWithPush({ callbackUrl: "/" });
       } catch {
         setError(t("errors.generic"));
       }

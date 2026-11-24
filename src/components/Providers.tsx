@@ -3,6 +3,7 @@
 import { SessionProvider } from "next-auth/react";
 import { MotionConfig } from "framer-motion";
 import { Toaster } from "sonner";
+import WebPushSessionSync from "@/components/WebPushSessionSync";
 
 export function Providers({ children }: { children: React.ReactNode }) {
   return (
@@ -27,6 +28,7 @@ export function Providers({ children }: { children: React.ReactNode }) {
       */}
       <MotionConfig reducedMotion="user">
         {children}
+        <WebPushSessionSync />
         <Toaster richColors position="top-center" />
       </MotionConfig>
     </SessionProvider>
