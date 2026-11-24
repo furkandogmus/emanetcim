@@ -149,6 +149,20 @@ describe("çeviri dosyaları", () => {
     expect(extra, `${loc}: ${BASE}.json'da karşılığı olmayan anahtarlar`).toEqual([]);
   });
 
+  // fr.json'da gorunmez U+200B bulundu (2026-11-24): aramayi ve karsilastirmayi bozar,
+  // yon isaretleri metni ters cizer. ZWNJ Farsca yazimin parcasi, yalniz fa'da serbest.
+  it.each(Object.keys(all))("%s: gorunmez/yon karakteri yok", (loc) => {
+    const raw = fs.readFileSync(path.join(DIR, `${loc}.json`), "utf8");
+    const allowed = loc === "fa" ? new Set(["‌"]) : new Set<string>();
+    const found = [...raw.matchAll(/[​-‏‪-‮⁠-⁤﻿]/g)]
+      .filter((m) => !allowed.has(m[0]))
+      .map((m) => {
+        const line = raw.slice(0, m.index).split("\n").length;
+        return `satir ${line}: U+${m[0].codePointAt(0)!.toString(16).toUpperCase().padStart(4, "0")}`;
+      });
+    expect(found, `${loc}.json gorunmez karakter tasiyor`).toEqual([]);
+  });
+
   it.each(locales.filter((l) => l !== "en"))(
     "%s: hiçbir metin İngilizce ile birebir aynı kalmadı",
     (loc) => {
