@@ -89,6 +89,15 @@ describe("istemci", () => {
     expect(fetchMock).toHaveBeenCalledTimes(1);
   });
 
+  it("yonetici olarak goruntulerken (hedef oturumu) baglama yapilmaz", () => {
+    m.useSession.mockReturnValue({
+      data: { user: { id: "target", role: "GUEST" }, impersonation: { adminId: "a", expiresAt: "" } },
+      status: "authenticated",
+    });
+    render(<WebPushSessionSync />);
+    expect(fetchMock).not.toHaveBeenCalled();
+  });
+
   it("oturum yokken baglama yapilmaz", () => {
     m.useSession.mockReturnValue({ data: null, status: "unauthenticated" });
     render(<WebPushSessionSync />);
@@ -117,6 +126,14 @@ describe("sunucu /api/push/subscribe", () => {
     expect(m.prisma.pushSubscription.deleteMany).toHaveBeenCalledWith({
       where: { userId: "user-a", endpoint: SUB.endpoint },
     });
+  });
+
+  it("goruntuleme oturumunda POST/DELETE 403, abonelik hedefe tasinmaz", async () => {
+    m.auth.mockResolvedValue({ user: { id: "target" }, impersonation: { adminId: "a", expiresAt: "" } });
+    expect((await POST(req(SUB))).status).toBe(403);
+    expect((await DELETE(req({ endpoint: SUB.endpoint }))).status).toBe(403);
+    expect(m.prisma.pushSubscription.upsert).not.toHaveBeenCalled();
+    expect(m.prisma.pushSubscription.deleteMany).not.toHaveBeenCalled();
   });
 
   it("oturumsuz istek 401", async () => {
