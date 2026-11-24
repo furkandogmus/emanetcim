@@ -3281,5 +3281,32 @@
       "IN_PROGRESS": "Bu form zaten gönderiliyor, birkaç saniye bekle."
     },
     "pickupNameCheck": "Teslim etmeden önce adı kontrol et: {name}"
+  },
+  "bagPhotos": {
+    "title": "Valiz fotoğrafları",
+    "operatorTitle": "Valiz fotoğrafı ekle",
+    "operatorHint": "İsteğe bağlı: teslim alırken valizin durumunu 1-{max} fotoğrafla kaydet. Hasar itirazında kanıt olur; yalnızca misafir, dükkan ve BagajPark görür.",
+    "guestHint": "Dükkan valizini teslim alırken bu fotoğrafları çekti. Hasar itirazında kanıt olarak kullanılır ve teslimden 30 gün sonra silinir.",
+    "adminHint": "Teslimde dükkanın çektiği valiz durumu fotoğrafları (itiraz kanıtı).",
+    "add": "Fotoğraf çek",
+    "addMore": "Fotoğraf ekle ({count}/{max})",
+    "retry": "Tekrar dene",
+    "deleteConfirm": "Bu fotoğraf silinsin mi?",
+    "deletePhoto": "{n}. fotoğrafı sil",
+    "openPhoto": "{n}. fotoğrafı büyük aç",
+    "photoAlt": "Valiz fotoğrafı {n}",
+    "errors": {
+      "generic": "Fotoğraf işlenemedi. Tekrar dene.",
+      "forbidden": "Bu rezervasyonun fotoğraflarına erişimin yok.",
+      "read_only": "Görüntüleme oturumunda fotoğraf eklenemez veya silinemez.",
+      "storage_unavailable": "Fotoğraf depolama şu an kullanılamıyor.",
+      "rate_limited": "Çok fazla deneme. Birkaç dakika sonra tekrar dene.",
+      "locked": "Teslimden sonra fotoğraflar kilitlenir; değiştirilemez.",
+      "limit": "Bu rezervasyon için en fazla 3 fotoğraf eklenebilir.",
+      "empty": "Fotoğraf seçilmedi.",
+      "too_large": "Fotoğraf çok büyük (en fazla 2 MB).",
+      "unsupported_type": "Bu dosya bir JPEG fotoğraf değil.",
+      "dimensions_too_large": "Fotoğrafın çözünürlüğü çok yüksek."
+    }
   }
 }

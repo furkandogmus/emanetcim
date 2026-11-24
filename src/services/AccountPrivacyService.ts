@@ -8,6 +8,7 @@ import { NOT_DROPPED_STATUSES } from "@/lib/booking-closure";
 import { closeExpiredBookingsForGuest } from "@/services/booking/closure";
 import { normalizeTrGsm10 } from "@/lib/netgsm";
 import { appleTokenService } from "@/services/AppleTokenService";
+import { bagPhotoService } from "@/services/BagPhotoService";
 import { notificationService } from "@/services/NotificationService";
 import logger from "@/lib/logger";
 
@@ -512,6 +513,8 @@ class AccountPrivacyService {
     const appleTokens = await appleTokenService.collectForUser(userId);
     await prisma.$transaction((tx) => this.eraseWithinTx(tx, userId));
     await appleTokenService.revokeTokens(userId, appleTokens);
+    // Isaretlenen valiz fotograflarinin nesneleri hemen; kalan olursa gunluk saklama isi.
+    void bagPhotoService.purgeMarked().catch((err: unknown) => logger.warn({ err, userId }, "bag_photo_erasure_purge_failed"));
   }
 
   /** Silme govdesi -- kendi silmesi, yonetici silmesi ve talep tamamlama AYNI listeyi kullanir. */
@@ -551,6 +554,8 @@ class AccountPrivacyService {
     await tx.mobileInstall.deleteMany({ where: { userId } });
     // Personel uyeligi ve bu e-postaya giden davetler: silinen hesap hicbir dukkanda calismaz.
     await tx.shopMember.deleteMany({ where: { userId } });
+    // Valiz fotograflari: acik itiraz kaniti kalir (itiraz kapaninca saklama kurali siler).
+    await bagPhotoService.markForGuestErasure(tx, userId, new Date());
     if (email) await tx.shopInvite.deleteMany({ where: { email } });
     /*
       Esnafin odeme/vergi kimligi (TCKN/VKN, IBAN, unvan, adres, iletisim). Elle

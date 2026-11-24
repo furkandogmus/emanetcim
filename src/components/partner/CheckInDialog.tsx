@@ -2,10 +2,11 @@
 
 import { useEffect, useState, useRef } from "react";
 import { useTranslations } from "next-intl";
-import { AlertTriangle, CheckCircle2, Loader2, Luggage, ShieldCheck, X , Camera } from "lucide-react";
+import { AlertTriangle, CheckCircle2, Loader2, Luggage, ShieldCheck, X } from "lucide-react";
 import { toast } from "sonner";
 import { checkInAction, getNextAvailableSealsAction } from "@/actions/partner";
 import { Link } from "@/i18n/routing";
+import BagPhotos from "@/components/bag-photos/BagPhotos";
 import { useModalBehavior } from "@/lib/hooks/useModalBehavior";
 import { useActionErrorText } from "@/lib/use-action-error";
 
@@ -93,22 +94,6 @@ export default function CheckInDialog({
     () => preview.bagCountS + preview.bagCountM + preview.bagCountXl > 0,
   );
   const [isProcessing, setIsProcessing] = useState(false);
-  /**
-   * Mühürlenmiş valizin kanıt fotoğrafı.
-   *
-   * NEDEN VAR (2026-09-01): ürün üç yerde "teslimde mühür ve fotoğraf" vaat
-   * ediyordu — `README_AI` akışı, `SealService` başlığı ve misafire gösterilen
-   * güvence metni — ama fotoğraf HİÇ ÇEKİLMİYORDU: bu ekranda kamera alanı
-   * yoktu ve `BookingSeal.photoUrl` üretimde hep boştu.
-   *
-   * Uyuşmazlıkta esnafın elindeki tek kanıt mühür numarasıydı. Mühür valizin
-   * AÇILMADIĞINI gösterir ama esnafa HANGİ DURUMDA geldiğini göstermez;
-   * fotoğraf tam o boşluğu kapatır.
-   *
-   * ZORUNLU DEĞİL: kamerası çalışmayan bir esnafın valizi hiç teslim
-   * alamaması, kanıt toplayamamaktan kötüdür.
-   */
-  const [photo, setPhoto] = useState<File | null>(null);
   /**
    * Ön doldurma GERÇEKTEN mühür getirdi mi.
    *
@@ -207,17 +192,11 @@ export default function CheckInDialog({
         SONSUZA dek kaliyordu, esnaf tezgahta musteriyi beklerken hicbir
         geri bildirim alamiyordu.
       */
-      /*
-        FOTOGRAF BAYT OLARAK GIDIYOR, adres olarak degil. Adres istemciden
-        gelseydi esnaf oraya istedigi gorselin adresini yazabilir ve
-        uyusmazlikta "kanit" diye gosterilen sey onun sectigi bir dosya olurdu.
-        Dogrulama ve yukleme sunucuda.
-      */
-      const photoBuffer = photo ? await photo.arrayBuffer() : null;
+      // Valiz fotografi artik ayri ve ozel (`BagPhotos`); eski herkese acik muhur fotografi gonderilmez.
       const result = await checkInAction(
         preview.id,
         hasSealInput ? { sealAssignments, faultySealNumbers: faultySeals } : undefined,
-        photoBuffer,
+        null,
         outsideHours ? { outsideHours: true } : undefined,
       );
       if (result.success) {
@@ -272,38 +251,8 @@ export default function CheckInDialog({
               </div>
             </div>
 
-            {storageReady && (
-              <div className="flex items-center gap-3 rounded-2xl border border-gray-100 bg-gray-50/60 p-3">
-                <Camera size={16} className="shrink-0 text-gray-400" />
-                <div className="min-w-0 flex-1">
-                  <p className="text-xs id-eyebrow text-gray-500">
-                    {t("sealPhotoTitle")}
-                  </p>
-                  <p className="mt-0.5 truncate text-[11px] text-gray-400">
-                    {photo ? photo.name : t("sealPhotoOptional")}
-                  </p>
-                </div>
-                <input
-                  id="seal-photo"
-                  type="file"
-                  accept="image/jpeg,image/png,image/webp"
-                  /* `capture`: telefonda dogrudan arka kamerayi acar. */
-                  capture="environment"
-                  className="sr-only"
-                  onChange={(e) => {
-                    const f = e.target.files?.[0] ?? null;
-                    e.target.value = "";
-                    setPhoto(f);
-                  }}
-                />
-                <label
-                  htmlFor="seal-photo"
-                  className="id-control shrink-0 cursor-pointer border border-gray-200 bg-white px-3 py-2 text-xs font-bold text-gray-700 hover:bg-gray-50"
-                >
-                  {photo ? t("sealPhotoChange") : t("sealPhotoAdd")}
-                </label>
-              </div>
-            )}
+            {/* Istege bagli 1-3 kare; yukleme hatasi teslimi engellemez. */}
+            {storageReady && <BagPhotos bookingId={preview.id} audience="operator" />}
 
             {sealRows.length > 0 && (
               <div className="flex flex-col gap-3">

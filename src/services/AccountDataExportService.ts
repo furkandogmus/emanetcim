@@ -55,7 +55,7 @@ class AccountDataExportService {
     });
     if (!user) return null;
 
-    const [bookings, reviews, legalAcceptances, shops, affiliate, deletionRequest, shopMemberships] = await Promise.all([
+    const [bookings, reviews, legalAcceptances, shops, affiliate, deletionRequest, shopMemberships, bagPhotosTaken] = await Promise.all([
       prisma.booking.findMany({
         where: { guestId: userId },
         orderBy: { createdAt: "asc" },
@@ -75,6 +75,8 @@ class AccountDataExportService {
           guestEmail: true,
           guestPhone: true,
           source: true,
+          // Valiz durumu fotograflari: yalniz meta veri; goruntunun kendisi uygulamadaki biletten acilir.
+          bagPhotos: { where: { deletedAt: null }, orderBy: { createdAt: "asc" }, select: { id: true, createdAt: true } },
         },
       }),
       prisma.review.findMany({
@@ -140,6 +142,12 @@ class AccountDataExportService {
         orderBy: { createdAt: "asc" },
         select: { role: true, createdAt: true, shop: { select: { id: true, name: true } } },
       }),
+      // Operator olarak cektigi valiz fotograflari (kimin hangi rezervasyonda kanit topladigi).
+      prisma.bagPhoto.findMany({
+        where: { uploadedById: userId, deletedAt: null },
+        orderBy: { createdAt: "asc" },
+        select: { id: true, bookingId: true, createdAt: true },
+      }),
     ]);
 
     const { accounts, ...profile } = user;
@@ -163,6 +171,7 @@ class AccountDataExportService {
         role: m.role,
         since: m.createdAt.toISOString(),
       })),
+      bagPhotosTaken: bagPhotosTaken.map((p) => ({ id: p.id, bookingId: p.bookingId, takenAt: p.createdAt.toISOString() })),
     };
   }
 

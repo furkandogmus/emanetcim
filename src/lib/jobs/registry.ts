@@ -191,6 +191,16 @@ export const JOB_REGISTRY: readonly JobDefinition[] = [
     enforced: true,
   },
   {
+    name: "bag-photo-retention",
+    what: "Teslimden (ya da kapanan itirazdan) 30 gün sonra valiz durumu fotoğraflarını S3'ten ve tablodan siler.",
+    ifItStops:
+      "Hasar kanıtı fotoğrafları vaat edilen 30 günden uzun saklanır (KVKK); S3 yaşam döngüsü kuralı 120 günde yine siler ama tablo satırları kalır.",
+    method: "POST",
+    cron: "43 3 * * *",
+    maxStaleHours: 72,
+    enforced: true,
+  },
+  {
     name: "backup-heartbeat",
     what: "Postgres yedegi S3'e yuklendiginde backup-s3.sh bu uca basari kaydi yazar.",
     ifItStops:

@@ -69,6 +69,10 @@
 # Calismazsa: Rozet donar: dükkan yavaşlasa da eski hızlı sayıyı göstermeye devam eder. Çalışmadan hiç, `responseTimeMinutes` platform genelinde 0'dı ve rozet hiçbir ölçüme dayanmıyordu (P2-7).
 29 3 * * * /opt/emanetci/scripts/call-internal-job.sh --job response-times --method POST >> /opt/emanetci/logs/bagajpark-response-times.log 2>&1
 
+# Teslimden (ya da kapanan itirazdan) 30 gün sonra valiz durumu fotoğraflarını S3'ten ve tablodan siler.
+# Calismazsa: Hasar kanıtı fotoğrafları vaat edilen 30 günden uzun saklanır (KVKK); S3 yaşam döngüsü kuralı 120 günde yine siler ama tablo satırları kalır.
+43 3 * * * /opt/emanetci/scripts/call-internal-job.sh --job bag-photo-retention --method POST >> /opt/emanetci/logs/bagajpark-bag-photo-retention.log 2>&1
+
 # Finans/mutabakat verisini dışa aktarır.
 # Calismazsa: Mutabakat elle yapılmak zorunda kalır.
 53 2 * * * /opt/emanetci/scripts/call-internal-job.sh --job finance-export --method GET >> /opt/emanetci/logs/bagajpark-finance-export.log 2>&1

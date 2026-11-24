@@ -29,6 +29,7 @@
 | `seal-forecast` | `37 6 * * 1` | — | POST | Mühür ihtiyacı öngörüsü |
 | `classify-inbox` | `13 5 * * *` | — | POST | Gelen kutusunu destek/toplu/otomatik ayırır |
 | `response-times` | `29 3 * * *` | — | POST | Dükkan "yanıt süresi" rozeti |
+| `bag-photo-retention` | `43 3 * * *` | — | POST | Valiz durumu fotoğrafları: teslimden / kapanan itirazdan 30 gün sonra S3 nesnesi ve satır silinir |
 | `finance-export` | `53 2 * * *` | — | GET | Finans/mutabakat dışa aktarımı |
 
 Bu tabloyu elle değil kayıt defterinden güncelleyin (`./scripts/emit-crontab.sh`).

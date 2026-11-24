@@ -19,6 +19,7 @@ import { bcp47ForUiLocale } from "@/lib/intl-locale";
 import Money from "@/components/common/Money";
 import AdminBookingClosureActions from "@/components/admin/AdminBookingClosureActions";
 import { formatInstant } from "@/lib/format-datetime";
+import BagPhotos from "@/components/bag-photos/BagPhotos";
 
 type Seal = {
   id: string;
@@ -186,6 +187,10 @@ export default function AdminBookingDetailClient({
         <p className="text-xs text-gray-400 mb-8 break-all">{booking.id}</p>
 
         <AdminBookingClosureActions bookingId={booking.id} status={booking.status} />
+
+        <div className="mb-6">
+          <BagPhotos bookingId={booking.id} audience="admin" />
+        </div>
 
         <div className="grid gap-6 md:grid-cols-2">
           <Section icon={User} title={t("bookingsSectionGuest")}>

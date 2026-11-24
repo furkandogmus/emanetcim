@@ -15,6 +15,7 @@ import {
 import { Link } from "@/i18n/routing";
 import { getTranslations, setRequestLocale } from "next-intl/server";
 import PrintButton from "@/components/guest/PrintButton";
+import BagPhotos from "@/components/bag-photos/BagPhotos";
 import BookingQrDisplay from "@/components/guest/BookingQrDisplay";
 import BookingDetailActions from "@/components/guest/BookingDetailActions";
 import { moneyToNumber } from "@/lib/money";
@@ -317,6 +318,10 @@ export default async function BookingDetailPage({
             </ul>
           </div>
         ) : null}
+
+        <div className="print:hidden">
+          <BagPhotos bookingId={booking.id} audience={isAdmin && !isOwner ? "admin" : "guest"} />
+        </div>
 
         {revisionAwaitingApproval && (
           <div className="print:hidden">

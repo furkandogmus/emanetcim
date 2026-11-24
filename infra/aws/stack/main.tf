@@ -452,10 +452,40 @@ resource "aws_iam_role_policy" "app_media_write" {
   role = aws_iam_role.app.id
   policy = jsonencode({
     Version = "2012-10-17"
-    Statement = [{
-      Effect   = "Allow"
-      Action   = ["s3:PutObject", "s3:DeleteObject"]
-      Resource = "${aws_s3_bucket.media.arn}/shops/*"
-    }]
+    Statement = [
+      {
+        Effect   = "Allow"
+        Action   = ["s3:PutObject", "s3:DeleteObject"]
+        Resource = "${aws_s3_bucket.media.arn}/shops/*"
+      },
+      {
+        # Valiz durumu fotograflari OZEL: kova politikasi bu oneki acmaz, okuma yalniz
+        # uygulamanin imzaladigi 5 dk'lik GET adresiyle (imza bu rolun GetObject yetkisini kullanir).
+        Sid      = "BagPhotosPrivate"
+        Effect   = "Allow"
+        Action   = ["s3:PutObject", "s3:GetObject", "s3:DeleteObject"]
+        Resource = "${aws_s3_bucket.media.arn}/bag-photos/*"
+      },
+    ]
   })
+}
+
+# Saklama isi (`bag-photo-retention`) 30 gunde siler; bu kural is durursa ya da satiri
+# silinmis yetim nesne kalirsa emniyet agi. Acik itirazin kaniti en fazla ~120 gun tutulur.
+resource "aws_s3_bucket_lifecycle_configuration" "media" {
+  bucket = aws_s3_bucket.media.id
+
+  rule {
+    id     = "bag-photos-safety-expiry"
+    status = "Enabled"
+    filter {
+      prefix = "bag-photos/"
+    }
+    expiration {
+      days = 120
+    }
+    abort_incomplete_multipart_upload {
+      days_after_initiation = 1
+    }
+  }
 }
