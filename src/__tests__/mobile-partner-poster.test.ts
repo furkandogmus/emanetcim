@@ -25,6 +25,7 @@ vi.mock("next-intl/server", () => ({
 import { GET } from "@/app/api/mobile/partner/poster/route";
 import SignedPosterPage from "@/app/[locale]/poster/page";
 import { signPosterLinkToken } from "@/lib/poster-link-token";
+import PosterTokenScrub from "@/components/app-promo/PosterTokenScrub";
 
 const ORIGINAL = { secret: process.env.AUTH_SECRET, base: process.env.NEXT_PUBLIC_BASE_URL };
 beforeAll(() => {
@@ -83,6 +84,8 @@ describe("/poster?t= sayfasi", () => {
     const html = JSON.stringify(el);
     expect(html).toContain("kaynak=afis-s1");
     expect(html).toContain("Kose Bakkal");
+    // Token adres cubugundan silinsin (analitik `location.href` gonderir).
+    expect((el as { props: { children: { type: unknown }[] } }).props.children[0].type).toBe(PosterTokenScrub);
   });
 
   it("bozuk ya da suresi dolmus bag dukkan okumadan uyari gosterir", async () => {

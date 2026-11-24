@@ -1980,7 +1980,8 @@
     "reviewAlreadyHidden": "Yorum zaten gizli.",
     "reviewNotHidden": "Yorum gizli değil.",
     "reviewReasonRequired": "Gizlemek için gerekçe yazın.",
-    "accountDeletionGuest": "Hesabınızı bu sayfadan doğrudan kapatabilirsiniz."
+    "accountDeletionGuest": "Hesabınızı bu sayfadan doğrudan kapatabilirsiniz.",
+    "coordinatesRequired": "Yayındaki dükkanın konum pini silinemez; pini taşıyabilirsiniz."
   },
   "Emails": {
     "verificationSubject": "E-postanızı Doğrulayın",

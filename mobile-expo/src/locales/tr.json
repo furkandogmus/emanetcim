@@ -1124,7 +1124,7 @@
     "address": "Açık adres",
     "district": "İlçe",
     "city": "Şehir",
-    "addressHint": "Misafirler dükkanını bu adresle bulur. Haritadaki konumu değiştirmek için web panelini kullan.",
+    "addressHint": "Misafirler dükkanını bu adresle bulur. Haritadaki pini aşağıdan düzenleyebilirsin.",
     "save": "Kaydet",
     "saved": "Ayarlar güncellendi.",
     "saveFailed": "Kaydedilemedi",
@@ -2231,6 +2231,7 @@
     "locationAdd": "Pini haritada belirle",
     "locationEdit": "Pini düzenle",
     "locationHint": "Haritayı sürükleyin ya da bir noktaya dokunun; pin dükkanın kapısında olsun.",
+    "locationPickFirst": "Kaydetmeden önce pini dükkanın yerine taşıyın ya da konumunuzu kullanın.",
     "locationCoordsA11y": "Seçilen koordinat",
     "locateMe": "Konumumu kullan",
     "locationSave": "Pini kaydet",
@@ -2254,7 +2255,8 @@
       "invalid_tr_phone": "Türkiye cep numarası girin (5XX XXX XX XX).",
       "login_phone_locked": "Bu numara tek giriş yolunuz. Önce hesabınıza e-posta ekleyin ya da destekle iletişime geçin.",
       "already_registered": "Bu numara başka bir hesapta kayıtlı.",
-      "no_shop": "Önce bir dükkanınız olmalı."
+      "no_shop": "Önce bir dükkanınız olmalı.",
+      "coordinates_required": "Yayındaki dükkanın pini silinemez; pini taşıyabilirsiniz."
     }
   }
 }

@@ -5,6 +5,7 @@ import { getClientIp } from "@/lib/client-ip";
 import { rateLimit } from "@/lib/rate-limit";
 import { verifyPosterLinkToken } from "@/lib/poster-link-token";
 import ShopPosterView, { loadShopPoster } from "@/components/app-promo/ShopPosterView";
+import PosterTokenScrub from "@/components/app-promo/PosterTokenScrub";
 
 export async function generateMetadata({ params }: { params: Promise<{ locale: string }> }): Promise<Metadata> {
   const { locale } = await params;
@@ -34,7 +35,12 @@ export default async function SignedPosterPage({
 
   const ip = await getClientIp();
   if (!(await rateLimit(`poster_link:ip:${ip}`, 30, 10 * 60_000))) {
-    return <PosterNotice title={t("posterRateLimitedTitle")} body={t("posterRateLimitedBody")} />;
+    return (
+      <>
+        <PosterTokenScrub />
+        <PosterNotice title={t("posterRateLimitedTitle")} body={t("posterRateLimitedBody")} />
+      </>
+    );
   }
 
   const shopId = token ? await verifyPosterLinkToken(token) : null;
@@ -42,10 +48,20 @@ export default async function SignedPosterPage({
     ? await prisma.shop.findUnique({ where: { id: shopId }, select: { id: true, name: true } })
     : null;
   if (!shop) {
-    return <PosterNotice title={t("posterLinkExpiredTitle")} body={t("posterLinkExpiredBody")} />;
+    return (
+      <>
+        <PosterTokenScrub />
+        <PosterNotice title={t("posterLinkExpiredTitle")} body={t("posterLinkExpiredBody")} />
+      </>
+    );
   }
 
-  return <ShopPosterView {...await loadShopPoster(shop)} />;
+  return (
+    <>
+      <PosterTokenScrub />
+      <ShopPosterView {...await loadShopPoster(shop)} />
+    </>
+  );
 }
 
 function PosterNotice({ title, body }: { title: string; body: string }) {

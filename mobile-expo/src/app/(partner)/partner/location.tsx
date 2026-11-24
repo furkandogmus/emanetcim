@@ -10,7 +10,9 @@ import { useTranslation } from "react-i18next";
 import { StackHeader } from "@/components/StackHeader";
 import { AppText, Button, CenterMessage, Loading } from "@/components/ui";
 import { StaleQueryBanner } from "@/components/StaleQueryBanner";
+import { ApiError } from "@/lib/api";
 import { errorMessage } from "@/lib/errors";
+import i18n from "@/lib/i18n";
 import { getDevicePosition } from "@/lib/location";
 import { MAP_ATTRIBUTION, useMapStyle } from "@/lib/map-style";
 import { goBackOr } from "@/lib/navigation";
@@ -58,8 +60,16 @@ function PinPicker({ shop }: { shop: PartnerShopSettings }) {
     : DEFAULT_PIN_CENTER;
   const [coords, setCoords] = useState<{ latitude: number; longitude: number }>(initial);
   const [locating, setLocating] = useState(false);
+  /*
+    Pini olmayan dukkan haritaya dokunmadan kaydedemez: aksi halde varsayilan
+    merkez (Sultanahmet) gercek konum gibi yazilir ve onaydaki
+    `missing_coordinates` kapisi delinir.
+  */
+  const [touched, setTouched] = useState(false);
+  const canSave = hasPin(shop) || touched;
 
   const moveTo = (latitude: number, longitude: number) => {
+    setTouched(true);
     setCoords({ latitude, longitude });
     camera.current?.easeTo({ center: [longitude, latitude], duration: 300 });
   };
@@ -86,7 +96,7 @@ function PinPicker({ shop }: { shop: PartnerShopSettings }) {
       notify(t("partnerParity.locationSaved"));
       goBackOr();
     },
-    onError: (e) => notify(t("shopSettings.saveFailed"), errorMessage(e, "shopSettings")),
+    onError: (e) => notify(t("shopSettings.saveFailed"), saveErrorText(e)),
   });
 
   return (
@@ -107,6 +117,7 @@ function PinPicker({ shop }: { shop: PartnerShopSettings }) {
           onRegionDidChange={(e) => {
             const v = e.nativeEvent;
             if (!v.userInteraction) return;
+            setTouched(true);
             setCoords({ latitude: v.center[1], longitude: v.center[0] });
           }}
         >
@@ -123,7 +134,9 @@ function PinPicker({ shop }: { shop: PartnerShopSettings }) {
       </View>
 
       <View style={styles.footer}>
-        <AppText variant="caption">{t("partnerParity.locationHint")}</AppText>
+        <AppText variant="caption">
+          {canSave ? t("partnerParity.locationHint") : t("partnerParity.locationPickFirst")}
+        </AppText>
         <AppText style={styles.coords} accessibilityLabel={t("partnerParity.locationCoordsA11y")}>
           {`${roundCoord(coords.latitude).toFixed(6)}, ${roundCoord(coords.longitude).toFixed(6)}`}
         </AppText>
@@ -135,11 +148,24 @@ function PinPicker({ shop }: { shop: PartnerShopSettings }) {
             loading={locating}
             onPress={() => void locateMe()}
           />
-          <Button style={{ flex: 1 }} title={t("partnerParity.locationSave")} loading={save.isPending} onPress={() => save.mutate()} />
+          <Button
+            style={{ flex: 1 }}
+            title={t("partnerParity.locationSave")}
+            loading={save.isPending}
+            disabled={!canSave}
+            onPress={() => save.mutate()}
+          />
         </View>
       </View>
     </View>
   );
+}
+
+/** Pin kodlari (`coordinates_required`) kendi ad alaninda; kalanlar ayarlar ekraniyla ortak. */
+function saveErrorText(e: unknown): string {
+  return e instanceof ApiError && i18n.exists(`partnerParity.errors.${e.code}`)
+    ? errorMessage(e, "partnerParity")
+    : errorMessage(e, "shopSettings");
 }
 
 const styles = StyleSheet.create({

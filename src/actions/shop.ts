@@ -62,7 +62,12 @@ export async function updateShopSettingsAction(
     hakki var), sonuc SOYLENIYOR. Bkz. `ShopSettingsImpact`.
   */
   const result = await shopService.updateSettings(shopId, parsed.data);
-  if (!result.ok) return { success: false, error: "Errors.invalidData" };
+  if (!result.ok) {
+    return {
+      success: false,
+      error: result.reason === "coordinates_required" ? "Errors.coordinatesRequired" : "Errors.invalidData",
+    };
+  }
   const impact = result.impact;
 
   revalidatePathAllLocales("/partner");

@@ -1903,7 +1903,8 @@
     "reviewAlreadyHidden": "このレビューはすでに非表示です。",
     "reviewNotHidden": "このレビューは非表示ではありません。",
     "reviewReasonRequired": "非表示にする理由を入力してください。",
-    "accountDeletionGuest": "このページから直接アカウントを閉じられます。"
+    "accountDeletionGuest": "このページから直接アカウントを閉じられます。",
+    "coordinatesRequired": "公開中の店舗の位置ピンは削除できません。ピンを移動してください。"
   },
   "Emails": {
     "verificationSubject": "メールアドレスを確認してください",

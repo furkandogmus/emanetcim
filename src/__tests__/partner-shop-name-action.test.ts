@@ -34,6 +34,12 @@ describe("updateShopSettingsAction dukkan adi", () => {
     expect(mockShopService.updateSettings).not.toHaveBeenCalled();
   });
 
+  it("yayindaki dukkanin pinini silmek ayri bir hata anahtari doner", async () => {
+    mockShopService.updateSettings.mockResolvedValue({ ok: false, reason: "coordinates_required" });
+    const res = await updateShopSettingsAction("s1", { latitude: null, longitude: null });
+    expect(res).toEqual({ success: false, error: "Errors.coordinatesRequired" });
+  });
+
   it("baskasinin dukkaninin adi degismez", async () => {
     mockPrisma.shop.findUnique.mockResolvedValue({ ownerId: "baska" });
     const res = await updateShopSettingsAction("s1", { name: "Yeni" });
