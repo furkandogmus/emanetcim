@@ -240,6 +240,7 @@ export async function POST(req: NextRequest) {
       affiliateCode: discounts.affiliateCode,
       affiliateDiscountAmount: discounts.affiliateDiscountAmount,
       appDiscountAmount: discounts.appDiscountAmount,
+      appDiscountPct: discounts.appDiscountPct,
       unitPrice: totals.unitPrice,
       insuranceFee: totals.insuranceFee,
       bagCountS: totals.bagCountS,

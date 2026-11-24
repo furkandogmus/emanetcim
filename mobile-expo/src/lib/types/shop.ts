@@ -35,7 +35,8 @@ export type NearbyShop = Shop & {
    * Aranan kalis ve valiz karisiminin sunucu toplami (`checkout/quote`un kodsuz toplamiyla ayni).
    * Yalnizca boy adetleriyle aranan, rezervasyon alabilen dukkanda gelir; eski sunucuda yok.
    */
-  stayQuote?: { total: number; days: number; bags: number };
+  /** `total` uygulama fiyati; `fullTotal` yalnizca indirim varken (eski sunucuda yok). */
+  stayQuote?: { total: number; fullTotal?: number; days: number; bags: number };
   /** Secilen saat dukkanin saatine oturtulduysa (ornegin alis kapanisa cekildi). */
   hoursNotice?: HoursNotice | null;
   /**

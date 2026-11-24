@@ -63,10 +63,17 @@ export class PricingService {
       rules
     );
 
-    const rawRefund = savedDays * dailyService * rules.earlyRefundRatio;
-
     const insuranceFee = moneyToNumber(booking.insuranceFee);
     const servicePaid = Math.max(0, moneyToNumber(booking.totalPrice) - insuranceFee);
+
+    /*
+      Iade odenen fiyattan: uygulama/kupon/davet/araci indirimi gunluk tutari da
+      dusurur. Liste fiyatiyla iade, %10 indirimli misafire odemediginin %10'unu
+      geri verirdi. Oran 1'i asmaz (eski kayitlarda toplam liste fiyatindan yuksek olabilir).
+    */
+    const fullService = plannedDays * dailyService;
+    const paidRatio = fullService > 0 ? Math.min(1, servicePaid / fullService) : 1;
+    const rawRefund = savedDays * dailyService * rules.earlyRefundRatio * paidRatio;
 
     const capped = Math.min(rawRefund, servicePaid);
     return Math.round(capped * 100) / 100;

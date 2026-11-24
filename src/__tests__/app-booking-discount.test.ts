@@ -153,3 +153,50 @@ describe("kanal rotadan gelir, istemciden degil", () => {
     expect(read("src/actions/booking.ts")).not.toContain('channel: "app"');
   });
 });
+
+describe("erken teslim iadesi odenen fiyattan", async () => {
+  const { pricingService } = await import("@/services/PricingService");
+  const flat = { ...DEFAULT_PRICING_RULES, earlyRefundRatio: 1, bagMultipliers: { S: 1, M: 1, XL: 1 } };
+  // 3 gun planli, 1 gun kullanildi: 2 gun iade. Liste: 3 x 100 = 300.
+  const stay = {
+    checkInTime: new Date("2026-12-01T10:00:00Z"),
+    checkOutTime: new Date("2026-12-04T10:00:00Z"),
+    unitPrice: 100,
+    bagCountM: 1,
+    insuranceFee: 0,
+  };
+  const out = new Date("2026-12-02T09:00:00Z");
+  const refund = (totalPrice: number) => pricingService.calculateEarlyRefund({ ...stay, totalPrice }, out, flat);
+
+  it("indirimsiz: 200", () => expect(refund(300)).toBe(200));
+  it("uygulama %10 (270): 180", () => expect(refund(270)).toBe(180));
+  it("kupon %20 (240): 160", () => expect(refund(240)).toBe(160));
+  it("ikisi birden (300 -> 270 -> 216): 144", () => expect(refund(216)).toBe(144));
+  it("liste fiyatindan yuksek eski kayit: oran 1'i asmaz", () => expect(refund(400)).toBe(200));
+});
+
+describe("tarihli arama kartinin toplami uygulama fiyati", () => {
+  it("total indirimli, fullTotal yalniz indirim varken", async () => {
+    const { toMobileStayQuote } = await import("@/lib/mobile-dto");
+    const t = { subtotalBeforeCoupon: 250, stayDays: 1, bagCountS: 0, bagCountM: 1, bagCountXl: 0 };
+    expect(toMobileStayQuote(t, 10)).toEqual({ total: 225, fullTotal: 250, days: 1, bags: 1 });
+    expect(toMobileStayQuote(t, 0)).toEqual({ total: 250, days: 1, bags: 1 });
+  });
+});
+
+describe("oran iki haneye yuvarlanir (denetim = DB)", () => {
+  it("12.345 -> 12.35", async () => {
+    const { platformSettingsUpdateSchema } = await import("@/services/PlatformSettingsService");
+    const d = DEFAULT_PRICING_RULES;
+    const parsed = platformSettingsUpdateSchema.parse({
+      ...d,
+      bagMultiplierS: d.bagMultipliers.S,
+      bagMultiplierM: d.bagMultipliers.M,
+      bagMultiplierXl: d.bagMultipliers.XL,
+      minAppVersion: "",
+      latestAppVersion: "",
+      appBookingDiscountPct: 12.345,
+    });
+    expect(parsed.appBookingDiscountPct).toBe(12.35);
+  });
+});
