@@ -6,5 +6,5 @@ export type ShopTeam = {
   limit: number;
 };
 
-/** `POST partner/team`: hesap varsa `added`, yoksa davet bagi gitti (`invited`). */
-export type ShopTeamInviteResult = { success: true; kind: "added" | "invited" };
+/** `POST partner/team`: yanit hesabin varligindan bagimsiz, her zaman davet. */
+export type ShopTeamInviteResult = { success: true; kind?: "invited" };

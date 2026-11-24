@@ -3192,7 +3192,6 @@
     "pendingTitle": "Bekleyen davetler",
     "expires": "Son geçerlilik {date}",
     "revoke": "Geri al",
-    "addedToast": "Personel eklendi ve haberdar edildi.",
     "invitedToast": "Davet e-postası gönderildi.",
     "removedToast": "Personel çıkarıldı.",
     "revokedToast": "Davet geri alındı.",
@@ -3213,6 +3212,10 @@
     "inviteExpired": "Bu davetin süresi dolmuş. Dükkandan yeni davet iste.",
     "inviteEmailMismatch": "Bu davet başka bir e-posta adresine gönderilmiş. O adresle giriş yap.",
     "staffPanel": "Dükkan paneli",
-    "staffPanelDesc": "{count, plural, one {# dükkanda personelsin} other {# dükkanda personelsin}}"
+    "staffPanelDesc": "{count, plural, one {# dükkanda personelsin} other {# dükkanda personelsin}}",
+    "errorShopInactive": "Dükkan onaylanıp yayına alınmadan ekip yönetilemez.",
+    "errorConflict": "Aynı anda başka bir ekip işlemi yapıldı, tekrar dene.",
+    "inviteEmailUnverified": "Daveti kabul etmek için önce e-posta adresini doğrula; doğrulama e-postası hesabına gönderildi.",
+    "closedAskOwner": "Dükkan şu an kapalı görünüyor. Saat dışı teslimi yalnızca dükkan sahibi onaylayabilir."
   }
 }

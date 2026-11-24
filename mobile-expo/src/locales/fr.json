@@ -2421,7 +2421,6 @@
     "pendingTitle": "Invitations en attente",
     "expires": "Expire le {{date}}",
     "revoke": "Annuler l'invitation",
-    "addedToast": "Membre ajouté et prévenu.",
     "invitedToast": "E-mail d'invitation envoyé.",
     "removedToast": "Membre retiré.",
     "revokedToast": "Invitation annulée.",
@@ -2437,11 +2436,13 @@
       "invalid_email": "Saisissez une adresse e-mail valide.",
       "self": "Vous ne pouvez pas vous ajouter vous-même.",
       "owner": "Cette adresse appartient au propriétaire.",
-      "already_member": "Cette personne fait déjà partie de l'équipe.",
       "limit": "Limite de personnel atteinte.",
       "rate_limited": "Trop d'invitations, réessayez plus tard.",
       "forbidden": "Seul le propriétaire gère l'équipe.",
-      "not_found": "Introuvable."
-    }
+      "not_found": "Introuvable.",
+      "shop_inactive": "L'équipe peut être gérée une fois le commerce approuvé et actif.",
+      "conflict": "Une autre modification d'équipe a eu lieu en même temps, réessayez."
+    },
+    "closedAskOwner": "Le commerce semble fermé. Seul le propriétaire peut autoriser une remise hors horaires."
   }
 }

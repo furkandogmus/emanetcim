@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
-import { requireMobileUser } from "@/lib/mobile-auth";
+import { requireMobileUser, requireRole } from "@/lib/mobile-auth";
 import { bookingService } from "@/services/BookingService";
 import { toMobileBookingDetail } from "@/lib/mobile-dto";
 import { canAccessBooking, canOperateBookingAtShop } from "@/services/booking/access";
@@ -28,5 +28,11 @@ export async function GET(req: NextRequest, { params }: { params: Promise<{ id: 
   const checkoutPreview =
     operator && b.status === "CHECKED_IN" ? await previewCheckOutCharges(b, new Date()) : null;
   // Misafir telefonu kurali (yalniz esnaf/yonetici + aktif kayit) DTO'da.
-  return NextResponse.json({ ...toMobileBookingDetail(await withCancelReason(b), { operator }), checkoutPreview });
+  // Personel (sahip, yonetici ya da misafirin kendisi degil): sahibin numarasi gitmez.
+  const hideShopContact =
+    operator && !!requireRole(auth.user, ["ADMIN"]) && b.shop.ownerId !== auth.user.id && b.guestId !== auth.user.id;
+  return NextResponse.json({
+    ...toMobileBookingDetail(await withCancelReason(b), { operator, hideShopContact }),
+    checkoutPreview,
+  });
 }

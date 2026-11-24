@@ -2387,7 +2387,6 @@
     "pendingTitle": "Pending invitations",
     "expires": "Expires {{date}}",
     "revoke": "Revoke",
-    "addedToast": "Staff member added and notified.",
     "invitedToast": "Invitation email sent.",
     "removedToast": "Staff member removed.",
     "revokedToast": "Invitation revoked.",
@@ -2403,11 +2402,13 @@
       "invalid_email": "Enter a valid email address.",
       "self": "You can't add yourself as staff.",
       "owner": "This address belongs to the shop owner.",
-      "already_member": "This person is already on the team.",
       "limit": "Staff limit reached.",
       "rate_limited": "Too many invitations sent, try again later.",
       "forbidden": "Only the shop owner can manage the team.",
-      "not_found": "Not found."
-    }
+      "not_found": "Not found.",
+      "shop_inactive": "You can manage a team once the shop is approved and live.",
+      "conflict": "Another team change happened at the same time, try again."
+    },
+    "closedAskOwner": "The shop looks closed right now. Only the shop owner can approve an out-of-hours handover."
   }
 }

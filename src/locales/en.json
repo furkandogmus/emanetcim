@@ -3205,7 +3205,6 @@
     "pendingTitle": "Pending invitations",
     "expires": "Expires {date}",
     "revoke": "Revoke",
-    "addedToast": "Staff member added and notified.",
     "invitedToast": "Invitation email sent.",
     "removedToast": "Staff member removed.",
     "revokedToast": "Invitation revoked.",
@@ -3226,6 +3225,10 @@
     "inviteExpired": "This invitation has expired. Ask the shop for a new one.",
     "inviteEmailMismatch": "This invitation was sent to a different email address. Sign in with that address.",
     "staffPanel": "Shop panel",
-    "staffPanelDesc": "{count, plural, one {You are staff at # shop} other {You are staff at # shops}}"
+    "staffPanelDesc": "{count, plural, one {You are staff at # shop} other {You are staff at # shops}}",
+    "errorShopInactive": "You can manage a team once the shop is approved and live.",
+    "errorConflict": "Another team change happened at the same time, try again.",
+    "inviteEmailUnverified": "Verify your email address first to accept the invitation.",
+    "closedAskOwner": "The shop looks closed right now. Only the shop owner can approve an out-of-hours handover."
   }
 }
