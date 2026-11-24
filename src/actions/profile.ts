@@ -59,7 +59,7 @@ export async function changePasswordAction(input: { currentPassword?: string; ne
   });
   if (!result.ok) return { ok: false as const, error: PASSWORD_ERROR_TO_KEY[result.reason] };
 
-  if (!result.rotated) {
+  if (result.firstPassword) {
     // Sifresiz hesaba ilk sifre: mobil uctaki gibi sahibine haber verilir.
     const user = await prisma.user.findUnique({ where: { id: auth.actor.id }, select: { email: true } });
     if (user?.email) {
@@ -70,9 +70,9 @@ export async function changePasswordAction(input: { currentPassword?: string; ne
     }
   }
   /*
-    `rotated`: `tokenVersion` artti, web oturumu da en gec bir dakikada duser
+    `tokenVersion` her durumda artti: web oturumu en gec bir dakikada duser
     (`auth.ts` yeniden dogrulama). Istemci kullaniciyi yeniden girise yollar.
   */
-  return { ok: true as const, rotated: result.rotated };
+  return { ok: true as const, firstPassword: result.firstPassword };
 }
 

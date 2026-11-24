@@ -59,15 +59,9 @@ export default function ProfileEditClient({
         setPasswordError(errorText(result.error));
         return;
       }
-      if (result.rotated) {
-        // Eski oturumlar `tokenVersion` ile dustu; bu sekme de yeniden giris ister.
-        toast.success(t("passwordChanged"));
-        await signOutWithPush({ redirectTo: "/login" });
-        return;
-      }
-      toast.success(t("passwordSet"));
-      setNewPassword("");
-      setConfirmPassword("");
+      // Eski oturumlar `tokenVersion` ile dustu (ilk sifrede de); bu sekme de yeniden giris ister.
+      toast.success(t(result.firstPassword ? "passwordSet" : "passwordChanged"));
+      await signOutWithPush({ redirectTo: "/login" });
     });
   };
 
