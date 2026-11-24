@@ -143,6 +143,8 @@ describe("record — kayit teyidi", () => {
     });
 
     expect(res).toEqual({ ok: true, alreadyRegistered: false });
+    // Teyit adres basina hiz sinirindan sonra atesle-unut gider.
+    await new Promise((r) => setTimeout(r, 0));
     // E-posta kucuk harfe indirilerek saklaniyor; teyit de ayni adrese gider.
     expect(mockConfirm).toHaveBeenCalledWith(
       "a@example.com",

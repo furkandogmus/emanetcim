@@ -4,6 +4,11 @@ import logger from "@/lib/logger";
 import { Prisma } from "@prisma/client";
 import { notificationService } from "@/services/NotificationService";
 import { analyticsService } from "@/services/AnalyticsService";
+import { isBlockedSignupEmail } from "@/lib/disposable-emails";
+import { rateLimit } from "@/lib/rate-limit";
+
+/** Ayni adrese gunde en fazla bu kadar teyit e-postasi (farkli noktalar dahil). */
+const CONFIRM_EMAILS_PER_ADDRESS_PER_DAY = 3;
 
 /**
  * Talep testi noktalarina birakilan "acilinca haber ver" kayitlari.
@@ -134,6 +139,10 @@ class PrelaunchInterestService {
     if (!EPOSTA_BICIMI.test(email) || email.length > 320) {
       return { ok: false, code: "invalid_email" };
     }
+    // Gecici/bot adresi kayit sinyali degil; teyit e-postasi da itibar harcar.
+    if (isBlockedSignupEmail(email)) {
+      return { ok: false, code: "invalid_email" };
+    }
 
     const shop = await prisma.shop.findUnique({
       where: { id: input.shopId },
@@ -169,13 +178,23 @@ class PrelaunchInterestService {
         `.catch` zorunlu: yakalanmamis bir red Node'da sureci indirir
         (mandal: unhandled-rejection, tavan 0).
       */
-      void notificationService
-        .notifyPrelaunchInterestReceived(
-          email,
-          input.shopId,
-          shop.name,
-          gecerliDil(input.locale) ?? DEFAULT_APP_LOCALE,
-        )
+      /*
+        Adres basina gunluk tavan: kayit yine yazilir (talep sinyali kaybolmaz),
+        yalniz e-posta atlanir. Kurban adres cok noktaya yazilarak bombalanamaz.
+      */
+      void rateLimit(`prelaunch_confirm_email:${email}`, CONFIRM_EMAILS_PER_ADDRESS_PER_DAY, 24 * 60 * 60_000)
+        .then((allowed) => {
+          if (!allowed) {
+            logger.warn({ shopId: input.shopId }, "prelaunch_interest_confirm_rate_limited");
+            return;
+          }
+          return notificationService.notifyPrelaunchInterestReceived(
+            email,
+            input.shopId,
+            shop.name,
+            gecerliDil(input.locale) ?? DEFAULT_APP_LOCALE,
+          );
+        })
         .catch((err) =>
           logger.warn({ err, shopId: input.shopId }, "prelaunch_interest_confirm_failed"),
         );

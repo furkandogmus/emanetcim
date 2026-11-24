@@ -1,4 +1,9 @@
 import { describe, it, expect, vi, afterEach } from "vitest";
+
+const rl = vi.hoisted(() => ({ rateLimit: vi.fn().mockResolvedValue(true) }));
+vi.mock("@/lib/rate-limit", () => ({ rateLimit: rl.rateLimit }));
+vi.mock("@/lib/get-ip", () => ({ getClientIp: vi.fn().mockResolvedValue("203.0.113.9") }));
+
 import { geocodeSearchCenterAction } from "@/actions/geocode-search-center";
 import { resetGeocodeCacheForTests } from "@/lib/geocode";
 
@@ -14,6 +19,15 @@ import { resetGeocodeCacheForTests } from "@/lib/geocode";
  */
 describe("geocodeSearchCenterAction", () => {
   const originalFetch = global.fetch;
+
+  it("IP basina hiz siniri dolunca Nominatim'e gidilmez", async () => {
+    const spy = vi.fn();
+    global.fetch = spy as unknown as typeof fetch;
+    rl.rateLimit.mockResolvedValueOnce(false);
+    expect(await geocodeSearchCenterAction("Besiktas", "tr")).toEqual({ ok: false });
+    expect(rl.rateLimit).toHaveBeenCalledWith("geocode_center:203.0.113.9", 30, 60_000);
+    expect(spy).not.toHaveBeenCalled();
+  });
 
   afterEach(() => {
     global.fetch = originalFetch;
