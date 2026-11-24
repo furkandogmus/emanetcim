@@ -159,7 +159,13 @@ type RawPage = {
  * Kunye metninde bu iki karakterin mesru kullanimi yok.
  */
 function stripHtml(s: string): string {
-  return s.replace(/<[^>]*>/g, "").replace(/[<>]/g, "").replace(/\s+/g, " ").trim();
+  let out = s;
+  let prev: string;
+  do {
+    prev = out;
+    out = out.replace(/<[^<>]*>/g, "");
+  } while (out !== prev);
+  return out.replace(/[<>]/g, "").replace(/\s+/g, " ").trim();
 }
 
 /**
