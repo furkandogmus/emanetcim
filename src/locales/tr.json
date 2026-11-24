@@ -3022,5 +3022,145 @@
     "error_not_guest": "Yalnızca misafir hesapları buradan silinebilir.",
     "error_active_bookings": "Hesabın açık rezervasyonu var; önce kapanmalı.",
     "error_cannot_flag_admin": "Yönetici hesabı inceleme hesabı yapılamaz."
+  },
+  "TransitHubs": {
+    "metaTitle": "{near} valiz emanet",
+    "metaDescription": "{city}, {near} valiz emanet: mesafeye göre sıralı, rezervasyona açık noktalar, bugünkü çalışma saatleri ve yol tarifi. Online ayırın, dükkânda ödeyin.",
+    "metaDescriptionEmpty": "{near} henüz rezervasyona açık bir valiz emanet noktası yok. Burada bir nokta isterseniz bize söyleyin.",
+    "headline": "{near} valiz emanet",
+    "shopsTitle": "{near} rezervasyona açık noktalar",
+    "shopsNote": "{radius} km içinde, mesafeye göre sıralı. Açık/kapalı durumu birkaç dakikada bir yenilenir.",
+    "distanceKm": "{distance} km",
+    "distanceM": "{distance} m",
+    "openNow": "Şu an açık",
+    "closedNow": "Şu an kapalı",
+    "todayHours": "Bugün {open} ile {close} arası",
+    "closedToday": "Bugün kapalı",
+    "open247": "7/24 açık",
+    "mapLabel": "{near} rezervasyona açık noktaların haritası",
+    "searchCta": "{near} nokta ara",
+    "cityLink": "{city} genelindeki tüm noktalar",
+    "emptyTitle": "{near} henüz rezervasyona açık nokta yok",
+    "emptyBody": "Yalnızca rezervasyon alan dükkânları listeliyoruz; burada henüz yok. Yine de tüm şehirde arama yapabilirsiniz.",
+    "emptyPartner": "{near} bir dükkânınız mı var? Esnafımız olun",
+    "gettingThereTitle": "Ulaşım",
+    "tipsTitle": "Pratik ipuçları",
+    "howTitle": "Nasıl çalışır?",
+    "how1": "Listeden bir nokta seçin, bırakma ve teslim alma saatinizi belirleyin.",
+    "how2": "Tezgâhta rezervasyonunuzu gösterip ödemeyi orada yapın; valizleriniz plastik mühürle mühürlenir.",
+    "how3": "Dükkânın çalışma saatleri içinde gelip valizlerinizi teslim alın.",
+    "faqTitle": "Sık sorulan sorular",
+    "faqNearestQ": "{near} valizimi nereye bırakabilirim?",
+    "faqNearestA": "Bu sayfadaki en yakın rezervasyona açık nokta {shop}, yaklaşık {distance} uzaklıkta.",
+    "faqPayQ": "Online ödeme yapmam gerekiyor mu?",
+    "faqPayA": "Hayır. Online ayırırsınız, ödemeyi valizlerinizi bırakırken dükkânda yaparsınız.",
+    "faqCancelQ": "Rezervasyonumu iptal edebilir miyim?",
+    "faqCancelA": "Evet. Bırakma saatinize kadar iptal ücretsizdir.",
+    "cityHubsTitle": "{city} içinde popüler noktalar",
+    "footerHubsTitle": "Popüler yerler",
+    "kinds": {
+      "airport": {
+        "tip1": "Uçuşunuzdan önce nokta ile terminal arasındaki yol süresini hesaba katın.",
+        "tip2": "Bırakma ve teslim alma dükkân açıkken yapılır; aşağıdan bugünkü saatlere bakın.",
+        "tip3": "Erken indiyseniz, otele giriş saatini beklemeden valizlerinizi bırakıp şehre çıkın.",
+        "faqQ": "Gece geç saatteki uçuşumdan önce valiz bırakabilir miyim?",
+        "faqA": "Evet, dükkânın çalışma saatleri içinde teslim almanız koşuluyla. Her nokta bugünkü saatini burada, haftalık saatlerini kendi sayfasında gösterir."
+      },
+      "bus_terminal": {
+        "tip1": "Şehirlerarası otobüsler sık sık gecikir; bırakma saatinize pay bırakın.",
+        "tip2": "Bırakma ve teslim alma dükkân açıkken yapılır; aşağıdan bugünkü saatlere bakın.",
+        "tip3": "Bir sonraki otobüsünüze kadar valizlerinizi bırakıp şehri gezin.",
+        "faqQ": "Noktayı nasıl bulurum?",
+        "faqA": "Adres ve yol tarifi bağlantısı için noktanın sayfasını açın."
+      },
+      "rail_station": {
+        "tip1": "Trenler arasında valizlerinizi bırakın, şehri onlarsız gezin.",
+        "tip2": "Bırakma ve teslim alma dükkân açıkken yapılır; aşağıdan bugünkü saatlere bakın.",
+        "tip3": "Valizleriniz bırakırken plastik mühürle mühürlenir.",
+        "faqQ": "Noktayı nasıl bulurum?",
+        "faqA": "Adres ve yol tarifi bağlantısı için noktanın sayfasını açın."
+      },
+      "district": {
+        "tip1": "Valizlerinizi bırakın, çevreyi elleriniz serbest gezin.",
+        "tip2": "Bırakma ve teslim alma dükkân açıkken yapılır; aşağıdan bugünkü saatlere bakın.",
+        "tip3": "Valizleriniz bırakırken plastik mühürle mühürlenir.",
+        "faqQ": "Noktayı nasıl bulurum?",
+        "faqA": "Adres ve yol tarifi bağlantısı için noktanın sayfasını açın."
+      }
+    },
+    "hubs": {
+      "istanbul-airport": {
+        "name": "İstanbul Havalimanı (IST)",
+        "near": "İstanbul Havalimanı (IST) yakınında",
+        "intro": "İstanbul Havalimanı, şehrin Avrupa yakasında, merkezin kuzeybatısındaki ana uluslararası havalimanıdır.",
+        "gettingThere": "M11 metro hattı havalimanını Gayrettepe'ye bağlar; Havaist otobüsleri Taksim dahil birçok semte gider."
+      },
+      "sabiha-gokcen-airport": {
+        "name": "Sabiha Gökçen Havalimanı (SAW)",
+        "near": "Sabiha Gökçen Havalimanı (SAW) yakınında",
+        "intro": "Sabiha Gökçen Uluslararası Havalimanı, İstanbul'a Anadolu yakasından, Pendik'ten hizmet verir.",
+        "gettingThere": "M4 metro hattı havalimanından Kadıköy'e uzanır; Havabüs otobüsleri Kadıköy ve Taksim'e gider."
+      },
+      "esenler-bus-terminal": {
+        "name": "Esenler Otogarı",
+        "near": "Esenler Otogarı yakınında",
+        "intro": "Esenler'deki Büyük İstanbul Otogarı, Avrupa yakasında şehirlerarası otobüslerin ana merkezidir.",
+        "gettingThere": "M1 metrosunun otogarda Otogar durağı vardır; hat Aksaray ve Zeytinburnu'na gider, Zeytinburnu'nda T1 tramvayına aktarma yapılır."
+      },
+      "sogutlucesme": {
+        "name": "Söğütlüçeşme",
+        "near": "Söğütlüçeşme yakınında",
+        "intro": "Kadıköy'deki Söğütlüçeşme, Ankara yüksek hızlı trenlerinin Anadolu yakası durağı ve bir Marmaray istasyonudur.",
+        "gettingThere": "Marmaray banliyö trenleri burada durur; istasyon Söğütlüçeşme metrobüs son durağının hemen yanındadır."
+      },
+      "sirkeci": {
+        "name": "Sirkeci",
+        "near": "Sirkeci yakınında",
+        "intro": "Tarihi Yarımada'daki Sirkeci, tarihi gar binasının yanında bir Marmaray istasyonudur; Eminönü'ne birkaç dakikalık yürüme mesafesindedir.",
+        "gettingThere": "T1 tramvayı Sirkeci'de durur; Marmaray trenleri Boğaz'ın altından Üsküdar'a geçer."
+      },
+      "taksim": {
+        "name": "Taksim",
+        "near": "Taksim yakınında",
+        "intro": "Taksim Meydanı, İstiklal Caddesi'nin başında, Beyoğlu'nun mağaza, otel ve eğlence hayatının merkezindedir.",
+        "gettingThere": "M2 metrosu Taksim'de durur; F1 füniküleri T1 tramvayı ve vapurlar için Kabataş'a iner."
+      },
+      "sultanahmet": {
+        "name": "Sultanahmet",
+        "near": "Sultanahmet yakınında",
+        "intro": "Ayasofya, Sultanahmet Camii ve Topkapı Sarayı'nın bulunduğu Sultanahmet, Tarihi Yarımada'nın en kalabalık gezi bölgesidir.",
+        "gettingThere": "T1 tramvayı Sultanahmet'te durur; Gülhane ve Çemberlitaş durakları da yürüme mesafesindedir."
+      },
+      "kadikoy": {
+        "name": "Kadıköy",
+        "near": "Kadıköy yakınında",
+        "intro": "Kadıköy, çarşı sokakları, kafeleri ve Moda sahiliyle Anadolu yakasının en hareketli merkezidir.",
+        "gettingThere": "Vapurlar Kadıköy iskelesini Eminönü, Karaköy ve Beşiktaş'a bağlar; M4 metrosu Kadıköy'den Sabiha Gökçen Havalimanı'na gider."
+      },
+      "besiktas": {
+        "name": "Beşiktaş",
+        "near": "Beşiktaş yakınında",
+        "intro": "Beşiktaş, Dolmabahçe Sarayı'na yakın, Avrupa yakasında hareketli bir sahil semtidir.",
+        "gettingThere": "Beşiktaş iskelesinden Üsküdar ve Kadıköy'e vapur kalkar; birçok şehir içi otobüs meydanda durur."
+      },
+      "karakoy": {
+        "name": "Karaköy",
+        "near": "Karaköy yakınında",
+        "intro": "Karaköy, Galata Köprüsü'nün kuzey ucunda; kafeler, galeriler ve kruvaziyer limanı hemen yakınında.",
+        "gettingThere": "T1 tramvayı Karaköy'de durur, vapurlar iskeleden kalkar; tarihi Tünel füniküleri İstiklal Caddesi'ne çıkar."
+      },
+      "eminonu": {
+        "name": "Eminönü",
+        "near": "Eminönü yakınında",
+        "intro": "Eminönü, Galata Köprüsü'nün güney ucundaki sahil meydanıdır; Mısır Çarşısı ve Yeni Cami buradadır.",
+        "gettingThere": "T1 tramvayı Eminönü'nde durur; vapurlar Kadıköy'e, Üsküdar'a ve Boğaz turlarına kalkar."
+      },
+      "galata": {
+        "name": "Galata",
+        "near": "Galata yakınında",
+        "intro": "Galata Kulesi çevresi, Karaköy ile İstiklal Caddesi arasında dik ve dar sokaklardan oluşur.",
+        "gettingThere": "En yakın duraklar M2 metrosunda Şişhane ve T1 tramvayında Karaköy'dür; Tünel füniküleri de yakındır."
+      }
+    }
   }
 }

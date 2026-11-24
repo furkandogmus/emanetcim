@@ -2877,5 +2877,145 @@
     "error_not_guest": "Hier können nur Gastkonten gelöscht werden.",
     "error_active_bookings": "Das Konto hat offene Buchungen; diese müssen zuerst abgeschlossen werden.",
     "error_cannot_flag_admin": "Ein Admin-Konto kann kein App-Review-Konto sein."
+  },
+  "TransitHubs": {
+    "metaTitle": "Gepäckaufbewahrung {near}",
+    "metaDescription": "Gepäckaufbewahrung {near}, {city}: buchbare Annahmestellen nach Entfernung sortiert, heutige Öffnungszeiten und Wegbeschreibung. Online reservieren, im Geschäft bezahlen.",
+    "metaDescriptionEmpty": "Noch keine buchbare Gepäckaufbewahrung {near}. Sagen Sie uns, wenn Sie hier eine nutzen würden.",
+    "headline": "Gepäckaufbewahrung {near}",
+    "shopsTitle": "Buchbare Annahmestellen {near}",
+    "shopsNote": "Im Umkreis von {radius} km, nach Entfernung sortiert. Der Öffnungsstatus wird alle paar Minuten aktualisiert.",
+    "distanceKm": "{distance} km",
+    "distanceM": "{distance} m",
+    "openNow": "Jetzt geöffnet",
+    "closedNow": "Jetzt geschlossen",
+    "todayHours": "Heute {open} bis {close}",
+    "closedToday": "Heute geschlossen",
+    "open247": "Rund um die Uhr geöffnet",
+    "mapLabel": "Karte der buchbaren Annahmestellen {near}",
+    "searchCta": "Annahmestellen {near} suchen",
+    "cityLink": "Alle Annahmestellen in {city}",
+    "emptyTitle": "Noch keine buchbare Annahmestelle {near}",
+    "emptyBody": "Wir listen nur Geschäfte, die Buchungen annehmen, und hier gibt es noch keines. Sie können trotzdem in der ganzen Stadt suchen.",
+    "emptyPartner": "Sie haben ein Geschäft {near}? Werden Sie Partner",
+    "gettingThereTitle": "Anreise",
+    "tipsTitle": "Praktische Tipps",
+    "howTitle": "So funktioniert's",
+    "how1": "Wählen Sie eine Annahmestelle aus der Liste und legen Sie Abgabe- und Abholzeit fest.",
+    "how2": "Zeigen Sie Ihre Buchung an der Theke und bezahlen Sie dort; Ihr Gepäck wird mit einem Kunststoffsiegel verplombt.",
+    "how3": "Holen Sie Ihr Gepäck während der Öffnungszeiten des Geschäfts wieder ab.",
+    "faqTitle": "Häufige Fragen",
+    "faqNearestQ": "Wo kann ich mein Gepäck {near} abgeben?",
+    "faqNearestA": "Die nächstgelegene buchbare Annahmestelle auf dieser Seite ist {shop}, etwa {distance} entfernt.",
+    "faqPayQ": "Muss ich online bezahlen?",
+    "faqPayA": "Nein. Sie reservieren online und bezahlen bei der Gepäckabgabe im Geschäft.",
+    "faqCancelQ": "Kann ich meine Buchung stornieren?",
+    "faqCancelA": "Ja. Bis zur Abgabezeit ist die Stornierung kostenlos.",
+    "cityHubsTitle": "Beliebte Orte in {city}",
+    "footerHubsTitle": "Beliebte Orte",
+    "kinds": {
+      "airport": {
+        "tip1": "Planen Sie vor Ihrem Flug die Fahrzeit zwischen Annahmestelle und Terminal ein.",
+        "tip2": "Abgabe und Abholung sind nur während der Öffnungszeiten möglich, prüfen Sie daher die heutigen Zeiten unten.",
+        "tip3": "Wenn Sie früh landen, geben Sie Ihr Gepäck ab und fahren Sie vor dem Hotel-Check-in in die Stadt.",
+        "faqQ": "Kann ich Gepäck vor einem späten Flug aufbewahren?",
+        "faqA": "Ja, solange Sie es während der Öffnungszeiten des Geschäfts abholen. Jede Annahmestelle zeigt hier die heutigen und auf ihrer eigenen Seite die wöchentlichen Zeiten."
+      },
+      "bus_terminal": {
+        "tip1": "Fernbusse kommen oft verspätet an, planen Sie bei der Abgabezeit etwas Puffer ein.",
+        "tip2": "Abgabe und Abholung sind nur während der Öffnungszeiten möglich, prüfen Sie daher die heutigen Zeiten unten.",
+        "tip3": "Geben Sie Ihr Gepäck ab und erkunden Sie die Stadt bis zu Ihrem nächsten Bus.",
+        "faqQ": "Wie finde ich die Annahmestelle?",
+        "faqA": "Auf der Seite der Annahmestelle finden Sie die Adresse und einen Link zur Wegbeschreibung."
+      },
+      "rail_station": {
+        "tip1": "Geben Sie Ihr Gepäck zwischen zwei Zügen ab und erkunden Sie die Stadt ohne Last.",
+        "tip2": "Abgabe und Abholung sind nur während der Öffnungszeiten möglich, prüfen Sie daher die heutigen Zeiten unten.",
+        "tip3": "Ihr Gepäck wird bei der Abgabe mit einem Kunststoffsiegel verplombt.",
+        "faqQ": "Wie finde ich die Annahmestelle?",
+        "faqA": "Auf der Seite der Annahmestelle finden Sie die Adresse und einen Link zur Wegbeschreibung."
+      },
+      "district": {
+        "tip1": "Geben Sie Ihr Gepäck ab und erkunden Sie die Gegend mit freien Händen.",
+        "tip2": "Abgabe und Abholung sind nur während der Öffnungszeiten möglich, prüfen Sie daher die heutigen Zeiten unten.",
+        "tip3": "Ihr Gepäck wird bei der Abgabe mit einem Kunststoffsiegel verplombt.",
+        "faqQ": "Wie finde ich die Annahmestelle?",
+        "faqA": "Auf der Seite der Annahmestelle finden Sie die Adresse und einen Link zur Wegbeschreibung."
+      }
+    },
+    "hubs": {
+      "istanbul-airport": {
+        "name": "Flughafen Istanbul (IST)",
+        "near": "in der Nähe des Flughafens Istanbul (IST)",
+        "intro": "Der Flughafen Istanbul ist der wichtigste internationale Flughafen der Stadt, auf der europäischen Seite nordwestlich des Zentrums.",
+        "gettingThere": "Die Metrolinie M11 verbindet den Flughafen mit Gayrettepe, und Havaist-Busse fahren in viele Stadtteile, darunter Taksim."
+      },
+      "sabiha-gokcen-airport": {
+        "name": "Flughafen Sabiha Gökçen (SAW)",
+        "near": "in der Nähe des Flughafens Sabiha Gökçen (SAW)",
+        "intro": "Der internationale Flughafen Sabiha Gökçen liegt auf der asiatischen Seite Istanbuls, in Pendik.",
+        "gettingThere": "Die Metrolinie M4 fährt vom Flughafen nach Kadıköy, und Havabus-Busse verbinden ihn mit Kadıköy und Taksim."
+      },
+      "esenler-bus-terminal": {
+        "name": "Busbahnhof Esenler",
+        "near": "in der Nähe des Busbahnhofs Esenler",
+        "intro": "Der Große Busbahnhof Istanbul in Esenler ist der zentrale Knoten für Fernbusse auf der europäischen Seite.",
+        "gettingThere": "Die Metro M1 hält an der Station Otogar am Busbahnhof und fährt nach Aksaray und Zeytinburnu, wo Sie in die Straßenbahn T1 umsteigen können."
+      },
+      "sogutlucesme": {
+        "name": "Bahnhof Söğütlüçeşme",
+        "near": "in der Nähe des Bahnhofs Söğütlüçeşme",
+        "intro": "Söğütlüçeşme in Kadıköy ist der Halt der Hochgeschwindigkeitszüge nach Ankara auf der asiatischen Seite und eine Marmaray-Station.",
+        "gettingThere": "Die Marmaray-Vorortzüge halten hier, und der Bahnhof liegt direkt neben der Metrobus-Endstation Söğütlüçeşme."
+      },
+      "sirkeci": {
+        "name": "Bahnhof Sirkeci",
+        "near": "in der Nähe des Bahnhofs Sirkeci",
+        "intro": "Sirkeci auf der historischen Halbinsel ist eine Marmaray-Station neben dem historischen Bahnhofsgebäude, wenige Gehminuten von Eminönü.",
+        "gettingThere": "Die Straßenbahn T1 hält in Sirkeci, und Marmaray-Züge fahren unter dem Bosporus nach Üsküdar."
+      },
+      "taksim": {
+        "name": "Taksim",
+        "near": "in der Nähe von Taksim",
+        "intro": "Der Taksim-Platz liegt am oberen Ende der İstiklal-Straße, im Zentrum der Geschäfte, Hotels und des Nachtlebens von Beyoğlu.",
+        "gettingThere": "Die Metro M2 hält am Taksim, und die Standseilbahn F1 fährt hinunter nach Kabataş zur Straßenbahn T1 und zu den Fähren."
+      },
+      "sultanahmet": {
+        "name": "Sultanahmet",
+        "near": "in der Nähe von Sultanahmet",
+        "intro": "In Sultanahmet liegen die Hagia Sophia, die Blaue Moschee und der Topkapı-Palast; es ist das meistbesuchte Gebiet der historischen Halbinsel.",
+        "gettingThere": "Die Straßenbahn T1 hält in Sultanahmet; auch die Haltestellen Gülhane und Çemberlitaş sind zu Fuß erreichbar."
+      },
+      "kadikoy": {
+        "name": "Kadıköy",
+        "near": "in der Nähe von Kadıköy",
+        "intro": "Kadıköy ist das lebendigste Zentrum der asiatischen Seite, bekannt für seine Marktstraßen, Cafés und die Uferpromenade von Moda.",
+        "gettingThere": "Fähren verbinden den Anleger Kadıköy mit Eminönü, Karaköy und Beşiktaş, und die Metro M4 fährt von Kadıköy zum Flughafen Sabiha Gökçen."
+      },
+      "besiktas": {
+        "name": "Beşiktaş",
+        "near": "in der Nähe von Beşiktaş",
+        "intro": "Beşiktaş ist ein lebhaftes Viertel am Wasser auf der europäischen Seite, nahe dem Dolmabahçe-Palast.",
+        "gettingThere": "Vom Anleger Beşiktaş fahren Fähren nach Üsküdar und Kadıköy, und viele Stadtbusse halten am Platz."
+      },
+      "karakoy": {
+        "name": "Karaköy",
+        "near": "in der Nähe von Karaköy",
+        "intro": "Karaköy liegt am nördlichen Ende der Galatabrücke, mit Cafés, Galerien und dem Kreuzfahrthafen in der Nähe.",
+        "gettingThere": "Die Straßenbahn T1 hält in Karaköy, Fähren legen am Anleger ab, und die historische Tünel-Bahn fährt hinauf zur İstiklal-Straße."
+      },
+      "eminonu": {
+        "name": "Eminönü",
+        "near": "in der Nähe von Eminönü",
+        "intro": "Eminönü ist der Platz am Wasser am südlichen Ende der Galatabrücke, mit dem Gewürzbasar und der Neuen Moschee.",
+        "gettingThere": "Die Straßenbahn T1 hält in Eminönü, und Fähren fahren nach Kadıköy, Üsküdar und zu Bosporus-Rundfahrten."
+      },
+      "galata": {
+        "name": "Galata",
+        "near": "in der Nähe von Galata",
+        "intro": "Rund um den Galataturm liegt ein Gewirr steiler Gassen zwischen Karaköy und der İstiklal-Straße.",
+        "gettingThere": "Die nächsten Haltestellen sind Şişhane an der Metro M2 und Karaköy an der Straßenbahn T1; auch die Tünel-Bahn ist nah."
+      }
+    }
   }
 }

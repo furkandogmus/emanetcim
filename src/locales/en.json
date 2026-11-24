@@ -3035,5 +3035,145 @@
     "error_not_guest": "Only guest accounts can be deleted here.",
     "error_active_bookings": "The account has open bookings; they must be closed first.",
     "error_cannot_flag_admin": "An admin account can't be an App Review account."
+  },
+  "TransitHubs": {
+    "metaTitle": "Luggage storage {near}",
+    "metaDescription": "Luggage storage {near}, {city}: bookable points sorted by distance, today's opening hours and directions. Reserve online, pay at the shop.",
+    "metaDescriptionEmpty": "There is no bookable luggage storage point {near} yet. Tell us you would use one here.",
+    "headline": "Luggage storage {near}",
+    "shopsTitle": "Bookable points {near}",
+    "shopsNote": "Within {radius} km, sorted by distance. Opening status is refreshed every few minutes.",
+    "distanceKm": "{distance} km",
+    "distanceM": "{distance} m",
+    "openNow": "Open now",
+    "closedNow": "Closed now",
+    "todayHours": "Today {open} to {close}",
+    "closedToday": "Closed today",
+    "open247": "Open 24/7",
+    "mapLabel": "Map of bookable points {near}",
+    "searchCta": "Search for points {near}",
+    "cityLink": "All points in {city}",
+    "emptyTitle": "No bookable point {near} yet",
+    "emptyBody": "We only list shops that take bookings, so there is none here yet. You can still search the whole city.",
+    "emptyPartner": "Do you run a shop {near}? Become a partner",
+    "gettingThereTitle": "Getting there",
+    "tipsTitle": "Practical tips",
+    "howTitle": "How it works",
+    "how1": "Pick a point from the list and choose your drop-off and pick-up times.",
+    "how2": "Show your booking at the counter and pay there; your bags are sealed with a plastic seal.",
+    "how3": "Come back during the shop's opening hours and collect your bags.",
+    "faqTitle": "Frequently asked questions",
+    "faqNearestQ": "Where can I leave my luggage {near}?",
+    "faqNearestA": "The closest bookable point on this page is {shop}, about {distance} away.",
+    "faqPayQ": "Do I have to pay online?",
+    "faqPayA": "No. You reserve online and pay at the shop when you drop off your bags.",
+    "faqCancelQ": "Can I cancel my booking?",
+    "faqCancelA": "Yes. Cancellation is free until your drop-off time.",
+    "cityHubsTitle": "Popular spots in {city}",
+    "footerHubsTitle": "Popular spots",
+    "kinds": {
+      "airport": {
+        "tip1": "Plan the transfer time between the point and the terminal before your flight.",
+        "tip2": "Drop-off and pick-up happen while the shop is open, so check today's hours below.",
+        "tip3": "If you land early, leave your bags and head into the city before hotel check-in.",
+        "faqQ": "Can I store luggage before a late flight?",
+        "faqA": "Yes, as long as you collect it during the shop's opening hours. Each point shows today's hours here and the full week on its own page."
+      },
+      "bus_terminal": {
+        "tip1": "Long-distance coaches often arrive late, so leave some slack in your drop-off time.",
+        "tip2": "Drop-off and pick-up happen while the shop is open, so check today's hours below.",
+        "tip3": "Leave your bags and see the city until your next coach.",
+        "faqQ": "How do I find the point?",
+        "faqA": "Open the point's page for its address and a directions link."
+      },
+      "rail_station": {
+        "tip1": "Leave your bags between trains and see the city without them.",
+        "tip2": "Drop-off and pick-up happen while the shop is open, so check today's hours below.",
+        "tip3": "Your bags are sealed with a plastic seal when you drop them off.",
+        "faqQ": "How do I find the point?",
+        "faqA": "Open the point's page for its address and a directions link."
+      },
+      "district": {
+        "tip1": "Drop your bags and explore the area hands-free.",
+        "tip2": "Drop-off and pick-up happen while the shop is open, so check today's hours below.",
+        "tip3": "Your bags are sealed with a plastic seal when you drop them off.",
+        "faqQ": "How do I find the point?",
+        "faqA": "Open the point's page for its address and a directions link."
+      }
+    },
+    "hubs": {
+      "istanbul-airport": {
+        "name": "Istanbul Airport (IST)",
+        "near": "near Istanbul Airport (IST)",
+        "intro": "Istanbul Airport is the city's main international airport, on the European side north-west of the centre.",
+        "gettingThere": "The M11 metro line links the airport with Gayrettepe, and Havaist coaches run to many districts, including Taksim."
+      },
+      "sabiha-gokcen-airport": {
+        "name": "Sabiha Gökçen Airport (SAW)",
+        "near": "near Sabiha Gökçen Airport (SAW)",
+        "intro": "Sabiha Gökçen International Airport serves Istanbul from the Asian side, in Pendik.",
+        "gettingThere": "The M4 metro line runs from the airport to Kadıköy, and Havabus coaches connect it with Kadıköy and Taksim."
+      },
+      "esenler-bus-terminal": {
+        "name": "Esenler Bus Terminal",
+        "near": "near Esenler Bus Terminal",
+        "intro": "The Great Istanbul Bus Terminal in Esenler is the main hub for long-distance coaches on the European side.",
+        "gettingThere": "The M1 metro has an Otogar station at the terminal and runs to Aksaray and Zeytinburnu, where you can change to the T1 tram."
+      },
+      "sogutlucesme": {
+        "name": "Söğütlüçeşme Station",
+        "near": "near Söğütlüçeşme Station",
+        "intro": "Söğütlüçeşme in Kadıköy is the Asian-side stop for high-speed trains to Ankara and a Marmaray station.",
+        "gettingThere": "Marmaray commuter trains stop here, and the station sits next to the Söğütlüçeşme metrobus terminus."
+      },
+      "sirkeci": {
+        "name": "Sirkeci Station",
+        "near": "near Sirkeci Station",
+        "intro": "Sirkeci on the Historic Peninsula is a Marmaray station beside the historic railway terminal, a short walk from Eminönü.",
+        "gettingThere": "The T1 tram stops at Sirkeci, and Marmaray trains cross under the Bosphorus to Üsküdar."
+      },
+      "taksim": {
+        "name": "Taksim",
+        "near": "near Taksim",
+        "intro": "Taksim Square sits at the top of İstiklal Avenue, at the centre of Beyoğlu's shops, hotels and nightlife.",
+        "gettingThere": "The M2 metro stops at Taksim, and the F1 funicular runs down to Kabataş for the T1 tram and ferries."
+      },
+      "sultanahmet": {
+        "name": "Sultanahmet",
+        "near": "near Sultanahmet",
+        "intro": "Sultanahmet is home to Hagia Sophia, the Blue Mosque and Topkapı Palace, the busiest sightseeing area of the Historic Peninsula.",
+        "gettingThere": "The T1 tram stops at Sultanahmet; the Gülhane and Çemberlitaş stops are also within walking distance."
+      },
+      "kadikoy": {
+        "name": "Kadıköy",
+        "near": "near Kadıköy",
+        "intro": "Kadıköy is the busiest centre on the Asian side, known for its market streets, cafés and the Moda seafront.",
+        "gettingThere": "Ferries connect Kadıköy pier with Eminönü, Karaköy and Beşiktaş, and the M4 metro runs from Kadıköy to Sabiha Gökçen Airport."
+      },
+      "besiktas": {
+        "name": "Beşiktaş",
+        "near": "near Beşiktaş",
+        "intro": "Beşiktaş is a lively waterfront district on the European side, close to Dolmabahçe Palace.",
+        "gettingThere": "Ferries from Beşiktaş pier cross to Üsküdar and Kadıköy, and many city buses stop at the square."
+      },
+      "karakoy": {
+        "name": "Karaköy",
+        "near": "near Karaköy",
+        "intro": "Karaköy sits at the northern end of the Galata Bridge, with cafés, galleries and the cruise port nearby.",
+        "gettingThere": "The T1 tram stops at Karaköy, ferries leave from the pier, and the historic Tünel funicular climbs to İstiklal Avenue."
+      },
+      "eminonu": {
+        "name": "Eminönü",
+        "near": "near Eminönü",
+        "intro": "Eminönü is the waterfront square at the southern end of the Galata Bridge, home to the Spice Bazaar and the New Mosque.",
+        "gettingThere": "The T1 tram stops at Eminönü, and ferries leave for Kadıköy, Üsküdar and Bosphorus tours."
+      },
+      "galata": {
+        "name": "Galata",
+        "near": "near Galata",
+        "intro": "The Galata Tower area is a maze of steep streets between Karaköy and İstiklal Avenue.",
+        "gettingThere": "The nearest stops are Şişhane on the M2 metro and Karaköy on the T1 tram; the Tünel funicular is also close."
+      }
+    }
   }
 }

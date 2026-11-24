@@ -2877,5 +2877,145 @@
     "error_not_guest": "Seuls les comptes clients peuvent être supprimés ici.",
     "error_active_bookings": "Le compte a des réservations ouvertes ; elles doivent d'abord être clôturées.",
     "error_cannot_flag_admin": "Un compte administrateur ne peut pas être un compte App Review."
+  },
+  "TransitHubs": {
+    "metaTitle": "Consigne à bagages {near}",
+    "metaDescription": "Consigne à bagages {near}, {city} : points réservables triés par distance, horaires du jour et itinéraire. Réservez en ligne, payez sur place.",
+    "metaDescriptionEmpty": "Il n'y a pas encore de consigne réservable {near}. Dites-nous si vous en utiliseriez une ici.",
+    "headline": "Consigne à bagages {near}",
+    "shopsTitle": "Points réservables {near}",
+    "shopsNote": "Dans un rayon de {radius} km, triés par distance. Le statut d'ouverture est actualisé toutes les quelques minutes.",
+    "distanceKm": "{distance} km",
+    "distanceM": "{distance} m",
+    "openNow": "Ouvert maintenant",
+    "closedNow": "Fermé actuellement",
+    "todayHours": "Aujourd'hui de {open} à {close}",
+    "closedToday": "Fermé aujourd'hui",
+    "open247": "Ouvert 24 h/24, 7 j/7",
+    "mapLabel": "Carte des points réservables {near}",
+    "searchCta": "Chercher des points {near}",
+    "cityLink": "Tous les points à {city}",
+    "emptyTitle": "Pas encore de point réservable {near}",
+    "emptyBody": "Nous ne listons que les commerces qui acceptent des réservations, et il n'y en a pas encore ici. Vous pouvez chercher dans toute la ville.",
+    "emptyPartner": "Vous tenez un commerce {near} ? Devenez partenaire",
+    "gettingThereTitle": "Comment s'y rendre",
+    "tipsTitle": "Conseils pratiques",
+    "howTitle": "Comment ça marche",
+    "how1": "Choisissez un point dans la liste, puis vos heures de dépôt et de retrait.",
+    "how2": "Présentez votre réservation au comptoir et payez sur place ; vos bagages reçoivent un scellé en plastique.",
+    "how3": "Revenez pendant les horaires d'ouverture du commerce pour récupérer vos bagages.",
+    "faqTitle": "Questions fréquentes",
+    "faqNearestQ": "Où laisser mes bagages {near} ?",
+    "faqNearestA": "Le point réservable le plus proche sur cette page est {shop}, à environ {distance}.",
+    "faqPayQ": "Dois-je payer en ligne ?",
+    "faqPayA": "Non. Vous réservez en ligne et payez au commerce lors du dépôt de vos bagages.",
+    "faqCancelQ": "Puis-je annuler ma réservation ?",
+    "faqCancelA": "Oui. L'annulation est gratuite jusqu'à l'heure de dépôt.",
+    "cityHubsTitle": "Lieux populaires à {city}",
+    "footerHubsTitle": "Lieux populaires",
+    "kinds": {
+      "airport": {
+        "tip1": "Avant votre vol, prévoyez le temps de trajet entre le point et le terminal.",
+        "tip2": "Le dépôt et le retrait se font pendant les horaires d'ouverture : vérifiez les horaires du jour ci-dessous.",
+        "tip3": "Si vous atterrissez tôt, déposez vos bagages et partez en ville avant l'arrivée à l'hôtel.",
+        "faqQ": "Puis-je laisser mes bagages avant un vol tardif ?",
+        "faqA": "Oui, à condition de les récupérer pendant les horaires d'ouverture du commerce. Chaque point affiche ici ses horaires du jour et, sur sa propre page, ceux de la semaine."
+      },
+      "bus_terminal": {
+        "tip1": "Les cars longue distance arrivent souvent en retard : prévoyez une marge pour l'heure de dépôt.",
+        "tip2": "Le dépôt et le retrait se font pendant les horaires d'ouverture : vérifiez les horaires du jour ci-dessous.",
+        "tip3": "Déposez vos bagages et visitez la ville jusqu'à votre prochain car.",
+        "faqQ": "Comment trouver le point ?",
+        "faqA": "Ouvrez la page du point pour voir son adresse et un lien d'itinéraire."
+      },
+      "rail_station": {
+        "tip1": "Déposez vos bagages entre deux trains et visitez la ville sans eux.",
+        "tip2": "Le dépôt et le retrait se font pendant les horaires d'ouverture : vérifiez les horaires du jour ci-dessous.",
+        "tip3": "Vos bagages sont scellés avec un scellé en plastique au moment du dépôt.",
+        "faqQ": "Comment trouver le point ?",
+        "faqA": "Ouvrez la page du point pour voir son adresse et un lien d'itinéraire."
+      },
+      "district": {
+        "tip1": "Déposez vos bagages et explorez le quartier les mains libres.",
+        "tip2": "Le dépôt et le retrait se font pendant les horaires d'ouverture : vérifiez les horaires du jour ci-dessous.",
+        "tip3": "Vos bagages sont scellés avec un scellé en plastique au moment du dépôt.",
+        "faqQ": "Comment trouver le point ?",
+        "faqA": "Ouvrez la page du point pour voir son adresse et un lien d'itinéraire."
+      }
+    },
+    "hubs": {
+      "istanbul-airport": {
+        "name": "Aéroport d'Istanbul (IST)",
+        "near": "près de l'aéroport d'Istanbul (IST)",
+        "intro": "L'aéroport d'Istanbul est le principal aéroport international de la ville, sur la rive européenne, au nord-ouest du centre.",
+        "gettingThere": "La ligne de métro M11 relie l'aéroport à Gayrettepe, et les cars Havaist desservent de nombreux quartiers, dont Taksim."
+      },
+      "sabiha-gokcen-airport": {
+        "name": "Aéroport Sabiha Gökçen (SAW)",
+        "near": "près de l'aéroport Sabiha Gökçen (SAW)",
+        "intro": "L'aéroport international Sabiha Gökçen dessert Istanbul depuis la rive asiatique, à Pendik.",
+        "gettingThere": "La ligne de métro M4 va de l'aéroport à Kadıköy, et les cars Havabus le relient à Kadıköy et à Taksim."
+      },
+      "esenler-bus-terminal": {
+        "name": "Gare routière d'Esenler",
+        "near": "près de la gare routière d'Esenler",
+        "intro": "La grande gare routière d'Istanbul, à Esenler, est le principal pôle des cars longue distance sur la rive européenne.",
+        "gettingThere": "Le métro M1 a une station Otogar à la gare routière et va jusqu'à Aksaray et Zeytinburnu, où vous pouvez prendre le tramway T1."
+      },
+      "sogutlucesme": {
+        "name": "Gare de Söğütlüçeşme",
+        "near": "près de la gare de Söğütlüçeşme",
+        "intro": "Söğütlüçeşme, à Kadıköy, est l'arrêt des trains à grande vitesse pour Ankara sur la rive asiatique et une station du Marmaray.",
+        "gettingThere": "Les trains de banlieue Marmaray s'y arrêtent, et la gare jouxte le terminus du métrobus de Söğütlüçeşme."
+      },
+      "sirkeci": {
+        "name": "Gare de Sirkeci",
+        "near": "près de la gare de Sirkeci",
+        "intro": "Sirkeci, sur la péninsule historique, est une station du Marmaray à côté de l'ancienne gare, à quelques minutes à pied d'Eminönü.",
+        "gettingThere": "Le tramway T1 s'arrête à Sirkeci, et les trains Marmaray passent sous le Bosphore jusqu'à Üsküdar."
+      },
+      "taksim": {
+        "name": "Taksim",
+        "near": "près de Taksim",
+        "intro": "La place Taksim se trouve en haut de l'avenue İstiklal, au cœur des boutiques, hôtels et de la vie nocturne de Beyoğlu.",
+        "gettingThere": "Le métro M2 s'arrête à Taksim, et le funiculaire F1 descend à Kabataş pour le tramway T1 et les ferries."
+      },
+      "sultanahmet": {
+        "name": "Sultanahmet",
+        "near": "près de Sultanahmet",
+        "intro": "Sultanahmet abrite Sainte-Sophie, la Mosquée bleue et le palais de Topkapı ; c'est le secteur le plus visité de la péninsule historique.",
+        "gettingThere": "Le tramway T1 s'arrête à Sultanahmet ; les arrêts Gülhane et Çemberlitaş sont aussi accessibles à pied."
+      },
+      "kadikoy": {
+        "name": "Kadıköy",
+        "near": "près de Kadıköy",
+        "intro": "Kadıköy est le centre le plus animé de la rive asiatique, connu pour ses rues commerçantes, ses cafés et le front de mer de Moda.",
+        "gettingThere": "Des ferries relient l'embarcadère de Kadıköy à Eminönü, Karaköy et Beşiktaş, et le métro M4 va de Kadıköy à l'aéroport Sabiha Gökçen."
+      },
+      "besiktas": {
+        "name": "Beşiktaş",
+        "near": "près de Beşiktaş",
+        "intro": "Beşiktaş est un quartier animé du bord de l'eau, sur la rive européenne, près du palais de Dolmabahçe.",
+        "gettingThere": "Des ferries partent de l'embarcadère de Beşiktaş pour Üsküdar et Kadıköy, et de nombreux bus s'arrêtent sur la place."
+      },
+      "karakoy": {
+        "name": "Karaköy",
+        "near": "près de Karaköy",
+        "intro": "Karaköy se trouve à l'extrémité nord du pont de Galata, avec cafés, galeries et le port de croisière à proximité.",
+        "gettingThere": "Le tramway T1 s'arrête à Karaköy, les ferries partent de l'embarcadère, et le funiculaire historique Tünel monte vers l'avenue İstiklal."
+      },
+      "eminonu": {
+        "name": "Eminönü",
+        "near": "près d'Eminönü",
+        "intro": "Eminönü est la place du bord de l'eau à l'extrémité sud du pont de Galata, avec le bazar aux épices et la Mosquée neuve.",
+        "gettingThere": "Le tramway T1 s'arrête à Eminönü, et des ferries partent pour Kadıköy, Üsküdar et les croisières sur le Bosphore."
+      },
+      "galata": {
+        "name": "Galata",
+        "near": "près de Galata",
+        "intro": "Le quartier de la tour de Galata est un dédale de rues en pente entre Karaköy et l'avenue İstiklal.",
+        "gettingThere": "Les arrêts les plus proches sont Şişhane sur le métro M2 et Karaköy sur le tramway T1 ; le funiculaire Tünel est également proche."
+      }
+    }
   }
 }
