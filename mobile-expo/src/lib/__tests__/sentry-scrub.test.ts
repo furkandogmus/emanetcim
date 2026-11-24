@@ -45,3 +45,54 @@ describe("sentry-scrub", () => {
     expect(e?.extra).toEqual({ password: "[redacted]", nested: { note: "mail [email]" } });
   });
 });
+
+describe("sentry-scrub (genis)", () => {
+  it.each([
+    "+905321234567",
+    "+44 20 7946 0958",
+    "+1 (415) 555-0132",
+    "0532 123 45 67",
+    "532-123-4567",
+    "05321234567",
+  ])("telefon silinir: %s", (p) => {
+    expect(scrubString(`tel ${p} kayitli`)).toBe("tel [phone] kayitli");
+  });
+
+  it.each(["1732467891234", "1732467891", "2026-11-24", "2026-11-24T10:00:00.000Z", "v0.3.6", "status 500 after 12000 ms"])(
+    "telefon olmayan korunur: %s",
+    (s) => {
+      expect(scrubString(s)).toBe(s);
+    },
+  );
+
+  it("anahtar adinda phone/email/name/address/token/secret/password gecen deger gitmez", () => {
+    const e = scrubEvent({
+      type: undefined,
+      extra: { guestPhone: "x", shopName: "Ornek", userEmail: "y", shopAddress: "z", refresh_token: "t", apiSecret: "s", newPassword: "p", count: 3 },
+    } as ErrorEvent);
+    expect(e?.extra).toEqual({
+      guestPhone: "[redacted]",
+      shopName: "[redacted]",
+      userEmail: "[redacted]",
+      shopAddress: "[redacted]",
+      refresh_token: "[redacted]",
+      apiSecret: "[redacted]",
+      newPassword: "[redacted]",
+      count: 3,
+    });
+  });
+
+  it("tags, logentry, fingerprint ve request.url sorgusu temizlenir", () => {
+    const e = scrubEvent({
+      type: undefined,
+      tags: { contact: "a@b.co", role: "ADMIN" },
+      logentry: { message: "login %s", params: ["a@b.co"] },
+      fingerprint: ["user a@b.co", "{{ default }}"],
+      request: { url: "https://x.test/p?phone=05321234567" },
+    } as ErrorEvent);
+    expect(e?.tags).toEqual({ contact: "[email]", role: "ADMIN" });
+    expect(e?.logentry).toEqual({ message: "login %s", params: ["[email]"] });
+    expect(e?.fingerprint).toEqual(["user [email]", "{{ default }}"]);
+    expect(e?.request?.url).toBe("https://x.test/p");
+  });
+});

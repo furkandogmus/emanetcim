@@ -10,7 +10,7 @@ import { ChevronRight, ExternalLink, X } from "lucide-react-native";
 import { useTranslation } from "react-i18next";
 
 import { Avatar } from "@/components/Avatar";
-import { useAppLock } from "@/components/AppLockGate";
+import { useAppLock } from "@/lib/app-lock-context";
 import { ToggleRow } from "@/components/ToggleRow";
 import { ChoiceSheet } from "@/components/ChoiceSheet";
 import { LANGUAGES } from "@/components/LanguageButton";

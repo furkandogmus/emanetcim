@@ -3,6 +3,7 @@ import { Keyboard, KeyboardAvoidingView, Modal, Platform, Pressable, ScrollView,
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useTranslation } from "react-i18next";
 
+import { useAppLock } from "@/lib/app-lock-context";
 import { colors, radius, space } from "@/theme/tokens";
 
 /*
@@ -39,9 +40,11 @@ export function Sheet({ visible, onClose, children }: { visible: boolean; onClos
   const { t } = useTranslation();
   const insets = useSafeAreaInsets();
   const keyboardOpen = useKeyboardOpen();
+  // Uygulama kilidi ustte acilabilsin: kilit varken panel sunulmaz (durumu sahibinde kalir).
+  const { covering } = useAppLock();
   return (
     <Modal
-      visible={visible}
+      visible={visible && !covering}
       transparent
       animationType="fade"
       statusBarTranslucent
