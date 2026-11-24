@@ -1,5 +1,7 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import { createDisputeAction, updateDisputeStatusAction } from "../actions/dispute";
+import { guestOutcomeStatus } from "../services/DisputeService";
+import { notificationService } from "@/services/NotificationService";
 
 const { mockPrisma, mockAuth } = vi.hoisted(() => {
   return {
@@ -22,6 +24,7 @@ vi.mock("@/lib/db", () => ({ default: mockPrisma }));
 vi.mock("@/services/NotificationService", () => ({
   notificationService: {
     notifyAdminsForDispute: vi.fn().mockResolvedValue(true),
+    notifyGuestDisputeOutcome: vi.fn().mockResolvedValue(undefined),
   },
 }));
 vi.mock("@/lib/revalidate-locales", () => ({ revalidatePathAllLocales: vi.fn() }));
@@ -143,13 +146,43 @@ describe("Dispute Actions", () => {
 
     it("should update status for admins", async () => {
       mockAuth.mockResolvedValue({ user: { id: "admin-1", role: "ADMIN" } });
-      mockPrisma.dispute.findUnique.mockResolvedValue({ status: "OPEN" });
+      mockPrisma.dispute.findUnique.mockResolvedValue({ status: "OPEN", bookingId: "b1" });
       const result = await updateDisputeStatusAction("d1", "RESOLVED", "Log note");
       expect(result.success).toBe(true);
       expect(mockPrisma.dispute.update).toHaveBeenCalledWith({
         where: { id: "d1" },
         data: { status: "RESOLVED", adminNote: "Log note" },
       });
+      // Ic not misafire gitmez: bildirime yalnizca durum gecer.
+      expect(notificationService.notifyGuestDisputeOutcome).toHaveBeenCalledWith({ bookingId: "b1", status: "RESOLVED" });
+    });
+
+    it("durum degismediyse misafire bildirim gitmez", async () => {
+      mockAuth.mockResolvedValue({ user: { id: "admin-1", role: "ADMIN" } });
+      mockPrisma.dispute.findUnique.mockResolvedValue({ status: "RESOLVED", bookingId: "b1" });
+      const result = await updateDisputeStatusAction("d1", "RESOLVED", "yalniz not");
+      expect(result.success).toBe(true);
+      expect(notificationService.notifyGuestDisputeOutcome).not.toHaveBeenCalled();
+    });
+
+    it("bildirim hatasi durum guncellemesini dusurmez", async () => {
+      mockAuth.mockResolvedValue({ user: { id: "admin-1", role: "ADMIN" } });
+      mockPrisma.dispute.findUnique.mockResolvedValue({ status: "OPEN", bookingId: "b1" });
+      vi.mocked(notificationService.notifyGuestDisputeOutcome).mockRejectedValueOnce(new Error("mail down"));
+      const result = await updateDisputeStatusAction("d1", "CLOSED", "");
+      expect(result.success).toBe(true);
+    });
+  });
+
+  describe("guestOutcomeStatus", () => {
+    it("sonuc her gecisde, inceleme yalnizca acik sikayetten bildirilir", () => {
+      expect(guestOutcomeStatus("OPEN", "IN_REVIEW")).toBe("IN_REVIEW");
+      expect(guestOutcomeStatus("OPEN", "RESOLVED")).toBe("RESOLVED");
+      expect(guestOutcomeStatus("IN_REVIEW", "CLOSED")).toBe("CLOSED");
+      expect(guestOutcomeStatus("RESOLVED", "CLOSED")).toBe("CLOSED");
+      expect(guestOutcomeStatus("RESOLVED", "IN_REVIEW")).toBeNull();
+      expect(guestOutcomeStatus("IN_REVIEW", "OPEN")).toBeNull();
+      expect(guestOutcomeStatus("CLOSED", "CLOSED")).toBeNull();
     });
   });
 });

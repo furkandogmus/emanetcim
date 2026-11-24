@@ -65,6 +65,17 @@ const ADMIN_DISPUTE_INCLUDE = {
   },
 } as const;
 
+/**
+ * Misafire bildirilecek gecis (G34). Sonuc (cozuldu/kapandi) her degisimde gider;
+ * "inceleniyor" yalnizca ilk kez, acik sikayetten alindiginda gider ki geri-ileri
+ * oynanan bir durum misafiri bogmasin. Ayni duruma ya da tekrar "acik"a gecis sessiz.
+ */
+export function guestOutcomeStatus(from: string, to: DisputeStatus): Exclude<DisputeStatus, "OPEN"> | null {
+  if (from === to || to === "OPEN") return null;
+  if (to === "IN_REVIEW") return from === "OPEN" ? "IN_REVIEW" : null;
+  return to;
+}
+
 class DisputeService {
   /** Yonetici listesi (web `/admin/disputes` ve mobil uc ayni sorgu). `status` taninmazsa filtresiz. */
   listForAdmin(status?: string | null) {
@@ -77,9 +88,9 @@ class DisputeService {
   }
 
   /**
-   * Yonetici durum + not gunceller. Web'deki kural aynen: dort durumdan herhangi
-   * birine gecilebilir, bos not `null`. Misafire bildirim ve iade YOK; web de
-   * yapmiyor, mobil yeni bir yan etki uretmesin.
+   * Yonetici durum + not gunceller (web action ve mobil uc ayni govde). Dort durumdan
+   * herhangi birine gecilebilir, bos not `null`. Iade YOK. Durum degistiyse misafire
+   * bildirim gider (`guestOutcomeStatus`); not ic nottur, misafire gitmez.
    */
   async updateStatus(
     actor: DisputeAdminActor,
@@ -95,7 +106,7 @@ class DisputeService {
     const adminNote = typeof adminNoteRaw === "string" ? adminNoteRaw.trim() || null : null;
     if (adminNote !== null && adminNote.length > DISPUTE_ADMIN_NOTE_MAX) return { ok: false, reason: "note_too_long" };
 
-    const existing = await prisma.dispute.findUnique({ where: { id: disputeId }, select: { status: true } });
+    const existing = await prisma.dispute.findUnique({ where: { id: disputeId }, select: { status: true, bookingId: true } });
     if (!existing) return { ok: false, reason: "not_found" };
 
     await prisma.dispute.update({ where: { id: disputeId }, data: { status, adminNote } });
@@ -108,6 +119,13 @@ class DisputeService {
       metadata: { from: existing.status, to: status, hasNote: adminNote !== null },
       ip: ctx.ip ?? null,
     });
+
+    const outcome = guestOutcomeStatus(existing.status, status);
+    if (outcome) {
+      void notificationService
+        .notifyGuestDisputeOutcome({ bookingId: existing.bookingId, status: outcome })
+        .catch((err) => logger.error({ err, disputeId }, "notify_guest_dispute_outcome_failed"));
+    }
     return { ok: true, status, adminNote };
   }
 

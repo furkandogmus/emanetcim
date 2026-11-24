@@ -8,6 +8,8 @@ import { rateLimit } from "@/lib/rate-limit";
 import { revalidatePathAllLocales } from "@/lib/revalidate-locales";
 import { requireAdmin } from "@/lib/action-auth";
 import { contactReplyBodySchema, replyToContactMessage } from "@/services/ContactReplyService";
+import { notificationService } from "@/services/NotificationService";
+import logger from "@/lib/logger";
 
 const contactSchema = z.object({
   name: z.string().min(2).max(100),
@@ -55,6 +57,9 @@ export async function sendContactMessageAction(
         categoryReason: "contact_form",
       },
     });
+    void notificationService
+      .notifyAdminsForContactMessage()
+      .catch((err) => logger.warn({ err }, "notify_admins_contact_failed"));
     return { status: "success" };
   } catch {
     return { status: "error", error: "server" };

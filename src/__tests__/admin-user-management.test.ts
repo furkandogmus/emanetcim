@@ -50,6 +50,7 @@ vi.mock("@/services/booking/closure", () => ({ closeExpiredBookingsForGuest: m.c
 import { adminUserService } from "@/services/AdminUserService";
 import { accountPrivacyService, erasureConfirmMatches } from "@/services/AccountPrivacyService";
 import { AuditLogService, auditLogService } from "@/services/AuditLogService";
+import { notificationService } from "@/services/NotificationService";
 
 const actor = { userId: "admin-1", ip: "203.0.113.5" };
 const auditActions = () => m.audit.mock.calls.map((c) => c[0].action);
@@ -121,6 +122,25 @@ describe("AdminUserService.changeRole", () => {
       data: { targetUserId: "u1", previousRole: "PARTNER", requestedRole: "ADMIN", requestedByUserId: "admin-1" },
     });
     expect(auditActions()).toEqual(["user.role_change_request"]);
+  });
+
+  it("bekleyen istek diger yoneticilere bildirilir; uygulanan degisiklik bildirilmez", async () => {
+    const notify = vi.spyOn(notificationService, "notifyAdminsForPendingRoleChange").mockResolvedValue();
+    m.prisma.user.findUnique.mockResolvedValue({ id: "u1", role: "PARTNER", name: "Ayse" });
+    await adminUserService.changeRole("u1", "ADMIN", actor);
+    expect(notify).toHaveBeenCalledTimes(1);
+    expect(notify).toHaveBeenCalledWith({
+      requestedByUserId: "admin-1",
+      targetName: "Ayse",
+      previousRole: "PARTNER",
+      requestedRole: "ADMIN",
+    });
+
+    notify.mockClear();
+    m.prisma.user.count.mockResolvedValue(1);
+    await adminUserService.changeRole("u1", "ADMIN", actor);
+    expect(notify).not.toHaveBeenCalled();
+    notify.mockRestore();
   });
 
   it("tek admin varken ADMIN'e yukseltme aninda uygulanir", async () => {

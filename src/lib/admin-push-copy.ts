@@ -12,11 +12,13 @@ export type AdminPushEvent =
   | "partnerLead"
   | "affiliateApplication"
   | "accountDeletion"
-  | "reviewReport";
+  | "reviewReport"
+  | "roleApproval"
+  | "contactMessage";
 
 export type AdminPushLang = "tr" | "en";
 
-export type AdminPushVars = { name?: string; code?: string; reason?: string };
+export type AdminPushVars = { name?: string; code?: string; reason?: string; role?: string; count?: number };
 
 type Copy = Record<AdminPushEvent, (v: AdminPushVars) => { title: string; body: string }>;
 
@@ -27,6 +29,15 @@ const DISPUTE_REASON: Record<AdminPushLang, Record<AdminDisputeReason, string>> 
   tr: { DAMAGE: "Hasar", THEFT: "Hırsızlık", OTHER: "Diğer" },
   en: { DAMAGE: "Damage", THEFT: "Theft", OTHER: "Other" },
 };
+
+const ROLE_LABEL: Record<AdminPushLang, Record<string, string>> = {
+  tr: { ADMIN: "Yönetici", PARTNER: "Esnaf", GUEST: "Misafir" },
+  en: { ADMIN: "Admin", PARTNER: "Partner", GUEST: "Guest" },
+};
+
+function roleLabel(lang: AdminPushLang, role: string | undefined): string {
+  return (role && ROLE_LABEL[lang][role]) || role || "";
+}
 
 export function disputeReasonLabel(lang: AdminPushLang, reason: string | undefined): string {
   const table = DISPUTE_REASON[lang];
@@ -61,6 +72,17 @@ export const ADMIN_PUSH_COPY: Record<AdminPushLang, Copy> = {
       title: "Yorum bildirildi",
       body: v.code ? `${v.code} şikayetle bir yorum incelemeyi bekliyor.` : "Bildirilen bir yorum incelemeyi bekliyor.",
     }),
+    roleApproval: (v) => ({
+      title: "Rol değişikliği onay bekliyor",
+      body: v.name
+        ? `${v.name} için ${roleLabel("tr", v.role)} rolü ikinci yönetici onayını bekliyor.`
+        : `${roleLabel("tr", v.role)} rolü ikinci yönetici onayını bekliyor.`,
+    }),
+    // Gonderen ve mesaj metni kilit ekranina dusmez; sayi okunmamis destek mesajlari.
+    contactMessage: (v) => ({
+      title: "Yeni destek mesajı",
+      body: (v.count ?? 1) > 1 ? `${v.count} okunmamış mesaj var.` : "Okunmamış bir mesaj var.",
+    }),
   },
   en: {
     dispute: (v) => ({ title: "New dispute", body: `Booking ${v.code ?? ""} · ${disputeReasonLabel("en", v.reason)}` }),
@@ -84,6 +106,16 @@ export const ADMIN_PUSH_COPY: Record<AdminPushLang, Copy> = {
       title: "Review reported",
       body: v.code ? `A review with ${v.code} reports is waiting for moderation.` : "A reported review is waiting for moderation.",
     }),
+    roleApproval: (v) => ({
+      title: "Role change awaiting approval",
+      body: v.name
+        ? `The ${roleLabel("en", v.role)} role for ${v.name} needs a second admin's approval.`
+        : `A ${roleLabel("en", v.role)} role change needs a second admin's approval.`,
+    }),
+    contactMessage: (v) => ({
+      title: "New support message",
+      body: (v.count ?? 1) > 1 ? `${v.count} unread messages.` : "One unread message.",
+    }),
   },
 };
 
@@ -102,6 +134,8 @@ export type AdminPushScreen =
   | "partnerLeads"
   | "affiliates"
   | "accountDeletions"
-  | "reviews";
+  | "reviews"
+  | "roleApprovals"
+  | "messages";
 
 export type AdminPushData = { adminScreen: AdminPushScreen; disputeId?: string };
