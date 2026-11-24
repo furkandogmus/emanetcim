@@ -2895,5 +2895,20 @@
     "lateDropoffHold": "Dükkan seni {time} saatine kadar bekliyor.",
     "prelaunchDeviceWants": "uygulamadan: {count}",
     "prelaunchDeviceWantsHint": "Uygulama cihaz kimliğiyle gelen tek tık istekler (cihaz kimliği uygulamada üretilir, çerezden kolay şişirilebilir)"
+  },
+  "AccountDataExport": {
+    "title": "Verilerimi dışa aktar",
+    "desc": "Hesabınla ilişkili kişisel verileri (profil, rezervasyonlar, değerlendirmeler, onaylanan metinler, varsa dükkan ve aracı bilgileri) JSON dosyası olarak al.",
+    "downloadButton": "İndir",
+    "emailButton": "E-postama gönder",
+    "emailNote": "E-posta yalnızca hesabının doğrulanmış adresine gider; 24 saatte bir istenebilir.",
+    "emailSent": "Dosya {email} adresine gönderildi. Birkaç dakika içinde gelmezse istenmeyen klasörüne bak.",
+    "errors": {
+      "generic": "Bir şeyler ters gitti. Lütfen tekrar dene.",
+      "tooManyDownloads": "Çok fazla indirme isteği. Biraz sonra tekrar dene.",
+      "rateLimited": "Son 24 saatte bir dışa aktarım gönderildi. {time} sonrasında yeniden isteyebilirsin.",
+      "noVerifiedEmail": "Hesabında doğrulanmış bir e-posta yok. Dosyayı indirebilir ya da önce e-postanı doğrulayabilirsin.",
+      "mailFailed": "E-posta şu an gönderilemedi. Biraz sonra tekrar dene."
+    }
   }
 }

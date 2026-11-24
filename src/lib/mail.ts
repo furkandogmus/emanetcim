@@ -468,3 +468,88 @@ export const sendPasswordSetNotice = async (email: string, locale: string = "tr"
     logger.error({ error }, "password_set_notice_exception");
   }
 };
+
+/** KVKK dışa aktarımı: JSON ek olarak, hesabın doğrulanmış adresine. */
+const DATA_EXPORT_COPY: Record<string, { subject: string; heading: string; text: string; note: string; footer: string }> = {
+  tr: {
+    subject: "BagajPark: Kişisel veri dışa aktarımın",
+    heading: "Verilerin ekte",
+    text: "İsteğin üzerine hesabınla ilişkili kişisel verileri ekteki JSON dosyasında gönderiyoruz: profil, rezervasyonlar, değerlendirmeler, onaylanan metinler ve varsa dükkan ile aracı bilgileri.",
+    note: "Güvenlik için IBAN ve vergi/kimlik numaraları yalnızca son 4 hanesiyle yer alır. Dosyayı başkalarıyla paylaşma.",
+    footer: "Bu isteği sen yapmadıysan şifreni değiştir ve bize yaz.",
+  },
+  en: {
+    subject: "BagajPark: Your personal data export",
+    heading: "Your data is attached",
+    text: "As requested, the attached JSON file contains the personal data linked to your account: profile, bookings, reviews, accepted documents and, where relevant, shop and affiliate details.",
+    note: "For security, IBAN and tax/ID numbers show only their last 4 digits. Do not share this file with others.",
+    footer: "If you did not request this, change your password and contact us.",
+  },
+  de: {
+    subject: "BagajPark: Export Ihrer personenbezogenen Daten",
+    heading: "Ihre Daten im Anhang",
+    text: "Wie angefordert enthält die angehängte JSON-Datei die mit Ihrem Konto verknüpften personenbezogenen Daten: Profil, Buchungen, Bewertungen, akzeptierte Dokumente und gegebenenfalls Geschäfts- und Partnerdaten.",
+    note: "Aus Sicherheitsgründen werden IBAN sowie Steuer- und Ausweisnummern nur mit den letzten 4 Stellen angezeigt. Geben Sie diese Datei nicht weiter.",
+    footer: "Wenn Sie das nicht angefordert haben, ändern Sie Ihr Passwort und schreiben Sie uns.",
+  },
+  fr: {
+    subject: "BagajPark : export de vos données personnelles",
+    heading: "Vos données en pièce jointe",
+    text: "Comme demandé, le fichier JSON joint contient les données personnelles liées à votre compte : profil, réservations, avis, documents acceptés et, le cas échéant, informations de commerce et d'affiliation.",
+    note: "Par sécurité, l'IBAN et les numéros fiscaux ou d'identité n'affichent que leurs 4 derniers chiffres. Ne partagez pas ce fichier.",
+    footer: "Si vous n'êtes pas à l'origine de cette demande, changez votre mot de passe et contactez-nous.",
+  },
+  ja: {
+    subject: "BagajPark: 個人データのエクスポート",
+    heading: "データを添付しました",
+    text: "ご依頼に基づき、アカウントに関連する個人データ(プロフィール、予約、レビュー、同意した文書、該当する場合は店舗およびアフィリエイト情報)を添付のJSONファイルでお送りします。",
+    note: "安全のため、IBANおよび税番号・身分証番号は末尾4桁のみ表示されます。このファイルを他人と共有しないでください。",
+    footer: "このリクエストに心当たりがない場合は、パスワードを変更し、ご連絡ください。",
+  },
+  fa: {
+    subject: "BagajPark: خروجی داده‌های شخصی شما",
+    heading: "داده‌های شما پیوست است",
+    text: "بنا به درخواست شما، فایل JSON پیوست داده‌های شخصی مرتبط با حسابتان را دارد: نمایه، رزروها، نظرها، متن‌های پذیرفته‌شده و در صورت وجود اطلاعات فروشگاه و همکاری در فروش.",
+    note: "برای امنیت، IBAN و شماره‌های مالیاتی/شناسایی فقط با ۴ رقم آخر نمایش داده می‌شوند. این فایل را با دیگران به اشتراک نگذارید.",
+    footer: "اگر این درخواست را شما نداده‌اید، رمز عبور خود را تغییر دهید و با ما تماس بگیرید.",
+  },
+};
+
+/** Basarida `true`; anahtar yoksa ya da gonderim duserse `false` (cagiran hakki yakmaz). */
+export const sendDataExportEmail = async (params: {
+  email: string;
+  locale: string;
+  filename: string;
+  json: string;
+}): Promise<boolean> => {
+  const resend = getResendClient();
+  if (!resend) {
+    logger.warn({}, "mail_data_export_skipped_no_resend_key");
+    return false;
+  }
+  // Mobilin `ru` gibi web'de olmayan dilleri Turkce yerine Ingilizce alir.
+  const lang = params.locale in DATA_EXPORT_COPY ? params.locale : params.locale ? "en" : "tr";
+  const c = DATA_EXPORT_COPY[lang];
+  try {
+    const { error } = await withTimeout(
+      resend.emails.send({
+        from: process.env.RESEND_FROM || "BagajPark <info@bagajpark.com>",
+        to: params.email,
+        subject: c.subject,
+        text: `${c.heading}\n\n${c.text}\n\n${c.note}\n\n${c.footer}`,
+        html: renderEmailHtml({ locale: lang, heading: c.heading, paragraphs: [c.text, c.note], footer: c.footer }),
+        attachments: [{ filename: params.filename, content: Buffer.from(params.json, "utf8"), contentType: "application/json" }],
+      }),
+      MAIL_SEND_TIMEOUT_MS,
+      "data_export_email_send",
+    );
+    if (error) {
+      logger.error({ error }, "data_export_email_error");
+      return false;
+    }
+    return true;
+  } catch (error) {
+    logger.error({ error }, "data_export_email_exception");
+    return false;
+  }
+};

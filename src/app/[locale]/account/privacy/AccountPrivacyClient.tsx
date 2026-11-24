@@ -3,11 +3,12 @@
 import { useState, useTransition } from "react";
 import { signOut, useSession } from "next-auth/react";
 import { useLocale, useTranslations } from "next-intl";
-import { Download, UserX } from "lucide-react";
+import { UserX } from "lucide-react";
 import { anonymizeGuestAccountAction, requestAccountDeletionAction } from "@/actions/account-privacy";
 import WebPushOptIn from "@/components/WebPushOptIn";
 import ConfirmDialog from "@/components/common/ConfirmDialog";
 import { formatInstant } from "@/lib/format-datetime";
+import DataExportCard from "./DataExportCard";
 
 type DeletionRequestState = { status: "PENDING"; dueAtIso: string } | null;
 
@@ -18,44 +19,6 @@ export default function AccountPrivacyClient({ deletionRequest = null }: { delet
   const [pending, startTransition] = useTransition();
   const [error, setError] = useState<string | null>(null);
   const [confirmOpen, setConfirmOpen] = useState(false);
-  const [exporting, setExporting] = useState(false);
-  const [exportError, setExportError] = useState<string | null>(null);
-
-  /*
-    ARTIK FETCH + BLOB (2026-09-10). Eskiden `window.location.href` ile TAM
-    SAYFA GEÇİŞİ yapılıyordu: butonda yükleniyor göstergesi yoktu (dört
-    paralel DB sorgusu bir an sürer, misafir tekrar tıklamaya eğilimliydi ve
-    ardışık tıklamalar dakikalık hız sınırını tetikleyebiliyordu) ve uç
-    401/429 döndüğünde tarayıcı UYGULAMADAN ÇIKIP o HAM JSON gövdesini
-    (`{"error":"Too many requests"}`) tüm sayfa içeriği olarak gösteriyordu —
-    ne BagajPark arayüzü, ne çeviri, ne geri dönüş yolu. Fetch ile aynı hata
-    şimdi bu sayfada, çevrilmiş metinle kalıyor.
-  */
-  const exportData = async () => {
-    setExportError(null);
-    setExporting(true);
-    try {
-      const res = await fetch("/api/account/data-export");
-      if (!res.ok) {
-        setExportError(t("errors.generic"));
-        return;
-      }
-      const blob = await res.blob();
-      const url = URL.createObjectURL(blob);
-      const a = document.createElement("a");
-      a.href = url;
-      a.download = `bagajpark-data-${session?.user?.id?.slice(0, 8) ?? "export"}.json`;
-      document.body.appendChild(a);
-      a.click();
-      a.remove();
-      URL.revokeObjectURL(url);
-    } catch {
-      setExportError(t("errors.generic"));
-    } finally {
-      setExporting(false);
-    }
-  };
-
   const anonymize = () => {
     setConfirmOpen(false);
     setError(null);
@@ -108,31 +71,20 @@ export default function AccountPrivacyClient({ deletionRequest = null }: { delet
   }
 
   // Esnaf ve yonetici aninda silemez (dukkan, hakedis, yetki): talep birakir (App Store 5.1.1(v)).
+  const fileStem = session?.user?.id?.slice(0, 8) ?? "export";
   if (session?.user?.role !== "GUEST") {
-    return <DeletionRequestCard initial={deletionRequest} />;
+    return (
+      <div className="flex max-w-lg flex-col gap-6">
+        <DataExportCard fileStem={fileStem} />
+        <DeletionRequestCard initial={deletionRequest} />
+      </div>
+    );
   }
 
   return (
     <div className="flex max-w-lg flex-col gap-6">
       <WebPushOptIn />
-      <div className="rounded-2xl border border-gray-100 bg-white p-6 shadow-sm">
-        <h2 className="flex items-center gap-2 text-lg font-black text-gray-900">
-          <Download size={20} className="text-gray-400" aria-hidden />
-          {t("exportTitle")}
-        </h2>
-        <p className="mt-2 text-sm text-gray-600">{t("exportDesc")}</p>
-        {exportError ? (
-          <p className="mt-2 text-sm font-bold text-red-700">{exportError}</p>
-        ) : null}
-        <button
-          type="button"
-          disabled={exporting}
-          onClick={() => void exportData()}
-          className="mt-4 rounded-full border border-gray-200 px-6 py-3 text-xs id-eyebrow text-gray-900 hover:bg-gray-50 disabled:opacity-50"
-        >
-          {exporting ? "…" : t("exportButton")}
-        </button>
-      </div>
+      <DataExportCard fileStem={fileStem} />
       <div className="rounded-2xl border border-red-100 bg-red-50/40 p-6">
         <h2 className="flex items-center gap-2 text-lg font-black text-red-900">
           <UserX size={20} className="text-red-700" aria-hidden />

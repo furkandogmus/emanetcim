@@ -25,6 +25,7 @@ import { z } from "zod";
 import prisma from "@/lib/db";
 import logger from "@/lib/logger";
 import { writeAuditLog } from "@/lib/audit-log";
+import { rateLimit } from "@/lib/rate-limit";
 import { csvCell } from "@/lib/csv";
 import { moneyToNumber } from "@/lib/money";
 import { generateCode } from "@/services/ReferralService";
@@ -332,6 +333,21 @@ export class AffiliateService {
         commissionPaid: b.affiliateCommission?.status === AffiliateCommissionStatus.PAID,
       })),
     };
+  }
+
+  /**
+   * Web formu ve mobil basvuru ayni kapidan: IP basina hiz siniri, sonra kayit.
+   * Bal kupu forma ozgu, tasiyicida kalir.
+   */
+  async apply(
+    input: unknown,
+    ctx: { userId?: string | null; ip: string },
+  ): Promise<{ ok: true; id: string } | { ok: false; reason: "invalid_data" | "already_applied" | "rate_limited" }> {
+    if (!(await rateLimit(`affiliate-apply:${ctx.ip}`, 5, 10 * 60_000))) return { ok: false, reason: "rate_limited" };
+    if (ctx.userId && !(await rateLimit(`affiliate-apply:user:${ctx.userId}`, 5, 10 * 60_000))) {
+      return { ok: false, reason: "rate_limited" };
+    }
+    return this.submitApplication(input, { userId: ctx.userId ?? null });
   }
 
   /** Herkese acik "Araci ol" basvurusu: PENDING kayit + admin bildirimi. */

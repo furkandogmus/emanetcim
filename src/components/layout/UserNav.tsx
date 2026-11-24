@@ -126,18 +126,17 @@ export default function UserNav() {
                 </Link>
               </li>
 
-              {session?.user?.role === 'GUEST' ? (
-                <li>
-                  <Link
-                    href="/account/privacy"
-                    onClick={() => setIsOpen(false)}
-                    className="flex items-center gap-3 w-full p-4 hover:bg-gray-50 rounded-2xl transition-colors text-sm font-bold text-gray-700 cursor-pointer"
-                  >
-                    <Fingerprint size={18} aria-hidden />
-                    {t('navPrivacyData')}
-                  </Link>
-                </li>
-              ) : null}
+              {/* Esnaf ve yonetici de disa aktarir ve silme talebi birakir (KVKK, App Store 5.1.1(v)). */}
+              <li>
+                <Link
+                  href="/account/privacy"
+                  onClick={() => setIsOpen(false)}
+                  className="flex items-center gap-3 w-full p-4 hover:bg-gray-50 rounded-2xl transition-colors text-sm font-bold text-gray-700 cursor-pointer"
+                >
+                  <Fingerprint size={18} aria-hidden />
+                  {t('navPrivacyData')}
+                </Link>
+              </li>
 
               <li>
                 <button

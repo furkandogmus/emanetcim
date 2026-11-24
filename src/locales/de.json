@@ -2750,5 +2750,20 @@
     "lateDropoffHold": "Der Laden hält deine Buchung bis {time}.",
     "prelaunchDeviceWants": "aus der App: {count}",
     "prelaunchDeviceWantsHint": "Ein-Tipp-Anfragen mit App-Geräte-ID (in der App erzeugt, leichter aufzublähen als das Web-Cookie)"
+  },
+  "AccountDataExport": {
+    "title": "Meine Daten exportieren",
+    "desc": "Erhalten Sie die mit Ihrem Konto verknüpften personenbezogenen Daten (Profil, Buchungen, Bewertungen, akzeptierte Dokumente und gegebenenfalls Geschäfts- und Partnerdaten) als JSON-Datei.",
+    "downloadButton": "Herunterladen",
+    "emailButton": "Per E-Mail senden",
+    "emailNote": "Die E-Mail geht nur an die bestätigte Adresse Ihres Kontos und kann einmal alle 24 Stunden angefordert werden.",
+    "emailSent": "Die Datei wurde an {email} gesendet. Wenn sie nicht in wenigen Minuten ankommt, prüfen Sie Ihren Spam-Ordner.",
+    "errors": {
+      "generic": "Etwas ist schiefgelaufen. Bitte versuchen Sie es erneut.",
+      "tooManyDownloads": "Zu viele Download-Anfragen. Bitte versuchen Sie es später erneut.",
+      "rateLimited": "In den letzten 24 Stunden wurde bereits ein Export gesendet. Ab {time} können Sie einen neuen anfordern.",
+      "noVerifiedEmail": "Ihr Konto hat keine bestätigte E-Mail-Adresse. Sie können die Datei herunterladen oder zuerst Ihre E-Mail bestätigen.",
+      "mailFailed": "Die E-Mail konnte gerade nicht gesendet werden. Bitte versuchen Sie es später erneut."
+    }
   }
 }
