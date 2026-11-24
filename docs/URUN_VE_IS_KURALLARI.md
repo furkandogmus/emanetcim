@@ -147,13 +147,29 @@ APPROVED ──check-in (tahsilat)──> PAID ──> CHECKED_IN ──check-ou
   açıksa normal teslim ekranı açılır. E-posta verildiyse onay yönetim bağıyla gider (misafir
   sonra o e-postayla hesap açınca rezervasyon bağlanır); yoksa QR ve kod ekrandan fotoğraflanır
   (misafire SMS yok). Operatör "misafir şartları kabul etti" beyanını işaretler; beyan, metin
-  sürümleriyle `CREATED` olayına yazılır. Sınır: operatör başına 10/10 dk, dükkan başına 30/saat.
+  sürümleriyle `CREATED` olayına yazılır. Sınır: operatör başına 10/10 dk, dükkan başına 30/saat,
+  aynı e-posta adresine günde 3 onay (aşılınca rezervasyon yine açılır, e-posta atlanır, QR
+  ekranda). Form gönderimi başına istemci anahtarı (`idempotencyKey`) ikinci rezervasyonu önler.
   `WalkInBookingService`.
+  - **E-posta kanıtlı değildir:** adresi operatör yazdı. Walk-in rezervasyonu o e-postayla açılan
+    hesaba **otomatik bağlanmaz**; misafir yönetim bağını kullanır. Bağ ya da QR fotoğrafı tek
+    başına teslim için yetmez: teslim ekranında (web ve mobil) misafirin adı gösterilir ve
+    operatör adı karşılaştırır.
+  - **Saklama (KVKK):** hesaba hiç bağlanmamış walk-in satırında ad, e-posta ve telefon teslimden
+    (yoksa planlı alma saatinden) 180 gün sonra `cleanup` işiyle boşaltılır; rezervasyon kaydı
+    defter için kalır. Hesap silmede hesaba bağlı rezervasyonların bu alanları da boşaltılır,
+    veri dışa aktarımı bu alanları içerir. Aydınlatma Metni (`/kvkk`, `/privacy`) operatörün
+    tezgahta topladığı misafir verisini (ad, isteğe bağlı telefon/e-posta, amaç: emanet ve
+    teslim; süre: 180 gün) kapsamalıdır; metin hukuk onayıyla güncellenir.
 - **Afiş atfı:** afiş QR'ı (`/app?kaynak=afis-<dükkan>`) 30 dakikalık imzalı çerez bırakır
   (son dokunuş); mağaza kapalıyken okutan kişi doğrudan dükkanın sayfasına iner. Uygulama
   `/shop/<id>?kaynak=afis-<id>` bağlantısıyla açıldıysa aynı pencereyle checkout'a ekler. Bu
-  pencerede başlayan rezervasyon `source = poster`, `sourceShopId` afişin dükkanı. Mağazadan
-  yeni kurulan uygulamaya atıf taşınmaz (ertelenmiş derin bağlantı native SDK ister).
+  pencerede başlayan rezervasyon `source = poster`, `sourceShopId` afişin dükkanı (aktif, test
+  ve talep testi olmayan dükkan). Başarılı web rezervasyonundan sonra çerez silinir; bir okutma
+  bir rezervasyon. Mağazadan yeni kurulan uygulamaya atıf taşınmaz (ertelenmiş derin bağlantı
+  native SDK ister). Afiş sayısı **güvenilmez bir göstergedir** (uygulama atfı imzasız, çerez
+  kopyalanabilir): paraya (bonus, komisyon) bağlanacaksa önce sunucu tarafı tek kullanımlık
+  nonce gerekir.
 - **Kanal istatistiği:** yalnız sayı; bonus/komisyon yok (sahip kararı). Esnaf panelinde bu ay
   ve geçen ay "Afişinizden gelen" ve "Kapıdan gelen" (personel de görür, tutar yok); yönetici
   analitiğinde app / web / walk-in / afiş / bilinmiyor dağılımı. İptaller sayılmaz.

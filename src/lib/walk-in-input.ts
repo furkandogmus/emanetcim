@@ -23,6 +23,8 @@ export const walkInInputSchema = z
     pickupAt: z.string().datetime(),
     /** Operator, misafirin Kullanim Sartlari ve Aydinlatma Metni'ni kabul ettigini beyan eder. */
     termsConfirmed: z.literal(true),
+    /** Form gonderimi basina istemci anahtari: ag tekrarinda ikinci rezervasyon acilmaz. */
+    idempotencyKey: z.string().regex(/^[A-Za-z0-9_-]{8,80}$/).optional(),
   })
   .strict();
 

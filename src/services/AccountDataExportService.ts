@@ -70,6 +70,11 @@ class AccountDataExportService {
           bagCountXl: true,
           totalPrice: true,
           createdAt: true,
+          // Kapidan gelen misafirin tezgahta girilen bilgileri (hesaba baglandiysa).
+          guestName: true,
+          guestEmail: true,
+          guestPhone: true,
+          source: true,
         },
       }),
       prisma.review.findMany({

@@ -20,6 +20,8 @@ export type WalkInRequest = {
   bagCount: number;
   pickupAt: string;
   termsConfirmed: true;
+  /** Ekran basina istemci anahtari: ag tekrari ikinci rezervasyon acmaz. */
+  idempotencyKey?: string;
 };
 
 /** `toMobileShopSourceStats`: panodaki afis / kapidan gelen sayilari (yeni sunucu). */

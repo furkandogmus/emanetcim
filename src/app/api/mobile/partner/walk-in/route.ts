@@ -8,6 +8,7 @@ import { walkInBookingService, type WalkInErrorCode } from "@/services/WalkInBoo
 
 const CODE_TO_HTTP: Record<WalkInErrorCode, { status: number; error: string }> = {
   INVALID_INPUT: { status: 400, error: "invalid_data" },
+  IN_PROGRESS: { status: 409, error: "request_in_progress" },
   TERMS_REQUIRED: { status: 400, error: "terms_required" },
   INVALID_DATES: { status: 400, error: "invalid_dates" },
   PLATFORM_HOLIDAY: { status: 400, error: "platform_holiday" },
@@ -31,7 +32,13 @@ export async function POST(req: NextRequest) {
   const auth = await requireMobileUser(req);
   if ("error" in auth) return auth.error;
   // Govde serviste `walkInInputSchema` ile dogrulanir.
-  const body = (await req.json().catch(() => null)) as WalkInInput | null;
+  const parsedBody = (await req.json().catch(() => null)) as WalkInInput | null;
+  // Mobil checkout gibi `Idempotency-Key` basligi da kabul edilir; govdedeki alan onceliklidir.
+  const headerKey = req.headers.get("idempotency-key")?.trim();
+  const body =
+    parsedBody && typeof parsedBody === "object" && headerKey && !parsedBody.idempotencyKey
+      ? { ...parsedBody, idempotencyKey: headerKey }
+      : parsedBody;
   const result = await walkInBookingService.create(
     { id: auth.user.id, role: auth.user.role, impersonatedBy: auth.user.impersonatedBy ?? null },
     body,

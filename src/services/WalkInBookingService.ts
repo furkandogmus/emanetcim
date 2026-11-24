@@ -1,7 +1,7 @@
 import prisma from "@/lib/db";
 import logger from "@/lib/logger";
 import { assertShopAccess, type ShopRelation } from "@/lib/shop-access";
-import { rateLimit } from "@/lib/rate-limit";
+import { claimOnce, rateLimit } from "@/lib/rate-limit";
 import { getPricingRules } from "@/lib/platform-settings";
 import { moneyToNumber } from "@/lib/money";
 import { computeAuthoritativeCheckoutTotals } from "@/lib/booking-server-price";
@@ -33,6 +33,14 @@ import { notificationService } from "@/services/NotificationService";
 export const WALK_IN_OPERATOR_LIMIT = { max: 10, windowMs: 10 * 60 * 1000 };
 /** Dukkan basina: birden cok personel ayni dukkani sisiremesin. */
 export const WALK_IN_SHOP_LIMIT = { max: 30, windowMs: 60 * 60 * 1000 };
+/**
+ * Operatorun yazdigi adrese gun boyu e-posta: bir adres baskasina spam hedefi olmasin.
+ * Asilinca rezervasyon yine acilir, yalniz e-posta atlanir (yanit ayni bicimde, QR ekranda).
+ */
+export const WALK_IN_EMAIL_LIMIT = { max: 3, windowMs: 24 * 60 * 60 * 1000 };
+/** Hesaba baglanmamis walk-in satirinda iletisim ve ad bu kadar gun sonra silinir. */
+export const WALK_IN_CONTACT_RETENTION_DAYS = 180;
+const DAY_MS = 24 * 60 * 60 * 1000;
 
 
 export type WalkInActor = {
@@ -43,6 +51,7 @@ export type WalkInActor = {
 
 export type WalkInErrorCode =
   | "INVALID_INPUT"
+  | "IN_PROGRESS"
   | "TERMS_REQUIRED"
   | "NOT_FOUND"
   | "FORBIDDEN"
@@ -92,6 +101,20 @@ export class WalkInBookingService {
     const access = await assertShopAccess(actor, input.shopId, "operate");
     if (!access.ok) return { ok: false, code: access.code };
 
+    /*
+      Tekrar: ayni form gonderimi (istemci anahtari) ikinci rezervasyon acmaz. Hesapsiz
+      satirda `(guestId, idempotencyKey)` benzersizligi NULL yuzunden tutmaz; esanli iki
+      istegi `claimOnce` ayirir, kayitli olan aranip aynen doner.
+    */
+    const key = input.idempotencyKey;
+    if (key) {
+      const existing = await findWalkInReplay(input.shopId, key);
+      if (existing) return existing;
+      if (!(await claimOnce(`walkin_idem:${input.shopId}:${key}`, 10 * 60 * 1000))) {
+        return (await findWalkInReplay(input.shopId, key)) ?? { ok: false, code: "IN_PROGRESS" };
+      }
+    }
+
     // Sira: yetkisiz istek sayaci tuketmesin, ama sinir dukkan/kapasite okumasindan once.
     const opOk = await rateLimit(`walkin_op:${actor.id}`, WALK_IN_OPERATOR_LIMIT.max, WALK_IN_OPERATOR_LIMIT.windowMs);
     const shopOk = opOk && (await rateLimit(`walkin_shop:${input.shopId}`, WALK_IN_SHOP_LIMIT.max, WALK_IN_SHOP_LIMIT.windowMs));
@@ -137,6 +160,7 @@ export class WalkInBookingService {
           checkInTime: now,
           checkOutTime: pickupAt,
           locale,
+          idempotencyKey: key,
         },
         {
           operator: { id: actor.id, role: actor.role },
@@ -170,7 +194,10 @@ export class WalkInBookingService {
     }
 
     let emailQueued = false;
-    if (guestEmail) {
+    if (
+      guestEmail &&
+      (await rateLimit(`walkin_email:${guestEmail}`, WALK_IN_EMAIL_LIMIT.max, WALK_IN_EMAIL_LIMIT.windowMs))
+    ) {
       emailQueued = true;
       void sendWalkInConfirmation(booking.id, guestEmail, totals.subtotalBeforeCoupon, pickupAt, locale ?? "tr", now).catch(
         (err) => logger.error({ err, bookingId: booking.id }, "walk_in_confirmation_failed"),
@@ -191,6 +218,48 @@ export class WalkInBookingService {
       emailQueued,
     };
   }
+
+  /**
+   * Saklama (KVKK): hesaba hic baglanmamis walk-in satirinda ad, e-posta ve telefon teslimden
+   * (yoksa planli alma saatinden) 180 gun sonra bosaltilir. Rezervasyonun kendisi defter
+   * icin kalir. `cleanup` isi gunde bir cagirir; doner: bosaltilan satir sayisi.
+   */
+  async purgeExpiredGuestContact(now: Date = new Date()): Promise<number> {
+    const cutoff = new Date(now.getTime() - WALK_IN_CONTACT_RETENTION_DAYS * DAY_MS);
+    const { count } = await prisma.booking.updateMany({
+      where: {
+        source: "walk_in",
+        guestId: null,
+        OR: [{ guestName: { not: null } }, { guestEmail: { not: null } }, { guestPhone: { not: null } }],
+        AND: [{ OR: [{ checkedOutAt: { lt: cutoff } }, { checkedOutAt: null, checkOutTime: { lt: cutoff } }] }],
+      },
+      data: { guestName: null, guestEmail: null, guestPhone: null },
+    });
+    return count;
+  }
+}
+
+async function findWalkInReplay(shopId: string, idempotencyKey: string): Promise<WalkInSuccess | null> {
+  const b = await prisma.booking.findFirst({
+    where: { shopId, source: "walk_in", idempotencyKey },
+    select: { id: true, status: true, qrCodeToken: true, totalPrice: true, checkInTime: true, checkOutTime: true },
+  });
+  if (!b) return null;
+  const checkedIn = b.status === "CHECKED_IN" || b.status === "CHECKED_OUT";
+  return {
+    ok: true,
+    bookingId: b.id,
+    shortCode: bookingShortCode(b.id),
+    qrCodeToken: b.qrCodeToken,
+    totalPrice: moneyToNumber(b.totalPrice),
+    checkInTime: b.checkInTime.toISOString(),
+    checkOutTime: b.checkOutTime.toISOString(),
+    checkedIn,
+    needsCheckIn: b.status === "APPROVED",
+    checkInErrorCode: null,
+    // Tekrar e-posta gondermez; ilk istek gonderdiyse misafirde zaten var.
+    emailQueued: false,
+  };
 }
 
 /** Olay satirina kisisel veri girmez: yalniz hangi iletisim kanalinin verildigi. */
@@ -223,8 +292,12 @@ async function sendWalkInConfirmation(
   now: Date,
 ): Promise<void> {
   const token = await signGuestManageLinkToken({ bookingId, email, checkOutTime, now });
-  await notificationService.notifyBookingSuccess(email, bookingId, total, locale, {
-    ticketUrl: `${getSiteBaseUrl()}/${locale}/bookings/manage/${token}`,
+  await notificationService.notifyWalkInBookingCreated({
+    email,
+    bookingId,
+    totalPrice: total,
+    locale,
+    manageUrl: `${getSiteBaseUrl()}/${locale}/bookings/manage/${token}`,
   });
 }
 

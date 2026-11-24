@@ -49,7 +49,12 @@ describe("linkGuestBookingsToVerifiedUser", () => {
 
     expect(await linkGuestBookingsToVerifiedUser("u1")).toBe(1);
     const where = mockPrisma.booking.findMany.mock.calls[0][0].where;
-    expect(where).toEqual({ guestId: null, guestEmail: { equals: "ada@example.com", mode: "insensitive" } });
+    expect(where).toEqual({
+      guestId: null,
+      guestEmail: { equals: "ada@example.com", mode: "insensitive" },
+      // Kapidan gelen misafirin e-postasini operator yazdi: otomatik baglanmaz, NULL kanal baglanir.
+      OR: [{ source: null }, { source: { not: "walk_in" } }],
+    });
     // Telefonla baglama YOK.
     expect(JSON.stringify(where)).not.toContain("guestPhone");
     expect(mockPrisma.booking.updateMany).toHaveBeenCalledWith({

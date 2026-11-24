@@ -3253,7 +3253,7 @@
     "guestName": "Guest name",
     "guestPhone": "Phone (optional)",
     "guestEmail": "Email (optional)",
-    "contactHint": "With an email, the confirmation and QR are emailed. Without one, the guest should photograph the QR on screen.",
+    "contactHint": "With an email, the guest receives a booking management link. Without one, the guest should photograph the QR on screen.",
     "bagCount": "Number of bags",
     "pickupAt": "Pick-up time",
     "termsConfirm": "The guest confirmed they have read and accept the Terms of Use and the Privacy Notice.",
@@ -3290,7 +3290,9 @@
       "SHOP_CLOSED_ON_DATE": "The shop is closed at the pick-up time. Choose another time.",
       "SHOP_PRELAUNCH": "This location is not open yet.",
       "AUTH": "Your session ended, please sign in again.",
-      "generic": "Something went wrong, please try again."
-    }
+      "generic": "Something went wrong, please try again.",
+      "IN_PROGRESS": "This form is already being submitted, wait a few seconds."
+    },
+    "pickupNameCheck": "Check the name before handing over: {name}"
   }
 }

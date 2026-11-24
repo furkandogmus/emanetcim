@@ -26,7 +26,16 @@ export async function linkGuestBookingsToVerifiedUser(userId: string): Promise<n
       `a_b@x.com` `axb@x.com`u yakalardi. Aday listesi tam esitlikle suzulur.
     */
     const candidates = await prisma.booking.findMany({
-      where: { guestId: null, guestEmail: { equals: email, mode: "insensitive" } },
+      where: {
+        guestId: null,
+        guestEmail: { equals: email, mode: "insensitive" },
+        /*
+          Kapidan gelen misafirin e-postasini OPERATOR yazdi; adres sahipligi kanitlanmadi.
+          Otomatik baglanmaz, misafir yonetim bagini kullanir. NULL kanal (eski satir) baglanir;
+          `{ not: "walk_in" }` tek basina NULL'u da dislardi.
+        */
+        OR: [{ source: null }, { source: { not: "walk_in" } }],
+      },
       select: { id: true, guestEmail: true },
     });
     const ids = candidates

@@ -558,6 +558,11 @@ class AccountPrivacyService {
       saklamayi gerektiren bir defter yok. Dukkan ve rezervasyon kayitlari kalir.
     */
     await tx.merchantProfile.deleteMany({ where: { shop: { ownerId: userId } } });
+    // Hesaba bagli rezervasyonda tezgahta / checkout'ta yazilmis iletisim de kisisel veridir.
+    await tx.booking.updateMany({
+      where: { guestId: userId },
+      data: { guestName: null, guestEmail: null, guestPhone: null },
+    });
     /*
       Satir SILINMIYOR, alanlari bosaltiliyor: rezervasyon gecmisi ve esnafin
       hakedis defteri bu id'ye bagli, `onDelete: Cascade` ATESLENMEZ.

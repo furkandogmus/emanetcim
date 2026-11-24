@@ -9,6 +9,7 @@ import { StackHeader } from "@/components/StackHeader";
 import { AppText, Banner, Button, Card, Chip } from "@/components/ui";
 import { Field } from "@/components/Field";
 import { errorMessage } from "@/lib/errors";
+import { newIdempotencyKey } from "@/lib/idempotency";
 import { SITE_ORIGIN } from "@/lib/images";
 import { languageInfo } from "@/lib/languages";
 import { useCreateWalkIn, usePartnerDashboard } from "@/lib/queries";
@@ -33,6 +34,8 @@ export default function WalkInScreen() {
   const [hours, setHours] = useState<number>(4);
   const [terms, setTerms] = useState(false);
   const [done, setDone] = useState<WalkInResult | null>(null);
+  // Ekran basina tek anahtar: zaman asimindan sonra tekrar basmak ayni rezervasyonu doner.
+  const [idempotencyKey] = useState(newIdempotencyKey);
 
   const openSite = (path: string) =>
     void Linking.openURL(`${SITE_ORIGIN}/${languageInfo(i18n.language).site}/${path}`).catch(() => undefined);
@@ -41,7 +44,7 @@ export default function WalkInScreen() {
 
   function submit() {
     if (!req || !shopId || create.isPending) return;
-    create.mutate(req, {
+    create.mutate({ ...req, idempotencyKey }, {
       onSuccess: (r) => {
         if (r.needsCheckIn) {
           // Muhur ya da saat istisnasi: rezervasyon acik, teslim normal ekrandan.

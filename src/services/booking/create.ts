@@ -196,7 +196,8 @@ export async function createInitialBooking(data: CreateInitialBookingInput): Pro
 export async function createWalkInBooking(
   data: Pick<
     CreateInitialBookingInput,
-    'shopId' | 'totalPrice' | 'bagCountS' | 'bagCountM' | 'bagCountXl' | 'checkInTime' | 'checkOutTime' | 'unitPrice' | 'insuranceFee' | 'locale'
+    | 'shopId' | 'totalPrice' | 'bagCountS' | 'bagCountM' | 'bagCountXl' | 'checkInTime' | 'checkOutTime'
+    | 'unitPrice' | 'insuranceFee' | 'locale' | 'idempotencyKey'
   >,
   walkIn: WalkInFields,
 ): Promise<Booking> {

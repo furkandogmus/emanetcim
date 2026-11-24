@@ -2424,7 +2424,7 @@
     "guestName": "Name des Gastes",
     "guestPhone": "Telefon (optional)",
     "guestEmail": "E-Mail (optional)",
-    "contactHint": "Mit E-Mail gehen Bestätigung und QR-Code per E-Mail raus. Ohne E-Mail fotografiert der Gast den QR-Code am Bildschirm.",
+    "contactHint": "Mit E-Mail erhält der Gast einen Link zur Buchungsverwaltung. Ohne E-Mail fotografiert der Gast den QR-Code am Bildschirm.",
     "bagCount": "Anzahl Gepäckstücke",
     "pickupIn": "Abholung in wie vielen Stunden?",
     "termsConfirm": "Der Gast hat bestätigt, dass er die Nutzungsbedingungen und die Datenschutzhinweise gelesen hat und akzeptiert.",
@@ -2461,7 +2461,9 @@
       "shop_closed_at_time": "Zur Abholzeit ist das Geschäft geschlossen. Andere Zeit wählen.",
       "insufficient_capacity": "Für diesen Zeitraum ist nicht genug Platz im Geschäft.",
       "too_many_requests": "Zu viele Laufkunden-Buchungen. Kurz warten und erneut versuchen.",
-      "generic": "Das hat nicht geklappt, bitte erneut versuchen."
-    }
+      "generic": "Das hat nicht geklappt, bitte erneut versuchen.",
+      "request_in_progress": "Dieses Formular wird bereits gesendet, bitte einige Sekunden warten."
+    },
+    "pickupNameCheck": "Vor der Herausgabe den Namen prüfen: {{name}}"
   }
 }

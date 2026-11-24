@@ -204,7 +204,7 @@ export async function getPartnerBookingSealsAction(bookingIdRaw: string) {
 
   const booking = await prisma.booking.findUnique({
     where: { id: bookingId },
-    include: { shop: true },
+    include: { shop: true, guest: { select: { name: true } } },
   });
   if (!booking) {
     return { success: false as const, error: "Errors.bookingNotFound" };
@@ -226,6 +226,8 @@ export async function getPartnerBookingSealsAction(bookingIdRaw: string) {
   return {
     success: true as const,
     bookingId,
+    // Teslimde operator adi karsilastirir (kapidan gelen misafirin hesabi yok).
+    guestName: booking.guest?.name || booking.guestName || null,
     seals: seals.map((s) => ({
       sealNumber: s.sealNumber,
       bagIndex: s.bagIndex,

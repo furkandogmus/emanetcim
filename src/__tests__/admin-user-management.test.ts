@@ -15,7 +15,7 @@ const m = vi.hoisted(() => {
       user: { findUnique: vi.fn(), findMany: vi.fn(), update: ok(), count: vi.fn() },
       adminRoleChangeRequest: { create: ok() },
       auditLog: { findMany: vi.fn(), groupBy: vi.fn() },
-      booking: { count: vi.fn() },
+      booking: { count: vi.fn(), updateMany: ok() },
       session: { deleteMany: ok() },
       account: { deleteMany: ok() },
       review: { deleteMany: ok(), updateMany: ok() },

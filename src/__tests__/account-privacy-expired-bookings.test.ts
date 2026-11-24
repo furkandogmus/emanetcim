@@ -9,7 +9,7 @@ const m = vi.hoisted(() => {
   const ok = () => vi.fn().mockReturnValue(Promise.resolve({}));
   return {
     prisma: {
-      booking: { count: vi.fn() },
+      booking: { count: vi.fn(), updateMany: ok() },
       session: { deleteMany: ok() },
       account: { deleteMany: ok() },
       review: { deleteMany: ok(), updateMany: ok() },
