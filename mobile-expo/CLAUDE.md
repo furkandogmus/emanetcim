@@ -58,7 +58,8 @@ API adresi derleme anında: `EXPO_PUBLIC_API_BASE_URL` (varsayılan emülatör i
   (`../src/lib/app-links.ts`); boşken 404 döner ve bağlantı tarayıcıda açılır.
 - **Farsça sağdan sola** (`src/lib/rtl.ts`): yön uygulama dilinden gelir, dil değişince yeniden
   yükler. `expo-localization` `supportsRTL` bilerek kapalı (iOS her açılışta cihaz yönüne
-  döndürüyor). Yöne bağlı ikon `style={flipInRtl}`; fiziksel `textAlign` iOS'ta çevrilmez.
+  döndürüyor). Yöne bağlı ikon `style={flipInRtl}`. `left`/`right` stilleri ve `textAlign` RTL'de iki
+  platformda da (Fabric) çevrilir: `"right"` RTL'de sola hizalar, elle ters çevirme.
 - Tema token'ları `src/theme/tokens.ts` — web `globals.css` kimliğinden elle aktarıldı.
 - `android/` ve `ios/` üretilir (CNG), elle düzenlenmez, git'e girmez.
 - **Kabul kriteri: Google Play'e yüklenebilir build.** İzin listesi, hesap silme ve
