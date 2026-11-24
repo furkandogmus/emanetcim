@@ -1,4 +1,5 @@
 import { SignJWT, jwtVerify } from "jose";
+import { NextResponse } from "next/server";
 import { JWT_AUDIENCE, JWT_ISSUER } from "@/lib/jwt-audience";
 
 /**
@@ -112,9 +113,8 @@ export function webImpersonationCookieOptions(expiresAt: Date) {
   };
 }
 
-/** Durdurma ucu: proxy goruntuleme sirasinda yazmaya yalniz buna ve cikisa izin verir. */
-export const WEB_IMPERSONATION_STOP_PATH = "/api/impersonation/stop";
-export const WEB_SIGNOUT_PATH = "/api/auth/signout";
+import { WEB_IMPERSONATION_STOP_PATH, WEB_SIGNOUT_PATH } from "@/lib/web-impersonation-paths";
+export { WEB_IMPERSONATION_STOP_PATH, WEB_SIGNOUT_PATH };
 
 /**
  * Proxy'nin "bu istegi dogruladim" damgasi. Oturum callback'i goruntulemeyi YALNIZ bu
@@ -176,13 +176,33 @@ export function impersonationProxyDecision(input: {
   isAdminPath: boolean;
 }): ImpersonationProxyDecision {
   if (!input.valid) return "clear_cookie";
-  if (input.pathname === WEB_SIGNOUT_PATH) return "clear_cookie";
-  if (input.pathname === WEB_IMPERSONATION_STOP_PATH) return "pass";
+  // Next rotayi cozulmus yolla eslestirir: `data%2Dexport` ham karsilastirmayi atlatmasin.
+  const path = normalizeProxyPath(input.pathname);
+  if (path === null) return "block";
+  if (path === WEB_SIGNOUT_PATH) return "clear_cookie";
+  if (path === WEB_IMPERSONATION_STOP_PATH) return "pass";
   const method = input.method.toUpperCase();
-  if (!SAFE_METHODS.has(method)) return method === "POST" && input.isServerAction ? "pass" : "block";
-  if (READ_BLOCKLIST.has(input.pathname)) return "block";
+  if (!SAFE_METHODS.has(method)) {
+    // Server action `/api`ye hic gitmez: orada `Next-Action` basligi sahtedir.
+    const isApi = path === "/api" || path.startsWith("/api/");
+    return method === "POST" && input.isServerAction && !isApi ? "pass" : "block";
+  }
+  if (READ_BLOCKLIST.has(path)) return "block";
   if (input.isAdminPath) return "redirect_home";
   return "pass";
+}
+
+/** Cozulmus, sondaki `/` atilmis, kucuk harf yol; cozulemeyen kodlama `null` (engellenir). */
+export function normalizeProxyPath(pathname: string): string | null {
+  let p: string;
+  try {
+    p = decodeURIComponent(pathname);
+  } catch {
+    return null;
+  }
+  p = p.replace(/\/+/g, "/");
+  if (p.length > 1) p = p.replace(/\/+$/, "");
+  return p.toLowerCase();
 }
 
 /**
@@ -204,4 +224,17 @@ export async function impersonationGate(input: {
   const decision = impersonationProxyDecision({ ...input, valid });
   const stamp = valid && decision !== "clear_cookie" ? await impersonationStamp(input.cookie) : null;
   return { decision, stamp };
+}
+
+/**
+ * Istek basligi degisikligi ayarlanmamis bir `next()` yanitina eklenir; boylece istemcinin
+ * gonderdigi damga hicbir daldan uygulamaya ulasmaz. Zaten ayarli yanit (intl, `/api`) dokunulmaz.
+ */
+export function withForwardedHeaders(res: NextResponse, overrideHeaders: Headers | null): NextResponse {
+  if (!overrideHeaders || res.headers.has("x-middleware-override-headers")) return res;
+  const carrier = NextResponse.next({ request: { headers: overrideHeaders } });
+  for (const [k, v] of carrier.headers) {
+    if (k === "x-middleware-override-headers" || k.startsWith("x-middleware-request-")) res.headers.set(k, v);
+  }
+  return res;
 }

@@ -81,12 +81,15 @@ async function refreshSearchShopsActionImpl(input: {
     }));
 
   const session = await actionSession();
-  analyticsService.track({
-    name: "search_performed",
-    sessionId: await resolveServerSessionId(session?.user?.id),
-    userId: session?.user?.id ?? null,
-    metadata: { resultCount: all.length, bags },
-  });
+  // Yonetici goruntulemesi hedefin analitigine yazilmaz.
+  if (!session?.impersonation) {
+    analyticsService.track({
+      name: "search_performed",
+      sessionId: await resolveServerSessionId(session?.user?.id),
+      userId: session?.user?.id ?? null,
+      metadata: { resultCount: all.length, bags },
+    });
+  }
 
   return {
     ok: true as const,

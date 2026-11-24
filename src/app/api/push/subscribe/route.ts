@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@/auth";
+import { rejectIfImpersonating } from "@/lib/impersonation-guard";
 import prisma from "@/lib/db";
 import logger from "@/lib/logger";
 
@@ -46,6 +47,8 @@ function isAllowedPushEndpoint(endpoint: string): boolean {
 export async function POST(req: NextRequest) {
   try {
     const session = await auth();
+    const blocked = rejectIfImpersonating(session);
+    if (blocked) return blocked;
     if (!session?.user?.id) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
@@ -82,6 +85,8 @@ export async function POST(req: NextRequest) {
 export async function DELETE(req: NextRequest) {
   try {
     const session = await auth();
+    const blocked = rejectIfImpersonating(session);
+    if (blocked) return blocked;
     if (!session?.user?.id) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }

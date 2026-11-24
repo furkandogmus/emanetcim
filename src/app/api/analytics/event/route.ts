@@ -47,6 +47,8 @@ export async function POST(req: NextRequest) {
   }
 
   const session = await auth();
+  // Goruntulemede olay hedefin hesabina yazilmaz.
+  if (session?.impersonation) return new NextResponse(null, { status: 204 });
 
   analyticsService.track({
     name: parsed.data.name,

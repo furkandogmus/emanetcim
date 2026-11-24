@@ -71,13 +71,16 @@ export default async function CheckoutPage({
     notFound();
   }
 
-  analyticsService.track({
-    name: "checkout_started",
-    sessionId: await resolveServerSessionId(session?.user?.id),
-    userId: session?.user?.id ?? null,
-    locale,
-    metadata: { shopId },
-  });
+  // Yonetici goruntulemesi hedefin analitigine yazilmaz.
+  if (!session?.impersonation) {
+    analyticsService.track({
+      name: "checkout_started",
+      sessionId: await resolveServerSessionId(session?.user?.id),
+      userId: session?.user?.id ?? null,
+      locale,
+      metadata: { shopId },
+    });
+  }
 
   const scheduleParts = (await loadScheduleParts([shopId], new Date().toISOString().slice(0, 10))).get(shopId);
 

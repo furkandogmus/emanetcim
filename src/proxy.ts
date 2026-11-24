@@ -9,6 +9,8 @@ import {
   WEB_IMPERSONATION_COOKIE,
   WEB_IMPERSONATION_STAMP_HEADER,
   impersonationGate,
+  normalizeProxyPath,
+  withForwardedHeaders,
 } from './lib/web-impersonation';
 import type { NextAuthRequest } from 'next-auth';
 
@@ -48,7 +50,7 @@ const authProxy = auth(async (req) => {
   const forgedStamp = req.headers.has(WEB_IMPERSONATION_STAMP_HEADER);
   if (!cookie && !forgedStamp) return routeRequest(req, null);
 
-  const { locale, barePath } = stripLocalePrefix(req.nextUrl.pathname);
+  const { locale, barePath } = stripLocalePrefix(normalizeProxyPath(req.nextUrl.pathname) ?? req.nextUrl.pathname);
   const gate = await impersonationGate({
     cookie,
     authUser: req.auth?.user,
@@ -94,7 +96,7 @@ function routeRequest(req: NextAuthRequest, overrideHeaders: Headers | null): Ne
     // basili QR'lar `/tr/app`e duser ve magaza yonlendirmesi hic calismaz.
     pathname === '/app'
   ) {
-    return NextResponse.next();
+    return withForwardedHeaders(NextResponse.next(), overrideHeaders);
   }
 
   // Auth.js pages.signIn locale öneki olmadan "/login" döner — next-intl'den önce locale ekle
@@ -145,6 +147,8 @@ function routeRequest(req: NextAuthRequest, overrideHeaders: Headers | null): Ne
   if (response.headers.has('x-next-intl-redirect') || response.status === 307 || response.status === 308) {
     return response;
   }
+  // next-intl'in kendi `NextResponse.next()` dallari (ornegin cozulemeyen yol) basliklari iletmez.
+  withForwardedHeaders(response, overrideHeaders);
 
   // 3. Protection Logic (Manually detect localized protected paths)
   const { locale: pathLocale, barePath: pathWithoutLocale } =

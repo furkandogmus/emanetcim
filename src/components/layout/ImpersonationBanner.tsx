@@ -5,7 +5,7 @@ import { useSession } from "next-auth/react";
 import { useLocale, useTranslations } from "next-intl";
 import { Eye } from "lucide-react";
 import { formatInstant } from "@/lib/format-datetime";
-import { WEB_IMPERSONATION_STOP_PATH } from "@/lib/web-impersonation";
+import { WEB_IMPERSONATION_STOP_PATH } from "@/lib/web-impersonation-paths";
 
 /** Web "olarak goruntule" serit: her sayfada ustte, cikis dugmesiyle. Sure dolunca sayfa adminle yenilenir. */
 export default function ImpersonationBanner() {
