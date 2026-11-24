@@ -1,6 +1,3 @@
-import prisma from "@/lib/db";
-import { distanceKm } from "@/lib/geo";
-import { OPERATING_SHOP_FILTER } from "@/lib/public-shop-filter";
 import { getActiveShopsOrderedByDistanceKm } from "@/lib/shop-distance-postgis";
 import { hoursForDate, isOpenAt, type DayHours } from "@/lib/shop-schedule";
 import { todayInZone } from "@/lib/stay-days";
@@ -32,25 +29,38 @@ export type HubShopsResult = {
 
 const MAX_HUB_SHOPS = 12;
 
-/** Ince icerik kapisi: sayfa ancak yaricapta ISLEYEN bir dukkan varsa dizine girer. */
-export function isHubIndexable(result: Pick<HubShopsResult, "shops">): boolean {
-  return result.shops.length > 0;
+/**
+ * Ince icerik kapisi: yaricapta ISLEYEN bir dukkan olmali ve yer, komsusunun
+ * kopyasi olarak isaretlenmemis olmali (`TransitHub.indexable`).
+ */
+export function isHubIndexable(hub: TransitHub, result: { shops: readonly unknown[] }): boolean {
+  return hub.indexable !== false && result.shops.length > 0;
 }
 
 /**
- * Yer sayfasinin dukkan listesi. Hata YUTULMAZ: sehir sayfasindan farkli olarak
- * bos liste burada `noindex` demek; gecici bir veritabani hatasi sayfayi dizinden
- * dusurmesin, ISR eski surumu sunmaya devam etsin.
+ * Sayfanin ve site haritasinin ORTAK sorgusu: ikisi ayni mesafe hesabiyla
+ * (PostGIS `ST_Distance`) karar versin, sinirdaki dukkan birinde var digerinde
+ * yok olmasin. Prelaunch satirlari da gelir (istek formu icin); yaricap <= 1 km
+ * yerlerde isleyen dukkan varsa onun 2 km'sindeki prelaunch zaten gizli.
  */
-export async function getHubShops(hub: TransitHub, now: Date = new Date()): Promise<HubShopsResult> {
-  const rows = await getActiveShopsOrderedByDistanceKm({
+export function findHubShopRows(hub: TransitHub) {
+  return getActiveShopsOrderedByDistanceKm({
     centerLat: hub.lat,
     centerLng: hub.lng,
     radiusKm: hubRadiusKm(hub),
+    take: MAX_HUB_SHOPS,
   });
-  const operating = rows
-    .filter(({ shop }) => !shop.isPrelaunch && shop.latitude != null && shop.longitude != null)
-    .slice(0, MAX_HUB_SHOPS);
+}
+
+type HubRow = Awaited<ReturnType<typeof findHubShopRows>>[number];
+
+function operatingRows(rows: HubRow[]): HubRow[] {
+  return rows.filter(({ shop }) => !shop.isPrelaunch && shop.latitude != null && shop.longitude != null);
+}
+
+export async function getHubShops(hub: TransitHub, now: Date = new Date()): Promise<HubShopsResult> {
+  const rows = await findHubShopRows(hub);
+  const operating = operatingRows(rows);
 
   if (operating.length === 0) {
     const nearest = rows.find(({ shop }) => shop.isPrelaunch);
@@ -86,24 +96,11 @@ export async function getHubShops(hub: TransitHub, now: Date = new Date()): Prom
   return { shops, prelaunch: null };
 }
 
-type Located = { latitude: number; longitude: number };
-
-/** Site haritasi icin: yaricapinda en az bir isleyen dukkan olan yerler. */
-export function hubsWithOperatingShop<H extends TransitHub>(
-  hubs: readonly H[],
-  operatingShops: readonly Located[],
-): H[] {
-  return hubs.filter((hub) =>
-    operatingShops.some(
-      (s) => distanceKm(hub.lat, hub.lng, s.latitude, s.longitude) <= hubRadiusKm(hub),
-    ),
+/** Site haritasi icin: dizine girecek yerler. Yer basina tek, indeksli sorgu. */
+export async function indexableHubs<H extends TransitHub>(hubs: readonly H[]): Promise<H[]> {
+  const candidates = hubs.filter((h) => h.indexable !== false);
+  const hits = await Promise.all(
+    candidates.map(async (h) => isHubIndexable(h, { shops: operatingRows(await findHubShopRows(h)) })),
   );
-}
-
-export async function operatingShopLocations(): Promise<Located[]> {
-  const rows = await prisma.shop.findMany({
-    where: { ...OPERATING_SHOP_FILTER, latitude: { not: null }, longitude: { not: null } },
-    select: { latitude: true, longitude: true },
-  });
-  return rows.map((r) => ({ latitude: r.latitude!, longitude: r.longitude! }));
+  return candidates.filter((_, i) => hits[i]);
 }

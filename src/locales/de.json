@@ -2957,10 +2957,10 @@
         "gettingThere": "Die Metrolinie M4 fährt vom Flughafen nach Kadıköy, und Havabus-Busse verbinden ihn mit Kadıköy und Taksim."
       },
       "esenler-bus-terminal": {
-        "name": "Busbahnhof Esenler",
-        "near": "in der Nähe des Busbahnhofs Esenler",
-        "intro": "Der Große Busbahnhof Istanbul in Esenler ist der zentrale Knoten für Fernbusse auf der europäischen Seite.",
-        "gettingThere": "Die Metro M1 hält an der Station Otogar am Busbahnhof und fährt nach Aksaray und Zeytinburnu, wo Sie in die Straßenbahn T1 umsteigen können."
+        "name": "Großer Busbahnhof Istanbul",
+        "near": "in der Nähe des Großen Busbahnhofs Istanbul",
+        "intro": "Der Große Busbahnhof Istanbul in Bayrampaşa, meist Esenler Otogarı genannt, ist der zentrale Knoten für Fernbusse auf der europäischen Seite.",
+        "gettingThere": "Die Metro M1 hat am Busbahnhof die Station Otogar. Beide Äste fahren nach Yenikapı (Umstieg in Marmaray und M2); auf dem Ast M1A steigen Sie in Zeytinburnu in die Straßenbahn T1 um."
       },
       "sogutlucesme": {
         "name": "Bahnhof Söğütlüçeşme",
@@ -2978,7 +2978,7 @@
         "name": "Taksim",
         "near": "in der Nähe von Taksim",
         "intro": "Der Taksim-Platz liegt am oberen Ende der İstiklal-Straße, im Zentrum der Geschäfte, Hotels und des Nachtlebens von Beyoğlu.",
-        "gettingThere": "Die Metro M2 hält am Taksim, und die Standseilbahn F1 fährt hinunter nach Kabataş zur Straßenbahn T1 und zu den Fähren."
+        "gettingThere": "Die Metro M2 hält am Taksim, und die Standseilbahn F1 fährt hinunter nach Kabataş zur Straßenbahn T1 und zu den Fähren. Die M2-Station Taksim und die Standseilbahn F1 sind gelegentlich vorübergehend geschlossen; prüfen Sie vor der Fahrt die Meldungen von Metro İstanbul."
       },
       "sultanahmet": {
         "name": "Sultanahmet",
@@ -3014,7 +3014,7 @@
         "name": "Galata",
         "near": "in der Nähe von Galata",
         "intro": "Rund um den Galataturm liegt ein Gewirr steiler Gassen zwischen Karaköy und der İstiklal-Straße.",
-        "gettingThere": "Die nächsten Haltestellen sind Şişhane an der Metro M2 und Karaköy an der Straßenbahn T1; auch die Tünel-Bahn ist nah."
+        "gettingThere": "Die nächsten Haltestellen sind Şişhane an der Metro M2 und Karaköy an der Straßenbahn T1; auch die Tünel-Bahn ist nah. M2-Stationen sind gelegentlich vorübergehend geschlossen; prüfen Sie vor der Fahrt die Meldungen von Metro İstanbul."
       }
     }
   }
