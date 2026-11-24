@@ -3218,6 +3218,106 @@ export class NotificationService implements INotificationService {
     });
     await this.sendEmail(email, content.subject, `${content.p1}\n\n${content.p2}`, undefined, html);
   }
+
+  /**
+   * Dukkan personeli daveti. `link` varsa hesabi olmayan e-postaya tek kullanimlik kayit
+   * bagi gider; yoksa mevcut hesaba "ekibe eklendin" bildirimi (e-posta + mobil push).
+   * Dukkan adi esnafin yazdigi deger: HTML govdede kacirilir.
+   */
+  async notifyShopStaffInvite(params: {
+    email: string;
+    shopName: string;
+    locale: string;
+    link?: string;
+    userId?: string;
+  }): Promise<void> {
+    const { email, shopName, locale, link, userId } = params;
+    const shopHtml = escapeEmailHtml(shopName);
+    const panelUrl = `${getSiteBaseUrl()}/${locale}/partner`;
+    const content = pickLocale({
+      tr: {
+        subject: `BagajPark: ${shopName} ekibine davet`,
+        heading: link ? "Ekibe davet edildin" : "Ekibe eklendin",
+        p1: link
+          ? `<strong>${shopHtml}</strong> seni BagajPark'ta dükkan personeli olarak davet etti. Davet 7 gün geçerli ve tek kullanımlık.`
+          : `<strong>${shopHtml}</strong> seni BagajPark'ta dükkan personeli olarak ekledi. Rezervasyonları görebilir, QR okutup valiz teslim alıp verebilirsin.`,
+        cta: link ? "Daveti kabul et" : "Paneli aç",
+        push: `${shopName} seni dükkan ekibine ekledi.`,
+        footer: "Bu daveti beklemiyorsan e-postayı yok sayabilirsin.",
+      },
+      en: {
+        subject: `BagajPark: Invitation to the ${shopName} team`,
+        heading: link ? "You're invited to a team" : "You've been added to a team",
+        p1: link
+          ? `<strong>${shopHtml}</strong> invited you to join as shop staff on BagajPark. The invitation is valid for 7 days and can be used once.`
+          : `<strong>${shopHtml}</strong> added you as shop staff on BagajPark. You can see bookings, scan QR codes and check bags in and out.`,
+        cta: link ? "Accept invitation" : "Open panel",
+        push: `${shopName} added you to the shop team.`,
+        footer: "If you weren't expecting this, you can ignore this email.",
+      },
+      de: {
+        subject: `BagajPark: Einladung ins Team von ${shopName}`,
+        heading: link ? "Sie wurden eingeladen" : "Sie wurden zum Team hinzugefügt",
+        p1: link
+          ? `<strong>${shopHtml}</strong> hat Sie als Mitarbeiter bei BagajPark eingeladen. Die Einladung ist 7 Tage gültig und einmal nutzbar.`
+          : `<strong>${shopHtml}</strong> hat Sie als Mitarbeiter bei BagajPark hinzugefügt. Sie sehen Buchungen, scannen QR-Codes und nehmen Gepäck an und geben es aus.`,
+        cta: link ? "Einladung annehmen" : "Panel öffnen",
+        push: `${shopName} hat Sie zum Team hinzugefügt.`,
+        footer: "Wenn Sie das nicht erwartet haben, ignorieren Sie diese E-Mail.",
+      },
+      fr: {
+        subject: `BagajPark : invitation dans l'équipe de ${shopName}`,
+        heading: link ? "Vous êtes invité dans une équipe" : "Vous avez été ajouté à une équipe",
+        p1: link
+          ? `<strong>${shopHtml}</strong> vous invite à rejoindre son équipe sur BagajPark. L'invitation est valable 7 jours et à usage unique.`
+          : `<strong>${shopHtml}</strong> vous a ajouté à son équipe sur BagajPark. Vous pouvez voir les réservations, scanner les QR codes et gérer le dépôt et le retrait des bagages.`,
+        cta: link ? "Accepter l'invitation" : "Ouvrir le panneau",
+        push: `${shopName} vous a ajouté à son équipe.`,
+        footer: "Si vous ne vous y attendiez pas, ignorez cet e-mail.",
+      },
+      ja: {
+        subject: `BagajPark: ${shopName} のチームへの招待`,
+        heading: link ? "チームに招待されました" : "チームに追加されました",
+        p1: link
+          ? `<strong>${shopHtml}</strong> から BagajPark の店舗スタッフとして招待されました。招待は7日間有効で、1回のみ使用できます。`
+          : `<strong>${shopHtml}</strong> が BagajPark の店舗スタッフとしてあなたを追加しました。予約の確認、QRの読み取り、荷物の受け取りと返却ができます。`,
+        cta: link ? "招待を承諾" : "パネルを開く",
+        push: `${shopName} があなたを店舗チームに追加しました。`,
+        footer: "心当たりがない場合は、このメールを無視してください。",
+      },
+      fa: {
+        subject: `BagajPark: دعوت به تیم ${shopName}`,
+        heading: link ? "به تیم دعوت شدید" : "به تیم اضافه شدید",
+        p1: link
+          ? `<strong>${shopHtml}</strong> شما را به‌عنوان کارمند فروشگاه در BagajPark دعوت کرد. این دعوت ۷ روز معتبر و یک‌بارمصرف است.`
+          : `<strong>${shopHtml}</strong> شما را به‌عنوان کارمند فروشگاه در BagajPark اضافه کرد. می‌توانید رزروها را ببینید، QR را اسکن کنید و چمدان تحویل بگیرید و بدهید.`,
+        cta: link ? "پذیرفتن دعوت" : "باز کردن پنل",
+        push: `${shopName} شما را به تیم فروشگاه اضافه کرد.`,
+        footer: "اگر انتظار این پیام را نداشتید، آن را نادیده بگیرید.",
+      },
+      ru: {
+        subject: `BagajPark: приглашение в команду ${shopName}`,
+        heading: link ? "Вас пригласили в команду" : "Вас добавили в команду",
+        p1: link
+          ? `<strong>${shopHtml}</strong> приглашает вас в сотрудники магазина на BagajPark. Приглашение действует 7 дней и одноразовое.`
+          : `<strong>${shopHtml}</strong> добавил вас в сотрудники магазина на BagajPark. Вы можете видеть бронирования, сканировать QR и принимать и выдавать багаж.`,
+        cta: link ? "Принять приглашение" : "Открыть панель",
+        push: `${shopName} добавил вас в команду магазина.`,
+        footer: "Если вы этого не ожидали, просто проигнорируйте письмо.",
+      },
+    }, locale);
+    const href = link ?? panelUrl;
+    const html = renderEmailHtml({
+      locale,
+      heading: content.heading,
+      paragraphs: [content.p1],
+      cta: { href, label: content.cta, variant: "button" },
+      footer: content.footer,
+    });
+    const text = `${content.heading}\n\n${content.p1.replace(/<[^>]+>/g, "")}\n\n${href}`;
+    await this.sendEmail(email, content.subject, text, undefined, html);
+    if (userId) await this.sendMobilePush(userId, content.heading, content.push);
+  }
 }
 
 export const notificationService = new NotificationService();

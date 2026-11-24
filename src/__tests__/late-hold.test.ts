@@ -7,7 +7,7 @@ import { NextRequest } from "next/server";
  */
 const m = vi.hoisted(() => ({
   user: { id: "owner-1", role: "PARTNER" as string },
-  prisma: { booking: { findUnique: vi.fn(), updateMany: vi.fn() } },
+  prisma: { booking: { findUnique: vi.fn(), updateMany: vi.fn() }, shopMember: { findUnique: vi.fn().mockResolvedValue(null) } },
   record: vi.fn(),
   audit: vi.fn(),
   notice: vi.fn(),

@@ -17,6 +17,7 @@ vi.mock("@/lib/db", () => ({
   default: {
     seal: { findUnique: vi.fn() },
     booking: { findUnique: vi.fn() },
+    shopMember: { findUnique: vi.fn().mockResolvedValue(null), count: vi.fn().mockResolvedValue(0) },
   },
 }));
 

@@ -2,8 +2,9 @@ import { setRequestLocale, getTranslations } from "next-intl/server";
 import { auth } from "@/auth";
 import { redirect } from "next/navigation";
 import { Link } from "@/i18n/routing";
-import { CalendarDays, ChevronRight, CircleHelp, Handshake, MapPin, Lock, UserRound } from "lucide-react";
+import { CalendarDays, ChevronRight, CircleHelp, Handshake, MapPin, Lock, Store, UserRound } from "lucide-react";
 import ReferralCodeCard from "@/components/account/ReferralCodeCard";
+import { countStaffShops } from "@/lib/shop-access";
 
 export default async function AccountPage({
   params,
@@ -27,6 +28,10 @@ export default async function AccountPage({
   const discountPct = String(
     Math.min(50, Math.max(0, Number(process.env.REFERRAL_DISCOUNT_PCT ?? "5"))),
   );
+
+  // Personel PARTNER degil; panele giden yol buradan (uyelik her acilista okunur).
+  const staffShops = session.user.role === "GUEST" ? await countStaffShops(session.user.id) : 0;
+  const tStaff = await getTranslations("shopStaff");
 
   const t = await getTranslations("Account");
   const tAffiliate = await getTranslations("Affiliate");
@@ -66,6 +71,16 @@ export default async function AccountPage({
 
       <div className="mx-auto grid max-w-5xl gap-5 p-4 sm:p-6 md:grid-cols-[1.2fr_0.8fr]">
         <section className="space-y-4">
+          {staffShops > 0 && (
+            <Link href="/partner" data-testid="staff-panel-link" className="group id-surface flex items-center gap-4 border border-gray-200 bg-white p-6 transition-transform hover:-translate-y-0.5">
+              <span className="id-accent-soft rounded-2xl p-3"><Store size={24} /></span>
+              <span>
+                <span className="id-display block text-lg text-gray-900">{tStaff("staffPanel")}</span>
+                <span className="block text-sm text-gray-500">{tStaff("staffPanelDesc", { count: staffShops })}</span>
+              </span>
+              <ChevronRight size={18} className="ml-auto text-gray-400 transition-transform group-hover:translate-x-1" />
+            </Link>
+          )}
           <Link href="/bookings" className="group flex items-center gap-4 rounded-3xl bg-gray-900 p-6 text-white shadow-xl transition-transform hover:-translate-y-0.5">
             <span className="rounded-2xl bg-white/10 p-3"><CalendarDays size={24} /></span>
             <span>

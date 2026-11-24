@@ -1,6 +1,7 @@
 import { Role } from "@prisma/client";
 import { auth } from "@/auth";
 import { inImpersonationReadScope } from "@/lib/impersonation-read-scope";
+import { assertShopAccess, type ShopAccessLevel, type ShopRelation } from "@/lib/shop-access";
 
 /**
  * Server action YETKİ KAPISI — tek yer.
@@ -119,4 +120,27 @@ export async function actionSession() {
     return null;
   }
   return session;
+}
+
+/** Fırlatan biçimde `requireUser`: esnaf paneli operasyonları (personel `PARTNER` değildir). */
+export function assertUser(): Promise<Actor> {
+  return assertRole([Role.GUEST, Role.PARTNER, Role.ADMIN], "Errors.unauthorized");
+}
+
+export type ShopAuthResult =
+  | { ok: true; actor: Actor; relation: ShopRelation }
+  | { ok: false; error: AuthErrorKey | "Errors.shopNotFound" };
+
+/**
+ * Dükkan kapsamlı action kapısı: oturum + `assertShopAccess` (sahip/personel/yönetici).
+ * `operate` personeli geçirir, `manage` geçirmez; kural `src/lib/shop-access.ts`.
+ */
+export async function requireShopAccess(shopId: string, level: ShopAccessLevel): Promise<ShopAuthResult> {
+  const auth = await requireUser();
+  if (!auth.ok) return auth;
+  const access = await assertShopAccess(auth.actor, shopId, level);
+  if (!access.ok) {
+    return { ok: false, error: access.code === "NOT_FOUND" ? "Errors.shopNotFound" : "Errors.unauthorized" };
+  }
+  return { ok: true, actor: auth.actor, relation: access.relation };
 }

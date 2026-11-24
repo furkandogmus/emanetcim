@@ -26,7 +26,7 @@ export async function PUT(req: NextRequest, { params }: { params: Promise<{ id: 
     temizligini `cancelBooking` uzerinden yurutur; buradan duzenleme yapabilseydi
     o muhasebe atlanirdi.
   */
-  if (!canAccessBooking(b, auth.user, { allowShopPartner: false })) {
+  if (!(await canAccessBooking(b, auth.user, { allowShopPartner: false }))) {
     return NextResponse.json({ error: "forbidden" }, { status: 403 });
   }
 

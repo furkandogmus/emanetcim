@@ -38,6 +38,13 @@ kararlar `docs/BACKLOG.md`. Eski `PLATFORM_SETTINGS.md` 2026-11-23'te buraya kat
 | `PARTNER` | Dükkan sahibi (esnaf) | web `/partner`, mobil esnaf sekmesi |
 | `ADMIN` | Platform yöneticisi | web `/admin`, mobil yönetici sekmesi |
 
+**Dükkan personeli** (2026-11-24) bir rol değil, `ShopMember` üyeliğidir: personel `PARTNER`
+olmaz (onboarding, merchant hesabı yok), yalnız operasyon yapar (rezervasyon, QR, teslim al/et,
+gelmedi, valiz revizyonu, misafiri bekle, mühür stoğu/kargo/arıza). Kazanç, ödeme/banka, dükkan
+ayarları, afiş, iptal ve ekip sahipte kalır. Sahip e-postayla davet eder (dükkan başına 10,
+davet bağı 7 gün, tek kullanımlık, yalnız davet edilen adresin hesabında kabul edilir) ve çıkarır;
+yetki her istekte veritabanından okunur (`src/lib/shop-access.ts`: `operate` / `manage`).
+
 Rol yükseltme dört göz ilkesiyle onaylanır (`AdminRoleChangeRequest`, `/admin/role-approvals`);
 son yönetici düşürülemez. Giriş: e-posta + şifre, Google, Apple (web ve iOS). SMS ile
 giriş kapalı (`SMS_LOGIN_ENABLED`); OAuth kurulumu `docs/GUVENLIK_VE_IZLEME.md` § Kimlik doğrulama.

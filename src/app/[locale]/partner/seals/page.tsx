@@ -1,6 +1,6 @@
 import { getTranslations, setRequestLocale } from "next-intl/server";
 import prisma from "@/lib/db";
-import { requirePartnerPage } from "@/lib/page-auth";
+import { requireShopOperatorPage } from "@/lib/page-auth";
 import { resolvePartnerShops } from "@/lib/partner-shop";
 import PartnerSealsClient from "@/components/partner/PartnerSealsClient";
 
@@ -15,7 +15,7 @@ export default async function PartnerSealsPage({
   setRequestLocale(locale);
   const t = await getTranslations({ locale, namespace: "Partner" });
 
-  const actor = await requirePartnerPage(locale, "/partner/seals");
+  const actor = await requireShopOperatorPage(locale, "/partner/seals");
 
   /*
     Dukkan secimi PANELLE AYNI kuraldan (`partner-shop.ts`). Onceki hali
@@ -25,7 +25,7 @@ export default async function PartnerSealsPage({
     yanlis dukkan icin siparis veriyordu.
   */
   const sp = (await searchParams) ?? {};
-  const { activeShop: shop } = await resolvePartnerShops(actor.id, sp.shop);
+  const { activeShop: shop } = await resolvePartnerShops(actor.id, sp.shop, "operate");
 
   if (!shop) {
     return (
@@ -73,6 +73,7 @@ export default async function PartnerSealsPage({
       inUseCount={inUseCount}
       returnedCount={returnedCount}
       requests={serializedRequests}
+      canManage={shop.relation === "owner"}
     />
   );
 }

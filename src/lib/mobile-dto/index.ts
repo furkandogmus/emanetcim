@@ -28,3 +28,4 @@ export * from "./account-deletion";
 export * from "./admin-insights";
 export * from "./admin-campaigns";
 export * from "./partner-parity";
+export * from "./shop-staff";

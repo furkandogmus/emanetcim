@@ -1,7 +1,6 @@
 "use server";
 
-import prisma from "@/lib/db";
-import { requireUser } from "@/lib/action-auth";
+import { requireShopAccess } from "@/lib/action-auth";
 import { revalidatePathAllLocales } from "@/lib/revalidate-locales";
 import { getClientIpOrNull } from "@/lib/client-ip";
 import { closureInputSchema, weeklyHoursSchema } from "@/lib/shop-schedule-input";
@@ -18,13 +17,8 @@ function revalidate() {
 }
 
 export async function saveWeeklyHoursAction(shopId: string, input: unknown) {
-  const auth = await requireUser();
+  const auth = await requireShopAccess(shopId, "manage");
   if (!auth.ok) return { success: false as const, error: auth.error };
-  const shop = await prisma.shop.findUnique({ where: { id: shopId }, select: { ownerId: true } });
-  if (!shop) return { success: false as const, error: "Errors.shopNotFound" };
-  if (shop.ownerId !== auth.actor.id && auth.actor.role !== "ADMIN") {
-    return { success: false as const, error: "Errors.unauthorized" };
-  }
   const parsed = weeklyHoursSchema.safeParse(input);
   if (!parsed.success) return { success: false as const, error: "Errors.invalidData" };
 
@@ -41,13 +35,8 @@ export async function saveWeeklyHoursAction(shopId: string, input: unknown) {
 }
 
 export async function addClosureAction(shopId: string, input: unknown) {
-  const auth = await requireUser();
+  const auth = await requireShopAccess(shopId, "manage");
   if (!auth.ok) return { success: false as const, error: auth.error };
-  const shop = await prisma.shop.findUnique({ where: { id: shopId }, select: { ownerId: true } });
-  if (!shop) return { success: false as const, error: "Errors.shopNotFound" };
-  if (shop.ownerId !== auth.actor.id && auth.actor.role !== "ADMIN") {
-    return { success: false as const, error: "Errors.unauthorized" };
-  }
   const parsed = closureInputSchema.safeParse(input);
   if (!parsed.success) return { success: false as const, error: "Errors.invalidData" };
 
@@ -63,13 +52,8 @@ export async function addClosureAction(shopId: string, input: unknown) {
 }
 
 export async function removeClosureAction(shopId: string, closureId: string) {
-  const auth = await requireUser();
+  const auth = await requireShopAccess(shopId, "manage");
   if (!auth.ok) return { success: false as const, error: auth.error };
-  const shop = await prisma.shop.findUnique({ where: { id: shopId }, select: { ownerId: true } });
-  if (!shop) return { success: false as const, error: "Errors.shopNotFound" };
-  if (shop.ownerId !== auth.actor.id && auth.actor.role !== "ADMIN") {
-    return { success: false as const, error: "Errors.unauthorized" };
-  }
   await removeClosure(shopId, closureId, { id: auth.actor.id, role: auth.actor.role, ip: await getClientIpOrNull() });
   revalidate();
   return { success: true as const };

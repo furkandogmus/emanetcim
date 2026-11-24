@@ -15,10 +15,12 @@ type Props = {
   noShowReady: boolean;
   /** "Misafir gelmedi"nin acilacagi an, dukkan diliminde bicimlenmis. */
   noShowAvailableLabel: string;
+  /** Personelde `false`: iptal `manage` islemi, yalniz "gelmedi" kalir. */
+  canCancel?: boolean;
 };
 
 /** Esnaf: valiz birakilmadan once "Rezervasyonu iptal et" ve "Misafir gelmedi". */
-export default function PartnerBookingClosureActions({ bookingId, noShowReady, noShowAvailableLabel }: Props) {
+export default function PartnerBookingClosureActions({ bookingId, noShowReady, noShowAvailableLabel, canCancel = true }: Props) {
   const t = useTranslations("Partner");
   const errorText = useActionErrorText();
   const router = useRouter();
@@ -63,6 +65,7 @@ export default function PartnerBookingClosureActions({ bookingId, noShowReady, n
           {t("partnerNoShowAvailableAt", { time: noShowAvailableLabel })}
         </p>
       )}
+      {canCancel && (
       <button
         type="button"
         disabled={busy}
@@ -75,6 +78,7 @@ export default function PartnerBookingClosureActions({ bookingId, noShowReady, n
       >
         {t("partnerCancelBooking")}
       </button>
+      )}
 
       <ConfirmDialog
         open={mode !== null}

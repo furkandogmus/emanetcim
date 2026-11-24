@@ -21,7 +21,7 @@ import {
 } from '@/lib/booking-closure';
 import { cancelBooking } from '@/services/booking/lifecycle';
 import { checkOut } from '@/services/booking/check-out';
-import { canOperateBookingAtShop } from '@/services/booking/access';
+import { canManageBookingAtShop, canOperateBookingAtShop } from '@/services/booking/access';
 import { bookingNotificationEmail } from '@/services/booking/guest-contact';
 import { notificationService } from '@/services/NotificationService';
 import type { PaymentActor } from '@/services/PaymentService';
@@ -63,7 +63,7 @@ function loadBooking(bookingId: string) {
       guestEmail: true,
       locale: true,
       guest: { select: { email: true } },
-      shop: { select: { ownerId: true } },
+      shop: { select: { id: true, ownerId: true } },
     },
   });
 }
@@ -159,7 +159,8 @@ export async function partnerCancelBooking(
 ): Promise<ClosureResult> {
   const booking = await loadBooking(bookingId);
   if (!booking) return { ok: false, code: 'NOT_FOUND' };
-  if (!canOperateBookingAtShop(booking, actor)) return { ok: false, code: 'FORBIDDEN' };
+  // Esnaf iptali `manage`: personel iptal edemez (urun karari, yalniz operasyon).
+  if (!canManageBookingAtShop(booking, actor)) return { ok: false, code: 'FORBIDDEN' };
   if (!isPartnerCancelReason(input.reason)) return { ok: false, code: 'INVALID_REASON' };
   const note = cleanNote(input.note);
   if (input.reason === 'other' && note.length === 0) return { ok: false, code: 'NOTE_REQUIRED' };
@@ -183,7 +184,7 @@ export async function markNoShow(
 ): Promise<ClosureResult> {
   const booking = await loadBooking(bookingId);
   if (!booking) return { ok: false, code: 'NOT_FOUND' };
-  if (!canOperateBookingAtShop(booking, actor)) return { ok: false, code: 'FORBIDDEN' };
+  if (!(await canOperateBookingAtShop(booking, actor))) return { ok: false, code: 'FORBIDDEN' };
   const availableAt = noShowAvailableAt(booking);
   if (!availableAt) return { ok: false, code: 'INVALID_STATUS' };
   if (now.getTime() < availableAt.getTime()) return { ok: false, code: 'TOO_EARLY' };

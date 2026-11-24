@@ -10,6 +10,7 @@ import path from "node:path";
  */
 const db = vi.hoisted(() => ({
   shop: { findMany: vi.fn() },
+  shopMember: { findMany: vi.fn().mockResolvedValue([]) },
   booking: { findMany: vi.fn(), count: vi.fn() },
   bookingEvent: { findMany: vi.fn() },
   $queryRaw: vi.fn(),
@@ -98,7 +99,8 @@ describe("GET /partner/bookings?q=", () => {
     db.$queryRaw.mockResolvedValue([{ id: "b1", total: BigInt(1) }]);
     await GET(req("?q=ilker"));
     // Kapsam: sorguya giden dukkan listesi yalnizca esnafin kendi dukkanlari.
-    expect(db.shop.findMany).toHaveBeenCalledWith({ where: { ownerId: "partner-a" }, select: { id: true, name: true } });
+    expect(db.shop.findMany).toHaveBeenCalledWith(expect.objectContaining({ where: { ownerId: "partner-a" } }));
+    expect(db.shopMember.findMany).toHaveBeenCalledWith(expect.objectContaining({ where: expect.objectContaining({ userId: "partner-a" }) }));
     const sqlValues = db.$queryRaw.mock.calls[0].slice(1);
     expect(sqlValues[0]).toEqual(["s1", "s2"]);
     for (const call of db.booking.findMany.mock.calls) {
@@ -163,8 +165,9 @@ describe("tavan ve toplam", () => {
 describe("web esnaf listesi ayni servisi kullanir", () => {
   it("sayfa partnerBookingSearchWhere'i kendi dukkan kimlikleriyle cagirir", () => {
     const src = fs.readFileSync(path.join(process.cwd(), "src/app/[locale]/partner/bookings/page.tsx"), "utf8");
-    expect(src).toMatch(/partnerBookingSearchWhere\(ownShopIds, q\)/);
+    // Kapsam sahip + personel olunan dukkanlar (`operableShopIds`), mobil uc ile ayni.
+    expect(src).toMatch(/partnerBookingSearchWhere\(q \? shopIds : \[\], q\)/);
     expect(src).toMatch(/partnerBookingsSearchTruncated/);
-    expect(src).toMatch(/where: \{ ownerId: userId \}/);
+    expect(src).toMatch(/operableShopIds\(userId\)/);
   });
 });

@@ -56,6 +56,9 @@ model User {
   reviewReports            ReviewReport[]
   reviewBlocks             ReviewBlock[]            @relation("ReviewBlocker")
   reviewBlockedBy          ReviewBlock[]            @relation("ReviewBlocked")
+  shopMemberships          ShopMember[]             @relation("ShopMemberUser")
+  shopMembersInvited       ShopMember[]             @relation("ShopMemberInviter")
+  shopInvitesSent          ShopInvite[]             @relation("ShopInviteInviter")
 
   @@index([email])
 }
@@ -219,6 +222,8 @@ model Shop {
   weeklyHours         ShopWeeklyHours[]
   closures            ShopClosure[]
   partnerLeads        PartnerLead[]
+  members             ShopMember[]
+  invites             ShopInvite[]
   owner               User                @relation(fields: [ownerId], references: [id], onDelete: Cascade)
 
   merchantProfile        MerchantProfile?
@@ -1527,4 +1532,47 @@ model AffiliateCommission {
 
   @@index([affiliateId, status])
   @@index([status, earnedAt])
+}
+
+/// Dukkan personeli. Sahip burada DEGIL (`Shop.ownerId`); personel yalnizca operasyon yapar
+/// (rezervasyon, QR, teslim, muhur). Yetki her istekte bu tablodan okunur, onbellek yok:
+/// satir silinince erisim o an biter (`src/lib/shop-access.ts`).
+model ShopMember {
+  id          String         @id @default(uuid())
+  shopId      String
+  userId      String
+  role        ShopMemberRole @default(STAFF)
+  invitedById String?
+  createdAt   DateTime       @default(now())
+  shop        Shop           @relation(fields: [shopId], references: [id], onDelete: Cascade)
+  user        User           @relation("ShopMemberUser", fields: [userId], references: [id], onDelete: Cascade)
+  invitedBy   User?          @relation("ShopMemberInviter", fields: [invitedById], references: [id], onDelete: SetNull)
+
+  @@unique([shopId, userId])
+  @@index([userId])
+}
+
+/// Hesabi olmayan e-postaya giden personel daveti. Ham anahtar yalnizca e-postada;
+/// burada SHA-256 ozeti. Tek kullanimlik (`acceptedAt`), sureli (`expiresAt`).
+model ShopInvite {
+  id           String         @id @default(uuid())
+  shopId       String
+  email        String
+  role         ShopMemberRole @default(STAFF)
+  tokenHash    String         @unique
+  invitedById  String?
+  expiresAt    DateTime
+  acceptedAt   DateTime?
+  acceptedById String?
+  revokedAt    DateTime?
+  createdAt    DateTime       @default(now())
+  shop         Shop           @relation(fields: [shopId], references: [id], onDelete: Cascade)
+  invitedBy    User?          @relation("ShopInviteInviter", fields: [invitedById], references: [id], onDelete: SetNull)
+
+  @@index([shopId])
+  @@index([email])
+}
+
+enum ShopMemberRole {
+  STAFF
 }

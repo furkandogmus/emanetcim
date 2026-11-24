@@ -40,11 +40,11 @@ export async function holdLateBooking(
       guestEmail: true,
       locale: true,
       guest: { select: { email: true } },
-      shop: { select: { ownerId: true, name: true, timezone: true, owner: { select: { phone: true } } } },
+      shop: { select: { id: true, ownerId: true, name: true, timezone: true, owner: { select: { phone: true } } } },
     },
   });
   if (!b) return { ok: false, code: "NOT_FOUND" };
-  if (!canOperateBookingAtShop(b, actor)) return { ok: false, code: "FORBIDDEN" };
+  if (!(await canOperateBookingAtShop(b, actor))) return { ok: false, code: "FORBIDDEN" };
 
   const decision = decideLateHold(b, now);
   if (!decision.ok) return { ok: false, code: decision.code };

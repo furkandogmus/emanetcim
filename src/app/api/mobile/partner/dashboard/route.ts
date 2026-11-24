@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import prisma from "@/lib/db";
-import { requireMobileUser, requireRole } from "@/lib/mobile-auth";
+import { requireMobileUser } from "@/lib/mobile-auth";
 import { getEffectiveCommission } from "@/lib/commission";
 import { resolvePartnerShops } from "@/lib/partner-shop";
 import { toMobilePartnerDashboard } from "@/lib/mobile-dto";
@@ -14,10 +14,11 @@ import { partnerDashboardService } from "@/services/PartnerDashboardService";
 export async function GET(req: NextRequest) {
   const auth = await requireMobileUser(req);
   if ("error" in auth) return auth.error;
-  const roleErr = requireRole(auth.user, ["PARTNER"]);
-  if (roleErr) return roleErr;
-
-  const { shops, activeShop } = await resolvePartnerShops(auth.user.id, req.nextUrl.searchParams.get("shop"));
+  const { shops, activeShop } = await resolvePartnerShops(
+    auth.user.id,
+    req.nextUrl.searchParams.get("shop"),
+    "operate",
+  );
   if (!activeShop) return NextResponse.json({ error: "no_shops" }, { status: 404 });
 
   const [shop, commission] = await Promise.all([

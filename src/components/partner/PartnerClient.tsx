@@ -11,6 +11,7 @@ import {
   Calendar,
   ShieldCheck,
   QrCode,
+  Users,
 } from "lucide-react";
 
 import { Link } from "@/i18n/routing";
@@ -102,6 +103,11 @@ interface PartnerClientProps {
   /** DEFECT_BACKLOG D7: yeni esnaf için ilk giriş kontrol listesi. */
   hasShopImage?: boolean;
   hasShopLocation?: boolean;
+  /**
+   * `false` = dukkan personeli: yalniz operasyon (QR, teslim, gecmis, muhur). Kazanc,
+   * afis, ayarlar, onboarding ve davet karti cizilmez; sunucu ayrica reddeder.
+   */
+  canManage?: boolean;
 }
 
 export default function PartnerClient({
@@ -126,8 +132,10 @@ export default function PartnerClient({
   commissionActive = false,
   hasShopImage = false,
   hasShopLocation = false,
+  canManage = true,
 }: PartnerClientProps) {
   const t = useTranslations("Partner");
+  const tStaff = useTranslations("shopStaff");
   const errorText = useActionErrorText();
   const tCommon = useTranslations("Common");
   /*
@@ -136,7 +144,7 @@ export default function PartnerClient({
     kazanc 0 ama gecmis rezervasyon iptal olmus olabilir; bagsHandledAllTime 0
     ise dukkan hicbir zaman gercek bir teslim almamis demektir.
   */
-  const isNewPartner = (pulse?.bagsHandledAllTime ?? 0) === 0 && totalEarnings === 0;
+  const isNewPartner = canManage && (pulse?.bagsHandledAllTime ?? 0) === 0 && totalEarnings === 0;
   /**
    * Gecikme hesabı için TEK referans an.
    *
@@ -488,7 +496,8 @@ export default function PartnerClient({
             </div>
           )}
         </div>
-        <div className="grid grid-cols-4 gap-2 sm:flex sm:flex-col">
+        <div className={`grid ${canManage ? "grid-cols-5" : "grid-cols-2"} gap-2 sm:flex sm:flex-col`}>
+          {canManage && (
           <Link
             href="/partner/earnings"
             className="flex min-w-0 flex-col items-center justify-center gap-1 rounded-2xl bg-orange-50 px-2 py-2.5 text-center text-[10px] font-bold text-orange-700 transition-all hover:bg-orange-100 active:scale-[0.97] sm:flex-row sm:gap-3 sm:px-4 sm:text-sm"
@@ -496,6 +505,7 @@ export default function PartnerClient({
             <Wallet size={18} />
             {t("earnings")}
           </Link>
+          )}
           <Link
             href="/partner/bookings"
             className="flex min-w-0 flex-col items-center justify-center gap-1 rounded-2xl bg-orange-50 px-2 py-2.5 text-center text-[10px] font-bold text-orange-700 transition-all hover:bg-orange-100 active:scale-[0.97] sm:flex-row sm:gap-3 sm:px-4 sm:text-sm"
@@ -510,6 +520,17 @@ export default function PartnerClient({
             <ShieldCheck size={18} />
             {t("sealsTitle")}
           </Link>
+          {canManage ? (
+            <Link
+              href={{ pathname: "/partner/team", query: { shop: shopId } }}
+              data-testid="partner-team-link"
+              className="id-accent-soft flex min-w-0 flex-col items-center justify-center gap-1 rounded-2xl px-2 py-2.5 text-center text-[10px] font-bold transition-all hover:opacity-90 active:scale-[0.97] sm:flex-row sm:gap-3 sm:px-4 sm:text-sm"
+            >
+              <Users size={18} />
+              {tStaff("navTeam")}
+            </Link>
+          ) : null}
+          {canManage && (
           <Link
             href={{ pathname: "/partner/poster", query: { shop: shopId } }}
             className="id-accent-soft flex min-w-0 flex-col items-center justify-center gap-1 rounded-2xl px-2 py-2.5 text-center text-[10px] font-bold transition-all hover:opacity-90 active:scale-[0.97] sm:flex-row sm:gap-3 sm:px-4 sm:text-sm"
@@ -517,6 +538,7 @@ export default function PartnerClient({
             <QrCode size={18} />
             {t("posterNav")}
           </Link>
+          )}
         </div>
       </header>
 
@@ -533,6 +555,7 @@ export default function PartnerClient({
             {...pulse}
             capacity={capacity}
             commissionActive={commissionActive}
+            showEarnings={canManage}
           />
         </div>
       )}
@@ -567,6 +590,8 @@ export default function PartnerClient({
             Fazla gosterge, gostergesizlikten kotudur.
           */}
           <div className="grid w-full grid-cols-1 gap-3 md:gap-6">
+            {canManage && (
+            <>
             <div className="ui-card flex items-center justify-between gap-2 p-5 md:rounded-4xl md:p-6">
               <div>
                 <p className="id-eyebrow text-gray-400">
@@ -592,6 +617,8 @@ export default function PartnerClient({
                 {monthlyShopViews}
               </p>
             </div>
+            </>
+            )}
             {/*
               BILDIRIMI ACMA DAVETI. `WebPushOptIn` bu kod tabaninda yalnizca
               MISAFIR ekranlarinda (checkout, hesap gizliligi) ciziliyordu --
@@ -606,9 +633,11 @@ export default function PartnerClient({
             <div>
               <WebPushOptIn />
             </div>
-            <div className="col-span-2">
-              <PartnerReferralCard />
-            </div>
+            {canManage && (
+              <div className="col-span-2">
+                <PartnerReferralCard />
+              </div>
+            )}
           </div>
         </div>
       )}
@@ -617,6 +646,7 @@ export default function PartnerClient({
         <PartnerHistoryTab
           bookings={bookings}
           merchantShareRatio={merchantShareRatio}
+          showEarnings={canManage}
           dateLocale={dateLocale}
           overdueOf={overdueOf}
           checkingOutId={checkingOutId}
@@ -625,7 +655,7 @@ export default function PartnerClient({
         />
       )}
 
-      {activeTab === "AYARLAR" && (
+      {activeTab === "AYARLAR" && canManage && (
         <div className="flex-1 max-w-md mx-auto w-full flex flex-col gap-8 animate-in slide-in-from-bottom-4 duration-500">
           <PartnerShopSettingsForm
             shopId={shopId}
@@ -642,6 +672,7 @@ export default function PartnerClient({
       <PartnerBottomNav
         activeTab={activeTab}
         onChange={setActiveTab}
+        showSettings={canManage}
       />
     </div>
   );

@@ -10,6 +10,7 @@ const { mockPrisma, mockAudit, mockRevalidate, mockAuth, mockRedirect } = vi.hoi
     platformSettings: { findUnique: vi.fn(), upsert: vi.fn() },
     notificationLog: { create: vi.fn() },
     shop: { findMany: vi.fn(), findUnique: vi.fn() },
+    shopMember: { count: vi.fn().mockResolvedValue(0), findMany: vi.fn().mockResolvedValue([]), findUnique: vi.fn().mockResolvedValue(null) },
   },
   mockAudit: vi.fn(),
   mockRevalidate: vi.fn(),

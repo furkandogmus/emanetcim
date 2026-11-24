@@ -12,6 +12,7 @@ const m = vi.hoisted(() => ({
     shop: { findMany: vi.fn() },
     affiliate: { findUnique: vi.fn() },
     accountDeletionRequest: { findUnique: vi.fn() },
+    shopMember: { findMany: vi.fn().mockResolvedValue([]) },
     auditLog: { findFirst: vi.fn(), create: vi.fn(), update: vi.fn() },
     $executeRaw: vi.fn(),
     $transaction: vi.fn(),
@@ -85,6 +86,7 @@ describe("buildExport", () => {
     expect(mp.iban).toMatch(/^\*+1234$/);
     expect(mp.vkn).toBeNull();
     expect(data!.exportedAt).toBe(NOW.toISOString());
+    expect(data!.shopMemberships).toEqual([]);
   });
 });
 
@@ -210,5 +212,19 @@ describe("tasiyicilar", () => {
     expect(dl.status).toBe(200);
     expect(dl.headers.get("Content-Disposition")).toContain("bagajpark-data-u1234567.json");
     expect((await dl.json()).shops).toHaveLength(1);
+  });
+});
+
+describe("buildExport: dukkan personeli uyelikleri", () => {
+  it("personel oldugu dukkanlar disa aktarimda yer alir", async () => {
+    m.db.user.findUnique.mockResolvedValue({ id: "u1", email: "a@example.com", accounts: [] });
+    for (const k of ["booking", "review", "legalAcceptance", "shop"] as const) m.db[k].findMany.mockResolvedValue([]);
+    m.db.shopMember.findMany.mockResolvedValueOnce([
+      { role: "STAFF", createdAt: new Date("2026-11-20T00:00:00Z"), shop: { id: "s9", name: "Otel" } },
+    ]);
+    const data = await accountDataExportService.buildExport("u1", new Date("2026-11-24T00:00:00Z"));
+    expect(data!.shopMemberships).toEqual([
+      { shopId: "s9", shopName: "Otel", role: "STAFF", since: "2026-11-20T00:00:00.000Z" },
+    ]);
   });
 });

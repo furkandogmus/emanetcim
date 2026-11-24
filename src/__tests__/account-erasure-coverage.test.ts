@@ -33,6 +33,7 @@ const ERASED = new Set([
   "MobileInstall",
   "ReviewReport",
   "ReviewBlock",
+  "ShopMember",
 ]);
 
 /**

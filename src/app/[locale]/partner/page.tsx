@@ -9,7 +9,7 @@ import { getEffectiveCommission } from "@/lib/commission";
 import { getPricingRules } from "@/lib/platform-settings";
 import { isStorageConfigured } from "@/lib/storage";
 import { moneyToNumber } from "@/lib/money";
-import { requirePartnerPage } from "@/lib/page-auth";
+import { requireShopOperatorPage } from "@/lib/page-auth";
 import { resolvePartnerShops } from "@/lib/partner-shop";
 import PartnerClient from "@/components/partner/PartnerClient";
 import { bookingTimeZone } from "@/lib/format-datetime";
@@ -38,7 +38,7 @@ export default async function PartnerPage({
   const initialBookingId = sp.booking?.trim() || undefined;
   const initialCheckoutBookingId = sp.checkoutBooking?.trim() || undefined;
 
-  const actor = await requirePartnerPage(locale, "/partner");
+  const actor = await requireShopOperatorPage(locale, "/partner");
 
   /**
    * Panel eskiden koşulsuz `shops[0]`'ı gösteriyordu. Çok dükkanlı esnafın
@@ -47,7 +47,9 @@ export default async function PartnerPage({
    * listede bulunamıyor, dolayısıyla teslim edilemiyordu. Seçim artık
    * `partner-shop.ts`'te — alt sayfalarla AYNI kural.
    */
-  const { shops, activeShop } = await resolvePartnerShops(actor.id, sp.shop);
+  const { shops, activeShop } = await resolvePartnerShops(actor.id, sp.shop, "operate");
+  // Personel: yalniz operasyon. Kazanc toplami ve sahip telefonu hic okunmaz.
+  const canManage = activeShop?.relation !== "staff";
 
   if (!activeShop) {
     return (
@@ -80,10 +82,9 @@ export default async function PartnerPage({
     await Promise.all([
       bookingService.getPartnerBookings(activeShop.id),
       getPricingRules(),
-      prisma.user.findUnique({
-        where: { id: actor.id },
-        select: { phone: true },
-      }),
+      canManage
+        ? prisma.user.findUnique({ where: { id: actor.id }, select: { phone: true } })
+        : Promise.resolve(null),
       analyticsService.getShopViewCountThisMonth(activeShop.id),
       /*
         TOPLAM KAZANC ARTIK LISTEDEN DEGIL, TOPLAMADAN.
@@ -93,7 +94,9 @@ export default async function PartnerPage({
         100'den fazla rezervasyonu olan esnafin ana paneldeki "toplam kazanc"i
         sessizce eksikti ve kazanc sayfasindaki rakamla tutmuyordu.
       */
-      partnerEarningsService.getTotals(activeShop.id, commission.rate),
+      canManage
+        ? partnerEarningsService.getTotals(activeShop.id, commission.rate)
+        : Promise.resolve({ gross: 0 }),
     ]);
 
   /*
@@ -144,6 +147,7 @@ export default async function PartnerPage({
       commissionActive={commission.rate > 0}
       hasShopImage={!!shopDetail.image}
       hasShopLocation={shopDetail.latitude != null && shopDetail.longitude != null}
+      canManage={canManage}
     />
   );
 }

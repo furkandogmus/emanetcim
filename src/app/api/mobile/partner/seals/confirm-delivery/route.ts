@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
-import { requireMobileUser, requireRole } from "@/lib/mobile-auth";
+import { requireMobileUser } from "@/lib/mobile-auth";
 import { sealService } from "@/services/SealService";
 import { SEAL_CODE_TO_HTTP } from "@/lib/mobile-seal-response";
 
@@ -16,17 +16,16 @@ import { SEAL_CODE_TO_HTTP } from "@/lib/mobile-seal-response";
 export async function POST(req: NextRequest) {
   const auth = await requireMobileUser(req);
   if ("error" in auth) return auth.error;
-  const roleErr = requireRole(auth.user, ["PARTNER"]);
-  if (roleErr) return roleErr;
 
   const { requestId } = await req.json().catch(() => ({ requestId: undefined }));
   if (!requestId || typeof requestId !== "string") {
     return NextResponse.json({ error: "invalid_data" }, { status: 400 });
   }
 
+  // Dukkan yetkisi serviste (`operate`: sahip ya da personel).
   const result = await sealService.confirmDelivery(requestId, {
     id: auth.user.id,
-    role: "PARTNER",
+    role: auth.user.role,
   });
 
   if (!result.ok) {

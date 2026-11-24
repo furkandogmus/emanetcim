@@ -4,6 +4,7 @@ import type { NextRequest } from "next/server";
 import { z } from "zod";
 import { requireMobileUser, requireRole } from "@/lib/mobile-auth";
 import prisma from "@/lib/db";
+import { countStaffShops } from "@/lib/shop-access";
 import { verifyQrToken } from "@/lib/qr-token";
 
 const schema = z.object({ code: z.string().min(1) });
@@ -16,8 +17,9 @@ const schema = z.object({ code: z.string().min(1) });
 export async function POST(req: NextRequest) {
   const auth = await requireMobileUser(req);
   if ("error" in auth) return auth.error;
+  // Personel PARTNER degildir; kaba kapi "dukkan tarafinda mi", asil kontrol kayit basina asagida.
   const forbid = requireRole(auth.user, ["PARTNER", "ADMIN"]);
-  if (forbid) return forbid;
+  if (forbid && (await countStaffShops(auth.user.id)) === 0) return forbid;
 
   const body = await req.json().catch(() => null);
   const parsed = schema.safeParse(body);
@@ -30,13 +32,13 @@ export async function POST(req: NextRequest) {
   if (Number.isInteger(serial) && serial > 0) {
     const seal = await prisma.seal.findUnique({
       where: { serialNumber: serial },
-      include: { shop: { select: { ownerId: true } } },
+      include: { shop: { select: { id: true, ownerId: true } } },
     });
     if (seal) {
       // Sahiplik kontrolu: bkz. `canOperateSealAtShop` — 2026-09-10'da
       // bulunan IDOR (herhangi bir PARTNER, seri numarasi deneyerek baska
       // dukkanlarin muhur envanterini gorebiliyordu).
-      if (!canOperateSealAtShop(seal, auth.user)) {
+      if (!(await canOperateSealAtShop(seal, auth.user))) {
         return NextResponse.json({ error: "forbidden" }, { status: 403 });
       }
       return NextResponse.json({
@@ -73,7 +75,7 @@ export async function POST(req: NextRequest) {
       : null;
     if (booking) {
       // Dukkan operasyonu: kural `booking/access.ts`te, uc yerde degil.
-      if (!canOperateBookingAtShop(booking, auth.user)) {
+      if (!(await canOperateBookingAtShop(booking, auth.user))) {
         return NextResponse.json({ error: "forbidden" }, { status: 403 });
       }
       return NextResponse.json({

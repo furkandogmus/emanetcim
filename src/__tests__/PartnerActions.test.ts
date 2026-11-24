@@ -12,6 +12,7 @@ const { mockPrisma, mockAuth } = vi.hoisted(() => {
         findUnique: vi.fn(),
         update: vi.fn(),
       },
+      shopMember: { findUnique: vi.fn().mockResolvedValue(null) },
     },
     mockAuth: vi.fn(),
   };
@@ -66,11 +67,24 @@ describe("Partner Actions", () => {
   });
 
   describe("setPendingBagRevisionAction", () => {
-    it("should fail if unauthorized", async () => {
-      mockAuth.mockResolvedValue({ user: { id: "guest-1", role: "GUEST" } });
+    it("should fail if unauthenticated", async () => {
+      mockAuth.mockResolvedValue(null);
       const result = await setPendingBagRevisionAction({});
       expect(result.success).toBe(false);
-      expect(result.error).toBe("Errors.notAuthorizedPartner");
+      expect(result.error).toBe("Errors.authRequired");
+    });
+
+    it("dükkan personeli olmayan misafir başka dükkana dokunamaz", async () => {
+      mockAuth.mockResolvedValue({ user: { id: "guest-1", role: "GUEST" } });
+      mockPrisma.booking.findUnique.mockResolvedValue({ id: "b1", shop: { id: "s1", ownerId: "partner-1" } });
+      const result = await setPendingBagRevisionAction({
+        bookingId: "550e8400-e29b-41d4-a716-446655440000",
+        bagCountS: 1,
+        bagCountM: 1,
+        bagCountXl: 0,
+      });
+      expect(result.success).toBe(false);
+      expect(result.error).toBe("Errors.unauthorized");
     });
 
     it("should validate input schema (Zod)", async () => {

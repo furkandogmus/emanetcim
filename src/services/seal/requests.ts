@@ -18,6 +18,7 @@
  * Tek govde, iki tasiyici. Yetki (dukkan sahipligi / admin) bilerek BURADA:
  * tasiyicilarin kendi tarafinda yazdigi sey tam olarak sapan seydi.
  */
+import { hasShopAccess } from '@/lib/shop-access';
 import prisma from '@/lib/db';
 import logger from '@/lib/logger';
 import { notificationService } from '@/services/NotificationService';
@@ -108,16 +109,17 @@ export async function createSealRequest(
  */
 export async function confirmSealDelivery(
   requestId: string,
-  actor: SealRequestActor,
+  // Kargoyu personel de teslim alir (`operate`); rolu PARTNER olmayabilir.
+  actor: { id: string; role: string },
 ): Promise<SealDeliveryResult> {
   try {
     const sealRequest = await prisma.sealRequest.findUnique({
       where: { id: requestId },
-      include: { shop: { select: { ownerId: true } } },
+      include: { shop: { select: { id: true, ownerId: true } } },
     });
     if (!sealRequest) return { ok: false, code: 'REQUEST_NOT_FOUND' };
 
-    if (actor.role !== 'ADMIN' && sealRequest.shop.ownerId !== actor.id) {
+    if (!(await hasShopAccess(actor, sealRequest.shop, 'operate'))) {
       return { ok: false, code: 'FORBIDDEN' };
     }
     if (sealRequest.status !== 'SHIPPED' && sealRequest.status !== 'DELIVERED') {

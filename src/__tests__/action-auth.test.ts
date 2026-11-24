@@ -177,7 +177,8 @@ describe("mandal: esnaf SAYFALARI da kapıyı kullanıyor", () => {
   it("her esnaf sayfası `requirePartnerPage` çağırıyor", () => {
     // Kopyayi yasaklamak yetmez: kapiyi HIC cagirmayan bir sayfa da gecerdi.
     const offenders = partnerPageFiles()
-      .filter((f) => !/requirePartnerPage\(/.test(fs.readFileSync(f, "utf8")))
+      // Operasyon sayfalari (personel de girer) `requireShopOperatorPage` kullanir.
+      .filter((f) => !/(requirePartnerPage|requireShopOperatorPage)\(/.test(fs.readFileSync(f, "utf8")))
       .map((f) => path.relative(process.cwd(), f));
     expect(
       offenders,

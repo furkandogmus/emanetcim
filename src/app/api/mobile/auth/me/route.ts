@@ -3,6 +3,7 @@ import type { NextRequest } from "next/server";
 import prisma from "@/lib/db";
 import { forbidWhileImpersonating, requireMobileUser } from "@/lib/mobile-auth";
 import { toMobileUser } from "@/lib/mobile-dto";
+import { countStaffShops } from "@/lib/shop-access";
 import { updateOwnProfile } from "@/services/auth/own-profile";
 import logger from "@/lib/logger";
 
@@ -34,7 +35,9 @@ export async function GET(req: NextRequest) {
   });
   if (!profile) return NextResponse.json({ error: "unauthorized" }, { status: 401 });
 
-  return NextResponse.json(toMobileUser(profile));
+  // Personel PARTNER degil: yeni istemci bu sayiyla esnaf sekmelerini acar. Eski istemci yok sayar.
+  const staffShopCount = await countStaffShops(profile.id);
+  return NextResponse.json(toMobileUser(profile, { staffShopCount }));
 }
 
 export async function PUT(req: NextRequest) {

@@ -38,6 +38,7 @@ const { mockPrisma, mockEvents, mockGetPricingRules, RULES, mockSendBagRevisionA
       booking: { findUnique: vi.fn(), update: vi.fn() },
       reservationSlot: { findMany: vi.fn(), groupBy: vi.fn(), updateMany: vi.fn() },
       bookingSeal: { count: vi.fn() },
+      shopMember: { findUnique: vi.fn().mockResolvedValue(null) },
       $transaction: vi.fn(),
     },
     mockEvents: { record: vi.fn().mockResolvedValue(undefined) },
@@ -443,3 +444,24 @@ describe("clearBagRevision", () => {
     ]);
   });
 });
+
+describe("dükkan personeli (side: shop)", () => {
+  const STAFF = { id: "staff-1", role: "GUEST" as const, side: "shop" as const };
+
+  it("üye olmayan personel FORBIDDEN; misafir yolu da açılmaz", async () => {
+    mockPrisma.booking.findUnique.mockResolvedValue(booking());
+    mockPrisma.shopMember.findUnique.mockResolvedValue(null);
+    expect(
+      await applyBagRevision("b1", STAFF, { counts: { bagCountS: 1, bagCountM: 1, bagCountXl: 0 } }),
+    ).toEqual({ ok: false, code: "FORBIDDEN" });
+    expect(mockPrisma.booking.update).not.toHaveBeenCalled();
+  });
+
+  it("üye personel öneri açabilir (yetki üyelikten)", async () => {
+    mockPrisma.booking.findUnique.mockResolvedValue(booking());
+    mockPrisma.shopMember.findUnique.mockResolvedValue({ id: "m1" });
+    const res = await proposeBagRevision("b1", { bagCountS: 2, bagCountM: 1, bagCountXl: 0 }, STAFF);
+    expect(res.ok).toBe(true);
+  });
+});
+

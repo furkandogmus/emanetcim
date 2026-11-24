@@ -549,6 +549,9 @@ class AccountPrivacyService {
     // Mobil cihaz token'i anonimlestirmeden sag cikan tek tanimlayici olurdu (2026-09-01).
     await tx.mobilePushToken.deleteMany({ where: { userId } });
     await tx.mobileInstall.deleteMany({ where: { userId } });
+    // Personel uyeligi ve bu e-postaya giden davetler: silinen hesap hicbir dukkanda calismaz.
+    await tx.shopMember.deleteMany({ where: { userId } });
+    if (email) await tx.shopInvite.deleteMany({ where: { email } });
     /*
       Esnafin odeme/vergi kimligi (TCKN/VKN, IBAN, unvan, adres, iletisim). Elle
       tahsilatta platform esnafa fatura kesmez ve hakedis odemez; bu alanlari

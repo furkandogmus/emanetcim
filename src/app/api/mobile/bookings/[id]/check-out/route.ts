@@ -2,7 +2,7 @@ import { DEFAULT_NOTIFICATION_LOCALE } from "@/lib/request-locale";
 import { canOperateBookingAtShop } from "@/services/booking/access";
 import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
-import { requireMobileUser, requireRole } from "@/lib/mobile-auth";
+import { requireMobileUser } from "@/lib/mobile-auth";
 import { bookingService } from "@/services/BookingService";
 import { notificationService } from "@/services/NotificationService";
 import prisma from "@/lib/db";
@@ -16,21 +16,19 @@ export async function POST(
   const auth = await requireMobileUser(req);
   if ("error" in auth) return auth.error;
   
-  const forbid = requireRole(auth.user, ["PARTNER", "ADMIN"]);
-  if (forbid) return forbid;
 
   const { id } = await params;
 
   const booking = await prisma.booking.findUnique({
     where: { id },
     // `locale`: bildirim MISAFIRIN dilinde gider; bkz. `Booking.locale`.
-    select: { shop: { select: { ownerId: true } }, guestEmail: true, locale: true },
+    select: { shop: { select: { id: true, ownerId: true } }, guestEmail: true, locale: true },
   });
   if (!booking) {
     return NextResponse.json({ error: "not_found" }, { status: 404 });
   }
   // Dukkan operasyonu: esnaf ya da admin; misafir haric. Kural tek yerde.
-  if (!canOperateBookingAtShop(booking, auth.user)) {
+  if (!(await canOperateBookingAtShop(booking, auth.user))) {
     return NextResponse.json({ error: "forbidden" }, { status: 403 });
   }
 

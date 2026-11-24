@@ -20,6 +20,8 @@ const m = vi.hoisted(() => {
     pushSubscription: { deleteMany: ok() },
     mobilePushToken: { deleteMany: ok() },
     mobileInstall: { deleteMany: ok() },
+    shopMember: { deleteMany: ok() },
+    shopInvite: { deleteMany: ok() },
     merchantProfile: { deleteMany: ok() },
     passwordResetCode: { deleteMany: ok() },
     mobileLoginCode: { deleteMany: ok() },

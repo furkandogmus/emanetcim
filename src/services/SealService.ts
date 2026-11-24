@@ -1,3 +1,4 @@
+import { assertShopAccess } from "@/lib/shop-access";
 import type { Prisma } from "@prisma/client";
 import prisma from "@/lib/db";
 import { randomUUID } from "crypto";
@@ -84,7 +85,7 @@ export class SealService {
     return createSealRequestImpl(shopId, quantity, actor, opts);
   }
 
-  async confirmDelivery(requestId: string, actor: SealRequestActor) {
+  async confirmDelivery(requestId: string, actor: { id: string; role: string }) {
     return confirmSealDeliveryImpl(requestId, actor);
   }
 
@@ -385,14 +386,9 @@ export class SealService {
     shopId: string,
     actor: { id: string; role: string },
   ): Promise<void> {
-    if (actor.role !== "ADMIN") {
-      const owned = await prisma.shop.findFirst({
-        where: { id: shopId, ownerId: actor.id },
-        select: { id: true },
-      });
-      if (!owned) {
-        throw new Error("shop_not_owned_by_actor");
-      }
+    // Ariza bildirimi operasyondur: sahip, personel ya da yonetici.
+    if (!(await assertShopAccess(actor, shopId, "operate")).ok) {
+      throw new Error("shop_not_owned_by_actor");
     }
 
     const seal = await prisma.seal.findUnique({

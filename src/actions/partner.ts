@@ -14,7 +14,13 @@ import logger from "@/lib/logger";
 import { z } from "zod";
 import { parseCheckInSeals } from "@/lib/seal-payload";
 import { bookingNotificationEmail } from "@/services/booking/guest-contact";
-import { requirePartner, assertPartner } from "@/lib/action-auth";
+import { requirePartner, requireUser, assertUser, requireShopAccess } from "@/lib/action-auth";
+import { hasShopAccess, operableShopIds } from "@/lib/shop-access";
+
+/** Esnaf panelinden gelen valiz revizyonu: yetki rolden degil dukkan uyeliginden (`bag-revision.ts`). */
+function shopSide(actor: { id: string; role: "GUEST" | "PARTNER" | "ADMIN" }) {
+  return { id: actor.id, role: actor.role, side: "shop" as const };
+}
 
 function revalidatePartnerPaths() {
   revalidatePathAllLocales("/partner");
@@ -109,7 +115,7 @@ const SHORT_CODE_RE = /^[0-9a-f]{6,12}$/i;
  * QR / ham id / kısa kod ile rezervasyon önizlemesi (esnaf paneli).
  */
 export async function getPartnerBookingPreviewAction(raw: string) {
-  const auth = await requirePartner();
+  const auth = await requireUser();
   if (!auth.ok) return { success: false as const, error: auth.error };
 
   let bookingId = raw.trim();
@@ -125,7 +131,7 @@ export async function getPartnerBookingPreviewAction(raw: string) {
     */
     include: {
       guest: { select: { name: true } },
-      shop: { select: { ownerId: true } },
+      shop: { select: { id: true, ownerId: true } },
     },
   });
 
@@ -140,16 +146,17 @@ export async function getPartnerBookingPreviewAction(raw: string) {
     bulamamaktan kötüdür: esnaf başkasının valizini teslim alır.
   */
   if (!booking && SHORT_CODE_RE.test(bookingId)) {
+    // Kapsam sahip + personel olunan dukkanlar; yonetici daraltilmaz.
     const scope =
-      auth.actor.role === "PARTNER"
-        ? { shop: { ownerId: auth.actor.id } }
-        : {};
+      auth.actor.role === "ADMIN"
+        ? {}
+        : { shopId: { in: await operableShopIds(auth.actor.id) } };
     const matches = await prisma.booking.findMany({
       where: { id: { startsWith: bookingId.toLowerCase() }, ...scope },
       // Dar secim -- gerekcesi yukarida.
       include: {
         guest: { select: { name: true } },
-        shop: { select: { ownerId: true } },
+        shop: { select: { id: true, ownerId: true } },
       },
       take: 2,
     });
@@ -160,10 +167,7 @@ export async function getPartnerBookingPreviewAction(raw: string) {
     return { success: false as const, error: "Errors.bookingNotFound" };
   }
 
-  if (
-    auth.actor.role === "PARTNER" &&
-    booking.shop.ownerId !== auth.actor.id
-  ) {
+  if (!(await hasShopAccess(auth.actor, booking.shop, "operate"))) {
     return {
       success: false as const,
       error: "Errors.unauthorized",
@@ -191,7 +195,7 @@ export async function getPartnerBookingPreviewAction(raw: string) {
  * Check-out öncesi rezervasyona bağlı mühür listesi (onay ekranı).
  */
 export async function getPartnerBookingSealsAction(bookingIdRaw: string) {
-  const auth = await requirePartner();
+  const auth = await requireUser();
   if (!auth.ok) return { success: false as const, error: auth.error };
 
   let bookingId = bookingIdRaw.trim();
@@ -205,7 +209,7 @@ export async function getPartnerBookingSealsAction(bookingIdRaw: string) {
   if (!booking) {
     return { success: false as const, error: "Errors.bookingNotFound" };
   }
-  if (booking.shop.ownerId !== auth.actor.id && auth.actor.role !== "ADMIN") {
+  if (!(await hasShopAccess(auth.actor, booking.shop, "operate"))) {
     return { success: false as const, error: "Errors.unauthorized" };
   }
 
@@ -255,7 +259,7 @@ export async function checkInAction(
    */
   options?: { outsideHours?: boolean },
 ) {
-  const actor = await assertPartner();
+  const actor = await assertUser();
 
   let bookingId = qrTokenOrBookingId.trim();
   const payload = await verifyQrToken(qrTokenOrBookingId);
@@ -273,7 +277,7 @@ export async function checkInAction(
     };
   }
 
-  if (actor.role === "PARTNER" && booking.shop.ownerId !== actor.id) {
+  if (!(await hasShopAccess(actor, booking.shop, "operate"))) {
     return {
       success: false as const,
       error: "Errors.unauthorized",
@@ -366,7 +370,7 @@ export async function checkInAction(
  * checkOutAction - Esnafın valizi müşteriye teslim ettiği adım.
  */
 export async function checkOutAction(qrTokenOrBookingId: string) {
-  const actor = await assertPartner();
+  const actor = await assertUser();
 
   let bookingId = qrTokenOrBookingId.trim();
   const payload = await verifyQrToken(qrTokenOrBookingId);
@@ -383,7 +387,7 @@ export async function checkOutAction(qrTokenOrBookingId: string) {
       code: "NOT_FOUND" as const,
     };
   }
-  if (actor.role === "PARTNER" && booking.shop.ownerId !== actor.id) {
+  if (!(await hasShopAccess(actor, booking.shop, "operate"))) {
     return {
       success: false as const,
       error: "Errors.unauthorized",
@@ -498,19 +502,8 @@ export async function rejectBookingAction(bookingId: string) {
  * Sıradaki uygun mühürleri getirir (Otomatik mühürleme için).
  */
 export async function getNextAvailableSealsAction(shopId: string, count: number) {
-  const auth = await requirePartner();
-  if (!auth.ok) return { success: false as const, error: auth.error };
-
-  // Sahiplik kontrolü: esnaf sadece kendi dükkanının mühürlerini görebilir
-  if (auth.actor.role === "PARTNER") {
-    const shop = await prisma.shop.findUnique({
-      where: { id: shopId },
-      select: { ownerId: true },
-    });
-    if (!shop || shop.ownerId !== auth.actor.id) {
-      return { success: false as const, error: "Errors.unauthorized" };
-    }
-  }
+  const auth = await requireShopAccess(shopId, "operate");
+  if (!auth.ok) return { success: false as const, error: "Errors.unauthorized" };
 
   const seals = await sealService.getNextAvailableSeals(shopId, count);
   return {
@@ -523,29 +516,12 @@ export async function getNextAvailableSealsAction(shopId: string, count: number)
  * Bir mührü hatalı olarak işaretler ve stoktan düşer.
  */
 export async function reportFaultySealAction(serialNumber: number, shopId: string) {
-  const auth = await requirePartner();
-  if (!auth.ok) return { success: false as const, error: auth.error };
-
   /*
-    SAHIPLIK (2026-08-31'de eklendi). `shopId` ISTEMCIDEN geliyor ve burada
-    hicbir dogrulamadan gecmiyordu: `requirePartner()` yalnizca "esnaf mi"
-    diye soruyor, "BU dukkanin esnafi mi" diye sormuyor. Yani bir esnaf baska
-    bir dukkanin kimligini gecirip o dukkanin muhurlerini arizali
-    isaretleyebiliyordu -- ve FAULTY muhur check-in'de reddedildigi icin hedef
-    dukkanin teslim alma akisi duruyordu.
-
-    Hemen ustteki `getNextAvailableSealsAction` bu kontrolu YAPIYOR; komsusu
-    yapmiyordu. Mobil karsiligi da 2026-08-25'te kapatilmisti. Kural artik
-    `SealService.markSealAsFaulty` icinde, yani hicbir tasiyici atlayamaz;
-    buradaki kontrol kullaniciya dogru mesaji vermek icin duruyor.
+    `shopId` istemciden gelir; kapi "BU dukkanda operasyon yetkisi var mi" diye sorar
+    (2026-08-31 IDOR). Kural ayrica `SealService.markSealAsFaulty` icinde.
   */
-  if (auth.actor.role === "PARTNER") {
-    const owned = await prisma.shop.findFirst({
-      where: { id: shopId, ownerId: auth.actor.id },
-      select: { id: true },
-    });
-    if (!owned) return { success: false as const, error: "Errors.unauthorized" };
-  }
+  const auth = await requireShopAccess(shopId, "operate");
+  if (!auth.ok) return { success: false as const, error: auth.error === "Errors.shopNotFound" ? "Errors.unauthorized" : auth.error };
 
   try {
     await sealService.markSealAsFaulty(serialNumber, shopId, auth.actor);
@@ -576,7 +552,7 @@ const pendingBagRevisionBodySchema = z.object({
  * Gövde `BookingService.proposeBagRevision`'da; mobil uç da aynı gövdeyi kullanır.
  */
 export async function setPendingBagRevisionAction(raw: unknown) {
-  const auth = await requirePartner();
+  const auth = await requireUser();
   if (!auth.ok) return { success: false as const, error: auth.error };
 
   const parsed = pendingBagRevisionBodySchema.safeParse(raw);
@@ -585,7 +561,7 @@ export async function setPendingBagRevisionAction(raw: unknown) {
   }
   const { bookingId, ...counts } = parsed.data;
 
-  const result = await bookingService.proposeBagRevision(bookingId, counts, auth.actor);
+  const result = await bookingService.proposeBagRevision(bookingId, counts, shopSide(auth.actor));
   if (!result.ok) {
     return {
       success: false as const,
@@ -624,7 +600,7 @@ export async function setPendingBagRevisionAction(raw: unknown) {
  * yüzeyinde gösterilmiyor. Onay akışı kurulursa o çift zaten hazır duruyor.
  */
 export async function reviseBagsAction(raw: unknown) {
-  const auth = await requirePartner();
+  const auth = await requireUser();
   if (!auth.ok) return { success: false as const, error: auth.error };
 
   const parsed = pendingBagRevisionBodySchema.safeParse(raw);
@@ -633,7 +609,7 @@ export async function reviseBagsAction(raw: unknown) {
   }
   const { bookingId, ...counts } = parsed.data;
 
-  const result = await bookingService.applyBagRevision(bookingId, auth.actor, {
+  const result = await bookingService.applyBagRevision(bookingId, shopSide(auth.actor), {
     counts,
     source: "web",
   });
@@ -654,10 +630,10 @@ export async function reviseBagsAction(raw: unknown) {
 }
 
 export async function applyPendingBagRevisionAction(bookingId: string) {
-  const auth = await requirePartner();
+  const auth = await requireUser();
   if (!auth.ok) return { success: false as const, error: auth.error };
 
-  const result = await bookingService.applyBagRevision(bookingId, auth.actor, {
+  const result = await bookingService.applyBagRevision(bookingId, shopSide(auth.actor), {
     source: "web",
   });
   if (!result.ok) {
@@ -679,10 +655,10 @@ export async function applyPendingBagRevisionAction(bookingId: string) {
  * ayrım yapmadan revizyonu yok ediyordu (P1-8).
  */
 export async function clearPendingBagRevisionAction(bookingId: string) {
-  const auth = await requirePartner();
+  const auth = await requireUser();
   if (!auth.ok) return { success: false as const, error: auth.error };
 
-  const result = await bookingService.clearBagRevision(bookingId, auth.actor);
+  const result = await bookingService.clearBagRevision(bookingId, shopSide(auth.actor));
   if (!result.ok) {
     return {
       success: false as const,

@@ -20,6 +20,8 @@ const m = vi.hoisted(() => {
       merchantProfile: { deleteMany: ok() },
       reviewBlock: { deleteMany: ok() },
       mobileInstall: { deleteMany: ok() },
+      shopMember: { deleteMany: ok() },
+      shopInvite: { deleteMany: ok() },
       user: { update: ok(), findUnique: vi.fn().mockResolvedValue({ email: "Ada@Example.com" }) },
       passwordResetCode: { deleteMany: ok() },
       mobileLoginCode: { deleteMany: ok() },

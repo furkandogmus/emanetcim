@@ -52,7 +52,7 @@ describe("mobil mühür uçlarında dükkan seçimi", () => {
   it("stok web ile aynı seçimden okunur ve yanıt dükkanı söyler", async () => {
     const res = (await GET(new NextRequest(`${URL_BASE}?shop=s2`)))!;
     expect(res.status).toBe(200);
-    expect(mockResolve).toHaveBeenCalledWith("p1", "s2");
+    expect(mockResolve).toHaveBeenCalledWith("p1", "s2", "operate");
     expect(mockDb.shop.findFirst).not.toHaveBeenCalled();
     expect((await res.json()).shop).toEqual({ id: "s2", name: "Galata" });
   });
@@ -72,7 +72,7 @@ describe("mobil mühür uçlarında dükkan seçimi", () => {
 
   it("dükkan belirtilmezse seçime null gider (web varsayılanı)", async () => {
     await GET(new NextRequest(URL_BASE));
-    expect(mockResolve).toHaveBeenCalledWith("p1", null);
+    expect(mockResolve).toHaveBeenCalledWith("p1", null, "operate");
   });
 
   it("dükkansız esnafa üç uç da 404 no_shop", async () => {

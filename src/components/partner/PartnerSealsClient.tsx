@@ -44,6 +44,8 @@ interface Props {
   inUseCount: number;
   returnedCount: number;
   requests: SealRequestRow[];
+  /** Personelde `false`: talep ve geri donusum `manage`; teslim alma ve stok gorunur. */
+  canManage?: boolean;
 }
 
 function StatusBadge({ status, t }: { status: string; t: (key: string) => string }) {
@@ -73,6 +75,7 @@ export default function PartnerSealsClient({
   inUseCount,
   returnedCount,
   requests,
+  canManage = true,
 }: Props) {
   const t = useTranslations("Partner");
   const errorText = useActionErrorText();
@@ -223,7 +226,7 @@ export default function PartnerSealsClient({
         </div>
 
         {/* Recycle returned seals */}
-        {returnedCount > 0 && (
+        {canManage && returnedCount > 0 && (
           <button
             onClick={handleRecycle}
             disabled={isPending}
@@ -235,6 +238,7 @@ export default function PartnerSealsClient({
         )}
 
         {/* Request new seals */}
+        {canManage && (
         <div className="bg-white rounded-2xl border border-gray-100 p-5">
           <div className="flex items-center justify-between mb-3">
             <h2 className="font-bold text-gray-900 text-sm">{t("sealsRequestTitle")}</h2>
@@ -291,6 +295,7 @@ export default function PartnerSealsClient({
             </p>
           )}
         </div>
+        )}
 
         {/* Request history */}
         {requests.length > 0 && (

@@ -1,7 +1,8 @@
 import { setRequestLocale, getTranslations } from "next-intl/server";
 import { ChevronLeft, Package, Clock, CheckCircle2, Phone, ChevronRight } from "lucide-react";
 import { Link } from "@/i18n/routing";
-import { requirePartnerPage } from "@/lib/page-auth";
+import { requireShopOperatorPage } from "@/lib/page-auth";
+import { operableShopIds } from "@/lib/shop-access";
 import prisma from "@/lib/db";
 import { formatDateTimeInZone, bookingTimeZone } from "@/lib/format-datetime";
 import { bcp47ForUiLocale } from "@/lib/intl-locale";
@@ -39,7 +40,7 @@ export default async function PartnerBookingsPage({
   const t = await getTranslations("Partner");
   const tGuest = await getTranslations("Guest");
 
-  const actor = await requirePartnerPage(locale, "/partner/bookings");
+  const actor = await requireShopOperatorPage(locale, "/partner/bookings");
   const userId = actor.id;
 
   const sp = (await searchParams) ?? {};
@@ -58,13 +59,11 @@ export default async function PartnerBookingsPage({
    */
   const filterStatuses = partnerBookingsFilterStatuses(filter);
   const q = normalizePartnerSearchQuery(sp.q);
-  // Arama mobil uctaki ayni servis: kod on eki / ad / telefon kuyrugu, yalnizca kendi dukkanlari.
-  const ownShopIds = q
-    ? (await prisma.shop.findMany({ where: { ownerId: userId }, select: { id: true } })).map((s) => s.id)
-    : [];
-  const { where: search, match } = await partnerBookingSearchWhere(ownShopIds, q);
+  // Kapsam: sahip + personel olunan dukkanlar. Arama mobil uctaki ayni servis.
+  const shopIds = await operableShopIds(userId);
+  const { where: search, match } = await partnerBookingSearchWhere(q ? shopIds : [], q);
   const where = {
-    shop: { ownerId: userId },
+    shopId: { in: shopIds },
     ...(filterStatuses ? { status: { in: filterStatuses } } : {}),
     ...search,
   };
