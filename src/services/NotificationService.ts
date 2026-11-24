@@ -835,6 +835,95 @@ export class NotificationService implements INotificationService {
    * Teyit ikisini birden çözüyor: gelen kutusunda bir iz kalıyor ve adres
    * çalışmıyorsa bu HEMEN belli oluyor.
    */
+  /**
+   * Kayit formuna zaten kayitli bir adres girildi (2026-11-24). Form artik yeni
+   * kayitla AYNI yaniti veriyor (hesap varligi sizdirilmaz); gercek sahibi
+   * durumu bu e-postadan ogrenir.
+   */
+  async notifyExistingAccountSignupAttempt(email: string, locale: string = "tr"): Promise<void> {
+    if (!email.includes("@")) return;
+    const domain = getSiteBaseUrl();
+    const loginUrl = `${domain}/${locale}/login`;
+    const resetUrl = `${domain}/${locale}/auth/forgot-password`;
+
+    const content = pickLocale({
+      tr: {
+        subject: "BagajPark hesabın zaten var",
+        heading: "Bu adresle zaten bir hesabın var",
+        p1: "Biri (muhtemelen sen) bu e-posta adresiyle yeniden kayıt olmayı denedi. Yeni hesap açılmadı; mevcut hesabın olduğu gibi duruyor.",
+        p2: "Giriş yapabilir ya da şifreni hatırlamıyorsan sıfırlayabilirsin.",
+        cta: "Giriş yap",
+        resetLabel: "Şifremi unuttum",
+        footer: "Bu sen değilsen bu e-postayı yok sayabilirsin; hesabında bir değişiklik yapılmadı.",
+      },
+      en: {
+        subject: "You already have a BagajPark account",
+        heading: "This address already has an account",
+        p1: "Someone (probably you) tried to sign up again with this email address. No new account was created; your existing account is unchanged.",
+        p2: "You can sign in, or reset your password if you have forgotten it.",
+        cta: "Sign in",
+        resetLabel: "Forgot password",
+        footer: "If this was not you, you can ignore this email; nothing on your account was changed.",
+      },
+      de: {
+        subject: "Sie haben bereits ein BagajPark-Konto",
+        heading: "Für diese Adresse gibt es bereits ein Konto",
+        p1: "Jemand (vermutlich Sie) hat versucht, sich mit dieser E-Mail-Adresse erneut zu registrieren. Es wurde kein neues Konto angelegt; Ihr bestehendes Konto ist unverändert.",
+        p2: "Sie können sich anmelden oder Ihr Passwort zurücksetzen, falls Sie es vergessen haben.",
+        cta: "Anmelden",
+        resetLabel: "Passwort vergessen",
+        footer: "Wenn Sie das nicht waren, können Sie diese E-Mail ignorieren; an Ihrem Konto wurde nichts geändert.",
+      },
+      fr: {
+        subject: "Vous avez déjà un compte BagajPark",
+        heading: "Cette adresse a déjà un compte",
+        p1: "Quelqu'un (probablement vous) a essayé de s'inscrire à nouveau avec cette adresse e-mail. Aucun nouveau compte n'a été créé ; votre compte existant est inchangé.",
+        p2: "Vous pouvez vous connecter, ou réinitialiser votre mot de passe si vous l'avez oublié.",
+        cta: "Se connecter",
+        resetLabel: "Mot de passe oublié",
+        footer: "Si ce n'était pas vous, ignorez cet e-mail ; rien n'a été modifié sur votre compte.",
+      },
+      ja: {
+        subject: "BagajParkのアカウントはすでにあります",
+        heading: "このメールアドレスのアカウントはすでに存在します",
+        p1: "このメールアドレスで再度登録しようとする操作がありました（おそらくご本人です）。新しいアカウントは作成されず、既存のアカウントはそのままです。",
+        p2: "ログインするか、パスワードをお忘れの場合は再設定してください。",
+        cta: "ログイン",
+        resetLabel: "パスワードを忘れた場合",
+        footer: "心当たりがない場合は、このメールを無視してください。アカウントには何も変更されていません。",
+      },
+      fa: {
+        subject: "شما از قبل حساب BagajPark دارید",
+        heading: "این نشانی از قبل حساب دارد",
+        p1: "کسی (احتمالاً خود شما) تلاش کرد با این نشانی ایمیل دوباره ثبت‌نام کند. حساب جدیدی ساخته نشد و حساب فعلی شما بدون تغییر است.",
+        p2: "می‌توانید وارد شوید یا اگر رمز عبور را فراموش کرده‌اید آن را بازنشانی کنید.",
+        cta: "ورود",
+        resetLabel: "فراموشی رمز عبور",
+        footer: "اگر این کار را شما انجام نداده‌اید، این ایمیل را نادیده بگیرید؛ هیچ تغییری در حساب شما داده نشد.",
+      },
+      ru: {
+        subject: "У вас уже есть аккаунт BagajPark",
+        heading: "Для этого адреса уже есть аккаунт",
+        p1: "Кто-то (вероятно, вы) попытался снова зарегистрироваться с этим адресом электронной почты. Новый аккаунт не создан, ваш текущий аккаунт не изменился.",
+        p2: "Вы можете войти или сбросить пароль, если забыли его.",
+        cta: "Войти",
+        resetLabel: "Забыли пароль?",
+        footer: "Если это были не вы, просто проигнорируйте это письмо: в вашем аккаунте ничего не изменилось.",
+      },
+    }, locale);
+
+    const body = `${content.heading}\n\n${content.p1}\n\n${content.p2}\n\n${content.cta}: ${loginUrl}\n${content.resetLabel}: ${resetUrl}\n\n${content.footer}`;
+    const html = renderEmailHtml({
+      locale,
+      heading: content.heading,
+      paragraphs: [content.p1, content.p2, `<a href="${resetUrl}">${content.resetLabel}</a>`],
+      cta: { href: loginUrl, label: content.cta, variant: "button" },
+      footer: content.footer,
+    });
+
+    await this.sendEmail(email, content.subject, body, undefined, html);
+  }
+
   async notifyPrelaunchInterestReceived(
     email: string,
     shopId: string,

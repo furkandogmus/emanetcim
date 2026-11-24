@@ -1,7 +1,7 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import { registerGuestAction, registerPartnerApplicationAction } from "../actions/register";
 
-const { mockPrisma, mockRateLimit, mockMail } = vi.hoisted(() => {
+const { mockPrisma, mockRateLimit, mockMail, mockExistingNotice } = vi.hoisted(() => {
   return {
     mockPrisma: {
       user: {
@@ -18,8 +18,16 @@ const { mockPrisma, mockRateLimit, mockMail } = vi.hoisted(() => {
     },
     mockRateLimit: vi.fn().mockResolvedValue(true),
     mockMail: vi.fn().mockResolvedValue(true),
+    mockExistingNotice: vi.fn().mockResolvedValue(undefined),
   };
 });
+
+vi.mock("@/services/NotificationService", () => ({
+  notificationService: {
+    notifyExistingAccountSignupAttempt: mockExistingNotice,
+    notifyAdminsForNewUser: vi.fn().mockResolvedValue(undefined),
+  },
+}));
 
 vi.mock("@/lib/db", () => ({ default: mockPrisma }));
 vi.mock("@/lib/rate-limit", () => ({ rateLimit: mockRateLimit }));
@@ -83,15 +91,30 @@ describe("Register Actions", () => {
       expect(mockPrisma.user.create).not.toHaveBeenCalled();
     });
 
-    it("should block if email already exists", async () => {
+    it("kayitli adres yeni kayitla ayni basariyi alir; sahibine bilgi e-postasi gider", async () => {
       mockPrisma.user.findUnique.mockResolvedValue({ id: "1" });
+      const result = await registerGuestAction({
+        email: "Exists@Test.com",
+        name: "Test",
+        password: "password123",
+      });
+      expect(result).toEqual({ success: true });
+      expect(mockPrisma.user.create).not.toHaveBeenCalled();
+      expect(mockMail).not.toHaveBeenCalled();
+      expect(mockExistingNotice).toHaveBeenCalledWith("exists@test.com", "tr");
+      expect(mockRateLimit).toHaveBeenCalledWith("register_existing_notice:exists@test.com", 3, 24 * 60 * 60 * 1000);
+    });
+
+    it("kayitli adrese bilgi e-postasi gunluk tavanda kesilir, yanit yine ayni", async () => {
+      mockPrisma.user.findUnique.mockResolvedValue({ id: "1" });
+      mockRateLimit.mockResolvedValueOnce(true).mockResolvedValueOnce(false);
       const result = await registerGuestAction({
         email: "exists@test.com",
         name: "Test",
         password: "password123",
       });
-      expect(result.success).toBe(false);
-      expect(result.error).toBe("Errors.emailAlreadyRegistered");
+      expect(result).toEqual({ success: true });
+      expect(mockExistingNotice).not.toHaveBeenCalled();
     });
 
     it("should create user and send verification email on success", async () => {
@@ -149,6 +172,20 @@ describe("Register Actions", () => {
 
       expect(result.success).toBe(false);
       expect(result.error).toBe("Errors.phoneAlreadyRegistered");
+    });
+
+    it("kayitli yaniti gunluk tavani asinca tooManyRequests (tarama siniri)", async () => {
+      mockPrisma.user.findUnique.mockResolvedValue({ id: "existing-phone" });
+      // 1: basvuru IP kovasi, 2: "kayitli" IP kovasi
+      mockRateLimit.mockResolvedValueOnce(true).mockResolvedValueOnce(false);
+      const result = await registerPartnerApplicationAction({
+        name: "Partner",
+        phone: "0555 555 55 55",
+        password: "password123",
+        shopName: "Shop",
+        shopAddress: "Address",
+      });
+      expect(result).toEqual({ success: false, error: "Errors.tooManyRequests" });
     });
 
     it("koordinatsız kaydı reddeder (DEFECT_BACKLOG D9)", async () => {

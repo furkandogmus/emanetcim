@@ -75,12 +75,25 @@ export async function registerGuestAction(data: unknown) {
     return { success: false as const, error: "Errors.invalidEmail" };
   }
 
-  const exists = await prisma.user.findUnique({ where: { email } });
+  // Hash once: kayitli adres yolu da ayni sureyi harcar (zamanlama farki sizdirmasin).
+  const passwordHash = await hashPassword(parsed.data.password);
+  const locale = await getLocale();
+
+  /*
+    Kayitli adres yeni kayitla AYNI basariyi alir (2026-11-24): "bu e-posta
+    kayitli" yaniti hesap varligini sizdiriyordu. Sahibine giris/sifirlama
+    e-postasi gider; adres basina gunluk tavan kurbani bombalamayi onler.
+  */
+  const exists = await prisma.user.findUnique({ where: { email }, select: { id: true } });
   if (exists) {
-    return { success: false as const, error: "Errors.emailAlreadyRegistered" };
+    if (await rateLimit(`register_existing_notice:${email}`, 3, 24 * 60 * 60 * 1000)) {
+      await notificationService
+        .notifyExistingAccountSignupAttempt(email, locale)
+        .catch((err) => logger.error({ err }, "notify_existing_account_signup_failed"));
+    }
+    return { success: true as const };
   }
 
-  const passwordHash = await hashPassword(parsed.data.password);
   const user = await prisma.user.create({
     data: {
       email,
@@ -106,7 +119,6 @@ export async function registerGuestAction(data: unknown) {
   });
 
   // Verify Email (sadece e-posta ile kayıt/login flowu için)
-  const locale = await getLocale();
   const verificationToken = await generateVerificationToken(user.email!);
   await sendVerificationEmail(user.email!, verificationToken.token, locale);
 
@@ -130,6 +142,19 @@ export async function registerGuestAction(data: unknown) {
   return { success: true as const };
 }
 
+/*
+  Esnaf basvurusunda "kayitli" yaniti KALIR: basvuru dukkan da yaratiyor ve
+  sessiz basari basvuruyu kaybettirirdi (telefon icin e-posta yolu da yok).
+  Sizinti yerine tarama sinirlanir: IP ve tanimlayici basina gunde 3 "kayitli" yaniti.
+*/
+async function partnerTakenAnswerAllowed(ip: string, identifier: string): Promise<boolean> {
+  const day = 24 * 60 * 60 * 1000;
+  return (
+    (await rateLimit(`register_partner_taken_ip:${ip}`, 3, day)) &&
+    (await rateLimit(`register_partner_taken_id:${identifier}`, 3, day))
+  );
+}
+
 export async function registerPartnerApplicationAction(data: unknown) {
   const parsed = partnerSchema.safeParse(data);
   if (!parsed.success) {
@@ -150,6 +175,9 @@ export async function registerPartnerApplicationAction(data: unknown) {
     }
     const exists = await prisma.user.findUnique({ where: { email } });
     if (exists) {
+      if (!(await partnerTakenAnswerAllowed(ip, email))) {
+        return { success: false as const, error: "Errors.tooManyRequests" };
+      }
       return { success: false as const, error: "Errors.emailAlreadyRegistered" };
     }
   }
@@ -160,6 +188,9 @@ export async function registerPartnerApplicationAction(data: unknown) {
   }
   const phoneExists = await prisma.user.findUnique({ where: { phone: phoneNorm } });
   if (phoneExists) {
+    if (!(await partnerTakenAnswerAllowed(ip, phoneNorm))) {
+      return { success: false as const, error: "Errors.tooManyRequests" };
+    }
     return { success: false as const, error: "Errors.phoneAlreadyRegistered" };
   }
 
