@@ -3291,7 +3291,8 @@ export class NotificationService implements INotificationService {
       cta: { href, label: content.cta, variant: "button" },
       footer: content.footer,
     });
-    const text = `${content.heading}\n\n${content.p1.replace(/<[^>]+>/g, "").replace(shopHtml, shopName)}\n\n${href}`;
+    // p1'deki tek etiket dukkan adini saran <strong>; etiket ayiklamak yerine birebir degistirilir.
+    const text = `${content.heading}\n\n${content.p1.replace(`<strong>${shopHtml}</strong>`, shopName)}\n\n${href}`;
     await this.sendEmail(email, content.subject, text, undefined, html);
   }
 }
