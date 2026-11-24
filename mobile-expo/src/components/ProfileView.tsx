@@ -18,6 +18,7 @@ import { AppText, Button, IconButton } from "@/components/ui";
 import { dataExportRetryAt } from "@/lib/account-parity";
 import { api, ApiError } from "@/lib/api";
 import { useAuth } from "@/lib/auth";
+import { hasStaffPanel } from "@/lib/shop-access";
 import { errorMessage } from "@/lib/errors";
 import { formatDay, formatDayTime } from "@/lib/format";
 import { useMyAffiliate, useMyDeletionRequest, useRequestAccountDeletion, useRequestDataExport } from "@/lib/queries";
@@ -164,6 +165,16 @@ export function ProfileView({ asTab = false, embedded = false }: { asTab?: boole
         </View>
         <ChevronRight size={18} color={colors.inkMuted} />
       </Pressable>
+
+      {/* Personel PARTNER degil: esnaf paneline giden yol misafir profilinde. */}
+      {!embedded && hasStaffPanel(user) ? (
+        <Section title={t("shopStaff.staffPanel")}>
+          <SettingsRow
+            label={t("shopStaff.staffPanelOpen", { count: user.staffShopCount ?? 0 })}
+            onPress={() => router.push("/partner")}
+          />
+        </Section>
+      ) : null}
 
       {isGuest ? <ReferralCard audience="guest" /> : null}
 

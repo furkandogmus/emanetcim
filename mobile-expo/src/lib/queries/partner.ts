@@ -6,6 +6,7 @@ import { partnerSearchTerm } from "../booking-search";
 import { useDebouncedValue } from "../use-debounced-value";
 import type { PartnerEarnings, PartnerSealsResponse, PartnerShop, PartnerBookingsResponse, PartnerShopSettings, PartnerSchedule, PartnerDashboard } from "../types";
 import { keys } from "./keys";
+import { dashboardAccess } from "../shop-access";
 
 /**
  * `polling`: esnaf listesi ekranda gorunurken 30 sn'de bir yenilenir (push gelene kadar).
@@ -71,10 +72,18 @@ export function usePartnerBookingSearch(raw: string, shopId: string | null) {
 
 export function usePartnerShop() {
   const [shopId] = usePartnerShopSelection();
+  // Dukkan ayarlari `manage`: personelde sunucu reddeder, istek hic gitmez.
+  const staff = useShopAccess() === "staff";
   return useQuery({
     queryKey: [...keys.partnerShop, shopId ?? "default"],
     queryFn: () => api<PartnerShop>(withShop("/partner/shop", shopId)),
+    enabled: !staff,
   });
+}
+
+/** Secili dukkandaki yetki (`partner/dashboard`); yuklenene kadar ve eski sunucuda sahip. */
+export function useShopAccess() {
+  return dashboardAccess(usePartnerDashboard().data);
 }
 
 export function usePartnerSeals() {

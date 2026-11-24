@@ -80,6 +80,7 @@ jest.mock("@/lib/queries", () => ({
   useOnlinePayments: () => false,
   isActiveBooking: () => true,
   usePartnerShop: () => ({ data: undefined }),
+  usePartnerDashboard: () => ({ data: undefined }),
   usePartnerCancel: () => ({ mutate: mockMutate, isPending: false }),
   usePartnerNoShow: () => ({ mutate: jest.fn(), isPending: false }),
   usePartnerLateHold: () => ({ mutate: jest.fn(), isPending: false }),

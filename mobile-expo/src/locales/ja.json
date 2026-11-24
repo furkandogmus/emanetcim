@@ -2336,5 +2336,43 @@
     "label": "アプリ価格",
     "checkoutLine": "アプリ割引 {{pct}}%",
     "badge": "アプリ限定 {{pct}}% オフ"
+  },
+  "shopStaff": {
+    "title": "チーム",
+    "intro": "スタッフは予約の確認、QRの読み取り、荷物の受け取りと返却ができます。売上、振込情報、店舗設定はあなただけが扱えます。",
+    "inviteLabel": "メールでスタッフを追加",
+    "invitePlaceholder": "staff@example.jp",
+    "inviteSubmit": "招待する",
+    "limitHint": "スタッフと保留中の招待 {{used}} / {{limit}}",
+    "membersTitle": "スタッフ",
+    "membersEmpty": "まだスタッフはいません。",
+    "since": "{{date}} から",
+    "remove": "外す",
+    "removeTitle": "スタッフを外す",
+    "removeConfirm": "{{name}} はこの店舗にアクセスできなくなります。続けますか？",
+    "pendingTitle": "保留中の招待",
+    "expires": "有効期限 {{date}}",
+    "revoke": "取り消す",
+    "addedToast": "スタッフを追加し、通知しました。",
+    "invitedToast": "招待メールを送信しました。",
+    "removedToast": "スタッフを外しました。",
+    "revokedToast": "招待を取り消しました。",
+    "inviteFailed": "招待を送信できませんでした",
+    "opsSection": "業務",
+    "staffNote": "この店舗のスタッフです。予約、QR、受け渡しを担当します。売上と店舗設定はオーナーが管理します。",
+    "guestMode": "ゲストアプリに切り替え",
+    "staffPanel": "店舗パネル",
+    "staffPanelOpen_other": "{{count}} 店舗のスタッフです。パネルを開く",
+    "pulseA11y": "{{shop}}、本日：来店 {{arrivals}} 名、受け取り {{pickups}} 個、店内の荷物 {{bags}} 個。",
+    "errors": {
+      "invalid_email": "有効なメールアドレスを入力してください。",
+      "self": "自分自身は追加できません。",
+      "owner": "このアドレスは店舗オーナーのものです。",
+      "already_member": "この人はすでにチームにいます。",
+      "limit": "スタッフの上限に達しました。",
+      "rate_limited": "招待が多すぎます。しばらくしてから再度お試しください。",
+      "forbidden": "チームを管理できるのは店舗オーナーだけです。",
+      "not_found": "見つかりません。"
+    }
   }
 }

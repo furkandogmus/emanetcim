@@ -26,8 +26,11 @@ jest.mock("react-native-safe-area-context", () => ({
   useSafeAreaInsets: () => ({ top: 0, bottom: 0, left: 0, right: 0 }),
 }));
 const idle = () => ({ mutate: jest.fn(), isPending: false });
+// Panodaki dukkan yetkisi; personel testi `access: "staff"` verir.
+let mockDashboard: unknown = undefined;
 jest.mock("@/lib/queries", () => ({
   usePartnerShop: () => ({ data: undefined }),
+  usePartnerDashboard: () => ({ data: mockDashboard }),
   usePartnerCancel: () => idle(),
   usePartnerNoShow: () => idle(),
   usePartnerLateHold: () => idle(),
@@ -106,6 +109,17 @@ describe("esnaf: iptal", () => {
     expect(screen.getByRole("button", { name: "Rezervasyonu iptal et" })).toBeTruthy();
     await screen.rerender(withClient(<PartnerBookingActions booking={booking({ status: "CHECKED_IN" })} />));
     expect(screen.queryByRole("button", { name: "Rezervasyonu iptal et" })).toBeNull();
+  });
+
+  it("dukkan personeli iptal dugmesini gormez (iptal sahibin isi)", async () => {
+    const b = booking({ status: "APPROVED" });
+    mockDashboard = { shops: [{ id: b.shopId, name: "D", access: "staff" }] };
+    try {
+      await render(withClient(<PartnerBookingActions booking={b} />));
+      expect(screen.queryByRole("button", { name: "Rezervasyonu iptal et" })).toBeNull();
+    } finally {
+      mockDashboard = undefined;
+    }
   });
 });
 

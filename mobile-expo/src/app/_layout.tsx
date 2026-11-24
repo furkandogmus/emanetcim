@@ -23,6 +23,7 @@ import { Geist_400Regular, Geist_500Medium, Geist_600SemiBold } from "@expo-goog
 import { ApiError } from "@/lib/api";
 import { pingAppOpen } from "@/lib/app-ping";
 import { AuthProvider, useAuth } from "@/lib/auth";
+import { hasStaffPanel } from "@/lib/shop-access";
 import { usePendingLinkResume } from "@/lib/use-pending-link";
 import { openFromNotification, registerForPush } from "@/lib/push";
 import { ForcedUpdateScreen, OtaReadyBanner, useUpdateRequired } from "@/components/AppUpdate";
@@ -146,7 +147,8 @@ function RootNavigator() {
         <Stack.Protected guard={role === "ADMIN"}>
           <Stack.Screen name="(admin)" />
         </Stack.Protected>
-        <Stack.Protected guard={role === "PARTNER"}>
+        {/* Dukkan personeli PARTNER degil (rolu GUEST): esnaf alanina uyelikle girer. */}
+        <Stack.Protected guard={role === "PARTNER" || (state.status === "signedIn" && hasStaffPanel(state.user))}>
           <Stack.Screen name="(partner)" />
         </Stack.Protected>
         <Stack.Protected guard={state.status === "signedIn"}>

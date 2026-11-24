@@ -10,6 +10,11 @@ export type MobileUser = {
   emailVerified: boolean;
   /** Hesapta sifre var mi (hash degil). Profilde "sifre belirle" / "degistir" ayrimi. */
   hasPassword: boolean;
+  /**
+   * Yalniz `auth/me`: personel oldugu dukkan sayisi. Personel `PARTNER` degildir (rolu cogu
+   * `GUEST`); eski sunucuda alan yok, yoksa 0 say.
+   */
+  staffShopCount?: number;
 };
 
 export type SessionResponse = {
