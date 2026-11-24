@@ -348,6 +348,11 @@ describe("web olarak goruntule", () => {
         expect(impersonationProxyDecision({ ...base, method: "GET", pathname: p }), p).toBe("block");
       }
       expect(impersonationProxyDecision({ ...base, method: "GET", pathname: "/tr/%E0%A4%A" })).toBe("block");
+      for (const p of ["/api/account/data-export", "/api/account/data%2Dexport", "/api/account/data-export/"]) {
+        for (const isServerAction of [false, true]) {
+          expect(impersonationProxyDecision({ ...base, isServerAction, method: "POST", pathname: p }), `POST ${p}`).toBe("block");
+        }
+      }
       expect(normalizeProxyPath("/api/impersonation/stop/")).toBe("/api/impersonation/stop");
     });
 
