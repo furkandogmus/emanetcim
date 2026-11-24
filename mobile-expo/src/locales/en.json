@@ -2114,5 +2114,97 @@
       "shop_now_open": "This spot has opened; you can book it now.",
       "too_many_requests": "Too many attempts. Please try again shortly."
     }
+  },
+  "accountParity": {
+    "sections": {
+      "earn": "Earn with BagajPark"
+    },
+    "exportRow": "Email me my data",
+    "exportTitle": "Email your data to you?",
+    "exportBody": "A JSON file with the personal data linked to your account is sent to your account's verified email address. You can request it once every 24 hours.",
+    "exportConfirm": "Send",
+    "exportSentTitle": "Sent",
+    "exportSentBody": "The file was sent to {{email}}. If it does not arrive within a few minutes, check your spam folder.",
+    "exportFailedTitle": "Could not send",
+    "becomePartner": "Become a partner shop",
+    "affiliateProgram": "Become an affiliate, earn commission",
+    "affiliatePanel": "Affiliate dashboard",
+    "howItWorks": "How it works",
+    "cancellation": "Cancellation policy",
+    "insurance": "Luggage protection",
+    "about": "About us",
+    "blog": "Blog",
+    "checkoutCancellationFree": "You can cancel for free until you drop off your luggage.",
+    "checkoutCancellationOnline": "Cancellation and refund terms depend on how long is left before drop-off.",
+    "checkoutCancellationLink": "Cancellation policy",
+    "errors": {
+      "rate_limited": "An export was already sent in the last 24 hours.",
+      "rate_limited_until": "An export was already sent in the last 24 hours. You can request another after {{time}}.",
+      "no_verified_email": "Your account has no verified email. Add and verify an email in your profile, then try again.",
+      "mail_failed": "The email could not be sent right now. Please try again later.",
+      "not_allowed_while_impersonating": "This is not available while viewing as another user."
+    }
+  },
+  "affiliate": {
+    "title": "Affiliate dashboard",
+    "noneTitle": "You are not an affiliate yet",
+    "noneBody": "Hosts, hotels and guides who send their guests to BagajPark earn a commission on every completed booking from their personal link.",
+    "apply": "Apply",
+    "learnMore": "About the programme",
+    "status": {
+      "pending": "Your application is under review",
+      "paused": "Your affiliate account is paused",
+      "active": "Active"
+    },
+    "pendingBody": "Once approved, your personal link and QR code appear here.",
+    "pausedBody": "Your link does not bring new bookings for now. Contact us for details.",
+    "link": "Your personal link",
+    "qrLabel": "QR code of your personal link",
+    "rates": "Commission {{commission}}% · guest discount {{discount}}%",
+    "share": "Share link",
+    "shareTip": "Put the QR code at reception or in your house guide; commission is recorded when a booking from your link is completed.",
+    "shareMessage": "Store your luggage safely with BagajPark and get {{pct}}% off with this link: {{url}}",
+    "stats": {
+      "clicks": "Clicks",
+      "bookings": "Bookings",
+      "completed": "Completed",
+      "earned": "Earned",
+      "unpaid": "Unpaid"
+    },
+    "bookingsTitle": "Bookings",
+    "noBookings": "No bookings from your link yet.",
+    "commissionPaid": "commission {{amount}} (paid)",
+    "commissionUnpaid": "commission {{amount}} (to be paid)",
+    "cancelled": "cancelled",
+    "pending": "commission on completion",
+    "applyTitle": "Affiliate application",
+    "applyIntro": "Our team reviews your application; once approved, your personal link and rates open in this dashboard.",
+    "form": {
+      "displayName": "Name or business name",
+      "displayNameHint": "Your guests see this name.",
+      "type": "Type",
+      "email": "Email",
+      "phone": "Phone",
+      "note": "Note (optional)",
+      "noteHint": "For example how many guests you host or which area you are in."
+    },
+    "types": {
+      "airbnb_host": "Host (Airbnb etc.)",
+      "hotel": "Hotel / guesthouse",
+      "guide": "Guide",
+      "agency": "Travel agency",
+      "other": "Other"
+    },
+    "submit": "Send application",
+    "appliedTitle": "Application received",
+    "appliedBody": "We will review it and get back to you soon.",
+    "toPanel": "Go to dashboard",
+    "errors": {
+      "invalid_data": "Enter your name and type correctly.",
+      "contact_required": "Enter an email or phone number.",
+      "already_applied": "You already applied with this account.",
+      "rate_limited": "Too many attempts. Please try again later.",
+      "not_allowed_while_impersonating": "Applications are not available while viewing as another user."
+    }
   }
 }

@@ -2114,5 +2114,97 @@
       "shop_now_open": "Dieser Ort ist jetzt geöffnet; du kannst buchen.",
       "too_many_requests": "Zu viele Versuche. Bitte versuche es gleich noch einmal."
     }
+  },
+  "accountParity": {
+    "sections": {
+      "earn": "Mit BagajPark verdienen"
+    },
+    "exportRow": "Meine Daten per E-Mail senden",
+    "exportTitle": "Deine Daten per E-Mail senden?",
+    "exportBody": "Eine JSON-Datei mit den personenbezogenen Daten deines Kontos wird an die bestätigte E-Mail-Adresse deines Kontos gesendet. Du kannst sie einmal alle 24 Stunden anfordern.",
+    "exportConfirm": "Senden",
+    "exportSentTitle": "Gesendet",
+    "exportSentBody": "Die Datei wurde an {{email}} gesendet. Wenn sie nicht in wenigen Minuten ankommt, sieh im Spam-Ordner nach.",
+    "exportFailedTitle": "Senden fehlgeschlagen",
+    "becomePartner": "Partnergeschäft werden",
+    "affiliateProgram": "Vermittler werden, Provision verdienen",
+    "affiliatePanel": "Vermittler-Übersicht",
+    "howItWorks": "So funktioniert's",
+    "cancellation": "Stornobedingungen",
+    "insurance": "Gepäckschutz",
+    "about": "Über uns",
+    "blog": "Blog",
+    "checkoutCancellationFree": "Du kannst kostenlos stornieren, bis du dein Gepäck abgibst.",
+    "checkoutCancellationOnline": "Storno- und Erstattungsbedingungen hängen von der verbleibenden Zeit bis zur Abgabe ab.",
+    "checkoutCancellationLink": "Stornobedingungen",
+    "errors": {
+      "rate_limited": "In den letzten 24 Stunden wurde bereits ein Export gesendet.",
+      "rate_limited_until": "In den letzten 24 Stunden wurde bereits ein Export gesendet. Ab {{time}} kannst du einen neuen anfordern.",
+      "no_verified_email": "Dein Konto hat keine bestätigte E-Mail-Adresse. Füge im Profil eine E-Mail hinzu, bestätige sie und versuche es erneut.",
+      "mail_failed": "Die E-Mail konnte gerade nicht gesendet werden. Bitte versuche es später erneut.",
+      "not_allowed_while_impersonating": "In der Ansicht als anderer Nutzer nicht möglich."
+    }
+  },
+  "affiliate": {
+    "title": "Vermittler-Übersicht",
+    "noneTitle": "Du bist noch kein Vermittler",
+    "noneBody": "Gastgeber, Hotels und Guides, die ihre Gäste zu BagajPark schicken, verdienen Provision für jede abgeschlossene Buchung über ihren persönlichen Link.",
+    "apply": "Bewerben",
+    "learnMore": "Zum Programm",
+    "status": {
+      "pending": "Deine Bewerbung wird geprüft",
+      "paused": "Dein Vermittlerkonto ist pausiert",
+      "active": "Aktiv"
+    },
+    "pendingBody": "Nach der Freigabe erscheinen hier dein persönlicher Link und QR-Code.",
+    "pausedBody": "Dein Link bringt derzeit keine neuen Buchungen. Schreib uns für Details.",
+    "link": "Dein persönlicher Link",
+    "qrLabel": "QR-Code deines persönlichen Links",
+    "rates": "Provision {{commission}} % · Gästerabatt {{discount}} %",
+    "share": "Link teilen",
+    "shareTip": "Leg den QR-Code an die Rezeption oder in deine Gästemappe; die Provision wird gutgeschrieben, wenn eine Buchung über deinen Link abgeschlossen ist.",
+    "shareMessage": "Gepäck sicher bei BagajPark aufbewahren, mit diesem Link {{pct}} % günstiger: {{url}}",
+    "stats": {
+      "clicks": "Klicks",
+      "bookings": "Buchungen",
+      "completed": "Abgeschlossen",
+      "earned": "Verdient",
+      "unpaid": "Offen"
+    },
+    "bookingsTitle": "Buchungen",
+    "noBookings": "Noch keine Buchungen über deinen Link.",
+    "commissionPaid": "Provision {{amount}} (bezahlt)",
+    "commissionUnpaid": "Provision {{amount}} (offen)",
+    "cancelled": "storniert",
+    "pending": "Provision nach Abschluss",
+    "applyTitle": "Vermittler-Bewerbung",
+    "applyIntro": "Unser Team prüft deine Bewerbung; nach der Freigabe werden dein Link und deine Konditionen hier freigeschaltet.",
+    "form": {
+      "displayName": "Name oder Firmenname",
+      "displayNameHint": "Deine Gäste sehen diesen Namen.",
+      "type": "Art",
+      "email": "E-Mail",
+      "phone": "Telefon",
+      "note": "Notiz (optional)",
+      "noteHint": "Zum Beispiel wie viele Gäste du empfängst oder in welcher Gegend du bist."
+    },
+    "types": {
+      "airbnb_host": "Gastgeber (Airbnb usw.)",
+      "hotel": "Hotel / Pension",
+      "guide": "Guide",
+      "agency": "Reisebüro",
+      "other": "Sonstiges"
+    },
+    "submit": "Bewerbung senden",
+    "appliedTitle": "Bewerbung erhalten",
+    "appliedBody": "Wir prüfen sie und melden uns bald.",
+    "toPanel": "Zur Übersicht",
+    "errors": {
+      "invalid_data": "Gib Name und Art korrekt an.",
+      "contact_required": "Gib eine E-Mail oder Telefonnummer an.",
+      "already_applied": "Mit diesem Konto hast du dich bereits beworben.",
+      "rate_limited": "Zu viele Versuche. Bitte versuche es später erneut.",
+      "not_allowed_while_impersonating": "In der Ansicht als anderer Nutzer nicht möglich."
+    }
   }
 }

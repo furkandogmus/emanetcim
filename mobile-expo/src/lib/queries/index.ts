@@ -23,3 +23,4 @@ export * from "./admin-ops";
 export * from "./account-deletion";
 export * from "./admin-insights";
 export * from "./admin-campaigns";
+export * from "./affiliate";

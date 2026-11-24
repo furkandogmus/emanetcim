@@ -147,6 +147,8 @@ function RootNavigator() {
         <Stack.Protected guard={state.status === "signedIn"}>
           <Stack.Screen name="profile" options={{ presentation: "modal" }} />
           <Stack.Screen name="profile-edit" options={{ presentation: "modal" }} />
+          <Stack.Screen name="affiliate" options={{ presentation: "modal" }} />
+          <Stack.Screen name="affiliate-apply" options={{ presentation: "modal" }} />
         </Stack.Protected>
       </Stack>
       <OtaReadyBanner />

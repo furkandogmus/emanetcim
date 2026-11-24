@@ -17,12 +17,13 @@ import { clearPendingReferral, loadPendingReferral, normalizeReferralCode } from
 import { formatMoney, formatStayWindow } from "@/lib/format";
 import { keys, useOnlinePayments, useShop } from "@/lib/queries";
 import { totalBags, useSearch } from "@/lib/search";
+import { openSitePage } from "@/lib/site-page";
 import type { CheckoutQuote, CheckoutRequest, CheckoutResponse } from "@/lib/types";
 import { colors, fonts, radius, space } from "@/theme/tokens";
 
 export default function CheckoutScreen() {
   const { shopId } = useLocalSearchParams<{ shopId: string }>();
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const search = useSearch();
   const queryClient = useQueryClient();
   const onlinePayments = useOnlinePayments();
@@ -484,6 +485,20 @@ export default function CheckoutScreen() {
             </AppText>
           </View>
         )}
+
+        {/* Iptal kurali onaydan once gorunsun; online kipte iade kademeleri sayfada. */}
+        <Pressable
+          accessibilityRole="link"
+          onPress={() => openSitePage("cancellation", i18n.language)}
+          style={styles.payNote}
+        >
+          <AppText variant="body" style={{ flex: 1, color: colors.inkSecondary }}>
+            {onlinePayments ? t("accountParity.checkoutCancellationOnline") : t("accountParity.checkoutCancellationFree")}{" "}
+            <AppText variant="body" style={{ color: colors.accent }}>
+              {t("accountParity.checkoutCancellationLink")}
+            </AppText>
+          </AppText>
+        </Pressable>
 
       </ScrollView>
       </KeyboardAvoidingView>

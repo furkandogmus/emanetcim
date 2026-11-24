@@ -15,13 +15,14 @@ import { LANGUAGES } from "@/components/LanguageButton";
 import { isAppLanguage, languageInfo } from "@/lib/languages";
 import { ReferralCard } from "@/components/ReferralCard";
 import { AppText, Button, IconButton } from "@/components/ui";
+import { dataExportRetryAt } from "@/lib/account-parity";
 import { api, ApiError } from "@/lib/api";
 import { useAuth } from "@/lib/auth";
 import { errorMessage } from "@/lib/errors";
-import { formatDay } from "@/lib/format";
-import { useMyDeletionRequest, useRequestAccountDeletion } from "@/lib/queries";
+import { formatDay, formatDayTime } from "@/lib/format";
+import { useMyAffiliate, useMyDeletionRequest, useRequestAccountDeletion, useRequestDataExport } from "@/lib/queries";
 import { setAppLanguage } from "@/lib/i18n";
-import { SITE_ORIGIN } from "@/lib/images";
+import { openSitePage } from "@/lib/site-page";
 import { notify } from "@/lib/notify";
 import { colors, radius, space } from "@/theme/tokens";
 
@@ -40,10 +41,6 @@ function useNotificationPermission() {
   return granted;
 }
 
-function sitePage(path: string, lang: string) {
-  return `${SITE_ORIGIN}/${languageInfo(lang).site}/${path}`;
-}
-
 /**
  * Profil icerigi. Rol sekmelerinde (misafir, esnaf) sekme olarak, yoneticide ve
  * derin baglantida `/profile` modali olarak acilir; `asTab` kapat dugmesini gizler.
@@ -58,11 +55,13 @@ export function ProfileView({ asTab = false, embedded = false }: { asTab?: boole
   const signedInRole = state.status === "signedIn" ? state.user.role : null;
   const deletionQuery = useMyDeletionRequest(signedInRole !== null && signedInRole !== "GUEST" && !impersonating);
   const requestDeletion = useRequestAccountDeletion();
+  const dataExport = useRequestDataExport();
+  const affiliateQuery = useMyAffiliate(state.status === "signedIn" ? state.user.id : null);
   if (state.status !== "signedIn") return null;
   const { user } = state;
   const isGuest = user.role === "GUEST";
   const deletionDue = deletionQuery.data?.status === "PENDING" ? deletionQuery.data.dueAt : null;
-  const openSite = (path: string) => void Linking.openURL(sitePage(path, i18n.language)).catch(() => undefined);
+  const openSite = (path: string) => openSitePage(path, i18n.language);
 
   /*
     Google Play ve App Store 5.1.1(v): hesap silme UYGULAMA ICINDEN. Misafir
@@ -104,6 +103,32 @@ export function ProfileView({ asTab = false, embedded = false }: { asTab?: boole
               onSuccess: (r) =>
                 notify(t("profile.requestReceivedTitle"), t("profile.requestReceivedBody", { days: r.slaDays })),
               onError: (e) => notify(t("profile.deleteFailedTitle"), errorMessage(e, "profile")),
+            },
+          ),
+      },
+    ]);
+  }
+
+  /** KVKK disa aktarimi: dosya dogrulanmis adrese gider (mobilde dosya modulu yok). */
+  function confirmDataExport() {
+    Alert.alert(t("accountParity.exportTitle"), t("accountParity.exportBody"), [
+      { text: t("common.cancel"), style: "cancel" },
+      {
+        text: t("accountParity.exportConfirm"),
+        onPress: () =>
+          dataExport.mutate(
+            { locale: i18n.language },
+            {
+              onSuccess: (r) => notify(t("accountParity.exportSentTitle"), t("accountParity.exportSentBody", { email: r.email })),
+              onError: (e) => {
+                const retryAt = dataExportRetryAt(e);
+                notify(
+                  t("accountParity.exportFailedTitle"),
+                  retryAt
+                    ? t("accountParity.errors.rate_limited_until", { time: formatDayTime(retryAt) })
+                    : errorMessage(e, "accountParity"),
+                );
+              },
             },
           ),
       },
@@ -153,14 +178,37 @@ export function ProfileView({ asTab = false, embedded = false }: { asTab?: boole
           value={languageInfo(i18n.language).label}
           onPress={() => setLangOpen(true)}
         />
+        {/* Goruntulemede sunucu da 403 doner: verisi baskasinin. */}
+        {impersonating ? null : (
+          <SettingsRow
+            label={t("accountParity.exportRow")}
+            value={dataExport.isPending ? t("common.loading") : undefined}
+            onPress={() => !dataExport.isPending && confirmDataExport()}
+          />
+        )}
+      </Section>
+
+      <Section title={t("accountParity.sections.earn")}>
+        {isGuest ? (
+          <SettingsRow label={t("accountParity.becomePartner")} external onPress={() => openSite("esnaf")} />
+        ) : null}
+        <SettingsRow
+          label={affiliateQuery.data ? t("accountParity.affiliatePanel") : t("accountParity.affiliateProgram")}
+          onPress={() => router.push(affiliateQuery.data || impersonating ? "/affiliate" : "/affiliate-apply")}
+        />
       </Section>
 
       <Section title={t("profile.sections.support")}>
+        <SettingsRow label={t("accountParity.howItWorks")} external onPress={() => openSite("how-it-works")} />
         <SettingsRow label={t("profile.faq")} external onPress={() => openSite("faq")} />
+        <SettingsRow label={t("accountParity.cancellation")} external onPress={() => openSite("cancellation")} />
+        <SettingsRow label={t("accountParity.insurance")} external onPress={() => openSite("insurance")} />
         <SettingsRow label={t("profile.contact")} external onPress={() => openSite("contact")} />
         <SettingsRow label={t("profile.terms")} external onPress={() => openSite("terms")} />
         <SettingsRow label={t("profile.privacy")} external onPress={() => openSite("privacy")} />
         <SettingsRow label={t("profile.kvkk")} external onPress={() => openSite("kvkk")} />
+        <SettingsRow label={t("accountParity.about")} external onPress={() => openSite("about")} />
+        <SettingsRow label={t("accountParity.blog")} external onPress={() => openSite("blog")} />
       </Section>
 
       <View style={{ gap: space.sm, marginTop: space.sm }}>
