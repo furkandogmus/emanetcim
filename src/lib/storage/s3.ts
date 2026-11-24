@@ -2,7 +2,10 @@ import {
   S3Client,
   PutObjectCommand,
   DeleteObjectCommand,
+  GetObjectCommand,
 } from "@aws-sdk/client-s3";
+import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
+import { isPrivateKey } from "./types";
 import type {
   StoragePort,
   StorageCapabilities,
@@ -63,6 +66,8 @@ export class S3Storage implements StoragePort {
   }
 
   publicUrl(key: string): string {
+    // Ozel nesnenin adresi kova politikasi yuzunden zaten 403 verir; burada hic uretilmez.
+    if (isPrivateKey(key)) throw new Error("private_object_has_no_public_url");
     return `${this.config.publicBaseUrl.replace(/\/+$/, "")}/${key}`;
   }
 
@@ -82,6 +87,34 @@ export class S3Storage implements StoragePort {
       }),
     );
     return { key: input.key, url: this.publicUrl(input.key) };
+  }
+
+  async putPrivate(input: PutObjectInput): Promise<{ key: string }> {
+    if (!isPrivateKey(input.key)) throw new Error("private_put_requires_private_prefix");
+    await this.client.send(
+      new PutObjectCommand({
+        Bucket: this.config.bucket,
+        Key: input.key,
+        Body: input.body,
+        ContentType: input.contentType,
+        CacheControl: "private, no-store",
+      }),
+    );
+    return { key: input.key };
+  }
+
+  async presignGet(key: string, expiresInSeconds: number): Promise<string> {
+    return getSignedUrl(
+      this.client,
+      new GetObjectCommand({
+        Bucket: this.config.bucket,
+        Key: key,
+        // Tarayici/uygulama imzali adresi onbellege almasin; adres zaten dakikalar icinde olur.
+        ResponseCacheControl: "private, no-store",
+        ResponseContentType: "image/jpeg",
+      }),
+      { expiresIn: expiresInSeconds },
+    );
   }
 
   async remove(key: string): Promise<void> {

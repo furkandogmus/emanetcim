@@ -11,6 +11,7 @@ import { bcp47ForUiLocale } from "@/lib/intl-locale";
 import { adminDisputeErrorKey } from "@/lib/admin-dispute-error-copy";
 import Money from "@/components/common/Money";
 import { formatInstant } from "@/lib/format-datetime";
+import BagPhotos from "@/components/bag-photos/BagPhotos";
 
 interface DisputeBooking {
   id: string;
@@ -297,6 +298,8 @@ export default function AdminDisputesClient({ disputes: initial }: { disputes: D
                     </div>
                   </div>
                 )}
+
+                <BagPhotos bookingId={d.booking.id} audience="admin" />
 
                 {d.adminNote && editId !== d.id && (
                   <div>

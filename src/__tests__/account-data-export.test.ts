@@ -13,6 +13,7 @@ const m = vi.hoisted(() => ({
     affiliate: { findUnique: vi.fn() },
     accountDeletionRequest: { findUnique: vi.fn() },
     shopMember: { findMany: vi.fn().mockResolvedValue([]) },
+    bagPhoto: { findMany: vi.fn().mockResolvedValue([]) },
     auditLog: { findFirst: vi.fn(), create: vi.fn(), update: vi.fn() },
     $executeRaw: vi.fn(),
     $transaction: vi.fn(),
@@ -226,5 +227,21 @@ describe("buildExport: dukkan personeli uyelikleri", () => {
     expect(data!.shopMemberships).toEqual([
       { shopId: "s9", shopName: "Otel", role: "STAFF", since: "2026-11-20T00:00:00.000Z" },
     ]);
+  });
+});
+
+describe("buildExport: valiz fotograflari", () => {
+  it("rezervasyon fotograflari ve operator olarak cekilenler yalniz meta veriyle gelir (anahtar/bayt yok)", async () => {
+    m.db.user.findUnique.mockResolvedValue({ id: "u1", email: "a@example.com", accounts: [] });
+    for (const k of ["review", "legalAcceptance", "shop"] as const) m.db[k].findMany.mockResolvedValue([]);
+    m.db.booking.findMany.mockResolvedValue([{ id: "b1", bagPhotos: [{ id: "p1", createdAt: new Date("2026-11-25T10:00:00Z") }] }]);
+    m.db.bagPhoto.findMany.mockResolvedValueOnce([
+      { id: "p2", bookingId: "b2", createdAt: new Date("2026-11-25T11:00:00Z") },
+    ]);
+    const data = await accountDataExportService.buildExport("u1", new Date("2026-11-26T00:00:00Z"));
+    const sel = m.db.booking.findMany.mock.calls.at(-1)![0].select.bagPhotos;
+    expect(sel).toMatchObject({ where: { deletedAt: null }, select: { id: true, createdAt: true } });
+    expect(data!.bagPhotosTaken).toEqual([{ id: "p2", bookingId: "b2", takenAt: "2026-11-25T11:00:00.000Z" }]);
+    expect(JSON.stringify(data)).not.toContain("bag-photos/");
   });
 });

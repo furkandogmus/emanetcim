@@ -38,9 +38,23 @@ export type PutObjectResult = {
   url: string;
 };
 
+/**
+ * Herkese acik adresi OLMAYAN onekler. `publicUrl` bunlar icin firlatir; okuma yalniz
+ * `presignGet` ile. Kova politikasi da yalniz `shops/*`'i acar (infra/aws/stack).
+ */
+export const PRIVATE_KEY_PREFIXES = ["bag-photos/"] as const;
+
+export function isPrivateKey(key: string): boolean {
+  return PRIVATE_KEY_PREFIXES.some((p) => key.startsWith(p));
+}
+
 export interface StoragePort {
   readonly capabilities: StorageCapabilities;
   put(input: PutObjectInput): Promise<PutObjectResult>;
+  /** Ozel nesne yazar (onbellek `private, no-store`); adres DONMEZ. */
+  putPrivate(input: PutObjectInput): Promise<{ key: string }>;
+  /** Kisa omurlu imzali GET adresi. Yetki kontrolu CAGIRANDA. */
+  presignGet(key: string, expiresInSeconds: number): Promise<string>;
   /** Nesneyi siler. Olmayan anahtarda HATA VERMEZ — silme idempotenttir. */
   remove(key: string): Promise<void>;
   /** Anahtardan herkese açık URL üretir (yazmadan). */

@@ -59,6 +59,7 @@ model User {
   shopMemberships          ShopMember[]             @relation("ShopMemberUser")
   shopMembersInvited       ShopMember[]             @relation("ShopMemberInviter")
   shopInvitesSent          ShopInvite[]             @relation("ShopInviteInviter")
+  bagPhotosUploaded        BagPhoto[]               @relation("BagPhotoUploader")
 
   @@index([email])
 }
@@ -437,6 +438,7 @@ model Booking {
   shop                       Shop                 @relation(fields: [shopId], references: [id], onDelete: Cascade)
   seals                      BookingSeal[]
   dispute                    Dispute?
+  bagPhotos                  BagPhoto[]
   notificationLogs           NotificationLog[]
   paymentLog                 PaymentLog?
   review                     Review?
@@ -1609,4 +1611,23 @@ model WalletGoogleObject {
   bookingId String   @id
   createdAt DateTime @default(now())
   booking   Booking  @relation(fields: [bookingId], references: [id], onDelete: Cascade)
+}
+
+/// Teslimde cekilen valiz durumu fotografi (2026-11-25): hasar itirazinda kanit.
+/// Nesne OZEL (`bag-photos/<bookingId>/<uuid>.jpg`), herkese acik adresi yok; okuma yalniz
+/// yetki kontrolunden sonra kisa omurlu imzali URL ile (`BagPhotoService`).
+/// `deletedAt` dolu = mantiken silindi, nesne silinmeyi bekliyor (saklama isi tamamlar).
+model BagPhoto {
+  id           String    @id @default(uuid())
+  bookingId    String
+  key          String    @unique
+  /// Fotografi ceken operator. Hesap kalici silinirse kanit kalir, bag bosalir.
+  uploadedById String?
+  createdAt    DateTime  @default(now())
+  deletedAt    DateTime?
+  booking      Booking   @relation(fields: [bookingId], references: [id], onDelete: Cascade)
+  uploadedBy   User?     @relation("BagPhotoUploader", fields: [uploadedById], references: [id], onDelete: SetNull)
+
+  @@index([bookingId, deletedAt])
+  @@index([deletedAt])
 }

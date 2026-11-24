@@ -3294,5 +3294,32 @@
       "IN_PROGRESS": "This form is already being submitted, wait a few seconds."
     },
     "pickupNameCheck": "Check the name before handing over: {name}"
+  },
+  "bagPhotos": {
+    "title": "Bag photos",
+    "operatorTitle": "Add bag photo",
+    "operatorHint": "Optional: record the bag's condition at drop-off with 1-{max} photos. They serve as evidence in a damage dispute; only the guest, the shop and BagajPark can see them.",
+    "guestHint": "The shop took these photos when it received your bag. They're used as evidence in a damage dispute and deleted 30 days after pick-up.",
+    "adminHint": "Bag condition photos taken by the shop at drop-off (dispute evidence).",
+    "add": "Take photo",
+    "addMore": "Add photo ({count}/{max})",
+    "retry": "Try again",
+    "deleteConfirm": "Delete this photo?",
+    "deletePhoto": "Delete photo {n}",
+    "openPhoto": "Open photo {n} full size",
+    "photoAlt": "Bag photo {n}",
+    "errors": {
+      "generic": "The photo couldn't be processed. Try again.",
+      "forbidden": "You don't have access to this booking's photos.",
+      "read_only": "Photos can't be added or removed while viewing as another user.",
+      "storage_unavailable": "Photo storage is unavailable right now.",
+      "rate_limited": "Too many attempts. Try again in a few minutes.",
+      "locked": "Photos are locked after drop-off and can't be changed.",
+      "limit": "You can add up to 3 photos per booking.",
+      "empty": "No photo selected.",
+      "too_large": "The photo is too large (2 MB max).",
+      "unsupported_type": "This file isn't a JPEG photo.",
+      "dimensions_too_large": "The photo's resolution is too high."
+    }
   }
 }

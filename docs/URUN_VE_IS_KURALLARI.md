@@ -95,7 +95,8 @@ APPROVED ──check-in (tahsilat)──> PAID ──> CHECKED_IN ──check-ou
 | Valizi dükkanda kalan misafir | Push + e-posta hatırlatma takvimi (168 saate kadar) | `OverdueGuestReminderService`, `booking-reminders` |
 | Kapanmamış rezervasyon | Süre aşımı taraması yalnız tespit eder, durum değiştirmez; karar operasyonundur | `OverdueBookingService`, `overdue-scan` |
 | Yorum | Check-out sonrası 1-5 yıldız + metin (en çok 2.000 karakter); hemen yayınlanır, yönetici gerekçeyle gizler | `ReviewService` |
-| Hasar / kayıp | Misafir itiraz açar; yönetici check-in mühür kaydı ve fotoğrafı ile karar verir | `DisputeService` |
+| Hasar / kayıp | Misafir itiraz açar; yönetici check-in mühür kaydı ve valiz durumu fotoğrafları ile karar verir | `DisputeService` |
+| Valiz durumu fotoğrafı | Teslimde sahip/personel isteğe bağlı 1-3 kare çeker (teslim öncesi ya da teslimden sonraki 60 dk; sonra kilitli, yalnız yönetici siler). Nesne özel (`bag-photos/`), okuma yetki kontrolünden sonra 5 dk'lık imzalı adresle: misafir biletinde, dükkan, yönetici rezervasyon ve itiraz ekranında. Teslimden 30 gün sonra silinir; itiraz açıksa kapanmasından 30 gün sonra. Yükleme hatası teslimi engellemez | `BagPhotoService`, `bag-photo-retention` |
 | Kupon | Yönetici tanımlar (`/admin/coupons`, mobil "Kuponlar"); iptalde kupon iade edilir | `CouponService` |
 | Davet indirimi | Başka bir misafirin kodu, ilk rezervasyonda, kuponsuz, ara toplamdan `REFERRAL_DISCOUNT_PCT` (varsayılan %5) | `ReferralService` |
 | Uygulama indirimi | Mobil uygulamadan yapılan rezervasyona platform geneli `appBookingDiscountPct` (varsayılan %10, 0 = kapalı); aşağıda | `src/lib/app-discount.ts`, `CheckoutDiscountService` |

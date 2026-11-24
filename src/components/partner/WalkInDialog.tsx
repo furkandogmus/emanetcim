@@ -6,6 +6,7 @@ import { CheckCircle2, Loader2, X } from "lucide-react";
 import { createWalkInBookingAction, type WalkInActionResult } from "@/actions/walk-in";
 import { Link } from "@/i18n/routing";
 import { useModalBehavior } from "@/lib/hooks/useModalBehavior";
+import BagPhotos from "@/components/bag-photos/BagPhotos";
 
 const KNOWN_ERRORS = new Set([
   "INVALID_INPUT",
@@ -140,6 +141,10 @@ export default function WalkInDialog({
               />
             ) : null}
             <p className="text-sm text-gray-600">{done.emailQueued ? t("emailSent") : t("photoHint")}</p>
+            {/* Valiz hemen teslim alindi: durum fotografi burada cekilir. */}
+            <div className="w-full text-left">
+              <BagPhotos bookingId={done.bookingId} audience="operator" />
+            </div>
             <button
               type="button"
               onClick={onDone}

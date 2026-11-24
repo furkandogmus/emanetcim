@@ -21,6 +21,7 @@ const m = vi.hoisted(() => {
     mobilePushToken: { deleteMany: ok() },
     mobileInstall: { deleteMany: ok() },
     shopMember: { deleteMany: ok() },
+    bagPhoto: { updateMany: ok() },
     shopInvite: { deleteMany: ok() },
     merchantProfile: { deleteMany: ok() },
     passwordResetCode: { deleteMany: ok() },
