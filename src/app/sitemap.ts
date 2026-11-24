@@ -4,6 +4,8 @@ import prisma from "@/lib/db";
 import { routing } from "@/i18n/routing";
 import { INDEXED_STORAGE_CITIES } from "@/lib/storage-cities";
 import { OPERATING_SHOP_FILTER } from "@/lib/public-shop-filter";
+import { hubPath, TRANSIT_HUBS } from "@/lib/transit-hubs";
+import { hubsWithOperatingShop, operatingShopLocations } from "@/lib/transit-hub-shops";
 
 export const dynamic = 'force-dynamic';
 
@@ -47,6 +49,25 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
         alternates: { languages: languagesForPath(`/luggage-storage/${c.slug}`) },
       });
     }
+  }
+
+  // Yer sayfalari: yalnizca yaricapinda isleyen dukkan olanlar; digerleri `noindex`.
+  const hubEntries: MetadataRoute.Sitemap = [];
+  try {
+    const hubs = hubsWithOperatingShop(TRANSIT_HUBS, await operatingShopLocations());
+    for (const locale of routing.locales) {
+      for (const hub of hubs) {
+        hubEntries.push({
+          url: `${base}/${locale}${hubPath(hub)}`,
+          lastModified: now,
+          changeFrequency: "weekly",
+          priority: 0.72,
+          alternates: { languages: languagesForPath(hubPath(hub)) },
+        });
+      }
+    }
+  } catch (error) {
+    console.error("Sitemap generation error (Hubs):", error);
   }
 
   const shopEntries: MetadataRoute.Sitemap = [];
@@ -105,5 +126,5 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     console.error("Sitemap generation error (Blog):", error);
   }
 
-  return [...staticPages, ...cityStorageEntries, ...shopEntries, ...blogEntries];
+  return [...staticPages, ...cityStorageEntries, ...hubEntries, ...shopEntries, ...blogEntries];
 }

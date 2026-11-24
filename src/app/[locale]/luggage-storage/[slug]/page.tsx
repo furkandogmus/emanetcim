@@ -18,6 +18,7 @@ import { buildBreadcrumbJsonLd } from "@/lib/breadcrumb-json-ld";
 import { buildFaqJsonLd } from "@/lib/faq-json-ld";
 import { socialMetadata } from "@/lib/social-metadata";
 import { serializeJsonLd } from "@/lib/json-ld-script";
+import { hubPath, hubsForCity } from "@/lib/transit-hubs";
 
 /*
   Nokta listesi veritabanindan geliyor; sayfa statik uretilip bes dakikada bir
@@ -89,6 +90,8 @@ export default async function CityLuggageStoragePage({
   const points = await getCityStoragePoints(city);
   const t = await getTranslations("CityStorage");
   const tCommon = await getTranslations("Common");
+  const tHub = await getTranslations("TransitHubs");
+  const hubs = hubsForCity(slug);
   const appName = tCommon("appName");
   const cityLabel = t(`${slug}.label`);
   const localeCopy = {
@@ -252,8 +255,28 @@ export default async function CityLuggageStoragePage({
           </section>
         )}
 
+        {hubs.length > 0 && (
+          <section className="mt-6 rounded-2xl border border-gray-100 bg-white p-6">
+            <h2 className="text-xl id-display text-gray-900">
+              {tHub("cityHubsTitle", { city: cityLabel })}
+            </h2>
+            <ul className="mt-4 flex flex-wrap gap-2">
+              {hubs.map((h) => (
+                <li key={h.slug}>
+                  <Link
+                    href={hubPath(h)}
+                    className="inline-block rounded-full border border-gray-100 bg-gray-50 px-3 py-1.5 text-xs font-bold text-gray-700 hover:underline"
+                  >
+                    {tHub(`hubs.${h.slug}.name`)}
+                  </Link>
+                </li>
+              ))}
+            </ul>
+          </section>
+        )}
+
         <section
-          className={`${points.length > 0 ? "mt-6" : "mt-12"} rounded-2xl border border-gray-100 bg-gray-50 p-6`}
+          className={`${points.length > 0 || hubs.length > 0 ? "mt-6" : "mt-12"} rounded-2xl border border-gray-100 bg-gray-50 p-6`}
         >
           <h2 className="text-xl font-black text-gray-900">{localeCopy.whyTitle}</h2>
           <ul className="mt-4 space-y-2 text-sm text-gray-600">

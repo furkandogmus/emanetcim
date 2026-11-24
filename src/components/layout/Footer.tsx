@@ -4,6 +4,7 @@ import { useTranslations } from "next-intl";
 import { Link } from "@/i18n/routing";
 import { MapPin, Globe, MessageCircle, Heart } from "lucide-react";
 import { STORAGE_CITIES } from "@/lib/storage-cities";
+import { hubPath, TRANSIT_HUBS } from "@/lib/transit-hubs";
 import { useSession } from "next-auth/react";
 import { usePathname } from "@/i18n/routing";
 import BrandMark from "@/components/common/BrandMark";
@@ -61,6 +62,7 @@ export default function Footer() {
   const t = useTranslations("Footer");
   const tCommon = useTranslations("Common");
   const tCity = useTranslations("CityStorage");
+  const tHub = useTranslations("TransitHubs");
   const { data: session } = useSession();
   const hideGuestBookingNav =
     session?.user?.role === "PARTNER" || session?.user?.role === "ADMIN";
@@ -298,6 +300,18 @@ export default function Footer() {
                   className="min-w-11 rounded-full border border-gray-100 bg-gray-50 px-3 py-1.5 text-center text-xs font-bold text-gray-600 transition hover:border-orange-200 hover:bg-white hover:text-orange-600"
                 >
                   {tCity(`${c.slug}.label`)}
+                </Link>
+              ))}
+            </div>
+            <h2 className="mt-8 mb-4 text-xs id-eyebrow text-gray-900">{tHub("footerHubsTitle")}</h2>
+            <div className="flex flex-wrap gap-2">
+              {TRANSIT_HUBS.map((h) => (
+                <Link
+                  key={h.slug}
+                  href={hubPath(h)}
+                  className="min-w-11 rounded-full border border-gray-100 bg-gray-50 px-3 py-1.5 text-center text-xs font-bold text-gray-600 transition hover:bg-white hover:underline"
+                >
+                  {tHub(`hubs.${h.slug}.name`)}
                 </Link>
               ))}
             </div>
