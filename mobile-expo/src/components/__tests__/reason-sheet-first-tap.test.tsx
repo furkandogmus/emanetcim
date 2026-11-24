@@ -84,6 +84,9 @@ jest.mock("@/lib/queries", () => ({
   usePartnerCancel: () => ({ mutate: mockMutate, isPending: false }),
   usePartnerNoShow: () => ({ mutate: jest.fn(), isPending: false }),
   usePartnerLateHold: () => ({ mutate: jest.fn(), isPending: false }),
+  useBagPhotos: () => ({ data: undefined }),
+  useUploadBagPhoto: () => ({ mutateAsync: jest.fn(), isPending: false }),
+  useDeleteBagPhoto: () => ({ mutate: jest.fn(), isPending: false }),
 }));
 jest.mock("@/lib/search", () => ({ useSearch: () => ({}), defaultWindow: () => ({}) }));
 jest.mock("@/lib/offline-tickets", () => ({

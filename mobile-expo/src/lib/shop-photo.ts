@@ -42,3 +42,15 @@ export async function prepareAvatar(asset: { uri: string; width: number; height:
   const out = await image.saveAsync({ format: SaveFormat.JPEG, compress: 0.8 });
   return { uri: out.uri, name: "avatar.jpg", type: "image/jpeg" };
 }
+
+/** Valiz durumu fotografi: uzun kenar 1600 px, JPEG 0.7. Yeniden kodlama EXIF/GPS'i atar. */
+export const BAG_PHOTO_EDGE = 1600;
+
+export async function prepareBagPhoto(asset: { uri: string; width: number; height: number }): Promise<UploadFile> {
+  const ctx = ImageManipulator.manipulate(asset.uri);
+  const target = resizeTarget(asset.width, asset.height, BAG_PHOTO_EDGE);
+  if (target) ctx.resize(target);
+  const image = await ctx.renderAsync();
+  const out = await image.saveAsync({ format: SaveFormat.JPEG, compress: 0.7 });
+  return { uri: out.uri, name: "bag.jpg", type: "image/jpeg" };
+}

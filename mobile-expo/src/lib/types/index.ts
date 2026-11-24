@@ -30,3 +30,4 @@ export * from "./partner-parity";
 export * from "./shop-staff";
 export * from "./wallet";
 export * from "./walk-in";
+export * from "./bag-photos";

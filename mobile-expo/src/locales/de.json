@@ -2465,5 +2465,42 @@
       "request_in_progress": "Dieses Formular wird bereits gesendet, bitte einige Sekunden warten."
     },
     "pickupNameCheck": "Vor der Herausgabe den Namen prüfen: {{name}}"
+  },
+  "bagPhotos": {
+    "title": "Gepäckfotos",
+    "operatorTitle": "Gepäckfoto hinzufügen",
+    "operatorHint": "Optional: Halte den Zustand des Gepäcks bei der Abgabe mit 1-{{max}} Fotos fest. Sie dienen bei einem Schadensfall als Nachweis; nur der Gast, der Laden und BagajPark sehen sie.",
+    "guestHint": "Der Laden hat diese Fotos bei der Annahme deines Gepäcks gemacht. Sie dienen bei einem Schadensfall als Nachweis und werden 30 Tage nach der Abholung gelöscht.",
+    "adminHint": "Fotos vom Gepäckzustand, die der Laden bei der Abgabe gemacht hat (Nachweis für Beschwerden).",
+    "add": "Foto aufnehmen",
+    "addMore": "Foto hinzufügen ({{count}}/{{max}})",
+    "retry": "Erneut versuchen",
+    "deleteConfirm": "Dieses Foto löschen?",
+    "deletePhoto": "Foto {{n}} löschen",
+    "openPhoto": "Foto {{n}} groß öffnen",
+    "photoAlt": "Gepäckfoto {{n}}",
+    "camera": "Kamera",
+    "gallery": "Aus Mediathek wählen",
+    "pickTitle": "Gepäckfoto",
+    "pickBody": "Wie möchtest du das Foto hinzufügen?",
+    "permissionDenied": "Kein Kamerazugriff. Du kannst ihn in den Einstellungen erlauben oder ein Foto aus der Mediathek wählen.",
+    "uploading": "Wird hochgeladen…",
+    "uploadFailed": "Das Foto konnte nicht hochgeladen werden. Du kannst die Annahme trotzdem fortsetzen.",
+    "deleteTitle": "Dieses Foto löschen?",
+    "delete": "Löschen",
+    "openSettings": "Einstellungen öffnen",
+    "errors": {
+      "generic": "Das Foto konnte nicht verarbeitet werden. Bitte erneut versuchen.",
+      "forbidden": "Du hast keinen Zugriff auf die Fotos dieser Buchung.",
+      "read_only": "In der Ansicht als anderer Nutzer können keine Fotos hinzugefügt oder gelöscht werden.",
+      "storage_unavailable": "Der Fotospeicher ist gerade nicht verfügbar.",
+      "rate_limited": "Zu viele Versuche. Bitte in ein paar Minuten erneut versuchen.",
+      "locked": "Nach der Abgabe sind die Fotos gesperrt und können nicht geändert werden.",
+      "limit": "Pro Buchung sind höchstens 3 Fotos möglich.",
+      "empty": "Kein Foto ausgewählt.",
+      "too_large": "Das Foto ist zu groß (max. 2 MB).",
+      "unsupported_type": "Diese Datei ist kein JPEG-Foto.",
+      "dimensions_too_large": "Die Auflösung des Fotos ist zu hoch."
+    }
   }
 }

@@ -6,6 +6,7 @@ import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { ArrowLeft } from "lucide-react-native";
 import { useTranslation } from "react-i18next";
 
+import { BagPhotos } from "@/components/BagPhotos";
 import { BagRevisionCard } from "@/components/BagRevisionCard";
 import { BookingTicket } from "@/components/BookingTicket";
 import { ExpiredBookingActions } from "@/components/ExpiredBookingActions";
@@ -277,6 +278,7 @@ export function BookingDetailView({ id, mode }: { id: string; mode: "guest" | "p
           audience={mode === "partner" ? "staff" : "guest"}
         />
         {showQr ? <WalletPassButton bookingId={b.id} status={b.status} /> : null}
+        {mode === "guest" ? <BagPhotos bookingId={b.id} audience="guest" /> : null}
 
         {/*
           Duzeltme muhur satirlarinin USTUNDE: tezgahta once valiz sayilir, sonra
@@ -295,6 +297,10 @@ export function BookingDetailView({ id, mode }: { id: string; mode: "guest" | "p
         ) : null}
         {/* Asil is (teslim al / et) duzeltme kartinin USTUNDE: kucuk telefonda ekran altinda kalmasin. */}
         {mode === "partner" ? <PartnerBookingActions key={b.status} booking={b} /> : null}
+        {/* Teslimden sonra: kisa pencerede ekleme/silme, sonra salt okunur kanit. */}
+        {mode === "partner" && !["APPROVED", "PAID", "WAITING_APPROVAL"].includes(b.status) ? (
+          <BagPhotos bookingId={b.id} audience="operator" />
+        ) : null}
         {mode === "partner" ? <GuestContact phone={b.guestPhone} /> : null}
         {mode === "partner" ? (
           <BagRevisionCard key={`rev-${b.status}-${b.bagCountS}-${b.bagCountM}-${b.bagCountXl}`} booking={b} />

@@ -35,6 +35,9 @@ jest.mock("@/lib/queries", () => ({
   usePartnerNoShow: () => idle(),
   usePartnerLateHold: () => idle(),
   useAdminBookingAction: () => idle(),
+  useBagPhotos: () => ({ data: undefined }),
+  useUploadBagPhoto: () => ({ mutateAsync: jest.fn(), isPending: false }),
+  useDeleteBagPhoto: () => ({ mutate: jest.fn(), isPending: false }),
 }));
 
 const NOW = Date.parse("2026-11-22T09:00:00Z"); // 12:00 TRT

@@ -7,6 +7,7 @@ import { Check } from "lucide-react-native";
 import { useTranslation } from "react-i18next";
 
 import { AppText, Banner, Button, Card } from "@/components/ui";
+import { BagPhotos } from "@/components/BagPhotos";
 import { Input } from "@/components/Field";
 import { ReasonSheet } from "@/components/ReasonSheet";
 import { ApiError, api } from "@/lib/api";
@@ -236,6 +237,8 @@ export function PartnerBookingActions({ booking }: { booking: BookingDetail }) {
             />
           </View>
         ))}
+        {/* Istege bagli; yukleme hatasi teslim dugmesini kilitlemez. */}
+        <BagPhotos bookingId={booking.id} audience="operator" />
         {partial ? <Banner tone="warning" body={t("partner.sealsPartial")} /> : null}
         {error ? <Banner tone="danger" body={error} /> : null}
         {closed ? (
