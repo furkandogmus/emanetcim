@@ -25,13 +25,16 @@ export default function AdminAuditLogClient({
   actions,
   entityTypes,
   filter,
+  personLabel,
 }: {
   entries: Entry[];
   actions: string[];
   entityTypes: string[];
-  filter: { action: string; entityType: string; q: string };
+  filter: { action: string; entityType: string; q: string; userId: string };
+  personLabel: string | null;
 }) {
   const t = useTranslations("Admin");
+  const tAccount = useTranslations("AdminUserAccount");
   const locale = useLocale();
   const router = useRouter();
   const dateLocale = bcp47ForUiLocale(locale);
@@ -39,12 +42,13 @@ export default function AdminAuditLogClient({
   const [q, setQ] = useState(filter.q);
   const [open, setOpen] = useState<string | null>(null);
 
-  function navigate(next: Partial<{ action: string; entityType: string; q: string }>) {
+  function navigate(next: Partial<{ action: string; entityType: string; q: string; userId: string }>) {
     const merged = { ...filter, q, ...next };
     const params = new URLSearchParams();
     if (merged.action !== "ALL") params.set("action", merged.action);
     if (merged.entityType !== "ALL") params.set("entityType", merged.entityType);
     if (merged.q.trim()) params.set("q", merged.q.trim());
+    if (merged.userId) params.set("userId", merged.userId);
     const qs = params.toString();
     router.push(qs ? `/admin/audit-log?${qs}` : "/admin/audit-log");
   }
@@ -75,6 +79,21 @@ export default function AdminAuditLogClient({
           {t("auditLogTitle")}
         </h1>
         <p className="text-sm text-gray-500 mb-8">{t("auditLogIntro")}</p>
+
+        {filter.userId ? (
+          <div className="mb-4 flex flex-wrap items-center gap-3">
+            <span className="rounded-full bg-gray-900 px-4 py-2 text-xs font-bold text-white">
+              {tAccount("auditFilteredBy", { name: personLabel ?? filter.userId })}
+            </span>
+            <button
+              type="button"
+              onClick={() => navigate({ userId: "" })}
+              className="text-xs text-gray-500 underline hover:text-gray-900"
+            >
+              {tAccount("auditClearPerson")}
+            </button>
+          </div>
+        ) : null}
 
         <form
           className="id-surface p-5 mb-6 grid gap-4 md:grid-cols-3"

@@ -65,6 +65,8 @@ async function resolveActor<R extends Role>(
     yapmasını söylüyordu.
   */
   if (!session?.user?.id) return { ok: false, error: "Errors.authRequired" };
+  // Web "olarak goruntule" salt okunur; proxy zaten yazmayi keser, bu ikinci kilit.
+  if (session.impersonation) return { ok: false, error: "Errors.unauthorized" };
   const role = session.user.role;
   if (!(allowed as readonly Role[]).includes(role)) return { ok: false, error: denied };
   return { ok: true, actor: { id: session.user.id, role: role as R } };

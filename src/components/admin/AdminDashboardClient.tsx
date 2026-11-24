@@ -15,6 +15,7 @@ import {
   Zap,
   TrendingUp,
   Flag,
+  Megaphone,
   UserCog,
   Scale,
   BarChart3,
@@ -68,6 +69,7 @@ export default function AdminDashboardClient({
   pendingRoleApprovals,
 }: AdminDashboardClientProps) {
   const t = useTranslations("Admin");
+  const tBroadcast = useTranslations("AdminBroadcast");
 
   return (
     <div className="min-h-screen bg-gray-50 p-10 font-sans">
@@ -336,6 +338,13 @@ export default function AdminDashboardClient({
               >
                 <UserX size={18} className="opacity-40" />
                 {t("accountDeletionsNav")}
+              </Link>
+              <Link
+                href="/admin/broadcast"
+                className="w-full min-h-[3rem] px-5 bg-white/10 rounded-2xl text-xs id-eyebrow hover:bg-white/20 transition-all text-left flex items-center gap-3"
+              >
+                <Megaphone size={18} className="opacity-40" />
+                {tBroadcast("navTitle")}
               </Link>
               <Link
                 href="/admin/reviews"

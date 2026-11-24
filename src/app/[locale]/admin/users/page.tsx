@@ -32,6 +32,7 @@ export default async function AdminUsersPage({
         isTest: true,
         emailVerified: true,
         createdAt: true,
+        reviewSandbox: true,
       },
     }),
     prisma.adminRoleChangeRequest.count(),

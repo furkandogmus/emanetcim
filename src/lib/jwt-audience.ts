@@ -40,6 +40,8 @@ export const JWT_AUDIENCE = {
   guestLookup: "bagajpark:guest-lookup",
   /** Esnafin uygulamadan actigi oturumsuz QR afisi bagi (`poster-link-token.ts`). */
   poster: "bagajpark:poster",
+  /** Web "olarak goruntule" cerezi (`web-impersonation.ts`): ayri turetilmis anahtar, `aud` zorunlu. */
+  webImpersonation: "bagajpark:web-impersonation",
 } as const;
 
 export type JwtAudience = (typeof JWT_AUDIENCE)[keyof typeof JWT_AUDIENCE];

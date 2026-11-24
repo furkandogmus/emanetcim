@@ -1,6 +1,7 @@
 import { setRequestLocale } from "next-intl/server";
 import { redirect } from "next/navigation";
 import { auth } from "@/auth";
+import { parseCursor } from "@/lib/cursor-page";
 import AdminReviewsClient from "@/components/admin/AdminReviewsClient";
 import { AUTO_HIDE_REASON, parseAdminReviewFilter, reviewService } from "@/services/ReviewService";
 
@@ -10,19 +11,23 @@ export default async function AdminReviewsPage({
   searchParams,
 }: {
   params: Promise<{ locale: string }>;
-  searchParams: Promise<{ filter?: string }>;
+  searchParams: Promise<{ filter?: string; cursor?: string }>;
 }) {
   const { locale } = await params;
   setRequestLocale(locale);
   const session = await auth();
   if (session?.user?.role !== "ADMIN") redirect(`/${locale}/login`);
 
-  const filter = parseAdminReviewFilter((await searchParams).filter ?? "reported");
-  const page = await reviewService.listForAdmin({ filter, take: 50 });
+  const sp = await searchParams;
+  const filter = parseAdminReviewFilter(sp.filter ?? "reported");
+  const cursor = parseCursor(sp.cursor);
+  const page = await reviewService.listForAdmin({ filter, cursor, take: 50 });
   return (
     <AdminReviewsClient
       filter={filter}
       total={page.total}
+      nextCursor={page.nextCursor}
+      isFirstPage={cursor === null}
       rows={page.items.map((r) => ({
         id: r.id,
         rating: r.rating,
