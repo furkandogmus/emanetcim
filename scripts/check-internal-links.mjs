@@ -4,14 +4,12 @@
  * Kullanım: BASE_URL=http://localhost:3000 node scripts/check-internal-links.mjs
  * (Sunucu çalışırken; CI’da Playwright veya staging URL ile koşturun.)
  */
-const LOCALES = [
-  "tr",
-  "en",
-  "de",
-  "fr",
-  "ja",
-  "fa",
-];
+import { readFileSync } from "node:fs";
+
+// Dil listesi `src/i18n/locales.ts`ten okunur: elle kopya ru eklenince geride kalmisti.
+const localesSrc = readFileSync(new URL("../src/i18n/locales.ts", import.meta.url), "utf8");
+const LOCALES = [...(/APP_LOCALES\s*=\s*\[([^\]]*)\]/.exec(localesSrc)?.[1] ?? "").matchAll(/"([a-z]{2})"/g)].map((m) => m[1]);
+if (LOCALES.length === 0) throw new Error("APP_LOCALES src/i18n/locales.ts icinden okunamadi");
 
 const paths = [
   "",
