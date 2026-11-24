@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import {
+  isSvixSecret,
   verifyWebhook,
   type WebhookSignatureHeaders,
 } from "@/lib/webhook-signature";
@@ -10,7 +11,7 @@ import { normalizeInboundSubjectLine } from "@/lib/reply-subject";
 import { classifyInboxMessage } from "@/lib/inbox-classifier";
 import { notificationService } from "@/services/NotificationService";
 import logger from "@/lib/logger";
-import { rateLimit } from "@/lib/rate-limit";
+import { claimOnce, rateLimit } from "@/lib/rate-limit";
 import { clientIpFromRequest } from "@/lib/client-ip";
 import { WEBHOOK_TOLERANCE_SECONDS } from "@/lib/webhook-signature";
 
@@ -91,30 +92,18 @@ function extractWebhookSignature(req: Request): WebhookSignatureHeaders | null {
   const svixId = req.headers.get("svix-id")?.trim();
   const svixTs = req.headers.get("svix-timestamp")?.trim();
   const sig = req.headers.get("svix-signature")?.trim();
-
-  if (svixId && svixTs && sig) {
-    return { svixId, svixTs, signature: sig };
-  }
-
-  // Fallback: legacy header formats
-  const auth = req.headers.get("authorization");
-  if (auth?.startsWith("Bearer ")) {
-    return { svixId: "", svixTs: "", signature: auth.slice(7).trim() };
-  }
-  const legacySig =
-    req.headers.get("x-resend-signature")?.trim() ||
-    req.headers.get("x-webhook-signature")?.trim();
-  if (legacySig) return { svixId: "", svixTs: "", signature: legacySig };
-
+  // Yalnizca Svix: zaman damgasiz eski basliklar (Bearer, x-resend-signature) tekrar oynatilabiliyordu.
+  if (svixId && svixTs && sig) return { svixId, svixTs, signature: sig };
   return null;
 }
 
 export async function POST(req: Request) {
   try {
     const secret = process.env.RESEND_WEBHOOK_SECRET?.trim();
-    if (!secret) {
+    if (!secret || !isSvixSecret(secret)) {
+      if (secret) logger.error({}, "resend_webhook_secret_not_svix");
       return NextResponse.json(
-        { error: "Webhook misconfigured: RESEND_WEBHOOK_SECRET is required." },
+        { error: "Webhook misconfigured: RESEND_WEBHOOK_SECRET must be a whsec_ signing secret." },
         { status: 503 },
       );
     }
@@ -158,15 +147,13 @@ export async function POST(req: Request) {
       SABIT kalir (Resend/Svix ayni olayin yeniden denemelerinde ayni id'yi
       kullanir); ayni id ikinci kez gorulurse istek reddedilir.
     */
-    if (sigData.svixId) {
-      const seenBefore = !(await rateLimit(
-        `webhook:resend:svix:${sigData.svixId}`,
-        1,
-        WEBHOOK_TOLERANCE_SECONDS * 1000,
-      ));
-      if (seenBefore) {
-        return NextResponse.json({ message: "Duplicate delivery ignored" }, { status: 200 });
-      }
+    // Sure ilk gorulmeden sayilir; toleransin iki kati +-5 dk damgali istegin tum kabul araligini kapsar.
+    const seenBefore = !(await claimOnce(
+      `webhook:resend:svix:${sigData.svixId}`,
+      2 * WEBHOOK_TOLERANCE_SECONDS * 1000,
+    ));
+    if (seenBefore) {
+      return NextResponse.json({ message: "Duplicate delivery ignored" }, { status: 200 });
     }
 
     let body: Record<string, unknown>;

@@ -96,8 +96,8 @@ describe("webhook imza doğrulaması", () => {
     expect(verifyWebhook(BODY, multi, SVIX_SECRET, NOW)).toEqual({ ok: true });
   });
 
-  it("Svix sırrı varken eski/zayıf imza yoluna düşülmez", () => {
-    // Eski yolda zaman damgasi yok, yani tekrar oynatma engellenemiyor.
+  it("Svix başlıksız (eski HMAC) istek reddedilir", () => {
+    // Eski yolda zaman damgasi yok, yani tekrar oynatma engellenemiyordu.
     const legacy = { svixId: "", svixTs: "", signature: "sha256=deadbeef" };
     expect(verifyWebhook(BODY, legacy, SVIX_SECRET, NOW)).toEqual({
       ok: false,
@@ -105,15 +105,13 @@ describe("webhook imza doğrulaması", () => {
     });
   });
 
-  it("Svix OLMAYAN sırla eski imza yolu hâlâ çalışır", () => {
+  it("whsec_ olmayan sırla HİÇBİR istek kabul edilmez (eski yol kaldırıldı)", () => {
     const plain = "plain-shared-secret";
     const sig = createHmac("sha256", plain).update(BODY).digest("hex");
     expect(
       verifyWebhook(BODY, { svixId: "", svixTs: "", signature: `sha256=${sig}` }, plain, NOW),
-    ).toEqual({ ok: true });
-    expect(
-      verifyWebhook(BODY, { svixId: "", svixTs: "", signature: "sha256=00" }, plain, NOW),
-    ).toEqual({ ok: false, reason: "bad_signature" });
+    ).toEqual({ ok: false, reason: "non_svix_secret" });
+    expect(verifyWebhook(BODY, headers(), plain, NOW)).toEqual({ ok: false, reason: "non_svix_secret" });
   });
 
   it("bozuk zaman damgası taze sayılmaz", () => {
