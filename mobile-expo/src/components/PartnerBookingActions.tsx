@@ -23,7 +23,8 @@ import { errorMessage } from "@/lib/errors";
 import { buildCheckInBody, shouldOfferOutsideHours } from "@/lib/check-in-request";
 import { SEALS_ENABLED } from "@/lib/config";
 import { formatDayTime, formatMoney, formatTime } from "@/lib/format";
-import { usePartnerCancel, usePartnerLateHold, usePartnerNoShow, usePartnerShop } from "@/lib/queries";
+import { usePartnerCancel, usePartnerDashboard, usePartnerLateHold, usePartnerNoShow, usePartnerShop } from "@/lib/queries";
+import { accessForShop } from "@/lib/shop-access";
 import type { BookingDetail, PartnerCancelReason } from "@/lib/types";
 import { notify } from "@/lib/notify";
 import { colors, fonts, radius, space } from "@/theme/tokens";
@@ -340,6 +341,8 @@ const MAX_TIMER_MS = 2 ** 31 - 1;
  */
 function PartnerManageActions({ booking }: { booking: BookingDetail }) {
   const { t } = useTranslation();
+  // Iptal `manage`: personelde dugme yok (sunucu da reddeder); "gelmedi" ve bekleme kalir.
+  const canCancel = accessForShop(usePartnerDashboard().data, booking.shopId) !== "staff";
   const cancel = usePartnerCancel(booking.id);
   const noShow = usePartnerNoShow(booking.id);
   const [open, setOpen] = useState(false);
@@ -456,16 +459,18 @@ function PartnerManageActions({ booking }: { booking: BookingDetail }) {
           ) : null}
         </View>
       ) : null}
-      <Button
-        variant="ghost"
-        textColor={colors.danger}
-        title={t("bookingActions.partner.cancel")}
-        disabled={busy}
-        onPress={() => {
-          setSheetError(null);
-          setOpen(true);
-        }}
-      />
+      {canCancel ? (
+        <Button
+          variant="ghost"
+          textColor={colors.danger}
+          title={t("bookingActions.partner.cancel")}
+          disabled={busy}
+          onPress={() => {
+            setSheetError(null);
+            setOpen(true);
+          }}
+        />
+      ) : null}
       <ReasonSheet
         visible={open}
         onClose={() => setOpen(false)}

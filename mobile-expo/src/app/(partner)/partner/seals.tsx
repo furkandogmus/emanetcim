@@ -12,7 +12,7 @@ import { api } from "@/lib/api";
 import { errorMessage } from "@/lib/errors";
 import { formatDay } from "@/lib/format";
 import { usePartnerShopSelection, withShop } from "@/lib/partner-shop";
-import { usePartnerSeals } from "@/lib/queries";
+import { usePartnerSeals, useShopAccess } from "@/lib/queries";
 import type { SealDeliveryResponse, SealRequest, SealRequestResponse } from "@/lib/types";
 import { notify } from "@/lib/notify";
 import { colors, fonts, radius, space } from "@/theme/tokens";
@@ -29,6 +29,8 @@ export default function PartnerSealsScreen() {
   const { t } = useTranslation();
   const queryClient = useQueryClient();
   const query = usePartnerSeals();
+  // Muhur siparisi `manage`: personel stogu gorur, kargoyu ve arizayi bildirir, siparis vermez.
+  const staff = useShopAccess() === "staff";
   const [selectedShop] = usePartnerShopSelection();
   // Talep ve arizali bildirimi, ekrandaki stogun dukkanina gider.
   const shopId = query.data?.shop?.id ?? selectedShop;
@@ -124,6 +126,7 @@ export default function PartnerSealsScreen() {
             <Stat value={query.data.returnedCount} label={t("seals.returned")} />
           </View>
 
+          {staff ? null : (
           <Card style={styles.card}>
             <AppText variant="heading" nativeID="seal-request-count">
               {t("seals.requestTitle")}
@@ -149,6 +152,7 @@ export default function PartnerSealsScreen() {
               onPress={() => requestSeals.mutate(parsedCount)}
             />
           </Card>
+          )}
 
           <Card style={styles.card}>
             <AppText variant="heading" nativeID="seal-faulty-serial">

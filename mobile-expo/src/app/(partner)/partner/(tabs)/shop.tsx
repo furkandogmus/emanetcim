@@ -12,9 +12,10 @@ import { ShopPhotos } from "@/components/ShopPhotos";
 import { ShopSwitcher } from "@/components/ShopSwitcher";
 import { AppText, Button, CenterMessage } from "@/components/ui";
 import { SEALS_ENABLED } from "@/lib/config";
+import { useAuth } from "@/lib/auth";
 import { errorMessage } from "@/lib/errors";
 import { usePartnerShopSelection } from "@/lib/partner-shop";
-import { fetchPartnerPosterLink, usePartnerShop } from "@/lib/queries";
+import { fetchPartnerPosterLink, usePartnerShop, useShopAccess } from "@/lib/queries";
 import { notify } from "@/lib/notify";
 import { colors, radius, space } from "@/theme/tokens";
 import { StaleQueryBanner } from "@/components/StaleQueryBanner";
@@ -27,6 +28,10 @@ export default function PartnerShopScreen() {
   const { t, i18n } = useTranslation();
   const [shopId] = usePartnerShopSelection();
   const query = usePartnerShop();
+  // Personel: dukkan ayarlari, kazanc, afis ve ekip yok; yalniz operasyon baglantilari.
+  const staff = useShopAccess() === "staff";
+  const { state } = useAuth();
+  const guestRole = state.status === "signedIn" && state.user.role === "GUEST";
   const go = (path: string) => router.push(path as Href);
   const posterBusy = useRef(false);
 
@@ -57,9 +62,18 @@ export default function PartnerShopScreen() {
           <ShopSwitcher />
         </View>
 
-        <StaleQueryBanner query={query} />
+        {staff ? null : <StaleQueryBanner query={query} />}
 
-        {query.isLoading ? (
+        {staff ? (
+          <Section title={t("shopStaff.opsSection")}>
+            <AppText variant="caption">{t("shopStaff.staffNote")}</AppText>
+            <LinkGroup>
+              {SEALS_ENABLED ? <LinkRow label={t("seals.open")} onPress={() => go("/partner/seals")} /> : null}
+              {/* Misafir alani yalniz GUEST rolune acik (`_layout` korumasi). */}
+              {guestRole ? <LinkRow label={t("shopStaff.guestMode")} onPress={() => router.replace("/home")} /> : null}
+            </LinkGroup>
+          </Section>
+        ) : query.isLoading ? (
           // Dukkan degisirken ekran ziplamasin: fotograf izgarasi ve satirlar yerinde bekler.
           <View style={styles.skeleton}>
             {[0, 1, 2].map((i) => (
@@ -83,6 +97,7 @@ export default function PartnerShopScreen() {
                 <LinkRow label={t("shopSettings.title")} onPress={() => go("/partner/settings")} />
                 {SEALS_ENABLED ? <LinkRow label={t("seals.open")} onPress={() => go("/partner/seals")} /> : null}
                 <LinkRow label={t("earnings.title")} onPress={() => go("/partner/earnings")} />
+                <LinkRow label={t("shopStaff.title")} onPress={() => go("/partner/team")} />
                 <LinkRow label={t("partnerParity.posterRow")} onPress={() => void openPoster()} />
                 <LinkRow label={t("referral.title")} onPress={() => go("/partner/referral")} />
               </LinkGroup>

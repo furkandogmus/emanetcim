@@ -5,6 +5,7 @@ import { useTranslation } from "react-i18next";
 import { AppText, Card } from "@/components/ui";
 import { formatMoney } from "@/lib/format";
 import { usePartnerDashboard } from "@/lib/queries";
+import { dashboardAccess } from "@/lib/shop-access";
 import { colors, fonts, radius, space } from "@/theme/tokens";
 
 /**
@@ -34,6 +35,8 @@ export function PartnerPulseCard() {
   }
 
   const d = query.data;
+  // Personel kazanc gormez (sunucu da sifir gonderir); yalniz gunluk sayilar.
+  const staff = dashboardAccess(d) === "staff";
   // Ay ici kazanc gecen ayin TAMAMIYLA kiyaslaniyor; bu ay henuz kazanc yokken "%100 az"
   // hicbir sey soylemiyor, esnafi da korkutuyor. O durumda rozet gizli.
   const pct = d.monthChangePct != null && d.monthNet > 0 ? d.monthChangePct : null;
@@ -45,10 +48,11 @@ export function PartnerPulseCard() {
     bags: d.bagsInStorage,
     month: formatMoney(d.monthNet),
   });
+  const a11y = staff ? t("shopStaff.pulseA11y", { shop: d.shop.name, arrivals: d.todayArrivals, pickups: d.todayPickups, bags: d.bagsInStorage }) : summary;
 
   return (
     <Card style={styles.card}>
-      <View accessible accessibilityLabel={summary} style={{ gap: space.md }}>
+      <View accessible accessibilityLabel={a11y} style={{ gap: space.md }}>
         <AppText variant="label" numberOfLines={1}>
           {t("pulse.todayLabel")}
         </AppText>
@@ -61,6 +65,7 @@ export function PartnerPulseCard() {
           <Stat value={d.bagsInStorage} label={t("pulse.inStorage")} emphasis={d.bagsInStorage > 0} />
         </View>
 
+        {staff ? null : (
         <View style={styles.month}>
           <View style={{ flex: 1 }}>
             <AppText variant="caption">{t("pulse.thisMonth")}</AppText>
@@ -76,6 +81,7 @@ export function PartnerPulseCard() {
             </View>
           ) : null}
         </View>
+        )}
       </View>
     </Card>
   );

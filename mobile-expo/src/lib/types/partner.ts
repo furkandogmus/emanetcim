@@ -114,11 +114,17 @@ export type PartnerEarnings = {
   insights?: PartnerEarningsInsights;
 };
 
+/** Dukkandaki yetki: sahip her seyi, personel yalniz operasyonu yapar. */
+export type ShopAccess = "owner" | "staff";
+
 /** `toMobilePartnerDashboard` (../src/lib/mobile-dto/partner.ts). */
 export type PartnerDashboard = {
   shop: { id: string; name: string };
   /** `isActive` eski sunucuda yok: yoksa aktif say. */
-  shops: { id: string; name: string; isActive?: boolean }[];
+  /** `access` eski sunucuda yok: yoksa sahip say. */
+  shops: { id: string; name: string; isActive?: boolean; access?: ShopAccess }[];
+  /** Secili dukkandaki yetki; `staff` ise kazanc alanlari sifir gelir ve gosterilmez. */
+  access?: ShopAccess;
   todayArrivals: number;
   todayPickups: number;
   bagsInStorage: number;

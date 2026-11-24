@@ -14,6 +14,7 @@ export default function PartnerLayout() {
         <Stack.Screen name="partner/location" />
         <Stack.Screen name="partner/schedule" />
         <Stack.Screen name="partner/referral" />
+        <Stack.Screen name="partner/team" />
         <Stack.Screen name="partner/[id]" />
       </Stack>
     </PartnerShopProvider>
