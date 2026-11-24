@@ -1707,7 +1707,8 @@
         "minAppVersion": "En düşük uygulama sürümü",
         "latestAppVersion": "Güncel uygulama sürümü",
         "iosAppStoreLive": "iOS uygulaması App Store'da yayında",
-        "androidPlayLive": "Android uygulaması Google Play'de herkese açık"
+        "androidPlayLive": "Android uygulaması Google Play'de herkese açık",
+        "appBookingDiscountPct": "Uygulama indirimi (%)"
       },
       "on": "Zorunlu",
       "off": "Zorunlu değil",
@@ -2364,5 +2365,10 @@
     "partnerInviteTitle": "Esnaf başvurusu web sitesinde",
     "partnerInviteBody": "Başvuru formu davet kodunuz eklenmiş olarak açılır.",
     "openOnWeb": "Web sitesinde aç"
+  },
+  "appDiscount": {
+    "label": "Uygulama fiyatı",
+    "checkoutLine": "Uygulama indirimi %{{pct}}",
+    "badge": "%{{pct}} uygulama indirimi"
   }
 }

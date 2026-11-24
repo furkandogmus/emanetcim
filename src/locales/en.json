@@ -3175,5 +3175,13 @@
         "gettingThere": "The nearest stops are Şişhane on the M2 metro and Karaköy on the T1 tram; the Tünel funicular is also close. M2 stations are occasionally closed temporarily; check Metro İstanbul announcements before you travel."
       }
     }
+  },
+  "AppDiscount": {
+    "hint": "{pct}% cheaper in the app:",
+    "appStore": "App Store",
+    "googlePlay": "Google Play",
+    "adminLabel": "App booking discount (%)",
+    "adminHint": "Applies to bookings made in the mobile app; 0 turns it off (max 50). Coupons apply to the remaining amount. With no commission, the shop bears the discount.",
+    "bookingRow": "App discount"
   }
 }

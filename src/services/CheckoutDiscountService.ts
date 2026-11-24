@@ -13,6 +13,8 @@
  * toplamdan hesaplanir.
  */
 import { applyReferralDiscount } from "@/lib/referral-discount";
+import { applyAppDiscount, type CheckoutChannel } from "@/lib/app-discount";
+import { getPricingRules } from "@/lib/platform-settings";
 import { couponService } from "@/services/CouponService";
 import { referralService, type ReferralRejection } from "@/services/ReferralService";
 import {
@@ -60,8 +62,21 @@ function affiliateQuote(a: ResolvedAffiliate | null, applied: boolean): Affiliat
   };
 }
 
+/**
+ * Uygulama kanali indirimi: kod indirimlerinden ONCE, ara toplamdan. Web kanalinda
+ * (ya da oran 0) sifir. Kanal tasiyicinin rotasindan gelir, istemciden degil.
+ */
+async function resolveAppDiscount(channel: CheckoutChannel | undefined, subtotal: number) {
+  if (channel !== "app") return { pct: 0, discountAmount: 0, totalPrice: subtotal };
+  const rules = await getPricingRules();
+  return applyAppDiscount(subtotal, rules.appBookingDiscountPct);
+}
+
 export type CheckoutDiscountClaim = {
   totalPrice: number;
+  /** Uygulama kanali indirimi (TRY); kod indirimleri bundan sonra kalan tutara uygulanir. */
+  appDiscountAmount: number;
+  appDiscountPct: number;
   couponDiscountAmount: number;
   couponCode?: string;
   /** Rezervasyon yazilamazsa `couponService.release` ile geri verilir. */
@@ -143,12 +158,18 @@ export class CheckoutDiscountService {
     referralCode?: string;
     affiliateCode?: string | null;
     guest: ReferralGuest;
+    channel?: CheckoutChannel;
   }): Promise<CheckoutDiscountClaim> {
-    const { subtotal, guest } = input;
+    const { guest } = input;
+    const app = await resolveAppDiscount(input.channel, input.subtotal);
+    const subtotal = app.totalPrice;
+    input = { ...input, subtotal };
     const aff = await resolveAffiliate(input.affiliateCode, guest, subtotal);
     const attribution = aff?.kind === "ok" ? aff.attribution : null;
     const base: CheckoutDiscountClaim = {
       totalPrice: subtotal,
+      appDiscountAmount: app.discountAmount,
+      appDiscountPct: app.pct,
       couponDiscountAmount: 0,
       referralDiscountAmount: 0,
       affiliateDiscountAmount: 0,
@@ -204,14 +225,18 @@ export class CheckoutDiscountService {
     referralCode?: string;
     affiliateCode?: string | null;
     guest: ReferralGuest;
+    channel?: CheckoutChannel;
   }): Promise<{
     total: number;
+    appDiscount: { pct: number; amount: number } | null;
     discount: { kind: "coupon" | "referral" | "affiliate"; code: string; amount: number } | null;
     codeStatus: CodeStatus;
     minPrice: number | null;
     affiliate: AffiliateQuote | null;
   }> {
-    const { subtotal, guest } = input;
+    const { guest } = input;
+    const app = await resolveAppDiscount(input.channel, input.subtotal);
+    const subtotal = app.totalPrice;
     const couponCode = input.couponCode ?? input.code;
     const referralCode = input.referralCode ?? input.code;
     const aff = await resolveAffiliate(input.affiliateCode, guest, subtotal);
@@ -224,6 +249,7 @@ export class CheckoutDiscountService {
     const picked = winner === "coupon" ? c.coupon : winner === "referral" ? c.referral : winner === "affiliate" ? affiliate : null;
     return {
       total: picked ? picked.total : subtotal,
+      appDiscount: app.discountAmount > 0 ? { pct: app.pct, amount: app.discountAmount } : null,
       discount: picked && winner ? { kind: winner, code: picked.code, amount: picked.amount } : null,
       codeStatus: winner === "affiliate" ? (codeValid ? "not_combinable" : rejected) : codeValid ? "applied" : rejected,
       minPrice: c.minPrice,

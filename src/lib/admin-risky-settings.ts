@@ -14,6 +14,8 @@ export const RISKY_PLATFORM_SETTING_FIELDS = [
   "bagMultiplierM",
   "bagMultiplierXl",
   "requireSealsOnCheckIn",
+  // Esnafin kazancini dusurur (komisyon yokken indirimi esnaf karsilar).
+  "appBookingDiscountPct",
   "minAppVersion",
   "latestAppVersion",
   // Kosullu: yalniz azalirsa / yakin tarih eklenirse (`riskyPlatformChanges`).

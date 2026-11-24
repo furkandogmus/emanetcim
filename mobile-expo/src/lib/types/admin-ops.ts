@@ -99,6 +99,8 @@ export type AdminPlatformSettingsValues = {
   /** Magaza yayin bayraklari; eski sunucu gondermez (yoksa kapali sayilir). */
   iosAppStoreLive?: boolean;
   androidPlayLive?: boolean;
+  /** Uygulama rezervasyonu indirimi (yuzde, 0 = kapali); eski sunucu gondermez. */
+  appBookingDiscountPct?: number;
 };
 
 /**

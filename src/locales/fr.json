@@ -3017,5 +3017,13 @@
         "gettingThere": "Les arrêts les plus proches sont Şişhane sur le métro M2 et Karaköy sur le tramway T1 ; le funiculaire Tünel est également proche. Les stations du M2 sont parfois fermées temporairement ; consultez les avis de Metro İstanbul avant de partir."
       }
     }
+  },
+  "AppDiscount": {
+    "hint": "{pct} % moins cher dans l’appli :",
+    "appStore": "App Store",
+    "googlePlay": "Google Play",
+    "adminLabel": "Remise réservation appli (%)",
+    "adminHint": "S’applique aux réservations faites dans l’appli mobile ; 0 la désactive (max 50). Les coupons s’appliquent au montant restant. Sans commission, la boutique supporte la remise.",
+    "bookingRow": "Remise appli"
   }
 }

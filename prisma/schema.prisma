@@ -414,6 +414,9 @@ model Booking {
   /// Araci misafir indirimiyle dusulen tutar (TRY). Kupon/davet indirimiyle
   /// birlesmez: tek indirim uygulanir (`CheckoutDiscountService`).
   affiliateDiscountAmount    Decimal              @default(0) @db.Decimal(12, 2)
+  /// Uygulama kanali indirimi (TRY): mobil checkout'ta ara toplamdan ONCE dusulur,
+  /// kupon/davet/araci indirimi kalan tutara uygulanir. `0` = web ya da indirim kapali.
+  appDiscountAmount          Decimal              @default(0) @db.Decimal(12, 2)
   affiliate                  Affiliate?           @relation(fields: [affiliateId], references: [id], onDelete: SetNull)
   affiliateCommission        AffiliateCommission?
   reservationSlots           ReservationSlot[]
@@ -787,6 +790,12 @@ model PlatformSettings {
   iosAppStoreLive Boolean @default(false)
   /// Android uygulaması Google Play'de HERKESE AÇIK mı (kapalı test değil)?
   androidPlayLive Boolean @default(false)
+
+  /// Mobil uygulamadan yapilan rezervasyona platform geneli indirim (yuzde, 0..50).
+  /// `0` = kapali. Yalnizca mobil checkout uclari uygular (`CheckoutDiscountService`);
+  /// web rezervasyonu tam fiyattir. Komisyon yokken indirimin bedelini esnaf karsilar
+  /// (sahip karari, 2026-11-24).
+  appBookingDiscountPct Decimal @default(10) @db.Decimal(5, 2)
 }
 
 /// Zamanlanmış iş çalıştırma defteri.

@@ -134,6 +134,7 @@ export const SETTINGS_FIELDS: (keyof AdminPlatformSettingsValues)[] = [
   "latestAppVersion",
   "iosAppStoreLive",
   "androidPlayLive",
+  "appBookingDiscountPct",
 ];
 
 export function isBoolSetting(f: keyof AdminPlatformSettingsValues) {
@@ -161,6 +162,8 @@ export function draftToValues(d: SettingsDraft): Record<string, unknown> {
         .split(/[\s,]+/)
         .map((x) => x.trim())
         .filter(Boolean);
+    // Eski sunucu bu alani bilmez: bos kalirsa gonderilmez, sunucu mevcut orani korur.
+    else if (f === "appBookingDiscountPct" && raw.trim() === "") continue;
     else out[f] = raw.trim() === "" ? NaN : Number(raw.trim().replace(",", "."));
   }
   return out;

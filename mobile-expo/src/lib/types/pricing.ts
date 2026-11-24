@@ -24,6 +24,8 @@ export type CheckoutQuote = {
   insuranceFee?: number;
   subtotal: number;
   total: number;
+  /** Uygulama indirimi: `subtotal`dan once dusulur, `total` zaten indirimli. Eski sunucu gondermez. */
+  appDiscount?: { pct: number; amount: number } | null;
   /** Tek indirim: kupon, davet ya da araci (buyuk olan; `CheckoutDiscountService`). */
   discount: { kind: "coupon" | "referral" | "affiliate"; code: string; amount: number } | null;
   /** `not_combinable`: kod gecerli ama daha buyuk referans indirimi uygulaniyor. */

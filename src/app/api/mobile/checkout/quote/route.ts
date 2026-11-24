@@ -99,6 +99,8 @@ export async function POST(req: NextRequest) {
     code: d.code,
     affiliateCode: d.affiliateCode,
     guest: { userId: auth.user.id },
+    // `intent` ile ayni kanal: onizlenen tutar uygulama fiyatidir.
+    channel: "app",
   });
 
   // Odeme ekrani fiyati KENDISI hesaplamaz: satirlar, gun ve sigorta buradan.

@@ -185,6 +185,8 @@ export default function CheckoutScreen() {
   // Sunucu kodu kabul ettiyse (indirimli ya da yalnizca atif) rezervasyona gider.
   const affiliateAccepted = !!affiliateCode && (affiliate?.status === "applied" || affiliate?.status === "attributed");
   const shownDiscount = priced?.discount ?? null;
+  // Sunucunun uyguladigi uygulama indirimi; eski sunucu alani gondermez.
+  const appDiscount = priced?.appDiscount && priced.appDiscount.amount > 0 ? priced.appDiscount : null;
 
   function quoteCode(code: string, aff: string | null) {
     setCodeError(null);
@@ -317,6 +319,16 @@ export default function CheckoutScreen() {
               <AppText variant="body">{formatMoney(priced.insuranceFee)}</AppText>
             </View>
           ) : null}
+          {appDiscount ? (
+            <View style={styles.priceRow}>
+              <AppText variant="body" style={{ flex: 1, color: colors.success }}>
+                {t("appDiscount.checkoutLine", { pct: appDiscount.pct })}
+              </AppText>
+              <AppText variant="body" style={{ color: colors.success }}>
+                −{formatMoney(appDiscount.amount)}
+              </AppText>
+            </View>
+          ) : null}
           {shownDiscount ? (
             <View style={styles.priceRow}>
               <AppText variant="body" style={{ flex: 1, color: colors.success }}>
@@ -336,9 +348,19 @@ export default function CheckoutScreen() {
           ) : null}
           <Divider />
           <View style={styles.priceRow}>
-            <AppText variant="heading" style={{ flex: 1 }}>
-              {t("checkout.total")}
-            </AppText>
+            <View style={{ flex: 1 }}>
+              <AppText variant="heading">{t("checkout.total")}</AppText>
+              {appDiscount ? (
+                <AppText variant="caption" style={{ color: colors.success }}>
+                  {t("appDiscount.label")}
+                </AppText>
+              ) : null}
+            </View>
+            {appDiscount && priced ? (
+              <AppText variant="body" style={styles.struck}>
+                {formatMoney(priced.subtotal)}
+              </AppText>
+            ) : null}
             <AppText variant="heading" style={{ fontFamily: fonts.display, fontSize: 22 }}>
               {total != null ? formatMoney(total) : "–"}
             </AppText>
@@ -565,6 +587,7 @@ function EditableRow({
 }
 
 const styles = StyleSheet.create({
+  struck: { textDecorationLine: "line-through", color: colors.inkSecondary, marginRight: space.sm },
   safe: { flex: 1, backgroundColor: colors.bg },
   header: {
     flexDirection: "row",

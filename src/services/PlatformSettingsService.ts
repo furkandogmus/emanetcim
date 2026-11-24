@@ -4,6 +4,7 @@ import prisma from "@/lib/db";
 import { moneyToNumber } from "@/lib/money";
 import { writeAuditLog } from "@/lib/audit-log";
 import { DEFAULT_PRICING_RULES } from "@/lib/pricing-rules";
+import { APP_DISCOUNT_MAX_PCT } from "@/lib/app-discount";
 import { parsePlatformHolidayDates } from "@/lib/booking-holidays";
 import { invalidatePricingRulesCache } from "@/lib/platform-settings";
 import { invalidateAppVersionGateCache } from "@/lib/app-version";
@@ -52,6 +53,8 @@ export const platformSettingsUpdateSchema = z.object({
   // Istege bagli: eski mobil surumler bu alanlari gondermez; gelmezse mevcut deger korunur.
   iosAppStoreLive: z.boolean().optional(),
   androidPlayLive: z.boolean().optional(),
+  // Eski mobil yonetici gondermez: gelmezse mevcut oran korunur (sifirlanmaz).
+  appBookingDiscountPct: z.number().min(0).max(APP_DISCOUNT_MAX_PCT).optional(),
 })
   /*
     KILITLENME KAPISI: en yeni yayindaki surumun ustunde bir `minAppVersion`
@@ -89,6 +92,7 @@ export type PlatformSettingsValues = {
   latestAppVersion: string | null;
   iosAppStoreLive: boolean;
   androidPlayLive: boolean;
+  appBookingDiscountPct: number;
 };
 
 /** Yonetici ekranlarinin gosterdigi degerler; satir yoksa varsayilan kurallar. */
@@ -121,6 +125,7 @@ export async function getPlatformSettingsForAdmin(): Promise<{
         latestAppVersion: null,
         iosAppStoreLive: false,
         androidPlayLive: false,
+        appBookingDiscountPct: d.appBookingDiscountPct,
       },
     };
   }
@@ -146,6 +151,7 @@ export async function getPlatformSettingsForAdmin(): Promise<{
       latestAppVersion: row.latestAppVersion,
       iosAppStoreLive: row.iosAppStoreLive,
       androidPlayLive: row.androidPlayLive,
+      appBookingDiscountPct: moneyToNumber(row.appBookingDiscountPct),
     },
   };
 }
@@ -185,7 +191,8 @@ export async function updatePlatformSettings(
   if (versioned && (snapshot.updatedAt?.toISOString() ?? null) !== opts.expectedUpdatedAt) {
     return { ok: false, reason: "stale_settings" };
   }
-  const changes = riskyPlatformChanges(snapshot.values, d);
+  const appBookingDiscountPct = d.appBookingDiscountPct ?? snapshot.values.appBookingDiscountPct;
+  const changes = riskyPlatformChanges(snapshot.values, { ...d, appBookingDiscountPct });
   const phrase = platformSettingsConfirmPhrase(changes);
   if (opts.requireConfirmation && changes.length > 0 && opts.confirmation !== phrase) {
     return { ok: false, reason: "confirmation_required", changes, phrase };
@@ -212,6 +219,7 @@ export async function updatePlatformSettings(
     latestAppVersion: d.latestAppVersion,
     iosAppStoreLive: d.iosAppStoreLive ?? snapshot.values.iosAppStoreLive,
     androidPlayLive: d.androidPlayLive ?? snapshot.values.androidPlayLive,
+    appBookingDiscountPct: new Prisma.Decimal(appBookingDiscountPct),
   };
   if (!versioned) {
     await prisma.platformSettings.upsert({ where: { id: "default" }, create: { id: "default", ...fields }, update: fields });
@@ -246,6 +254,9 @@ export async function updatePlatformSettings(
     entityId: "default",
     metadata: {
       riskyChanged: changes.map((c) => c.field),
+      ...(appBookingDiscountPct !== snapshot.values.appBookingDiscountPct
+        ? { appBookingDiscountPct: { from: snapshot.values.appBookingDiscountPct, to: appBookingDiscountPct } }
+        : {}),
       ...(storeFlagsChanged
         ? { storeFlags: { iosAppStoreLive: fields.iosAppStoreLive, androidPlayLive: fields.androidPlayLive } }
         : {}),

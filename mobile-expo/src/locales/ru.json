@@ -1757,7 +1757,8 @@
         "minAppVersion": "Минимальная версия приложения",
         "latestAppVersion": "Актуальная версия приложения",
         "iosAppStoreLive": "Приложение iOS опубликовано в App Store",
-        "androidPlayLive": "Приложение Android доступно всем в Google Play"
+        "androidPlayLive": "Приложение Android доступно всем в Google Play",
+        "appBookingDiscountPct": "Скидка в приложении (%)"
       },
       "on": "Обязательно",
       "off": "Необязательно",
@@ -2441,5 +2442,10 @@
     "partnerInviteTitle": "Заявка партнёра подаётся на сайте",
     "partnerInviteBody": "Форма заявки откроется с уже указанным кодом приглашения.",
     "openOnWeb": "Открыть сайт"
+  },
+  "appDiscount": {
+    "label": "Цена в приложении",
+    "checkoutLine": "Скидка в приложении {{pct}}%",
+    "badge": "Скидка {{pct}}% в приложении"
   }
 }

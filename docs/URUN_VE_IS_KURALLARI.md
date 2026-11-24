@@ -90,7 +90,29 @@ APPROVED ──check-in (tahsilat)──> PAID ──> CHECKED_IN ──check-ou
 | Hasar / kayıp | Misafir itiraz açar; yönetici check-in mühür kaydı ve fotoğrafı ile karar verir | `DisputeService` |
 | Kupon | Yönetici tanımlar (`/admin/coupons`, mobil "Kuponlar"); iptalde kupon iade edilir | `CouponService` |
 | Davet indirimi | Başka bir misafirin kodu, ilk rezervasyonda, kuponsuz, ara toplamdan `REFERRAL_DISCOUNT_PCT` (varsayılan %5) | `ReferralService` |
+| Uygulama indirimi | Mobil uygulamadan yapılan rezervasyona platform geneli `appBookingDiscountPct` (varsayılan %10, 0 = kapalı); aşağıda | `src/lib/app-discount.ts`, `CheckoutDiscountService` |
 | Yönetim bağlantısı | Eski hesapsız rezervasyonun yönetim bağlantısı en fazla 7 gün geçerli; yeni hesapsız rezervasyon açılmaz | `guest-link.ts` |
+
+### Uygulama indirimi (2026-11-24)
+
+- **Kim alır:** yalnızca mobil uygulamanın ödeme uçlarından (`/api/mobile/checkout/quote`,
+  `/intent`) gelen rezervasyon. Kanal rotadan türetilir; istemci fiyat ya da bayrak
+  gönderemez. Web rezervasyonu tam fiyattır.
+- **Sıra (sektörde yaygın "kanal fiyatı + kod" düzeni):** uygulama indirimi ara toplamdan
+  (sigorta dahil) **önce** düşülür; kupon, davet ya da aracı indirimi (tek indirim kuralı
+  değişmeden) **kalan tutara** uygulanır. Kuponun asgari tutar şartı da kalan tutara bakar.
+  Örnek: 250 TL → %10 uygulama → 225 TL → %20 kupon → 180 TL.
+- **Yuvarlama:** kuruşa, yarım kuruş yukarı (`applyAppDiscount`).
+- **Defter:** `Booking.appDiscountAmount`; oran `pricingSnapshot` içinde. Esnaf kazancı, yönetici
+  ciro özeti ve e-postalar indirimli `totalPrice`ı kullanır. Düzenleme ve valiz revizyonunda
+  tutar kupon gibi kilitli kalır (`lockedBookingDiscount`).
+- **Bedel:** komisyon bugün 0 olduğu için indirimi esnaf karşılar (sahip kararı). Oran değişikliği
+  bu yüzden riskli alandır (onay ifadesi) ve denetim kaydına eski → yeni yazılır.
+- **Gösterim:** mobil dükkan detayı ve ödeme ekranında üstü çizili fiyat + "Uygulama fiyatı"
+  (sunucu alanları `appPrice`, `appDiscount`). Web dükkan ve ödeme sayfasında sessiz bir
+  "Uygulamada %10 daha ucuz" satırı yayındaki mağazanın `/app?kaynak=web-shop|web-checkout`
+  bağıyla; oran 0 ya da mağaza kapalıysa gizli, iOS'ta App Store yayındayken Safari akıllı
+  bandı aynı işi yaptığı için gizli.
 
 ## Dükkan ve esnaf
 
@@ -134,6 +156,7 @@ Web: **`/admin/platform-settings`**. Mobil: yönetici sekmesi → "Platform ayar
 | `platformHolidayDates` | boş | Rezervasyona kapalı günler (`YYYY-MM-DD` JSON); `BOOKING_CALENDAR_TIMEZONE`, varsayılan `Europe/Istanbul` |
 | `minAppVersion`, `latestAppVersion` | boş | Mobil zorunlu / önerilen güncelleme eşiği (semver) |
 | `iosAppStoreLive`, `androidPlayLive` | false | Mağaza yayın bayrakları (aşağıda) |
+| `appBookingDiscountPct` | 10 | Mobil uygulama rezervasyonu indirimi (yüzde, 0..50; 0 = kapalı). § Uygulama indirimi |
 
 ### Önbellek ve denetim
 

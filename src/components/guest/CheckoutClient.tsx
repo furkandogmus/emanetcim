@@ -55,6 +55,7 @@ import { foreignDisplayCurrency, formatTryCurrency } from "@/lib/currency";
 import { useModalBehavior } from "@/lib/hooks/useModalBehavior";
 import { buildCheckoutReturnPath, checkoutAuthHref } from "@/lib/checkout-return-url";
 import { useActionErrorText } from "@/lib/use-action-error";
+import AppDiscountHint from "@/components/app-promo/AppDiscountHint";
 interface CheckoutClientProps {
   shopId: string;
   shopName: string;
@@ -838,6 +839,7 @@ export default function CheckoutClient({
               {foreignDisplayCurrency(locale) && (
                 <p className="mt-2 text-right text-[11px] text-gray-400">{t("chargedInTryNote")}</p>
               )}
+              <AppDiscountHint pct={pricingRules.appBookingDiscountPct} source="web-checkout" className="mt-2 text-right" />
             </section>
 
             <BagProtection variant="checkout" insuranceEnabled={insuranceEnabled} />

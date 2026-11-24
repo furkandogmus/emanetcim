@@ -26,6 +26,7 @@ function mapRow(row: {
   bagMultiplierXl: unknown;
   platformHolidayDates?: unknown;
   platformCommissionRate?: unknown;
+  appBookingDiscountPct?: unknown;
 }): PricingRules {
   return {
     // Kolon yeni; eski satirlarda null gelirse varsayilana duser.
@@ -50,6 +51,10 @@ function mapRow(row: {
       XL: moneyToNumber(row.bagMultiplierXl),
     },
     platformHolidayDates: parsePlatformHolidayDates(row.platformHolidayDates),
+    appBookingDiscountPct:
+      row.appBookingDiscountPct == null
+        ? DEFAULT_PRICING_RULES.appBookingDiscountPct
+        : moneyToNumber(row.appBookingDiscountPct),
   };
 }
 

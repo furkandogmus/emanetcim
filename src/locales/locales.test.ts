@@ -46,6 +46,8 @@ const IDENTICAL_TO_EN_OK = new Set([
   "Contact.emailAddress", // destek e-posta adresi
   "KVKK.a1", // şirketin tescilli ünvanı
   "Guest.responseTimeMinutes", // "≤{minutes} min" — Fransızcada da doğru
+  "AppDiscount.appStore", // mağaza adı
+  "AppDiscount.googlePlay", // mağaza adı
 ]);
 
 /** İstasyon/semt arama sorguları: yer adı, çevrilmez. */

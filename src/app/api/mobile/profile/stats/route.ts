@@ -44,7 +44,7 @@ export async function GET(req: NextRequest) {
       rezervasyonun kendisiyle birlikte kayitli. Ayni odenmis-rezervasyon
       kumesi uzerinden toplanir ki "harcanan" ile ayni evreni anlatsin.
     */
-    prisma.booking.aggregate({ where: paidWhere, _sum: { couponDiscountAmount: true } }),
+    prisma.booking.aggregate({ where: paidWhere, _sum: { couponDiscountAmount: true, appDiscountAmount: true } }),
   ]);
 
   return NextResponse.json({
@@ -52,7 +52,7 @@ export async function GET(req: NextRequest) {
     completedBookings,
     // `Number(...)` DEGIL: tutarlar Prisma `Decimal`; cevrim tek yerden
     // (`moneyToNumber`) yapilir.
-    totalSavings: moneyToNumber(savings._sum.couponDiscountAmount),
+    totalSavings: moneyToNumber(savings._sum.couponDiscountAmount) + moneyToNumber(savings._sum.appDiscountAmount),
     totalSpent: moneyToNumber(totalSpent._sum.totalPrice),
   });
 }

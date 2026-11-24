@@ -78,6 +78,8 @@ export default function ShopDetailScreen() {
   }
 
   const shop = query.data;
+  // Sunucu indirimli fiyati verir; alan yoksa (eski sunucu) ya da oran 0 ise duz fiyat.
+  const appPrice = shop.appPrice && shop.appPrice.pct > 0 ? shop.appPrice : null;
   // Kapak once, galeri ardindan; kapak yoksa galeri yine gosterilir.
   const photos = [shop.image, ...(shop.gallery ?? [])].filter((u): u is string => !!resolveImage(u));
   const hours = hoursLabel(shop, t);
@@ -196,6 +198,11 @@ export default function ShopDetailScreen() {
           {!shop.isPrelaunch && shop.priceBySize ? (
             <Card style={{ gap: space.sm }}>
               <AppText variant="heading">{t("shop.prices")}</AppText>
+              {appPrice ? (
+                <AppText variant="caption" style={{ color: colors.success }}>
+                  {t("appDiscount.badge", { pct: appPrice.pct })}
+                </AppText>
+              ) : null}
               {(
                 [
                   ["s", shop.priceBySize.s],
@@ -208,9 +215,16 @@ export default function ShopDetailScreen() {
                     <AppText variant="bodyMedium">{t(`bags.${size}`)}</AppText>
                     <AppText variant="caption">{t(`bags.${size}Desc`)}</AppText>
                   </View>
-                  <AppText variant="bodyMedium" style={{ fontVariant: ["tabular-nums"] }}>
-                    {t("shop.perDay", { price: formatMoney(price) })}
-                  </AppText>
+                  <View style={{ alignItems: "flex-end" }}>
+                    {appPrice ? (
+                      <AppText variant="caption" style={styles.struck}>
+                        {formatMoney(price)}
+                      </AppText>
+                    ) : null}
+                    <AppText variant="bodyMedium" style={{ fontVariant: ["tabular-nums"] }}>
+                      {t("shop.perDay", { price: formatMoney(appPrice ? appPrice.priceBySize[size] : price) })}
+                    </AppText>
+                  </View>
                 </View>
               ))}
             </Card>
@@ -243,10 +257,19 @@ export default function ShopDetailScreen() {
         <View style={[styles.cta, { paddingBottom: insets.bottom + space.md }]}>
           {shop.priceBySize ? (
             <View>
-              <AppText variant="caption">{t("shop.perDayMediumLabel")}</AppText>
-              <AppText variant="heading" style={{ fontFamily: fonts.display, fontSize: 22 }}>
-                {formatMoney(shop.priceBySize.m)}
+              <AppText variant="caption">
+                {appPrice ? t("appDiscount.label") : t("shop.perDayMediumLabel")}
               </AppText>
+              <View style={{ flexDirection: "row", alignItems: "baseline", gap: space.xs }}>
+                {appPrice ? (
+                  <AppText variant="caption" style={styles.struck}>
+                    {formatMoney(shop.priceBySize.m)}
+                  </AppText>
+                ) : null}
+                <AppText variant="heading" style={{ fontFamily: fonts.display, fontSize: 22 }}>
+                  {formatMoney(appPrice ? appPrice.priceBySize.m : shop.priceBySize.m)}
+                </AppText>
+              </View>
             </View>
           ) : null}
           <Button
@@ -296,6 +319,7 @@ function Reviews({ shopId }: { shopId: string }) {
 }
 
 const styles = StyleSheet.create({
+  struck: { textDecorationLine: "line-through", color: colors.inkSecondary },
   root: { flex: 1, backgroundColor: colors.bg },
   photo: { height: 280, backgroundColor: colors.surfaceMuted, alignItems: "center", justifyContent: "center" },
   back: { position: "absolute", left: space.lg },

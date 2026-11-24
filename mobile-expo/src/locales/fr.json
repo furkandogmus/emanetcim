@@ -1732,7 +1732,8 @@
         "minAppVersion": "Version minimale de l’application",
         "latestAppVersion": "Dernière version de l’application",
         "iosAppStoreLive": "Application iOS disponible sur l’App Store",
-        "androidPlayLive": "Application Android publique sur Google Play"
+        "androidPlayLive": "Application Android publique sur Google Play",
+        "appBookingDiscountPct": "Remise réservation appli (%)"
       },
       "on": "Obligatoire",
       "off": "Facultatif",
@@ -2398,5 +2399,10 @@
     "partnerInviteTitle": "L'inscription partenaire se fait sur le site web",
     "partnerInviteBody": "Le formulaire de candidature s'ouvre avec votre code d'invitation déjà rempli.",
     "openOnWeb": "Ouvrir le site web"
+  },
+  "appDiscount": {
+    "label": "Prix appli",
+    "checkoutLine": "Remise appli {{pct}} %",
+    "badge": "{{pct}} % de remise appli"
   }
 }

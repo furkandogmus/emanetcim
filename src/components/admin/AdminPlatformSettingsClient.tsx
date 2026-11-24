@@ -29,6 +29,8 @@ export type PlatformSettingsFormValues = {
   latestAppVersion: string;
   iosAppStoreLive: boolean;
   androidPlayLive: boolean;
+  /** Uygulama rezervasyonu indirimi (yuzde, 0 = kapali). */
+  appBookingDiscountPct: number;
 };
 
 function StoreToggle({
@@ -134,6 +136,7 @@ export default function AdminPlatformSettingsClient({
   updatedAtLabel: string;
 }) {
   const t = useTranslations("Admin");
+  const tApp = useTranslations("AppDiscount");
   const router = useRouter();
   const [pending, startTransition] = useTransition();
   const [form, setForm] = useState<PlatformSettingsFormValues>(initial);
@@ -165,6 +168,7 @@ export default function AdminPlatformSettingsClient({
         latestAppVersion: form.latestAppVersion,
         iosAppStoreLive: form.iosAppStoreLive,
         androidPlayLive: form.androidPlayLive,
+        appBookingDiscountPct: form.appBookingDiscountPct,
       });
       if (!res.success) {
         toast.error(t("platformSettingsInvalid"));
@@ -311,6 +315,16 @@ export default function AdminPlatformSettingsClient({
           value={form.latestAppVersion}
           onChange={(v) => patch({ latestAppVersion: v })}
         />
+
+        <div className="md:col-span-2 flex flex-col gap-1">
+          <Field
+            label={tApp("adminLabel")}
+            value={form.appBookingDiscountPct}
+            onChange={(v) => patch({ appBookingDiscountPct: Math.min(50, Math.max(0, v)) })}
+            step="0.5"
+          />
+          <span className="text-[10px] text-gray-400">{tApp("adminHint")}</span>
+        </div>
 
         <StoreToggle
           id="iosAppStoreLive"

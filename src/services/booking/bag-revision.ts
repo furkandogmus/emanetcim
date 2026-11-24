@@ -25,6 +25,7 @@
  * `manual` oldugu surece tahsilat dukkanda yapilir; defterle baglanmasi ayri is
  * (P1-21). Bu yuzden `PaymentService` cagrilmaz — ama fark denetim izine yazilir.
  */
+import { lockedBookingDiscount } from '@/lib/app-discount';
 import { isBagRevisableStatus } from '@/lib/bag-revision-status';
 import { Prisma } from '@prisma/client';
 import prisma from '@/lib/db';
@@ -218,11 +219,8 @@ export async function proposeBagRevision(
     });
     // Kilitli indirim onizlemede de dusulur -- bkz. applyBagRevision'daki ayni
     // gerekce (2026-09-10'da bulundu).
-    const lockedDiscountPreview =
-      moneyToNumber(booking.couponDiscountAmount) +
-      moneyToNumber(booking.referralDiscountAmount) +
-      // Araci misafir indirimi de kilitli indirimdir (2026-11-23).
-      moneyToNumber(booking.affiliateDiscountAmount);
+    // Kupon, davet, araci ve uygulama indirimi kilitli (`lockedBookingDiscount`).
+    const lockedDiscountPreview = lockedBookingDiscount(booking);
     const afterTotal = Math.max(0, round2(after.subtotalBeforeCoupon - lockedDiscountPreview));
     const beforeTotal = Math.max(0, round2(before.subtotalBeforeCoupon - lockedDiscountPreview));
     const extraAmount = round2(afterTotal - beforeTotal);
@@ -356,11 +354,8 @@ export async function applyBagRevision(
       DUZELTMESI bile (ayni sayiyla) misafirin indirimini sessizce
       buharlastirirdi.
     */
-    const lockedDiscount =
-      moneyToNumber(booking.couponDiscountAmount) +
-      moneyToNumber(booking.referralDiscountAmount) +
-      // Araci misafir indirimi de kilitli indirimdir (2026-11-23).
-      moneyToNumber(booking.affiliateDiscountAmount);
+    // Kupon, davet, araci ve uygulama indirimi kilitli (`lockedBookingDiscount`).
+    const lockedDiscount = lockedBookingDiscount(booking);
     const newTotal = Math.max(0, round2(totals.subtotalBeforeCoupon - lockedDiscount));
     const previousTotal = moneyToNumber(booking.totalPrice);
     const delta = round2(newTotal - previousTotal);

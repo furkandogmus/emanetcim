@@ -1682,7 +1682,8 @@
         "minAppVersion": "アプリの最低バージョン",
         "latestAppVersion": "アプリの最新バージョン",
         "iosAppStoreLive": "iOS アプリを App Store で公開中",
-        "androidPlayLive": "Android アプリを Google Play で公開中"
+        "androidPlayLive": "Android アプリを Google Play で公開中",
+        "appBookingDiscountPct": "アプリ予約割引（%）"
       },
       "on": "必須",
       "off": "任意",
@@ -2330,5 +2331,10 @@
     "partnerInviteTitle": "パートナー登録はウェブサイトで行います",
     "partnerInviteBody": "招待コードが入力された状態で申請フォームが開きます。",
     "openOnWeb": "ウェブサイトを開く"
+  },
+  "appDiscount": {
+    "label": "アプリ価格",
+    "checkoutLine": "アプリ割引 {{pct}}%",
+    "badge": "アプリ限定 {{pct}}% オフ"
   }
 }
