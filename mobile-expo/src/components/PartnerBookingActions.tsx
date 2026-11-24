@@ -75,6 +75,8 @@ export function PartnerBookingActions({ booking }: { booking: BookingDetail }) {
     Ayar eski bir degerle onbellekte kalmissa SEAL_REQUIRED yaniti da alanlari acar.
   */
   const router = useRouter();
+  // Saat disi istisnasi sahip/yonetici karari (`canOverrideClosedHours`); personele sunulmaz.
+  const canOverrideHours = accessForShop(usePartnerDashboard().data, booking.shopId) !== "staff";
   const serverSeals = usePartnerShop().data?.requireSealsOnCheckIn === true;
   const [sealsForced, setSealsForced] = useState(false);
   const sealsOn = SEALS_ENABLED || serverSeals || sealsForced;
@@ -117,13 +119,14 @@ export function PartnerBookingActions({ booking }: { booking: BookingDetail }) {
         return;
       }
       if (e instanceof ApiError && e.code === "SEAL_REQUIRED") setSealsForced(true);
-      setClosed(e instanceof ApiError && e.code === "SHOP_CLOSED");
-      setError(errorMessage(e, "partner"));
+      const shopClosed = e instanceof ApiError && e.code === "SHOP_CLOSED";
+      setClosed(shopClosed && canOverrideHours);
+      setError(shopClosed && !canOverrideHours ? t("shopStaff.closedAskOwner") : errorMessage(e, "partner"));
       /*
         Kayitli saatler cogu dukkanda varsayilanda kaldi; tezgahtaki esnaf dukkanin
         acik oldugunu bilir. Onaylarsa sunucu teslimi saat disi diye kaydeder.
       */
-      if (shouldOfferOutsideHours(e, vars.outsideHours === true)) confirmOutsideHours();
+      if (canOverrideHours && shouldOfferOutsideHours(e, vars.outsideHours === true)) confirmOutsideHours();
     },
   });
 

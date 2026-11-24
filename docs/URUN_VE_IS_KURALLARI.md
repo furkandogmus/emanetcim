@@ -76,8 +76,9 @@ APPROVED ──check-in (tahsilat)──> PAID ──> CHECKED_IN ──check-ou
   (`src/lib/qr-token.ts`, en az 48 saat geçerli). Manuel sağlayıcıda tahsilat bu anda
   deftere yazılır, sonra durum `CHECKED_IN` olur. Mühür kaydı `requireSealsOnCheckIn`
   açıksa zorunludur (varsayılan kapalı). Kapanıştan sonra `checkInGraceMin` (30 dk)
-  tolerans var; dükkan kapalı görünüyorsa sahip/yönetici "yine de teslim al" diyebilir
-  (olaya `outside_hours` yazılır).
+  tolerans var; dükkan kapalı görünüyorsa yalnızca sahip/yönetici "yine de teslim al" diyebilir
+  (olaya `outside_hours` yazılır). Dükkan personeli bu istisnayı göremez ve kullanamaz
+  (`canOverrideClosedHours`); saatleri sahip düzeltir ya da teslimi o onaylar.
 - **Valiz revizyonu** (`bag-revision.ts`): gelen valiz sayısı farklıysa esnaf düzeltir,
   tutar yeniden hesaplanır.
 - **Check-out** (`check-out.ts`): gecikme ücreti ve erken teslim iadesi hesaplanır ve

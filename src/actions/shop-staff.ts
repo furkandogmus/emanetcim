@@ -11,10 +11,11 @@ const INVITE_ERROR_KEY: Record<Exclude<InviteResult, { ok: true }>["code"], stri
   INVALID_EMAIL: "shopStaff.errorInvalidEmail",
   SELF: "shopStaff.errorSelf",
   OWNER: "shopStaff.errorOwner",
-  ALREADY_MEMBER: "shopStaff.errorAlreadyMember",
   LIMIT: "shopStaff.errorLimit",
   RATE_LIMITED: "shopStaff.errorRateLimited",
   NOT_FOUND: "Errors.shopNotFound",
+  SHOP_INACTIVE: "shopStaff.errorShopInactive",
+  CONFLICT: "shopStaff.errorConflict",
 };
 
 function revalidateTeam() {
@@ -27,7 +28,7 @@ export async function inviteShopStaffAction(shopId: string, email: string) {
   const result = await inviteStaff({ actor: auth.actor, shopId, email, locale: await getLocale() });
   if (!result.ok) return { success: false as const, error: INVITE_ERROR_KEY[result.code] };
   revalidateTeam();
-  return { success: true as const, kind: result.kind };
+  return { success: true as const };
 }
 
 export async function removeShopStaffAction(shopId: string, userId: string) {
@@ -49,14 +50,22 @@ export async function revokeShopInviteAction(shopId: string, inviteId: string) {
 export async function acceptShopInviteAction(token: string) {
   const auth = await requireUser();
   if (!auth.ok) return { success: false as const, error: auth.error };
-  const user = await prisma.user.findUnique({ where: { id: auth.actor.id }, select: { email: true } });
-  const result = await acceptInvite(token, { id: auth.actor.id, email: user?.email ?? null });
+  const user = await prisma.user.findUnique({ where: { id: auth.actor.id }, select: { email: true, emailVerified: true } });
+  const result = await acceptInvite(token, {
+    id: auth.actor.id,
+    email: user?.email ?? null,
+    emailVerified: user?.emailVerified != null,
+  });
   if (!result.ok) {
     const key = {
       INVALID: "shopStaff.inviteInvalid",
       EXPIRED: "shopStaff.inviteExpired",
       EMAIL_MISMATCH: "shopStaff.inviteEmailMismatch",
+      EMAIL_UNVERIFIED: "shopStaff.inviteEmailUnverified",
       LIMIT: "shopStaff.errorLimit",
+      ALREADY_MEMBER: "shopStaff.errorAlreadyMember",
+      SHOP_INACTIVE: "shopStaff.errorShopInactive",
+      CONFLICT: "shopStaff.errorConflict",
     }[result.code];
     return { success: false as const, error: key };
   }

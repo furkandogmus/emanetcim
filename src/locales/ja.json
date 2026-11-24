@@ -3047,7 +3047,6 @@
     "pendingTitle": "保留中の招待",
     "expires": "有効期限 {date}",
     "revoke": "取り消す",
-    "addedToast": "スタッフを追加し、通知しました。",
     "invitedToast": "招待メールを送信しました。",
     "removedToast": "スタッフを外しました。",
     "revokedToast": "招待を取り消しました。",
@@ -3068,6 +3067,10 @@
     "inviteExpired": "この招待は期限切れです。店舗に新しい招待を依頼してください。",
     "inviteEmailMismatch": "この招待は別のメールアドレスに送信されています。そのアドレスでログインしてください。",
     "staffPanel": "店舗パネル",
-    "staffPanelDesc": "{count, plural, other {# 店舗のスタッフです}}"
+    "staffPanelDesc": "{count, plural, other {# 店舗のスタッフです}}",
+    "errorShopInactive": "店舗が承認され公開されるまでチームは管理できません。",
+    "errorConflict": "同時に別のチーム変更が行われました。もう一度お試しください。",
+    "inviteEmailUnverified": "招待を承諾するには、まずメールアドレスを確認してください。",
+    "closedAskOwner": "店舗は現在閉店中のようです。営業時間外の受け取りを承認できるのは店舗オーナーだけです。"
   }
 }

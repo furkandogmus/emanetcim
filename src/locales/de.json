@@ -3047,7 +3047,6 @@
     "pendingTitle": "Offene Einladungen",
     "expires": "Gültig bis {date}",
     "revoke": "Zurückziehen",
-    "addedToast": "Mitarbeiter hinzugefügt und benachrichtigt.",
     "invitedToast": "Einladungs-E-Mail gesendet.",
     "removedToast": "Mitarbeiter entfernt.",
     "revokedToast": "Einladung zurückgezogen.",
@@ -3068,6 +3067,10 @@
     "inviteExpired": "Diese Einladung ist abgelaufen. Bitten Sie das Geschäft um eine neue.",
     "inviteEmailMismatch": "Diese Einladung wurde an eine andere E-Mail-Adresse gesendet. Melden Sie sich mit dieser Adresse an.",
     "staffPanel": "Geschäftspanel",
-    "staffPanelDesc": "{count, plural, one {Sie sind Mitarbeiter in # Geschäft} other {Sie sind Mitarbeiter in # Geschäften}}"
+    "staffPanelDesc": "{count, plural, one {Sie sind Mitarbeiter in # Geschäft} other {Sie sind Mitarbeiter in # Geschäften}}",
+    "errorShopInactive": "Ein Team kann erst verwaltet werden, wenn das Geschäft freigegeben und aktiv ist.",
+    "errorConflict": "Gleichzeitig wurde eine andere Teamänderung vorgenommen, versuchen Sie es erneut.",
+    "inviteEmailUnverified": "Bestätigen Sie zuerst Ihre E-Mail-Adresse, um die Einladung anzunehmen.",
+    "closedAskOwner": "Das Geschäft scheint gerade geschlossen. Nur der Inhaber kann eine Übergabe außerhalb der Öffnungszeiten freigeben."
   }
 }

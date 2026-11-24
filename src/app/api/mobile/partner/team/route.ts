@@ -16,13 +16,17 @@ const INVITE_HTTP: Record<Exclude<InviteResult, { ok: true }>["code"], number> =
   INVALID_EMAIL: 400,
   SELF: 400,
   OWNER: 400,
-  ALREADY_MEMBER: 409,
   LIMIT: 409,
   RATE_LIMITED: 429,
   NOT_FOUND: 404,
+  SHOP_INACTIVE: 409,
+  CONFLICT: 409,
 };
 
-/** POST `{ email, locale? }`: hesap varsa dogrudan ekler, yoksa davet bagi gonderir. */
+/**
+ * POST `{ email, locale? }`: her zaman davet bagi (dogrudan ekleme yok). Yanit hesabin
+ * varligindan bagimsiz; `kind` 0.3.x'te eklenen istemci icin sabit `invited`.
+ */
 export async function POST(req: NextRequest) {
   const gate = await teamGate(req, { write: true });
   if ("error" in gate) return gate.error;
@@ -33,5 +37,5 @@ export async function POST(req: NextRequest) {
   if (!result.ok) {
     return NextResponse.json({ error: result.code.toLowerCase() }, { status: INVITE_HTTP[result.code] });
   }
-  return NextResponse.json({ success: true, kind: result.kind });
+  return NextResponse.json({ success: true, kind: "invited" });
 }

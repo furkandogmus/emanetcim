@@ -32,9 +32,9 @@ export default function PartnerTeamScreen() {
     invite.mutate(
       { email: email.trim(), locale: i18n.language },
       {
-        onSuccess: (r) => {
+        onSuccess: () => {
           setEmail("");
-          notify(t("shopStaff.title"), t(r.kind === "added" ? "shopStaff.addedToast" : "shopStaff.invitedToast"));
+          notify(t("shopStaff.title"), t("shopStaff.invitedToast"));
         },
         onError: (e) => notify(t("shopStaff.inviteFailed"), errorMessage(e, "shopStaff")),
       },

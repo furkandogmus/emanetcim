@@ -3047,7 +3047,6 @@
     "pendingTitle": "Invitations en attente",
     "expires": "Expire le {date}",
     "revoke": "Annuler l'invitation",
-    "addedToast": "Membre ajouté et prévenu.",
     "invitedToast": "E-mail d'invitation envoyé.",
     "removedToast": "Membre retiré.",
     "revokedToast": "Invitation annulée.",
@@ -3068,6 +3067,10 @@
     "inviteExpired": "Cette invitation a expiré. Demandez-en une nouvelle au commerce.",
     "inviteEmailMismatch": "Cette invitation a été envoyée à une autre adresse e-mail. Connectez-vous avec cette adresse.",
     "staffPanel": "Panneau du commerce",
-    "staffPanelDesc": "{count, plural, one {Vous travaillez dans # commerce} other {Vous travaillez dans # commerces}}"
+    "staffPanelDesc": "{count, plural, one {Vous travaillez dans # commerce} other {Vous travaillez dans # commerces}}",
+    "errorShopInactive": "L'équipe peut être gérée une fois le commerce approuvé et actif.",
+    "errorConflict": "Une autre modification d'équipe a eu lieu en même temps, réessayez.",
+    "inviteEmailUnverified": "Vérifiez d'abord votre adresse e-mail pour accepter l'invitation.",
+    "closedAskOwner": "Le commerce semble fermé. Seul le propriétaire peut autoriser une remise hors horaires."
   }
 }

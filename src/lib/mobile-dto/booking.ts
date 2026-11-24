@@ -108,7 +108,11 @@ function toMobilePendingBagRevision(raw: unknown) {
   return { bagCountS: s, bagCountM: m, bagCountXl: xl, extraAmount: extra, newTotal: next };
 }
 
-export function toMobileBookingDetail(b: BookingDetailSource, opts: { operator?: boolean } = {}) {
+export function toMobileBookingDetail(
+  b: BookingDetailSource,
+  /** `hideShopContact`: dukkan personeli sahibin kisisel numarasini almaz (web ile ayni). */
+  opts: { operator?: boolean; hideShopContact?: boolean } = {},
+) {
   /*
     Misafirin telefonu YALNIZCA islemi yapan esnaf/yonetici icin ve YALNIZCA
     aktif rezervasyonda (gelmeyen/gec kalan misafiri aramak icin). Kural burada,
@@ -122,9 +126,9 @@ export function toMobileBookingDetail(b: BookingDetailSource, opts: { operator?:
     guestName: b.guest?.name ?? "",
     latitude: b.shop.latitude,
     longitude: b.shop.longitude,
-    shopPhone: b.shop.owner.phone ?? "",
+    shopPhone: opts.hideShopContact ? "" : (b.shop.owner.phone ?? ""),
     // Web `BookingDetailActions` ile ayni cevrim; cevrilemeyen numarada WhatsApp dugmesi cizilmez.
-    shopWhatsapp: toWhatsAppNumber(b.shop.owner.phone),
+    shopWhatsapp: opts.hideShopContact ? null : toWhatsAppNumber(b.shop.owner.phone),
     // Turist taksiciye gosterebilsin; koordinatsiz dukkanda yol tarifi de buradan.
     shopAddress: fullAddress(b.shop.address, b.shop.district, b.shop.city),
     seals: b.seals.map((s) => ({

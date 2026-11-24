@@ -175,6 +175,14 @@ describe("suresi dolan rezervasyon (expired)", () => {
     expect(isBookingExpired({ status: "CHECKED_OUT", checkOutTime: past }, now)).toBe(false);
   });
 
+  it("dukkan personeline sahibin numarasi ve WhatsApp'i gitmez", () => {
+    const withOwner = { ...BOOKING, shop: { ...BOOKING.shop, owner: { phone: "5321234567" } } };
+    expect(toMobileBookingDetail(withOwner).shopPhone).toBe("5321234567");
+    const staff = toMobileBookingDetail(withOwner, { operator: true, hideShopContact: true });
+    expect(staff.shopPhone).toBe("");
+    expect(staff.shopWhatsapp).toBeNull();
+  });
+
   it("ozet govdesi `expired` alanini tasir", () => {
     const old = { ...BOOKING, status: "APPROVED", checkOutTime: new Date("2020-01-01T00:00:00Z") };
     expect(toMobileBookingSummary(old).expired).toBe(true);

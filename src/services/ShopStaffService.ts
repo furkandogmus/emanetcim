@@ -21,16 +21,36 @@ export const INVITES_PER_HOUR = 20;
 
 export type StaffActor = { id: string; role: string };
 
+/**
+ * Davet yaniti hesabin VARLIGINDAN ve uyelikten BAGIMSIZ: her gecerli adres icin ayni
+ * `{ ok: true }`. Sahip zaten ekipte olani uye listesinden gorur. Sahibin ve aktorun
+ * kendi adresi icin hata doner (o bilgiyi zaten biliyorlar).
+ */
 export type InviteResult =
-  | { ok: true; kind: "added" | "invited" }
+  | { ok: true }
   | {
       ok: false;
-      code: "INVALID_EMAIL" | "SELF" | "OWNER" | "ALREADY_MEMBER" | "LIMIT" | "RATE_LIMITED" | "NOT_FOUND";
+      code: "INVALID_EMAIL" | "SELF" | "OWNER" | "LIMIT" | "RATE_LIMITED" | "NOT_FOUND" | "SHOP_INACTIVE" | "CONFLICT";
     };
 
 export type AcceptResult =
   | { ok: true; shopId: string; shopName: string }
-  | { ok: false; code: "INVALID" | "EXPIRED" | "EMAIL_MISMATCH" | "LIMIT" };
+  | {
+      ok: false;
+      code: "INVALID" | "EXPIRED" | "EMAIL_MISMATCH" | "EMAIL_UNVERIFIED" | "LIMIT" | "ALREADY_MEMBER" | "SHOP_INACTIVE" | "CONFLICT";
+    };
+
+/** Prisma hata kodu: P2002 tekil ihlali, P2034 serilestirme cakismasi. */
+function prismaCode(err: unknown): string | null {
+  return typeof err === "object" && err !== null && "code" in err && typeof (err as { code: unknown }).code === "string"
+    ? (err as { code: string }).code
+    : null;
+}
+
+/** Onayli ve acik dukkan: ekip yonetimi yalniz bunlarda (bekleyen basvuru davet atamaz). */
+function shopIsLive(shop: { isActive: boolean; approvedAt: Date | null }): boolean {
+  return shop.isActive && shop.approvedAt !== null;
+}
 
 export function hashInviteToken(token: string): string {
   return crypto.createHash("sha256").update(token).digest("hex");
@@ -80,63 +100,68 @@ export async function inviteStaff(params: {
     return { ok: false, code: "RATE_LIMITED" };
   }
 
-  const shop = await prisma.shop.findUnique({
-    where: { id: shopId },
-    select: { id: true, name: true, ownerId: true, owner: { select: { email: true } } },
-  });
+  const [shop, actorRow] = await Promise.all([
+    prisma.shop.findUnique({
+      where: { id: shopId },
+      select: { id: true, name: true, isActive: true, approvedAt: true, owner: { select: { email: true } } },
+    }),
+    prisma.user.findUnique({ where: { id: actor.id }, select: { email: true } }),
+  ]);
   if (!shop) return { ok: false, code: "NOT_FOUND" };
+  if (!shopIsLive(shop)) return { ok: false, code: "SHOP_INACTIVE" };
   if (shop.owner.email?.toLowerCase() === email) return { ok: false, code: "OWNER" };
+  if (actorRow?.email?.toLowerCase() === email) return { ok: false, code: "SELF" };
 
-  const user = await prisma.user.findFirst({
-    where: { email: { equals: email, mode: "insensitive" } },
+  /*
+    HER ZAMAN DAVET YOLU (2026-11-24 QA): hesap varsa dogrudan eklemek, e-postasi
+    dogrulanmamis bir on-hesabi (baskasinin adresiyle acilmis) dukkana sokabiliyordu ve
+    yanit "hesap var mi" sorusunu cevapliyordu. Zaten uye olan adrese bag gitmez ama
+    yanit ayni kalir.
+  */
+  const alreadyMember = await prisma.shopMember.findFirst({
+    where: { shopId, user: { email: { equals: email, mode: "insensitive" } } },
     select: { id: true },
   });
-  if (user?.id === actor.id) return { ok: false, code: "SELF" };
-  if (user?.id === shop.ownerId) return { ok: false, code: "OWNER" };
-  if (user) {
-    const existing = await prisma.shopMember.findUnique({
-      where: { shopId_userId: { shopId, userId: user.id } },
-      select: { id: true },
-    });
-    if (existing) return { ok: false, code: "ALREADY_MEMBER" };
-  }
+  if (alreadyMember) return { ok: true };
 
-  const [memberCount, inviteCount] = await Promise.all([
-    prisma.shopMember.count({ where: { shopId } }),
-    prisma.shopInvite.count({ where: { ...activeInviteWhere(shopId, now), NOT: { email } } }),
-  ]);
-  if (memberCount + inviteCount >= MAX_STAFF_PER_SHOP) return { ok: false, code: "LIMIT" };
-
-  if (user) {
-    await prisma.shopMember.create({ data: { shopId, userId: user.id, invitedById: actor.id } });
-    await prisma.shopInvite.updateMany({ where: { ...activeInviteWhere(shopId, now), email }, data: { revokedAt: now } });
-    auditIfAdmin(actor, "admin.shop_staff.add", shopId, { userId: user.id });
-    void notificationService
-      .notifyShopStaffInvite({ email, shopName: shop.name, locale, userId: user.id })
-      .catch((err) => logger.error({ err, shopId }, "shop_staff_added_notify_failed"));
-    return { ok: true, kind: "added" };
-  }
-
-  // Ayni adrese tek gecerli davet: yenisi eskisini gecersiz kilar (eski bag olu kalir).
+  // Tavan ve yazim TEK serilestirilebilir islemde: iki es zamanli davet 10'u asamaz.
   const token = crypto.randomBytes(32).toString("base64url");
-  await prisma.$transaction([
-    prisma.shopInvite.updateMany({ where: { ...activeInviteWhere(shopId, now), email }, data: { revokedAt: now } }),
-    prisma.shopInvite.create({
-      data: {
-        shopId,
-        email,
-        tokenHash: hashInviteToken(token),
-        invitedById: actor.id,
-        expiresAt: new Date(now.getTime() + SHOP_INVITE_TTL_MS),
+  try {
+    const created = await prisma.$transaction(
+      async (tx) => {
+        const [members, invites] = await Promise.all([
+          tx.shopMember.count({ where: { shopId } }),
+          tx.shopInvite.count({ where: { ...activeInviteWhere(shopId, now), NOT: { email } } }),
+        ]);
+        if (members + invites >= MAX_STAFF_PER_SHOP) return false;
+        // Ayni adrese tek gecerli davet: yenisi eskisini gecersiz kilar.
+        await tx.shopInvite.updateMany({ where: { ...activeInviteWhere(shopId, now), email }, data: { revokedAt: now } });
+        await tx.shopInvite.create({
+          data: {
+            shopId,
+            email,
+            tokenHash: hashInviteToken(token),
+            invitedById: actor.id,
+            expiresAt: new Date(now.getTime() + SHOP_INVITE_TTL_MS),
+          },
+        });
+        return true;
       },
-    }),
-  ]);
+      { isolationLevel: "Serializable" },
+    );
+    if (!created) return { ok: false, code: "LIMIT" };
+  } catch (err) {
+    const code = prismaCode(err);
+    if (code === "P2034" || code === "P2002") return { ok: false, code: "CONFLICT" };
+    throw err;
+  }
+
   auditIfAdmin(actor, "admin.shop_staff.invite", shopId, { email });
   const link = `${getSiteBaseUrl()}/${locale}/staff-invite?t=${encodeURIComponent(token)}`;
   void notificationService
     .notifyShopStaffInvite({ email, shopName: shop.name, locale, link })
     .catch((err) => logger.error({ err, shopId }, "shop_staff_invite_notify_failed"));
-  return { ok: true, kind: "invited" };
+  return { ok: true };
 }
 
 /** Personeli cikarir. Yetki her istekte tablodan okundugu icin erisim o an biter. */
@@ -156,13 +181,13 @@ export async function revokeInvite(actor: StaffActor, shopId: string, inviteId: 
 }
 
 /**
- * Daveti oturumdaki hesaba baglar. Bag yalnizca davet edilen E-POSTANIN hesabinda
- * calisir: iletilen/sizan bag baska bir hesaba dukkan erisimi vermez. Tek kullanim
- * kosullu `updateMany` ile: iki es zamanli kabulden yalniz biri gecer.
+ * Daveti oturumdaki hesaba baglar. Bag yalnizca davet edilen E-POSTANIN, DOGRULANMIS
+ * hesabinda calisir: iletilen bag ya da baskasinin adresiyle acilmis on-hesap dukkana
+ * erisemez. Tek kullanim ve tavan ayni serilestirilebilir islemde.
  */
 export async function acceptInvite(
   token: string,
-  user: { id: string; email: string | null },
+  user: { id: string; email: string | null; emailVerified: boolean },
   now: Date = new Date(),
 ): Promise<AcceptResult> {
   if (!token || token.length > 200) return { ok: false, code: "INVALID" };
@@ -176,39 +201,48 @@ export async function acceptInvite(
       revokedAt: true,
       expiresAt: true,
       invitedById: true,
-      shop: { select: { name: true, ownerId: true } },
+      shop: { select: { name: true, ownerId: true, isActive: true, approvedAt: true } },
     },
   });
   if (!invite || invite.acceptedAt || invite.revokedAt) return { ok: false, code: "INVALID" };
   if (invite.expiresAt <= now) return { ok: false, code: "EXPIRED" };
   if (!user.email || user.email.trim().toLowerCase() !== invite.email) return { ok: false, code: "EMAIL_MISMATCH" };
+  if (!user.emailVerified) return { ok: false, code: "EMAIL_UNVERIFIED" };
+  if (!shopIsLive(invite.shop)) return { ok: false, code: "SHOP_INACTIVE" };
+  const isOwner = invite.shop.ownerId === user.id;
 
-  const already = await prisma.shopMember.findUnique({
-    where: { shopId_userId: { shopId: invite.shopId, userId: user.id } },
-    select: { id: true },
-  });
-  if (!already && invite.shop.ownerId !== user.id) {
-    // Davetin kendisi tavanda sayiliyordu; uye olunca sayim uyeye gecer.
-    const members = await prisma.shopMember.count({ where: { shopId: invite.shopId } });
-    if (members >= MAX_STAFF_PER_SHOP) return { ok: false, code: "LIMIT" };
+  try {
+    const outcome = await prisma.$transaction(
+      async (tx) => {
+        const { count } = await tx.shopInvite.updateMany({
+          where: { id: invite.id, acceptedAt: null, revokedAt: null, expiresAt: { gt: now } },
+          data: { acceptedAt: now, acceptedById: user.id },
+        });
+        if (count === 0) return "INVALID" as const;
+        if (isOwner) return "OK" as const;
+        // Bu davetin kendisi tavanda sayiliyordu; simdi uyeye donusuyor.
+        const members = await tx.shopMember.count({ where: { shopId: invite.shopId } });
+        if (members >= MAX_STAFF_PER_SHOP) throw new LimitReached();
+        await tx.shopMember.create({
+          data: { shopId: invite.shopId, userId: user.id, invitedById: invite.invitedById },
+        });
+        return "OK" as const;
+      },
+      { isolationLevel: "Serializable" },
+    );
+    if (outcome !== "OK") return { ok: false, code: outcome };
+  } catch (err) {
+    if (err instanceof LimitReached) return { ok: false, code: "LIMIT" };
+    const code = prismaCode(err);
+    if (code === "P2002") return { ok: false, code: "ALREADY_MEMBER" };
+    if (code === "P2034") return { ok: false, code: "CONFLICT" };
+    throw err;
   }
-
-  const claimed = await prisma.$transaction(async (tx) => {
-    const { count } = await tx.shopInvite.updateMany({
-      where: { id: invite.id, acceptedAt: null, revokedAt: null, expiresAt: { gt: now } },
-      data: { acceptedAt: now, acceptedById: user.id },
-    });
-    if (count === 0) return false;
-    if (!already && invite.shop.ownerId !== user.id) {
-      await tx.shopMember.create({
-        data: { shopId: invite.shopId, userId: user.id, invitedById: invite.invitedById },
-      });
-    }
-    return true;
-  });
-  if (!claimed) return { ok: false, code: "INVALID" };
   return { ok: true, shopId: invite.shopId, shopName: invite.shop.name };
 }
+
+/** Tavan asilinca islemi geri almak icin (davet kabul edilmis sayilmasin). */
+class LimitReached extends Error {}
 
 /** Davet sayfasi icin: bag gecerli mi, hangi dukkan (oturum acmadan once gosterilir). */
 export async function peekInvite(token: string, now: Date = new Date()) {

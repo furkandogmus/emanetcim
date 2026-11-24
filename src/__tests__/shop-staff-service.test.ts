@@ -3,8 +3,8 @@ import { describe, it, expect, vi, beforeEach } from "vitest";
 const { db, mockRate, mockNotify, mockAudit } = vi.hoisted(() => {
   const db = {
     shop: { findUnique: vi.fn() },
-    user: { findFirst: vi.fn() },
-    shopMember: { findUnique: vi.fn(), count: vi.fn(), create: vi.fn(), deleteMany: vi.fn() },
+    user: { findUnique: vi.fn() },
+    shopMember: { findUnique: vi.fn(), findFirst: vi.fn(), count: vi.fn(), create: vi.fn(), deleteMany: vi.fn() },
     shopInvite: { count: vi.fn(), updateMany: vi.fn(), create: vi.fn(), findUnique: vi.fn() },
     $transaction: vi.fn(),
   };
@@ -26,13 +26,15 @@ import {
 
 const OWNER = { id: "owner", role: "PARTNER" };
 const NOW = new Date("2026-11-24T10:00:00Z");
+const SHOP = { id: "s1", name: "Otel", isActive: true, approvedAt: new Date(0), owner: { email: "sahip@example.com" } };
 
 beforeEach(() => {
   vi.clearAllMocks();
   mockRate.mockResolvedValue(true);
   mockNotify.mockResolvedValue(undefined);
-  db.shop.findUnique.mockResolvedValue({ id: "s1", name: "Otel", ownerId: "owner", owner: { email: "sahip@example.com" } });
-  db.user.findFirst.mockResolvedValue(null);
+  db.shop.findUnique.mockResolvedValue(SHOP);
+  db.user.findUnique.mockResolvedValue({ email: "sahip@example.com" });
+  db.shopMember.findFirst.mockResolvedValue(null);
   db.shopMember.findUnique.mockResolvedValue(null);
   db.shopMember.count.mockResolvedValue(0);
   db.shopInvite.count.mockResolvedValue(0);
@@ -42,36 +44,39 @@ beforeEach(() => {
 });
 
 describe("inviteStaff", () => {
-  it("hesabi olan e-posta dogrudan eklenir ve haberdar edilir (e-posta + push)", async () => {
-    db.user.findFirst.mockResolvedValue({ id: "u2" });
-    const res = await inviteStaff({ actor: OWNER, shopId: "s1", email: " Personel@Example.com ", locale: "tr", now: NOW });
-    expect(res).toEqual({ ok: true, kind: "added" });
-    expect(db.shopMember.create).toHaveBeenCalledWith({ data: { shopId: "s1", userId: "u2", invitedById: "owner" } });
-    expect(mockNotify).toHaveBeenCalledWith(expect.objectContaining({ email: "personel@example.com", userId: "u2" }));
-    expect(db.shopInvite.create).not.toHaveBeenCalled();
-  });
-
-  it("hesapsiz e-postaya tek kullanimlik, sureli bag gider; veritabaninda yalniz ozet", async () => {
-    const res = await inviteStaff({ actor: OWNER, shopId: "s1", email: "yeni@example.com", locale: "en", now: NOW });
-    expect(res).toEqual({ ok: true, kind: "invited" });
+  it("her zaman davet yolu: hesabi olan adres de dogrudan eklenmez", async () => {
+    const res = await inviteStaff({ actor: OWNER, shopId: "s1", email: " Personel@Example.com ", locale: "en", now: NOW });
+    expect(res).toEqual({ ok: true });
+    expect(db.shopMember.create).not.toHaveBeenCalled();
     const data = db.shopInvite.create.mock.calls[0][0].data;
+    expect(data.email).toBe("personel@example.com");
     expect(data.expiresAt.getTime() - NOW.getTime()).toBe(7 * 24 * 3600_000);
     const link: string = mockNotify.mock.calls[0][0].link;
     expect(link).toMatch(/^https:\/\/bagajpark\.test\/en\/staff-invite\?t=/);
     const token = decodeURIComponent(link.split("t=")[1]);
     expect(data.tokenHash).toBe(hashInviteToken(token));
-    expect(data.tokenHash).not.toContain(token);
-    // Ayni adrese onceki gecerli davet iptal edilir.
+    // Ayni adrese onceki gecerli davet iptal edilir; tavan ve yazim serilestirilebilir islemde.
     expect(db.shopInvite.updateMany).toHaveBeenCalledWith(expect.objectContaining({ data: { revokedAt: NOW } }));
+    expect(db.$transaction).toHaveBeenCalledWith(expect.any(Function), { isolationLevel: "Serializable" });
   });
 
-  it("sinirlar: gecersiz e-posta, sahip, zaten ekipte, tavan, hiz siniri", async () => {
+  it("zaten ekipte olan adres: ayni yanit, bag gitmez (hesap var mi sorusu cevapsiz)", async () => {
+    db.shopMember.findFirst.mockResolvedValueOnce({ id: "m" });
+    expect(await inviteStaff({ actor: OWNER, shopId: "s1", email: "uye@example.com", locale: "tr" })).toEqual({ ok: true });
+    expect(db.shopInvite.create).not.toHaveBeenCalled();
+    expect(mockNotify).not.toHaveBeenCalled();
+  });
+
+  it("sinirlar: gecersiz e-posta, sahip, kendisi, onaysiz dukkan, tavan, hiz siniri", async () => {
     expect(await inviteStaff({ actor: OWNER, shopId: "s1", email: "x", locale: "tr" })).toEqual({ ok: false, code: "INVALID_EMAIL" });
     expect(await inviteStaff({ actor: OWNER, shopId: "s1", email: "sahip@example.com", locale: "tr" })).toEqual({ ok: false, code: "OWNER" });
+    db.user.findUnique.mockResolvedValueOnce({ email: "ben@example.com" });
+    expect(await inviteStaff({ actor: { id: "adm", role: "ADMIN" }, shopId: "s1", email: "ben@example.com", locale: "tr" })).toEqual({ ok: false, code: "SELF" });
 
-    db.user.findFirst.mockResolvedValueOnce({ id: "u2" });
-    db.shopMember.findUnique.mockResolvedValueOnce({ id: "m" });
-    expect(await inviteStaff({ actor: OWNER, shopId: "s1", email: "u2@example.com", locale: "tr" })).toEqual({ ok: false, code: "ALREADY_MEMBER" });
+    db.shop.findUnique.mockResolvedValueOnce({ ...SHOP, approvedAt: null });
+    expect(await inviteStaff({ actor: OWNER, shopId: "s1", email: "a@example.com", locale: "tr" })).toEqual({ ok: false, code: "SHOP_INACTIVE" });
+    db.shop.findUnique.mockResolvedValueOnce({ ...SHOP, isActive: false });
+    expect(await inviteStaff({ actor: OWNER, shopId: "s1", email: "a@example.com", locale: "tr" })).toEqual({ ok: false, code: "SHOP_INACTIVE" });
 
     db.shopMember.count.mockResolvedValueOnce(MAX_STAFF_PER_SHOP - 1);
     db.shopInvite.count.mockResolvedValueOnce(1);
@@ -79,7 +84,12 @@ describe("inviteStaff", () => {
 
     mockRate.mockResolvedValueOnce(false);
     expect(await inviteStaff({ actor: OWNER, shopId: "s1", email: "hiz@example.com", locale: "tr" })).toEqual({ ok: false, code: "RATE_LIMITED" });
-    expect(db.shopMember.create).not.toHaveBeenCalled();
+    expect(db.shopInvite.create).not.toHaveBeenCalled();
+  });
+
+  it("es zamanli yazim cakismasi (P2034) temiz CONFLICT olur", async () => {
+    db.$transaction.mockRejectedValueOnce(Object.assign(new Error("tx"), { code: "P2034" }));
+    expect(await inviteStaff({ actor: OWNER, shopId: "s1", email: "a@example.com", locale: "tr" })).toEqual({ ok: false, code: "CONFLICT" });
   });
 
   it("yonetici yazimi denetim kaydina gider, esnafinki gitmez", async () => {
@@ -99,8 +109,9 @@ describe("acceptInvite", () => {
     revokedAt: null,
     expiresAt: new Date(NOW.getTime() + 3600_000),
     invitedById: "owner",
-    shop: { name: "Otel", ownerId: "owner" },
+    shop: { name: "Otel", ownerId: "owner", isActive: true, approvedAt: new Date(0) },
   };
+  const V = { emailVerified: true };
 
   beforeEach(() => {
     db.shopInvite.findUnique.mockResolvedValue(invite);
@@ -108,29 +119,44 @@ describe("acceptInvite", () => {
   });
 
   it("davet edilen e-postanin hesabi kabul eder, uyelik acilir", async () => {
-    const res = await acceptInvite("tok", { id: "u9", email: "Yeni@Example.com" }, NOW);
+    const res = await acceptInvite("tok", { id: "u9", email: "Yeni@Example.com", ...V }, NOW);
     expect(res).toEqual({ ok: true, shopId: "s1", shopName: "Otel" });
     expect(db.shopInvite.findUnique).toHaveBeenCalledWith(expect.objectContaining({ where: { tokenHash: hashInviteToken("tok") } }));
     expect(db.shopMember.create).toHaveBeenCalledWith({ data: { shopId: "s1", userId: "u9", invitedById: "owner" } });
   });
 
+  it("dogrulanmamis e-postanin hesabi kabul edemez (on-hesap ele gecirme)", async () => {
+    expect(await acceptInvite("tok", { id: "u9", email: invite.email, emailVerified: false }, NOW)).toEqual({
+      ok: false,
+      code: "EMAIL_UNVERIFIED",
+    });
+    expect(db.shopInvite.updateMany).not.toHaveBeenCalled();
+  });
+
+  it("zaten uye (P2002) temiz ALREADY_MEMBER; onaysiz dukkanda kabul yok", async () => {
+    db.shopMember.create.mockRejectedValueOnce(Object.assign(new Error("dup"), { code: "P2002" }));
+    expect(await acceptInvite("tok", { id: "u9", email: invite.email, ...V }, NOW)).toEqual({ ok: false, code: "ALREADY_MEMBER" });
+    db.shopInvite.findUnique.mockResolvedValueOnce({ ...invite, shop: { ...invite.shop, isActive: false } });
+    expect(await acceptInvite("tok", { id: "u9", email: invite.email, ...V }, NOW)).toEqual({ ok: false, code: "SHOP_INACTIVE" });
+  });
+
   it("baska e-postanin hesabi kabul edemez (iletilen bag)", async () => {
-    expect(await acceptInvite("tok", { id: "u9", email: "baska@example.com" }, NOW)).toEqual({ ok: false, code: "EMAIL_MISMATCH" });
+    expect(await acceptInvite("tok", { id: "u9", email: "baska@example.com", ...V }, NOW)).toEqual({ ok: false, code: "EMAIL_MISMATCH" });
     expect(db.shopMember.create).not.toHaveBeenCalled();
   });
 
   it("suresi dolmus, kullanilmis ya da geri alinmis davet calismaz", async () => {
     db.shopInvite.findUnique.mockResolvedValueOnce({ ...invite, expiresAt: new Date(NOW.getTime() - 1) });
-    expect(await acceptInvite("tok", { id: "u9", email: invite.email }, NOW)).toEqual({ ok: false, code: "EXPIRED" });
+    expect(await acceptInvite("tok", { id: "u9", email: invite.email, ...V }, NOW)).toEqual({ ok: false, code: "EXPIRED" });
     db.shopInvite.findUnique.mockResolvedValueOnce({ ...invite, acceptedAt: NOW });
-    expect(await acceptInvite("tok", { id: "u9", email: invite.email }, NOW)).toEqual({ ok: false, code: "INVALID" });
+    expect(await acceptInvite("tok", { id: "u9", email: invite.email, ...V }, NOW)).toEqual({ ok: false, code: "INVALID" });
     db.shopInvite.findUnique.mockResolvedValueOnce({ ...invite, revokedAt: NOW });
-    expect(await acceptInvite("tok", { id: "u9", email: invite.email }, NOW)).toEqual({ ok: false, code: "INVALID" });
+    expect(await acceptInvite("tok", { id: "u9", email: invite.email, ...V }, NOW)).toEqual({ ok: false, code: "INVALID" });
   });
 
   it("es zamanli ikinci kabul tek kullanim kosulunda duser", async () => {
     db.shopInvite.updateMany.mockResolvedValueOnce({ count: 0 });
-    expect(await acceptInvite("tok", { id: "u9", email: invite.email }, NOW)).toEqual({ ok: false, code: "INVALID" });
+    expect(await acceptInvite("tok", { id: "u9", email: invite.email, ...V }, NOW)).toEqual({ ok: false, code: "INVALID" });
     expect(db.shopMember.create).not.toHaveBeenCalled();
   });
 });
@@ -142,5 +168,13 @@ describe("removeStaff", () => {
     expect(db.shopMember.deleteMany).toHaveBeenCalledWith({ where: { shopId: "s1", userId: "u2" } });
     db.shopMember.deleteMany.mockResolvedValueOnce({ count: 0 });
     expect(await removeStaff(OWNER, "s1", "u3")).toBe(false);
+  });
+});
+
+describe("davet e-postasinda dukkan adi", () => {
+  it("duz metinde satir/etiket enjekte edilemez, uzunluk sinirli", async () => {
+    const { plainShopName } = await vi.importActual<typeof import("@/services/NotificationService")>("@/services/NotificationService");
+    expect(plainShopName("Otel\r\nBcc: x@example.com <b>")).toBe("Otel Bcc: x@example.com b");
+    expect(plainShopName("x".repeat(200))).toHaveLength(80);
   });
 });

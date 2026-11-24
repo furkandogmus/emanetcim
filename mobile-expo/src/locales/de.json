@@ -2387,7 +2387,6 @@
     "pendingTitle": "Offene Einladungen",
     "expires": "Gültig bis {{date}}",
     "revoke": "Zurückziehen",
-    "addedToast": "Mitarbeiter hinzugefügt und benachrichtigt.",
     "invitedToast": "Einladungs-E-Mail gesendet.",
     "removedToast": "Mitarbeiter entfernt.",
     "revokedToast": "Einladung zurückgezogen.",
@@ -2403,11 +2402,13 @@
       "invalid_email": "Geben Sie eine gültige E-Mail-Adresse ein.",
       "self": "Sie können sich nicht selbst hinzufügen.",
       "owner": "Diese Adresse gehört dem Inhaber.",
-      "already_member": "Diese Person ist bereits im Team.",
       "limit": "Mitarbeiterlimit erreicht.",
       "rate_limited": "Zu viele Einladungen, versuchen Sie es später erneut.",
       "forbidden": "Nur der Inhaber kann das Team verwalten.",
-      "not_found": "Nicht gefunden."
-    }
+      "not_found": "Nicht gefunden.",
+      "shop_inactive": "Ein Team kann erst verwaltet werden, wenn das Geschäft freigegeben und aktiv ist.",
+      "conflict": "Gleichzeitig wurde eine andere Teamänderung vorgenommen, versuchen Sie es erneut."
+    },
+    "closedAskOwner": "Das Geschäft scheint gerade geschlossen. Nur der Inhaber kann eine Übergabe außerhalb der Öffnungszeiten freigeben."
   }
 }

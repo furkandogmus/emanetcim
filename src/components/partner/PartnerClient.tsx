@@ -421,6 +421,7 @@ export default function PartnerClient({
           storageReady={storageReady}
           onClose={closeScanResult}
           onSuccess={handleCheckInSuccess}
+          canOverrideHours={canManage}
         />
       )}
 

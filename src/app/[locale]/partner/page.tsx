@@ -13,6 +13,7 @@ import { requireShopOperatorPage } from "@/lib/page-auth";
 import { resolvePartnerShops } from "@/lib/partner-shop";
 import PartnerClient from "@/components/partner/PartnerClient";
 import { bookingTimeZone } from "@/lib/format-datetime";
+import { redactMoneyPropsForStaff, redactPulseForStaff } from "@/lib/partner-panel-redaction";
 
 /**
  * Esnaf Ana Sayfası — Partner Dashboard (Server Component)
@@ -104,10 +105,9 @@ export default async function PartnerPage({
     dukkani actiginda sordugu sorularin (bugun kac valiz gelecek, kaci alinacak,
     elimde ne var, bu ay nasil gidiyor) hicbiri ekranda yoktu.
   */
-  const pulse = await partnerDashboardService.getSnapshot(
-    activeShop.id,
-    shopDetail.timezone,
-    commission.rate,
+  const pulse = redactPulseForStaff(
+    await partnerDashboardService.getSnapshot(activeShop.id, shopDetail.timezone, commission.rate),
+    canManage,
   );
 
   /*
@@ -121,30 +121,40 @@ export default async function PartnerPage({
   */
   const bookings = result.items;
 
-  const marketPrice = pricingRules.defaultPricePerDay;
+  const money = redactMoneyPropsForStaff(
+    {
+      totalEarnings: totals.gross,
+      merchantShareRatio: commission.merchantShareRatio,
+      initialPricePerDay: moneyToNumber(shopDetail.pricePerDay) || pricingRules.defaultPricePerDay,
+      marketPrice: pricingRules.defaultPricePerDay,
+      initialPhone: ownerPhoneRow?.phone ?? "",
+      commissionActive: commission.rate > 0,
+    },
+    canManage,
+  );
 
   return (
     <PartnerClient
       shopId={activeShop.id}
       shopName={activeShop.name}
-      totalEarnings={totals.gross}
-      merchantShareRatio={commission.merchantShareRatio}
+      totalEarnings={money.totalEarnings}
+      merchantShareRatio={money.merchantShareRatio}
       initialCapacity={shopDetail.capacity}
       shopTimeZone={bookingTimeZone(shopDetail)}
-      initialPricePerDay={moneyToNumber(shopDetail.pricePerDay) || marketPrice}
-      marketPrice={marketPrice}
+      initialPricePerDay={money.initialPricePerDay}
+      marketPrice={money.marketPrice}
       bookings={JSON.parse(JSON.stringify(bookings))}
       shops={shops.map((s) => ({ id: s.id, name: s.name }))}
       initialBookingId={initialBookingId}
       initialCheckoutBookingId={initialCheckoutBookingId}
-      initialPhone={ownerPhoneRow?.phone ?? ""}
+      initialPhone={money.initialPhone}
       requireSeals={pricingRules.requireSealsOnCheckIn}
       /* Depolama hazir degilse check-in fotograf alani hic cizilmez. */
       storageReady={isStorageConfigured()}
-      monthlyShopViews={monthlyShopViews}
+      monthlyShopViews={canManage ? monthlyShopViews : 0}
       pulse={pulse}
       capacity={shopDetail.capacity}
-      commissionActive={commission.rate > 0}
+      commissionActive={money.commissionActive}
       hasShopImage={!!shopDetail.image}
       hasShopLocation={shopDetail.latitude != null && shopDetail.longitude != null}
       canManage={canManage}

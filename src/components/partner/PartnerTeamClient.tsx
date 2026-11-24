@@ -45,7 +45,7 @@ export default function PartnerTeamClient({ shopId, shopName, shops, members, in
     startTransition(async () => {
       const res = await inviteShopStaffAction(shopId, email);
       if (!res.success) return showError(res.error);
-      toast.success(res.kind === "added" ? t("addedToast") : t("invitedToast"));
+      toast.success(t("invitedToast"));
       setEmail("");
       router.refresh();
     });

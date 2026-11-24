@@ -55,6 +55,8 @@ interface CheckInDialogProps {
   onClose: () => void;
   /** Check-in sunucuda başarıyla tamamlandı; ebeveyn listeyi tazeler. */
   onSuccess: () => void;
+  /** Personelde `false`: saat dışı istisnası sahip/yönetici kararı, onay kutusu çizilmez. */
+  canOverrideHours?: boolean;
 }
 
 /**
@@ -69,8 +71,10 @@ export default function CheckInDialog({
   storageReady = false,
   onClose,
   onSuccess,
+  canOverrideHours = true,
 }: CheckInDialogProps) {
   const t = useTranslations("Partner");
+  const tStaff = useTranslations("shopStaff");
   const errorText = useActionErrorText();
   const modalRef = useRef<HTMLDivElement>(null);
   useModalBehavior({ open: true, onClose, ref: modalRef });
@@ -218,8 +222,10 @@ export default function CheckInDialog({
       );
       if (result.success) {
         onSuccess();
-      } else if (result.code === "SHOP_CLOSED" && !outsideHours) {
+      } else if (result.code === "SHOP_CLOSED" && !outsideHours && canOverrideHours) {
         setAskOutsideHours(true);
+      } else if (result.code === "SHOP_CLOSED") {
+        toast.error(tStaff("closedAskOwner"));
       } else {
         setAskOutsideHours(false);
         toast.error(errorText(result.error, t("checkInFailed")));
