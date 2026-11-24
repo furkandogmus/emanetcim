@@ -2060,5 +2060,58 @@
       "forbidden": "Dafür sind Administratorrechte nötig.",
       "not_allowed_while_impersonating": "In einer Ansicht-als-Sitzung sind keine Admin-Änderungen erlaubt."
     }
+  },
+  "guestParity": {
+    "filters": "Filter",
+    "filtersActive": "Filter, {{count}} aktiv",
+    "sortTitle": "Sortieren nach",
+    "sort": {
+      "distance": "Entfernung",
+      "price_asc": "Preis (aufsteigend)",
+      "price_desc": "Preis (absteigend)",
+      "rating": "Bewertung"
+    },
+    "amenitiesTitle": "Ausstattung",
+    "cctv": "Videoüberwachung",
+    "climate": "Klimatisiert",
+    "largeItems": "Großes Gepäck",
+    "maxPriceTitle": "Max. Tagespreis",
+    "maxPriceHint": "Grundpreis des Ladens pro Tag",
+    "anyPrice": "Alle",
+    "upTo": "≤ {{price}}",
+    "minRatingTitle": "Mindestbewertung",
+    "anyRating": "Alle",
+    "ratingAtLeast": "{{rating}}+",
+    "clear": "Zurücksetzen",
+    "showResults": "Ergebnisse anzeigen",
+    "clearFilters": "Filter zurücksetzen",
+    "emptyFilteredTitle": "Keine Orte passen zu diesen Filtern",
+    "emptyFilteredBody": "Lockere oder entferne die Filter.",
+    "addFavorite": "Zu Favoriten hinzufügen",
+    "removeFavorite": "Aus Favoriten entfernen",
+    "favoritesTitle": "Deine Favoriten",
+    "favoritesCount_one": "{{count}} Ort",
+    "favoritesCount_other": "{{count}} Orte",
+    "favoritesEmptyTitle": "Noch keine Favoriten",
+    "favoritesEmptyBody": "Tippe bei Orten, die dir gefallen, auf das Herz; sie erscheinen hier. Die Liste bleibt nur auf diesem Gerät.",
+    "favoriteUnavailable": "Dieser Ort ist nicht mehr gelistet",
+    "prelaunchTitle": "Soll hier ein Ort öffnen?",
+    "prelaunchBody": "Dieser Ort ist noch nicht geöffnet und nimmt keine Buchungen an. Hinterlasse deinen Wunsch; bei genug Interesse eröffnen wir ihn.",
+    "wantCta": "Benachrichtigen, wenn geöffnet",
+    "wantDone": "Wunsch erhalten",
+    "wantCount_one": "{{count}} Person wünscht sich hier einen Ort",
+    "wantCount_other": "{{count}} Personen wünschen sich hier einen Ort",
+    "wantFirst": "Sei die erste Person, die fragt.",
+    "subscribed": "Wir schreiben an die E-Mail deines Kontos, sobald er öffnet.",
+    "signInToNotify": "Melde dich an, um bei Eröffnung eine E-Mail zu bekommen.",
+    "whatsappShop": "Per WhatsApp schreiben",
+    "whatsappMessage": "Hallo, es geht um meine BagajPark-Buchung ({{code}}).",
+    "addToCalendar": "Zum Kalender hinzufügen",
+    "calendarTitle": "Gepäckaufbewahrung: {{shop}}",
+    "calendarDetails": "BagajPark-Buchung {{code}}: {{shop}}",
+    "errors": {
+      "shop_now_open": "Dieser Ort ist jetzt geöffnet; du kannst buchen.",
+      "too_many_requests": "Zu viele Versuche. Bitte versuche es gleich noch einmal."
+    }
   }
 }

@@ -2060,5 +2060,58 @@
       "forbidden": "This needs admin rights.",
       "not_allowed_while_impersonating": "Admin changes are not allowed in a view-as session."
     }
+  },
+  "guestParity": {
+    "filters": "Filters",
+    "filtersActive": "Filters, {{count}} active",
+    "sortTitle": "Sort by",
+    "sort": {
+      "distance": "Distance",
+      "price_asc": "Price (low to high)",
+      "price_desc": "Price (high to low)",
+      "rating": "Rating"
+    },
+    "amenitiesTitle": "Amenities",
+    "cctv": "CCTV",
+    "climate": "Climate control",
+    "largeItems": "Large items",
+    "maxPriceTitle": "Max daily price",
+    "maxPriceHint": "The shop's base daily price",
+    "anyPrice": "Any",
+    "upTo": "≤ {{price}}",
+    "minRatingTitle": "Minimum rating",
+    "anyRating": "Any",
+    "ratingAtLeast": "{{rating}}+",
+    "clear": "Clear",
+    "showResults": "Show results",
+    "clearFilters": "Clear filters",
+    "emptyFilteredTitle": "No spots match these filters",
+    "emptyFilteredBody": "Loosen or clear the filters.",
+    "addFavorite": "Add to favourites",
+    "removeFavorite": "Remove from favourites",
+    "favoritesTitle": "Your favourites",
+    "favoritesCount_one": "{{count}} spot",
+    "favoritesCount_other": "{{count}} spots",
+    "favoritesEmptyTitle": "No favourites yet",
+    "favoritesEmptyBody": "Tap the heart on spots you like and they will show up here. The list is kept on this device only.",
+    "favoriteUnavailable": "This spot is no longer listed",
+    "prelaunchTitle": "Want a spot here?",
+    "prelaunchBody": "This spot has not opened yet and does not take bookings. Leave your request; if there is enough interest, we open it.",
+    "wantCta": "Notify me when it opens",
+    "wantDone": "Request received",
+    "wantCount_one": "{{count}} person wants a spot here",
+    "wantCount_other": "{{count}} people want a spot here",
+    "wantFirst": "Be the first to ask.",
+    "subscribed": "We will email your account address when it opens.",
+    "signInToNotify": "Sign in to get an email when it opens.",
+    "whatsappShop": "Message on WhatsApp",
+    "whatsappMessage": "Hello, I'm writing about my BagajPark booking ({{code}}).",
+    "addToCalendar": "Add to calendar",
+    "calendarTitle": "Luggage storage: {{shop}}",
+    "calendarDetails": "BagajPark booking {{code}}: {{shop}}",
+    "errors": {
+      "shop_now_open": "This spot has opened; you can book it now.",
+      "too_many_requests": "Too many attempts. Please try again shortly."
+    }
   }
 }

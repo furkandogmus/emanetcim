@@ -1,11 +1,13 @@
-import { useEffect } from "react";
+import { useEffect, type ReactNode } from "react";
 import { Pressable, ScrollView, StyleSheet, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { router, useLocalSearchParams } from "expo-router";
-import { ArrowLeft, BadgeCheck, Star, Store } from "lucide-react-native";
+import { ArrowLeft, BadgeCheck, Cctv, Luggage, Snowflake, Star, Store } from "lucide-react-native";
 import { useTranslation } from "react-i18next";
 
+import { FavoriteButton } from "@/components/FavoriteButton";
 import { PhotoPager } from "@/components/PhotoPager";
+import { PrelaunchWantCard } from "@/components/PrelaunchWantCard";
 import { ReviewItem } from "@/components/ReviewItem";
 import { hoursLabel } from "@/components/ShopCard";
 import { AppText, Banner, Button, Card, CenterMessage, IconButton, Loading } from "@/components/ui";
@@ -102,6 +104,9 @@ export default function ShopDetailScreen() {
           >
             <ArrowLeft size={20} color={colors.ink} />
           </IconButton>
+          <View style={[styles.favorite, { top: insets.top + space.sm }]}>
+            <FavoriteButton shopId={shop.id} size={20} floating />
+          </View>
         </View>
 
         <View style={styles.sheet}>
@@ -141,8 +146,24 @@ export default function ShopDetailScreen() {
             <AppText variant="caption">{t("shop.restroom")}</AppText>
           ) : null}
 
+          {/* Web dukkan sayfasindaki olanak rozetleri; harita suzgeci ayni alanlari okur. */}
+          {shop.hasCctv || shop.hasClimateControl || shop.acceptsLargeItems ? (
+            <View style={styles.amenities}>
+              {shop.hasCctv ? <Amenity icon={<Cctv size={16} color={colors.accent} />} label={t("guestParity.cctv")} /> : null}
+              {shop.hasClimateControl ? (
+                <Amenity icon={<Snowflake size={16} color={colors.accent} />} label={t("guestParity.climate")} />
+              ) : null}
+              {shop.acceptsLargeItems ? (
+                <Amenity icon={<Luggage size={16} color={colors.accent} />} label={t("guestParity.largeItems")} />
+              ) : null}
+            </View>
+          ) : null}
+
           {shop.isPrelaunch ? (
-            <Banner tone="warning" body={t("shop.prelaunch")} />
+            <>
+              <Banner tone="warning" body={t("shop.prelaunch")} />
+              <PrelaunchWantCard shopId={shop.id} initialCount={shop.prelaunchWantCount ?? 0} />
+            </>
           ) : (
             <View style={styles.rule}>
               <View style={{ flex: 1, gap: 2 }}>
@@ -239,6 +260,17 @@ export default function ShopDetailScreen() {
   );
 }
 
+function Amenity({ icon, label }: { icon: ReactNode; label: string }) {
+  return (
+    <View style={styles.amenity}>
+      {icon}
+      <AppText variant="caption" style={{ color: colors.ink }}>
+        {label}
+      </AppText>
+    </View>
+  );
+}
+
 function Reviews({ shopId }: { shopId: string }) {
   const { t } = useTranslation();
   const query = useShopReviews(shopId);
@@ -267,6 +299,19 @@ const styles = StyleSheet.create({
   root: { flex: 1, backgroundColor: colors.bg },
   photo: { height: 280, backgroundColor: colors.surfaceMuted, alignItems: "center", justifyContent: "center" },
   back: { position: "absolute", left: space.lg },
+  favorite: { position: "absolute", right: space.lg },
+  amenities: { flexDirection: "row", flexWrap: "wrap", gap: space.sm },
+  amenity: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 6,
+    paddingHorizontal: space.md,
+    paddingVertical: 6,
+    borderRadius: radius.pill,
+    borderWidth: 1,
+    borderColor: colors.border,
+    backgroundColor: colors.surface,
+  },
   sheet: {
     marginTop: -space.xl,
     backgroundColor: colors.bg,

@@ -1,8 +1,8 @@
-import { useInfiniteQuery, useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { useInfiniteQuery, useMutation, useQueries, useQuery, useQueryClient } from "@tanstack/react-query";
 import { api } from "../api";
 import { nextCursorOf } from "../paging";
-import { totalBags, type Bags } from "../search";
-import type { NearbyShop, ReportReviewRequest, ShopDetail, ShopReviewsPage } from "../types";
+import { filterParams, totalBags, type Bags, type SearchFilters } from "../search";
+import type { NearbyShop, PrelaunchWantResponse, ReportReviewRequest, ShopDetail, ShopReviewsPage } from "../types";
 import { keys } from "./keys";
 
 export function useShop(id: string) {
@@ -11,6 +11,18 @@ export function useShop(id: string) {
     donmez; bayat token `optionalAuth` ile yenilenir, olmazsa istek anonim kalir.
   */
   return useQuery({ queryKey: keys.shop(id), queryFn: () => api<ShopDetail>(`/shops/${id}`, { optionalAuth: true }) });
+}
+
+/** Favoriler ekrani: cihazdaki kimliklerin dukkan detaylari (`useShop` ile ayni onbellek). */
+export function useFavoriteShops(ids: readonly string[]) {
+  return useQueries({
+    queries: ids.map((id) => ({
+      queryKey: keys.shop(id),
+      queryFn: () => api<ShopDetail>(`/shops/${id}`, { optionalAuth: true }),
+      // Kaldirilmis nokta 404 doner; tekrar denemek ekrani bekletir.
+      retry: false,
+    })),
+  });
 }
 
 /** Dukkan ekranindaki ozet: ilk 5 yorum ve gercek toplam (dizi ucu 50'de kesip toplam vermiyordu). */
@@ -42,6 +54,8 @@ export type NearbyParams = {
   checkIn: Date;
   checkOut: Date;
   bags: Bags;
+  /** Yoksa suzgecsiz ve servis sirasiyla (eski cagiranlar). */
+  filters?: SearchFilters;
 };
 
 export function useNearbyShops(p: NearbyParams | null) {
@@ -63,10 +77,24 @@ export function useNearbyShops(p: NearbyParams | null) {
         bagsXl: String(p!.bags.xl),
         // Saate oturmayan dukkanlar da gelsin (bookable:false); eski istemci bunu gondermez.
         includeClosed: "1",
+        ...(p!.filters ? filterParams(p!.filters) : {}),
       });
       // Token gider: kum havuzu hesabi test dukkanlarini da gorur (bkz. `useShop`).
       return api<NearbyShop[]>(`/shops/nearby?${q}`, { optionalAuth: true });
     },
+  });
+}
+
+/**
+ * Talep testi noktasi: "burada olsun" + girisliyse "acilinca haber ver". Girissizde
+ * cihaz kimligi gider (sunucu dedupe anahtari); token varsa sunucu hesabi kullanir.
+ */
+export function usePrelaunchWant(shopId: string) {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: async (body: { deviceId: string; notify: boolean; locale: string }) =>
+      api<PrelaunchWantResponse>("/prelaunch/want", { method: "POST", body: { shopId, ...body }, optionalAuth: true }),
+    onSuccess: () => void qc.invalidateQueries({ queryKey: keys.shop(shopId) }),
   });
 }
 

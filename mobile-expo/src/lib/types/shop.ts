@@ -18,6 +18,10 @@ export type Shop = {
   isVerified: boolean;
   /** Talep testi noktasi: haritada gorunur ama rezervasyon ALINMAZ. */
   isPrelaunch: boolean;
+  /** Olanaklar (rozet + suzgec). Eski sunucu gondermez: rozet cizilmez. */
+  hasCctv?: boolean;
+  hasClimateControl?: boolean;
+  acceptsLargeItems?: boolean;
 };
 
 export type NearbyShop = Shop & {
@@ -54,6 +58,8 @@ export type ShopDetail = Shop & {
   closures?: { startDate: string; endDate: string }[];
   /** Boyut basina gunluk fiyat, sunucu yuvarlamasiyla. Eski sunucuda yok. */
   priceBySize?: { s: number; m: number; xl: number };
+  /** Talep testi noktasinda "N kisi istedi"; isletilen dukkanda `null`, eski sunucuda yok. */
+  prelaunchWantCount?: number | null;
   pricing: {
     bagMultiplierS: number;
     bagMultiplierM: number;
@@ -64,3 +70,10 @@ export type ShopDetail = Shop & {
 
 
 export type ShopGalleryImage = { id: string; url: string };
+
+/** `POST /prelaunch/want` yaniti. `subscribed`: girisliyken "acilinca haber ver" kaydi. */
+export type PrelaunchWantResponse = {
+  count: number;
+  alreadyCounted: boolean;
+  subscribed: "new" | "already" | null;
+};

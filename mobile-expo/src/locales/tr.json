@@ -2060,5 +2060,58 @@
       "forbidden": "Bunun için yönetici yetkisi gerekiyor.",
       "not_allowed_while_impersonating": "Görüntüleme oturumunda yönetici değişikliği yapılamaz."
     }
+  },
+  "guestParity": {
+    "filters": "Filtreler",
+    "filtersActive": "Filtreler, {{count}} etkin",
+    "sortTitle": "Sırala",
+    "sort": {
+      "distance": "Mesafe",
+      "price_asc": "Fiyat (artan)",
+      "price_desc": "Fiyat (azalan)",
+      "rating": "Puan"
+    },
+    "amenitiesTitle": "Olanaklar",
+    "cctv": "Güvenlik kamerası",
+    "climate": "İklimlendirme",
+    "largeItems": "Büyük eşya",
+    "maxPriceTitle": "Günlük azami fiyat",
+    "maxPriceHint": "Dükkanın günlük taban fiyatı",
+    "anyPrice": "Hepsi",
+    "upTo": "≤ {{price}}",
+    "minRatingTitle": "Asgari puan",
+    "anyRating": "Hepsi",
+    "ratingAtLeast": "{{rating}}+",
+    "clear": "Temizle",
+    "showResults": "Sonuçları göster",
+    "clearFilters": "Filtreleri temizle",
+    "emptyFilteredTitle": "Bu filtrelere uyan nokta yok",
+    "emptyFilteredBody": "Filtreleri gevşet ya da temizle.",
+    "addFavorite": "Favorilere ekle",
+    "removeFavorite": "Favorilerden çıkar",
+    "favoritesTitle": "Favorilerin",
+    "favoritesCount_one": "{{count}} nokta",
+    "favoritesCount_other": "{{count}} nokta",
+    "favoritesEmptyTitle": "Henüz favorin yok",
+    "favoritesEmptyBody": "Beğendiğin noktalarda kalbe dokun; burada toplanır. Liste yalnızca bu cihazda tutulur.",
+    "favoriteUnavailable": "Bu nokta artık listelenmiyor",
+    "prelaunchTitle": "Burada nokta açılsın mı?",
+    "prelaunchBody": "Bu nokta henüz açılmadı ve rezervasyon almıyor. İstersen talebini bırak; yeterli ilgi olursa burayı açıyoruz.",
+    "wantCta": "Açılınca haber ver",
+    "wantDone": "Talebin alındı",
+    "wantCount_one": "{{count}} kişi burada nokta istiyor",
+    "wantCount_other": "{{count}} kişi burada nokta istiyor",
+    "wantFirst": "İlk isteyen sen ol.",
+    "subscribed": "Açıldığında hesabındaki e-postaya haber vereceğiz.",
+    "signInToNotify": "Açıldığında e-postayla haber almak için giriş yap.",
+    "whatsappShop": "WhatsApp'tan yaz",
+    "whatsappMessage": "Merhaba, BagajPark rezervasyonum ({{code}}) hakkında yazıyorum.",
+    "addToCalendar": "Takvime ekle",
+    "calendarTitle": "Bagaj emaneti: {{shop}}",
+    "calendarDetails": "BagajPark rezervasyonu {{code}}: {{shop}}",
+    "errors": {
+      "shop_now_open": "Bu nokta açıldı; artık rezervasyon yapabilirsin.",
+      "too_many_requests": "Çok fazla deneme yapıldı. Biraz sonra tekrar dene."
+    }
   }
 }
