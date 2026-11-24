@@ -1,6 +1,6 @@
 {
   "ios": {
     "NSLocationWhenInUseUsageDescription": "Yakınındaki emanet noktalarını göstermek için konumunu kullanıyoruz.",
-    "NSCameraUsageDescription": "Misafirin rezervasyon QR kodunu okutmak için kamerayı kullanıyoruz."
+    "NSCameraUsageDescription": "Misafirin rezervasyon QR kodunu okutmak ve teslimde valizlerin durumunu fotoğraflamak için kamerayı kullanıyoruz."
   }
 }
