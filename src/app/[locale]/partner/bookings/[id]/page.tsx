@@ -11,7 +11,8 @@ import {
 } from "lucide-react";
 import { Link } from "@/i18n/routing";
 import { formatPhoneForDisplay, phoneDialHref } from "@/lib/phone-format";
-import { requirePartnerPage } from "@/lib/page-auth";
+import { requireShopOperatorPage } from "@/lib/page-auth";
+import { listAccessibleShops } from "@/lib/shop-access";
 import { waMeUrl } from "@/lib/whatsapp";
 import prisma from "@/lib/db";
 import { notFound } from "next/navigation";
@@ -52,11 +53,13 @@ export default async function PartnerBookingDetailPage({
   const t = await getTranslations("Partner");
   const tGuest = await getTranslations("Guest");
 
-  const actor = await requirePartnerPage(locale, `/partner/bookings/${id}`);
+  const actor = await requireShopOperatorPage(locale, `/partner/bookings/${id}`);
   const userId = actor.id;
+  // Sahip + personel olunan dukkanlar; baskasinin rezervasyonu 404.
+  const accessible = await listAccessibleShops(userId, "operate");
 
   const booking = await prisma.booking.findFirst({
-    where: { id, shop: { ownerId: userId } },
+    where: { id, shopId: { in: accessible.map((s) => s.id) } },
     /*
       DAR SECIM (2026-08-31): `guest: true` misafirin `passwordHash`ini ve
       base64 avatarini (MB'lar) da getiriyordu; bu sayfa yalnizca ad, telefon
@@ -300,6 +303,7 @@ export default async function PartnerBookingDetailPage({
             bookingId={booking.id}
             noShowReady={noShowReady}
             noShowAvailableLabel={fmt(noShowAt)}
+            canCancel={accessible.find((s) => s.id === booking.shopId)?.relation === "owner"}
           />
         )}
       </div>

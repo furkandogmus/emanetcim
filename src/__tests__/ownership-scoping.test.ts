@@ -50,6 +50,8 @@ const OWNERSHIP_PATTERNS = [
   /ownerId:\s*session\.user\.id/,
   /shop\.ownerId\s*!==\s*auth\.actor\.id/,
   /shop\.ownerId\s*!==\s*session\.user\.id/,
+  // Dukkan yetki kapisi (`src/lib/shop-access.ts`): sahip/personel/yonetici, seviyeli.
+  /requireShopAccess\(\s*shopId\s*,/,
 ];
 
 /**
@@ -135,8 +137,8 @@ describe("istemciden gelen dukkan kimligi sahiplikle dogrulanir", () => {
     const fn = svc.match(/async markSealAsFaulty\([\s\S]*?\n  \}/);
     expect(fn).not.toBeNull();
     expect(fn![0], "markSealAsFaulty `actor` almali").toMatch(/actor:\s*\{/);
-    expect(fn![0], "ADMIN disindaki aktor icin dukkan sahipligi dogrulanmali").toMatch(
-      /ownerId:\s*actor\.id/,
+    expect(fn![0], "ADMIN disindaki aktor icin dukkan yetkisi dogrulanmali").toMatch(
+      /assertShopAccess\(actor,\s*shopId,\s*"operate"\)/,
     );
   });
 });

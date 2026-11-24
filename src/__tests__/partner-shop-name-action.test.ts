@@ -1,12 +1,13 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
 
 /** Web esnaf ayarlarinda dukkan adi (mobilde zaten vardi): ayni servis govdesi. */
-const { mockRequireUser, mockPrisma, mockShopService } = vi.hoisted(() => ({
-  mockRequireUser: vi.fn(),
-  mockPrisma: { shop: { findUnique: vi.fn() } },
+const { mockAuth, mockPrisma, mockShopService } = vi.hoisted(() => ({
+  mockAuth: vi.fn(),
+  mockPrisma: { shop: { findUnique: vi.fn() }, shopMember: { findUnique: vi.fn() } },
   mockShopService: { updateSettings: vi.fn() },
 }));
-vi.mock("@/lib/action-auth", () => ({ requireUser: mockRequireUser, requirePartner: vi.fn() }));
+// Gercek kapi (`requireShopAccess`) calisir; yalniz oturum ve veritabani sahte.
+vi.mock("@/auth", () => ({ auth: mockAuth }));
 vi.mock("@/lib/db", () => ({ default: mockPrisma }));
 vi.mock("@/services/ShopService", () => ({ shopService: mockShopService }));
 vi.mock("@/lib/revalidate-locales", () => ({ revalidatePathAllLocales: vi.fn() }));
@@ -16,8 +17,9 @@ import { updateShopSettingsAction } from "@/actions/shop";
 
 beforeEach(() => {
   vi.clearAllMocks();
-  mockRequireUser.mockResolvedValue({ ok: true, actor: { id: "p1", role: "PARTNER" } });
-  mockPrisma.shop.findUnique.mockResolvedValue({ ownerId: "p1" });
+  mockAuth.mockResolvedValue({ user: { id: "p1", role: "PARTNER" } });
+  mockPrisma.shop.findUnique.mockResolvedValue({ id: "s1", ownerId: "p1" });
+  mockPrisma.shopMember.findUnique.mockResolvedValue(null);
   mockShopService.updateSettings.mockResolvedValue({ ok: true, impact: { bookingsOutsideHours: 0, bagsOverCapacity: 0 } });
 });
 
@@ -41,8 +43,17 @@ describe("updateShopSettingsAction dukkan adi", () => {
   });
 
   it("baskasinin dukkaninin adi degismez", async () => {
-    mockPrisma.shop.findUnique.mockResolvedValue({ ownerId: "baska" });
+    mockPrisma.shop.findUnique.mockResolvedValue({ id: "s1", ownerId: "baska" });
     const res = await updateShopSettingsAction("s1", { name: "Yeni" });
     expect(res).toEqual({ success: false, error: "Errors.unauthorized" });
+  });
+
+  it("dukkan personeli ayarlari degistiremez (manage)", async () => {
+    mockAuth.mockResolvedValue({ user: { id: "staff-1", role: "GUEST" } });
+    mockPrisma.shop.findUnique.mockResolvedValue({ id: "s1", ownerId: "p1" });
+    mockPrisma.shopMember.findUnique.mockResolvedValue({ id: "m1" });
+    const res = await updateShopSettingsAction("s1", { name: "Yeni" });
+    expect(res).toEqual({ success: false, error: "Errors.unauthorized" });
+    expect(mockShopService.updateSettings).not.toHaveBeenCalled();
   });
 });

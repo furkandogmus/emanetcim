@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
-import { requireMobileUser, requireRole } from "@/lib/mobile-auth";
+import { requireMobileUser } from "@/lib/mobile-auth";
 import { bookingService } from "@/services/BookingService";
 import type { BagRevisionErrorCode } from "@/services/BookingService";
 
@@ -46,8 +46,6 @@ const CODE_TO_HTTP: Record<BagRevisionErrorCode, { status: number; error: string
 export async function POST(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   const auth = await requireMobileUser(req);
   if ("error" in auth) return auth.error;
-  const roleErr = requireRole(auth.user, ["PARTNER"]);
-  if (roleErr) return roleErr;
   const { id } = await params;
 
   const body = await req.json().catch(() => ({}));
@@ -69,7 +67,8 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ id:
 
   const result = await bookingService.applyBagRevision(
     id,
-    { id: auth.user.id, role: "PARTNER", impersonatedBy: auth.user.impersonatedBy ?? null },
+    // Yetki dukkan uyeliginden (`side: "shop"`): personel `PARTNER` degildir.
+    { id: auth.user.id, role: auth.user.role, side: "shop", impersonatedBy: auth.user.impersonatedBy ?? null },
     {
       counts: {
         bagCountS: s ?? current.bagCountS,

@@ -1,4 +1,4 @@
-import prisma from "@/lib/db";
+import { listAccessibleShops, type ShopAccessLevel } from "@/lib/shop-access";
 
 /**
  * Esnaf panelinde AKTİF DÜKKANI seçen tek yer.
@@ -21,36 +21,29 @@ import prisma from "@/lib/db";
  */
 
 /** `isActive`: onay bekleyen basvuru ayirt edilsin (dukkan seciminde "Onay bekliyor"). */
-export type PartnerShopRef = { id: string; name: string; isActive: boolean };
-
-/** Sıralama SABİT: `findFirst`in plan-bağımlı davranışının yerine geçer. */
-const SHOP_ORDER = { createdAt: "desc" } as const;
+export type PartnerShopRef = { id: string; name: string; isActive: boolean; relation: "owner" | "staff" };
 
 /**
- * Esnafın dükkanlarını ve aktif olanı çözer.
+ * Esnafin (ya da personelin) dukkanlarini ve aktif olani cozer.
  *
- * `requestedShopId` sahiplik listesinde YOKSA sessizce ilkine düşer — hata
- * göstermek yerine: kimliği elle değiştiren biri başkasının dükkanını göremez
- * (asıl koruma bu), yalnız dükkanını silmiş/devretmiş esnaf da eski bağlantıyla
- * kilitlenmez.
+ * `level`: `manage` yalniz sahip olunanlari, `operate` personel olunanlari da listeler
+ * (`src/lib/shop-access.ts`). Varsayilan `manage`: eski cagiranlar personeli gormez.
+ *
+ * `requestedShopId` listede YOKSA sessizce ilkine duser: kimligi elle degistiren biri
+ * baskasinin dukkanini goremez (asil koruma bu), yalniz dukkanini devretmis esnaf da
+ * eski baglantiyla kilitlenmez.
  */
 export async function resolvePartnerShops(
-  ownerId: string,
+  userId: string,
   requestedShopId?: string | null,
+  level: ShopAccessLevel = "manage",
 ): Promise<{ shops: PartnerShopRef[]; activeShop: PartnerShopRef | null }> {
-  const rows = await prisma.shop.findMany({
-    where: { ownerId },
-    orderBy: SHOP_ORDER,
-    select: { id: true, name: true, isActive: true },
-  });
-  const shops = rows;
+  const rows = await listAccessibleShops(userId, level);
 
   // Varsayilan: en yeni AKTIF dukkan. Uc dukkanli esnaf onay bekleyen yeni basvurusuyla
   // aciliyordu; misafiri ve valizi olan dukkan ikinci siradaydi (2026-11-19, emulator).
   const requested = requestedShopId?.trim();
   const fallback = rows.find((s) => s.isActive) ?? rows[0];
   const pick = (requested ? rows.find((s) => s.id === requested) : undefined) ?? fallback;
-  const activeShop = pick ?? null;
-
-  return { shops, activeShop };
+  return { shops: rows, activeShop: pick ?? null };
 }

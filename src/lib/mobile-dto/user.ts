@@ -23,8 +23,10 @@ type MobileUserSource = {
  * `emailVerified` tarih DEĞİL boolean olarak çıkar: istemcinin ihtiyacı olan tek
  * bilgi bu ve tarihin kendisi hesap sahibinin işine yaramıyor.
  */
-export function toMobileUser(u: MobileUserSource) {
+export function toMobileUser(u: MobileUserSource, extra?: { staffShopCount?: number }) {
   return {
+    /** Yalniz `auth/me`: personel oldugu dukkan sayisi (rol `PARTNER` olmayabilir). */
+    ...(extra?.staffShopCount !== undefined ? { staffShopCount: extra.staffShopCount } : {}),
     id: u.id,
     email: u.email,
     name: u.name,

@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
 import prisma from "@/lib/db";
-import { requireMobileUser, requireRole } from "@/lib/mobile-auth";
+import { requireMobileUser } from "@/lib/mobile-auth";
 import { toMobileSealRequest } from "@/lib/mobile-dto";
 import { resolvePartnerShops } from "@/lib/partner-shop";
 
@@ -15,10 +15,8 @@ import { resolvePartnerShops } from "@/lib/partner-shop";
 export async function GET(req: NextRequest) {
   const auth = await requireMobileUser(req);
   if ("error" in auth) return auth.error;
-  const roleErr = requireRole(auth.user, ["PARTNER"]);
-  if (roleErr) return roleErr;
 
-  const { activeShop } = await resolvePartnerShops(auth.user.id, req.nextUrl.searchParams.get("shop"));
+  const { activeShop } = await resolvePartnerShops(auth.user.id, req.nextUrl.searchParams.get("shop"), "operate");
   const shop = activeShop
     ? await prisma.shop.findUnique({
         where: { id: activeShop.id },

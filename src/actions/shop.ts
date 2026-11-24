@@ -1,9 +1,8 @@
 "use server";
 
-import prisma from "@/lib/db";
 import { revalidatePathAllLocales } from "@/lib/revalidate-locales";
 import { z } from "zod";
-import { requireUser, requirePartner } from "@/lib/action-auth";
+import { requirePartner, requireShopAccess } from "@/lib/action-auth";
 import { shopService } from "@/services/ShopService";
 import { getClientIpOrNull } from "@/lib/client-ip";
 
@@ -37,19 +36,9 @@ export async function updateShopSettingsAction(
     longitude?: number | null;
   }
 ) {
-  const auth = await requireUser();
+  // Ayarlar `manage`: personel dukkan ayarini degistiremez.
+  const auth = await requireShopAccess(shopId, "manage");
   if (!auth.ok) return { success: false, error: auth.error };
-
-  const shop = await prisma.shop.findUnique({
-    where: { id: shopId },
-    select: { ownerId: true },
-  });
-
-  if (!shop) return { success: false, error: "Errors.shopNotFound" };
-
-  if (shop.ownerId !== auth.actor.id) {
-    if (auth.actor.role !== "ADMIN") return { success: false, error: "Errors.unauthorized" };
-  }
 
   const parsed = shopSettingsSchema.safeParse(data);
   if (!parsed.success) {

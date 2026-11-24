@@ -55,7 +55,7 @@ class AccountDataExportService {
     });
     if (!user) return null;
 
-    const [bookings, reviews, legalAcceptances, shops, affiliate, deletionRequest] = await Promise.all([
+    const [bookings, reviews, legalAcceptances, shops, affiliate, deletionRequest, shopMemberships] = await Promise.all([
       prisma.booking.findMany({
         where: { guestId: userId },
         orderBy: { createdAt: "asc" },
@@ -129,6 +129,12 @@ class AccountDataExportService {
         where: { userId },
         select: { status: true, requestedAt: true, dueAt: true, note: true },
       }),
+      // Personel oldugu dukkanlar (KVKK: hangi isletmenin verisine eristigi).
+      prisma.shopMember.findMany({
+        where: { userId },
+        orderBy: { createdAt: "asc" },
+        select: { role: true, createdAt: true, shop: { select: { id: true, name: true } } },
+      }),
     ]);
 
     const { accounts, ...profile } = user;
@@ -146,6 +152,12 @@ class AccountDataExportService {
       })),
       affiliate,
       deletionRequest,
+      shopMemberships: shopMemberships.map((m) => ({
+        shopId: m.shop.id,
+        shopName: m.shop.name,
+        role: m.role,
+        since: m.createdAt.toISOString(),
+      })),
     };
   }
 

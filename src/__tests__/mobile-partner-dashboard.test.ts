@@ -52,7 +52,8 @@ describe("mobil esnaf ozeti", () => {
     expect(mockSnapshot).toHaveBeenCalledWith("s1", "Europe/Istanbul", 0.1);
     expect(await res.json()).toEqual({
       shop: { id: "s1", name: "A" },
-      shops: [{ id: "s1", name: "A", isActive: true }],
+      shops: [{ id: "s1", name: "A", isActive: true, access: "owner" }],
+      access: "owner",
       todayArrivals: 3,
       todayPickups: 2,
       bagsInStorage: 5,
@@ -64,7 +65,7 @@ describe("mobil esnaf ozeti", () => {
 
   it("?shop= web ile ayni secime iletilir", async () => {
     await GET(req("?shop=s2"));
-    expect(mockResolve).toHaveBeenCalledWith("p1", "s2");
+    expect(mockResolve).toHaveBeenCalledWith("p1", "s2", "operate");
   });
 
   it("dukkansiz esnafa 404 no_shops", async () => {
@@ -75,10 +76,20 @@ describe("mobil esnaf ozeti", () => {
     expect(mockSnapshot).not.toHaveBeenCalled();
   });
 
-  it("misafir 403", async () => {
+  it("dukkani olmayan misafir: no_shops, ozet hesaplanmaz", async () => {
     mockRequireMobileUser.mockResolvedValue({ user: { id: "g1", role: "GUEST" } });
+    mockResolve.mockResolvedValue({ shops: [], activeShop: null });
     const res = (await GET(req()))!;
-    expect(res.status).toBe(403);
+    expect(res.status).toBe(404);
     expect(mockSnapshot).not.toHaveBeenCalled();
+  });
+
+  it("personel: ayni gunluk sayilar, kazanc alanlari sifir, access staff", async () => {
+    mockRequireMobileUser.mockResolvedValue({ user: { id: "st1", role: "GUEST" } });
+    const staffShop = { id: "s1", name: "A", isActive: true, relation: "staff" };
+    mockResolve.mockResolvedValue({ shops: [staffShop], activeShop: staffShop });
+    const body = await (await GET(req()))!.json();
+    expect(body).toMatchObject({ access: "staff", todayArrivals: 3, bagsInStorage: 5, monthNet: 0, prevMonthNet: 0, monthChangePct: null });
+    expect(body.shops[0].access).toBe("staff");
   });
 });

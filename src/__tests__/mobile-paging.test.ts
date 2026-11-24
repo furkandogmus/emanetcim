@@ -8,6 +8,7 @@ import { NextRequest } from "next/server";
  */
 const db = vi.hoisted(() => ({
   shop: { findMany: vi.fn() },
+  shopMember: { findMany: vi.fn().mockResolvedValue([]) },
   booking: { findMany: vi.fn(), count: vi.fn() },
   user: { findMany: vi.fn() },
   contactMessage: { findMany: vi.fn() },

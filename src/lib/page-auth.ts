@@ -2,6 +2,7 @@ import { redirect } from "next/navigation";
 import { Role } from "@prisma/client";
 import { auth } from "@/auth";
 import type { Actor } from "@/lib/action-auth";
+import { countStaffShops } from "@/lib/shop-access";
 
 /**
  * Sayfa (Server Component) YETKİ KAPISI — `action-auth.ts`'in sayfa karşılığı.
@@ -44,6 +45,10 @@ async function resolvePageActor<R extends Role>(
 
   const role = session.user.role;
   if (!(allowed as readonly Role[]).includes(role)) {
+    // Personel sahip sayfasina girdiyse operasyon paneline; digerleri ana sayfaya.
+    if (path.startsWith("/partner") && (await countStaffShops(session.user.id)) > 0) {
+      redirect(`/${locale}/partner`);
+    }
     // Giriş yapmış ama yetkisiz: login'e yollamak döngü üretir.
     redirect(`/${locale}`);
   }
@@ -71,4 +76,21 @@ export function requireAdminPage(
   path: string,
 ): Promise<Actor<typeof Role.ADMIN>> {
   return resolvePageActor([Role.ADMIN], locale, path);
+}
+
+/**
+ * Esnaf paneli OPERASYON sayfalari (pano, rezervasyonlar, muhur): sahip/yonetici rolu ya
+ * da en az bir dukkanda personel uyeligi. Uyelik her istekte okunur. Hangi dukkan
+ * goruldugu `resolvePartnerShops(..., "operate")` ile ayrica daraltilir.
+ */
+export async function requireShopOperatorPage(locale: string, path: string): Promise<Actor> {
+  const session = await auth();
+  if (!session?.user?.id) {
+    const callbackUrl = encodeURIComponent(`/${locale}${path}`);
+    redirect(`/${locale}/login?callbackUrl=${callbackUrl}`);
+  }
+  const role = session.user.role;
+  if (role === Role.PARTNER || role === Role.ADMIN) return { id: session.user.id, role };
+  if ((await countStaffShops(session.user.id)) > 0) return { id: session.user.id, role };
+  redirect(`/${locale}`);
 }

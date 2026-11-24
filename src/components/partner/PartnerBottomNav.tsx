@@ -12,9 +12,11 @@ export type PartnerTab = "PANEL" | "GECMIS" | "AYARLAR";
 interface PartnerBottomNavProps {
   activeTab: PartnerTab;
   onChange: (tab: PartnerTab) => void;
+  /** Personelde `false`: dukkan ayarlari sekmesi yok. */
+  showSettings?: boolean;
 }
 
-export default function PartnerBottomNav({ activeTab, onChange }: PartnerBottomNavProps) {
+export default function PartnerBottomNav({ activeTab, onChange, showSettings = true }: PartnerBottomNavProps) {
   const t = useTranslations("Partner");
   return (
   <nav className="fixed bottom-3 left-1/2 z-20 flex w-[calc(100%-1.5rem)] max-w-md -translate-x-1/2 justify-around gap-2 rounded-3xl border border-gray-100 bg-white/90 px-3 py-2 shadow-[0_20px_50px_rgba(0,0,0,0.1)] backdrop-blur-2xl sm:bottom-8 sm:w-auto sm:gap-8 sm:px-6 sm:py-3">
@@ -38,6 +40,7 @@ export default function PartnerBottomNav({ activeTab, onChange }: PartnerBottomN
       <BarChart3 size={22} />
       <span className="text-[9px] font-black uppercase tracking-wider">{t("transactionHistory")}</span>
     </button>
+    {showSettings && (
     <button
       type="button"
       onClick={() => onChange("AYARLAR")}
@@ -48,6 +51,7 @@ export default function PartnerBottomNav({ activeTab, onChange }: PartnerBottomN
       <Settings size={22} />
       <span className="text-[9px] font-black uppercase tracking-wider">{t("settings")}</span>
     </button>
+    )}
   </nav>
   );
 }

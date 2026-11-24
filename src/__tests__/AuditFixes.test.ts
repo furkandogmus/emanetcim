@@ -11,6 +11,7 @@ const { mockPrisma, mockAuth, mockBookingService, mockSealService } = vi.hoisted
   return {
     mockPrisma: {
       shop: { findUnique: vi.fn() },
+      shopMember: { count: vi.fn().mockResolvedValue(0), findMany: vi.fn().mockResolvedValue([]), findUnique: vi.fn().mockResolvedValue(null) },
       booking: {
         findUnique: vi.fn(),
         update: vi.fn(),

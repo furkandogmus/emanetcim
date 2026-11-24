@@ -8,7 +8,7 @@ import { describe, it, expect, vi, beforeEach } from "vitest";
  */
 
 const m = vi.hoisted(() => ({
-  prisma: { booking: { findUnique: vi.fn(), findMany: vi.fn() } },
+  prisma: { booking: { findUnique: vi.fn(), findMany: vi.fn() }, shopMember: { findUnique: vi.fn().mockResolvedValue(null) } },
   cancelBooking: vi.fn(),
   checkOut: vi.fn(),
   audit: vi.fn(),

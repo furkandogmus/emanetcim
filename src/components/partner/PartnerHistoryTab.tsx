@@ -11,6 +11,8 @@ import { PLATFORM_TIMEZONE } from "@/lib/datetime-local";
 interface PartnerHistoryTabProps {
   bookings: PartnerBookingListItem[];
   merchantShareRatio: number;
+  /** Personelde `false`: esnaf payi (net kazanc) gosterilmez. */
+  showEarnings?: boolean;
   dateLocale: string;
   overdueOf: (checkOutTime: string | Date) => ReturnType<typeof computeOverdue>;
   checkingOutId: string | null;
@@ -23,6 +25,7 @@ interface PartnerHistoryTabProps {
 export default function PartnerHistoryTab({
   bookings,
   merchantShareRatio,
+  showEarnings = true,
   dateLocale,
   overdueOf,
   checkingOutId,
@@ -101,6 +104,7 @@ export default function PartnerHistoryTab({
                 </div>
 
                 <div className="flex justify-between items-center border-t border-gray-50 pt-6">
+                  {showEarnings ? (
                   <div className="flex flex-col gap-1">
                     <p className="id-eyebrow text-gray-400">
                       {t("netEarningsShort")}
@@ -118,6 +122,7 @@ export default function PartnerHistoryTab({
                       </span>
                     </p>
                   </div>
+                  ) : <span />}
                   <div className="text-right">
                     <p className="id-eyebrow text-gray-400">
                       {t("bagLabel")}

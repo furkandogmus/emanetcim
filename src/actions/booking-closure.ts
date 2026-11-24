@@ -1,6 +1,6 @@
 "use server";
 
-import { requireAdmin, requirePartner } from "@/lib/action-auth";
+import { requireAdmin, requirePartner, requireUser } from "@/lib/action-auth";
 import { getClientIp } from "@/lib/get-ip";
 import { revalidatePathAllLocales } from "@/lib/revalidate-locales";
 import {
@@ -61,7 +61,8 @@ export async function partnerCancelBookingAction(bookingId: string, reason: stri
 }
 
 export async function markNoShowAction(bookingId: string) {
-  const auth = await requirePartner();
+  // Personel de yapar; dukkan yetkisi serviste (`canOperateBookingAtShop`).
+  const auth = await requireUser();
   if (!auth.ok) return { success: false as const, error: auth.error };
   const result = await markNoShow(bookingId, auth.actor);
   return toActionResult(result, bookingId);
@@ -69,7 +70,8 @@ export async function markNoShowAction(bookingId: string) {
 
 /** "Misafiri bekle" (gec birakma). Govde `src/services/booking/late-hold.ts`. */
 export async function holdLateBookingAction(bookingId: string) {
-  const auth = await requirePartner();
+  // Personel de yapar; dukkan yetkisi serviste (`canOperateBookingAtShop`).
+  const auth = await requireUser();
   if (!auth.ok) return { success: false as const, error: auth.error };
   const result = await holdLateBooking(bookingId, auth.actor);
   return toActionResult(result, bookingId);

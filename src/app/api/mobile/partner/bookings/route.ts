@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
 import { requireMobileUser, requireRole } from "@/lib/mobile-auth";
+import { listAccessibleShops } from "@/lib/shop-access";
 import prisma from "@/lib/db";
 import { cursorArgs, parseCursor, toPage } from "@/lib/cursor-page";
 import { toMobilePartnerBookingRow } from "@/lib/mobile-dto";
@@ -10,8 +11,7 @@ import { partnerBookingSearchWhere } from "@/services/PartnerBookingSearchServic
 export async function GET(req: NextRequest) {
   const auth = await requireMobileUser(req);
   if ("error" in auth) return auth.error;
-  const forbid = requireRole(auth.user, ["PARTNER"]);
-  if (forbid) return forbid;
+
 
   const { searchParams } = new URL(req.url);
   const page = Math.max(1, Number(searchParams.get("page")) || 1);
@@ -21,10 +21,10 @@ export async function GET(req: NextRequest) {
   const cursor = parseCursor(searchParams.get("cursor"));
   const skip = cursor ? 0 : (page - 1) * limit;
 
-  const shops = await prisma.shop.findMany({
-    where: { ownerId: auth.user.id },
-    select: { id: true, name: true },
-  });
+  // Sahip + personel olunan dukkanlar (`operate`); hicbiri yoksa eski davranis: 403.
+  const shops = await listAccessibleShops(auth.user.id, "operate");
+  const notPartner = requireRole(auth.user, ["PARTNER"]);
+  if (shops.length === 0 && notPartner) return notPartner;
 
   // `shopId` yalnizca esnafin KENDI dukkanlari icinde daraltir; baskasininki bos liste verir.
   const shopIdParam = searchParams.get("shopId")?.trim();

@@ -169,10 +169,11 @@ function routeRequest(req: NextAuthRequest, overrideHeaders: Headers | null): Ne
       return NextResponse.redirect(homeUrl);
     }
 
-    if (isPartnerPath && userRole !== "PARTNER" && userRole !== "ADMIN") {
-      const homeUrl = new URL(`/${pathLocale}`, nextUrl);
-      return NextResponse.redirect(homeUrl);
-    }
+    /*
+      Esnaf paneline rol kapisi YOK: dukkan personeli `PARTNER` degildir ve uyelik JWT'de
+      tasinmaz (cikarilan personel aninda dusmeli). Kapi sayfada, veritabanindan:
+      `requirePartnerPage` / `requireShopOperatorPage` (`src/lib/page-auth.ts`).
+    */
   }
 
   /*

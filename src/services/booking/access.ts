@@ -16,6 +16,8 @@
  * Fark artık ADI OLAN bir parametre: `allowShopPartner`.
  */
 
+import { hasShopAccess } from "@/lib/shop-access";
+
 export type BookingActor = { id: string; role: string };
 
 /**
@@ -27,7 +29,7 @@ export type BookingActor = { id: string; role: string };
  * verdi -- tipi daraltmak, sorguya kullanilmayan bir alan eklemekten dogru.
  */
 export type ShopOwnedSubject = {
-  shop: { ownerId: string };
+  shop: { id: string; ownerId: string };
 };
 
 export type BookingAccessSubject = ShopOwnedSubject & {
@@ -39,16 +41,15 @@ export type BookingAccessSubject = ShopOwnedSubject & {
  * OKUMA için `true` (esnaf paneli rezervasyonu görmeli),
  * DEĞİŞTİRME için `false` (esnafın yolu "reddet").
  */
-export function canAccessBooking(
+export async function canAccessBooking(
   booking: BookingAccessSubject,
   actor: BookingActor,
   opts: { allowShopPartner: boolean },
-): boolean {
+): Promise<boolean> {
   if (actor.role === "ADMIN") return true;
   if (booking.guestId && booking.guestId === actor.id) return true;
-  if (opts.allowShopPartner && actor.role === "PARTNER") {
-    return booking.shop.ownerId === actor.id;
-  }
+  // Dukkan tarafi = sahip ya da personel (`operate`); rol sartinin yerini uyelik aldi.
+  if (opts.allowShopPartner) return hasShopAccess(actor, booking.shop, "operate");
   return false;
 }
 
@@ -77,7 +78,15 @@ export function canAccessBooking(
 export function canOperateBookingAtShop(
   booking: ShopOwnedSubject,
   actor: BookingActor,
-): boolean {
+): Promise<boolean> {
+  return hasShopAccess(actor, booking.shop, "operate");
+}
+
+/**
+ * Esnaf iptali gibi `manage` seviyesindeki rezervasyon islemleri: sahip ya da yonetici.
+ * Personel burada YOK (urun karari 2026-11-24: personel = yalniz operasyon).
+ */
+export function canManageBookingAtShop(booking: ShopOwnedSubject, actor: BookingActor): boolean {
   if (actor.role === "ADMIN") return true;
   return booking.shop.ownerId === actor.id;
 }
@@ -93,12 +102,13 @@ export function canOperateBookingAtShop(
  * -- herhangi bir kimliklenmis PARTNER, seri numarasini deneyerek (ardisik)
  * BASKA dukkanlarin muhur envanterini gorebiliyordu (IDOR).
  */
-export function canOperateSealAtShop(
-  seal: { shop: { ownerId: string } | null },
+export async function canOperateSealAtShop(
+  seal: { shop: { id: string; ownerId: string } | null },
   actor: BookingActor,
-): boolean {
+): Promise<boolean> {
   if (actor.role === "ADMIN") return true;
-  return seal.shop?.ownerId === actor.id;
+  if (!seal.shop) return false;
+  return hasShopAccess(actor, seal.shop, "operate");
 }
 
 /**

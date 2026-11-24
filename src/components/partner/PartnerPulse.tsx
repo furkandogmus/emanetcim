@@ -37,6 +37,8 @@ export type PulseProps = {
   bagsHandledAllTime: number;
   /** Komisyon yürürlükte mi? Değilse "tamamı sende" rozeti çıkar. */
   commissionActive: boolean;
+  /** Personelde `false`: kazanc karti cizilmez. */
+  showEarnings?: boolean;
 };
 
 export default function PartnerPulse({
@@ -48,6 +50,7 @@ export default function PartnerPulse({
   monthChangePct,
   bagsHandledAllTime,
   commissionActive,
+  showEarnings = true,
 }: PulseProps) {
   const t = useTranslations("Partner");
   const bcp47 = bcp47ForUiLocale(useLocale());
@@ -123,6 +126,7 @@ export default function PartnerPulse({
 
       <div className="grid gap-3 sm:grid-cols-2">
         {/* ── BU AY + MOMENTUM ── */}
+        {showEarnings && (
         <Link
           href="/partner/earnings"
           className="ui-card flex flex-col justify-between gap-2 p-5 transition-transform hover:-translate-y-0.5"
@@ -162,6 +166,7 @@ export default function PartnerPulse({
             </p>
           )}
         </Link>
+        )}
 
         {/* ── KİLOMETRE TAŞI ── */}
         {milestone && (

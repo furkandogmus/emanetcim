@@ -26,6 +26,7 @@
  * (P1-21). Bu yuzden `PaymentService` cagrilmaz — ama fark denetim izine yazilir.
  */
 import { lockedBookingDiscount } from '@/lib/app-discount';
+import { canOperateBookingAtShop } from '@/services/booking/access';
 import { isBagRevisableStatus } from '@/lib/bag-revision-status';
 import { Prisma } from '@prisma/client';
 import prisma from '@/lib/db';
@@ -47,7 +48,16 @@ export type BagRevisionActor = {
   role: 'PARTNER' | 'ADMIN' | 'GUEST';
   /** Yonetici goruntuleme oturumunda dugmeye basan yonetici (bkz. `BookingEventService.record`). */
   impersonatedBy?: string | null;
+  /**
+   * Esnaf panelinden gelen istek. Personel `PARTNER` degildir (cogu `GUEST`); rolden
+   * "dukkan tarafi" cikarilamaz, tasiyici bunu acikca soyler. Yetki yine uyelikten.
+   */
+  side?: 'shop';
 };
+
+function isShopSide(actor: BagRevisionActor): boolean {
+  return actor.side === 'shop' || actor.role === 'PARTNER';
+}
 
 export type BagCounts = { bagCountS: number; bagCountM: number; bagCountXl: number };
 
@@ -112,8 +122,9 @@ async function loadForRevision(
 ): Promise<{ booking: RevisableBooking } | { error: BagRevisionErrorCode }> {
   const booking = await findBooking(bookingId);
   if (!booking) return { error: 'NOT_FOUND' };
-  if (actor.role === 'PARTNER' && booking.shop.ownerId !== actor.id) {
-    return { error: 'FORBIDDEN' };
+  if (isShopSide(actor)) {
+    if (!(await canOperateBookingAtShop(booking, actor))) return { error: 'FORBIDDEN' };
+    return { booking };
   }
   /*
     HESAPLI misafir icin sahiplik burada dogrulanir (`booking.guestId`).
@@ -368,7 +379,7 @@ export async function applyBagRevision(
       yorumu bu ayrimi zaten bekliyordu ("onay akisi kurulursa hazir duruyor").
       ADMIN ve GUEST'in kendisi (onayladiginda) bu kapidan gecer.
     */
-    if (booking.status === 'CHECKED_IN' && delta > 0 && actor.role === 'PARTNER') {
+    if (booking.status === 'CHECKED_IN' && delta > 0 && isShopSide(actor) && actor.role !== 'ADMIN') {
       await persistPendingRevision(bookingId, counts, delta, previousTotal, newTotal, rulesSource);
       const guestEmail = bookingNotificationEmail(booking);
       if (guestEmail) {

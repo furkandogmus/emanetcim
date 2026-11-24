@@ -39,24 +39,29 @@ type PartnerDashboardSource = Pick<
   "todayArrivals" | "todayPickups" | "bagsInStorage" | "monthNet" | "prevMonthNet" | "monthChangePct"
 >;
 
-type ShopRef = { id: string; name: string; isActive?: boolean };
+type ShopRef = { id: string; name: string; isActive?: boolean; relation?: "owner" | "staff" };
 
 /**
  * Esnafin gunluk dukkan ozeti. Web panelinin "gunluk enstantane" blogu ile ayni
- * servis (`partnerDashboardService.getSnapshot`); mobil ana ekran yalnizca
- * rezervasyon listesiydi.
+ * servis (`partnerDashboardService.getSnapshot`).
+ *
+ * Personelde (`access: "staff"`) kazanc ALANLARI SIFIR: personel kazanc gormez (urun
+ * karari 2026-11-24). Alanlar silinmez, sayi kalir: eski istemci onlari `number` okur.
  */
 export function toMobilePartnerDashboard(s: PartnerDashboardSource, shop: ShopRef, shops: ShopRef[]) {
+  const staff = shop.relation === "staff";
   return {
     /** Ozetin ait oldugu dukkan; cok dukkanli esnafta kart hangisi oldugunu soyler. */
     shop: { id: shop.id, name: shop.name },
-    shops: shops.map((x) => ({ id: x.id, name: x.name, isActive: x.isActive ?? true })),
+    shops: shops.map((x) => ({ id: x.id, name: x.name, isActive: x.isActive ?? true, access: x.relation ?? "owner" })),
+    /** Secili dukkandaki yetki; yeni istemci personelde sahip ekranlarini gizler. */
+    access: staff ? ("staff" as const) : ("owner" as const),
     todayArrivals: s.todayArrivals,
     todayPickups: s.todayPickups,
     bagsInStorage: s.bagsInStorage,
-    monthNet: s.monthNet,
-    prevMonthNet: s.prevMonthNet,
-    monthChangePct: s.monthChangePct,
+    monthNet: staff ? 0 : s.monthNet,
+    prevMonthNet: staff ? 0 : s.prevMonthNet,
+    monthChangePct: staff ? null : s.monthChangePct,
   };
 }
 

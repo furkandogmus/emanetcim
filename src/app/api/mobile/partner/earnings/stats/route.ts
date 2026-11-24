@@ -8,6 +8,7 @@ import { toMobilePartnerEarningRow, toMobilePartnerInsights } from "@/lib/mobile
 import { partnerEarningsService } from "@/services/PartnerEarningsService";
 import { getEffectiveCommission } from "@/lib/commission";
 import { startOfDayInTimeZone } from "@/lib/timezone";
+import { listAccessibleShops } from "@/lib/shop-access";
 
 export async function GET(req: NextRequest) {
   const auth = await requireMobileUser(req);
@@ -15,8 +16,10 @@ export async function GET(req: NextRequest) {
   const roleErr = requireRole(auth.user, ["PARTNER"]);
   if (roleErr) return roleErr;
 
+  // Kazanc `manage`: yalniz sahip olunan dukkanlar, personel asla.
+  const ownedIds = (await listAccessibleShops(auth.user.id, "manage")).map((s) => s.id);
   const owned = await prisma.shop.findMany({
-    where: { ownerId: auth.user.id, isActive: true },
+    where: { id: { in: ownedIds }, isActive: true },
     select: { id: true, timezone: true, rating: true },
   });
   // `?shop=` uygulamanin dukkan secimini izler (pano gibi); yoksa tum dukkanlar.

@@ -1,10 +1,9 @@
 "use server";
 
-import prisma from "@/lib/db";
 import logger from "@/lib/logger";
 import { sealService } from "@/services/SealService";
 import { revalidatePathAllLocales } from "@/lib/revalidate-locales";
-import { requireAdmin, requirePartner } from "@/lib/action-auth";
+import { requireAdmin, requirePartner, requireShopAccess, requireUser } from "@/lib/action-auth";
 
 /*
   Yakalanan hatanın metni DÖNMEZ (2026-08-25). Eskiden `e.message` dönüyordu ve
@@ -74,7 +73,8 @@ export async function shipSealRequestAction(params: {
 export async function confirmSealDeliveryAction(
   requestId: string
 ): Promise<{ success: boolean; error?: string }> {
-  const auth = await requirePartner();
+  // Kargoyu personel de teslim alir; dukkan yetkisi serviste.
+  const auth = await requireUser();
   if (!auth.ok) return { success: false, error: SEAL_CODE_TO_ERROR.FORBIDDEN };
 
   const result = await sealService.confirmDelivery(requestId, auth.actor);
@@ -111,23 +111,10 @@ export async function requestSealsAction(
 export async function recycleReturnedSealsAction(
   shopId: string
 ): Promise<{ success: boolean; recycled: number; error?: string }> {
-  const auth = await requirePartner();
+  // Stok yonetimi `manage`: sahip ya da yonetici.
+  const auth = await requireShopAccess(shopId, "manage");
   if (!auth.ok) {
-    return { success: false, recycled: 0, error: SEAL_CODE_TO_ERROR.FORBIDDEN };
-  }
-
-  /*
-    ROL kapisi yukarida; burada kalan SAHIPLIK kuralidir: admin her dükkanı,
-    esnaf yalnızca kendi dükkanını geri dönüştürebilir.
-  */
-  if (auth.actor.role !== "ADMIN") {
-    const shop = await prisma.shop.findFirst({
-      where: { id: shopId, ownerId: auth.actor.id },
-      select: { id: true },
-    });
-    if (!shop) {
-      return { success: false, recycled: 0, error: SEAL_CODE_TO_ERROR.SHOP_NOT_FOUND };
-    }
+    return { success: false, recycled: 0, error: SEAL_CODE_TO_ERROR.SHOP_NOT_FOUND };
   }
 
   try {

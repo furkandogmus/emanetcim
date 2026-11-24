@@ -23,6 +23,7 @@ const { mockPrisma, mockTx, mockNotifications } = vi.hoisted(() => {
     mockPrisma: {
       sealRequest: { findUnique: vi.fn(), create: vi.fn() },
       shop: { findFirst: vi.fn() },
+      shopMember: { findUnique: vi.fn().mockResolvedValue(null) },
       seal: { updateMany: vi.fn() },
       $transaction: vi.fn(async (fn: (tx: typeof mockTx) => unknown) => fn(mockTx)),
     },
