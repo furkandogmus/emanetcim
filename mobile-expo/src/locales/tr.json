@@ -2114,5 +2114,97 @@
       "shop_now_open": "Bu nokta açıldı; artık rezervasyon yapabilirsin.",
       "too_many_requests": "Çok fazla deneme yapıldı. Biraz sonra tekrar dene."
     }
+  },
+  "accountParity": {
+    "sections": {
+      "earn": "BagajPark ile kazan"
+    },
+    "exportRow": "Verilerimi e-postayla gönder",
+    "exportTitle": "Verilerin e-postana gönderilsin mi?",
+    "exportBody": "Hesabınla ilişkili kişisel verileri içeren bir JSON dosyası, hesabının doğrulanmış e-posta adresine gönderilir. 24 saatte bir isteyebilirsin.",
+    "exportConfirm": "Gönder",
+    "exportSentTitle": "Gönderildi",
+    "exportSentBody": "Dosya {{email}} adresine gönderildi. Birkaç dakika içinde gelmezse istenmeyen klasörüne bak.",
+    "exportFailedTitle": "Gönderilemedi",
+    "becomePartner": "Esnaf ol, valiz emanet al",
+    "affiliateProgram": "Aracı ol, komisyon kazan",
+    "affiliatePanel": "Aracı paneli",
+    "howItWorks": "Nasıl çalışır",
+    "cancellation": "İptal koşulları",
+    "insurance": "Valiz güvencesi",
+    "about": "Hakkımızda",
+    "blog": "Blog",
+    "checkoutCancellationFree": "Valizini bırakana kadar ücretsiz iptal edebilirsin.",
+    "checkoutCancellationOnline": "İptal ve iade koşulları bırakma saatine kalan süreye göre değişir.",
+    "checkoutCancellationLink": "İptal koşulları",
+    "errors": {
+      "rate_limited": "Son 24 saatte zaten bir dışa aktarım gönderildi.",
+      "rate_limited_until": "Son 24 saatte bir dışa aktarım gönderildi. {{time}} sonrasında yeniden isteyebilirsin.",
+      "no_verified_email": "Hesabında doğrulanmış bir e-posta yok. Profilinden e-posta ekleyip doğruladıktan sonra tekrar dene.",
+      "mail_failed": "E-posta şu an gönderilemedi. Biraz sonra tekrar dene.",
+      "not_allowed_while_impersonating": "Görüntüleme oturumunda bu işlem yapılamaz."
+    }
+  },
+  "affiliate": {
+    "title": "Aracı paneli",
+    "noneTitle": "Henüz aracı değilsin",
+    "noneBody": "Misafirlerini BagajPark'a yönlendiren ev sahipleri, oteller ve rehberler, kişisel bağlantılarından gelen her tamamlanan rezervasyondan komisyon kazanır.",
+    "apply": "Başvur",
+    "learnMore": "Program hakkında",
+    "status": {
+      "pending": "Başvurun inceleniyor",
+      "paused": "Aracılığın duraklatıldı",
+      "active": "Aktif"
+    },
+    "pendingBody": "Onaylandığında kişisel bağlantın ve QR kodun burada görünür.",
+    "pausedBody": "Bu sürede bağlantın yeni rezervasyon getirmez. Ayrıntı için bize ulaş.",
+    "link": "Kişisel bağlantın",
+    "qrLabel": "Kişisel bağlantının QR kodu",
+    "rates": "Komisyon %{{commission}} · misafir indirimi %{{discount}}",
+    "share": "Bağlantıyı paylaş",
+    "shareTip": "QR kodu resepsiyona ya da ev kılavuzuna koyabilirsin; bağlantıdan gelen rezervasyon tamamlanınca komisyon yazılır.",
+    "shareMessage": "Valizlerini BagajPark'ta güvenle bırak, bu bağlantıyla %{{pct}} indirim: {{url}}",
+    "stats": {
+      "clicks": "Tıklama",
+      "bookings": "Rezervasyon",
+      "completed": "Tamamlanan",
+      "earned": "Kazanılan",
+      "unpaid": "Ödenmemiş"
+    },
+    "bookingsTitle": "Rezervasyonlar",
+    "noBookings": "Bağlantından henüz rezervasyon yok.",
+    "commissionPaid": "komisyon {{amount}} (ödendi)",
+    "commissionUnpaid": "komisyon {{amount}} (ödenecek)",
+    "cancelled": "iptal",
+    "pending": "tamamlanınca komisyon",
+    "applyTitle": "Aracı başvurusu",
+    "applyIntro": "Başvurunu ekibimiz inceler; onaylanınca kişisel bağlantın ve oranların bu panelde açılır.",
+    "form": {
+      "displayName": "Ad ya da işletme adı",
+      "displayNameHint": "Misafirlerin bu adı görür.",
+      "type": "Tür",
+      "email": "E-posta",
+      "phone": "Telefon",
+      "note": "Not (isteğe bağlı)",
+      "noteHint": "Örneğin kaç misafir ağırladığın ya da hangi bölgede olduğun."
+    },
+    "types": {
+      "airbnb_host": "Ev sahibi (Airbnb vb.)",
+      "hotel": "Otel / pansiyon",
+      "guide": "Rehber",
+      "agency": "Seyahat acentesi",
+      "other": "Diğer"
+    },
+    "submit": "Başvuruyu gönder",
+    "appliedTitle": "Başvurun alındı",
+    "appliedBody": "İnceleyip en kısa sürede dönüş yapacağız.",
+    "toPanel": "Panele git",
+    "errors": {
+      "invalid_data": "Adını ve türünü doğru gir.",
+      "contact_required": "E-posta ya da telefon gir.",
+      "already_applied": "Bu hesapla zaten bir başvurun var.",
+      "rate_limited": "Çok fazla deneme. Biraz sonra tekrar dene.",
+      "not_allowed_while_impersonating": "Görüntüleme oturumunda başvuru yapılamaz."
+    }
   }
 }
