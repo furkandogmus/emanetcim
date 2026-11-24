@@ -113,4 +113,54 @@ describe("GET /api/mobile/shops/nearby", () => {
     mockSearch.mockResolvedValue([]);
     expect((await GET(url({ bagsXl: "21" }))).status).toBe(400);
   });
+
+  describe("süzgeç ve sıralama (web SearchClient ile aynı)", () => {
+    const open = { open247: true };
+    const rows = () => [
+      shopRow("a", { ...open, distanceKm: 3, pricePerDay: 300, rating: 4.8, hasCctv: true, hasClimateControl: true, acceptsLargeItems: false }),
+      shopRow("b", { ...open, distanceKm: 1, pricePerDay: 200, rating: 0, hasCctv: false, hasClimateControl: true, acceptsLargeItems: true }),
+      shopRow("c", { ...open, distanceKm: 2, pricePerDay: 250, rating: 4.1, hasCctv: true, hasClimateControl: false, acceptsLargeItems: true }),
+    ];
+    const ids = async (q: Record<string, string>) =>
+      ((await (await GET(url(q))).json()) as { id: string }[]).map((s) => s.id);
+
+    it("parametre yoksa servis sırası korunur", async () => {
+      mockSearch.mockResolvedValue(rows());
+      expect(await ids({})).toEqual(["a", "b", "c"]);
+    });
+
+    it("olanak süzgeçleri birlikte uygulanır", async () => {
+      mockSearch.mockResolvedValue(rows());
+      expect(await ids({ cctv: "1" })).toEqual(["a", "c"]);
+      expect(await ids({ cctv: "1", largeItems: "1" })).toEqual(["c"]);
+      expect(await ids({ climate: "true" })).toEqual(["a", "b"]);
+    });
+
+    it("azami fiyat pricePerDay'e, asgari puan rating'e bakar (puansız 0)", async () => {
+      mockSearch.mockResolvedValue(rows());
+      expect(await ids({ maxPrice: "250" })).toEqual(["b", "c"]);
+      expect(await ids({ minRating: "4" })).toEqual(["a", "c"]);
+    });
+
+    it("sıralamalar", async () => {
+      mockSearch.mockResolvedValue(rows());
+      expect(await ids({ sort: "distance" })).toEqual(["b", "c", "a"]);
+      expect(await ids({ sort: "price_asc" })).toEqual(["b", "c", "a"]);
+      expect(await ids({ sort: "price_desc" })).toEqual(["a", "c", "b"]);
+      expect(await ids({ sort: "rating" })).toEqual(["a", "c", "b"]);
+    });
+
+    it("sıralamada da rezervasyon alamayan dükkan sonda kalır", async () => {
+      mockSearch.mockResolvedValue([shopRow("closed", { distanceKm: 0.1 }), ...rows()]);
+      expect(await ids({ includeClosed: "1", sort: "distance" })).toEqual(["b", "c", "a", "closed"]);
+    });
+
+    it("geçersiz değerler 400", async () => {
+      mockSearch.mockResolvedValue([]);
+      expect((await GET(url({ sort: "cheapest" }))).status).toBe(400);
+      expect((await GET(url({ minRating: "6" }))).status).toBe(400);
+      expect((await GET(url({ maxPrice: "-1" }))).status).toBe(400);
+      expect((await GET(url({ cctv: "yes" }))).status).toBe(400);
+    });
+  });
 });

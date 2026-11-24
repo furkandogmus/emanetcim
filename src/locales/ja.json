@@ -2732,5 +2732,21 @@
     "confirmTitle_delete": "このレビューを削除しますか?",
     "confirmBody_delete": "レビューは完全に削除されます。",
     "done_delete": "レビューを削除しました。"
+  },
+  "GuestBookingParity": {
+    "expiredTitle": "期限切れ",
+    "expiredBody": "受け取り時刻を過ぎましたが、荷物は預けられていません。この予約はもう使用できません。",
+    "rebook": "もう一度予約する",
+    "closeExpired": "予約を終了する",
+    "closeExpiredTitle": "この予約を終了しますか？",
+    "closeExpiredBody": "荷物を預けていない場合は、この予約を終了できます。この操作は取り消せません。",
+    "closeExpiredConfirm": "はい、終了します",
+    "closeExpiredKeep": "残す",
+    "closeExpiredDone": "予約を終了しました。",
+    "closeExpiredFailed": "予約を終了できませんでした。",
+    "lateTitle": "預け入れ時刻を過ぎています",
+    "lateDropoff": "予約は{time}に自動的に終了します。向かっている途中ならお店に電話してください。",
+    "partnerWaitingTitle": "お店があなたを待っています",
+    "lateDropoffHold": "お店は{time}まで予約を保持しています。"
   }
 }

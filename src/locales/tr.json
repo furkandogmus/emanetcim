@@ -2877,5 +2877,21 @@
     "confirmTitle_delete": "Yorum silinsin mi?",
     "confirmBody_delete": "Yorum kalıcı olarak silinir.",
     "done_delete": "Yorum silindi."
+  },
+  "GuestBookingParity": {
+    "expiredTitle": "Süresi doldu",
+    "expiredBody": "Alma saati geçti ve valizler bırakılmadı. Bu rezervasyon artık kullanılamaz.",
+    "rebook": "Yeniden rezervasyon yap",
+    "closeExpired": "Rezervasyonu kapat",
+    "closeExpiredTitle": "Bu rezervasyon kapatılsın mı?",
+    "closeExpiredBody": "Valizlerini bırakmadıysan bu rezervasyonu kapatabilirsin. Bu işlem geri alınamaz.",
+    "closeExpiredConfirm": "Evet, kapat",
+    "closeExpiredKeep": "Vazgeç",
+    "closeExpiredDone": "Rezervasyon kapatıldı.",
+    "closeExpiredFailed": "Rezervasyon kapatılamadı.",
+    "lateTitle": "Bırakma saatin geçti",
+    "lateDropoff": "Rezervasyonun {time} itibarıyla otomatik kapanacak. Yoldaysan dükkanı ara.",
+    "partnerWaitingTitle": "Esnaf seni bekliyor",
+    "lateDropoffHold": "Dükkan seni {time} saatine kadar bekliyor."
   }
 }

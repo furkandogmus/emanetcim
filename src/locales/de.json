@@ -2732,5 +2732,21 @@
     "confirmTitle_delete": "Bewertung löschen?",
     "confirmBody_delete": "Die Bewertung wird endgültig gelöscht.",
     "done_delete": "Bewertung gelöscht."
+  },
+  "GuestBookingParity": {
+    "expiredTitle": "Abgelaufen",
+    "expiredBody": "Die Abholzeit ist vorbei und dein Gepäck wurde nicht abgegeben. Diese Buchung kann nicht mehr genutzt werden.",
+    "rebook": "Erneut buchen",
+    "closeExpired": "Buchung schließen",
+    "closeExpiredTitle": "Diese Buchung schließen?",
+    "closeExpiredBody": "Wenn du dein Gepäck nicht abgegeben hast, kannst du diese Buchung schließen. Das kann nicht rückgängig gemacht werden.",
+    "closeExpiredConfirm": "Ja, schließen",
+    "closeExpiredKeep": "Behalten",
+    "closeExpiredDone": "Buchung geschlossen.",
+    "closeExpiredFailed": "Die Buchung konnte nicht geschlossen werden.",
+    "lateTitle": "Deine Abgabezeit ist vorbei",
+    "lateDropoff": "Deine Buchung wird um {time} automatisch geschlossen. Wenn du unterwegs bist, ruf den Laden an.",
+    "partnerWaitingTitle": "Der Laden wartet auf dich",
+    "lateDropoffHold": "Der Laden hält deine Buchung bis {time}."
   }
 }

@@ -101,3 +101,22 @@ describe("recordWant", () => {
     );
   });
 });
+
+describe("registerWant (web action + mobil uc ortak govde)", () => {
+  it("kayit sonucunu aynen doner", async () => {
+    const res = await prelaunchInterestService.registerWant({ ...INPUT, source: "mobile" });
+    expect(res).toEqual({ ok: true, alreadyCounted: false, count: 7 });
+  });
+
+  it("acilmis nokta shop_not_prelaunch, bulunamayan failed", async () => {
+    mockPrisma.shop.findUnique.mockResolvedValue({ isPrelaunch: false });
+    expect(await prelaunchInterestService.registerWant(INPUT)).toEqual({ ok: false, code: "shop_not_prelaunch" });
+    mockPrisma.shop.findUnique.mockResolvedValue(null);
+    expect(await prelaunchInterestService.registerWant(INPUT)).toEqual({ ok: false, code: "failed" });
+  });
+
+  it("veritabani hatasi firlatmaz", async () => {
+    mockPrisma.prelaunchWant.create.mockRejectedValue(new Error("db down"));
+    expect(await prelaunchInterestService.registerWant(INPUT)).toEqual({ ok: false, code: "failed" });
+  });
+});

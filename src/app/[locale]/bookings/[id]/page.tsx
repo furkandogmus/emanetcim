@@ -25,6 +25,11 @@ import type { Metadata } from "next";
 import { bcp47ForUiLocale } from "@/lib/intl-locale";
 import { formatTryCurrency } from "@/lib/currency";
 import { bookingShortCode } from "@/lib/booking-code";
+import { isBookingExpired, isNotDroppedStatus } from "@/lib/booking-closure";
+import { guestLateNotice } from "@/lib/late-dropoff";
+import { buildCheckoutReturnPath } from "@/lib/checkout-return-url";
+import { formatTimeInZone } from "@/lib/format-datetime";
+import ExpiredBookingPanel from "@/components/guest/ExpiredBookingPanel";
 
 export async function generateMetadata({
   params,
@@ -66,6 +71,7 @@ export default async function BookingDetailPage({
         id: true, guestId: true, shopId: true, checkInTime: true, checkOutTime: true,
         totalPrice: true, bagCountS: true, bagCountM: true, bagCountXl: true,
         status: true, qrCodeToken: true, createdAt: true, pendingBagRevision: true,
+        checkedInAt: true, lateHoldUntil: true,
         shop: { select: { name: true, pricePerDay: true, address: true, latitude: true, longitude: true, timezone: true, openingTime: true, closingTime: true, open247: true, owner: { select: { phone: true } } } },
         seals: { orderBy: { bagIndex: "asc" } },
       },
@@ -108,7 +114,25 @@ export default async function BookingDetailPage({
   const confirmedAtShop = booking.status === "APPROVED";
   const waitingShop = booking.status === "WAITING_APPROVAL";
   // Liste (BookingsClient) ile ayni kume: onay bekleyen talep de iptal edilebilir.
-  const canCancel = ["PENDING", "WAITING_APPROVAL", "APPROVED", "PAID"].includes(booking.status);
+  /*
+    Mobil ile ayni iki kural (`isBookingExpired`, `guestLateNotice`): suresi dolan
+    rezervasyonda QR, degistir ve iptal gizlenir, yerine "yeniden rezervasyon" ve
+    "kapat" gelir; gec kalan misafir otomatik kapanisi ya da esnafin bekletmesini gorur.
+  */
+  const now = new Date();
+  const expired = isBookingExpired(booking, now);
+  const late = expired ? null : guestLateNotice(booking, now);
+  const tParity = await getTranslations("GuestBookingParity");
+  const shopZone = bookingTimeZone(booking.shop);
+  const lateTime = late
+    ? formatTimeInZone(late.holdUntil ?? late.closeAt, { locale: dateLocale, timeZone: shopZone })
+    : null;
+  const rebookHref = buildCheckoutReturnPath(locale, booking.shopId, {
+    bagS: booking.bagCountS,
+    bagM: booking.bagCountM,
+    bagXl: booking.bagCountXl,
+  });
+  const canCancel = !expired && isNotDroppedStatus(booking.status);
 
   return (
     <div className="min-h-screen bg-gray-50 pt-32 pb-20 px-6 font-sans">
@@ -130,6 +154,33 @@ export default async function BookingDetailPage({
           <ChevronLeft size={16} aria-hidden />
           {t("backToBookings")}
         </Link>
+
+        {expired && (
+          <div className="print:hidden">
+            <ExpiredBookingPanel
+              bookingId={booking.id}
+              rebookHref={rebookHref}
+              canClose={isNotDroppedStatus(booking.status)}
+            />
+          </div>
+        )}
+
+        {late && lateTime && (
+          <div
+            role="status"
+            data-testid="late-dropoff-banner"
+            className={`print:hidden rounded-4xl border p-5 ${late.holdUntil ? "border-emerald-200 bg-emerald-50" : "border-amber-200 bg-amber-50"}`}
+          >
+            <p className="font-bold text-gray-900">
+              {late.holdUntil ? tParity("partnerWaitingTitle") : tParity("lateTitle")}
+            </p>
+            <p className="text-sm text-gray-700">
+              {late.holdUntil
+                ? tParity("lateDropoffHold", { time: lateTime })
+                : tParity("lateDropoff", { time: lateTime })}
+            </p>
+          </div>
+        )}
 
         {/* Status header */}
         <div className="flex flex-col items-center text-center gap-2 mb-4">
@@ -168,7 +219,7 @@ export default async function BookingDetailPage({
         </div>
 
         {/* QR & ID Card */}
-        {(isPaidFlow || confirmedAtShop) ? (
+        {(isPaidFlow || confirmedAtShop) && !expired ? (
         <div className="bg-white rounded-4xl p-8 shadow-xl shadow-gray-200/50 border border-gray-100 flex flex-col items-center gap-6">
            <BookingQrDisplay token={booking.qrCodeToken} />
            <div className="text-center">
@@ -266,7 +317,7 @@ export default async function BookingDetailPage({
           </div>
         )}
 
-        <BookingDetailModifySection
+        {!expired && <BookingDetailModifySection
           booking={JSON.parse(
             JSON.stringify({
               id: booking.id,
@@ -290,7 +341,7 @@ export default async function BookingDetailPage({
             })
           )}
           pricingRules={JSON.parse(JSON.stringify(pricingRules))}
-        />
+        />}
 
         <div className="print:hidden">
           <BookingDetailActions

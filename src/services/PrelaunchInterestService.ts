@@ -3,6 +3,7 @@ import prisma from "@/lib/db";
 import logger from "@/lib/logger";
 import { Prisma } from "@prisma/client";
 import { notificationService } from "@/services/NotificationService";
+import { analyticsService } from "@/services/AnalyticsService";
 
 /**
  * Talep testi noktalarina birakilan "acilinca haber ver" kayitlari.
@@ -59,7 +60,43 @@ export type RecordWantResult =
   | { ok: true; alreadyCounted: boolean; count: number }
   | { ok: false; code: "shop_not_prelaunch" | "shop_not_found" };
 
+export type RegisterWantInput = RecordWantInput & { sessionId?: string | null };
+
+export type RegisterWantOutcome =
+  | { ok: true; alreadyCounted: boolean; count: number }
+  | { ok: false; code: "shop_not_prelaunch" | "failed" };
+
 class PrelaunchInterestService {
+  /**
+   * Tek tiklik istek: kayit + analitik. Web action'i ve mobil `prelaunch/want`
+   * ucu bunu cagirir; tasiyicilarda yalniz kimlik (cerez / cihaz) ve hata metni kalir.
+   */
+  async registerWant(input: RegisterWantInput): Promise<RegisterWantOutcome> {
+    let result: RecordWantResult;
+    try {
+      result = await this.recordWant(input);
+    } catch (err) {
+      logger.error({ err }, "prelaunch_want_register_failed");
+      return { ok: false, code: "failed" };
+    }
+    // `shop_not_found` da "artik rezervasyon yap" degil: genel hata.
+    if (!result.ok) return { ok: false, code: result.code === "shop_not_prelaunch" ? "shop_not_prelaunch" : "failed" };
+
+    // Atesle-unut: analitik yazimi kullaniciyi bekletmemeli ve DUSURMEMELI.
+    void Promise.resolve()
+      .then(() =>
+        analyticsService.track({
+          name: "prelaunch_want",
+          sessionId: input.sessionId ?? "server",
+          locale: input.locale ?? undefined,
+          metadata: { shopId: input.shopId, source: input.source ?? "web" },
+        }),
+      )
+      .catch((err) => logger.warn({ err }, "prelaunch_want_track_failed"));
+
+    return result;
+  }
+
   /**
    * Ilgi kaydini yazar.
    *

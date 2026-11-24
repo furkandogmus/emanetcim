@@ -104,41 +104,29 @@ export async function registerPrelaunchWantAction(data: unknown) {
 
   const locale = await getLocale();
 
-  let result;
   let anonId: string;
   try {
     anonId = await ensureAnonVisitorId();
-    result = await prelaunchInterestService.recordWant({
-      shopId: parsed.data.shopId,
-      anonId,
-      locale,
-      source: "web",
-    });
   } catch (err) {
     logger.error({ err }, "prelaunch_want_action_failed");
     return { success: false as const, error: "Errors.generic" };
   }
 
+  // Govde serviste (`registerWant`): mobil `prelaunch/want` ucu da onu cagirir.
+  const result = await prelaunchInterestService.registerWant({
+    shopId: parsed.data.shopId,
+    anonId,
+    locale,
+    source: "web",
+    sessionId: parsed.data.sessionId,
+  });
   if (!result.ok) {
     // Nokta bu arada acilmis olabilir; dogru eylem artik rezervasyon yapmak.
     return {
       success: false as const,
-      error:
-        result.code === "shop_not_prelaunch"
-          ? "Errors.shopNowOpenBookInstead"
-          : "Errors.generic",
+      error: result.code === "shop_not_prelaunch" ? "Errors.shopNowOpenBookInstead" : "Errors.generic",
     };
   }
-
-  // Atesle-unut: analitik yazimi kullaniciyi bekletmemeli ve DUSURMEMELI.
-  void Promise.resolve(
-    analyticsService.track({
-      name: "prelaunch_want",
-      sessionId: parsed.data.sessionId ?? "server",
-      locale,
-      metadata: { shopId: parsed.data.shopId },
-    }),
-  ).catch((err) => logger.warn({ err }, "prelaunch_want_track_failed"));
 
   return {
     success: true as const,

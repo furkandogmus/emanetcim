@@ -16,6 +16,9 @@ type ShopSummarySource = {
   closingTime: string | null;
   open247: boolean;
   hasRestroom: boolean;
+  hasCctv: boolean;
+  hasClimateControl: boolean;
+  acceptsLargeItems: boolean;
   isActive: boolean;
   isVerified: boolean;
   isPrelaunch?: boolean;
@@ -55,6 +58,10 @@ export function toMobileShop(s: ShopSummarySource, schedule?: MobileSchedule) {
     closingTime: s.closingTime,
     open247: s.open247,
     hasRestroom: s.hasRestroom,
+    // Olanak rozetleri ve mobil suzgec: web dukkan sayfasindaki ayni uc alan.
+    hasCctv: s.hasCctv,
+    hasClimateControl: s.hasClimateControl,
+    acceptsLargeItems: s.acceptsLargeItems,
     isActive: s.isActive,
     isVerified: s.isVerified,
     isPrelaunch: s.isPrelaunch ?? false,

@@ -14,9 +14,17 @@ import logger from "@/lib/logger";
 import { loadScheduleParts } from "@/services/ShopScheduleService";
 import { markAuthStale, resolveMobileShopViewer } from "@/lib/mobile-auth";
 import type { ShopViewer } from "@/lib/public-shop-filter";
+import {
+  NO_AMENITY_FILTER,
+  SEARCH_SORTS,
+  compareShopsBy,
+  matchesAmenityFilters,
+  type ShopAmenityCriteria,
+} from "@/lib/search-filter";
 
 const MAX_RADIUS_M = 50_000;
 const MAX_LIMIT = 50;
+const flag = z.enum(["1", "true"]).optional();
 
 const schema = z.object({
   lat: z.coerce.number().min(-90).max(90),
@@ -42,7 +50,41 @@ const schema = z.object({
    * eskisi gibi listeden cikarilir.
    */
   includeClosed: z.enum(["1", "true"]).optional(),
+  /*
+    Web aramasiyla (`SearchClient`) ayni suzgec ve siralama (`@/lib/search-filter`).
+    Hepsi istege bagli: gondermeyen eski istemcinin yaniti degismez.
+  */
+  sort: z.enum(SEARCH_SORTS).optional(),
+  cctv: flag,
+  climate: flag,
+  largeItems: flag,
+  maxPrice: z.coerce.number().min(0).max(100_000).optional(),
+  minRating: z.coerce.number().min(0).max(5).optional(),
 });
+
+/** Suzgec gondermeyen istemci icin kriter `null`: liste aynen doner. */
+function amenityCriteria(q: z.infer<typeof schema>): ShopAmenityCriteria | null {
+  if (!q.cctv && !q.climate && !q.largeItems && q.maxPrice === undefined && q.minRating === undefined) return null;
+  return {
+    ...NO_AMENITY_FILTER,
+    hasCctv: !!q.cctv,
+    hasClimateControl: !!q.climate,
+    acceptsLargeItems: !!q.largeItems,
+    maxPrice: q.maxPrice ?? null,
+    minRating: q.minRating ?? 0,
+  };
+}
+
+/** Suzgec, sonra siralama. `sort` yoksa servisin sirasi korunur (eski istemci kendisi siralar). */
+function refine<T extends Parameters<typeof matchesAmenityFilters>[0] & { distanceKm: number }>(
+  shops: T[],
+  q: z.infer<typeof schema>,
+): T[] {
+  const criteria = amenityCriteria(q);
+  const kept = criteria ? shops.filter((s) => matchesAmenityFilters(s, criteria)) : [...shops];
+  if (q.sort) kept.sort(compareShopsBy(q.sort));
+  return kept;
+}
 
 export async function GET(req: NextRequest) {
   // Inceleme kum havuzu: `reviewSandbox` hesapta test dukkanlari da doner; anonim/gercek kullanicida degisiklik yok.
@@ -59,6 +101,7 @@ async function search(req: NextRequest, viewer: ShopViewer) {
   const parsed = schema.safeParse(Object.fromEntries(req.nextUrl.searchParams));
   if (!parsed.success) return NextResponse.json({ error: "invalid" }, { status: 400 });
   const { lat, lng, r, page, limit, checkIn, checkOut, bags, bagsS, bagsM, bagsXl, includeClosed } = parsed.data;
+  const query = parsed.data;
   const mix =
     bagsS !== undefined || bagsM !== undefined || bagsXl !== undefined
       ? { s: bagsS ?? 0, m: bagsM ?? 0, xl: bagsXl ?? 0 }
@@ -109,6 +152,7 @@ async function search(req: NextRequest, viewer: ShopViewer) {
       logger.error({ err }, "mobile_nearby_search_failed");
       return NextResponse.json({ error: "search_unavailable" }, { status: 503 });
     }
+    results = refine(results, query);
     const schedules = await loadScheduleParts(
       results.map((s) => s.id),
       toDatetimeLocalValueInTimeZone(ci).slice(0, 10),
@@ -168,7 +212,7 @@ async function search(req: NextRequest, viewer: ShopViewer) {
         hoursNotice: snapped.drop || snapped.pickup ? { drop: snapped.drop ?? null, pickup: snapped.pickup ?? null } : null,
       });
     }
-    // Rezervasyon alabilenler once; kendi icinde sunucunun siralamasi korunur.
+    // Rezervasyon alabilenler once; kendi icinde `refine` sirasi korunur.
     const items = [...open, ...closed].slice((page - 1) * limit, page * limit);
     return NextResponse.json(items);
   }
@@ -177,8 +221,9 @@ async function search(req: NextRequest, viewer: ShopViewer) {
     shopService.findNearby(lat, lng, radiusKm, page, limit, viewer),
     getPricingRules(),
   ]);
+  // Tarihsiz yol sayfalanmis gelir: suzgec yalnizca bu sayfaya uygulanir (mobil hep tarihle arar).
   return NextResponse.json(
-    shops.map((s) => ({
+    refine(shops, query).map((s) => ({
       ...toMobileShop(s),
       distanceKm: s.distanceKm,
       priceRange: toMobilePriceRange(s.pricePerDay, rules),

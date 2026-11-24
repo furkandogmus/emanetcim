@@ -42,6 +42,16 @@ export function isNotDroppedStatus(status: string): boolean {
 }
 
 /**
+ * Suresi dolmus (gelinmemis) rezervasyon: bekleyen/onayli/odenmis, valiz hic teslim
+ * edilmemis ve alma saati gecmis. Kural SUNUCUDA: web ve mobil ayni cevabi gorur,
+ * cihaz saati yanlis olan turist bos bir QR gostermez. Durum bilerek degismez
+ * (sure asimi taramasi yalnizca isaretler), bu yuzden bu bir turetilmis alandir.
+ */
+export function isBookingExpired(b: { status: string; checkOutTime: Date }, now: Date = new Date()): boolean {
+  return isNotDroppedStatus(b.status) && b.checkOutTime.getTime() < now.getTime();
+}
+
+/**
  * "Misafir gelmedi" dugmesinin acildigi an; durum buna izin vermiyorsa `null`.
  * Gelecekte bir an da donebilir: istemci dugmeyi o ana kadar kapali tutar.
  */

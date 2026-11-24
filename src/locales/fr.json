@@ -2732,5 +2732,21 @@
     "confirmTitle_delete": "Supprimer cet avis ?",
     "confirmBody_delete": "L’avis est supprimé définitivement.",
     "done_delete": "Avis supprimé."
+  },
+  "GuestBookingParity": {
+    "expiredTitle": "Expirée",
+    "expiredBody": "L'heure de retrait est passée et vos bagages n'ont pas été déposés. Cette réservation ne peut plus être utilisée.",
+    "rebook": "Réserver à nouveau",
+    "closeExpired": "Clôturer la réservation",
+    "closeExpiredTitle": "Clôturer cette réservation ?",
+    "closeExpiredBody": "Si vous n'avez pas déposé vos bagages, vous pouvez clôturer cette réservation. Cette action est irréversible.",
+    "closeExpiredConfirm": "Oui, clôturer",
+    "closeExpiredKeep": "La garder",
+    "closeExpiredDone": "Réservation clôturée.",
+    "closeExpiredFailed": "La réservation n'a pas pu être clôturée.",
+    "lateTitle": "Votre heure de dépôt est passée",
+    "lateDropoff": "Votre réservation sera clôturée automatiquement à {time}. Si vous êtes en route, appelez la boutique.",
+    "partnerWaitingTitle": "La boutique vous attend",
+    "lateDropoffHold": "La boutique garde votre réservation jusqu'à {time}."
   }
 }

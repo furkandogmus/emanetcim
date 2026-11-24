@@ -150,3 +150,16 @@ export function decideLateHold(b: LateSubject, now: Date): LateHoldDecision {
 export function isSilentBacklog(closeAt: Date, now: Date): boolean {
   return now.getTime() - closeAt.getTime() > LATE_SILENT_BACKLOG_MS;
 }
+
+export type GuestLateNotice = { closeAt: Date; holdUntil: Date | null };
+
+/**
+ * Misafirin gec birakma bandi: birakma saati gecti, valiz birakilmadi. Bekletme
+ * suruyorsa "esnaf seni bekliyor" (`holdUntil`), yoksa otomatik kapanis ani.
+ * Mobil `lateDropoffState` ayni kurali DTO'daki `lateCloseAt`/`lateHoldUntil`dan okur.
+ */
+export function guestLateNotice(b: LateSubject, now: Date): GuestLateNotice | null {
+  const closeAt = lateCloseAt(b);
+  if (!closeAt || now.getTime() < b.checkInTime.getTime()) return null;
+  return { closeAt, holdUntil: isLateHoldActive(b, now) ? b.lateHoldUntil : null };
+}
