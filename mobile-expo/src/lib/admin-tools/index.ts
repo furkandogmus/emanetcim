@@ -8,6 +8,7 @@
  *   ardindan ve "Son rezervasyonlar"in onunde cizilir.
  * - Web'e giden bolum: `web.ts`.
  */
+import { ADMIN_INSIGHT_TOOLS } from "./insights";
 import { ADMIN_OPS_TOOLS } from "./ops";
 import type { AdminToolSection } from "./types";
 
@@ -15,4 +16,4 @@ export { ADMIN_MANAGE_LINKS } from "./manage";
 export { ADMIN_WEB_SECTIONS, type AdminWebSection } from "./web";
 export type { AdminToolLink, AdminToolSection } from "./types";
 
-export const ADMIN_TOOL_SECTIONS: readonly AdminToolSection[] = [ADMIN_OPS_TOOLS];
+export const ADMIN_TOOL_SECTIONS: readonly AdminToolSection[] = [ADMIN_OPS_TOOLS, ADMIN_INSIGHT_TOOLS];

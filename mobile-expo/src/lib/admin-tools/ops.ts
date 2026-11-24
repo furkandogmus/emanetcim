@@ -1,4 +1,4 @@
-import { AlertTriangle, Flag, Handshake, SlidersHorizontal, Ticket, Wallet } from "lucide-react-native";
+import { AlertTriangle, BadgePercent, Flag, Handshake, SlidersHorizontal, Ticket, Wallet } from "lucide-react-native";
 
 import type { AdminToolSection } from "./types";
 
@@ -9,6 +9,7 @@ export const ADMIN_OPS_TOOLS: AdminToolSection = {
   links: [
     { key: "disputes", href: "/admin/disputes", Icon: AlertTriangle, labelKey: "adminOps.tools.disputes" },
     { key: "coupons", href: "/admin/coupons", Icon: Ticket, labelKey: "adminOps.tools.coupons" },
+    { key: "campaigns", href: "/admin/campaigns", Icon: BadgePercent, labelKey: "adminCampaigns.title" },
     { key: "affiliates", href: "/admin/affiliates", Icon: Handshake, labelKey: "adminOps.tools.affiliates" },
     { key: "payments", href: "/admin/payments", Icon: Wallet, labelKey: "adminOps.tools.payments" },
     { key: "settings", href: "/admin/platform-settings", Icon: SlidersHorizontal, labelKey: "adminOps.tools.settings" },

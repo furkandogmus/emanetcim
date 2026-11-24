@@ -6,6 +6,7 @@ import type { Href } from "expo-router";
 import { ChevronRight, ExternalLink, User } from "lucide-react-native";
 import { useTranslation } from "react-i18next";
 
+import { AdminSystemCard } from "@/components/AdminSystemCard";
 import { LuggageTag, MapSnippet } from "@/components/Illustrations";
 import { LinkGroup, LinkRow } from "@/components/LinkRow";
 import { RevenueChart } from "@/components/RevenueChart";
@@ -213,6 +214,8 @@ function Dashboard({
           </LinkGroup>
         )}
       </Section>
+
+      <AdminSystemCard />
 
       <Section title={t("admin.webPanel")}>
         <LinkGroup>
