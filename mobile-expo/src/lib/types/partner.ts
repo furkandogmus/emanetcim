@@ -1,3 +1,4 @@
+import type { PartnerEarningsInsights } from "./partner-parity";
 import type { BookingSummary } from "./booking";
 
 export type PartnerBooking = BookingSummary & { guestName: string };
@@ -65,6 +66,11 @@ export type PartnerShopSettings = PartnerShop & {
   city: string | null;
   district: string | null;
   priceRange?: { min: number; max: number };
+  /** Konum pini; ikisi birlikte dolu ya da bos. Eski sunucu gondermez. */
+  latitude?: number | null;
+  longitude?: number | null;
+  /** Sahibin numarasi: yeni rezervasyon SMS'i buraya gider, ayni zamanda giris numarasi. */
+  phone?: string | null;
 };
 
 /** `partner/shop/schedule` GET. Gun ISO (1 = pazartesi), saatler "HH:mm", tarihler dukkan gunu "YYYY-MM-DD". */
@@ -105,6 +111,7 @@ export type PartnerEarnings = {
   /** Yururlukteki oran, 0..1. Dukkanda tahsilatta 0. */
   commissionRate: number;
   merchantShareRatio: number;
+  insights?: PartnerEarningsInsights;
 };
 
 /** `toMobilePartnerDashboard` (../src/lib/mobile-dto/partner.ts). */

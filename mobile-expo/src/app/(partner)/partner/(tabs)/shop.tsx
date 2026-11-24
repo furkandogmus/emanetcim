@@ -1,5 +1,6 @@
+import { useRef } from "react";
 import type { ReactNode } from "react";
-import { RefreshControl, ScrollView, StyleSheet, View } from "react-native";
+import { Linking, RefreshControl, ScrollView, StyleSheet, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { router } from "expo-router";
 import type { Href } from "expo-router";
@@ -13,7 +14,8 @@ import { AppText, Button, CenterMessage } from "@/components/ui";
 import { SEALS_ENABLED } from "@/lib/config";
 import { errorMessage } from "@/lib/errors";
 import { usePartnerShopSelection } from "@/lib/partner-shop";
-import { usePartnerShop } from "@/lib/queries";
+import { fetchPartnerPosterLink, usePartnerShop } from "@/lib/queries";
+import { notify } from "@/lib/notify";
 import { colors, radius, space } from "@/theme/tokens";
 import { StaleQueryBanner } from "@/components/StaleQueryBanner";
 
@@ -22,10 +24,25 @@ import { StaleQueryBanner } from "@/components/StaleQueryBanner";
  * Ayri "Profil" sekmesi yerine tek ekran: esnaf icin hesap, dukkanin bir parcasi.
  */
 export default function PartnerShopScreen() {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const [shopId] = usePartnerShopSelection();
   const query = usePartnerShop();
   const go = (path: string) => router.push(path as Href);
+  const posterBusy = useRef(false);
+
+  /** Web panelindeki afisin aynisi, tarayicida: oradan yazdirilir ya da PDF kaydedilir. */
+  async function openPoster() {
+    if (posterBusy.current) return;
+    posterBusy.current = true;
+    try {
+      const { url } = await fetchPartnerPosterLink(shopId, i18n.language);
+      await Linking.openURL(url);
+    } catch (e) {
+      notify(t("partnerParity.posterFailed"), errorMessage(e, "partnerParity"));
+    } finally {
+      posterBusy.current = false;
+    }
+  }
 
   return (
     <SafeAreaView style={styles.safe} edges={["top"]}>
@@ -66,6 +83,7 @@ export default function PartnerShopScreen() {
                 <LinkRow label={t("shopSettings.title")} onPress={() => go("/partner/settings")} />
                 {SEALS_ENABLED ? <LinkRow label={t("seals.open")} onPress={() => go("/partner/seals")} /> : null}
                 <LinkRow label={t("earnings.title")} onPress={() => go("/partner/earnings")} />
+                <LinkRow label={t("partnerParity.posterRow")} onPress={() => void openPoster()} />
                 <LinkRow label={t("referral.title")} onPress={() => go("/partner/referral")} />
               </LinkGroup>
             </Section>

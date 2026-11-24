@@ -11,6 +11,7 @@ import { formatDayTime, formatMoney } from "@/lib/format";
 import { usePartnerEarnings } from "@/lib/queries";
 import { colors, fonts, radius, space } from "@/theme/tokens";
 import { StaleQueryBanner } from "@/components/StaleQueryBanner";
+import { PartnerInsightCharts } from "@/components/PartnerInsightCharts";
 
 /**
  * Esnaf kazanci. Tutarlar sunucuda komisyon dusulmus esnaf payidir; istemci
@@ -67,6 +68,8 @@ export default function PartnerEarningsScreen() {
               ) : (
                 <Banner title={t("earnings.noCommissionTitle")} body={t("earnings.noCommissionBody")} />
               )}
+              {/* Web kazanc sayfasinin grafikleri; eski sunucu `insights` gondermez. */}
+              {data.insights ? <PartnerInsightCharts insights={data.insights} /> : null}
               <AppText variant="label">{t("earnings.recent", { count: data.history.length })}</AppText>
             </View>
           }
