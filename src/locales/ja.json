@@ -2747,6 +2747,8 @@
     "lateTitle": "預け入れ時刻を過ぎています",
     "lateDropoff": "予約は{time}に自動的に終了します。向かっている途中ならお店に電話してください。",
     "partnerWaitingTitle": "お店があなたを待っています",
-    "lateDropoffHold": "お店は{time}まで予約を保持しています。"
+    "lateDropoffHold": "お店は{time}まで予約を保持しています。",
+    "prelaunchDeviceWants": "アプリから: {count}",
+    "prelaunchDeviceWantsHint": "アプリの端末IDによるワンタップ希望（IDはアプリ内で生成され、Webのクッキーより水増しされやすい）"
   }
 }

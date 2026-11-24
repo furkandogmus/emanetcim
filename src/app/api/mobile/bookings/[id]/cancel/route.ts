@@ -3,6 +3,7 @@ import type { NextRequest } from "next/server";
 import { requireMobileUser } from "@/lib/mobile-auth";
 import { bookingService } from "@/services/BookingService";
 import { canGuestSelfCancel } from "@/services/booking/access";
+import { guestCancelOptions } from "@/lib/booking-closure";
 
 export async function DELETE(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   const auth = await requireMobileUser(req);
@@ -23,7 +24,8 @@ export async function DELETE(req: NextRequest, { params }: { params: Promise<{ i
   try {
     const result = await bookingService.cancelBooking(id, {
       actor: { id: auth.user.id, role: auth.user.role, impersonatedBy: auth.user.impersonatedBy ?? null },
-      reason: "guest_cancel",
+      // Suresi dolani kapatmak `expired_no_dropoff`, esnafa bildirim yok (web ile ayni kural).
+      ...guestCancelOptions(b),
     });
     if (result.ok) {
       return NextResponse.json({ success: true, fullRefund: result.fullRefund });

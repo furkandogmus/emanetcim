@@ -10,6 +10,7 @@ const { mockPrisma, mockRequireMobileUser } = vi.hoisted(() => ({
     $queryRaw: vi.fn(),
     analyticsEvent: { groupBy: vi.fn(), findMany: vi.fn() },
     shop: { findMany: vi.fn() },
+    prelaunchWant: { groupBy: vi.fn() },
     jobRun: { groupBy: vi.fn(), findMany: vi.fn() },
     platformSettings: { findUnique: vi.fn() },
     notificationLog: { findMany: vi.fn(), groupBy: vi.fn(), count: vi.fn() },
@@ -166,6 +167,9 @@ describe("bildirim defteri", () => {
 });
 
 describe("on acilis raporu", () => {
+  beforeEach(() => {
+    mockPrisma.prelaunchWant.groupBy.mockResolvedValue([]);
+  });
   const shop = (id: string, city: string | null, wants: number, emails: number) => ({
     id,
     name: `Nokta ${id}`,

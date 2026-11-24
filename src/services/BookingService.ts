@@ -152,7 +152,7 @@ export interface IBookingService {
   getUserBookings(userId: string, opts?: { page?: number; limit?: number }): Promise<{ items: GuestBookingListItem[]; total: number }>;
   getPartnerBookings(shopId: string, opts?: { page?: number; limit?: number }): Promise<{ items: PartnerBookingListItem[]; total: number }>;
   getBookingDetails(id: string): Promise<BookingWithShopGuestDetails | null>;
-  cancelBooking(bookingId: string, opts?: Pick<CancelBookingOptions, 'actor' | 'reason'>): Promise<CancelBookingResult>;
+  cancelBooking(bookingId: string, opts?: Pick<CancelBookingOptions, 'actor' | 'reason' | 'notifyPartner'>): Promise<CancelBookingResult>;
   approveBooking(bookingId: string, actor: PartnerReviewActor, opts?: { locale?: string }): Promise<PartnerReviewResult>;
   rejectBooking(bookingId: string, actor: PartnerReviewActor, opts?: { locale?: string }): Promise<PartnerReviewResult>;
   markAsPaid(bookingId: string): Promise<void>;
@@ -313,9 +313,13 @@ export class BookingService implements IBookingService {
 
   async cancelBooking(
     bookingId: string,
-    opts?: Pick<CancelBookingOptions, 'actor' | 'reason'>,
+    opts?: Pick<CancelBookingOptions, 'actor' | 'reason' | 'notifyPartner'>,
   ): Promise<CancelBookingResult> {
-    return cancelBookingImpl(bookingId, { actor: opts?.actor, reason: opts?.reason ?? 'guest_cancel' });
+    return cancelBookingImpl(bookingId, {
+      actor: opts?.actor,
+      reason: opts?.reason ?? 'guest_cancel',
+      notifyPartner: opts?.notifyPartner,
+    });
   }
 
   /**

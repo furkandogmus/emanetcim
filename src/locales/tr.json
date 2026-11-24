@@ -2892,6 +2892,8 @@
     "lateTitle": "Bırakma saatin geçti",
     "lateDropoff": "Rezervasyonun {time} itibarıyla otomatik kapanacak. Yoldaysan dükkanı ara.",
     "partnerWaitingTitle": "Esnaf seni bekliyor",
-    "lateDropoffHold": "Dükkan seni {time} saatine kadar bekliyor."
+    "lateDropoffHold": "Dükkan seni {time} saatine kadar bekliyor.",
+    "prelaunchDeviceWants": "uygulamadan: {count}",
+    "prelaunchDeviceWantsHint": "Uygulama cihaz kimliğiyle gelen tek tık istekler (cihaz kimliği uygulamada üretilir, çerezden kolay şişirilebilir)"
   }
 }

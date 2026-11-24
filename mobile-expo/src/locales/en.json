@@ -2109,6 +2109,7 @@
     "addToCalendar": "Add to calendar",
     "calendarTitle": "Luggage storage: {{shop}}",
     "calendarDetails": "BagajPark booking {{code}}: {{shop}}",
+    "notifyMe": "Email me when it opens",
     "errors": {
       "shop_now_open": "This spot has opened; you can book it now.",
       "too_many_requests": "Too many attempts. Please try again shortly."

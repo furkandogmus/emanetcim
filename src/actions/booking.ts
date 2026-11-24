@@ -29,6 +29,7 @@ import { checkoutDiscountService } from "@/services/CheckoutDiscountService";
 import { AFFILIATE_COOKIE } from "@/services/AffiliateService";
 import { requireUser } from "@/lib/action-auth";
 import { canGuestSelfCancel } from "@/services/booking/access";
+import { guestCancelOptions } from "@/lib/booking-closure";
 import type {
   CancelBookingErrorCode,
   ModifyBookingErrorCode,
@@ -364,7 +365,7 @@ export async function cancelBookingAction(bookingId: string) {
   try {
     const result = await bookingService.cancelBooking(bookingId, {
       actor: { id: auth.actor.id, role: auth.actor.role },
-      reason: "guest_cancel",
+      ...guestCancelOptions(booking),
     });
 
     if (result.ok) {

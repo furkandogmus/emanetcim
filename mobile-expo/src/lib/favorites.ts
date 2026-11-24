@@ -33,6 +33,8 @@ export function parseFavorites(raw: string | null): string[] {
 
 let ids: string[] = [];
 let loaded = false;
+/** Okuma hata verdiyse depodaki liste bilinmiyor: ustune `[id]` yazilip silinmesin. */
+let readFailed = false;
 let loading: Promise<void> | null = null;
 const listeners = new Set<() => void>();
 
@@ -42,22 +44,28 @@ function emit() {
 
 function load(): Promise<void> {
   if (loaded) return Promise.resolve();
-  loading ??= SecureStore.getItemAsync(KEY)
-    .catch(() => null)
-    .then((raw) => {
-      // Yukleme surerken yapilan degisiklik ezilmesin.
-      if (!loaded) ids = parseFavorites(raw);
+  loading ??= SecureStore.getItemAsync(KEY).then(
+    (raw) => {
+      ids = parseFavorites(raw);
       loaded = true;
       emit();
-    });
+    },
+    () => {
+      readFailed = true;
+      loaded = true;
+    },
+  );
   return loading;
 }
 
-export function toggleFavorite(id: string): void {
+/** Once depo okunur: okuma bitmeden yapilan dokunus kayitli listeyi `[id]` ile ezmesin. */
+export async function toggleFavorite(id: string): Promise<void> {
+  await load();
   ids = toggleFavoriteId(ids, id);
-  loaded = true;
   emit();
-  void SecureStore.setItemAsync(KEY, JSON.stringify(ids)).catch(() => undefined);
+  // Okunamayan depoya yazilmaz; degisiklik bu oturumda bellekte kalir.
+  if (readFailed) return;
+  await SecureStore.setItemAsync(KEY, JSON.stringify(ids)).catch(() => undefined);
 }
 
 function subscribe(l: () => void) {
@@ -80,6 +88,7 @@ export function useFavorites() {
 export function __resetFavoritesForTest() {
   ids = [];
   loaded = false;
+  readFailed = false;
   loading = null;
   listeners.clear();
 }

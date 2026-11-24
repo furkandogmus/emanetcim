@@ -2109,6 +2109,7 @@
     "addToCalendar": "Zum Kalender hinzufügen",
     "calendarTitle": "Gepäckaufbewahrung: {{shop}}",
     "calendarDetails": "BagajPark-Buchung {{code}}: {{shop}}",
+    "notifyMe": "Per E-Mail benachrichtigen, wenn geöffnet",
     "errors": {
       "shop_now_open": "Dieser Ort ist jetzt geöffnet; du kannst buchen.",
       "too_many_requests": "Zu viele Versuche. Bitte versuche es gleich noch einmal."

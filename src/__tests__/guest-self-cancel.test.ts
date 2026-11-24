@@ -7,7 +7,9 @@ import { NextRequest } from "next/server";
  *   - yonetici BASKASININ rezervasyonunu buradan iptal EDEMEZ (forbidden):
  *     yolu zorunlu aciklamali ve denetim kayitli yonetici iptalidir;
  *   - goruntuleme oturumu (aktor misafirin kendisi) iptal edebilir;
- *   - alma saati gecmis (suresi dolmus) APPROVED kayit iptal edilebilir.
+ *   - alma saati gecmis (suresi dolmus) APPROVED kayit kapatilabilir: neden
+ *     `expired_no_dropoff`, esnafa "iptal edildi" push'u gitmez;
+ *   - suresi dolmamis kayitta normal `guest_cancel`, esnaf haberdar edilir.
  * Servis zinciri gercek; yalniz Prisma ve yan etkiler sahte.
  */
 
@@ -58,6 +60,11 @@ const EXPIRED = {
   guest: { id: "g1" },
 };
 
+const FUTURE = {
+  checkInTime: new Date("2099-01-01T09:00:00Z"),
+  checkOutTime: new Date("2099-01-01T18:00:00Z"),
+};
+
 const del = async () => {
   const res = await DELETE(new NextRequest("http://localhost/x", { method: "DELETE" }), {
     params: Promise.resolve({ id: "b1" }),
@@ -77,12 +84,25 @@ beforeEach(() => {
 });
 
 describe("web cancelBookingAction", () => {
-  it("misafir suresi dolmus kendi rezervasyonunu iptal eder (guest_cancel)", async () => {
+  it("misafir suresi dolmus kendi rezervasyonunu kapatir (expired_no_dropoff, esnafa bildirim yok)", async () => {
     expect(await cancelBookingAction("b1")).toMatchObject({ success: true });
     const { bookingEventService } = await import("@/services/BookingEventService");
     expect(bookingEventService.record).toHaveBeenCalledWith(
-      expect.objectContaining({ event: "CANCELLED", metadata: expect.objectContaining({ reason: "guest_cancel" }) }),
+      expect.objectContaining({ event: "CANCELLED", metadata: expect.objectContaining({ reason: "expired_no_dropoff" }) }),
     );
+    const { notificationService } = await import("@/services/NotificationService");
+    expect(notificationService.notifyPartnerBookingChange).not.toHaveBeenCalled();
+  });
+
+  it("suresi dolmamis rezervasyonda guest_cancel ve esnafa bildirim", async () => {
+    m.prisma.booking.findUnique.mockResolvedValue({ ...EXPIRED, ...FUTURE });
+    expect(await cancelBookingAction("b1")).toMatchObject({ success: true });
+    const { bookingEventService } = await import("@/services/BookingEventService");
+    expect(bookingEventService.record).toHaveBeenCalledWith(
+      expect.objectContaining({ metadata: expect.objectContaining({ reason: "guest_cancel" }) }),
+    );
+    const { notificationService } = await import("@/services/NotificationService");
+    expect(notificationService.notifyPartnerBookingChange).toHaveBeenCalled();
   });
 
   it("yonetici baskasinin rezervasyonunu buradan iptal edemez", async () => {
@@ -93,10 +113,25 @@ describe("web cancelBookingAction", () => {
 });
 
 describe("mobil DELETE /bookings/[id]/cancel", () => {
-  it("misafir suresi dolmus kendi rezervasyonunu iptal eder", async () => {
+  it("misafir suresi dolmus kendi rezervasyonunu kapatir (expired_no_dropoff, esnafa bildirim yok)", async () => {
     const res = await del();
     expect(res.status).toBe(200);
     expect(await res.json()).toMatchObject({ success: true });
+    const { bookingEventService } = await import("@/services/BookingEventService");
+    expect(bookingEventService.record).toHaveBeenCalledWith(
+      expect.objectContaining({ metadata: expect.objectContaining({ reason: "expired_no_dropoff" }) }),
+    );
+    const { notificationService } = await import("@/services/NotificationService");
+    expect(notificationService.notifyPartnerBookingChange).not.toHaveBeenCalled();
+  });
+
+  it("suresi dolmamis rezervasyonda guest_cancel", async () => {
+    m.prisma.booking.findUnique.mockResolvedValue({ ...EXPIRED, ...FUTURE });
+    expect((await del()).status).toBe(200);
+    const { bookingEventService } = await import("@/services/BookingEventService");
+    expect(bookingEventService.record).toHaveBeenCalledWith(
+      expect.objectContaining({ metadata: expect.objectContaining({ reason: "guest_cancel" }) }),
+    );
   });
 
   it("yonetici baskasinin rezervasyonunda 403 forbidden", async () => {
@@ -113,6 +148,7 @@ describe("mobil DELETE /bookings/[id]/cancel", () => {
   });
 
   it("goruntuleme oturumu (aktor misafirin kendisi) misafir iptalidir", async () => {
+    m.prisma.booking.findUnique.mockResolvedValue({ ...EXPIRED, ...FUTURE });
     m.mobileUser = { id: "g1", role: "GUEST", impersonatedBy: "admin-1" };
     const res = await del();
     expect(res.status).toBe(200);

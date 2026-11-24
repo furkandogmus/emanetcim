@@ -16,7 +16,7 @@ export function FavoriteButton({ shopId, size = 18, floating }: { shopId: string
       accessibilityLabel={fav ? t("guestParity.removeFavorite") : t("guestParity.addFavorite")}
       accessibilityState={{ selected: fav }}
       hitSlop={10}
-      onPress={() => toggle(shopId)}
+      onPress={() => void toggle(shopId)}
       style={({ pressed }) => [
         styles.button,
         { width: size + 14, height: size + 14 },

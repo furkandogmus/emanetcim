@@ -28,6 +28,8 @@ export default async function AdminPrelaunchPage({
 
   const t = await getTranslations("Admin");
   const tCommon = await getTranslations("Common");
+  // Uygulama cihaz kimligiyle gelen istekler ayri: cerezden kolay sisirilir.
+  const tParity = await getTranslations("GuestBookingParity");
   // Sifirlarin ayiklanmasi ve sehir toplami serviste (`adminReport`); mobil ekran da onu okur.
   const report = await prelaunchInterestService.adminReport();
   const cities = report.cities.map((c) => [c.city, c.count] as const);
@@ -100,6 +102,12 @@ export default async function AdminPrelaunchPage({
                   </td>
                   <td className="py-3 text-right tabular-nums">
                     <span title={t("prelaunchWants")}>{r.wantCount}</span>
+                    {r.deviceWantCount > 0 && (
+                      <span className="text-xs text-gray-400" title={tParity("prelaunchDeviceWantsHint")}>
+                        {" "}
+                        ({tParity("prelaunchDeviceWants", { count: r.deviceWantCount })})
+                      </span>
+                    )}
                     <span className="text-gray-300"> / </span>
                     <span title={t("prelaunchEmails")}>{r.interestCount}</span>
                   </td>

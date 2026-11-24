@@ -2747,6 +2747,8 @@
     "lateTitle": "Votre heure de dépôt est passée",
     "lateDropoff": "Votre réservation sera clôturée automatiquement à {time}. Si vous êtes en route, appelez la boutique.",
     "partnerWaitingTitle": "La boutique vous attend",
-    "lateDropoffHold": "La boutique garde votre réservation jusqu'à {time}."
+    "lateDropoffHold": "La boutique garde votre réservation jusqu'à {time}.",
+    "prelaunchDeviceWants": "depuis l'app : {count}",
+    "prelaunchDeviceWantsHint": "Demandes en un clic envoyées avec un identifiant d'appareil de l'app (généré dans l'app, plus facile à gonfler que le cookie web)"
   }
 }

@@ -2171,6 +2171,7 @@
     "addToCalendar": "Добавить в календарь",
     "calendarTitle": "Хранение багажа: {{shop}}",
     "calendarDetails": "Бронирование BagajPark {{code}}: {{shop}}",
+    "notifyMe": "Сообщить по почте об открытии",
     "errors": {
       "shop_now_open": "Точка открылась, теперь её можно забронировать.",
       "too_many_requests": "Слишком много попыток. Попробуйте чуть позже."

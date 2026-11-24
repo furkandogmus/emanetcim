@@ -52,6 +52,19 @@ export function isBookingExpired(b: { status: string; checkOutTime: Date }, now:
 }
 
 /**
+ * Misafirin kendi iptalinin nedeni. Suresi dolmus (valiz hic birakilmamis)
+ * rezervasyonu kapatmak gercek bir iptal degil: `expired_no_dropoff` yazilir ve
+ * esnafa "iptal edildi" push'u gitmez (dukkan icin is degisikligi yok). Iade
+ * davranisi ayni kalir. Web action'i ve mobil iptal ucu bunu okur.
+ */
+export function guestCancelOptions(
+  b: { status: string; checkOutTime: Date },
+  now: Date = new Date(),
+): { reason: "guest_cancel" } | { reason: "expired_no_dropoff"; notifyPartner: false } {
+  return isBookingExpired(b, now) ? { reason: "expired_no_dropoff", notifyPartner: false } : { reason: "guest_cancel" };
+}
+
+/**
  * "Misafir gelmedi" dugmesinin acildigi an; durum buna izin vermiyorsa `null`.
  * Gelecekte bir an da donebilir: istemci dugmeyi o ana kadar kapali tutar.
  */

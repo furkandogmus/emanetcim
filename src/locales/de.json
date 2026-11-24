@@ -2747,6 +2747,8 @@
     "lateTitle": "Deine Abgabezeit ist vorbei",
     "lateDropoff": "Deine Buchung wird um {time} automatisch geschlossen. Wenn du unterwegs bist, ruf den Laden an.",
     "partnerWaitingTitle": "Der Laden wartet auf dich",
-    "lateDropoffHold": "Der Laden hält deine Buchung bis {time}."
+    "lateDropoffHold": "Der Laden hält deine Buchung bis {time}.",
+    "prelaunchDeviceWants": "aus der App: {count}",
+    "prelaunchDeviceWantsHint": "Ein-Tipp-Anfragen mit App-Geräte-ID (in der App erzeugt, leichter aufzublähen als das Web-Cookie)"
   }
 }

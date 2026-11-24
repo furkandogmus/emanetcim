@@ -49,16 +49,34 @@ describe("POST /api/mobile/prelaunch/want", () => {
     expect(mockRecord).not.toHaveBeenCalled();
   });
 
-  it("girisli: hesap kimligi + hesap e-postasina haber verme kaydi", async () => {
+  it("girisli: sayac yine CIHAZ kimligiyle, hesap yalniz haber verme kaydinda", async () => {
     const res = await POST(req({ shopId: SHOP, deviceId: DEVICE, notify: true }, true));
     expect((await res.json()).subscribed).toBe("new");
-    expect(mockRegister).toHaveBeenCalledWith(expect.objectContaining({ anonId: "user:u1" }));
+    expect(mockRegister).toHaveBeenCalledWith(expect.objectContaining({ anonId: `device:${DEVICE}` }));
     expect(mockRecord).toHaveBeenCalledWith(expect.objectContaining({ email: "guest@example.test", source: "mobile" }));
   });
 
-  it("kimlik yoksa 400, gecersiz govde 400", async () => {
+  it.each([
+    ["once girissiz, sonra girisli", [false, true]],
+    ["once girisli, sonra girissiz", [true, false]],
+  ])("%s: iki istek ayni dedupe anahtarini kullanir (kisi iki kez sayilmaz)", async (_label, order) => {
+    for (const token of order) await POST(req({ shopId: SHOP, deviceId: DEVICE, notify: true }, token));
+    const keys = mockRegister.mock.calls.map((c) => (c[0] as { anonId: string }).anonId);
+    expect(new Set(keys)).toEqual(new Set([`device:${DEVICE}`]));
+    // Haber verme kaydi yalniz girisli istekte, hesap e-postasiyla.
+    expect(mockRecord).toHaveBeenCalledTimes(1);
+  });
+
+  it("cihaz kimligi yoksa ya da govde gecersizse 400; hiz sinirina dokunulmaz", async () => {
     expect((await POST(req({ shopId: SHOP }))).status).toBe(400);
+    expect((await POST(req({ shopId: SHOP }, true))).status).toBe(400);
     expect((await POST(req({ shopId: "x", deviceId: DEVICE }))).status).toBe(400);
+    expect(mockRateLimit).not.toHaveBeenCalled();
+  });
+
+  it("hiz siniri IP + nokta basina", async () => {
+    await POST(req({ shopId: SHOP, deviceId: DEVICE }));
+    expect(mockRateLimit).toHaveBeenCalledWith(`mobile_prelaunch_want:1.1.1.1:${SHOP}`, 10, 600_000);
   });
 
   it("reddedilen token anonime dusmez: 401", async () => {
@@ -69,7 +87,7 @@ describe("POST /api/mobile/prelaunch/want", () => {
 
   it("goruntuleme oturumunda yazilmaz", async () => {
     mockAuth.mockResolvedValue({ user: { id: "u1", role: "GUEST", email: "g@example.test", impersonatedBy: "a1" } });
-    expect((await POST(req({ shopId: SHOP }, true))).status).toBe(403);
+    expect((await POST(req({ shopId: SHOP, deviceId: DEVICE }, true))).status).toBe(403);
   });
 
   it("hiz siniri 429", async () => {
