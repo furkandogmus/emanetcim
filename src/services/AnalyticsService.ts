@@ -75,11 +75,12 @@ class AnalyticsService {
           where: { createdAt: { gte: since } },
           _count: { _all: true },
         }),
-        prisma.analyticsEvent.findMany({
-          where: { createdAt: { gte: since } },
-          distinct: ["sessionId"],
-          select: { sessionId: true },
-        }),
+        // Tekil oturum veritabaninda sayilir: `findMany({ distinct })` her satiri Node'a cekiyordu.
+        prisma.$queryRaw<Array<{ count: bigint }>>`
+          SELECT COUNT(DISTINCT "sessionId") AS count
+          FROM "AnalyticsEvent"
+          WHERE "createdAt" >= ${since}
+        `,
         prisma.analyticsEvent.groupBy({
           by: ["path"],
           where: { createdAt: { gte: since }, name: "page_view", path: { not: null } },
@@ -114,7 +115,7 @@ class AnalyticsService {
 
     return {
       days,
-      uniqueSessions: uniqueSessionsRaw.length,
+      uniqueSessions: Number(uniqueSessionsRaw[0]?.count ?? 0),
       pageViews: counts["page_view"] ?? 0,
       searches: counts["search_performed"] ?? 0,
       shopViews: counts["shop_view"] ?? 0,

@@ -1,3 +1,4 @@
+import { Prisma } from "@prisma/client";
 import { z } from "zod";
 import prisma from "@/lib/db";
 import { writeAuditLog } from "@/lib/audit-log";
@@ -31,6 +32,11 @@ export const campaignUpdateSchema = z.object({
   isActive: z.boolean().optional(),
   endsAt: dateInput.nullable().optional(),
 });
+
+/** Okuma ile yazma arasinda baska yonetici sildiyse Prisma P2025 firlatir; 500 degil `not_found`. */
+function isRecordNotFound(err: unknown): boolean {
+  return err instanceof Prisma.PrismaClientKnownRequestError && err.code === "P2025";
+}
 
 export type CampaignWriteResult =
   | { ok: true; id: string }
@@ -82,10 +88,15 @@ export class CampaignService {
     if (!parsed.success) return { ok: false, reason: "invalid_data" };
     const d = parsed.data;
     if (!(await this.exists(id))) return { ok: false, reason: "not_found" };
-    await prisma.campaign.update({
-      where: { id },
-      data: { ...d, ...(d.message !== undefined ? { message: d.message?.trim() || null } : {}) },
-    });
+    try {
+      await prisma.campaign.update({
+        where: { id },
+        data: { ...d, ...(d.message !== undefined ? { message: d.message?.trim() || null } : {}) },
+      });
+    } catch (err) {
+      if (isRecordNotFound(err)) return { ok: false, reason: "not_found" };
+      throw err;
+    }
     // Yalniz acma/kapama degistiyse eylem adi onu soyler: denetim kaydinda "duraklatildi" aranir.
     const onlyToggle = Object.keys(d).length === 1 && d.isActive !== undefined;
     writeAuditLog({
@@ -108,7 +119,12 @@ export class CampaignService {
   async remove(actor: CampaignActor, id: string, ctx: Ctx = {}): Promise<CampaignWriteResult> {
     const existing = await prisma.campaign.findUnique({ where: { id }, select: { id: true, name: true } });
     if (!existing) return { ok: false, reason: "not_found" };
-    await prisma.campaign.delete({ where: { id } });
+    try {
+      await prisma.campaign.delete({ where: { id } });
+    } catch (err) {
+      if (isRecordNotFound(err)) return { ok: false, reason: "not_found" };
+      throw err;
+    }
     writeAuditLog({
       actorUserId: actor.id,
       actorRole: actor.role,

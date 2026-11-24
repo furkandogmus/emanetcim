@@ -6,6 +6,7 @@ import { useTranslation } from "react-i18next";
 
 import { AdminOpsScreen, SectionTitle, opsStyles } from "@/components/AdminOps";
 import { Field } from "@/components/Field";
+import { LoadMoreFooter } from "@/components/LoadMoreFooter";
 import { SearchBox } from "@/components/SearchBox";
 import { Segmented } from "@/components/Segmented";
 import { AppText, Banner, Button, Card } from "@/components/ui";
@@ -204,30 +205,39 @@ function GuestPicker({ onPick }: { onPick: (g: GuestSource) => void }) {
   const [q, setQ] = useState("");
   const onSearch = useCallback((v: string) => setQ(v), []);
   const query = useAdminUsers(q);
+  // Arama ucu rol suzmuyor: misafir olmayanlar istemcide ayiklanir, sonraki sayfalar "daha fazla" ile gelir.
   const guests = flattenPages(query.data, (p) => p.users).filter((u) => u.role === "GUEST");
+  const hasMore = !!query.hasNextPage;
   return (
     <View style={{ gap: space.sm }}>
       <SearchBox placeholder={t("adminPartnerNew.guestSearch")} onSearch={onSearch} />
       {!q.trim() ? (
         <AppText variant="caption">{t("adminPartnerNew.guestSearchHint")}</AppText>
-      ) : query.isLoading ? null : guests.length === 0 ? (
-        <AppText variant="caption">{t("adminPartnerNew.guestNone")}</AppText>
-      ) : (
-        guests.map((u) => (
-          <Pressable
-            key={u.id}
-            accessibilityRole="button"
-            onPress={() => onPick({ id: u.id, name: u.name, email: u.email, phone: u.phone })}
-            style={({ pressed }) => [opsStyles.row, pressed && { backgroundColor: colors.surfaceMuted }]}
-          >
-            <AppText variant="bodyMedium" numberOfLines={1}>
-              {u.name || u.email}
-            </AppText>
-            <AppText variant="caption" numberOfLines={1}>
-              {[u.email, u.phone].filter(Boolean).join(" · ")}
-            </AppText>
-          </Pressable>
-        ))
+      ) : query.isLoading ? null : (
+        <>
+          {guests.length === 0 && !hasMore ? <AppText variant="caption">{t("adminPartnerNew.guestNone")}</AppText> : null}
+          {guests.map((u) => (
+            <Pressable
+              key={u.id}
+              accessibilityRole="button"
+              onPress={() => onPick({ id: u.id, name: u.name, email: u.email, phone: u.phone })}
+              style={({ pressed }) => [opsStyles.row, pressed && { backgroundColor: colors.surfaceMuted }]}
+            >
+              <AppText variant="bodyMedium" numberOfLines={1}>
+                {u.name || u.email}
+              </AppText>
+              <AppText variant="caption" numberOfLines={1}>
+                {[u.email, u.phone].filter(Boolean).join(" · ")}
+              </AppText>
+            </Pressable>
+          ))}
+          <LoadMoreFooter
+            hasMore={hasMore}
+            loading={query.isFetchingNextPage}
+            failed={query.isFetchNextPageError}
+            onPress={() => void query.fetchNextPage()}
+          />
+        </>
       )}
     </View>
   );

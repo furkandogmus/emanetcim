@@ -31,6 +31,7 @@ vi.mock("@/lib/mobile-auth", async (orig) => ({
   requireMobileUser: mockRequireMobileUser,
 }));
 
+import { Prisma } from "@prisma/client";
 import * as campaignsRoot from "@/app/api/mobile/admin/campaigns/route";
 import * as campaignOne from "@/app/api/mobile/admin/campaigns/[id]/route";
 import * as partnersRoute from "@/app/api/mobile/admin/partners/route";
@@ -169,6 +170,23 @@ describe("kampanyalar", () => {
       body: { error: "not_found" },
     });
     NO_WRITES();
+  });
+
+  it("okuma ile yazma arasinda silinen kayit 500 degil 404 not_found (P2025)", async () => {
+    const gone = new Prisma.PrismaClientKnownRequestError("Record not found", { code: "P2025", clientVersion: "test" });
+    mockPrisma.campaign.update.mockRejectedValueOnce(gone);
+    expect(await json(await campaignOne.PATCH(req("/campaigns/c1", "PATCH", { isActive: false }), p("c1")))).toEqual({
+      status: 404,
+      body: { error: "not_found" },
+    });
+    mockPrisma.campaign.delete.mockRejectedValueOnce(gone);
+    expect(await json(await campaignOne.DELETE(req("/campaigns/c1", "DELETE"), p("c1")))).toEqual({
+      status: 404,
+      body: { error: "not_found" },
+    });
+    expect(mockAudit).not.toHaveBeenCalled();
+    mockPrisma.campaign.delete.mockRejectedValueOnce(gone);
+    await expect(deleteCampaignAction("c1")).rejects.toThrow("not_found");
   });
 
   it("web action'lari ayni govdeden gecer (denetim kaydi dahil); sil basarisizlikta firlatir", async () => {
