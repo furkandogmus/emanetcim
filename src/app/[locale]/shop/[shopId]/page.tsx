@@ -135,13 +135,16 @@ export default async function ShopDetailPage({
     notFound();
   }
 
-  analyticsService.track({
-    name: "shop_view",
-    sessionId: await resolveServerSessionId(session?.user?.id),
-    userId: session?.user?.id ?? null,
-    locale,
-    metadata: { shopId: shop.id },
-  });
+  // Yonetici goruntulemesi hedefin analitigine yazilmaz.
+  if (!session?.impersonation) {
+    analyticsService.track({
+      name: "shop_view",
+      sessionId: await resolveServerSessionId(session?.user?.id),
+      userId: session?.user?.id ?? null,
+      locale,
+      metadata: { shopId: shop.id },
+    });
+  }
 
   /*
     Talep testi noktasinda "kac kisi burayi istiyor" sayisi SUNUCUDA okunur:

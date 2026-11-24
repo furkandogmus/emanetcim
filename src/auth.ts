@@ -144,7 +144,9 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
           session.impersonation = { adminId: imp.adminId, expiresAt: imp.expiresAt.toISOString() };
         } else if (imp?.mode === "anonymous") {
           // Okuma kapsami disindaki action: ne hedefin ne adminin kimligi.
-          session.user = { ...session.user, id: "", role: Role.GUEST, name: null, email: "", image: null, emailVerified: null };
+          // `id` hic yok (bos dize degil): `session.user.id ?? null` gercekten null versin.
+          const anonymous: Omit<Session["user"], "id"> = { role: Role.GUEST, name: null, email: null, image: null, emailVerified: null };
+          session.user = anonymous as Session["user"];
           session.impersonation = { adminId: imp.adminId, expiresAt: imp.expiresAt.toISOString() };
         } else if (imp?.mode === "stale") {
           session.impersonation = { stale: true, expiresAt: imp.expiresAt?.toISOString() ?? null };

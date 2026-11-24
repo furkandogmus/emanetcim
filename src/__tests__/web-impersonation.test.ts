@@ -39,12 +39,16 @@ import {
   impersonationGate,
   impersonationProxyDecision,
   impersonationStamp,
+  normalizeProxyPath,
   signWebImpersonation,
+  withForwardedHeaders,
   verifyWebImpersonation,
 } from "@/lib/web-impersonation";
 import { readWebImpersonation, resolveWebImpersonation } from "@/lib/web-impersonation-session";
 import { asImpersonationRead } from "@/lib/impersonation-read-scope";
 import { authConfig } from "@/auth.config";
+import { NextResponse } from "next/server";
+import { rejectIfImpersonating } from "@/lib/impersonation-guard";
 import { IMPERSONATION_TTL_SECONDS } from "@/lib/mobile-auth";
 import { startImpersonationAction } from "@/actions/admin-impersonation";
 import { POST as stopRoute } from "@/app/api/impersonation/stop/route";
@@ -337,6 +341,37 @@ describe("web olarak goruntule", () => {
       expect(impersonationProxyDecision({ ...base, method: "GET", pathname: "/tr/bookings" })).toBe("pass");
       expect(impersonationProxyDecision({ ...base, method: "GET", pathname: "/api/account/data-export" })).toBe("block");
       expect(impersonationProxyDecision({ ...base, isAdminPath: true, method: "GET", pathname: "/tr/admin" })).toBe("redirect_home");
+    });
+
+    it("kodlanmis ya da sonda egik cizgili yol blok listesini atlatamaz; cozulemeyen kodlama engellenir", () => {
+      for (const p of ["/api/account/data%2Dexport", "/api/account/data-export/", "/api/account/%64ata-export", "/API/account/data-export", "/api//account/data-export"]) {
+        expect(impersonationProxyDecision({ ...base, method: "GET", pathname: p }), p).toBe("block");
+      }
+      expect(impersonationProxyDecision({ ...base, method: "GET", pathname: "/tr/%E0%A4%A" })).toBe("block");
+      expect(normalizeProxyPath("/api/impersonation/stop/")).toBe("/api/impersonation/stop");
+    });
+
+    it("/api'ye sahte Next-Action basligiyla yazma kesilir", () => {
+      for (const p of ["/api/push/subscribe", "/api/account/data-export", "/api"]) {
+        expect(impersonationProxyDecision({ ...base, isServerAction: true, method: "POST", pathname: p }), p).toBe("block");
+      }
+      expect(impersonationProxyDecision({ ...base, isServerAction: true, method: "POST", pathname: "/api/impersonation/stop" })).toBe("pass");
+    });
+
+    it("route kilidi: goruntuleme ve stale oturumda 403", async () => {
+      expect(rejectIfImpersonating({ user: { id: TARGET }, impersonation: { adminId: ADMIN, expiresAt: "" } } as never)?.status).toBe(403);
+      expect(rejectIfImpersonating({ user: { id: ADMIN }, impersonation: { stale: true, expiresAt: null } } as never)?.status).toBe(403);
+      expect(rejectIfImpersonating({ user: { id: ADMIN } } as never)).toBeNull();
+    });
+
+    it("basliksiz next() yanitina da temizlenmis basliklar iletilir (istemci damgasi duser)", () => {
+      const h = new Headers({ "x-keep": "1" });
+      const res = withForwardedHeaders(NextResponse.next(), h);
+      expect(res.headers.get("x-middleware-override-headers")).toBe("x-keep");
+      expect(res.headers.get(`x-middleware-request-${WEB_IMPERSONATION_STAMP_HEADER}`)).toBeNull();
+      const already = NextResponse.next({ request: { headers: new Headers({ a: "1" }) } });
+      expect(withForwardedHeaders(already, h).headers.get("x-middleware-override-headers")).toBe("a");
+      expect(withForwardedHeaders(NextResponse.next(), null).headers.has("x-middleware-override-headers")).toBe(false);
     });
 
     it("gecersiz cerez temizlenir", () => {

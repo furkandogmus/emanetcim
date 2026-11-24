@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { z } from "zod";
 import { auth } from "@/auth";
+import { rejectIfImpersonating } from "@/lib/impersonation-guard";
 import { rateLimit } from "@/lib/rate-limit";
 import { getClientIp } from "@/lib/get-ip";
 import { accountDataExportService } from "@/services/AccountDataExportService";
@@ -15,6 +16,8 @@ export const dynamic = "force-dynamic";
  */
 export async function GET() {
   const session = await auth();
+  const blocked = rejectIfImpersonating(session);
+  if (blocked) return blocked;
   if (!session?.user?.id) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
@@ -45,6 +48,9 @@ const EmailBody = z.object({ locale: z.string().max(8).optional() });
 
 export async function POST(req: Request) {
   const session = await auth();
+  // Goruntulemede hedefin verisi yoneticinin istegiyle hedefe e-postalanmaz (proxy de keser).
+  const blocked = rejectIfImpersonating(session);
+  if (blocked) return blocked;
   if (!session?.user?.id) {
     return NextResponse.json({ error: "unauthorized" }, { status: 401 });
   }
