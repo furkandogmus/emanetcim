@@ -30,7 +30,8 @@ import { bookingNotificationEmail } from "@/services/booking/guest-contact";
 import { DEFAULT_NOTIFICATION_LOCALE } from "@/lib/request-locale";
 import type { DisputeStatus } from "@/lib/dispute-status";
 import { APP_STORE_BADGE, GOOGLE_PLAY_BADGE, appLinkHref, getAppStoreFlags } from "@/lib/app-stores";
-import type { EmailAppBadges } from "@/lib/email-template";
+import type { EmailAppBadges, EmailWalletButton } from "@/lib/email-template";
+import { walletPassService } from "@/services/WalletPassService";
 
 /**
  * NEDEN (2026-08-25): `sendEmail` partner check-in/check-out akışlarında
@@ -82,6 +83,25 @@ async function bookingEmailAppBadges(
     badges.push({ href, src: `${root}${GOOGLE_PLAY_BADGE.png}`, alt: copy.playAlt, width: 150, height: 58 });
   }
   return badges.length > 0 ? { label: copy.appRow, badges } : undefined;
+}
+
+/** Onay e-postasindaki Wallet dugmeleri; yapilandirma yoksa ya da kart verilemiyorsa bos. */
+async function bookingEmailWalletButtons(bookingId: string, locale: string): Promise<EmailWalletButton[]> {
+  const links = await walletPassService.linksForEmail(bookingId).catch((err) => {
+    logger.warn({ err, bookingId }, "wallet_email_links_failed");
+    return [];
+  });
+  if (links.length === 0) return [];
+  const copy = pickLocale({
+    tr: { apple: "Apple Cüzdan'a Ekle", google: "Google Cüzdan'a Ekle" },
+    en: { apple: "Add to Apple Wallet", google: "Add to Google Wallet" },
+    de: { apple: "Zu Apple Wallet hinzufügen", google: "Zu Google Wallet hinzufügen" },
+    fr: { apple: "Ajouter à Apple Wallet", google: "Ajouter à Google Wallet" },
+    ja: { apple: "Apple Walletに追加", google: "Google ウォレットに追加" },
+    fa: { apple: "افزودن به Apple Wallet", google: "افزودن به Google Wallet" },
+    ru: { apple: "Добавить в Apple Wallet", google: "Добавить в Google Кошелёк" },
+  }, locale);
+  return links.map((l) => ({ href: l.url, label: l.kind === "apple" ? copy.apple : copy.google }));
 }
 
 /** `excludeUserIds`: push'u tetikleyen yonetici kendi istegini bildirim olarak almaz. */
@@ -814,6 +834,7 @@ export class NotificationService implements INotificationService {
         { label: content.row2, value: price },
       ],
       cta: { href: bookingUrl, label: content.cta, variant: "button" },
+      walletButtons: await bookingEmailWalletButtons(bookingId, locale),
       appBadges: await bookingEmailAppBadges(domain, content),
       footer: content.footer,
     });

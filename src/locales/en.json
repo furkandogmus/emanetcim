@@ -3230,5 +3230,18 @@
     "errorConflict": "Another team change happened at the same time, try again.",
     "inviteEmailUnverified": "Verify your email address first to accept the invitation.",
     "closedAskOwner": "The shop looks closed right now. Only the shop owner can approve an out-of-hours handover."
+  },
+  "Wallet": {
+    "shop": "Storage point",
+    "dropOff": "Drop-off",
+    "pickUp": "Pick-up",
+    "bags": "Bags",
+    "code": "Code",
+    "address": "Address",
+    "cancelled": "Cancelled",
+    "nearShop": "You are near {shop}: your ticket is ready.",
+    "addApple": "Add to Apple Wallet",
+    "addGoogle": "Add to Google Wallet",
+    "hint": "Add your ticket to your wallet; it appears on the lock screen near the shop."
   }
 }

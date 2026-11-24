@@ -3217,5 +3217,18 @@
     "errorConflict": "Aynı anda başka bir ekip işlemi yapıldı, tekrar dene.",
     "inviteEmailUnverified": "Daveti kabul etmek için önce e-posta adresini doğrula; doğrulama e-postası hesabına gönderildi.",
     "closedAskOwner": "Dükkan şu an kapalı görünüyor. Saat dışı teslimi yalnızca dükkan sahibi onaylayabilir."
+  },
+  "Wallet": {
+    "shop": "Emanet noktası",
+    "dropOff": "Bırakma",
+    "pickUp": "Teslim alma",
+    "bags": "Valiz",
+    "code": "Kod",
+    "address": "Adres",
+    "cancelled": "İptal edildi",
+    "nearShop": "{shop} yakınındasınız: biletiniz hazır.",
+    "addApple": "Apple Cüzdan'a Ekle",
+    "addGoogle": "Google Cüzdan'a Ekle",
+    "hint": "Biletinizi cüzdanınıza ekleyin; dükkana yaklaşınca kilit ekranında görünür."
   }
 }

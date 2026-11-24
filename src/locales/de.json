@@ -3072,5 +3072,18 @@
     "errorConflict": "Gleichzeitig wurde eine andere Teamänderung vorgenommen, versuchen Sie es erneut.",
     "inviteEmailUnverified": "Bestätigen Sie zuerst Ihre E-Mail-Adresse, um die Einladung anzunehmen.",
     "closedAskOwner": "Das Geschäft scheint gerade geschlossen. Nur der Inhaber kann eine Übergabe außerhalb der Öffnungszeiten freigeben."
+  },
+  "Wallet": {
+    "shop": "Aufbewahrungsort",
+    "dropOff": "Abgabe",
+    "pickUp": "Abholung",
+    "bags": "Gepäck",
+    "code": "Code",
+    "address": "Adresse",
+    "cancelled": "Storniert",
+    "nearShop": "Sie sind in der Nähe von {shop}: Ihr Ticket ist bereit.",
+    "addApple": "Zu Apple Wallet hinzufügen",
+    "addGoogle": "Zu Google Wallet hinzufügen",
+    "hint": "Fügen Sie Ihr Ticket Ihrer Wallet hinzu; in der Nähe des Geschäfts erscheint es auf dem Sperrbildschirm."
   }
 }

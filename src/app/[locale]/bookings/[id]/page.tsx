@@ -30,6 +30,8 @@ import { guestLateNotice } from "@/lib/late-dropoff";
 import { buildCheckoutReturnPath } from "@/lib/checkout-return-url";
 import { formatTimeInZone } from "@/lib/format-datetime";
 import ExpiredBookingPanel from "@/components/guest/ExpiredBookingPanel";
+import WalletButtons from "@/components/guest/WalletButtons";
+import { walletPassService } from "@/services/WalletPassService";
 
 export async function generateMetadata({
   params,
@@ -133,6 +135,8 @@ export default async function BookingDetailPage({
     bagXl: booking.bagCountXl,
   });
   const canCancel = !expired && isNotDroppedStatus(booking.status);
+  // Kart misafirin cuzdanina girer: yonetici goruntulemesinde dugme yok.
+  const walletLinks = isOwner && !expired ? await walletPassService.linksForVerifiedOwner(booking) : [];
 
   return (
     <div className="min-h-screen bg-gray-50 pt-32 pb-20 px-6 font-sans">
@@ -225,6 +229,9 @@ export default async function BookingDetailPage({
            <div className="text-center">
               <p className="text-[10px] font-black text-gray-400 uppercase tracking-[0.3em] mb-1">{t("bookingCodeLabel")}</p>
               <code className="text-xl font-mono font-black text-orange-600 tracking-widest">{bookingShortCode(booking.id)}</code>
+           </div>
+           <div className="print:hidden w-full">
+             <WalletButtons links={walletLinks} />
            </div>
         </div>
         ) : (

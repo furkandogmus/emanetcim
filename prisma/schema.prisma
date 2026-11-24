@@ -432,6 +432,7 @@ model Booking {
   notificationLogs           NotificationLog[]
   paymentLog                 PaymentLog?
   review                     Review?
+  walletPassDevices          WalletPassDevice[]
 
   @@unique([guestId, idempotencyKey])
   @@index([guestId])
@@ -1575,4 +1576,19 @@ model ShopInvite {
 
 enum ShopMemberRole {
   STAFF
+}
+
+/// Apple Wallet PassKit web servisi: kartini ekleyen cihaz, guncelleme push'u icin.
+/// Seri numarasi rezervasyon kimligidir; rezervasyon silinince kayit da gider.
+model WalletPassDevice {
+  id              String   @id @default(uuid())
+  deviceLibraryId String
+  pushToken       String
+  bookingId       String
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+  booking         Booking  @relation(fields: [bookingId], references: [id], onDelete: Cascade)
+
+  @@unique([deviceLibraryId, bookingId])
+  @@index([bookingId])
 }

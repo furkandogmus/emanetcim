@@ -110,8 +110,25 @@ export type EmailContent = {
   cta?: EmailCta;
   /** Magaza rozetleri satiri (yalnizca yayindaki magazalar). Bos/verilmezse cizilmez. */
   appBadges?: EmailAppBadges;
+  /** "Apple/Google Cuzdan'a ekle" metin dugmeleri. Bos/verilmezse cizilmez. */
+  walletButtons?: EmailWalletButton[];
   footer: string;
 };
+
+export type EmailWalletButton = { href: string; label: string };
+
+/** Iki markanin yonergesi: siyah zemin, beyaz yazi. Resmi rozet gorseli kullanilmiyor. */
+function renderWalletButtons(buttons: EmailWalletButton[]): string {
+  const links = buttons
+    .map(
+      (b) =>
+        `<a href="${escapeEmailHtml(b.href)}" style="display:inline-block;background:#000000;color:#ffffff;` +
+        `padding:10px 18px;text-decoration:none;border-radius:8px;font-weight:bold;margin:4px 8px 4px 0">` +
+        `${escapeEmailHtml(b.label)}</a>`,
+    )
+    .join("");
+  return `<div style="margin:8px 0 16px">${links}</div>`;
+}
 
 export type EmailAppBadges = {
   label: string;
@@ -218,6 +235,7 @@ export function renderEmailHtml(content: EmailContent): string {
     ...content.paragraphs.map((p) => `<p>${p}</p>`),
     content.rows?.length ? renderRows(content.rows, accent) : "",
     content.cta ? renderCta(content.cta, accent) : "",
+    content.walletButtons?.length ? renderWalletButtons(content.walletButtons) : "",
     content.appBadges?.badges.length ? renderAppBadges(content.appBadges) : "",
     `<p style="font-size:13px;color:${EMAIL_MUTED_COLOR};margin-top:24px">${content.footer}</p>`,
   ];

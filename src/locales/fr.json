@@ -3072,5 +3072,18 @@
     "errorConflict": "Une autre modification d'équipe a eu lieu en même temps, réessayez.",
     "inviteEmailUnverified": "Vérifiez d'abord votre adresse e-mail pour accepter l'invitation.",
     "closedAskOwner": "Le commerce semble fermé. Seul le propriétaire peut autoriser une remise hors horaires."
+  },
+  "Wallet": {
+    "shop": "Point de consigne",
+    "dropOff": "Dépôt",
+    "pickUp": "Retrait",
+    "bags": "Bagages",
+    "code": "Code",
+    "address": "Adresse",
+    "cancelled": "Annulée",
+    "nearShop": "Vous êtes près de {shop} : votre billet est prêt.",
+    "addApple": "Ajouter à Apple Wallet",
+    "addGoogle": "Ajouter à Google Wallet",
+    "hint": "Ajoutez votre billet à votre portefeuille ; il s'affiche sur l'écran verrouillé près de la boutique."
   }
 }
