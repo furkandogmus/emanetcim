@@ -1,5 +1,6 @@
 import { moneyToNumber } from "@/lib/money";
 import type { PricingRules } from "@/lib/pricing-rules";
+import { applyAppDiscount } from "@/lib/app-discount";
 
 /**
  * Mobil ödeme ekranının TAHMİNİ tutarı hesaplarken kullandığı kurallar.
@@ -71,6 +72,7 @@ export function toMobilePricing(r: PricingRules) {
 /** `checkout/quote`: secilen tek indirim ve araci kodu durumu (`CheckoutDiscountService.preview`). */
 export function toMobileCheckoutDiscount(q: {
   total: number;
+  appDiscount: { pct: number; amount: number } | null;
   discount: { kind: "coupon" | "referral" | "affiliate"; code: string; amount: number } | null;
   codeStatus: string | null;
   minPrice: number | null;
@@ -78,11 +80,31 @@ export function toMobileCheckoutDiscount(q: {
 }) {
   return {
     total: q.total,
+    // Yeni alan: eski uygulama yok sayar, `total` zaten indirimli.
+    appDiscount: q.appDiscount ? { pct: q.appDiscount.pct, amount: q.appDiscount.amount } : null,
     discount: q.discount ? { kind: q.discount.kind, code: q.discount.code, amount: q.discount.amount } : null,
     codeStatus: q.codeStatus,
     minPrice: q.minPrice,
     affiliate: q.affiliate
       ? { code: q.affiliate.code, status: q.affiliate.status, ratePct: q.affiliate.ratePct, amount: q.affiliate.amount }
       : null,
+  };
+}
+
+/**
+ * Dukkan detayindaki "Uygulama fiyati": boyut basina gunluk fiyatin indirimli hali,
+ * `checkout/intent` ile ayni yuvarlama. Oran 0 ise `null` (istemci ustu cizili fiyat gostermez).
+ */
+export function toMobileAppPrice(pricePerDay: unknown, r: PricingRules) {
+  const base = toMobilePriceBySize(pricePerDay, r);
+  const pct = applyAppDiscount(base.m, r.appBookingDiscountPct).pct;
+  if (pct <= 0) return null;
+  return {
+    pct,
+    priceBySize: {
+      s: applyAppDiscount(base.s, pct).totalPrice,
+      m: applyAppDiscount(base.m, pct).totalPrice,
+      xl: applyAppDiscount(base.xl, pct).totalPrice,
+    },
   };
 }

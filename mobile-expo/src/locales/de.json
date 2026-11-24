@@ -1707,7 +1707,8 @@
         "minAppVersion": "Minimale App-Version",
         "latestAppVersion": "Aktuelle App-Version",
         "iosAppStoreLive": "iOS-App ist im App Store live",
-        "androidPlayLive": "Android-App ist bei Google Play öffentlich"
+        "androidPlayLive": "Android-App ist bei Google Play öffentlich",
+        "appBookingDiscountPct": "App-Buchungsrabatt (%)"
       },
       "on": "Pflicht",
       "off": "Keine Pflicht",
@@ -2364,5 +2365,10 @@
     "partnerInviteTitle": "Die Partnerbewerbung erfolgt auf der Website",
     "partnerInviteBody": "Das Bewerbungsformular öffnet sich mit Ihrem Einladungscode.",
     "openOnWeb": "Website öffnen"
+  },
+  "appDiscount": {
+    "label": "App-Preis",
+    "checkoutLine": "App-Rabatt {{pct}} %",
+    "badge": "{{pct}} % App-Rabatt"
   }
 }

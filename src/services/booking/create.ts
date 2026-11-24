@@ -58,6 +58,10 @@ async function affiliateFields(data: CreateInitialBookingInput) {
   };
 }
 
+function nonNegativeAmount(v: unknown): number {
+  return typeof v === 'number' && Number.isFinite(v) ? Math.max(0, v) : 0;
+}
+
 /**
  * Rezervasyonun YARATILDIGI durum.
  *
@@ -276,6 +280,7 @@ async function createInitialBookingOnce(data: CreateInitialBookingInput): Promis
               ? Math.max(0, data.couponDiscountAmount)
               : 0,
           couponCode: data.couponCode ?? null,
+          appDiscountAmount: nonNegativeAmount(data.appDiscountAmount),
           ...affiliate,
           bagCountS: data.bagCountS,
           bagCountM: data.bagCountM,
@@ -324,6 +329,7 @@ async function createInitialBookingOnce(data: CreateInitialBookingInput): Promis
     metadata: {
       shopId: data.shopId,
       totalPrice: data.totalPrice,
+      ...(nonNegativeAmount(data.appDiscountAmount) > 0 ? { appDiscountAmount: nonNegativeAmount(data.appDiscountAmount) } : {}),
       bagCountS: data.bagCountS,
       bagCountM: data.bagCountM,
       bagCountXl: data.bagCountXl,
@@ -446,6 +452,7 @@ export async function createSlotBooking(
               ? Math.max(0, data.couponDiscountAmount)
               : 0,
           couponCode: data.couponCode ?? null,
+          appDiscountAmount: nonNegativeAmount(data.appDiscountAmount),
           ...affiliate,
           bagCountS: data.bagCountS,
           bagCountM: data.bagCountM,
@@ -490,6 +497,7 @@ export async function createSlotBooking(
     metadata: {
       shopId: data.shopId,
       totalPrice: data.totalPrice,
+      ...(nonNegativeAmount(data.appDiscountAmount) > 0 ? { appDiscountAmount: nonNegativeAmount(data.appDiscountAmount) } : {}),
       slotBooking: true,
     },
   }).catch((err) => logger.error({ err, bookingId: booking.id }, "booking_event_created_failed"));

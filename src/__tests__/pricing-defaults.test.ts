@@ -57,6 +57,7 @@ describe("fiyat varsayılanları — şema ile kod aynı olmalı", () => {
       kaynagi) kapsanmayan bir kosesiydi.
     */
     ["platformCommissionRate", DEFAULT_PRICING_RULES.platformCommissionRate],
+    ["appBookingDiscountPct", DEFAULT_PRICING_RULES.appBookingDiscountPct],
   ];
 
   it.each(PAIRS)(

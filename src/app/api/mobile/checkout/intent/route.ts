@@ -203,6 +203,8 @@ export async function POST(req: NextRequest) {
     referralCode: parsed.data.referralCode,
     affiliateCode: parsed.data.affiliateCode,
     guest: { userId: auth.user.id },
+    // Kanal rotadan: bu uc yalnizca uygulamadan cagrilir, istemci bayragi yok.
+    channel: "app",
   });
   const toplam = discounts.totalPrice;
   const appliedCouponId = discounts.couponId;
@@ -237,6 +239,7 @@ export async function POST(req: NextRequest) {
       referredByCode: discounts.referredByCode,
       affiliateCode: discounts.affiliateCode,
       affiliateDiscountAmount: discounts.affiliateDiscountAmount,
+      appDiscountAmount: discounts.appDiscountAmount,
       unitPrice: totals.unitPrice,
       insuranceFee: totals.insuranceFee,
       bagCountS: totals.bagCountS,

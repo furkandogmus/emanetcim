@@ -2,7 +2,7 @@ import { NextResponse } from "next/server";
 import { markAuthStale, resolveMobileShopViewer } from "@/lib/mobile-auth";
 import type { ShopViewer } from "@/lib/public-shop-filter";
 import { ShopService } from "@/services/ShopService";
-import { toMobilePriceBySize, toMobilePricing, toMobilePublicGallery, toMobileShop } from "@/lib/mobile-dto";
+import { toMobileAppPrice, toMobilePriceBySize, toMobilePricing, toMobilePublicGallery, toMobileShop } from "@/lib/mobile-dto";
 import { shopGalleryService } from "@/services/ShopGalleryService";
 import { getPricingRules } from "@/lib/platform-settings";
 import { todayInZone } from "@/lib/stay-days";
@@ -51,6 +51,8 @@ async function detail(id: string, viewer: ShopViewer) {
     pricing: toMobilePricing(rules),
     // Boyut basina gunluk fiyat sunucudan, yuvarlanmis: istemci carpan uygulamaz.
     priceBySize: toMobilePriceBySize(s.pricePerDay, rules),
+    // Uygulama indirimi kapaliysa `null`; eski uygulama alani yok sayar.
+    appPrice: s.isPrelaunch ? null : toMobileAppPrice(s.pricePerDay, rules),
     // Kapak `image`da; galeri onun ardindan kaydirilir.
     gallery: toMobilePublicGallery(images),
     prelaunchWantCount: wantCount,

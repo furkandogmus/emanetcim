@@ -85,6 +85,8 @@ function SettingsForm({ settings }: { settings: AdminPlatformSettings }) {
       </AppText>
 
       {SETTINGS_FIELDS.map((f) => {
+        // Eski sunucu alani tasimiyor: duzenlenecek bir sey yok.
+        if (f === "appBookingDiscountPct" && settings.values.appBookingDiscountPct === undefined) return null;
         const isRisky = settings.riskyFields.includes(f);
         const title = isRisky ? `${label(f)} · ${t("adminOps.risky")}` : label(f);
         if (isBoolSetting(f)) {

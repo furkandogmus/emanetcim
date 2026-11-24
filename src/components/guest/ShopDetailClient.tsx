@@ -43,6 +43,7 @@ import PrelaunchNotifyButton from "@/components/guest/PrelaunchNotifyButton";
 import PrelaunchDemandPanel from "@/components/guest/PrelaunchDemandPanel";
 import { buildDirectionsUrl } from "@/lib/directions-url";
 import PartnerDemandPopup from "@/components/guest/PartnerDemandPopup";
+import AppDiscountHint from "@/components/app-promo/AppDiscountHint";
 
 /*
   CTA sinif dizgeleri TEK YERDE: rezervasyon dali ile talep-testi dali ayni
@@ -328,7 +329,9 @@ export default function ShopDetailClient({
             shopName={shop.name}
             initialWantCount={prelaunchWantCount}
           />
-        ) : null}
+        ) : (
+          <AppDiscountHint pct={pricingRules.appBookingDiscountPct} source="web-shop" />
+        )}
           <section>
             <h2 className="text-2xl font-black text-gray-900 mb-3">{mobileCopy.premiumAmenities}</h2>
             <div className="grid grid-cols-2 gap-3">
@@ -598,6 +601,7 @@ export default function ShopDetailClient({
               </li>
             ))}
           </ul>
+          <AppDiscountHint pct={pricingRules.appBookingDiscountPct} source="web-shop" className="mt-3" />
         </section>
         )}
 

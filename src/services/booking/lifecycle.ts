@@ -1,6 +1,7 @@
 /**
  * Iptal ve duzenleme: kesinti, kredi kuponu, kapasite yeniden kontrolu.
  */
+import { lockedBookingDiscount } from '@/lib/app-discount';
 import { retryOnWriteConflict } from '@/lib/tx-retry';
 import { Prisma } from '@prisma/client';
 import prisma from '@/lib/db';
@@ -445,11 +446,8 @@ export async function modifyBooking(
     (tam fiyat uzerinden) tahsil ediliyordu. Kilitli indirim tutari burada
     yeni alt toplamdan dusulur.
   */
-  const lockedDiscount =
-    moneyToNumber(booking.couponDiscountAmount) +
-    moneyToNumber(booking.referralDiscountAmount) +
-    // Araci misafir indirimi de kilitli indirimdir (2026-11-23).
-    moneyToNumber(booking.affiliateDiscountAmount);
+  // Kupon, davet, araci ve uygulama indirimi kilitli (`lockedBookingDiscount`).
+  const lockedDiscount = lockedBookingDiscount(booking);
   const newTotal = Math.max(
     0,
     Math.round((authTotals.subtotalBeforeCoupon - lockedDiscount) * 100) / 100

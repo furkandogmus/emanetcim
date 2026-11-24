@@ -58,6 +58,8 @@ export type ShopDetail = Shop & {
   closures?: { startDate: string; endDate: string }[];
   /** Boyut basina gunluk fiyat, sunucu yuvarlamasiyla. Eski sunucuda yok. */
   priceBySize?: { s: number; m: number; xl: number };
+  /** Uygulama fiyati (indirimli, sunucu yuvarlamasiyla). Indirim kapaliysa `null`, eski sunucuda yok. */
+  appPrice?: { pct: number; priceBySize: { s: number; m: number; xl: number } } | null;
   /** Talep testi noktasinda "N kisi istedi"; isletilen dukkanda `null`, eski sunucuda yok. */
   prelaunchWantCount?: number | null;
   pricing: {

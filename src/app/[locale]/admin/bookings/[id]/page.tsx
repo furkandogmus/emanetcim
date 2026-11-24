@@ -96,6 +96,7 @@ export default async function AdminBookingDetailPage({
         insuranceFee: moneyToNumber(booking.insuranceFee),
         lateFeeApplied: moneyToNumber(booking.lateFeeApplied),
         referralDiscountAmount: moneyToNumber(booking.referralDiscountAmount),
+        appDiscountAmount: moneyToNumber(booking.appDiscountAmount),
         referredByCode: booking.referredByCode,
         qrCodeToken: booking.qrCodeToken,
         slotCount: booking.reservationSlots.length,

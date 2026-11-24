@@ -3017,5 +3017,13 @@
         "gettingThere": "Die nächsten Haltestellen sind Şişhane an der Metro M2 und Karaköy an der Straßenbahn T1; auch die Tünel-Bahn ist nah. M2-Stationen sind gelegentlich vorübergehend geschlossen; prüfen Sie vor der Fahrt die Meldungen von Metro İstanbul."
       }
     }
+  },
+  "AppDiscount": {
+    "hint": "In der App {pct} % günstiger:",
+    "appStore": "App Store",
+    "googlePlay": "Google Play",
+    "adminLabel": "App-Buchungsrabatt (%)",
+    "adminHint": "Gilt für Buchungen in der mobilen App; 0 schaltet ihn ab (max. 50). Gutscheine gelten für den Restbetrag. Ohne Provision trägt der Laden den Rabatt.",
+    "bookingRow": "App-Rabatt"
   }
 }

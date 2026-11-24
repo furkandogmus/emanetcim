@@ -84,6 +84,8 @@ export type CreateInitialBookingInput = {
   affiliateCode?: string | null;
   /** `CheckoutDiscountService` araci indirimini sectiyse dusulen tutar. */
   affiliateDiscountAmount?: number;
+  /** Uygulama kanali indirimi (TRY); yalnizca mobil checkout doldurur. */
+  appDiscountAmount?: number;
 };
 
 export type ModifyBookingInput = {

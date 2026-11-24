@@ -3162,5 +3162,13 @@
         "gettingThere": "En yakın duraklar M2 metrosunda Şişhane ve T1 tramvayında Karaköy'dür; Tünel füniküleri de yakındır. M2 istasyonları zaman zaman geçici olarak kapatılabilir; yola çıkmadan Metro İstanbul duyurularına bakın."
       }
     }
+  },
+  "AppDiscount": {
+    "hint": "Uygulamada %{pct} daha ucuz:",
+    "appStore": "App Store",
+    "googlePlay": "Google Play",
+    "adminLabel": "Uygulama rezervasyonu indirimi (%)",
+    "adminHint": "Mobil uygulamadan yapılan rezervasyona uygulanır, 0 yazılırsa kapanır (en çok 50). Kupon indirimi kalan tutara uygulanır. Komisyon yokken indirimi esnaf karşılar.",
+    "bookingRow": "Uygulama indirimi"
   }
 }

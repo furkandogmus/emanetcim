@@ -42,6 +42,11 @@ export type PricingRules = {
    * aynı yerde: veritabanı, yönetim arayüzü, önbellek, audit.
    */
   platformCommissionRate: number;
+  /**
+   * Mobil uygulama rezervasyonuna indirim (yuzde, 0 = kapali). Yalnizca mobil
+   * checkout uclari uygular; kural `src/lib/app-discount.ts`.
+   */
+  appBookingDiscountPct: number;
 };
 
 /**
@@ -76,4 +81,5 @@ export const DEFAULT_PRICING_RULES: PricingRules = {
   defaultPricePerDay: 250,
   bagMultipliers: { S: 0.8, M: 1.0, XL: 1.5 },
   platformHolidayDates: [],
+  appBookingDiscountPct: 10,
 };

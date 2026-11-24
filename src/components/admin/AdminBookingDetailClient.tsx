@@ -53,6 +53,8 @@ export type AdminBookingDetail = {
   insuranceFee: number;
   lateFeeApplied: number;
   referralDiscountAmount: number;
+  /** Mobil uygulama kanali indirimi; web rezervasyonunda 0. */
+  appDiscountAmount: number;
   referredByCode: string | null;
   qrCodeToken: string | null;
   slotCount: number;
@@ -135,6 +137,7 @@ export default function AdminBookingDetailClient({
   events: AdminBookingEvent[];
 }) {
   const t = useTranslations("Admin");
+  const tApp = useTranslations("AppDiscount");
   const locale = useLocale();
   const dateLocale = bcp47ForUiLocale(locale);
   const [openEvent, setOpenEvent] = useState<string | null>(null);
@@ -242,6 +245,9 @@ export default function AdminBookingDetailClient({
                 </span>
               }
             />
+            {booking.appDiscountAmount > 0 ? (
+              <Row label={tApp("bookingRow")} value={<Money amount={booking.appDiscountAmount} />} />
+            ) : null}
             <Row
               label={t("bookingsTotal")}
               value={
