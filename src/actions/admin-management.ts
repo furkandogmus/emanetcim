@@ -141,6 +141,8 @@ export type DeleteUserActionResult =
       error:
         | typeof DELETE_USER_BLOCKED_CODE
         | "unauthorized"
+        | "target_is_admin"
+        | "has_payment_history"
         | typeof DELETE_USER_HAS_ACTIVE_BOOKING_CODE;
     };
 
@@ -160,6 +162,8 @@ export async function deleteUserAction(
   if (!result.ok) {
     const error = {
       cannot_delete_self: "unauthorized",
+      target_is_admin: "target_is_admin",
+      has_payment_history: "has_payment_history",
       has_active_booking: DELETE_USER_HAS_ACTIVE_BOOKING_CODE,
       blocked_by_relations: DELETE_USER_BLOCKED_CODE,
     } as const;

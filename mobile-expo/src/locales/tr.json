@@ -2280,14 +2280,14 @@
       "convertTitle": "{{name}} esnaf hesabına çevrilsin",
       "convertBody": "Hesap esnaf olur ve dükkân onay bekleyen başvuru olarak açılır. Telefon esnafın giriş numarası olur.",
       "convertSubmit": "Esnafa çevir",
-      "blockIp": "IP adresini engelle",
-      "blockIpTitle": "{{ip}} engellensin mi?",
-      "blockIpBody": "Kullanıcının son giriş yaptığı IP adresi engel listesine eklenir. Aynı ağı paylaşan başka kişiler de etkilenebilir.",
-      "blockIpConfirm": "Engelle",
-      "blockIpDone": "{{ip}} engel listesine eklendi.",
+      "blockIp": "IP'yi işaretle (yalnız kayıt)",
+      "blockIpTitle": "{{ip}} kayda geçirilsin mi?",
+      "blockIpBody": "Bu işlem trafiği engellemez, yalnızca kayıt tutar. Kullanıcının son giriş yaptığı IP adresi işaretli IP listesine eklenir.",
+      "blockIpConfirm": "İşaretle",
+      "blockIpDone": "{{ip}} işaretlendi (yalnız kayıt).",
       "delete": "Hesabı ve tüm kayıtlarını sil",
       "deleteTitle": "{{name}} kalıcı olarak silinsin mi?",
-      "deleteBody": "Hesap ve bağlı tüm kayıtlar silinir, geri alınamaz. Açık rezervasyonu olan hesap silinmez. KVKK silme talebi için \"Hesabı sil\" seçeneğini kullanın.",
+      "deleteBody": "Hesap ve bağlı tüm kayıtlar silinir, geri alınamaz. Açık rezervasyonu ya da ödeme geçmişi olan hesap ve yönetici hesabı silinmez. KVKK silme talebi için \"Hesabı sil\" seçeneğini kullanın.",
       "deleteConfirm": "Tamamen sil",
       "deleteDone": "Hesap silindi.",
       "reasonLabel": "Gerekçe",
@@ -2299,13 +2299,15 @@
         "blocked_by_relations": "Hesaba bağlı kayıtlar silmeyi engelliyor.",
         "no_ip": "Bu kullanıcı için kayıtlı IP adresi yok.",
         "invalid_ip": "Kayıtlı IP adresi geçersiz.",
-        "own_ip": "Şu an kullandığınız IP adresini engelleyemezsiniz.",
+        "own_ip": "Şu an kullandığınız IP adresini işaretleyemezsiniz.",
         "not_found": "Kullanıcı bulunamadı.",
         "invalid_data": "Alanları kontrol edin.",
         "location_required": "Geçerli bir konum girin (enlem, boylam ya da harita bağlantısı).",
         "invalid_tr_phone": "Geçerli bir Türkiye cep telefonu girin.",
         "phone_already_registered": "Bu telefon başka bir esnaf ya da yönetici hesabında kayıtlı.",
-        "not_guest": "Yalnızca misafir hesabı esnafa çevrilebilir."
+        "not_guest": "Yalnızca misafir hesabı esnafa çevrilebilir.",
+        "target_is_admin": "Yönetici hesabı silinemez. Önce iki yönetici onaylı rol değişikliğiyle düşürün.",
+        "has_payment_history": "Hesabın ödeme geçmişi ya da bekleyen hakedişi var; kalıcı silme bunları da siler. Bunun yerine \"Hesabı sil\" ile anonimleştirin."
       }
     },
     "messages": {
@@ -2342,7 +2344,8 @@
       "info": "Dükkân bilgileri",
       "name": "Dükkân adı",
       "address": "Adres",
-      "nameRequired": "En az 2 karakter."
+      "nameRequired": "En az 2 karakter.",
+      "addressRequired": "En az {{min}} karakterlik bir adres girin."
     },
     "booking": {
       "openDispute": "İtirazı aç",

@@ -166,7 +166,11 @@ export default function AdminUsersClient({
           if (!res.ok) {
             // `HAS_ACTIVE_BOOKING` da iliskili-kayit engeliydi ama "unauthorized"
             // dalina dusuyordu -- admin, tam yetkisi varken "yetkiniz yok" okuyordu.
-            if (
+            if (res.error === "target_is_admin") {
+              toast.error(t("deleteUserTargetIsAdmin"));
+            } else if (res.error === "has_payment_history") {
+              toast.error(t("deleteUserHasPaymentHistory"));
+            } else if (
               res.error === DELETE_USER_BLOCKED_CODE ||
               res.error === DELETE_USER_HAS_ACTIVE_BOOKING_CODE
             ) {
@@ -253,29 +257,30 @@ export default function AdminUsersClient({
     }
   };
 
-  const handleBlockIp = async (ip: string) => {
+  /*
+    `BlockedIp` hicbir yerde uygulanmiyor: islem yalnizca kayit dusuyor. Dugme ve
+    onay metni bunu acikca soyler; yonetici trafigi kestigini sanmasin.
+  */
+  const handleBlockIp = (ip: string) => {
     if (!ip) return;
-    try {
-      /**
-       * SONUÇ KONTROL EDİLİYOR.
-       *
-       * `blockIpAction` başarısızlıkta FIRLATMIYOR, `{ success: false }` dönüyor
-       * (ör. geçersiz IP biçimi). Yalnızca `catch` yazmak, hiçbir şey
-       * engellenmediği hâlde "IP engellendi" demek anlamına geliyordu —
-       * yöneticinin bir güvenlik denetimini yapılmış sanması.
-       */
-      const res = await blockIpAction(
-        ip,
-        "Admin manually blocked this IP from user list.",
-      );
-      if (!res.success) {
-        toast.error(t("ipBlockFailed"));
-        return;
-      }
-      toast.warning(t("ipBlockedSuccess"));
-    } catch (caughtError: unknown) {
-      toast.error(tErrors(actionErrorKey(caughtError)));
-    }
+    setConfirmState({
+      open: true,
+      message: t("ipFlagConfirm", { ip }),
+      confirmLabel: t("blockThisIp"),
+      onConfirm: async () => {
+        try {
+          // `{ success: false }` doner, firlatmaz: sonuc okunmazsa yapilmamis is "yapildi" gorunur.
+          const res = await blockIpAction(ip, "Flagged by admin from user list (record only).");
+          if (!res.success) {
+            toast.error(t("ipBlockFailed"));
+            return;
+          }
+          toast.success(t("ipBlockedSuccess"));
+        } catch (caughtError: unknown) {
+          toast.error(tErrors(actionErrorKey(caughtError)));
+        }
+      },
+    });
   };
 
   return (

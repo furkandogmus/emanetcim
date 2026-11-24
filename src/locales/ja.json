@@ -953,7 +953,7 @@
     "userDeleted": "ユーザーを削除しました。",
     "deleteUserBlockedByRelations": "この利用者には店舗・予約などの関連レコードが残っているため削除できません。先にそれらを削除してください。",
     "resendSuccess": "確認メールを再送しました。",
-    "ipBlockedSuccess": "IP アドレスをブロックしました。",
+    "ipBlockedSuccess": "IP アドレスを記録しました（記録のみ）。",
     "backToDashboard": "ダッシュボードに戻る",
     "searchUsersPlaceholder": "ユーザーを検索…",
     "active": "ACTIVE",
@@ -985,7 +985,7 @@
     "date": "Date",
     "searchApplicationsPlaceholder": "申請を検索…",
     "noApplicationsFound": "No applications.",
-    "blockThisIp": "Block IP",
+    "blockThisIp": "IP を記録（記録のみ）",
     "searchShopsPlaceholder": "店舗を検索…",
     "performance": "Performance",
     "inactive": "INACTIVE",
@@ -1114,7 +1114,7 @@
     "messagesBulkSelectAll": "表示中を選択",
     "messagesBulkDelete": "選択したものを削除",
     "messagesBulkConfirm": "選択したメッセージを完全に削除しますか？",
-    "ipBlockFailed": "IP をブロックできませんでした。形式を確認してください。",
+    "ipBlockFailed": "IP を記録できませんでした。形式を確認してください。",
     "resendFailed": "確認メールを送信できませんでした。",
     "campaignUpdateFailed": "キャンペーンを更新できませんでした。",
     "campaignDeleteFailed": "キャンペーンを削除できませんでした。",
@@ -1374,7 +1374,10 @@
     "partnerLeadMapsSearch": "住所を Google マップで検索",
     "affiliatesTitle": "紹介パートナー",
     "accountDeletionsNav": "アカウント削除リクエスト",
-    "reviewModerationNav": "レビューの管理"
+    "reviewModerationNav": "レビューの管理",
+    "ipFlagConfirm": "{ip} を記録しますか？通信は遮断されず、記録が残るだけです。",
+    "deleteUserTargetIsAdmin": "管理者アカウントは削除できません。先に2人目の管理者の承認によるロール変更で降格してください。",
+    "deleteUserHasPaymentHistory": "このアカウントには支払い履歴または未払いの精算があり、完全削除するとそれらも消えます。代わりにアカウントを匿名化してください。"
   },
   "Auth": {
     "loginTitle": "バガジパークにサインインする",

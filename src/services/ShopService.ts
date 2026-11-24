@@ -1393,6 +1393,8 @@ export class ShopService implements IShopService {
   ): Promise<AdminShopUpdateResult> {
     const invalid = { ok: false, error: "Errors.invalidData" } as const;
     if (data.name !== undefined && !String(data.name).trim()) return invalid;
+    // Bos adres misafire dukkani bulduramaz: alan gonderildiyse bos olamaz.
+    if (data.address !== undefined && !String(data.address ?? "").trim()) return invalid;
 
     const coord = (v: number | undefined) =>
       v === undefined ? undefined : typeof v === "number" && Number.isFinite(v) ? v : null;

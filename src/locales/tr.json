@@ -959,7 +959,7 @@
     "userDeleted": "Kullanıcı başarıyla silindi.",
     "deleteUserBlockedByRelations": "Bu kullanıcı silinemiyor: bağlı dükkan, rezervasyon veya başka kayıt var. Önce ilişkili kayıtları kaldırın.",
     "resendSuccess": "Doğrulama e-postası tekrar gönderildi.",
-    "ipBlockedSuccess": "IP adresi engellendi.",
+    "ipBlockedSuccess": "IP adresi işaretlendi (yalnız kayıt).",
     "backToDashboard": "PANELE DÖN",
     "searchUsersPlaceholder": "İsim, e-posta veya IP ara...",
     "active": "AKTİF",
@@ -991,7 +991,7 @@
     "date": "Tarih",
     "searchApplicationsPlaceholder": "Başvuru ara...",
     "noApplicationsFound": "Bekleyen başvuru bulunmuyor.",
-    "blockThisIp": "IP Engelle",
+    "blockThisIp": "IP'yi işaretle (yalnız kayıt)",
     "searchShopsPlaceholder": "Dükkan, sahip veya telefon ara...",
     "performance": "Performans",
     "inactive": "PASİF",
@@ -1120,7 +1120,7 @@
     "messagesBulkSelectAll": "Görünenleri seç",
     "messagesBulkDelete": "Seçilenleri sil",
     "messagesBulkConfirm": "Seçilen mesajlar kalıcı olarak silinsin mi?",
-    "ipBlockFailed": "IP engellenemedi. Biçimi kontrol edin.",
+    "ipBlockFailed": "IP işaretlenemedi. Biçimi kontrol edin.",
     "resendFailed": "Doğrulama e-postası gönderilemedi.",
     "campaignUpdateFailed": "Kampanya güncellenemedi.",
     "campaignDeleteFailed": "Kampanya silinemedi.",
@@ -1374,7 +1374,10 @@
     "partnerLeadMapsSearch": "Adresi Google Maps'te ara",
     "affiliatesTitle": "Aracılar",
     "accountDeletionsNav": "Hesap silme talepleri",
-    "reviewModerationNav": "Yorum moderasyonu"
+    "reviewModerationNav": "Yorum moderasyonu",
+    "ipFlagConfirm": "{ip} adresi kayda geçirilsin mi? Bu işlem trafiği engellemez, yalnızca kayıt tutar.",
+    "deleteUserTargetIsAdmin": "Yönetici hesabı silinemez. Önce iki yönetici onaylı rol değişikliğiyle düşürün.",
+    "deleteUserHasPaymentHistory": "Bu hesabın ödeme geçmişi ya da bekleyen hakedişi var; kalıcı silme bunları da siler. Bunun yerine hesabı anonimleştirin."
   },
   "Auth": {
     "loginTitle": "BagajPark'a Giriş Yap",

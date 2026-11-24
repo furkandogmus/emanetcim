@@ -2280,14 +2280,14 @@
       "convertTitle": "{{name}} in ein Partnerkonto umwandeln",
       "convertBody": "Das Konto wird zum Partner, und der Laden wird als Bewerbung angelegt, die auf Freigabe wartet. Die Telefonnummer wird zur Anmeldenummer des Partners.",
       "convertSubmit": "In Partner umwandeln",
-      "blockIp": "IP-Adresse sperren",
-      "blockIpTitle": "{{ip}} sperren?",
-      "blockIpBody": "Die IP-Adresse der letzten Anmeldung wird auf die Sperrliste gesetzt. Andere Personen im selben Netz können betroffen sein.",
-      "blockIpConfirm": "Sperren",
-      "blockIpDone": "{{ip}} wurde auf die Sperrliste gesetzt.",
+      "blockIp": "IP markieren (nur Vermerk)",
+      "blockIpTitle": "{{ip}} vermerken?",
+      "blockIpBody": "Das sperrt keinen Datenverkehr, es wird nur ein Eintrag gespeichert. Die IP-Adresse der letzten Anmeldung kommt auf die Liste markierter IPs.",
+      "blockIpConfirm": "Markieren",
+      "blockIpDone": "{{ip}} markiert (nur Vermerk).",
       "delete": "Konto mit allen Daten löschen",
       "deleteTitle": "{{name}} endgültig löschen?",
-      "deleteBody": "Das Konto und alle verknüpften Datensätze werden gelöscht. Das lässt sich nicht rückgängig machen. Konten mit offenen Buchungen werden nicht gelöscht. Für einen Löschantrag nach Datenschutzrecht „Konto löschen“ verwenden.",
+      "deleteBody": "Das Konto und alle verknüpften Datensätze werden gelöscht. Das lässt sich nicht rückgängig machen. Adminkonten und Konten mit offenen Buchungen oder Zahlungsverlauf werden nicht gelöscht. Für einen Löschantrag nach Datenschutzrecht „Konto löschen“ verwenden.",
       "deleteConfirm": "Alles löschen",
       "deleteDone": "Konto gelöscht.",
       "reasonLabel": "Begründung",
@@ -2299,13 +2299,15 @@
         "blocked_by_relations": "Verknüpfte Datensätze verhindern das Löschen.",
         "no_ip": "Für diesen Nutzer ist keine IP-Adresse gespeichert.",
         "invalid_ip": "Die gespeicherte IP-Adresse ist ungültig.",
-        "own_ip": "Sie können die IP-Adresse, die Sie gerade nutzen, nicht sperren.",
+        "own_ip": "Sie können die IP-Adresse, die Sie gerade nutzen, nicht markieren.",
         "not_found": "Nutzer nicht gefunden.",
         "invalid_data": "Bitte prüfen Sie die Felder.",
         "location_required": "Geben Sie einen gültigen Standort ein (Breite, Länge oder Kartenlink).",
         "invalid_tr_phone": "Geben Sie eine gültige türkische Mobilnummer ein.",
         "phone_already_registered": "Diese Nummer gehört zu einem anderen Partner- oder Adminkonto.",
-        "not_guest": "Nur ein Gastkonto kann in einen Partner umgewandelt werden."
+        "not_guest": "Nur ein Gastkonto kann in einen Partner umgewandelt werden.",
+        "target_is_admin": "Ein Adminkonto kann nicht gelöscht werden. Stufen Sie es zuerst über den Rollenwechsel mit zweiter Admin-Freigabe herab.",
+        "has_payment_history": "Das Konto hat Zahlungsverlauf oder eine offene Auszahlung; endgültiges Löschen würde beides entfernen. Anonymisieren Sie es stattdessen mit „Konto löschen“."
       }
     },
     "messages": {
@@ -2342,7 +2344,8 @@
       "info": "Ladendaten",
       "name": "Name des Ladens",
       "address": "Adresse",
-      "nameRequired": "Mindestens 2 Zeichen."
+      "nameRequired": "Mindestens 2 Zeichen.",
+      "addressRequired": "Geben Sie eine Adresse mit mindestens {{min}} Zeichen ein."
     },
     "booking": {
       "openDispute": "Reklamation öffnen",

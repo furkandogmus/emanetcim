@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
 import { requireMobileUser, requireRole } from "@/lib/mobile-auth";
-import { unpaidCommissionsCsv } from "@/services/AffiliateService";
+import { monthRange, unpaidCommissionsCsv } from "@/services/AffiliateService";
 
 /**
  * Odenmemis araci komisyonlari CSV'si (web `/api/admin/affiliates/commissions` ile ayni
@@ -14,7 +14,8 @@ export async function GET(req: NextRequest) {
   if (forbid) return forbid;
 
   const month = req.nextUrl.searchParams.get("month") || undefined;
-  if (month && !/^\d{4}-\d{2}$/.test(month)) return NextResponse.json({ error: "invalid_data" }, { status: 400 });
+  // Bicim yetmez: "2026-13" gecersiz ay, aralik yoksa servis TUM komisyonlari dokerdi.
+  if (month && !monthRange(month)) return NextResponse.json({ error: "invalid_data" }, { status: 400 });
   const csv = await unpaidCommissionsCsv({ month });
   return NextResponse.json(
     { csv, filename: `araci-komisyon-${month ?? "tum"}.csv` },

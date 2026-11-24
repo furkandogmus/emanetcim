@@ -959,7 +959,7 @@
     "userDeleted": "User deleted.",
     "deleteUserBlockedByRelations": "This user cannot be deleted while they still have a shop, bookings, or other linked records. Remove those first.",
     "resendSuccess": "Verification email resent.",
-    "ipBlockedSuccess": "IP address blocked.",
+    "ipBlockedSuccess": "IP address flagged (record only).",
     "backToDashboard": "BACK TO DASHBOARD",
     "searchUsersPlaceholder": "Search users...",
     "active": "ACTIVE",
@@ -991,7 +991,7 @@
     "date": "Date",
     "searchApplicationsPlaceholder": "Search applications...",
     "noApplicationsFound": "No applications.",
-    "blockThisIp": "Block IP",
+    "blockThisIp": "Flag IP (record only)",
     "searchShopsPlaceholder": "Search shops...",
     "performance": "Performance",
     "inactive": "INACTIVE",
@@ -1120,7 +1120,7 @@
     "messagesBulkSelectAll": "Select visible",
     "messagesBulkDelete": "Delete selected",
     "messagesBulkConfirm": "Permanently delete the selected messages?",
-    "ipBlockFailed": "Could not block the IP. Check the format.",
+    "ipBlockFailed": "Could not flag the IP. Check the format.",
     "resendFailed": "Could not send the verification email.",
     "campaignUpdateFailed": "Could not update the campaign.",
     "campaignDeleteFailed": "Could not delete the campaign.",
@@ -1374,7 +1374,10 @@
     "partnerLeadMapsSearch": "Search the address on Google Maps",
     "affiliatesTitle": "Referrers",
     "accountDeletionsNav": "Account deletion requests",
-    "reviewModerationNav": "Review moderation"
+    "reviewModerationNav": "Review moderation",
+    "ipFlagConfirm": "Record {ip}? This does not block traffic; it only keeps a record.",
+    "deleteUserTargetIsAdmin": "An admin account can't be deleted. Demote it first through the two-admin role change.",
+    "deleteUserHasPaymentHistory": "This account has payment history or a pending payout, and a permanent delete would erase them. Anonymise the account instead."
   },
   "Auth": {
     "loginTitle": "Sign in to BagajPark",

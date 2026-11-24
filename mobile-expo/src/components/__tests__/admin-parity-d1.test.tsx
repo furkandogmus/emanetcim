@@ -119,6 +119,8 @@ describe("kapilar (saf)", () => {
     expect(canHardDelete(GUEST, "admin-1")).toBe(true);
     expect(canHardDelete(GUEST, "g1")).toBe(false);
     expect(canHardDelete({ ...GUEST, isAnonymized: true }, "admin-1")).toBe(false);
+    // Yonetici once iki admin onayli rol akisiyla dusurulur.
+    expect(canHardDelete({ ...GUEST, role: "ADMIN" }, "admin-1")).toBe(false);
     expect(canBlockIp(GUEST, "admin-1")).toBe(true);
     expect(canBlockIp({ ...GUEST, lastIp: null }, "admin-1")).toBe(false);
     expect(canBlockIp(GUEST, "g1")).toBe(false);
@@ -181,7 +183,7 @@ describe("kullanici karti: yikici islemler", () => {
     await waitFor(() => expect(mutations()).toEqual([{ path: "/admin/users/g1", body: { reason: "Sahte hesap" } }]));
   });
 
-  it("IP engeli son IP'yi gosterir, gerekceyle block-ip ucuna gider; sunucu reddi panelde cevrilir", async () => {
+  it("IP isareti son IP'yi gosterir, trafigi engellemedigini soyler, gerekceyle block-ip ucuna gider; sunucu reddi panelde cevrilir", async () => {
     mockHandler = async (path) => {
       if (path === "/admin/users/g1") return { user };
       if (path.endsWith("/block-ip")) throw new ApiError(409, "own_ip");
@@ -189,10 +191,11 @@ describe("kullanici karti: yikici islemler", () => {
     };
     await renderUser();
     expect(screen.getByText("Son IP: 198.51.100.7")).toBeTruthy();
-    await fireEvent.press(screen.getByRole("button", { name: "IP adresini engelle" }));
+    await fireEvent.press(screen.getByRole("button", { name: "IP'yi işaretle (yalnız kayıt)" }));
     await fireEvent.changeText(await screen.findByLabelText("Gerekçe"), "Spam basvuru");
-    await fireEvent.press(screen.getByRole("button", { name: "Engelle" }));
-    expect(await screen.findByText(/kullandığınız IP adresini engelleyemezsiniz/)).toBeTruthy();
+    expect(screen.getByText(/trafiği engellemez/)).toBeTruthy();
+    await fireEvent.press(screen.getByRole("button", { name: "İşaretle" }));
+    expect(await screen.findByText(/kullandığınız IP adresini işaretleyemezsiniz/)).toBeTruthy();
     expect(mutations()).toEqual([{ path: "/admin/users/g1/block-ip", body: { reason: "Spam basvuru" } }]);
   });
 
@@ -201,7 +204,7 @@ describe("kullanici karti: yikici islemler", () => {
     user = { ...GUEST, role: "PARTNER" };
     await renderUser();
     expect(screen.queryByRole("button", { name: "Hesabı ve tüm kayıtlarını sil" })).toBeNull();
-    expect(screen.queryByRole("button", { name: "IP adresini engelle" })).toBeNull();
+    expect(screen.queryByRole("button", { name: "IP'yi işaretle (yalnız kayıt)" })).toBeNull();
     expect(screen.queryByRole("button", { name: "Esnafa çevir" })).toBeNull();
   });
 });
@@ -209,6 +212,8 @@ describe("kullanici karti: yikici islemler", () => {
 describe("sunucu hata kodlari", () => {
   const CODES = [
     "cannot_delete_self",
+    "target_is_admin",
+    "has_payment_history",
     "has_active_booking",
     "blocked_by_relations",
     "no_ip",

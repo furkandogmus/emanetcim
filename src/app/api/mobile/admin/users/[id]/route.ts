@@ -58,6 +58,8 @@ const DeleteSchema = z.object({ reason: z.string().trim().min(3).max(500) }).str
 
 const DELETE_STATUS: Record<Extract<DeleteUserResult, { ok: false }>["error"], number> = {
   cannot_delete_self: 409,
+  target_is_admin: 409,
+  has_payment_history: 409,
   has_active_booking: 409,
   blocked_by_relations: 409,
 };

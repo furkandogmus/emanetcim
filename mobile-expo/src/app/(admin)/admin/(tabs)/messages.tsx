@@ -50,7 +50,11 @@ export default function AdminMessagesScreen() {
   // Secim modu: null kapali; acikken satira dokunmak secer, mesaj acilmaz.
   const [selected, setSelected] = useState<Set<string> | null>(null);
 
-  const setSearch = useCallback((q: string) => setFilters((f) => (f.q === q ? f : { ...f, q })), []);
+  const setSearch = useCallback((q: string) => {
+    setFilters((f) => (f.q === q ? f : { ...f, q }));
+    // Arama degisince secim de sifirlanir: gorunmeyen mesaj toplu silmeye girmesin.
+    setSelected((cur) => (cur && cur.size > 0 ? new Set() : cur));
+  }, [setFilters, setSelected]);
   function updateFilters(next: Partial<AdminMessageFilters>) {
     setFilters((f) => ({ ...f, ...next }));
     setSelected((cur) => (cur ? new Set() : cur));
@@ -120,7 +124,9 @@ export default function AdminMessagesScreen() {
   }
 
   function confirmBulkDelete() {
-    const ids = [...(selected ?? [])].slice(0, MESSAGE_BULK_MAX);
+    // Yalniz ekranda gorunenler: secimden sonra liste degistiyse kalanlar silinmez.
+    const visible = new Set(messages.map((m) => m.id));
+    const ids = [...(selected ?? [])].filter((id) => visible.has(id)).slice(0, MESSAGE_BULK_MAX);
     if (ids.length === 0) return;
     Alert.alert(
       t("adminParityD1.messages.bulkDeleteTitle", { count: ids.length }),
@@ -132,6 +138,7 @@ export default function AdminMessagesScreen() {
     );
   }
 
+  const visibleSelected = selected ? messages.filter((m) => selected.has(m.id)).length : 0;
   const allVisibleSelected = !!selected && messages.length > 0 && messages.every((m) => selected.has(m.id));
   const categoryLabel = (c: AdminMessageCategory | null) => {
     const name = t(`adminParityD1.messages.category.${c ?? "ALL"}`);
@@ -194,8 +201,8 @@ export default function AdminMessagesScreen() {
             />
             <Button
               variant="danger"
-              title={t("adminParityD1.messages.deleteSelected", { count: selected.size })}
-              disabled={selected.size === 0}
+              title={t("adminParityD1.messages.deleteSelected", { count: visibleSelected })}
+              disabled={visibleSelected === 0}
               loading={removeMany.isPending}
               onPress={confirmBulkDelete}
             />

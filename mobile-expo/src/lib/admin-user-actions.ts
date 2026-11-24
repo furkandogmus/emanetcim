@@ -64,9 +64,12 @@ export const anonymizeUser = (id: string, confirm: string, reason: string) =>
 /** Kalici silme ve IP engelinde gerekce alt siniri (sunucu semasi ile ayni). */
 export const DESTRUCTIVE_REASON_MIN = 3;
 
-/** Kalici silme: kendisi degil, anonim hesap degil (web "sil" ile ayni kapi; kurallar sunucuda). */
-export function canHardDelete(user: Pick<AdminUserDetail, "id" | "isAnonymized">, myId: string | null): boolean {
-  return user.id !== myId && !user.isAnonymized;
+/**
+ * Kalici silme: kendisi, yonetici ve anonim hesap degil. Yonetici once iki admin
+ * onayli rol akisiyla dusurulur. Odeme gecmisi kurali sunucuda (`has_payment_history`).
+ */
+export function canHardDelete(user: Pick<AdminUserDetail, "id" | "role" | "isAnonymized">, myId: string | null): boolean {
+  return user.id !== myId && user.role !== "ADMIN" && !user.isAnonymized;
 }
 
 /** IP engeli: kayitli son IP varsa ve kendisi degilse. */

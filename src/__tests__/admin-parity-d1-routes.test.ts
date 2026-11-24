@@ -33,7 +33,10 @@ vi.mock("@/services/PartnerLeadService", () => ({ partnerLeadService: leads }));
 const ops = vi.hoisted(() => ({ bookingNotifications: vi.fn() }));
 vi.mock("@/services/AdminOpsService", () => ({ adminOpsService: ops }));
 const aff = vi.hoisted(() => ({ unpaidCommissionsCsv: vi.fn() }));
-vi.mock("@/services/AffiliateService", () => aff);
+vi.mock("@/services/AffiliateService", async (orig) => ({
+  monthRange: (await orig<typeof import("@/services/AffiliateService")>()).monthRange,
+  ...aff,
+}));
 
 import { signAccessToken, signImpersonationToken } from "@/lib/mobile-auth";
 import * as usersRoute from "@/app/api/mobile/admin/users/route";
@@ -231,6 +234,9 @@ describe("diger D1 uclari", () => {
 
   it("komisyon CSV'si: ay bicimi dogrulanir, metin JSON'da doner", async () => {
     expect((await commissions(req("GET", "/x?month=2026-1", adminToken))).status).toBe(400);
+    // Bicim dogru ama ay gecersiz: aralik yok, eskiden TUM komisyonlar doniyordu.
+    expect((await commissions(req("GET", "/x?month=2026-13", adminToken))).status).toBe(400);
+    expect(aff.unpaidCommissionsCsv).not.toHaveBeenCalled();
     aff.unpaidCommissionsCsv.mockResolvedValue("a,b\n1,2");
     const res = await commissions(req("GET", "/x?month=2026-11", adminToken));
     expect(await res.json()).toEqual({ csv: "a,b\n1,2", filename: "araci-komisyon-2026-11.csv" });
