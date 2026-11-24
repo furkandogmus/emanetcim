@@ -5,8 +5,8 @@ import { createHmac, timingSafeEqual } from "node:crypto";
  *
  * NEDEN AYRI MODÜL (2026-08-24): bu uç, kimlik doğrulaması olmayan ve
  * veritabanına YAZAN tek genel POST ucu (`/api/webhooks/resend`). Doğrulama
- * mantığı route dosyasının içindeydi ve **hiç testi yoktu**. Buradaki üç
- * fonksiyon saf: gövde, başlıklar ve sır alır, boolean döner.
+ * mantığı route dosyasının içindeydi ve **hiç testi yoktu**. Buradaki
+ * fonksiyonlar saf: gövde, başlıklar ve sır alır, boolean döner.
  */
 
 /**
@@ -87,23 +87,9 @@ export function verifySvixSignature(
 }
 
 /**
- * Svix ÖNCESİ biçim: gövdenin ham HMAC'i, zaman damgası yok.
- *
- * Zaman damgası olmadığı için bu yolda tekrar oynatma engellenemez. Bu yüzden
- * yalnızca sır bir Svix sırrı DEĞİLSE kabul edilir (`isSvixSecret`); `whsec_`
- * ile başlayan bir sır varken zayıf yola düşmek, güçlü yolu anlamsız kılardı.
+ * Yalnizca Svix (`whsec_`) sirri kabul edilir (2026-11-24). Svix oncesi ham HMAC
+ * yolu zaman damgasi tasimadigi icin tekrar oynatmaya acikti ve kaldirildi.
  */
-export function verifyLegacySignature(
-  rawBody: string,
-  signature: string,
-  secret: string,
-): boolean {
-  const provided = signature.replace(/^sha256=/i, "").trim();
-  if (!provided) return false;
-  const expected = createHmac("sha256", secret).update(rawBody).digest("hex");
-  return equalsConstantTime(Buffer.from(expected), Buffer.from(provided));
-}
-
 export function isSvixSecret(secret: string): boolean {
   return secret.startsWith("whsec_");
 }
@@ -111,7 +97,10 @@ export function isSvixSecret(secret: string): boolean {
 /** Doğrulama sonucu — reddedilme sebebi loglanabilsin diye ayrı ayrı. */
 export type WebhookVerdict =
   | { ok: true }
-  | { ok: false; reason: "missing_signature" | "stale_timestamp" | "bad_signature" };
+  | {
+      ok: false;
+      reason: "missing_signature" | "stale_timestamp" | "bad_signature" | "non_svix_secret";
+    };
 
 export function verifyWebhook(
   rawBody: string,
@@ -119,21 +108,14 @@ export function verifyWebhook(
   secret: string,
   nowMs: number,
 ): WebhookVerdict {
-  if (!headers) return { ok: false, reason: "missing_signature" };
-
-  if (headers.svixId) {
-    if (!isTimestampFresh(headers.svixTs, nowMs)) {
-      return { ok: false, reason: "stale_timestamp" };
-    }
-    return verifySvixSignature(rawBody, headers, secret)
-      ? { ok: true }
-      : { ok: false, reason: "bad_signature" };
+  if (!isSvixSecret(secret)) return { ok: false, reason: "non_svix_secret" };
+  if (!headers?.svixId || !headers.svixTs || !headers.signature) {
+    return { ok: false, reason: "missing_signature" };
   }
-
-  // Svix sırrı varken eski/zayıf yola düşülmez.
-  if (isSvixSecret(secret)) return { ok: false, reason: "missing_signature" };
-
-  return verifyLegacySignature(rawBody, headers.signature, secret)
+  if (!isTimestampFresh(headers.svixTs, nowMs)) {
+    return { ok: false, reason: "stale_timestamp" };
+  }
+  return verifySvixSignature(rawBody, headers, secret)
     ? { ok: true }
     : { ok: false, reason: "bad_signature" };
 }

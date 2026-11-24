@@ -148,3 +148,25 @@ export async function rateLimit(
   }
   return redisRateLimit(key, max, windowMs);
 }
+
+const onceMemory = new Map<string, number>();
+
+/**
+ * Anahtari `ttlMs` boyunca BIR KEZ verir (webhook id tekillestirmesi).
+ * `rateLimit` sabit pencere kullanir; pencere sinirinda ayni id yeniden
+ * gecebilirdi. Burada sure ilk goruldugu andan sayilir (`SET NX PX`).
+ */
+export async function claimOnce(key: string, ttlMs: number): Promise<boolean> {
+  const redis = getRedis();
+  if (!redis) {
+    if (process.env.NODE_ENV === "production" && isDistributedRateLimitRequired()) {
+      throw new Error("Distributed rate limit is required in production. Set REDIS_URL.");
+    }
+    const now = Date.now();
+    for (const [k, exp] of onceMemory) if (exp <= now) onceMemory.delete(k);
+    if ((onceMemory.get(key) ?? 0) > now) return false;
+    onceMemory.set(key, now + ttlMs);
+    return true;
+  }
+  return (await redis.set(`once:v1:${key}`, "1", "PX", ttlMs, "NX")) === "OK";
+}
