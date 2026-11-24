@@ -5,14 +5,11 @@ import { rateLimit } from "@/lib/rate-limit";
 import { clientIp } from "@/lib/internal-api-guard";
 
 /**
- * Servis kodunun mobil HTTP karsiligi. Istemcinin gordugu kodlar DEGISMEDI;
- * degisen tek sey, govdenin web sayfasiyla PAYLASILIYOR olmasi.
+ * Servis kodunun mobil HTTP karsiligi. Bulunamayan / suresi dolan / hesapsiz token
+ * tek yanit verir (bkz. `VerifyEmailErrorCode`).
  */
 const CODE_TO_HTTP: Record<VerifyEmailErrorCode, { status: number; error: string }> = {
-  INVALID_TOKEN: { status: 400, error: "invalid_data" },
-  TOKEN_NOT_FOUND: { status: 400, error: "token_not_found" },
-  TOKEN_EXPIRED: { status: 400, error: "token_expired" },
-  USER_NOT_FOUND: { status: 404, error: "user_not_found" },
+  INVALID_TOKEN: { status: 400, error: "invalid_or_expired_token" },
   UNKNOWN: { status: 500, error: "server_error" },
 };
 

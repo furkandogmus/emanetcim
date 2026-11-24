@@ -1474,7 +1474,8 @@
     "newPasswordMismatch": "Şifreler eşleşmiyor.",
     "newPasswordInvalid": "Şifre kaydedilemedi. Bilgileri kontrol edin.",
     "tooManyAttempts": "Çok fazla deneme yaptınız. Lütfen bir saat sonra tekrar deneyin.",
-    "registerShopLocation": "İşyeri Konumu"
+    "registerShopLocation": "İşyeri Konumu",
+    "verifyEmailLinkInvalid": "Bu doğrulama bağlantısı geçersiz ya da süresi dolmuş. Yeni bir bağlantı isteyin."
   },
   "UserNav": {
     "signIn": "Giriş yap",

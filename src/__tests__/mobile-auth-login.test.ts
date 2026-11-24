@@ -1,11 +1,11 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import { NextRequest } from "next/server";
 
-const { mockPrisma, rateLimit, signAccess, signRefresh, record } = vi.hoisted(() => ({
+const { mockPrisma, rateLimit, signAccess, signRefresh, record, verifyCode } = vi.hoisted(() => ({
   mockPrisma: {
     user: { findUnique: vi.fn(), findFirst: vi.fn(), create: vi.fn(), update: vi.fn() },
-    verificationToken: { delete: vi.fn() },
   },
+  verifyCode: vi.fn(),
   rateLimit: vi.fn(async (_key: string, _max: number, _windowMs: number) => true),
   signAccess: vi.fn(async () => "access"),
   signRefresh: vi.fn(async () => "refresh"),
@@ -24,6 +24,10 @@ vi.mock("@/services/AnalyticsService", () => ({ analyticsService: { track: vi.fn
 vi.mock("@/lib/analytics-server", () => ({ resolveServerSessionId: vi.fn(async () => "s") }));
 vi.mock("@/lib/logger", () => ({ default: { warn: vi.fn(), error: vi.fn(), info: vi.fn() } }));
 vi.mock("@/services/auth/verify-email", () => ({ markEmailVerifiedByCode: vi.fn() }));
+vi.mock("@/services/auth/mobile-login-code", async (orig) => ({
+  ...(await orig<typeof import("@/services/auth/mobile-login-code")>()),
+  verifyMobileLoginCode: verifyCode,
+}));
 vi.mock("@/services/auth/legal-acceptance", () => ({ recordMobileLegalAcceptance: record }));
 vi.mock("@/lib/auth-password", async (orig) => ({
   ...(await orig<typeof import("@/lib/auth-password")>()),
@@ -49,7 +53,7 @@ describe("auth/session", () => {
     const res = await POST(req({ phone: "5321234567", code: "123456" }));
     expect(res.status).toBe(400);
     expect((await res.json()).error).toBe("sms_unavailable");
-    expect(mockPrisma.verificationToken.delete).not.toHaveBeenCalled();
+    expect(verifyCode).not.toHaveBeenCalled();
     expect(mockPrisma.user.create).not.toHaveBeenCalled();
   });
 
@@ -78,11 +82,11 @@ describe("auth/session", () => {
     mockPrisma.user.findUnique.mockResolvedValue(null);
     const res = await POST(req({ email: "x@mailinator.com", code: "123456" }));
     expect(res.status).toBe(403);
-    expect(mockPrisma.verificationToken.delete).not.toHaveBeenCalled();
+    expect(verifyCode).not.toHaveBeenCalled();
   });
 
   it("yeni e-posta hesabi adsiz acilir ve acceptedLegal ile kabul kaydi yazilir", async () => {
-    mockPrisma.verificationToken.delete.mockResolvedValue({ expires: new Date(Date.now() + 60_000) });
+    verifyCode.mockResolvedValue({ ok: true, user: null });
     mockPrisma.user.findUnique.mockResolvedValue(null);
     mockPrisma.user.create.mockResolvedValue({
       id: "u2",
@@ -101,7 +105,7 @@ describe("auth/session", () => {
   });
 
   it("acceptedLegal gelmezse (eski surum) kabul kaydi yazilmaz", async () => {
-    mockPrisma.verificationToken.delete.mockResolvedValue({ expires: new Date(Date.now() + 60_000) });
+    verifyCode.mockResolvedValue({ ok: true, user: null });
     mockPrisma.user.findUnique.mockResolvedValue(null);
     mockPrisma.user.create.mockResolvedValue({
       id: "u3",
@@ -115,5 +119,21 @@ describe("auth/session", () => {
     });
     await POST(req({ email: "gast2@example.com", code: "123456" }));
     expect(record).not.toHaveBeenCalled();
+  });
+
+  it("kod sonucu: yanlis 401 invalid_code, sinir 429, ADMIN 403 password_login_required ve token yok", async () => {
+    mockPrisma.user.findUnique.mockResolvedValue(null);
+    verifyCode.mockResolvedValueOnce({ ok: false, code: "INVALID_CODE" });
+    const wrong = await POST(req({ email: "a@example.com", code: "000000" }));
+    expect([wrong.status, (await wrong.json()).error]).toEqual([401, "invalid_code"]);
+    verifyCode.mockResolvedValueOnce({ ok: false, code: "TOO_MANY_ATTEMPTS" });
+    const many = await POST(req({ email: "a@example.com", code: "000000" }));
+    expect([many.status, (await many.json()).error]).toEqual([429, "too_many_attempts"]);
+    verifyCode.mockResolvedValueOnce({ ok: false, code: "ADMIN_OTP_DISABLED" });
+    const admin = await POST(req({ email: "a@example.com", code: "000000" }));
+    expect([admin.status, (await admin.json()).error]).toEqual([403, "password_login_required"]);
+    expect(signAccess).not.toHaveBeenCalled();
+    expect(mockPrisma.user.create).not.toHaveBeenCalled();
+    expect(verifyCode).toHaveBeenCalledWith("a@example.com", "email", "000000");
   });
 });

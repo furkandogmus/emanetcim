@@ -4,6 +4,7 @@ import { withJobRun } from "@/lib/jobs/run-ledger";
 import logger from "@/lib/logger";
 import { authorizeCron } from "@/lib/internal-api-guard";
 import { purgeOldAppLinkHits } from "@/services/AppLinkService";
+import { purgeStaleMobileLoginCodes } from "@/services/auth/mobile-login-code";
 
 // Yerel `authorize()` kopyası kaldırıldı (2026-08-22): sır karşılaştırmasını `===`
 // ile yapıyordu, yani sabit zamanlı değildi ve dört uçtaki kopyalardan biriydi.
@@ -50,6 +51,7 @@ async function runCleanup(req: NextRequest): Promise<NextResponse> {
       ]);
     // `/app` isabet defteri de 90 gunle sinirli (AppLinkService).
     const deletedAppLinkHits = await purgeOldAppLinkHits(now);
+    const deletedLoginCodes = await purgeStaleMobileLoginCodes(now);
 
     logger.info(
       {
@@ -57,6 +59,7 @@ async function runCleanup(req: NextRequest): Promise<NextResponse> {
         deletedSessions: deletedSessions.count,
         deletedAnalyticsEvents: deletedAnalyticsEvents.count,
         deletedAppLinkHits,
+        deletedLoginCodes,
       },
       "database_cleanup_success"
     );
@@ -68,6 +71,7 @@ async function runCleanup(req: NextRequest): Promise<NextResponse> {
         deletedSessions: deletedSessions.count,
         deletedAnalyticsEvents: deletedAnalyticsEvents.count,
         deletedAppLinkHits,
+        deletedLoginCodes,
       },
     };
   });

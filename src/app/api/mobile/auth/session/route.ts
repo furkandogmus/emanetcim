@@ -16,6 +16,7 @@ import { toMobileUser } from "@/lib/mobile-dto";
 import { markEmailVerifiedByCode } from "@/services/auth/verify-email";
 import { recordMobileLegalAcceptance } from "@/services/auth/legal-acceptance";
 import { smsLoginEnabled } from "@/lib/sms-login";
+import { findUserByMobileIdentity, verifyMobileLoginCode } from "@/services/auth/mobile-login-code";
 
 const schema = z.union([
   z.object({
@@ -74,7 +75,6 @@ export async function POST(req: NextRequest) {
   if (code && !isEmail && !smsLoginEnabled()) {
     return NextResponse.json({ error: "sms_unavailable" }, { status: 400 });
   }
-  const identifier = `mobile:${normalizedIdentity}`;
 
   let user: User | null = null;
 
@@ -97,25 +97,19 @@ export async function POST(req: NextRequest) {
       }
     }
 
-    const token = await prisma.verificationToken.delete({
-      where: { identifier_token: { identifier, token: code } },
-    }).catch(() => null);
-
-    if (!token || token.expires < new Date()) {
+    // Tek aktif kod, kod basina ve kimlik basina deneme siniri: `mobile-login-code.ts`.
+    const verified = await verifyMobileLoginCode(normalizedIdentity, isEmail ? "email" : "phone", code);
+    if (!verified.ok) {
+      if (verified.code === "TOO_MANY_ATTEMPTS") {
+        return NextResponse.json({ error: "too_many_attempts" }, { status: 429 });
+      }
+      if (verified.code === "ADMIN_OTP_DISABLED") {
+        // Yalnizca dogru kodla ulasilir: rol bilgisi kodu bilmeyene sizmaz.
+        return NextResponse.json({ error: "password_login_required" }, { status: 403 });
+      }
       return NextResponse.json({ error: "invalid_code" }, { status: 401 });
     }
-
-    user = isEmail
-      ? await prisma.user.findUnique({ where: { email: normalizedIdentity } })
-      : await prisma.user.findFirst({
-          where: {
-            OR: [
-              { phone: normalizedIdentity },
-              { phone: `+90${normalizedIdentity}` },
-              { phone: `0${normalizedIdentity}` }
-            ]
-          }
-        });
+    user = verified.user;
 
     if (!user) {
       // Kodla kayit da ayni kurala tabi: bot kalibi ve gecici domain yeni hesap acamaz.
@@ -171,17 +165,7 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: "too_many_attempts" }, { status: 429 });
     }
 
-    user = isEmail
-      ? await prisma.user.findUnique({ where: { email: normalizedIdentity } })
-      : await prisma.user.findFirst({
-          where: {
-            OR: [
-              { phone: normalizedIdentity },
-              { phone: `+90${normalizedIdentity}` },
-              { phone: `0${normalizedIdentity}` }
-            ]
-          }
-        });
+    user = await findUserByMobileIdentity(normalizedIdentity, isEmail ? "email" : "phone");
 
     if (!user || !user.passwordHash) {
       return NextResponse.json({ error: "invalid_credentials" }, { status: 401 });

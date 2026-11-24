@@ -18,12 +18,18 @@ import prisma from "@/lib/db";
 import logger from "@/lib/logger";
 import { linkGuestBookingsToVerifiedUser } from "@/services/booking/guest-link";
 
-export type VerifyEmailErrorCode =
-  | "INVALID_TOKEN"
-  | "TOKEN_NOT_FOUND"
-  | "TOKEN_EXPIRED"
-  | "USER_NOT_FOUND"
-  | "UNKNOWN";
+/**
+ * Bulunamayan, suresi dolan ve hesabi olmayan token TEK kod (`INVALID_TOKEN`).
+ * Ayri kodlar bir kahin (oracle) idi: `VerificationToken` baska akislarin
+ * satirlarini da tutar ve "hesap yok" yaniti, baska turden bir token'in CANLI
+ * oldugunu soyluyordu (2026-11-24 guvenlik incelemesi).
+ */
+export type VerifyEmailErrorCode = "INVALID_TOKEN" | "UNKNOWN";
+
+/** Dogrulama satirinin kimligi ham e-postadir; onekli (`mobile:`, `password-reset:`) satirlar degil. */
+function isEmailVerificationIdentifier(identifier: string): boolean {
+  return identifier.includes("@") && !identifier.includes(":");
+}
 
 export type VerifyEmailResult =
   | { ok: true; email: string }
@@ -49,16 +55,15 @@ export async function verifyEmailToken(
     const existingToken = await prisma.verificationToken.findUnique({
       where: { token: value },
     });
-    if (!existingToken) return { ok: false, code: "TOKEN_NOT_FOUND" };
-
-    if (new Date(existingToken.expires) < new Date()) {
-      return { ok: false, code: "TOKEN_EXPIRED" };
+    if (!existingToken || !isEmailVerificationIdentifier(existingToken.identifier)) {
+      return { ok: false, code: "INVALID_TOKEN" };
     }
+    if (new Date(existingToken.expires) < new Date()) return { ok: false, code: "INVALID_TOKEN" };
 
     const existingUser = await prisma.user.findUnique({
       where: { email: existingToken.identifier },
     });
-    if (!existingUser) return { ok: false, code: "USER_NOT_FOUND" };
+    if (!existingUser) return { ok: false, code: "INVALID_TOKEN" };
 
     await prisma.$transaction([
       prisma.user.update({

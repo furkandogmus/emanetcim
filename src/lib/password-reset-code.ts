@@ -64,3 +64,21 @@ export function resetCodeMatches(email: string, code: string, storedHash: string
   }
   return crypto.timingSafeEqual(a, b);
 }
+
+/**
+ * Ayni HMAC, baska bir kod turu icin (`scope` alan ayirici): mobil giris kodu
+ * sifirlama koduyla ayni hash'i uretmez.
+ */
+export function hashScopedCode(scope: string, subject: string, code: string): string {
+  return crypto.createHmac("sha256", codeSecret()).update(`${scope}:${subject}:${code}`).digest("hex");
+}
+
+export function scopedCodeMatches(scope: string, subject: string, code: string, storedHash: string): boolean {
+  const a = Buffer.from(hashScopedCode(scope, subject, code), "hex");
+  const b = Buffer.from(storedHash, "hex");
+  if (a.length !== b.length) {
+    crypto.timingSafeEqual(a, a);
+    return false;
+  }
+  return crypto.timingSafeEqual(a, b);
+}

@@ -1474,7 +1474,8 @@
     "newPasswordInvalid": "Impossible d'enregistrer le mot de passe. Vérifiez votre saisie.",
     "contactSupportHelp": "Si l'e-mail n'est toujours pas arrivé, contactez-nous à info@bagajpark.com.",
     "tooManyAttempts": "Trop de tentatives. Réessayez dans une heure.",
-    "registerShopLocation": "Emplacement du commerce"
+    "registerShopLocation": "Emplacement du commerce",
+    "verifyEmailLinkInvalid": "Ce lien de vérification est invalide ou a expiré. Demandez-en un nouveau."
   },
   "UserNav": {
     "signIn": "Se connecter",

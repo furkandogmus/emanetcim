@@ -22,6 +22,7 @@ const m = vi.hoisted(() => {
     mobileInstall: { deleteMany: ok() },
     merchantProfile: { deleteMany: ok() },
     passwordResetCode: { deleteMany: ok() },
+    mobileLoginCode: { deleteMany: ok() },
     verificationToken: { deleteMany: ok() },
     $transaction: vi.fn(),
   };

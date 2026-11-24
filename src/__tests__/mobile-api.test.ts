@@ -7,15 +7,23 @@ vi.mock("@/lib/db", () => ({
       upsert: vi.fn(),
       findUnique: vi.fn(),
     },
+    mobileLoginCode: {
+      upsert: vi.fn(),
+      findMany: vi.fn(async () => []),
+      deleteMany: vi.fn(),
+    },
     shop: {
       findMany: vi.fn(),
       findUnique: vi.fn(),
     },
     user: {
       findUnique: vi.fn(),
+      findFirst: vi.fn(),
     },
   },
 }));
+
+vi.stubEnv("AUTH_SECRET", "test-secret-for-login-codes");
 
 // shops/nearby fiyat araligi icin platform kurallarini okur; testte veritabani yok.
 vi.mock("@/lib/platform-settings", async () => {
@@ -98,22 +106,60 @@ describe("Mobile API - Auth OTP", () => {
     const body = await res.json();
     expect(body.ok).toBe(true);
     expect(sendMobileOtp).toHaveBeenCalled();
-    expect(prisma.verificationToken.upsert).toHaveBeenCalled();
+    // Kod duz saklanmaz: satirda yalnizca HMAC var, gonderilen kod yok.
+    const sent = vi.mocked(sendMobileOtp).mock.calls[0][1];
+    const row = vi.mocked(prisma.mobileLoginCode.upsert).mock.calls[0][0];
+    expect(row.where).toEqual({ identity: "test@bagajpark.com" });
+    expect(row.create.codeHash).toMatch(/^[0-9a-f]{64}$/);
+    expect(JSON.stringify(row)).not.toContain(sent);
+    expect(prisma.verificationToken.upsert).not.toHaveBeenCalled();
   });
 
-  it("should use the fixed code and send no mail for the Play review account", async () => {
+  it("Play inceleme hesabi (reviewSandbox) sabit kodu alir, e-posta gitmez", async () => {
     vi.stubEnv("PLAY_REVIEW_EMAIL", "Review@Example.com");
     vi.stubEnv("PLAY_REVIEW_OTP", "246810");
+    vi.mocked(prisma.user.findUnique).mockResolvedValueOnce({ id: "r1", role: "GUEST", reviewSandbox: true } as never);
     const { POST } = await import("@/app/api/mobile/auth/otp/route");
+    const { hashScopedCode } = await import("@/lib/password-reset-code");
     const req = new Request("http://localhost/api/mobile/auth/otp", {
       method: "POST",
       body: JSON.stringify({ email: "review@example.com" }),
     });
     const res = await POST(req);
     vi.unstubAllEnvs();
+    vi.stubEnv("AUTH_SECRET", "test-secret-for-login-codes");
     expect(res.status).toBe(200);
     expect(sendMobileOtp).not.toHaveBeenCalled();
-    expect(vi.mocked(prisma.verificationToken.upsert).mock.calls[0][0].create.token).toBe("246810");
+    expect(vi.mocked(prisma.mobileLoginCode.upsert).mock.calls[0][0].create.codeHash).toBe(
+      hashScopedCode("mobile-login", "review@example.com", "246810"),
+    );
+  });
+
+  it("inceleme e-postasi reviewSandbox degilse sabit kod verilmez, normal kod gider", async () => {
+    vi.stubEnv("PLAY_REVIEW_EMAIL", "review@example.com");
+    vi.stubEnv("PLAY_REVIEW_OTP", "246810");
+    vi.mocked(prisma.user.findUnique).mockResolvedValueOnce({ id: "r1", role: "GUEST", reviewSandbox: false } as never);
+    const { POST } = await import("@/app/api/mobile/auth/otp/route");
+    const res = await POST(
+      new Request("http://localhost/api/mobile/auth/otp", { method: "POST", body: JSON.stringify({ email: "review@example.com" }) }),
+    );
+    vi.unstubAllEnvs();
+    vi.stubEnv("AUTH_SECRET", "test-secret-for-login-codes");
+    expect(res.status).toBe(200);
+    expect(sendMobileOtp).toHaveBeenCalled();
+    expect(vi.mocked(sendMobileOtp).mock.calls[0][1]).not.toBe("246810");
+  });
+
+  it("ADMIN hesabina kod gonderilmez; yanit ayni (200 ok), satir eslesmez hash tasir", async () => {
+    vi.mocked(prisma.user.findUnique).mockResolvedValueOnce({ id: "a1", role: "ADMIN", reviewSandbox: false } as never);
+    const { POST } = await import("@/app/api/mobile/auth/otp/route");
+    const res = await POST(
+      new Request("http://localhost/api/mobile/auth/otp", { method: "POST", body: JSON.stringify({ email: "admin@example.com" }) }),
+    );
+    expect(res.status).toBe(200);
+    expect(await res.json()).toEqual({ ok: true });
+    expect(sendMobileOtp).not.toHaveBeenCalled();
+    expect(prisma.mobileLoginCode.upsert).toHaveBeenCalled();
   });
 
   it("should ignore a malformed review code and send a normal OTP", async () => {
@@ -126,6 +172,7 @@ describe("Mobile API - Auth OTP", () => {
     });
     const res = await POST(req);
     vi.unstubAllEnvs();
+    vi.stubEnv("AUTH_SECRET", "test-secret-for-login-codes");
     expect(res.status).toBe(200);
     expect(sendMobileOtp).toHaveBeenCalled();
   });
@@ -139,7 +186,7 @@ describe("Mobile API - Auth OTP", () => {
     const res = await POST(req);
     expect(res.status).toBe(400);
     expect((await res.json()).error).toBe("sms_unavailable");
-    expect(prisma.verificationToken.upsert).not.toHaveBeenCalled();
+    expect(prisma.mobileLoginCode.upsert).not.toHaveBeenCalled();
   });
 
   it("giris kodu e-postasi Accept-Language dilinde gider", async () => {
@@ -164,7 +211,7 @@ describe("Mobile API - Auth OTP", () => {
     expect(res.status).toBe(403);
     expect((await res.json()).error).toBe("invalid_email");
     expect(sendMobileOtp).not.toHaveBeenCalled();
-    expect(prisma.verificationToken.upsert).not.toHaveBeenCalled();
+    expect(prisma.mobileLoginCode.upsert).not.toHaveBeenCalled();
   });
 });
 
