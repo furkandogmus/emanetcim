@@ -38,8 +38,13 @@ export function normalizeResetEmail(email: string): string {
 }
 
 /** Esit olasilikli 6 hane (`randomInt` modulo sapmasi tasimaz). */
-export function generatePasswordResetCode(): string {
+/** 6 haneli tek kullanimlik sayi kodu (sifirlama ve mobil giris ortak). Parola degil. */
+export function generateOneTimeCode(): string {
   return crypto.randomInt(0, 10 ** PASSWORD_RESET_CODE_LENGTH).toString().padStart(PASSWORD_RESET_CODE_LENGTH, "0");
+}
+
+export function generatePasswordResetCode(): string {
+  return generateOneTimeCode();
 }
 
 export function hashPasswordResetCode(email: string, code: string): string {

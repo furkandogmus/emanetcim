@@ -4,7 +4,7 @@ import prisma from "@/lib/db";
 import logger from "@/lib/logger";
 import { rateLimit } from "@/lib/rate-limit";
 import {
-  generatePasswordResetCode,
+  generateOneTimeCode,
   hashScopedCode,
   isWellFormedResetCode,
   scopedCodeMatches,
@@ -116,7 +116,7 @@ export async function issueMobileLoginCode(
     logger.info({ userId: user.id }, "mobile_otp_play_review_code_issued");
   } else {
     if (review) logger.warn({ userId: user?.id ?? null }, "mobile_otp_play_review_not_sandbox");
-    const code = generatePasswordResetCode();
+    const code = generateOneTimeCode();
     codeHash = hashFor(identity, code);
     result = { kind: "deliver", code };
   }
