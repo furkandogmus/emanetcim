@@ -2356,5 +2356,13 @@
       "shareCsv": "Ödenmemiş komisyonları paylaş (CSV)",
       "shareCsvHint": "Ay boşsa tüm ödenmemiş komisyonlar gelir. Metin paylaşım menüsüyle e-posta ya da Drive'a gönderilebilir."
     }
+  },
+  "deepLink": {
+    "partnerOnlyTitle": "Bu bağlantı esnaf hesabı için",
+    "partnerOnlyBody": "Bu rezervasyonu açmak için dükkânın esnaf hesabıyla giriş yapın.",
+    "switchAccount": "Başka hesapla giriş yap",
+    "partnerInviteTitle": "Esnaf başvurusu web sitesinde",
+    "partnerInviteBody": "Başvuru formu davet kodunuz eklenmiş olarak açılır.",
+    "openOnWeb": "Web sitesinde aç"
   }
 }

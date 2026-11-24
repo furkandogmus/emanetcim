@@ -13,7 +13,13 @@ import { api, ApiError } from "@/lib/api";
 import { useAuth } from "@/lib/auth";
 import { errorMessage } from "@/lib/errors";
 import { newIdempotencyKey } from "@/lib/idempotency";
-import { clearPendingReferral, loadPendingReferral, normalizeReferralCode } from "@/lib/pending-referral";
+import {
+  clearPendingInvite,
+  clearPendingReferral,
+  loadPendingInvite,
+  loadPendingReferral,
+  normalizeReferralCode,
+} from "@/lib/pending-referral";
 import { formatMoney, formatStayWindow } from "@/lib/format";
 import { keys, useOnlinePayments, useShop } from "@/lib/queries";
 import { totalBags, useSearch } from "@/lib/search";
@@ -48,6 +54,12 @@ export default function CheckoutScreen() {
     let alive = true;
     void loadPendingReferral().then((code) => {
       if (alive && code) setAffiliateCode((cur) => cur ?? code);
+    });
+    // Davet baglantisinin (`/register?ref=`) kodu indirim alanina hazir gelir; misafir uygular.
+    void loadPendingInvite().then((code) => {
+      if (!alive || !code) return;
+      setCodeInput((cur) => cur || code);
+      setCodeOpen(true);
     });
     return () => {
       alive = false;
@@ -96,6 +108,7 @@ export default function CheckoutScreen() {
     onSuccess: (res) => {
       attempt.current = null;
       clearPendingReferral();
+      clearPendingInvite();
       void queryClient.invalidateQueries({ queryKey: keys.myBookings });
       router.replace({ pathname: "/success", params: { bookingId: res.bookingId } });
     },
@@ -205,6 +218,7 @@ export default function CheckoutScreen() {
   }
 
   function removeCode() {
+    clearPendingInvite();
     setQuote(null);
     setActiveCode(null);
     setCodeInput("");
