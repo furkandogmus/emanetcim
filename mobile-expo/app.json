@@ -155,14 +155,14 @@
         "expo-image-picker",
         {
           "photosPermission": false,
-          "cameraPermission": "Misafirin rezervasyon QR kodunu okutmak için kamerayı kullanıyoruz.",
+          "cameraPermission": "Misafirin rezervasyon QR kodunu okutmak ve teslimde valizlerin durumunu fotoğraflamak için kamerayı kullanıyoruz.",
           "microphonePermission": false
         }
       ],
       [
         "expo-camera",
         {
-          "cameraPermission": "Misafirin rezervasyon QR kodunu okutmak için kamerayı kullanıyoruz.",
+          "cameraPermission": "Misafirin rezervasyon QR kodunu okutmak ve teslimde valizlerin durumunu fotoğraflamak için kamerayı kullanıyoruz.",
           "microphonePermission": false,
           "recordAudioAndroid": false
         }
