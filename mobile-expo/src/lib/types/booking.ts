@@ -39,6 +39,8 @@ export type BookingDetail = BookingSummary & {
   latitude: number | null;
   longitude: number | null;
   shopPhone: string;
+  /** wa.me icin ulke kodlu numara (sunucu `toWhatsAppNumber`); cevrilemezse ya da eski sunucuda yok. */
+  shopWhatsapp?: string | null;
   /** "Adres, semt, sehir". Eski sunucu gondermez. */
   shopAddress?: string;
   seals: { sealNumber: number; bagIndex: number; bagSize: string }[];

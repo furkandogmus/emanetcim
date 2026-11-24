@@ -8,6 +8,48 @@ import { nextSlot, wallInstant, wallParts } from "./time";
 export type Place = { label: string; latitude: number; longitude: number; isCurrent?: boolean; radiusM?: number };
 export type Bags = { s: number; m: number; xl: number };
 
+/** Web `SearchClient` / sunucu `@/lib/search-filter` ile ayni siralamalar. */
+export const SEARCH_SORTS = ["distance", "price_asc", "price_desc", "rating"] as const;
+export type SearchSort = (typeof SEARCH_SORTS)[number];
+
+/**
+ * Harita suzgeci. Kural sunucuda (`shops/nearby`): fiyat dukkanin gunluk taban fiyati
+ * (`pricePerDay`), puansiz dukkan 0 sayilir. `maxPrice` `null`: ust sinir yok.
+ */
+export type SearchFilters = {
+  sort: SearchSort;
+  cctv: boolean;
+  climate: boolean;
+  largeItems: boolean;
+  maxPrice: number | null;
+  minRating: number;
+};
+
+export const DEFAULT_FILTERS: SearchFilters = {
+  sort: "distance",
+  cctv: false,
+  climate: false,
+  largeItems: false,
+  maxPrice: null,
+  minRating: 0,
+};
+
+/** Rozet sayisi: siralama suzgec sayilmaz. */
+export function activeFilterCount(f: SearchFilters): number {
+  return [f.cctv, f.climate, f.largeItems, f.maxPrice != null, f.minRating > 0].filter(Boolean).length;
+}
+
+/** `shops/nearby` sorgu parametreleri; varsayilan degerler gonderilmez. */
+export function filterParams(f: SearchFilters): Record<string, string> {
+  const q: Record<string, string> = { sort: f.sort };
+  if (f.cctv) q.cctv = "1";
+  if (f.climate) q.climate = "1";
+  if (f.largeItems) q.largeItems = "1";
+  if (f.maxPrice != null) q.maxPrice = String(f.maxPrice);
+  if (f.minRating > 0) q.minRating = String(f.minRating);
+  return q;
+}
+
 // Sehir listesi sunucudan gelir (`useCities`, GET /cities): yalnizca dukkani olan sehirler.
 
 type SearchState = {
@@ -17,12 +59,14 @@ type SearchState = {
   bags: Bags;
   /** Pencere misafirce degil varsayilanca yarin sabaha kaydirildi (aksam acilis). */
   rolled: boolean;
+  filters: SearchFilters;
 };
 
 type SearchContextValue = SearchState & {
   setPlace: (p: Place) => void;
   setWindow: (checkIn: Date, checkOut: Date, rolled?: boolean) => void;
   setBags: (b: Bags) => void;
+  setFilters: (f: SearchFilters) => void;
 };
 
 /**
@@ -51,6 +95,7 @@ export function SearchProvider({ children }: { children: ReactNode }) {
     place: null,
     ...defaultWindow(),
     bags: { s: 0, m: 1, xl: 0 },
+    filters: DEFAULT_FILTERS,
   }));
 
   /*
@@ -96,6 +141,7 @@ export function SearchProvider({ children }: { children: ReactNode }) {
       setPlace: (place) => setState((s) => ({ ...s, place })),
       setWindow: (checkIn, checkOut, rolled = false) => setState((s) => ({ ...s, checkIn, checkOut, rolled })),
       setBags: (bags) => setState((s) => ({ ...s, bags })),
+      setFilters: (filters) => setState((s) => ({ ...s, filters })),
     }),
     [state],
   );

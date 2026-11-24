@@ -14,6 +14,7 @@ export default function GuestLayout() {
       <Stack.Screen name="(tabs)" />
       <Stack.Screen name="search" options={{ presentation: "modal", animation: "slide_from_bottom" }} />
       <Stack.Screen name="map" />
+      <Stack.Screen name="favorites" />
       <Stack.Screen name="shop/[id]" />
       <Stack.Screen name="checkout" />
       <Stack.Screen name="success" options={{ gestureEnabled: false }} />

@@ -5,11 +5,12 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { Camera, Map, Marker, UserLocation } from "@maplibre/maplibre-react-native";
 import type { CameraRef, LngLatBounds } from "@maplibre/maplibre-react-native";
 import { Redirect, router } from "expo-router";
-import { ArrowLeft, Search } from "lucide-react-native";
+import { ArrowLeft, Search, SlidersHorizontal } from "lucide-react-native";
 import { useTranslation } from "react-i18next";
 
 import { BottomSheet, SheetFlatList } from "@/components/BottomSheet";
 import { MapSnippet } from "@/components/Illustrations";
+import { SearchFiltersSheet } from "@/components/SearchFiltersSheet";
 import { ShopCard } from "@/components/ShopCard";
 import { AppText, Button, CenterMessage, IconButton, Loading } from "@/components/ui";
 import { ApiError } from "@/lib/api";
@@ -21,7 +22,7 @@ import { nextOpenInstant, shiftWindowTo } from "@/lib/next-open";
 import { MAP_ATTRIBUTION, useMapStyle } from "@/lib/map-style";
 import { useNearbyShops } from "@/lib/queries";
 import { shopPriceA11y } from "@/lib/shop-label";
-import { totalBags, useSearch } from "@/lib/search";
+import { activeFilterCount, DEFAULT_FILTERS, totalBags, useSearch } from "@/lib/search";
 import { wallInstant, wallParts } from "@/lib/time";
 import type { NearbyShop } from "@/lib/types";
 import { colors, fonts, radius, shadow, space } from "@/theme/tokens";
@@ -69,6 +70,7 @@ export default function MapScreen() {
   const pendingRegion = useRef<Viewport | null>(null);
   const [moved, setMoved] = useState(false);
   const [selectedId, setSelectedId] = useState<string | null>(null);
+  const [filtersOpen, setFiltersOpen] = useState(false);
   const lastMarkerPress = useRef(0);
   const camera = useRef<CameraRef>(null);
   const mapStyle = useMapStyle();
@@ -133,6 +135,7 @@ export default function MapScreen() {
       checkIn: search.checkIn,
       checkOut: search.checkOut,
       bags: search.bags,
+      filters: search.filters,
     },
   );
 
@@ -140,11 +143,12 @@ export default function MapScreen() {
     // Talep testi noktalari mobilde gosterilmez (urun karari 2026-10-18): prod'daki
     // ~500 noktanin yalnizca ~10'u rezervasyon aliyor, gerisi harita ve listeyi
     // "Yakinda" kartlariyla dolduruyordu. Olcum web'de surer.
-    // Rezervasyon alabilenler once (kapalilar soluk, sonda); grup icinde yakindan uzaga.
+    // Rezervasyon alabilenler once (kapalilar soluk, sonda); grup icinde sunucunun
+    // sectigi siralama (`sort`, varsayilan mesafe) korunur: `sort` kararlidir.
     () =>
       (query.data ?? [])
         .filter((s) => !s.isPrelaunch)
-        .sort((a, b) => Number(b.bookable !== false) - Number(a.bookable !== false) || a.distanceKm - b.distanceKm),
+        .sort((a, b) => Number(b.bookable !== false) - Number(a.bookable !== false)),
     [query.data],
   );
   const bookableCount = useMemo(() => shops.filter((s) => s.bookable !== false).length, [shops]);
@@ -171,9 +175,12 @@ export default function MapScreen() {
     const morning = wallInstant(p.year, p.month, p.day + 1, 9);
     setWindow(morning, new Date(morning.getTime() + 4 * 60 * 60 * 1000));
   };
+  const filterCount = activeFilterCount(search.filters);
+  const clearFilters = () => search.setFilters({ ...DEFAULT_FILTERS, sort: search.filters.sort });
   const emptyActions = (
     <View style={{ gap: space.sm, alignSelf: "stretch" }}>
-      <Button title={t("map.changeDates")} onPress={changeDates} />
+      {filterCount > 0 ? <Button title={t("guestParity.clearFilters")} onPress={clearFilters} /> : null}
+      <Button variant={filterCount > 0 ? "secondary" : "primary"} title={t("map.changeDates")} onPress={changeDates} />
       <Button variant="secondary" title={t("map.tomorrowMorning")} onPress={tomorrowMorning} />
     </View>
   );
@@ -235,6 +242,18 @@ export default function MapScreen() {
             {summary}
           </AppText>
         </Pressable>
+        <IconButton
+          label={filterCount > 0 ? t("guestParity.filtersActive", { count: filterCount }) : t("guestParity.filters")}
+          onPress={() => setFiltersOpen(true)}
+          style={[shadow.card, filterCount > 0 && styles.filterActive]}
+        >
+          <SlidersHorizontal size={20} color={filterCount > 0 ? colors.white : colors.ink} />
+          {filterCount > 0 ? (
+            <View style={styles.filterBadge}>
+              <Text style={styles.filterBadgeText}>{filterCount}</Text>
+            </View>
+          ) : null}
+        </IconButton>
       </View>
 
       {moved ? (
@@ -304,8 +323,8 @@ export default function MapScreen() {
         ) : shops.length === 0 ? (
           <CenterMessage
             art={<MapSnippet width={120} price="?" />}
-            title={t("map.emptyWindowTitle")}
-            body={t("map.emptyWindowBody")}
+            title={filterCount > 0 ? t("guestParity.emptyFilteredTitle") : t("map.emptyWindowTitle")}
+            body={filterCount > 0 ? t("guestParity.emptyFilteredBody") : t("map.emptyWindowBody")}
             action={emptyActions}
           />
         ) : (
@@ -318,6 +337,18 @@ export default function MapScreen() {
           />
         )}
       </BottomSheet>
+
+      <SearchFiltersSheet
+        key={filtersOpen ? "open" : "closed"}
+        visible={filtersOpen}
+        value={search.filters}
+        onClose={() => setFiltersOpen(false)}
+        onApply={(f) => {
+          setFiltersOpen(false);
+          setSelectedId(null);
+          search.setFilters(f);
+        }}
+      />
     </View>
   );
 }
@@ -401,6 +432,20 @@ const styles = StyleSheet.create({
     ...shadow.floating,
   },
   searchHere: { position: "absolute", alignSelf: "center" },
+  filterActive: { backgroundColor: colors.ink },
+  filterBadge: {
+    position: "absolute",
+    top: -4,
+    right: -4,
+    minWidth: 18,
+    height: 18,
+    paddingHorizontal: 4,
+    borderRadius: 9,
+    backgroundColor: colors.accent,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  filterBadgeText: { fontFamily: fonts.bodySemibold, fontSize: 11, color: colors.white },
   // Fiyat hapi: dar ekranda komsu pinleri ortmesin diye kucuk tutuldu (web `h-8`).
   // Pin alt-orta noktadan baglanir; ek dokunma alani yalnizca ustte olmali ki etiket konumundan kaymasin.
   pinTouch: { paddingTop: 14 },

@@ -5,7 +5,7 @@ import { Image } from "expo-image";
 import { router } from "expo-router";
 import { useQueryClient } from "@tanstack/react-query";
 import { getDevicePosition } from "@/lib/location";
-import { ChevronRight, Search } from "lucide-react-native";
+import { ChevronRight, Heart, Search } from "lucide-react-native";
 import { useTranslation } from "react-i18next";
 
 import { BrandMark } from "@/components/BrandMark";
@@ -22,6 +22,7 @@ import { AppText } from "@/components/ui";
 import { prefetchMapStyle } from "@/lib/map-style";
 import { isActiveBooking, useCities, useMyBookings } from "@/lib/queries";
 import { useOfflineTickets } from "@/lib/offline-tickets";
+import { useFavorites } from "@/lib/favorites";
 import type { BookingSummary } from "@/lib/types";
 import { colors, fonts, radius, shadow, space } from "@/theme/tokens";
 
@@ -36,6 +37,7 @@ export default function HomeScreen() {
   const cityStrip = useRef<ScrollView>(null);
   const cityArrows = useScrollArrows(cityStrip);
   const cities = useCities();
+  const favorites = useFavorites();
   // Liste sunucudan gelmediyse (internet yok) "Siradaki" karti cihazdaki biletten kurulur.
   const offlineTickets = useOfflineTickets(bookings.isError && !bookings.data);
   const active = (bookings.data ?? offlineTickets)
@@ -153,6 +155,22 @@ export default function HomeScreen() {
             <BookingRow booking={b} title={b.shopName} onPress={() => router.push(`/bookings/${b.id}`)} />
           </View>
         ))}
+
+        {/* Favoriler cihazda; liste bosken giris noktasi da gizli (kalp karttan eklenir). */}
+        {favorites.ids.length > 0 ? (
+          <Pressable
+            accessibilityRole="button"
+            onPress={() => router.push("/favorites")}
+            style={({ pressed }) => [styles.favRow, pressed && { backgroundColor: colors.surfaceMuted }]}
+          >
+            <Heart size={20} color={colors.danger} fill={colors.danger} />
+            <View style={{ flex: 1 }}>
+              <AppText variant="bodyMedium">{t("guestParity.favoritesTitle")}</AppText>
+              <AppText variant="caption">{t("guestParity.favoritesCount", { count: favorites.ids.length })}</AppText>
+            </View>
+            <ChevronRight size={18} color={colors.borderStrong} />
+          </Pressable>
+        ) : null}
 
         {/* Sunucudan: yalnizca dukkani olan sehirler, cok noktasi olan once. Hata/bos ise bolum gizli. */}
         {cities.isLoading || (cities.data?.length ?? 0) > 0 ? (
@@ -279,6 +297,16 @@ export default function HomeScreen() {
 }
 
 const styles = StyleSheet.create({
+  favRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: space.md,
+    padding: space.lg,
+    borderRadius: radius.card,
+    borderWidth: 1,
+    borderColor: colors.border,
+    backgroundColor: colors.surface,
+  },
   root: { flex: 1, backgroundColor: colors.bg },
   hero: { justifyContent: "space-between", backgroundColor: colors.ink },
   scrim: {

@@ -9,6 +9,7 @@ import { formatDay, formatDistance, formatMoney, formatRating } from "@/lib/form
 import { nextOpenInstant, openDayKind } from "@/lib/next-open";
 import { mediumDaily, shopPriceA11y, stayLabel } from "@/lib/shop-label";
 import { RemoteImage } from "@/components/RemoteImage";
+import { FavoriteButton } from "@/components/FavoriteButton";
 import { resolveImage } from "@/lib/images";
 import type { NearbyShop } from "@/lib/types";
 import { colors, fonts, radius, space } from "@/theme/tokens";
@@ -103,6 +104,10 @@ export const ShopCard = memo(function ShopCard({
         ) : (
           <Store size={24} color={colors.borderStrong} strokeWidth={1.5} />
         )}
+        {/* Kartin kendi dokunusundan ayri: kalp karti acmaz. */}
+        <View style={styles.fav}>
+          <FavoriteButton shopId={shop.id} size={13} />
+        </View>
       </View>
 
       <View style={styles.body}>
@@ -212,6 +217,7 @@ const styles = StyleSheet.create({
     justifyContent: "center",
   },
   body: { flex: 1, gap: 4 },
+  fav: { position: "absolute", top: 3, left: 3 },
   titleRow: { flexDirection: "row", alignItems: "center", gap: 6 },
   metaRow: { flexDirection: "row", alignItems: "center", gap: 4 },
   ratingText: { fontFamily: fonts.bodySemibold, fontSize: 13, color: colors.ink },

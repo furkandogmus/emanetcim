@@ -23,7 +23,9 @@ import { isActiveBooking, useBooking, useOnlinePayments } from "@/lib/queries";
 import { defaultWindow, useSearch } from "@/lib/search";
 import type { BookingDetail } from "@/lib/types";
 import { notify } from "@/lib/notify";
-import { whatsappNumber, dialUrl } from "@/lib/phone";
+import { whatsappNumber, dialUrl, openUrl, waUrl } from "@/lib/phone";
+import { googleCalendarUrl } from "@/lib/calendar-link";
+import { bookingCode } from "@/lib/booking-search";
 import { loadOfflineTicket, saveOfflineTicket, type OfflineTicket } from "@/lib/offline-tickets";
 import { colors, radius, space } from "@/theme/tokens";
 import { StaleQueryBanner } from "@/components/StaleQueryBanner";
@@ -324,6 +326,46 @@ export function BookingDetailView({ id, mode }: { id: string; mode: "guest" | "p
                     style={{ flex: 1 }}
                     title={t("bookings.call")}
                     onPress={() => void Linking.openURL(dialUrl(b.shopPhone)).catch(() => undefined)}
+                  />
+                ) : null}
+              </View>
+            ) : null}
+            {/*
+              Web `BookingDetailActions` ile ayni: dukkana WhatsApp (hazir metin + kisa kod;
+              numara wa.me bicimine cevrilemezse cizilmez) ve Google Takvim baglantisi.
+            */}
+            {b.shopWhatsapp || (isActiveBooking(b) && !expired) ? (
+              <View style={styles.actionRow}>
+                {b.shopWhatsapp ? (
+                  <Button
+                    variant="secondary"
+                    style={{ flex: 1 }}
+                    title={t("guestParity.whatsappShop")}
+                    onPress={() =>
+                      openUrl(
+                        `${waUrl(b.shopWhatsapp!)}?text=${encodeURIComponent(
+                          t("guestParity.whatsappMessage", { code: bookingCode(b.id) }),
+                        )}`,
+                      )
+                    }
+                  />
+                ) : null}
+                {isActiveBooking(b) && !expired ? (
+                  <Button
+                    variant="secondary"
+                    style={{ flex: 1 }}
+                    title={t("guestParity.addToCalendar")}
+                    onPress={() =>
+                      openUrl(
+                        googleCalendarUrl({
+                          title: t("guestParity.calendarTitle", { shop: b.shopName }),
+                          details: t("guestParity.calendarDetails", { code: bookingCode(b.id), shop: b.shopName }),
+                          location: b.shopAddress ?? null,
+                          start: b.checkInTime,
+                          end: b.checkOutTime,
+                        }),
+                      )
+                    }
                   />
                 ) : null}
               </View>
