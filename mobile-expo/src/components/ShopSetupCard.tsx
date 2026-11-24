@@ -6,6 +6,7 @@ import { useTranslation } from "react-i18next";
 import { AppText, Card } from "@/components/ui";
 import { usePartnerShop } from "@/lib/queries";
 import { colors, radius, space } from "@/theme/tokens";
+import { flipInRtl } from "@/lib/rtl";
 
 /**
  * "Dukkanini tamamla": fotografsiz ve saati hic girilmemis dukkanlar
@@ -49,7 +50,7 @@ export function ShopSetupCard() {
             <AppText variant="bodyMedium">{it.title}</AppText>
             <AppText variant="caption">{it.body}</AppText>
           </View>
-          <ChevronRight size={18} color={colors.inkMuted} />
+          <ChevronRight size={18} color={colors.inkMuted} style={flipInRtl} />
         </Pressable>
       ))}
     </Card>

@@ -1,0 +1,6 @@
+{
+  "ios": {
+    "NSLocationWhenInUseUsageDescription": "Nous utilisons votre position pour afficher les consignes à bagages proches de vous.",
+    "NSCameraUsageDescription": "Nous utilisons l'appareil photo pour scanner le code QR de réservation du client."
+  }
+}

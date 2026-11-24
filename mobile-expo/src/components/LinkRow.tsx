@@ -5,6 +5,7 @@ import { ChevronRight } from "lucide-react-native";
 
 import { AppText } from "@/components/ui";
 import { colors, radius, space } from "@/theme/tokens";
+import { flipInRtl } from "@/lib/rtl";
 
 /** Ayar satirlarini tek kartta, ince ayiricilarla toplar (profildeki "Hesap" grubuyla ayni). */
 export function LinkGroup({ children }: { children: ReactNode }) {
@@ -32,7 +33,7 @@ export function LinkRow({ icon, label, onPress }: { icon?: ReactNode; label: str
       <AppText variant="bodyMedium" style={{ flex: 1 }}>
         {label}
       </AppText>
-      <ChevronRight size={18} color={colors.inkMuted} />
+      <ChevronRight size={18} color={colors.inkMuted} style={flipInRtl} />
     </Pressable>
   );
 }

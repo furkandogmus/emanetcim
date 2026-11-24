@@ -1,0 +1,6 @@
+{
+  "ios": {
+    "NSLocationWhenInUseUsageDescription": "برای نمایش نقاط نگهداری چمدان نزدیک شما از موقعیت مکانی‌تان استفاده می‌کنیم.",
+    "NSCameraUsageDescription": "برای اسکن کد QR رزرو مهمان از دوربین استفاده می‌کنیم."
+  }
+}

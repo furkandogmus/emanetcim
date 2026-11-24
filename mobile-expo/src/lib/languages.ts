@@ -11,6 +11,7 @@ export const APP_LANGUAGES = [
   { value: "fr", label: "Français", intl: "fr-FR", site: "fr" },
   { value: "ja", label: "日本語", intl: "ja-JP", site: "ja" },
   { value: "ru", label: "Русский", intl: "ru-RU", site: "ru" },
+  { value: "fa", label: "فارسی", intl: "fa-IR", site: "fa" },
 ] as const;
 
 export type AppLanguage = (typeof APP_LANGUAGES)[number]["value"];

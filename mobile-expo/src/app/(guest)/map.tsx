@@ -27,6 +27,7 @@ import { wallInstant, wallParts } from "@/lib/time";
 import type { NearbyShop } from "@/lib/types";
 import { colors, fonts, radius, shadow, space } from "@/theme/tokens";
 import { isBlockingError } from "@/lib/query-view";
+import { flipInRtl } from "@/lib/rtl";
 
 const DEFAULT_RADIUS_M = 15_000;
 const SHEET_PEEK = 150;
@@ -229,7 +230,7 @@ export default function MapScreen() {
 
       <View style={[styles.top, { paddingTop: insets.top + space.sm }]}>
         <IconButton label={t("common.back")} onPress={goBackOr} style={shadow.card}>
-          <ArrowLeft size={20} color={colors.ink} />
+          <ArrowLeft size={20} color={colors.ink} style={flipInRtl} />
         </IconButton>
         <Pressable
           accessibilityRole="button"

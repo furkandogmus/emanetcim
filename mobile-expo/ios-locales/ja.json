@@ -1,0 +1,6 @@
+{
+  "ios": {
+    "NSLocationWhenInUseUsageDescription": "近くの荷物預かり所を表示するために位置情報を使用します。",
+    "NSCameraUsageDescription": "お客様の予約QRコードを読み取るためにカメラを使用します。"
+  }
+}

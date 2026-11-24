@@ -12,6 +12,7 @@ import { usePartnerEarnings } from "@/lib/queries";
 import { colors, fonts, radius, space } from "@/theme/tokens";
 import { StaleQueryBanner } from "@/components/StaleQueryBanner";
 import { PartnerInsightCharts } from "@/components/PartnerInsightCharts";
+import { flipInRtl } from "@/lib/rtl";
 
 /**
  * Esnaf kazanci. Tutarlar sunucuda komisyon dusulmus esnaf payidir; istemci
@@ -95,7 +96,7 @@ export default function PartnerEarningsScreen() {
                 <AppText variant="bodyMedium" style={{ fontFamily: fonts.bodySemibold, fontVariant: ["tabular-nums"] }}>
                   {amount}
                 </AppText>
-                {item.bookingId ? <ChevronRight size={18} color={colors.inkMuted} /> : null}
+                {item.bookingId ? <ChevronRight size={18} color={colors.inkMuted} style={flipInRtl} /> : null}
               </>
             );
             const bookingId = item.bookingId;

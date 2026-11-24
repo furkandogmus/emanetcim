@@ -20,6 +20,7 @@ import { useAdminBooking, useAdminBookingNotifications } from "@/lib/queries";
 import type { AdminBookingDetail } from "@/lib/types";
 import { colors, radius, space } from "@/theme/tokens";
 import { StaleQueryBanner } from "@/components/StaleQueryBanner";
+import { flipInRtl } from "@/lib/rtl";
 
 const DAY = 24 * 60 * 60 * 1000;
 
@@ -39,7 +40,7 @@ export default function AdminBookingScreen() {
     <SafeAreaView style={styles.safe} edges={["top"]}>
       <View style={styles.header}>
         <IconButton label={t("common.back")} onPress={() => router.back()}>
-          <ArrowLeft size={20} color={colors.ink} />
+          <ArrowLeft size={20} color={colors.ink} style={flipInRtl} />
         </IconButton>
       </View>
 

@@ -26,6 +26,7 @@ import { setAppLanguage } from "@/lib/i18n";
 import { openSitePage } from "@/lib/site-page";
 import { notify } from "@/lib/notify";
 import { colors, radius, space } from "@/theme/tokens";
+import { flipInRtl } from "@/lib/rtl";
 
 /** Sistem ayarindan donunce guncellensin diye uygulama one geldikce yeniden okunur. */
 function useNotificationPermission() {
@@ -163,7 +164,7 @@ export function ProfileView({ asTab = false, embedded = false }: { asTab?: boole
             </AppText>
           )}
         </View>
-        <ChevronRight size={18} color={colors.inkMuted} />
+        <ChevronRight size={18} color={colors.inkMuted} style={flipInRtl} />
       </Pressable>
 
       {/* Personel PARTNER degil: esnaf paneline giden yol misafir profilinde. */}
@@ -344,7 +345,7 @@ function SettingsRow({
       {external ? (
         <ExternalLink size={16} color={colors.inkMuted} />
       ) : (
-        <ChevronRight size={18} color={colors.inkMuted} />
+        <ChevronRight size={18} color={colors.inkMuted} style={flipInRtl} />
       )}
     </Pressable>
   );

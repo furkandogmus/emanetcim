@@ -30,6 +30,8 @@ yarn-error.*
 # macOS
 .DS_Store
 *.pem
+# OTA kod imzasinin ACIK sertifikasi; ozel anahtar repo disinda.
+!certs/certificate.pem
 
 # local env files
 .env*.local

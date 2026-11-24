@@ -1,5 +1,5 @@
 import { memo } from "react";
-import { Pressable, StyleSheet, Text, View } from "react-native";
+import { I18nManager, Platform, Pressable, StyleSheet, Text, View } from "react-native";
 import { BadgeCheck, Clock, Star, Store } from "lucide-react-native";
 import { useTranslation } from "react-i18next";
 import type { TFunction } from "i18next";
@@ -198,6 +198,9 @@ export const ShopCard = memo(function ShopCard({
   );
 });
 
+// textAlign iOS'ta RTL'de cevrilmez, Android'de cevrilir: "bitis" hizasi platforma gore.
+const END: "left" | "right" = I18nManager.isRTL && Platform.OS === "ios" ? "left" : "right";
+
 const styles = StyleSheet.create({
   card: {
     flexDirection: "row",
@@ -228,8 +231,8 @@ const styles = StyleSheet.create({
   right: { alignItems: "flex-end", alignSelf: "flex-start", paddingTop: 2, maxWidth: 112 },
   struck: { fontSize: 12, color: colors.inkSecondary, textDecorationLine: "line-through", fontVariant: ["tabular-nums"] },
   price: { fontFamily: fonts.display, fontSize: 18, lineHeight: 22, color: colors.ink, fontVariant: ["tabular-nums"] },
-  perDay: { fontFamily: fonts.body, fontSize: 12, color: colors.inkMuted, textAlign: "right" },
-  daily: { fontFamily: fonts.body, fontSize: 11, color: colors.inkMuted, textAlign: "right", marginTop: 2 },
+  perDay: { fontFamily: fonts.body, fontSize: 12, color: colors.inkMuted, textAlign: END },
+  daily: { fontFamily: fonts.body, fontSize: 11, color: colors.inkMuted, textAlign: END, marginTop: 2 },
   soon: { backgroundColor: colors.surfaceMuted, borderRadius: radius.pill, paddingHorizontal: 8, paddingVertical: 3 },
   soonText: { fontFamily: fonts.bodyMedium, fontSize: 12, color: colors.inkSecondary },
 });

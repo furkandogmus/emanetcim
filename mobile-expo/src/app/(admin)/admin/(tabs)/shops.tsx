@@ -16,6 +16,7 @@ import { formatRating } from "@/lib/format";
 import { colors, radius, space } from "@/theme/tokens";
 import { isBlockingError } from "@/lib/query-view";
 import { StaleQueryBanner } from "@/components/StaleQueryBanner";
+import { flipInRtl } from "@/lib/rtl";
 
 /** Doluluk bu oranin ustundeyse cubuk turuncu: o dukkana yeni rezervasyon yonlendirmek riskli. */
 const BUSY = 0.8;
@@ -116,7 +117,7 @@ export default function AdminShopsScreen() {
                 <AppText variant="bodyMedium" style={{ flex: 1 }}>
                   {t("admin.pendingApplicationsCount", { count: pending })}
                 </AppText>
-                <ChevronRight size={18} color={colors.inkMuted} />
+                <ChevronRight size={18} color={colors.inkMuted} style={flipInRtl} />
               </Pressable>
             ) : null
           }
@@ -255,7 +256,7 @@ function ShopRow({ shop: s }: { shop: AdminShop }) {
         <AppText variant="caption" style={{ fontSize: 13, flex: 1 }}>
           {t("admin.shopToday", { arrivals: s.arrivalsToday, pickups: s.pickupsToday })}
         </AppText>
-        <ChevronRight size={16} color={colors.inkMuted} />
+        <ChevronRight size={16} color={colors.inkMuted} style={flipInRtl} />
       </View>
     </Pressable>
   );

@@ -5,12 +5,14 @@ import * as SecureStore from "expo-secure-store";
 
 import de from "@/locales/de.json";
 import en from "@/locales/en.json";
+import fa from "@/locales/fa.json";
 import fr from "@/locales/fr.json";
 import ja from "@/locales/ja.json";
 import ru from "@/locales/ru.json";
 import tr from "@/locales/tr.json";
 
 import { deviceLanguage, isAppLanguage, type AppLanguage } from "./languages";
+import { syncLayoutDirection } from "./rtl";
 
 // Adlandirilmis `use` export'u this'siz; ornek uzerinden cagrilmali.
 // eslint-disable-next-line import/no-named-as-default-member
@@ -19,6 +21,7 @@ void i18n.use(initReactI18next).init({
     tr: { translation: tr },
     en: { translation: en },
     de: { translation: de },
+    fa: { translation: fa },
     fr: { translation: fr },
     ja: { translation: ja },
     ru: { translation: ru },
@@ -39,6 +42,7 @@ void Promise.resolve()
   .then((lang) => {
     // eslint-disable-next-line import/no-named-as-default-member
     if (isAppLanguage(lang) && i18n.language !== lang) void i18n.changeLanguage(lang);
+    return syncLayoutDirection(isAppLanguage(lang) ? lang : i18n.language);
   })
   .catch(() => undefined);
 
@@ -46,6 +50,8 @@ export async function setAppLanguage(lang: AppLanguage) {
   // eslint-disable-next-line import/no-named-as-default-member
   await i18n.changeLanguage(lang);
   await SecureStore.setItemAsync(LANG_KEY, lang).catch(() => undefined);
+  // Farsca'ya girip cikmak yerlesimi aynalar; yeniden yukleme gerekir.
+  await syncLayoutDirection(lang, true).catch(() => undefined);
 }
 
 export default i18n;
