@@ -3,6 +3,7 @@ import {
   PutObjectCommand,
   DeleteObjectCommand,
   GetObjectCommand,
+  HeadObjectCommand,
 } from "@aws-sdk/client-s3";
 import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
 import { isPrivateKey } from "./types";
@@ -101,6 +102,17 @@ export class S3Storage implements StoragePort {
       }),
     );
     return { key: input.key };
+  }
+
+  async exists(key: string): Promise<boolean> {
+    try {
+      await this.client.send(new HeadObjectCommand({ Bucket: this.config.bucket, Key: key }));
+      return true;
+    } catch (err) {
+      const e = err as { name?: string; $metadata?: { httpStatusCode?: number } };
+      if (e.name === "NotFound" || e.$metadata?.httpStatusCode === 404) return false;
+      throw err;
+    }
   }
 
   async presignGet(key: string, expiresInSeconds: number): Promise<string> {

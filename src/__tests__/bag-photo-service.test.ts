@@ -22,6 +22,7 @@ const storage = vi.hoisted(() => ({
   putPrivate: vi.fn(),
   presignGet: vi.fn(),
   remove: vi.fn(),
+  exists: vi.fn(),
 }));
 const access = vi.hoisted(() => ({ operators: new Set<string>() }));
 const rate = vi.hoisted(() => ({ allow: true }));
@@ -52,7 +53,7 @@ const STRANGER = { id: "stranger", role: "PARTNER" };
 const VIEW_AS_GUEST = { ...GUEST, impersonatedBy: "admin" };
 
 function booking(over: Record<string, unknown> = {}) {
-  return { id: BOOKING, guestId: "guest", status: "APPROVED", checkedInAt: null, shop: { id: "s1", ownerId: "owner" }, ...over };
+  return { id: BOOKING, guestId: "guest", status: "APPROVED", checkedInAt: null, checkOutTime: new Date(NOW.getTime() + 86_400_000), shop: { id: "s1", ownerId: "owner" }, ...over };
 }
 
 /** SOI + SOF0 (640x480) + SOS + EOI: boyut okunabilen en kucuk JPEG. */
@@ -80,6 +81,7 @@ beforeEach(() => {
   storage.presignGet.mockResolvedValue("https://s3.test/signed");
   storage.putPrivate.mockImplementation(async ({ key }: { key: string }) => ({ key }));
   storage.remove.mockResolvedValue(undefined);
+  storage.exists.mockResolvedValue(true);
 });
 
 describe("goruntuleme (list)", () => {
@@ -222,21 +224,46 @@ describe("saklama isi (runRetention)", () => {
     id,
     key: `bag-photos/b/${id}.jpg`,
     deletedAt,
-    booking: { status: "CHECKED_OUT", checkedOutAt: new Date(NOW.getTime() - 40 * DAY), updatedAt: NOW, dispute: null, ...booking },
+    booking: {
+      status: "CHECKED_OUT",
+      checkedOutAt: new Date(NOW.getTime() - 40 * DAY),
+      checkOutTime: new Date(NOW.getTime() - 40 * DAY),
+      updatedAt: NOW,
+      dispute: null,
+      ...booking,
+    },
   });
 
   it("acik itirazli fotograf aday sorgusunda elenir ve silinmez; suresi dolanlar silinir", async () => {
-    db.bagPhoto.findMany.mockResolvedValue([
+    db.bagPhoto.findMany.mockResolvedValueOnce([
       row("due", {}),
       row("open", { dispute: { status: "OPEN", updatedAt: NOW } }),
       row("closedRecently", { dispute: { status: "RESOLVED", updatedAt: new Date(NOW.getTime() - 3 * DAY) } }),
-      row("marked", { status: "CHECKED_IN", checkedOutAt: null }, NOW),
-    ]);
+      row("marked", { status: "CHECKED_IN", checkedOutAt: null, checkOutTime: NOW }, NOW),
+    ]).mockResolvedValueOnce([]);
     const r = await bagPhotoService.runRetention(NOW);
-    expect(r).toEqual({ scanned: 4, removed: 2, failed: 0, kept: 2 });
+    expect(r).toEqual({ scanned: 4, removed: 2, failed: 0, kept: 2, missing: 0 });
     expect(storage.remove.mock.calls.map((c) => c[0])).toEqual(["bag-photos/b/due.jpg", "bag-photos/b/marked.jpg"]);
     const where = db.bagPhoto.findMany.mock.calls[0][0].where;
     expect(JSON.stringify(where)).toContain('"NOT":{"dispute":{"status":{"in":["OPEN","IN_REVIEW"]}}}');
+    expect(JSON.stringify(where)).toContain('"status":{"notIn":["CHECKED_OUT","CANCELLED"]},"checkOutTime"');
+  });
+
+  it("S3'te nesnesi olmayan canli satir silinir; HEAD hatasi yok sayilmaz", async () => {
+    db.bagPhoto.findMany.mockResolvedValueOnce([]).mockResolvedValueOnce([
+      { id: "gone", key: "bag-photos/b/gone.jpg" },
+      { id: "here", key: "bag-photos/b/here.jpg" },
+      { id: "err", key: "bag-photos/b/err.jpg" },
+    ]);
+    storage.exists.mockImplementation(async (k: string) => {
+      if (k.includes("err")) throw new Error("AccessDenied");
+      return !k.includes("gone");
+    });
+    const r = await bagPhotoService.runRetention(NOW);
+    expect(r.missing).toBe(1);
+    expect(db.bagPhoto.delete).toHaveBeenCalledTimes(1);
+    expect(db.bagPhoto.delete).toHaveBeenCalledWith({ where: { id: "gone" } });
+    expect(storage.presignGet).not.toHaveBeenCalled();
   });
 
   it("nesne silinemezse satir kalir ve failed sayilir", async () => {

@@ -15,6 +15,7 @@ const EXT = /\.(ts|tsx|js|mjs)$/;
 
 const READ_SCOPE_ALLOWLIST = [
   "src/actions/affiliate.ts:previewAffiliateCheckoutAction",
+  "src/actions/bag-photos.ts:listBagPhotosAction",
   "src/actions/referral.ts:validateReferralCodeAction",
   "src/actions/search-shops.ts:refreshSearchShopsAction",
 ];

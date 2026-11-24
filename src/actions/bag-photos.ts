@@ -2,7 +2,8 @@
 
 import { z } from "zod";
 import { getClientIpOrNull } from "@/lib/client-ip";
-import { requireUser } from "@/lib/action-auth";
+import { actionSession, requireUser } from "@/lib/action-auth";
+import { asImpersonationRead } from "@/lib/impersonation-read-scope";
 import { BAG_PHOTO_MAX_BYTES } from "@/lib/bag-photos";
 import { bagPhotoService, type BagPhotoFailure, type BagPhotoList } from "@/services/BagPhotoService";
 
@@ -11,14 +12,24 @@ const id = z.string().uuid();
 
 type Result<T> = { success: true; data: T } | { success: false; code: BagPhotoFailure | "auth" };
 
-export async function listBagPhotosAction(bookingId: string): Promise<Result<BagPhotoList>> {
-  const auth = await requireUser();
-  if (!auth.ok) return { success: false, code: "auth" };
+async function listBagPhotosActionImpl(bookingId: string): Promise<Result<BagPhotoList>> {
+  // Goruntuleme oturumunda hedefin gozuyle OKUR (mobil ile ayni); yazma action'lari kapali kalir.
+  const session = await actionSession();
+  if (!session?.user?.id) return { success: false, code: "auth" };
   if (!id.safeParse(bookingId).success) return { success: false, code: "not_found" };
-  const r = await bagPhotoService.list(auth.actor, bookingId);
+  const impersonatedBy = session.impersonation && "adminId" in session.impersonation ? session.impersonation.adminId : undefined;
+  const r = await bagPhotoService.list(
+    { id: session.user.id, role: session.user.role, ...(session.impersonation ? { impersonatedBy: impersonatedBy ?? "unknown" } : {}) },
+    bookingId,
+  );
   if (!r.ok) return { success: false, code: r.reason };
   const { ok: _ok, ...data } = r;
   return { success: true, data };
+}
+
+/** Salt okuma: "olarak goruntule" oturumunda da calisir (`asImpersonationRead`). */
+export async function listBagPhotosAction(bookingId: string): Promise<Result<BagPhotoList>> {
+  return asImpersonationRead(() => listBagPhotosActionImpl(bookingId));
 }
 
 export async function uploadBagPhotoAction(bookingId: string, form: FormData): Promise<Result<{ id: string }>> {

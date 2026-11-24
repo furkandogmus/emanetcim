@@ -24,12 +24,16 @@ export const OPEN_DISPUTE_STATUSES: readonly string[] = ["OPEN", "IN_REVIEW"];
 const DAY_MS = 24 * 60 * 60 * 1000;
 const PRE_CHECK_IN = new Set(["APPROVED", "PAID", "WAITING_APPROVAL"]);
 
-/** Operator su an fotograf ekleyip silebilir mi? */
+/**
+ * Operator su an fotograf ekleyip silebilir mi? Teslim alinmamis rezervasyonda planli
+ * bitis (`checkOutTime`) gecince kapanir: o rezervasyon artik teslim almayacak ve saklama
+ * kurali onun fotograflarini planli bitisten 30 gun sonra siler.
+ */
 export function bagPhotoEditWindowOpen(
-  booking: { status: string; checkedInAt: Date | null },
+  booking: { status: string; checkedInAt: Date | null; checkOutTime: Date },
   now: Date,
 ): boolean {
-  if (PRE_CHECK_IN.has(booking.status)) return true;
+  if (PRE_CHECK_IN.has(booking.status)) return now.getTime() <= booking.checkOutTime.getTime();
   if (booking.status !== "CHECKED_IN" || !booking.checkedInAt) return false;
   return now.getTime() - booking.checkedInAt.getTime() <= BAG_PHOTO_EDIT_WINDOW_AFTER_CHECK_IN_MIN * 60_000;
 }
@@ -39,23 +43,24 @@ export type RetentionSubject = {
   booking: {
     status: string;
     checkedOutAt: Date | null;
+    /** Planli bitis; hic kapanmamis rezervasyonun yedek bitis ani. */
+    checkOutTime: Date;
     updatedAt: Date;
     dispute: { status: string; updatedAt: Date } | null;
   };
 };
 
 /**
- * Fotograf ne zaman silinir? `null` = simdilik silinmez (acik itiraz ya da rezervasyon
- * hala acik). Kural: teslimden 30 gun sonra; itiraz acildiysa kapanmasindan 30 gun
- * sonra (hangisi gec ise). Iptal edilen rezervasyonda son guncellemeden 30 gun sonra.
- * Itirazin kapanma ani ayri tutulmuyor; `Dispute.updatedAt` son durum degisikligidir.
+ * Fotograf ne zaman silinir? `null` = acik itiraz, silinmez. Kural: teslimden 30 gun
+ * sonra; itiraz acildiysa kapanmasindan 30 gun sonra (hangisi gec ise). Iptalde son
+ * guncellemeden, hic kapanmamis rezervasyonda (teslim edilmemis, gelmemis) planli
+ * bitisten 30 gun sonra. Itirazin kapanma ani `Dispute.updatedAt`ten okunur.
  */
 export function bagPhotoDeleteAt(p: RetentionSubject): Date | null {
   if (p.deletedAt) return p.deletedAt;
   const { booking } = p;
   if (booking.dispute && OPEN_DISPUTE_STATUSES.includes(booking.dispute.status)) return null;
-  const end = booking.checkedOutAt ?? (booking.status === "CANCELLED" ? booking.updatedAt : null);
-  if (!end) return null;
+  const end = booking.checkedOutAt ?? (booking.status === "CANCELLED" ? booking.updatedAt : booking.checkOutTime);
   let due = end.getTime() + BAG_PHOTO_RETENTION_DAYS * DAY_MS;
   if (booking.dispute) due = Math.max(due, booking.dispute.updatedAt.getTime() + BAG_PHOTO_RETENTION_DAYS * DAY_MS);
   return new Date(due);
