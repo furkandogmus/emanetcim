@@ -11,7 +11,9 @@ export const APP_LANGUAGES = [
   { value: "fr", label: "Français", intl: "fr-FR", site: "fr" },
   { value: "ja", label: "日本語", intl: "ja-JP", site: "ja" },
   { value: "ru", label: "Русский", intl: "ru-RU", site: "ru" },
-  { value: "fa", label: "فارسی", intl: "fa-IR", site: "fa" },
+  // Gregoryen takvim + Latin rakam: takvim izgarasi Gregoryen ve {{count}} gibi degiskenler
+  // Latin basiliyor; varsayilan fa-IR Hicri-i Semsi ve Farsca rakamla ikisini de bozardi.
+  { value: "fa", label: "فارسی", intl: "fa-IR-u-ca-gregory-nu-latn", site: "fa" },
 ] as const;
 
 export type AppLanguage = (typeof APP_LANGUAGES)[number]["value"];

@@ -12,7 +12,8 @@ function requestLanguage() {
   // Once uygulama dili, sonra Ingilizce: sunucu tanimadigi dilde (ru) Turkceye
   // dusuyordu; Rusca telefonla Ingilizce kullanan misafire e-posta Turkce gidiyordu.
   const lang = languageInfo(i18n.language);
-  return `${lang.intl}, ${lang.value}, en;q=0.5`;
+  // Accept-Language uzanti (`-u-ca-...`) tasimaz.
+  return `${lang.intl.split("-u-")[0]}, ${lang.value}, en;q=0.5`;
 }
 
 /** Iki token TEK kayitta: ayri iki yazim arasinda surec olurse cift birbirinden kopuyordu. */

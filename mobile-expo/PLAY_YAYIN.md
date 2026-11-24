@@ -127,10 +127,11 @@ yenile" şeridi gösterir; yeniden başlatma kullanıcının dokunuşuyla olur.
 
 **OTA kod imzası (0.3.5+):** `app.json` → `updates.codeSigningCertificate`
 (`certs/certificate.pem`, açık sertifika, repoda) ve `codeSigningMetadata`
-(`keyid: main`, `alg: rsa-v1_5-sha256`). Özel anahtar repoda değil:
-`~/Documents/personal/bagajpark-ota-signing/keys/private-key.pem` (yedeği parola
-yöneticisinde tutulmalı). `npm run update:production` onu `--private-key-path` ile geçirir;
-başka yerdeyse `OTA_SIGNING_KEY=/yol/private-key.pem`. Anahtarsız yayın durur.
+(`keyid: main`, `alg: rsa-v1_5-sha256`). Özel anahtar repoda değil; yayın yapanın
+makinesinde durur, yedeği parola yöneticisinde tutulmalı. `npm run update:production`
+yolunu zorunlu `OTA_SIGNING_KEY` ortam değişkeninden alır ve `--private-key-path` ile
+geçirir; değişken yoksa ya da dosya yoksa yayın durur:
+`OTA_SIGNING_KEY=/yol/private-key.pem npm run update:production -- --message "..."`.
 - 0.3.5+ ikililer sertifikayı gömülü taşır ve imzasız ya da başka anahtarla imzalı
   güncellemeyi reddeder (gömülü JS'te kalır).
 - 0.3.0–0.3.4 ikililerde sertifika yok; imza istemezler (`expo-expect-signature` başlığı

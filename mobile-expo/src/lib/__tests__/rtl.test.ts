@@ -3,21 +3,26 @@ import { I18nManager } from "react-native";
 import * as Updates from "expo-updates";
 import * as SecureStore from "expo-secure-store";
 
-import { isRtlLanguage, syncLayoutDirection } from "@/lib/rtl";
+import { isRtlLanguage, resetRtlSessionForTests, syncLayoutDirection } from "@/lib/rtl";
 
 jest.mock("expo-updates", () => ({ reloadAsync: jest.fn(() => Promise.resolve()) }));
-jest.mock("expo-secure-store", () => {
-  const store = new Map<string, string>();
-  return {
-    getItemAsync: jest.fn((k: string) => Promise.resolve(store.get(k) ?? null)),
-    setItemAsync: jest.fn((k: string, v: string) => Promise.resolve(void store.set(k, v))),
-    deleteItemAsync: jest.fn((k: string) => Promise.resolve(void store.delete(k))),
-  };
-});
+jest.mock("expo-secure-store", () => ({
+  getItemAsync: jest.fn(),
+  setItemAsync: jest.fn(),
+  deleteItemAsync: jest.fn(() => Promise.resolve()),
+}));
+
+const store = new Map<string, string>();
+const get = SecureStore.getItemAsync as unknown as jest.Mock<(k: string) => Promise<string | null>>;
+const set = SecureStore.setItemAsync as unknown as jest.Mock<(k: string, v: string) => Promise<void>>;
 
 describe("rtl", () => {
   beforeEach(() => {
     jest.clearAllMocks();
+    store.clear();
+    resetRtlSessionForTests();
+    get.mockImplementation((k) => Promise.resolve(store.get(k) ?? null));
+    set.mockImplementation((k, v) => Promise.resolve(void store.set(k, v)));
     jest.spyOn(I18nManager, "forceRTL").mockImplementation(() => undefined);
     jest.spyOn(I18nManager, "allowRTL").mockImplementation(() => undefined);
   });
@@ -39,10 +44,22 @@ describe("rtl", () => {
     expect(Updates.reloadAsync).toHaveBeenCalledTimes(1);
   });
 
-  it("acilista ayni yon icin ikinci kez denemez (dongu yok)", async () => {
-    // Onceki test denemeyi kaydetti ama isRTL degismedi (platform yok saydi).
+  it("acilista ayni yon icin kayitli deneme varsa yeniden yuklemez", async () => {
+    store.set("rtl_reload_attempt", "rtl");
     await expect(syncLayoutDirection("fa")).resolves.toBe(false);
     expect(Updates.reloadAsync).not.toHaveBeenCalled();
-    expect(SecureStore.getItemAsync).toHaveBeenCalled();
+  });
+
+  it("SecureStore yazamazsa acilista yeniden yuklemez (dongu yok)", async () => {
+    set.mockImplementation(() => Promise.reject(new Error("keychain")));
+    await expect(syncLayoutDirection("fa")).resolves.toBe(false);
+    expect(Updates.reloadAsync).not.toHaveBeenCalled();
+  });
+
+  it("ayni oturumda en fazla bir yeniden yukleme", async () => {
+    await expect(syncLayoutDirection("fa", true)).resolves.toBe(true);
+    await expect(syncLayoutDirection("fa", true)).resolves.toBe(false);
+    await expect(syncLayoutDirection("fa")).resolves.toBe(false);
+    expect(Updates.reloadAsync).toHaveBeenCalledTimes(1);
   });
 });

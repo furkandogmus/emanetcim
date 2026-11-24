@@ -12,8 +12,15 @@ import * as Updates from "expo-updates";
  * Yon degisikligi yalniz yeniden yuklemeyle gecerli olur (RN `isRTL`i acilista okur).
  */
 const RTL_LANGUAGES: ReadonlySet<string> = new Set(["fa"]);
-// Yeniden yukleme denendi ama yon degismediyse (platform yok sayarsa) dongu olmasin.
+// Yeniden yukleme denendi ama yon degismediyse (platform yok saydiysa) dongu olmasin.
 const ATTEMPT_KEY = "rtl_reload_attempt";
+// Ayni JS oturumunda en fazla bir yeniden yukleme (acilis kontrolu ile dil secimi yarisirsa).
+let reloadRequested = false;
+
+/** Yalniz testler icin. */
+export function resetRtlSessionForTests() {
+  reloadRequested = false;
+}
 
 export function isRtlLanguage(lang: string): boolean {
   return RTL_LANGUAGES.has(lang);
@@ -41,13 +48,21 @@ export async function syncLayoutDirection(lang: string, userAction = false): Pro
     await SecureStore.deleteItemAsync(ATTEMPT_KEY).catch(() => undefined);
     return false;
   }
+  if (reloadRequested) return false;
   if (!userAction) {
     const tried = await SecureStore.getItemAsync(ATTEMPT_KEY).catch(() => null);
     if (tried === want) return false;
   }
   I18nManager.allowRTL(rtl);
   I18nManager.forceRTL(rtl);
-  await SecureStore.setItemAsync(ATTEMPT_KEY, want).catch(() => undefined);
+  const recorded = await SecureStore.setItemAsync(ATTEMPT_KEY, want).then(
+    () => true,
+    () => false,
+  );
+  // Acilista deneme kaydedilemediyse yeniden yukleme yok: kayitsiz yukleme sonsuz donguye
+  // donebilirdi. Bayraklar yine yazildi, bir sonraki soguk acilista gecerli olur.
+  if (!userAction && !recorded) return false;
+  reloadRequested = true;
   await reload();
   return true;
 }

@@ -44,12 +44,30 @@ describe("fr/ja cogul", () => {
 describe("fa", () => {
   it("Farsca telefon Farsca acilir; site ve tarih fa", () => {
     expect(deviceLanguage(["fa"])).toBe("fa");
-    expect(languageInfo("fa")).toMatchObject({ intl: "fa-IR", site: "fa", label: "فارسی" });
+    expect(languageInfo("fa")).toMatchObject({ site: "fa", label: "فارسی" });
   });
 
   it("cogul one/other ve sayi metinde", () => {
     const fa = i18n.getFixedT("fa");
     expect(fa("common.day", { count: 3 })).toContain("3");
     expect(fa("common.day", { count: 3 })).not.toContain("common.day");
+  });
+});
+
+describe("fa tarih ve sayi", () => {
+  it("Gregoryen takvim ve Latin rakam; Hicri-i Semsi degil", () => {
+    const intl = languageInfo("fa").intl;
+    const s = new Intl.DateTimeFormat(intl, { year: "numeric", month: "long", day: "numeric", timeZone: "UTC" }).format(
+      new Date("2026-11-24T12:00:00Z"),
+    );
+    expect(s).toContain("2026");
+    expect(s).toContain("24");
+    expect(s).not.toMatch(/[۰-۹]/);
+    expect(new Intl.NumberFormat(intl).format(1234)).toMatch(/1.?234/);
+  });
+
+  it("fa.json yalniz Latin rakam tasir", () => {
+    // eslint-disable-next-line @typescript-eslint/no-require-imports
+    expect(JSON.stringify(require("@/locales/fa.json"))).not.toMatch(/[۰-۹٠-٩]/);
   });
 });
