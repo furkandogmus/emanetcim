@@ -2356,5 +2356,13 @@
       "shareCsv": "Offene Provisionen teilen (CSV)",
       "shareCsvHint": "Ohne Monat werden alle offenen Provisionen ausgegeben. Den Text über das Teilen-Menü per E-Mail oder an Drive senden."
     }
+  },
+  "deepLink": {
+    "partnerOnlyTitle": "Dieser Link ist für ein Partnerkonto",
+    "partnerOnlyBody": "Melden Sie sich mit dem Partnerkonto des Geschäfts an, um diese Buchung zu öffnen.",
+    "switchAccount": "Mit anderem Konto anmelden",
+    "partnerInviteTitle": "Die Partnerbewerbung erfolgt auf der Website",
+    "partnerInviteBody": "Das Bewerbungsformular öffnet sich mit Ihrem Einladungscode.",
+    "openOnWeb": "Website öffnen"
   }
 }

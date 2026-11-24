@@ -2356,5 +2356,13 @@
       "shareCsv": "Share unpaid commissions (CSV)",
       "shareCsvHint": "With no month, all unpaid commissions are included. Send the text by email or to Drive from the share menu."
     }
+  },
+  "deepLink": {
+    "partnerOnlyTitle": "This link is for a partner account",
+    "partnerOnlyBody": "Sign in with the shop's partner account to open this booking.",
+    "switchAccount": "Sign in with another account",
+    "partnerInviteTitle": "Partner sign-up is on the website",
+    "partnerInviteBody": "The application form opens with your invite code filled in.",
+    "openOnWeb": "Open website"
   }
 }
