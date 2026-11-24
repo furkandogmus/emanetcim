@@ -86,6 +86,8 @@ describe("createWalkInBooking", () => {
       affiliateId: null,
       couponDiscountAmount: 0,
       referralDiscountAmount: 0,
+      // Uygulama kanali indirimi walk-in'e uygulanmaz.
+      appDiscountAmount: 0,
     });
     expect(b.qrCodeToken).toBeTruthy();
   });
