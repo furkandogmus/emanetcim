@@ -2905,6 +2905,8 @@
     "lateTitle": "Your drop-off time has passed",
     "lateDropoff": "Your booking closes automatically at {time}. If you are on your way, call the shop.",
     "partnerWaitingTitle": "The shop is waiting for you",
-    "lateDropoffHold": "The shop is holding your booking until {time}."
+    "lateDropoffHold": "The shop is holding your booking until {time}.",
+    "prelaunchDeviceWants": "from the app: {count}",
+    "prelaunchDeviceWantsHint": "One-tap requests sent with an app device id (generated in the app, easier to inflate than the web cookie)"
   }
 }

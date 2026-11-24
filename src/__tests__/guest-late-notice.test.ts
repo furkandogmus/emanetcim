@@ -1,6 +1,6 @@
 import { describe, it, expect } from "vitest";
 import { guestLateNotice, type LateSubject } from "@/lib/late-dropoff";
-import { isBookingExpired } from "@/lib/booking-closure";
+import { guestCancelOptions, isBookingExpired } from "@/lib/booking-closure";
 
 /** Web misafir rezervasyon sayfasindaki gec birakma bandi ve suresi dolma (mobil ile ayni kural). */
 
@@ -44,5 +44,18 @@ describe("isBookingExpired", () => {
     expect(isBookingExpired({ status: "APPROVED", checkOutTime: CHECK_OUT }, min(121))).toBe(true);
     expect(isBookingExpired({ status: "APPROVED", checkOutTime: CHECK_OUT }, min(119))).toBe(false);
     expect(isBookingExpired({ status: "CHECKED_IN", checkOutTime: CHECK_OUT }, min(200))).toBe(false);
+  });
+});
+
+describe("guestCancelOptions", () => {
+  it("suresi dolani kapatmak expired_no_dropoff, esnafa bildirim yok", () => {
+    expect(guestCancelOptions({ status: "APPROVED", checkOutTime: CHECK_OUT }, min(121))).toEqual({
+      reason: "expired_no_dropoff",
+      notifyPartner: false,
+    });
+  });
+
+  it("suresi dolmamis rezervasyonda normal misafir iptali", () => {
+    expect(guestCancelOptions({ status: "APPROVED", checkOutTime: CHECK_OUT }, min(10))).toEqual({ reason: "guest_cancel" });
   });
 });

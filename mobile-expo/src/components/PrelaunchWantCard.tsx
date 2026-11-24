@@ -14,7 +14,9 @@ import { colors, space } from "@/theme/tokens";
 /**
  * Talep testi noktasi: tek dokunusla "burada olsun" sayilir; girisliyse hesap
  * e-postasina "acilinca haber ver" kaydi da yazilir (web `PrelaunchDemandPanel`).
- * Sayi sunucudan gelen TAZE toplamdir, yerel `+1` degil.
+ * Sayi sunucudan gelen TAZE toplamdir, yerel `+1` degil. Sayac cihaz kimligiyle
+ * tekillesir: girissiz tiklayip sonra giris yapan kisi "Haber ver"e basinca yeniden
+ * sayilmaz, yalniz haber verme kaydi yazilir.
  */
 export function PrelaunchWantCard({ shopId, initialCount }: { shopId: string; initialCount: number }) {
   const { t, i18n } = useTranslation();
@@ -24,11 +26,12 @@ export function PrelaunchWantCard({ shopId, initialCount }: { shopId: string; in
   const [result, setResult] = useState<PrelaunchWantResponse | null>(null);
   const count = result?.count ?? initialCount;
 
-  async function submit() {
-    if (want.isPending || result) return;
+  async function send() {
+    if (want.isPending) return;
     const deviceId = await getDeviceId();
     want.mutate({ deviceId, notify: signedIn, locale: i18n.language }, { onSuccess: setResult });
   }
+  const canSubscribe = signedIn && !!result && !result.subscribed;
 
   return (
     <Card style={{ gap: space.md }}>
@@ -40,12 +43,20 @@ export function PrelaunchWantCard({ shopId, initialCount }: { shopId: string; in
         title={result ? t("guestParity.wantDone") : t("guestParity.wantCta")}
         disabled={!!result}
         loading={want.isPending}
-        onPress={() => void submit()}
+        onPress={() => void send()}
       />
       <AppText variant="caption" accessibilityLiveRegion="polite">
         {count > 0 ? t("guestParity.wantCount", { count }) : t("guestParity.wantFirst")}
       </AppText>
       {result?.subscribed ? <AppText variant="caption">{t("guestParity.subscribed")}</AppText> : null}
+      {canSubscribe ? (
+        <Button
+          variant="secondary"
+          title={t("guestParity.notifyMe")}
+          loading={want.isPending}
+          onPress={() => void send()}
+        />
+      ) : null}
       {result && !signedIn ? (
         <Button variant="secondary" title={t("guestParity.signInToNotify")} onPress={() => router.push("/login")} />
       ) : null}

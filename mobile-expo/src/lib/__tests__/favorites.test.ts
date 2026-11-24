@@ -46,8 +46,30 @@ describe("parseFavorites", () => {
 
 describe("toggleFavorite", () => {
   it("cihaza yazar", async () => {
-    toggleFavorite("shop-1");
-    await Promise.resolve();
+    await toggleFavorite("shop-1");
     expect(JSON.parse(store.get("bp_favorite_shops")!)).toEqual(["shop-1"]);
+  });
+
+  it("okuma bitmeden yapilan dokunus kayitli listeyi ezmez", async () => {
+    store.set("bp_favorite_shops", JSON.stringify(["old-1", "old-2"]));
+    let release!: () => void;
+    const gate = new Promise<void>((r) => (release = r));
+    (SecureStore.getItemAsync as jest.Mock).mockImplementationOnce(async (k: unknown) => {
+      await gate;
+      return store.get(k as string) ?? null;
+    });
+    const pending = toggleFavorite("new");
+    release();
+    await pending;
+    expect(JSON.parse(store.get("bp_favorite_shops")!)).toEqual(["new", "old-1", "old-2"]);
+  });
+
+  it("okuma hata verirse depoya yazilmaz", async () => {
+    store.set("bp_favorite_shops", JSON.stringify(["old-1"]));
+    (SecureStore.getItemAsync as jest.Mock).mockImplementationOnce(async () => {
+      throw new Error("keychain locked");
+    });
+    await toggleFavorite("new");
+    expect(JSON.parse(store.get("bp_favorite_shops")!)).toEqual(["old-1"]);
   });
 });

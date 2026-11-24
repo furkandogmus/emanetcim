@@ -363,8 +363,19 @@ class PrelaunchInterestService {
       district: string | null;
       interestCount: number;
       wantCount: number;
+      /**
+       * `wantCount`in uygulama cihaz kimligiyle (`device:`) gelen kismi. Cihaz kimligi
+       * istemcide uretildigi icin cerezden kolay sisirilir; rapor ayri gosterir.
+       */
+      deviceWantCount: number;
     }[]
   > {
+    const deviceWants = await prisma.prelaunchWant.groupBy({
+      by: ["shopId"],
+      where: { anonId: { startsWith: "device:" } },
+      _count: { _all: true },
+    });
+    const deviceByShop = new Map(deviceWants.map((r) => [r.shopId, r._count._all]));
     const shops = await prisma.shop.findMany({
       where: { isPrelaunch: true },
       select: {
@@ -384,6 +395,7 @@ class PrelaunchInterestService {
         district: s.district,
         interestCount: s._count.prelaunchInterests,
         wantCount: s._count.prelaunchWants,
+        deviceWantCount: deviceByShop.get(s.id) ?? 0,
       }))
       /*
         Once TEK TIK sayisi: en genis sinyal o. E-posta esitligi bozar --

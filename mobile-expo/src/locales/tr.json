@@ -2109,6 +2109,7 @@
     "addToCalendar": "Takvime ekle",
     "calendarTitle": "Bagaj emaneti: {{shop}}",
     "calendarDetails": "BagajPark rezervasyonu {{code}}: {{shop}}",
+    "notifyMe": "Açılınca e-postayla haber ver",
     "errors": {
       "shop_now_open": "Bu nokta açıldı; artık rezervasyon yapabilirsin.",
       "too_many_requests": "Çok fazla deneme yapıldı. Biraz sonra tekrar dene."

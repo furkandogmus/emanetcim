@@ -11,27 +11,32 @@ import logger from "@/lib/logger";
  * Talep testi noktasi: "burada olsun" tek tik + (girisliyse) "acilinca haber ver".
  *
  * Web `registerPrelaunchWantAction` ile ayni govde (`registerWant`). Dedupe anahtari
- * web'de `bp_anon` cerezi; burada girisli kullanicida hesap, girissizde uygulamanin
- * cihazda tuttugu rastgele kimlik. Cihaz kimligi istemcide uretildigi icin IP basina
- * hiz siniri sayacin sisirilmesini sinirlar.
+ * web'de `bp_anon` cerezi, burada HER ZAMAN uygulamanin cihazda tuttugu kimlik
+ * (`device:<uuid>`): once girissiz tiklayip sonra giris yapan kisi ikinci kez
+ * sayilmaz. Hesap yalniz "acilinca haber ver" kaydinin e-postasi icin okunur; ayni
+ * istek tekrar gelirse sayac artmaz, yalniz haber verme kaydi yazilir.
+ *
+ * Cihaz kimligi istemcide uretilir, yani tek basina sisirmeye karsi koruma degil:
+ * yonetici raporu `device:` isteklerini ayri sayar (`summary`). Hiz siniri IP + nokta
+ * basina; otel NAT'indaki farkli noktalara bakan misafirler birbirini kilitlemez.
  */
 const schema = z.object({
   shopId: z.string().uuid(),
-  deviceId: z.string().uuid().optional(),
+  deviceId: z.string().uuid(),
   /** Girisli kullanicinin hesap e-postasina "acilinca haber ver" kaydi da yazilir. */
   notify: z.boolean().optional(),
   locale: z.string().min(2).max(10).optional(),
 });
 
 export async function POST(req: NextRequest) {
-  const ip = await getClientIp(req);
-  if (!(await rateLimit(`mobile_prelaunch_want:${ip}`, 10, 10 * 60_000))) {
-    return NextResponse.json({ error: "too_many_requests" }, { status: 429 });
-  }
-
   const parsed = schema.safeParse(await req.json().catch(() => null));
   if (!parsed.success) return NextResponse.json({ error: "invalid" }, { status: 400 });
   const { shopId, deviceId, notify, locale } = parsed.data;
+
+  const ip = await getClientIp(req);
+  if (!(await rateLimit(`mobile_prelaunch_want:${ip}:${shopId}`, 10, 10 * 60_000))) {
+    return NextResponse.json({ error: "too_many_requests" }, { status: 429 });
+  }
 
   // Bearer geldiyse dogrulanir; reddedilirse 401 (istemci yeniler), anonime dusulmez.
   let user: { id: string; email: string | null } | null = null;
@@ -42,9 +47,7 @@ export async function POST(req: NextRequest) {
     if (blocked) return blocked;
     user = { id: auth.user.id, email: auth.user.email };
   }
-  const anonId = user ? `user:${user.id}` : deviceId ? `device:${deviceId}` : null;
-  if (!anonId) return NextResponse.json({ error: "invalid" }, { status: 400 });
-
+  const anonId = `device:${deviceId}`;
   const want = await prelaunchInterestService.registerWant({ shopId, anonId, locale, source: "mobile" });
   if (!want.ok) {
     return want.code === "shop_not_prelaunch"

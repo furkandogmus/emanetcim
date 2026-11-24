@@ -13,7 +13,7 @@ import { describe, it, expect, vi, beforeEach } from "vitest";
 const { mockPrisma } = vi.hoisted(() => ({
   mockPrisma: {
     shop: { findUnique: vi.fn() },
-    prelaunchWant: { create: vi.fn(), count: vi.fn() },
+    prelaunchWant: { create: vi.fn(), count: vi.fn(), groupBy: vi.fn() },
   },
 }));
 
@@ -118,5 +118,24 @@ describe("registerWant (web action + mobil uc ortak govde)", () => {
   it("veritabani hatasi firlatmaz", async () => {
     mockPrisma.prelaunchWant.create.mockRejectedValue(new Error("db down"));
     expect(await prelaunchInterestService.registerWant(INPUT)).toEqual({ ok: false, code: "failed" });
+  });
+});
+
+describe("summary: uygulama cihazi istekleri ayri sayilir", () => {
+  it("device: istekleri deviceWantCount olarak doner, toplam degismez", async () => {
+    const findMany = vi.fn().mockResolvedValue([
+      { id: "s1", name: "A", city: "X", district: null, _count: { prelaunchInterests: 1, prelaunchWants: 5 } },
+      { id: "s2", name: "B", city: "X", district: null, _count: { prelaunchInterests: 0, prelaunchWants: 2 } },
+    ]);
+    (mockPrisma.shop as unknown as { findMany: typeof findMany }).findMany = findMany;
+    mockPrisma.prelaunchWant.groupBy.mockResolvedValue([{ shopId: "s1", _count: { _all: 4 } }]);
+
+    const rows = await prelaunchInterestService.summary();
+
+    expect(mockPrisma.prelaunchWant.groupBy).toHaveBeenCalledWith(
+      expect.objectContaining({ where: { anonId: { startsWith: "device:" } } }),
+    );
+    expect(rows.find((r) => r.shopId === "s1")).toMatchObject({ wantCount: 5, deviceWantCount: 4 });
+    expect(rows.find((r) => r.shopId === "s2")).toMatchObject({ wantCount: 2, deviceWantCount: 0 });
   });
 });
