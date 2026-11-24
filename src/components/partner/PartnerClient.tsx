@@ -629,6 +629,7 @@ export default function PartnerClient({
         <div className="flex-1 max-w-md mx-auto w-full flex flex-col gap-8 animate-in slide-in-from-bottom-4 duration-500">
           <PartnerShopSettingsForm
             shopId={shopId}
+            initialName={shopName}
             initialCapacity={initialCapacity}
             initialPricePerDay={initialPricePerDay}
             marketPrice={marketPrice}

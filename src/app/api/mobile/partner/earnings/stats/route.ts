@@ -4,7 +4,8 @@ import prisma from "@/lib/db";
 import { requireMobileUser, requireRole } from "@/lib/mobile-auth";
 import { computeSplit } from "@/lib/platform-split";
 import { COLLECTED_ORDER_BY, collectedEarningsWhere } from "@/lib/earning-collection";
-import { toMobilePartnerEarningRow } from "@/lib/mobile-dto";
+import { toMobilePartnerEarningRow, toMobilePartnerInsights } from "@/lib/mobile-dto";
+import { partnerEarningsService } from "@/services/PartnerEarningsService";
 import { getEffectiveCommission } from "@/lib/commission";
 import { startOfDayInTimeZone } from "@/lib/timezone";
 
@@ -16,7 +17,7 @@ export async function GET(req: NextRequest) {
 
   const owned = await prisma.shop.findMany({
     where: { ownerId: auth.user.id, isActive: true },
-    select: { id: true, timezone: true },
+    select: { id: true, timezone: true, rating: true },
   });
   // `?shop=` uygulamanin dukkan secimini izler (pano gibi); yoksa tum dukkanlar.
   const requested = req.nextUrl.searchParams.get("shop");
@@ -95,6 +96,9 @@ export async function GET(req: NextRequest) {
 
   const formattedHistory = history.map((b) => toMobilePartnerEarningRow(b, commissionRate));
 
+  // Web kazanc sayfasiyla ayni ozet (`getSummary`); grafikler istemcide hesaplanmaz.
+  const insights = await partnerEarningsService.getInsights(shops, commissionRate);
+
   return NextResponse.json({
     totalBalance: totalEarnings,
     todayEarnings,
@@ -104,5 +108,6 @@ export async function GET(req: NextRequest) {
     /* Mobil de "komisyonsuz donem"i yazabilsin diye; web ile ayni sayi. */
     commissionRate,
     merchantShareRatio,
+    insights: toMobilePartnerInsights(insights),
   });
 }

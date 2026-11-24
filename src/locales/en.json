@@ -558,7 +558,7 @@
     "cancelDialogTitle": "Cancel booking",
     "cancelConfirmAction": "Confirm cancellation",
     "cancellationPolicyTitle": "Cancellation policy",
-    "cancellationTierFullSimple": "Free cancellation and a full refund until you drop off your bags.",
+    "cancellationTierFullSimple": "Free cancellation, full refund, anytime before check-in.",
     "cancellationYourCase": "Your booking",
     "cancellationEstimateCard": "About ₺{amount} will be refunded to your card.",
     "cancellationUnpaidNote": "Free cancellation. Nothing is charged; the request is simply cancelled.",
@@ -648,7 +648,7 @@
     "totalBags": "Total bags",
     "authModalLogin": "Sign In",
     "authModalRegister": "Sign Up",
-    "checkoutPolicyCalloutBody": "Free cancellation and a full refund until you drop off your bags.",
+    "checkoutPolicyCalloutBody": "Free cancellation, full refund, anytime before check-in.",
     "checkoutPaymentMethodsNote": "Card payment via service provider (secure). Cash is not accepted. Apple Pay / Google Pay / PayPal may be added with service provider — we’ll announce when live.",
     "checkoutPaymentAfterApprovalNote": "Your card is only charged after the shop approves your request. You will complete payment on the next step or from “My bookings”.",
     "checkoutFaqLink": "FAQ",
@@ -766,7 +766,10 @@
     "stayDayClosed": "The shop is closed on {date}; please choose another day.",
     "shopClosedOn": "Closed: {range}",
     "searchSubmit": "Search",
-    "checkoutAffiliateLine": "Referral discount ({pct}%)"
+    "checkoutAffiliateLine": "Referral discount ({pct}%)",
+    "cancellationTierFull": "Cancel at least {hours} hours before check-in: full refund to your card.",
+    "cancellationTierPartial": "If between {minHours} and {maxHours} hours remain before check-in: {percent}% is refunded to your card.",
+    "cancellationEstimateCredit": "Less than 60 minutes remain, so the refund is issued as BagajPark credits."
   },
   "Admin": {
     "dashboardTitle": "BagajPark Admin Center",
@@ -1677,7 +1680,7 @@
     "q3": "3. Prohibitions",
     "a3": "Flammable and illegal items forbidden.",
     "q4": "4. Refunds",
-    "a4": "Any cancellation made before the bags are dropped off is refunded in full, with no deductions or fees. Once the shop has taken the bags, the booking can no longer be cancelled.",
+    "a4": "Any cancellation made before the check-in time receives a full refund of the amount paid, with no deductions or fees.",
     "q6": "6. Changes",
     "a6": "BagajPark reserves the right to change the terms of service and pricing policy without prior notice.",
     "intro": "By using the BagajPark platform, you are deemed to have accepted these rules. Please read carefully.",
@@ -1717,7 +1720,7 @@
     "q1": "Is my luggage safe?",
     "a1": "Yes. Partner shops follow platform rules; the shopkeeper checks your bags in by scanning your booking QR code, and the booking record keeps the drop-off and pickup times and the bag count. Protection up to 10,000 TL per bag applies under the conditions described in our Terms — it complements shop operations and is not a standalone retail policy.",
     "q2": "How do refunds work if I cancel?",
-    "a2": "You can cancel for free anytime until you drop off your bags; the full amount is refunded to your card. Once the shop has taken your bags, the booking can no longer be cancelled.",
+    "a2": "You can cancel anytime before your check-in time for a full refund to your card — no hidden conditions.",
     "q3": "Which payment methods are accepted?",
     "a3": "Pay online with major credit and debit cards through our secure provider (service provider). Cash is not accepted. Apple Pay, Google Pay and PayPal can be enabled via service provider when we activate that gateway — we will announce it on the site.",
     "q4": "What if the shop is closed or I need help?",
@@ -1733,7 +1736,7 @@
     "a7": "Yes. We use S, M and XL slots with different daily rates. Choose the size that matches your luggage. Oversized or unusual items may need partner approval — ask support before booking.",
     "q8": "Do you accept cash?",
     "a8": "No. Only online card payments (and future wallet options) are accepted. This keeps a clear payment trail and aligns with platform protection rules.",
-    "a2Onsite": "You can cancel for free anytime until you drop off your bags. Because payment is taken at the shop, you are never charged if you cancel. Once the shop has taken your bags, the booking can no longer be cancelled.",
+    "a2Onsite": "You can cancel free of charge any time before your check-in. Because payment is taken at the shop, cancelling means you are never charged. No hidden terms.",
     "a3Onsite": "You pay at the shop where you drop off your luggage — in cash or on the partner's card terminal. No card details are asked for when you book. Online payment is coming soon; we'll announce it on the site."
   },
   "MarketingBecomePartner": {
@@ -1842,14 +1845,14 @@
   },
   "Cancellation": {
     "title": "Cancellation & Refund Policy",
-    "subtitle": "Free cancellation and a full refund until you drop off your bags.",
-    "badge": "FREE TO CANCEL UNTIL DROP-OFF",
+    "subtitle": "Free cancellation, full refund, anytime before check-in.",
+    "badge": "ALWAYS FREE TO CANCEL",
     "heroTitle": "Worry-Free",
     "heroTitle2": "Cancellation",
-    "tier1Title": "Until Drop-off",
+    "tier1Title": "Until Check-in",
     "tier1Badge": "Full Refund",
-    "tier1Desc": "Cancel anytime until you leave your bags at the shop, even after your check-in time, for a full refund to your card. Once the shop has taken your bags, the booking can no longer be cancelled.",
-    "tier1DescOnsite": "Cancel anytime until you leave your bags at the shop, even after your check-in time, at no cost. Because payment is taken at the shop, you are never charged if you cancel. Once the shop has taken your bags, the booking can no longer be cancelled.",
+    "tier1Desc": "Cancel anytime before your check-in time for a full refund to your card — no hidden conditions.",
+    "tier1DescOnsite": "Cancel anytime before your check-in time at no cost. Because payment is taken at the shop, you're never charged if you cancel — no hidden conditions.",
     "tier2Title": "Automatic & Fast",
     "tier2Badge": "No Waiting",
     "tier2Desc": "Your cancellation is processed instantly — no approval needed from anyone.",
@@ -2921,5 +2924,14 @@
       "mailFailed": "The email could not be sent right now. Please try again later.",
       "inProgress": "Your export is being prepared right now. Check your email in a few minutes."
     }
+  },
+  "PartnerParity": {
+    "shopNameLabel": "Shop name",
+    "shopNameHint": "Guests see your shop under this name on the map and in search.",
+    "shopNameInvalid": "Shop name must be between 2 and 200 characters.",
+    "posterLinkExpiredTitle": "This poster link has expired",
+    "posterLinkExpiredBody": "For security the link is valid for 15 minutes. Open the QR poster again from the partner panel in the app.",
+    "posterRateLimitedTitle": "Too many attempts",
+    "posterRateLimitedBody": "Please try again in a few minutes."
   }
 }

@@ -44,6 +44,7 @@ export default async function PartnerSettingsPage({
         where: { id: shopRef.id },
         select: {
           id: true,
+          name: true,
           capacity: true,
           openingTime: true,
           closingTime: true,
@@ -105,6 +106,7 @@ export default async function PartnerSettingsPage({
 
         <PartnerShopSettingsForm
           shopId={shop.id}
+          initialName={shop.name}
           initialCapacity={shop.capacity}
           initialPricePerDay={moneyToNumber(shop.pricePerDay) || marketPrice}
           initialAddress={shop.address ?? ""}

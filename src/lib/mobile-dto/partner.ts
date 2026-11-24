@@ -100,6 +100,8 @@ type PartnerShopSource = {
   openingTime: string | null;
   closingTime: string | null;
   open247: boolean;
+  latitude?: number | null;
+  longitude?: number | null;
 };
 
 /**
@@ -124,6 +126,8 @@ export function toMobilePartnerShop(
     openingTime: shop.openingTime,
     closingTime: shop.closingTime,
     open247: shop.open247,
+    latitude: shop.latitude ?? null,
+    longitude: shop.longitude ?? null,
     ...extras,
   };
 }

@@ -31,6 +31,22 @@ const shopUpdateSchema = z.object({
   address: z.string().max(500).optional(),
   city: z.string().max(100).optional(),
   district: z.string().max(100).optional(),
+  /*
+    Konum pini: web formuyla ayni aralik. Iki alan BIRLIKTE gelir (yalniz enlem
+    yazilirsa pin baska bir yere kayar); null ikisini birden siler. 0,0 bir
+    "secilmedi" degeridir, gercek dukkan degil: reddedilir.
+  */
+  latitude: z.number().finite().min(-90).max(90).nullable().optional(),
+  longitude: z.number().finite().min(-180).max(180).nullable().optional(),
+}).refine((d) => (d.latitude === undefined) === (d.longitude === undefined), {
+  message: "coordinates_pair",
+  path: ["latitude"],
+}).refine((d) => (d.latitude === null) === (d.longitude === null), {
+  message: "coordinates_pair",
+  path: ["latitude"],
+}).refine((d) => !(d.latitude === 0 && d.longitude === 0), {
+  message: "coordinates_unset",
+  path: ["latitude"],
 });
 
 export async function GET(req: NextRequest) {
@@ -127,6 +143,8 @@ export async function PUT(req: NextRequest) {
     if (parsed.data.address !== undefined) data.address = parsed.data.address;
     if (parsed.data.city !== undefined) data.city = parsed.data.city;
     if (parsed.data.district !== undefined) data.district = parsed.data.district;
+    if (parsed.data.latitude !== undefined) data.latitude = parsed.data.latitude;
+    if (parsed.data.longitude !== undefined) data.longitude = parsed.data.longitude;
 
     /* Bant + etki + yazma serviste (web action'iyla ayni govde). */
     const result = await shopService.updateSettings(shop.id, data);

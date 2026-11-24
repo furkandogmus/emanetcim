@@ -10,6 +10,7 @@ import { getClientIpOrNull } from "@/lib/client-ip";
 const hm = /^\d{1,2}:\d{2}$/;
 
 const shopSettingsSchema = z.object({
+  name: z.string().trim().min(2).max(200).optional(),
   capacity: z.number().int().min(1).max(100_000).optional(),
   openingTime: z.string().regex(hm, "Saat HH:mm olmalıdır.").optional(),
   closingTime: z.string().regex(hm, "Saat HH:mm olmalıdır.").optional(),
@@ -24,6 +25,7 @@ const shopSettingsSchema = z.object({
 export async function updateShopSettingsAction(
   shopId: string,
   data: {
+    name?: string;
     capacity?: number;
     openingTime?: string;
     closingTime?: string;
