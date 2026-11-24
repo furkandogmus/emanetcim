@@ -1,6 +1,7 @@
 "use client";
 
-import { signOut, useSession } from 'next-auth/react';
+import { useSession } from 'next-auth/react';
+import { signOutWithPush } from '@/lib/web-push-client';
 import type { LucideIcon } from 'lucide-react';
 import { User, LogOut, Shield, Store, ChevronDown, Fingerprint } from 'lucide-react';
 import { useEffect, useId, useRef, useState } from 'react';
@@ -141,7 +142,7 @@ export default function UserNav() {
               <li>
                 <button
                   type="button"
-                  onClick={() => signOut()}
+                  onClick={() => void signOutWithPush()}
                   className="flex items-center gap-3 w-full p-4 hover:bg-red-50 rounded-2xl transition-colors text-sm font-bold text-red-600"
                 >
                   <LogOut size={18} aria-hidden />

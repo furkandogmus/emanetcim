@@ -29,7 +29,7 @@ import BookingModifyModal, {
 import type { GuestBookingListItem } from '@/services/BookingService';
 import type { PricingRules } from '@/lib/pricing-rules';
 import { bcp47ForUiLocale } from '@/lib/intl-locale';
-import { signOut } from 'next-auth/react';
+import { signOutWithPush } from '@/lib/web-push-client';
 import { useModalBehavior } from '@/lib/hooks/useModalBehavior';
 import { useActionErrorText } from "@/lib/use-action-error";
 
@@ -286,7 +286,7 @@ export default function BookingsClient({
           </Link>
           <button
             type="button"
-            onClick={() => void signOut({ callbackUrl: `/${locale}` })}
+            onClick={() => void signOutWithPush({ callbackUrl: `/${locale}` })}
             className="w-full text-left px-2 pt-2 text-xs font-bold text-red-600"
           >
             {tUserNav('signOut')}

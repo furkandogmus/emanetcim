@@ -2,7 +2,7 @@
 
 import { useState, useTransition } from "react";
 import { useTranslations } from "next-intl";
-import { signOut } from "next-auth/react";
+import { signOutWithPush } from "@/lib/web-push-client";
 import { toast } from "sonner";
 import { useActionErrorText } from "@/lib/use-action-error";
 import { changePasswordAction, updateProfileAction } from "@/actions/profile";
@@ -62,7 +62,7 @@ export default function ProfileEditClient({
       if (result.rotated) {
         // Eski oturumlar `tokenVersion` ile dustu; bu sekme de yeniden giris ister.
         toast.success(t("passwordChanged"));
-        await signOut({ redirectTo: "/login" });
+        await signOutWithPush({ redirectTo: "/login" });
         return;
       }
       toast.success(t("passwordSet"));
