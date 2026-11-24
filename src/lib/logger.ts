@@ -1,10 +1,7 @@
 import pino from 'pino';
+import { SERVER_VERSION } from './server-version';
 
-const version =
-  process.env.APP_VERSION ||
-  process.env.VERCEL_GIT_COMMIT_SHA?.slice(0, 12) ||
-  process.env.npm_package_version ||
-  'dev';
+const version = SERVER_VERSION;
 
 /**
  * Yapılandırılmış log (Pino). Üretimde JSON; geliştirmede pino-pretty.

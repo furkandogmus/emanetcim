@@ -25,3 +25,5 @@ export * from "./admin-reviews";
 export * from "./admin-ops";
 export * from "./affiliate";
 export * from "./account-deletion";
+export * from "./admin-insights";
+export * from "./admin-campaigns";

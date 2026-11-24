@@ -42,7 +42,26 @@ export type JobHealthReport = {
 
 const MS_PER_HOUR = 60 * 60 * 1000;
 
+export type JobRunRow = {
+  id: string;
+  job: string;
+  status: string;
+  startedAt: Date;
+  finishedAt: Date | null;
+  durationMs: number | null;
+  detail: unknown;
+};
+
 export class JobHealthService {
+  /** Son calistirmalar, yeniden eskiye (web `/admin/jobs` ve mobil sistem ekrani). */
+  recentRuns(take = 50): Promise<JobRunRow[]> {
+    return prisma.jobRun.findMany({
+      orderBy: { startedAt: "desc" },
+      take,
+      select: { id: true, job: true, status: true, startedAt: true, finishedAt: true, durationMs: true, detail: true },
+    });
+  }
+
   async check(now: Date = new Date()): Promise<JobHealthReport> {
     const names = JOB_REGISTRY.map((j) => j.name);
 

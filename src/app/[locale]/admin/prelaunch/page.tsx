@@ -28,32 +28,11 @@ export default async function AdminPrelaunchPage({
 
   const t = await getTranslations("Admin");
   const tCommon = await getTranslations("Common");
-  const rows = await prelaunchInterestService.summary();
-
-  /**
-   * SIFIRLAR TABLODAN ÇIKARILIR, sayıları başlıkta durur.
-   *
-   * Nokta sayısı 50'den birkaç yüze çıktı (`scripts/prelaunch-points.ts`).
-   * Hepsini basmak tabloyu birkaç yüz satırlık bir "0" listesine çevirir ve
-   * asıl sinyali — hangi üç noktada kaç kişi e-posta bıraktı — görünmez kılar.
-   * Ama sıfırları tamamen susturmak da yanıltıcı olur: "3 kayıt" rakamı ancak
-   * "kaç nokta denendi" ile birlikte anlam taşıyor, o yüzden sessiz nokta
-   * sayısı `prelaunchSilent` satırında yazılı kalıyor.
-   */
-  const byCity = new Map<string, number>();
-  for (const r of rows) {
-    // Sehir toplaminda IKI sinyal birlikte: bir sehri acmaya deger kilan sey
-    // toplam talep, tek basina e-posta degil.
-    byCity.set(
-      r.city ?? "—",
-      (byCity.get(r.city ?? "—") ?? 0) + r.interestCount + r.wantCount,
-    );
-  }
-  const cities = [...byCity.entries()]
-    .filter(([, count]) => count > 0)
-    .sort((a, b) => b[1] - a[1]);
-  const activeRows = rows.filter((r) => r.interestCount > 0 || r.wantCount > 0);
-  const silentCount = rows.length - activeRows.length;
+  // Sifirlarin ayiklanmasi ve sehir toplami serviste (`adminReport`); mobil ekran da onu okur.
+  const report = await prelaunchInterestService.adminReport();
+  const cities = report.cities.map((c) => [c.city, c.count] as const);
+  const activeRows = report.points;
+  const silentCount = report.silentCount;
 
   return (
     <div className="min-h-screen bg-gray-50 flex flex-col font-sans">
@@ -73,7 +52,7 @@ export default async function AdminPrelaunchPage({
       <div className="p-10 max-w-5xl mx-auto w-full flex flex-col gap-10">
         <p className="text-sm text-gray-600 max-w-2xl">{t("prelaunchIntro")}</p>
         <p className="text-sm text-gray-500">
-          {t("prelaunchSilent", { count: silentCount, total: rows.length })}
+          {t("prelaunchSilent", { count: silentCount, total: report.totalPoints })}
         </p>
 
         <section className="flex flex-col gap-3">

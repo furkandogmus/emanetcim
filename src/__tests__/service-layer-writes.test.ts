@@ -73,7 +73,8 @@ const SERVICE_ONLY_MODELS = [
  *
  * Bunlar henüz servise taşınmadı ve hepsi aynı aciliyette değil: `user` /
  * `session` / `verificationToken` çoğunlukla kimlik doğrulama akışlarının kendi
- * kayıtları, `contactMessage` / `blogPost` / `campaign` ise içerik CRUD'u.
+ * kayıtları, `contactMessage` / `blogPost` ise içerik CRUD'u (`campaign` 2026-11-24'te
+ * `CampaignService`e taşındı).
  * Tavanlar borç kapandıkça DÜŞÜRÜLÜR.
  *
  * 2026-08-31: şifre sıfırlamanın gövdesi `src/services/auth/password-reset.ts`e,
@@ -88,7 +89,6 @@ const CEILINGS: Record<string, number> = {
   analyticsEvent: 1,
   blockedIp: 1,
   blogPost: 4,
-  campaign: 4,
   contactMessage: 8,
   jobRun: 2,
   mobilePushToken: 2,
@@ -124,7 +124,7 @@ const CEILINGS: Record<string, number> = {
 */
 
 /** Toplam tavan — yeni bir MODELİN sessizce eklenmesini de yakalar. */
-const TOTAL_CEILING = 61;
+const TOTAL_CEILING = 57;
 
 /**
  * Yorumlar ayıklanır: bu dosyaların çoğunda "eskiden burada ham

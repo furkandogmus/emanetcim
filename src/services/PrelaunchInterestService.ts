@@ -357,6 +357,29 @@ class PrelaunchInterestService {
           b.wantCount - a.wantCount || b.interestCount - a.interestCount,
       );
   }
+
+  /**
+   * Yonetici raporu: sehir toplami ve sifir olmayan noktalar. Web `/admin/prelaunch`
+   * ve mobil `admin/prelaunch` ayni kirilimi okur.
+   *
+   * SIFIRLAR LISTEDEN CIKAR, sayilari `silentCount`ta kalir: yuzlerce "0" satiri
+   * asil sinyali gomer, ama "3 kayit" ancak "kac nokta denendi" ile anlam tasir.
+   * Sehir toplaminda iki sinyal birlikte (tek tik + e-posta); nokta satirinda ayri.
+   */
+  async adminReport() {
+    const rows = await this.summary();
+    const byCity = new Map<string, number>();
+    for (const r of rows) {
+      const key = r.city ?? "—";
+      byCity.set(key, (byCity.get(key) ?? 0) + r.interestCount + r.wantCount);
+    }
+    const cities = [...byCity.entries()]
+      .filter(([, count]) => count > 0)
+      .sort((a, b) => b[1] - a[1])
+      .map(([city, count]) => ({ city, count }));
+    const points = rows.filter((r) => r.interestCount > 0 || r.wantCount > 0);
+    return { totalPoints: rows.length, silentCount: rows.length - points.length, cities, points };
+  }
 }
 
 export const prelaunchInterestService = new PrelaunchInterestService();
