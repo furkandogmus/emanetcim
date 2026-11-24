@@ -37,7 +37,6 @@ export type BookingEventType =
 
 /** Wallet kartinin gosterdigi bir seyi (saat, valiz, durum) degistiren olaylar. */
 const WALLET_EVENTS: ReadonlySet<BookingEventType> = new Set([
-  "PAID",
   "APPROVED",
   "CHECKED_IN",
   "CHECKED_OUT",
@@ -60,6 +59,8 @@ export class BookingEventService {
      */
     impersonatedBy?: string | null;
     metadata?: Record<string, unknown>;
+    /** `false`: odeme defteri gibi ikincil kayit; ayni gecis karti zaten guncelledi. */
+    walletRefresh?: boolean;
   }): Promise<void> {
     const metadata = {
       ...(params.metadata ?? {}),
@@ -75,7 +76,7 @@ export class BookingEventService {
       },
     });
     // Her gecis buradan geciyor; kart guncellemesi ayri ayri servislere yazilmaz.
-    if (WALLET_EVENTS.has(params.event)) {
+    if (params.walletRefresh !== false && WALLET_EVENTS.has(params.event)) {
       void walletPassService.notifyBookingChanged(params.bookingId).catch((err) => {
         logger.warn({ err, bookingId: params.bookingId }, "wallet_pass_update_failed");
       });

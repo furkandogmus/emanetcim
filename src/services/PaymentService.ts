@@ -529,6 +529,8 @@ export class PaymentService {
         actorRole: actor?.role ?? null,
         impersonatedBy: actor?.impersonatedBy ?? null,
         metadata,
+        // Defter kaydi: durum gecisini yasam dongusu ayrica yaziyor, kart ikinci kez guncellenmez.
+        walletRefresh: false,
       })
       .catch((err) =>
         logger.error({ err, bookingId, event }, "payment_audit_failed"),

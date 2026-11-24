@@ -9,6 +9,7 @@ const { mockPrisma, mockRequireMobileUser, mockRateLimit } = vi.hoisted(() => ({
   mockPrisma: {
     booking: { findUnique: vi.fn() },
     walletPassDevice: { findUnique: vi.fn(), upsert: vi.fn(), deleteMany: vi.fn(), findMany: vi.fn() },
+    walletGoogleObject: { upsert: vi.fn(), findUnique: vi.fn(), deleteMany: vi.fn() },
   },
   mockRequireMobileUser: vi.fn(),
   mockRateLimit: vi.fn(),
@@ -38,7 +39,7 @@ import { createQrToken } from "@/lib/qr-token";
 import { signPosterLinkToken } from "@/lib/poster-link-token";
 import { toMobileAppConfig } from "@/lib/mobile-dto";
 import { renderEmailHtml } from "@/lib/email-template";
-import { WalletPassService } from "@/services/WalletPassService";
+import { MAX_DEVICES_PER_PASS, WalletPassService, purgeFinishedWalletRecords } from "@/services/WalletPassService";
 import { GET as appleLinkGET } from "@/app/api/wallet/apple/route";
 import { GET as googleLinkGET } from "@/app/api/wallet/google/route";
 import { GET as mobileWalletGET } from "@/app/api/mobile/bookings/[id]/wallet/route";
@@ -138,6 +139,7 @@ beforeEach(() => {
   vi.clearAllMocks();
   disableAll();
   mockRateLimit.mockResolvedValue(true);
+  mockPrisma.walletPassDevice.findMany.mockResolvedValue([]);
   mockRequireMobileUser.mockResolvedValue({ user: { id: "guest-1", role: "GUEST", email: null } });
 });
 afterEach(() => {
@@ -290,7 +292,7 @@ describe("yapilandirilmamisken kapali", () => {
 
   it("e-posta ve web bagi bos", async () => {
     const svc = new WalletPassService();
-    expect(await svc.linksForEmail("bk-1")).toEqual([]);
+    expect(await svc.emailWalletKinds("bk-1")).toEqual([]);
     expect(await svc.linksForVerifiedOwner({ id: "bk-1", status: "APPROVED", qrCodeToken: "x" })).toEqual([]);
   });
 
@@ -380,6 +382,7 @@ describe("erisim", () => {
     const res = await googleLinkGET(new NextRequest(`https://example.test/api/wallet/google?t=${token}`));
     expect(res.status).toBe(302);
     expect(res.headers.get("location")).toMatch(/^https:\/\/pay\.google\.com\/gp\/v\/save\/[\w-]+\.[\w-]+\.[\w-]+$/);
+    expect(mockPrisma.walletGoogleObject.upsert).toHaveBeenCalledWith({ where: { bookingId: "bk-1" }, create: { bookingId: "bk-1" }, update: {} });
   });
 });
 
@@ -459,12 +462,52 @@ describe("onay e-postasi", () => {
     expect(html).toContain("t=a&amp;b");
   });
 
-  it("e-posta bagi QR omru kadar gecerli (cikis + 24 saat)", async () => {
+  it("e-posta yalnizca acik taraflari bildirir; imzali kart bagi uretmez", async () => {
     enableApple();
-    const b = await booking({ id: "bk-1", checkOutTime: new Date(Date.now() + 10 * 86_400_000) });
-    mockPrisma.booking.findUnique.mockResolvedValue(b);
-    const [link] = await new WalletPassService().linksForEmail("bk-1");
-    expect(link.kind).toBe("apple");
-    expect(Math.abs(link.expiresAt.getTime() - (b.checkOutTime.getTime() + 86_400_000))).toBeLessThan(2000);
+    mockPrisma.booking.findUnique.mockResolvedValue(await booking({ id: "bk-1" }));
+    expect(await new WalletPassService().emailWalletKinds("bk-1")).toEqual(["apple"]);
+    mockPrisma.booking.findUnique.mockResolvedValue(await booking({ id: "bk-1", status: "CANCELLED" }));
+    expect(await new WalletPassService().emailWalletKinds("bk-1")).toEqual([]);
+  });
+});
+
+describe("kotuye kullanim sinirlari", () => {
+  it("seri basina en fazla 10 cihaz: fazlasi (en eskiler) silinir", async () => {
+    mockPrisma.booking.findUnique.mockResolvedValue({ id: "bk-1" });
+    mockPrisma.walletPassDevice.findUnique.mockResolvedValue(null);
+    mockPrisma.walletPassDevice.findMany.mockResolvedValue([{ id: "old-1" }]);
+    await new WalletPassService().registerDevice("dev11", "bk-1", "tok");
+    expect(mockPrisma.walletPassDevice.findMany).toHaveBeenCalledWith(expect.objectContaining({
+      where: { bookingId: "bk-1" }, orderBy: { updatedAt: "desc" }, skip: MAX_DEVICES_PER_PASS,
+    }));
+    expect(mockPrisma.walletPassDevice.deleteMany).toHaveBeenCalledWith({ where: { id: { in: ["old-1"] } } });
+  });
+
+  it("30 gundur kapali kartlarin kayitlari temizlenir", async () => {
+    mockPrisma.walletPassDevice.deleteMany.mockResolvedValue({ count: 2 });
+    mockPrisma.walletGoogleObject.deleteMany.mockResolvedValue({ count: 1 });
+    const now = new Date("2026-12-31T00:00:00Z");
+    expect(await purgeFinishedWalletRecords(now)).toBe(3);
+    const where = mockPrisma.walletPassDevice.deleteMany.mock.calls[0][0].where;
+    expect(where.booking.status.in).toEqual(["CANCELLED", "CHECKED_OUT"]);
+    expect(where.booking.updatedAt.lt.toISOString()).toBe("2026-12-01T00:00:00.000Z");
+  });
+
+  it("Google nesnesi kaydedilmemisse degisiklikte ag cagrisi yok", async () => {
+    enableGoogle();
+    const fetchSpy = vi.spyOn(globalThis, "fetch");
+    mockPrisma.walletGoogleObject.findUnique.mockResolvedValue(null);
+    await new WalletPassService().notifyBookingChanged("bk-1");
+    expect(fetchSpy).not.toHaveBeenCalled();
+    expect(mockPrisma.booking.findUnique).not.toHaveBeenCalled();
+    fetchSpy.mockRestore();
+  });
+
+  it("WALLET_PASS_AUTH_SECRET verilirse kart kimligi ondan turetilir", () => {
+    const fromAuth = passAuthenticationToken("bk-1");
+    vi.stubEnv("WALLET_PASS_AUTH_SECRET", "x".repeat(40));
+    const fromWallet = passAuthenticationToken("bk-1");
+    expect(fromWallet).not.toBe(fromAuth);
+    expect(verifyPassAuthorization(`ApplePass ${fromWallet}`, "bk-1")).toBe(true);
   });
 });

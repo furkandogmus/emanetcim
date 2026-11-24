@@ -1,5 +1,6 @@
 import { readFile } from "node:fs/promises";
 import path from "node:path";
+import type { BookingStatus } from "@prisma/client";
 import prisma from "@/lib/db";
 import logger from "@/lib/logger";
 import { getSiteBaseUrl } from "@/lib/site-base-url";
@@ -43,6 +44,11 @@ const BOOKING_SELECT = {
   updatedAt: true,
   shop: { select: { name: true, address: true, latitude: true, longitude: true, timezone: true } },
 } as const;
+
+/** Bir kart icin tutulan en fazla cihaz kaydi; asilinca en eskisi duser. */
+export const MAX_DEVICES_PER_PASS = 10;
+/** Kapanmis kartin cihaz kayitlari bu kadar gun sonra silinir. */
+export const FINISHED_PASS_RETENTION_DAYS = 30;
 
 type WalletBookingRow = WalletBookingSource & { guestId: string | null };
 
@@ -109,17 +115,16 @@ export class WalletPassService {
   }
 
   /**
-   * Onay e-postasindaki bag: e-posta sonradan acilir, bu yuzden QR'in omru kadar
-   * (cikis + 24 saat, en az 48 saat) gecerli. Kapali ya da kartsiz rezervasyonda bos.
+   * Onay e-postasi hangi dugmeleri gostersin. E-postaya imzali kart bagi girmez:
+   * gunlerce acik kalan bir bag, QR'i tasiyan bir tasiyici token olurdu. Dugme
+   * oturumlu bilet sayfasina gider; sahibi orada 15 dakikalik bagi alir.
    */
-  async linksForEmail(bookingId: string, now: Date = new Date()): Promise<WalletLink[]> {
+  async emailWalletKinds(bookingId: string): Promise<WalletKind[]> {
     const caps = this.capabilities();
     if (!caps.walletApple && !caps.walletGoogle) return [];
     const b = await this.load(bookingId);
     if (!b || !ISSUABLE_STATUSES.has(b.status) || !walletPassContent(b, "tr")) return [];
-    const expiresAt = new Date(Math.max(b.checkOutTime.getTime() + 24 * 3600_000, now.getTime() + 48 * 3600_000));
-    const kinds: WalletKind[] = [...(caps.walletApple ? ["apple" as const] : []), ...(caps.walletGoogle ? ["google" as const] : [])];
-    return Promise.all(kinds.map((k) => this.signLink(bookingId, k, expiresAt)));
+    return [...(caps.walletApple ? ["apple" as const] : []), ...(caps.walletGoogle ? ["google" as const] : [])];
   }
 
   /** Imzali `.pkpass`. Iptal / teslim edilmis rezervasyonda da doner (`voided`): cihaz guncellemesi bunu ister. */
@@ -165,7 +170,10 @@ export class WalletPassService {
       logoUrl: `${base}/icons/icon-512x512.png`,
       uiLocale: locale,
     });
-    return googleSaveUrl(cfg, object, base);
+    const url = await googleSaveUrl(cfg, object, base);
+    // Nesne ancak bag verildiyse var olabilir; yamalar yalniz bunlara gider.
+    await prisma.walletGoogleObject.upsert({ where: { bookingId }, create: { bookingId }, update: {} });
+    return url;
   }
 
   /** PassKit kayit ucu: 201 yeni, 200 zaten kayitli. Seri bilinmiyorsa null (404). */
@@ -181,6 +189,16 @@ export class WalletPassService {
       create: { deviceLibraryId, bookingId, pushToken },
       update: { pushToken },
     });
+    // Kart dosyasi paylasilabilir: tek seri sinirsiz cihaz kaydi ve push uretemesin.
+    const overflow = await prisma.walletPassDevice.findMany({
+      where: { bookingId },
+      orderBy: { updatedAt: "desc" },
+      skip: MAX_DEVICES_PER_PASS,
+      select: { id: true },
+    });
+    if (overflow.length > 0) {
+      await prisma.walletPassDevice.deleteMany({ where: { id: { in: overflow.map((r) => r.id) } } });
+    }
     return prev ? 200 : 201;
   }
 
@@ -238,6 +256,8 @@ export class WalletPassService {
   private async patchGoogle(bookingId: string): Promise<void> {
     const cfg = readGoogleWalletConfig();
     if (!cfg) return;
+    const saved = await prisma.walletGoogleObject.findUnique({ where: { bookingId }, select: { bookingId: true } });
+    if (!saved) return;
     const b = await this.load(bookingId);
     if (!b) return;
     const locale = uiLocale(b.locale);
@@ -250,6 +270,20 @@ export class WalletPassService {
     });
     await patchGoogleObject(cfg, object);
   }
+}
+
+/**
+ * Gunluk temizlik (`cleanup` isi): iptal / teslim edilmis ve 30 gundur
+ * degismemis rezervasyonlarin cihaz ve Google kayitlari. Kart zaten voided.
+ */
+export async function purgeFinishedWalletRecords(now: Date = new Date()): Promise<number> {
+  const cutoff = new Date(now.getTime() - FINISHED_PASS_RETENTION_DAYS * 86_400_000);
+  const where = { booking: { status: { in: ["CANCELLED", "CHECKED_OUT"] as BookingStatus[] }, updatedAt: { lt: cutoff } } };
+  const [devices, objects] = await Promise.all([
+    prisma.walletPassDevice.deleteMany({ where }),
+    prisma.walletGoogleObject.deleteMany({ where }),
+  ]);
+  return devices.count + objects.count;
 }
 
 export const walletPassService = new WalletPassService();

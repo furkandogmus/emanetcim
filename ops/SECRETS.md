@@ -47,6 +47,18 @@ bash scripts/secrets-remote.sh render
 istemci sırrı çalışma anında anahtardan üretilir (`docker-compose.yml`). Sunucuda dosyayı
 elle düzenlemeyin — bir sonraki deploy üzerine yazar.
 
+## Wallet kartları (Apple / Google)
+
+Anahtarlar `docker-compose.env.example`'da (`WALLET_APPLE_*`, `WALLET_GOOGLE_*`); bir tarafın
+tek değişkeni boşsa o taraf kapalıdır. PEM'ler tek satır base64 SecureString.
+
+**`WALLET_PASS_AUTH_SECRET` (boşsa `AUTH_SECRET`) değişirse verilmiş Apple kartları
+güncelleme alamaz:** her kartın PassKit kimliği bu sırdan türetilir ve kartın içine
+gömülüdür. Cihaz eski kimlikle gelir, sunucu 401 döner; kart iptal/saat değişikliğini
+göstermez. Misafirin kartı yeniden eklemesi gerekir. Bu yüzden `AUTH_SECRET`'i
+döndürmeden önce `WALLET_PASS_AUTH_SECRET`'i eski `AUTH_SECRET` değeriyle sabitleyin.
+Pass Type ID sertifikasının yenilenmesi bu kimliği etkilemez.
+
 ## `scripts/secrets-remote.sh` — SSH'sız, değer basmadan
 
 Bütün işler sunucuda SSM Run Command ile olur; çıktı yalnızca anahtar adlarıdır (SSM komut

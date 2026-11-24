@@ -433,6 +433,7 @@ model Booking {
   paymentLog                 PaymentLog?
   review                     Review?
   walletPassDevices          WalletPassDevice[]
+  walletGoogleObject         WalletGoogleObject?
 
   @@unique([guestId, idempotencyKey])
   @@index([guestId])
@@ -1591,4 +1592,11 @@ model WalletPassDevice {
 
   @@unique([deviceLibraryId, bookingId])
   @@index([bookingId])
+}
+
+/// Google Wallet nesnesi icin kaydetme bagi verildi: yalniz bunlar degisiklikte yamalanir.
+model WalletGoogleObject {
+  bookingId String   @id
+  createdAt DateTime @default(now())
+  booking   Booking  @relation(fields: [bookingId], references: [id], onDelete: Cascade)
 }

@@ -24,7 +24,7 @@ beforeEach(() => {
 describe("WalletPassButton", () => {
   it("bayrak kapaliyken ya da eski sunucuda cizilmez", async () => {
     mockConfig.data = { minAppVersion: null, latestAppVersion: null };
-    await render(<WalletPassButton bookingId="bk-1" />);
+    await render(<WalletPassButton bookingId="bk-1" status="APPROVED" />);
     expect(screen.queryByTestId("wallet-pass-button")).toBeNull();
   });
 
@@ -33,7 +33,7 @@ describe("WalletPassButton", () => {
     const kind = Platform.OS === "ios" ? "apple" : "google";
     mockFetch.mockResolvedValue({ kind, url: "https://example.test/api/wallet/x?t=abc", expiresAt: "2026-12-01T00:00:00Z" });
     const open = jest.spyOn(Linking, "openURL").mockResolvedValue(true);
-    await render(<WalletPassButton bookingId="bk-1" />);
+    await render(<WalletPassButton bookingId="bk-1" status="APPROVED" />);
     await act(async () => {
       await fireEvent.press(screen.getByTestId("wallet-pass-button"));
     });
