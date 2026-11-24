@@ -1,5 +1,6 @@
 import "@/lib/intl-polyfills";
 import i18n from "@/lib/i18n";
+import { captureError, initSentry, setSentryUser, wrapRoot } from "@/lib/sentry";
 
 import { useEffect, useState } from "react";
 import { AppState, Pressable, StyleSheet, Text, View } from "react-native";
@@ -29,8 +30,12 @@ import { openFromNotification, registerForPush } from "@/lib/push";
 import { ForcedUpdateScreen, OtaReadyBanner, useUpdateRequired } from "@/components/AppUpdate";
 import { ImpersonationFrame } from "@/components/ImpersonationBanner";
 import { BrandIntro, introHoldsSplash } from "@/components/BrandIntro";
+import { AppLockGate } from "@/components/AppLockGate";
 import { SearchProvider } from "@/lib/search";
 import { colors } from "@/theme/tokens";
+
+// Ilk is: acilista cokme de raporlansin. DSN yoksa hicbir sey kurulmaz.
+initSentry();
 
 void SplashScreen.preventAutoHideAsync().catch(() => undefined);
 
@@ -78,6 +83,7 @@ function RootNavigator() {
 
   // Tekil kullanici sayaci: gunde bir; giris yapilinca hesap cihaza baglansin diye bir kez daha.
   const userId = state.status === "signedIn" ? state.user.id : null;
+  useEffect(() => setSentryUser(userId, role), [userId, role]);
   useEffect(() => {
     if (state.status === "loading" || viewingAs) return;
     void pingAppOpen(userId).catch(() => undefined);
@@ -165,7 +171,7 @@ function RootNavigator() {
   );
 }
 
-export default function RootLayout() {
+function RootLayout() {
   const [fontsLoaded] = useFonts({
     BricolageGrotesque_600SemiBold,
     BricolageGrotesque_700Bold,
@@ -184,7 +190,9 @@ export default function RootLayout() {
           <StatusBar style="dark" />
           {fontsLoaded ? (
             <ImpersonationFrame>
-              <RootNavigator />
+              <AppLockGate>
+                <RootNavigator />
+              </AppLockGate>
             </ImpersonationFrame>
           ) : null}
         </AuthProvider>
@@ -192,6 +200,8 @@ export default function RootLayout() {
     </GestureHandlerRootView>
   );
 }
+
+export default wrapRoot(RootLayout);
 
 /**
  * Render hatasinda uygulama kapanmasin: sade, cevrilmis bir ekran. Kok sinir saglayicilarin
@@ -201,6 +211,7 @@ export default function RootLayout() {
 export function ErrorBoundary({ error, retry }: ErrorBoundaryProps) {
   useEffect(() => {
     console.error(error);
+    captureError(error);
     // Acilis sirasinda cokerse yerel ekran hata ekraninin ustunde kalmasin.
     void SplashScreen.hideAsync().catch(() => undefined);
   }, [error]);

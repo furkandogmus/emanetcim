@@ -65,11 +65,13 @@ Kod tarafı hazır; aşağıdaki hesap adımları hesap sahibinin elinde.
 | Cihaz veya diğer kimlikler | Evet | Analitik (tekil kullanıcı sayacı), uygulama işlevi (bildirim) | (1) Cihazda üretilen rastgele kurulum kimliği (`installId`) + platform + sürüm günde bir `/ping` ile gider ve girişliyse hesaba bağlanır. (2) Bildirim için FCM (Android) / Expo push (iOS) belirteci hesaba bağlı saklanır |
 | Rezervasyon geçmişi, esnaf kazancı | Evet | Uygulama işlevi | Hesaba bağlı |
 | Ödeme bilgisi | Hayır | — | Ödeme dükkanda |
+| Uygulama etkinliği / teşhis: kilitlenme günlükleri, tanılama | Evet, 0.3.6+ ve yalnız DSN tanımlıysa | Uygulama işlevi (hata ayıklama) | Sentry. `sendDefaultPii: false`; e-posta, telefon, jeton, istek gövdesi olaydan silinir (`src/lib/sentry-scrub.ts`). Yalnız opak kullanıcı kimliği + rol. Performans izleme kapalı |
+| Takvim etkinlikleri | Hayır (cihazda kalır) | Uygulama işlevi | 0.3.6+: "Takvime ekle" iki etkinliği cihaz takvimine yazar; izin yalnız dokununca istenir, takvim okunup sunucuya gitmez |
 | Reklam kimliği, üçüncü taraf analitik SDK'sı | Hayır | — | Reklam/analitik SDK'sı yok; sayaç kendi sunucumuza gider |
 
 - Aktarımda şifreleme: **Evet** (HTTPS).
 - Kullanıcı silme talebi: **Evet** — uygulama içi + `https://bagajpark.com/tr/contact`.
-- Üçüncü taraflarla paylaşım: **Hayır** (Google ile giriş ve harita altlığı kullanıcının kendi eylemiyle Google/OpenFreeMap'e gider). Bildirim sağlayıcıları (Google FCM, Expo) işlemci olarak sayılır.
+- Üçüncü taraflarla paylaşım: **Hayır** (Google ile giriş ve harita altlığı kullanıcının kendi eylemiyle Google/OpenFreeMap'e gider). Bildirim sağlayıcıları (Google FCM, Expo) ve Sentry işlemci olarak sayılır.
 - Gizlilik politikası metninin bu tabloyla aynı şeyleri söylediğini her sürümden önce kontrol et.
 
 **Diğer zorunlu formlar:** İçerik derecelendirme anketi, hedef kitle (yetişkin; çocuklara

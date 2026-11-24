@@ -25,7 +25,7 @@ import { defaultWindow, useSearch } from "@/lib/search";
 import type { BookingDetail } from "@/lib/types";
 import { notify } from "@/lib/notify";
 import { whatsappNumber, dialUrl, openUrl, waUrl } from "@/lib/phone";
-import { googleCalendarUrl } from "@/lib/calendar-link";
+import { useAddToCalendar } from "@/lib/use-add-to-calendar";
 import { bookingCode } from "@/lib/booking-search";
 import { loadOfflineTicket, saveOfflineTicket, type OfflineTicket } from "@/lib/offline-tickets";
 import { colors, radius, space } from "@/theme/tokens";
@@ -105,6 +105,7 @@ export function BookingDetailView({ id, mode }: { id: string; mode: "guest" | "p
   const scrollRef = useRef<ScrollView>(null);
   const search = useSearch();
   const onlinePayments = useOnlinePayments();
+  const calendar = useAddToCalendar();
 
   /**
    * Degerlendirme / sorun formu sayfanin en altinda acilir; acildiginda ekranin
@@ -364,17 +365,8 @@ export function BookingDetailView({ id, mode }: { id: string; mode: "guest" | "p
                     variant="secondary"
                     style={{ flex: 1 }}
                     title={t("guestParity.addToCalendar")}
-                    onPress={() =>
-                      openUrl(
-                        googleCalendarUrl({
-                          title: t("guestParity.calendarTitle", { shop: b.shopName }),
-                          details: t("guestParity.calendarDetails", { code: bookingCode(b.id), shop: b.shopName }),
-                          location: b.shopAddress ?? null,
-                          start: b.checkInTime,
-                          end: b.checkOutTime,
-                        }),
-                      )
-                    }
+                    loading={calendar.busy}
+                    onPress={() => void calendar.add(b)}
                   />
                 ) : null}
               </View>

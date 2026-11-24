@@ -2503,5 +2503,31 @@
       "unsupported_type": "Bu dosya bir JPEG fotoğraf değil.",
       "dimensions_too_large": "Fotoğrafın çözünürlüğü çok yüksek."
     }
+  },
+  "appLock": {
+    "title": "BagajPark kilitli",
+    "body": "Devam etmek için kimliğini doğrula.",
+    "unlock": "Kilidi aç",
+    "signOut": "Çıkış yap",
+    "prompt": "BagajPark kilidini aç",
+    "confirmPrompt": "Uygulama kilidini değiştirmek için doğrula",
+    "cancel": "Vazgeç",
+    "settingLabel": "Uygulama kilidi",
+    "settingHint": "Açılışta ve 5 dakikadan uzun aradan sonra Face ID, parmak izi ya da cihaz kodu ister."
+  },
+  "calendarSync": {
+    "dropOffTitle": "Valiz bırakma: {{shop}}",
+    "pickUpTitle": "Valiz alma: {{shop}}",
+    "added": "Bırakma ve alma saatleri takvime eklendi",
+    "alreadyTitle": "Zaten takvimde",
+    "alreadyBody": "Bu rezervasyonu takvime daha önce ekledin. Yeniden eklensin mi?",
+    "addAgain": "Yeniden ekle",
+    "ok": "Tamam",
+    "deniedTitle": "Takvim izni kapalı",
+    "deniedBody": "Etkinlik eklemek için Ayarlar'dan BagajPark'a takvim izni ver.",
+    "openSettings": "Ayarları aç",
+    "cancel": "Vazgeç",
+    "failed": "Takvime eklenemedi",
+    "noCalendar": "Cihazda etkinlik eklenebilecek bir takvim bulunamadı."
   }
 }

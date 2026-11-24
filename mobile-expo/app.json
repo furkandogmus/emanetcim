@@ -3,7 +3,7 @@
     "name": "BagajPark",
     "slug": "bagajpark",
     "scheme": "bagajpark",
-    "version": "0.3.5",
+    "version": "0.3.6",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
     "userInterfaceStyle": "light",
@@ -57,8 +57,6 @@
         "android.permission.SYSTEM_ALERT_WINDOW",
         "android.permission.READ_EXTERNAL_STORAGE",
         "android.permission.WRITE_EXTERNAL_STORAGE",
-        "android.permission.USE_BIOMETRIC",
-        "android.permission.USE_FINGERPRINT",
         "android.permission.READ_MEDIA_IMAGES",
         "android.permission.READ_MEDIA_VIDEO",
         "android.permission.READ_MEDIA_VISUAL_USER_SELECTED"
@@ -114,7 +112,7 @@
       [
         "expo-secure-store",
         {
-          "faceIDPermission": "BagajPark Face ID kullanmaz; oturum bilgisi cihazın güvenli deposunda saklanır."
+          "faceIDPermission": "Uygulama kilidini Face ID ile açmak için kullanıyoruz."
         }
       ],
       "expo-font",
@@ -177,6 +175,21 @@
       ],
       "@react-native-google-signin/google-signin",
       "expo-apple-authentication",
+      [
+        "expo-local-authentication",
+        {
+          "faceIDPermission": "Uygulama kilidini Face ID ile açmak için kullanıyoruz."
+        }
+      ],
+      [
+        "expo-calendar",
+        {
+          "calendarPermission": "Rezervasyonunun bırakma ve alma saatlerini takvimine eklemek için kullanıyoruz.",
+          "writeOnlyAccess": true,
+          "writeOnlyCalendarPermission": "Rezervasyonunun bırakma ve alma saatlerini takvimine eklemek için kullanıyoruz.",
+          "remindersPermission": false
+        }
+      ],
       [
         "expo-build-properties",
         {

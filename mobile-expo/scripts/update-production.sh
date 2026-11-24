@@ -102,3 +102,11 @@ fi
 
 echo "API: $EXPO_PUBLIC_API_BASE_URL"
 npx -y "eas-cli@${EAS_CLI_VERSION}" update --channel production --environment production --non-interactive ${rollout_args[@]+"${rollout_args[@]}"} "$@"
+
+# Sentry: OTA paketinin kaynak haritalari (eas update `dist/`e yazar). Jeton yoksa atlanir;
+# SENTRY_ORG / SENTRY_PROJECT de ortamdan gelir.
+if [ -n "${SENTRY_AUTH_TOKEN:-}" ]; then
+  npx sentry-expo-upload-sourcemaps dist
+else
+  echo "SENTRY_AUTH_TOKEN yok: kaynak haritasi yuklenmedi"
+fi

@@ -2503,5 +2503,31 @@
       "unsupported_type": "Diese Datei ist kein JPEG-Foto.",
       "dimensions_too_large": "Die Auflösung des Fotos ist zu hoch."
     }
+  },
+  "appLock": {
+    "title": "BagajPark ist gesperrt",
+    "body": "Bestätige deine Identität, um fortzufahren.",
+    "unlock": "Entsperren",
+    "signOut": "Abmelden",
+    "prompt": "BagajPark entsperren",
+    "confirmPrompt": "Bestätige, um die App-Sperre zu ändern",
+    "cancel": "Abbrechen",
+    "settingLabel": "App-Sperre",
+    "settingHint": "Fragt beim Start und nach mehr als 5 Minuten Pause nach Face ID, Fingerabdruck oder Gerätecode."
+  },
+  "calendarSync": {
+    "dropOffTitle": "Gepäckabgabe: {{shop}}",
+    "pickUpTitle": "Gepäckabholung: {{shop}}",
+    "added": "Abgabe und Abholung wurden in deinen Kalender eingetragen",
+    "alreadyTitle": "Bereits im Kalender",
+    "alreadyBody": "Du hast diese Buchung schon in deinen Kalender eingetragen. Erneut hinzufügen?",
+    "addAgain": "Erneut hinzufügen",
+    "ok": "OK",
+    "deniedTitle": "Kalenderzugriff ist aus",
+    "deniedBody": "Erlaube BagajPark in den Einstellungen den Kalenderzugriff, um Termine einzutragen.",
+    "openSettings": "Einstellungen öffnen",
+    "cancel": "Abbrechen",
+    "failed": "Eintragen fehlgeschlagen",
+    "noCalendar": "Auf diesem Gerät gibt es keinen Kalender, der neue Termine annimmt."
   }
 }

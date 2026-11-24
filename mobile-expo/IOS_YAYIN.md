@@ -62,3 +62,10 @@ iki platform aynı kanalı ve runtime'ı kullanır).
 - İzin metinleri `app.json` eklenti ayarlarında, dilleri `ios-locales/`. "Always" konum ve hareket
   metinleri yalnızca expo-location kütüphanesi bu API'leri içerdiği için var; uygulama arka
   planda konum istemez.
+
+## 0.3.6 gizlilik etiketi
+
+App Store Connect → App Privacy: Sentry DSN tanımlıysa "Crash Data" ve "Other Diagnostic
+Data" (kimliğe bağlı değil, takip yok, amaç App Functionality) eklenir. Takvim yazma izni
+(`NSCalendarsWriteOnlyAccessUsageDescription`) veri toplama sayılmaz: etkinlik cihazda kalır.
+Face ID metni artık uygulama kilidi içindir (`NSFaceIDUsageDescription`).

@@ -1,6 +1,9 @@
 {
   "ios": {
     "NSLocationWhenInUseUsageDescription": "Wir verwenden deinen Standort, um Gepäckaufbewahrungen in deiner Nähe anzuzeigen.",
-    "NSCameraUsageDescription": "Wir verwenden die Kamera, um den Buchungs-QR-Code des Gastes zu scannen und den Zustand des Gepäcks bei der Abgabe zu fotografieren."
+    "NSCameraUsageDescription": "Wir verwenden die Kamera, um den Buchungs-QR-Code des Gastes zu scannen und den Zustand des Gepäcks bei der Abgabe zu fotografieren.",
+    "NSFaceIDUsageDescription": "Wir verwenden Face ID, um die App-Sperre aufzuheben.",
+    "NSCalendarsUsageDescription": "Wir tragen Abgabe- und Abholzeit deiner Buchung in deinen Kalender ein.",
+    "NSCalendarsWriteOnlyAccessUsageDescription": "Wir tragen Abgabe- und Abholzeit deiner Buchung in deinen Kalender ein."
   }
 }

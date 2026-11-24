@@ -1,6 +1,9 @@
 {
   "ios": {
     "NSLocationWhenInUseUsageDescription": "We use your location to show luggage storage points near you.",
-    "NSCameraUsageDescription": "We use the camera to scan the guest's booking QR code and to photograph the condition of bags at drop-off."
+    "NSCameraUsageDescription": "We use the camera to scan the guest's booking QR code and to photograph the condition of bags at drop-off.",
+    "NSFaceIDUsageDescription": "We use Face ID to unlock the app lock.",
+    "NSCalendarsUsageDescription": "We add your booking's drop-off and pick-up times to your calendar.",
+    "NSCalendarsWriteOnlyAccessUsageDescription": "We add your booking's drop-off and pick-up times to your calendar."
   }
 }

@@ -1,6 +1,9 @@
 {
   "ios": {
     "NSLocationWhenInUseUsageDescription": "近くの荷物預かり所を表示するために位置情報を使用します。",
-    "NSCameraUsageDescription": "お客様の予約QRコードの読み取りと、預け入れ時の荷物の状態の撮影にカメラを使用します。"
+    "NSCameraUsageDescription": "お客様の予約QRコードの読み取りと、預け入れ時の荷物の状態の撮影にカメラを使用します。",
+    "NSFaceIDUsageDescription": "アプリロックの解除に Face ID を使用します。",
+    "NSCalendarsUsageDescription": "予約の預け入れ・受け取り時刻をカレンダーに追加します。",
+    "NSCalendarsWriteOnlyAccessUsageDescription": "予約の預け入れ・受け取り時刻をカレンダーに追加します。"
   }
 }
