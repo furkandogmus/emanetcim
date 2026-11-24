@@ -53,6 +53,8 @@ export interface StoragePort {
   put(input: PutObjectInput): Promise<PutObjectResult>;
   /** Ozel nesne yazar (onbellek `private, no-store`); adres DONMEZ. */
   putPrivate(input: PutObjectInput): Promise<{ key: string }>;
+  /** Nesne var mi (HEAD). Yalniz 404 `false`; diger hatalar firlar. */
+  exists(key: string): Promise<boolean>;
   /** Kisa omurlu imzali GET adresi. Yetki kontrolu CAGIRANDA. */
   presignGet(key: string, expiresInSeconds: number): Promise<string>;
   /** Nesneyi siler. Olmayan anahtarda HATA VERMEZ — silme idempotenttir. */

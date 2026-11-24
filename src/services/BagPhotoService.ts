@@ -65,7 +65,7 @@ const UPLOAD_LIMIT = { max: 30, windowMs: 10 * 60_000 };
 async function loadBooking(bookingId: string) {
   return prisma.booking.findUnique({
     where: { id: bookingId },
-    select: { id: true, guestId: true, status: true, checkedInAt: true, shop: { select: { id: true, ownerId: true } } },
+    select: { id: true, guestId: true, status: true, checkedInAt: true, checkOutTime: true, shop: { select: { id: true, ownerId: true } } },
   });
 }
 type BookingRow = NonNullable<Awaited<ReturnType<typeof loadBooking>>>;
@@ -252,8 +252,8 @@ export class BagPhotoService {
   }
 
   /** Gunluk saklama isi: kurala gore suresi dolanlari siler (`bagPhotoDeleteAt`). */
-  async runRetention(now = new Date(), batch = 500): Promise<{ scanned: number; removed: number; failed: number; kept: number }> {
-    if (!isStorageConfigured()) return { scanned: 0, removed: 0, failed: 0, kept: 0 };
+  async runRetention(now = new Date(), batch = 500): Promise<{ scanned: number; removed: number; failed: number; kept: number; missing: number }> {
+    if (!isStorageConfigured()) return { scanned: 0, removed: 0, failed: 0, kept: 0, missing: 0 };
     const cutoff = bagPhotoRetentionCutoff(now);
     const candidates = await prisma.bagPhoto.findMany({
       where: {
@@ -263,7 +263,12 @@ export class BagPhotoService {
           {
             booking: {
               NOT: { dispute: { status: { in: [...OPEN_DISPUTE_STATUSES] } } },
-              OR: [{ checkedOutAt: { lt: cutoff } }, { status: "CANCELLED", updatedAt: { lt: cutoff } }],
+              OR: [
+                { checkedOutAt: { lt: cutoff } },
+                { status: "CANCELLED", updatedAt: { lt: cutoff } },
+                // Hic kapanmamis (CHECKED_IN/APPROVED...) rezervasyon: planli bitis yedek.
+                { status: { notIn: ["CHECKED_OUT", "CANCELLED"] }, checkOutTime: { lt: cutoff } },
+              ],
             },
           },
         ],
@@ -276,6 +281,7 @@ export class BagPhotoService {
           select: {
             status: true,
             checkedOutAt: true,
+            checkOutTime: true,
             updatedAt: true,
             dispute: { select: { status: true, updatedAt: true } },
           },
@@ -295,7 +301,40 @@ export class BagPhotoService {
       if (await purgeRow(c)) removed++;
       else failed++;
     }
-    return { scanned: candidates.length, removed, failed, kept };
+    const missing = await this.dropMissingObjects(batch);
+    return { scanned: candidates.length, removed, failed, kept, missing };
+  }
+
+  /**
+   * Nesnesi S3'te artik olmayan canli satirlar (yasam dongusu kurali, elle silme):
+   * isaretlenip silinir, boylece yok bir nesne icin imzali adres uretilmez.
+   * HEAD hatasi (yetki, ag) "yok" sayilmaz; satir kalir.
+   */
+  async dropMissingObjects(limit = 500): Promise<number> {
+    const rows = await prisma.bagPhoto.findMany({
+      where: { deletedAt: null },
+      orderBy: { createdAt: "asc" },
+      select: { id: true, key: true },
+      take: limit,
+    });
+    const storage = getStorage();
+    let dropped = 0;
+    for (const r of rows) {
+      let exists = true;
+      try {
+        exists = await storage.exists(r.key);
+      } catch (err) {
+        logger.warn({ err, photoId: r.id }, "bag_photo_head_failed");
+        continue;
+      }
+      if (exists) continue;
+      await prisma.bagPhoto.update({ where: { id: r.id }, data: { deletedAt: new Date() } });
+      await prisma.bagPhoto.delete({ where: { id: r.id } }).catch((err: unknown) => {
+        logger.warn({ err, photoId: r.id }, "bag_photo_row_delete_failed");
+      });
+      dropped++;
+    }
+    return dropped;
   }
 }
 
