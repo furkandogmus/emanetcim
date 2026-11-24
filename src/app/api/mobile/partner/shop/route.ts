@@ -150,7 +150,9 @@ export async function PUT(req: NextRequest) {
     const result = await shopService.updateSettings(shop.id, data);
     if (!result.ok) {
       return NextResponse.json(
-        { error: result.reason, min: result.min, max: result.max },
+        result.reason === "price_out_of_range"
+          ? { error: result.reason, min: result.min, max: result.max }
+          : { error: result.reason },
         { status: 400 },
       );
     }

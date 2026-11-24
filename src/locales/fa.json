@@ -1903,7 +1903,8 @@
     "reviewAlreadyHidden": "این نظر از قبل پنهان است.",
     "reviewNotHidden": "این نظر پنهان نیست.",
     "reviewReasonRequired": "برای پنهان کردن دلیل بنویسید.",
-    "accountDeletionGuest": "می‌توانید حساب خود را مستقیماً در همین صفحه ببندید."
+    "accountDeletionGuest": "می‌توانید حساب خود را مستقیماً در همین صفحه ببندید.",
+    "coordinatesRequired": "پین مکان فروشگاه فعال را نمی‌توان حذف کرد؛ می‌توانید آن را جابه‌جا کنید."
   },
   "Emails": {
     "verificationSubject": "ایمیل خود را تأیید کنید",

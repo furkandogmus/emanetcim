@@ -82,6 +82,9 @@ export type PartnerEarningsSummary = {
   monthly: MonthlyEarning[];
   peakHours: { hour: string; count: number }[];
   avgStayHours: number;
+  /** Yuvarlanmamis ortalama ve ortalamaya giren satir sayisi: dukkanlari birlestirmek icin. */
+  avgStayHoursExact: number;
+  stayBookingCount: number;
 };
 
 /** Mobil kazanc ekraninin grafikleri: son aylar, yogun saat ve ozet oranlar. */
@@ -117,7 +120,8 @@ export function recentMonthKeys(now: Date, timezone: string | null | undefined, 
 
 /**
  * Birden cok dukkanin ozetini tek gorunume katlar (tek dukkanda birebir ayni
- * sayilar). Ortalama kalis teslim adediyle agirliklanir.
+ * sayilar). Ortalama kalis, ortalamanin kendi tabaniyla (hakedis durumlarindaki
+ * satir sayisi) ve yuvarlanmamis degerle agirliklanir; yuvarlama en sonda.
  */
 export function mergeEarningsInsights(
   summaries: { summary: PartnerEarningsSummary; rating: number | null }[],
@@ -129,6 +133,7 @@ export function mergeEarningsInsights(
   let earning = 0;
   let all = 0;
   let stayWeighted = 0;
+  let stayCount = 0;
   for (const { summary } of summaries) {
     for (const m of summary.monthly) {
       const cur = byMonth.get(m.month) ?? { net: 0, count: 0 };
@@ -137,7 +142,8 @@ export function mergeEarningsInsights(
     for (const h of summary.peakHours) hours.set(h.hour, (hours.get(h.hour) ?? 0) + h.count);
     earning += summary.earningBookingCount;
     all += summary.allBookingCount;
-    stayWeighted += summary.avgStayHours * summary.earningBookingCount;
+    stayWeighted += summary.avgStayHoursExact * summary.stayBookingCount;
+    stayCount += summary.stayBookingCount;
   }
   const ratings = summaries.map((s) => s.rating).filter((r): r is number => typeof r === "number" && r > 0);
   return {
@@ -149,7 +155,7 @@ export function mergeEarningsInsights(
       const hour = `${String(h).padStart(2, "0")}:00`;
       return { hour, count: hours.get(hour) ?? 0 };
     }),
-    avgStayHours: earning > 0 ? Math.round(stayWeighted / earning) : 0,
+    avgStayHours: stayCount > 0 ? Math.round(stayWeighted / stayCount) : 0,
     conversionPct: all > 0 ? Math.round((earning / all) * 100) : 0,
     avgRating: ratings.length > 0 ? Math.round((ratings.reduce((a, b) => a + b, 0) / ratings.length) * 10) / 10 : null,
   };
@@ -157,7 +163,7 @@ export function mergeEarningsInsights(
 
 type MonthRow = { month: string; gross: Prisma.Decimal | null; count: bigint };
 type HourRow = { hour: number; count: bigint };
-type StayRow = { avg_hours: number | null };
+type StayRow = { avg_hours: number | null; stay_count: bigint | number | null };
 
 /**
  * Hakedişe sayılan durumlar — SQL tarafına aynı listeden geçer.
@@ -208,7 +214,8 @@ class PartnerEarningsService {
         GROUP BY 1
       `,
       prisma.$queryRaw<StayRow[]>`
-        SELECT AVG(EXTRACT(EPOCH FROM ("checkOutTime" - "checkInTime")) / 3600.0)::float8 AS avg_hours
+        SELECT AVG(EXTRACT(EPOCH FROM ("checkOutTime" - "checkInTime")) / 3600.0)::float8 AS avg_hours,
+               COUNT("checkOutTime" - "checkInTime") AS stay_count
         FROM "Booking"
         WHERE "shopId" = ${shopId}
           AND "status"::text IN (${EARNING_STATUS_SQL})
@@ -248,6 +255,8 @@ class PartnerEarningsService {
       monthly,
       peakHours,
       avgStayHours: Math.round(stayRows[0]?.avg_hours ?? 0),
+      avgStayHoursExact: stayRows[0]?.avg_hours ?? 0,
+      stayBookingCount: Number(stayRows[0]?.stay_count ?? 0),
     };
   }
 

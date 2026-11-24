@@ -1124,7 +1124,7 @@
     "address": "Street address",
     "district": "District",
     "city": "City",
-    "addressHint": "Guests find your shop by this address. Use the web panel to move the pin on the map.",
+    "addressHint": "Guests find your shop by this address. You can edit the map pin below.",
     "save": "Save",
     "saved": "Settings saved.",
     "saveFailed": "Could not save",
@@ -2231,6 +2231,7 @@
     "locationAdd": "Set the pin on the map",
     "locationEdit": "Edit pin",
     "locationHint": "Drag the map or tap a spot so the pin sits at your shop's door.",
+    "locationPickFirst": "Move the pin to your shop or use your location before saving.",
     "locationCoordsA11y": "Selected coordinates",
     "locateMe": "Use my location",
     "locationSave": "Save pin",
@@ -2254,7 +2255,8 @@
       "invalid_tr_phone": "Enter a Turkish mobile number (5XX XXX XX XX).",
       "login_phone_locked": "This number is your only way to sign in. Add an email to your account first or contact support.",
       "already_registered": "This number is registered to another account.",
-      "no_shop": "You need a shop first."
+      "no_shop": "You need a shop first.",
+      "coordinates_required": "A live shop's pin cannot be removed; you can move it instead."
     }
   }
 }

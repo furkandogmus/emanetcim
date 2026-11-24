@@ -292,7 +292,8 @@ export function priceBand(rules: { defaultPricePerDay: number }): { min: number;
 
 export type UpdateShopSettingsResult =
   | { ok: true; shop: Shop; impact: SettingsImpact }
-  | { ok: false; reason: 'price_out_of_range'; min: number; max: number };
+  | { ok: false; reason: 'price_out_of_range'; min: number; max: number }
+  | { ok: false; reason: 'coordinates_required' };
 
 export interface IShopService {
   findNearby(
@@ -1057,6 +1058,15 @@ export class ShopService implements IShopService {
    * Etki YAZMADAN ONCE olculur (sonra "eski saatlere gore" sorusu sorulamaz).
    */
   async updateSettings(shopId: string, input: ShopSettingsInput): Promise<UpdateShopSettingsResult> {
+    /*
+      Yayindaki dukkan pinini silemez: mesafe aramasi koordinatsiz dukkani hic
+      dondurmez, misafir icin dukkan kaybolur. Bekleyen/pasif dukkanda serbest;
+      onay zaten `missing_coordinates` ile pin istiyor.
+    */
+    if (input.latitude === null || input.longitude === null) {
+      const current = await prisma.shop.findUnique({ where: { id: shopId }, select: { isActive: true } });
+      if (current?.isActive) return { ok: false, reason: 'coordinates_required' };
+    }
     if (input.pricePerDay !== undefined) {
       const rules = await getPricingRules();
       const { min, max } = priceBand(rules);

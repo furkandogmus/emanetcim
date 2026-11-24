@@ -1124,7 +1124,7 @@
     "address": "Straße und Hausnummer",
     "district": "Bezirk",
     "city": "Stadt",
-    "addressHint": "Gäste finden deinen Laden über diese Adresse. Den Pin auf der Karte verschiebst du im Web-Panel.",
+    "addressHint": "Gäste finden deinen Laden über diese Adresse. Den Pin auf der Karte bearbeitest du weiter unten.",
     "save": "Speichern",
     "saved": "Einstellungen gespeichert.",
     "saveFailed": "Speichern nicht möglich",
@@ -2231,6 +2231,7 @@
     "locationAdd": "Pin auf der Karte setzen",
     "locationEdit": "Pin bearbeiten",
     "locationHint": "Ziehen Sie die Karte oder tippen Sie auf einen Punkt, bis der Pin an Ihrer Ladentür sitzt.",
+    "locationPickFirst": "Verschieben Sie den Pin zu Ihrem Geschäft oder nutzen Sie Ihren Standort, bevor Sie speichern.",
     "locationCoordsA11y": "Gewählte Koordinaten",
     "locateMe": "Meinen Standort verwenden",
     "locationSave": "Pin speichern",
@@ -2254,7 +2255,8 @@
       "invalid_tr_phone": "Geben Sie eine türkische Mobilnummer ein (5XX XXX XX XX).",
       "login_phone_locked": "Diese Nummer ist Ihr einziger Anmeldeweg. Fügen Sie zuerst eine E-Mail hinzu oder wenden Sie sich an den Support.",
       "already_registered": "Diese Nummer gehört zu einem anderen Konto.",
-      "no_shop": "Sie brauchen zuerst ein Geschäft."
+      "no_shop": "Sie brauchen zuerst ein Geschäft.",
+      "coordinates_required": "Der Pin eines aktiven Geschäfts kann nicht entfernt werden; Sie können ihn verschieben."
     }
   }
 }

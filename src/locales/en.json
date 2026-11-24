@@ -1980,7 +1980,8 @@
     "reviewAlreadyHidden": "The review is already hidden.",
     "reviewNotHidden": "The review is not hidden.",
     "reviewReasonRequired": "Enter a reason to hide it.",
-    "accountDeletionGuest": "You can close your account directly on this page."
+    "accountDeletionGuest": "You can close your account directly on this page.",
+    "coordinatesRequired": "A live shop's location pin cannot be removed; you can move it instead."
   },
   "Emails": {
     "verificationSubject": "Verify Your Email",

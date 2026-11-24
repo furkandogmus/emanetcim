@@ -1903,7 +1903,8 @@
     "reviewAlreadyHidden": "L’avis est déjà masqué.",
     "reviewNotHidden": "L’avis n’est pas masqué.",
     "reviewReasonRequired": "Indiquez un motif pour le masquer.",
-    "accountDeletionGuest": "Vous pouvez fermer votre compte directement sur cette page."
+    "accountDeletionGuest": "Vous pouvez fermer votre compte directement sur cette page.",
+    "coordinatesRequired": "Le repère d'une boutique en ligne ne peut pas être supprimé ; vous pouvez le déplacer."
   },
   "Emails": {
     "verificationSubject": "Vérifiez votre e-mail",

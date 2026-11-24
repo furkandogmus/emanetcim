@@ -1903,7 +1903,8 @@
     "reviewAlreadyHidden": "Die Bewertung ist bereits ausgeblendet.",
     "reviewNotHidden": "Die Bewertung ist nicht ausgeblendet.",
     "reviewReasonRequired": "Geben Sie zum Ausblenden einen Grund an.",
-    "accountDeletionGuest": "Sie können Ihr Konto direkt auf dieser Seite schließen."
+    "accountDeletionGuest": "Sie können Ihr Konto direkt auf dieser Seite schließen.",
+    "coordinatesRequired": "Der Standort-Pin eines aktiven Geschäfts kann nicht entfernt werden; Sie können ihn verschieben."
   },
   "Emails": {
     "verificationSubject": "Bestätigen Sie Ihre E-Mail",

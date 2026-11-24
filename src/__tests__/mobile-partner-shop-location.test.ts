@@ -80,6 +80,13 @@ describe("PUT partner/shop konum pini", () => {
     expect(mockShopService.updateSettings).not.toHaveBeenCalled();
   });
 
+  it("yayindaki dukkanin pini silinemez: servis kodu istemciye gider", async () => {
+    mockShopService.updateSettings.mockResolvedValue({ ok: false, reason: "coordinates_required" });
+    const res = (await put({ latitude: null, longitude: null }))!;
+    expect(res.status).toBe(400);
+    expect(await res.json()).toEqual({ error: "coordinates_required" });
+  });
+
   it("pin gonderilmezse servise konum alani gitmez", async () => {
     await put({ name: "Yeni Ad" });
     expect(mockShopService.updateSettings).toHaveBeenCalledWith("s1", { name: "Yeni Ad" });

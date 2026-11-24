@@ -15,6 +15,8 @@ function summary(over: Partial<PartnerEarningsSummary> = {}): PartnerEarningsSum
     monthly: [],
     peakHours: Array.from({ length: 24 }, (_, h) => ({ hour: `${String(h).padStart(2, "0")}:00`, count: 0 })),
     avgStayHours: 0,
+    avgStayHoursExact: 0,
+    stayBookingCount: 0,
     ...over,
   };
 }
@@ -47,6 +49,8 @@ describe("mergeEarningsInsights", () => {
       earningBookingCount: 3,
       allBookingCount: 4,
       avgStayHours: 5,
+      avgStayHoursExact: 5.2,
+      stayBookingCount: 4,
       monthly: [{ month: "2026-11", grossTotal: 300, netTotal: 270, commissionTotal: 30, count: 3 }],
     });
     s.peakHours[9].count = 2;
@@ -61,17 +65,22 @@ describe("mergeEarningsInsights", () => {
     expect(out.avgRating).toBe(4.6);
   });
 
-  it("cok dukkan: aylar ve saatler toplanir, kalis teslim adediyle agirliklanir", () => {
+  it("cok dukkan: aylar ve saatler toplanir, kalis kendi satir sayisiyla ve yuvarlanmadan agirliklanir", () => {
     const a = summary({
       earningBookingCount: 1,
       allBookingCount: 2,
+      // Ortalamanin tabani teslim adedi degil: hakedis durumlarindaki 3 satir.
       avgStayHours: 2,
+      avgStayHoursExact: 2.4,
+      stayBookingCount: 3,
       monthly: [{ month: "2026-11", grossTotal: 100, netTotal: 100, commissionTotal: 0, count: 1 }],
     });
     const b = summary({
       earningBookingCount: 3,
       allBookingCount: 6,
-      avgStayHours: 6,
+      avgStayHours: 3,
+      avgStayHoursExact: 3.4,
+      stayBookingCount: 1,
       monthly: [{ month: "2026-11", grossTotal: 50.1, netTotal: 50.1, commissionTotal: 0, count: 3 }],
     });
     const out = mergeEarningsInsights(
@@ -82,7 +91,8 @@ describe("mergeEarningsInsights", () => {
       months,
     );
     expect(out.months[1]).toEqual({ month: "2026-11", net: 150.1, count: 4 });
-    expect(out.avgStayHours).toBe(5);
+    // (2.4*3 + 3.4*1) / 4 = 2.65 -> 3. Once yuvarlansaydi (2*3 + 3) / 4 = 2.25 -> 2.
+    expect(out.avgStayHours).toBe(3);
     expect(out.conversionPct).toBe(50);
     // Puansiz dukkan (0) ortalamayi asagi cekmez.
     expect(out.avgRating).toBe(4);
