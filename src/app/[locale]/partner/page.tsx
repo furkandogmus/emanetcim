@@ -5,6 +5,7 @@ import { bookingService } from "@/services/BookingService";
 import { analyticsService } from "@/services/AnalyticsService";
 import { partnerEarningsService } from "@/services/PartnerEarningsService";
 import { partnerDashboardService } from "@/services/PartnerDashboardService";
+import { bookingSourceService } from "@/services/BookingSourceService";
 import { getEffectiveCommission } from "@/lib/commission";
 import { getPricingRules } from "@/lib/platform-settings";
 import { isStorageConfigured } from "@/lib/storage";
@@ -79,7 +80,7 @@ export default async function PartnerPage({
   ]);
   if (!shopDetail) redirect(`/${locale}/partner`);
 
-  const [result, pricingRules, ownerPhoneRow, monthlyShopViews, totals] =
+  const [result, pricingRules, ownerPhoneRow, monthlyShopViews, totals, sourceStats] =
     await Promise.all([
       bookingService.getPartnerBookings(activeShop.id),
       getPricingRules(),
@@ -98,6 +99,8 @@ export default async function PartnerPage({
       canManage
         ? partnerEarningsService.getTotals(activeShop.id, commission.rate)
         : Promise.resolve({ gross: 0 }),
+      // Yalniz sayi, tutar yok: personel de gorur.
+      bookingSourceService.shopStats(activeShop.id, shopDetail.timezone),
     ]);
 
   /*
@@ -158,6 +161,7 @@ export default async function PartnerPage({
       hasShopImage={!!shopDetail.image}
       hasShopLocation={shopDetail.latitude != null && shopDetail.longitude != null}
       canManage={canManage}
+      sourceStats={sourceStats}
     />
   );
 }

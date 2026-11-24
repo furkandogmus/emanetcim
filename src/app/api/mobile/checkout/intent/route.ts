@@ -24,6 +24,8 @@ import { BookingStatus } from "@prisma/client";
 import { notificationService } from "@/services/NotificationService";
 import { analyticsService } from "@/services/AnalyticsService";
 import { isShopBookableBy } from "@/lib/public-shop-filter";
+import { clientPosterAttribution } from "@/lib/booking-source";
+import { bookingSourceService } from "@/services/BookingSourceService";
 
 /**
  * Servisin rezervasyon REDDETME kodlarinin HTTP karsiliklari.
@@ -76,6 +78,14 @@ const schema = z.object({
     onay vermis olmasin. Eski istemci gondermez; o zaman kontrol atlanir.
   */
   expectedTotal: z.number().min(0).max(1_000_000).optional(),
+  /**
+   * Afis atfi (2026-11-25): uygulama `/shop/<id>?kaynak=afis-<id>` baglantisiyla acildiysa.
+   * Yalniz istatistik; bicim, pencere ve dukkan dogrulanir, gecmeyen atif yok sayilir.
+   */
+  posterAttribution: z
+    .object({ shopId: z.string().max(64), capturedAt: z.string().max(40) })
+    .optional()
+    .catch(undefined),
 });
 
 /** `Idempotency-Key`: istemci UUID'si; baska bicim reddedilir (anahtar indekse girer). */
@@ -221,6 +231,10 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: "price_changed", totalPrice: toplam }, { status: 409 });
   }
 
+  const posterShopId = await bookingSourceService.resolvePosterShop(
+    clientPosterAttribution(parsed.data.posterAttribution),
+  );
+
   let booking;
   try {
     booking = await bookingService.createInitialBooking({
@@ -255,6 +269,8 @@ export async function POST(req: NextRequest) {
         izi yoktu. Ikisi de artik servisin isi.
       */
       initialStatus: BookingStatus.APPROVED,
+      source: posterShopId ? "poster" : "app",
+      sourceShopId: posterShopId,
     });
   } catch (e) {
     /*

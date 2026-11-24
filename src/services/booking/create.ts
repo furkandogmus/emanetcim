@@ -33,6 +33,7 @@ import {
   BookingShopPrelaunchError,
 } from '@/services/booking/errors';
 import type { CreateInitialBookingInput, TxClient } from '@/services/BookingService';
+import type { BookingSource } from '@/lib/booking-source';
 import { affiliateService } from '@/services/AffiliateService';
 
 /**
@@ -67,6 +68,29 @@ function snapshotRules(rules: PricingRules, data: CreateInitialBookingInput): Pr
 
 function nonNegativeAmount(v: unknown): number {
   return typeof v === 'number' && Number.isFinite(v) ? Math.max(0, v) : 0;
+}
+
+/**
+ * Kapidan gelen misafir (2026-11-25): rezervasyonu dukkan operatoru acar, misafirin hesabi
+ * yoktur. Oturum kapisini YALNIZ bu yol atlar; yetki ve hiz siniri `WalkInBookingService`te.
+ */
+export type WalkInFields = {
+  operator: { id: string; role: 'GUEST' | 'PARTNER' | 'ADMIN' };
+  guestName: string;
+  guestEmail: string | null;
+  guestPhone: string | null;
+  /** BookingEvent'e yazilan ek iz (operator iliskisi, KVKK onayi). */
+  eventMetadata: Record<string, unknown>;
+};
+
+/** Kanal ve afis dukkani: tasiyicinin verdigi deger; afis disinda dukkan yazilmaz. */
+function sourceFields(
+  data: CreateInitialBookingInput,
+  walkIn?: WalkInFields,
+): { source: BookingSource | null; sourceShopId: string | null } {
+  if (walkIn) return { source: 'walk_in', sourceShopId: null };
+  const source = data.source ?? null;
+  return { source, sourceShopId: source === 'poster' ? data.sourceShopId ?? null : null };
 }
 
 /**
@@ -164,11 +188,27 @@ export async function createInitialBooking(data: CreateInitialBookingInput): Pro
   }
 }
 
-async function createInitialBookingOnce(data: CreateInitialBookingInput): Promise<Booking> {
+/**
+ * Kapidan gelen misafir icin rezervasyon: hesapsiz (`guestId = null`), indirimsiz, tarih
+ * penceresi / tatil / saat / kapasite kurallari normal yolla ayni. Durum `APPROVED`;
+ * teslim alma ayrica `checkIn` ile yapilir (tahsilat ve muhur orada).
+ */
+export async function createWalkInBooking(
+  data: Pick<
+    CreateInitialBookingInput,
+    'shopId' | 'totalPrice' | 'bagCountS' | 'bagCountM' | 'bagCountXl' | 'checkInTime' | 'checkOutTime' | 'unitPrice' | 'insuranceFee' | 'locale'
+  >,
+  walkIn: WalkInFields,
+): Promise<Booking> {
+  // `guestId` yalnizca tip icin dolu; walk-in yolunda hicbir yere yazilmaz.
+  return createInitialBookingOnce({ ...data, guestId: '', initialStatus: 'APPROVED' }, walkIn);
+}
+
+async function createInitialBookingOnce(data: CreateInitialBookingInput, walkIn?: WalkInFields): Promise<Booking> {
   // Oturum kapisi EN ONCE: hesapsiz istek kapasite/slot sorgusu da yaptirmaz.
-  assertSignedInGuest(data);
+  if (!walkIn) assertSignedInGuest(data);
   assertBookingInput(data);
-  if (data.idempotencyKey) {
+  if (data.idempotencyKey && !walkIn) {
     const existing = await findBookingByIdempotencyKey(data.guestId, data.idempotencyKey);
     if (existing) throw new BookingIdempotentReplayError(existing);
   }
@@ -225,7 +265,7 @@ async function createInitialBookingOnce(data: CreateInitialBookingInput): Promis
   const newBags = totalBagCount(data.bagCountS, data.bagCountM, data.bagCountXl);
   
   // Slot-based booking path
-  if (data.slotIds && data.slotIds.length > 0) {
+  if (!walkIn && data.slotIds && data.slotIds.length > 0) {
     return createSlotBooking(data, newBags, rules);
   }
 
@@ -235,7 +275,14 @@ async function createInitialBookingOnce(data: CreateInitialBookingInput): Promis
     tasarlanmistir ve cagirandan yeniden denemesini bekler -- Postgres'in kendi
     mesaji da "please retry" diyor. Olcum ve gerekce `@/lib/tx-retry`de.
   */
-  const affiliate = await affiliateFields(data);
+  const affiliate = walkIn
+    ? { affiliateId: null, affiliateCommissionRate: null, affiliateGuestDiscountRate: null, affiliateDiscountAmount: 0 }
+    : await affiliateFields(data);
+  const guestId = walkIn ? null : data.guestId;
+  const source = sourceFields(data, walkIn);
+  const actor = walkIn
+    ? { actorId: walkIn.operator.id, actorRole: walkIn.operator.role }
+    : { actorId: data.guestId, actorRole: 'GUEST' as const };
   const booking = await retryOnWriteConflict(() => prisma.$transaction(
     async (tx) => {
       const shop = await tx.shop.findUnique({ where: { id: data.shopId } });
@@ -270,7 +317,11 @@ async function createInitialBookingOnce(data: CreateInitialBookingInput): Promis
 
       const booking = await tx.booking.create({
         data: {
-          guestId: data.guestId,
+          guestId,
+          ...(walkIn
+            ? { guestName: walkIn.guestName, guestEmail: walkIn.guestEmail, guestPhone: walkIn.guestPhone }
+            : {}),
+          ...source,
           // Misafirin dili: bildirimler bunu okur. Bkz. `Booking.locale`.
           locale: data.locale ?? null,
           shopId: data.shopId,
@@ -307,9 +358,10 @@ async function createInitialBookingOnce(data: CreateInitialBookingInput): Promis
         olusturmadan 48 saat oluyordu: haftalar once alinan rezervasyonun
         bileti teslim gunu "taninmayan kod" cikiyordu.
       */
+      // Hesapsiz rezervasyonda QR'in misafir alani rezervasyon kimligi (eski hesapsiz yolla ayni).
       const qrCodeToken = await createQrToken({
         bookingId: booking.id,
-        guestId: data.guestId,
+        guestId: guestId ?? booking.id,
         shopId: data.shopId,
         checkOutTime: data.checkOutTime.toISOString(),
       });
@@ -331,8 +383,7 @@ async function createInitialBookingOnce(data: CreateInitialBookingInput): Promis
   void bookingEventService.record({
     bookingId: booking.id,
     event: "CREATED",
-    actorId: data.guestId,
-    actorRole: "GUEST",
+    ...actor,
     metadata: {
       shopId: data.shopId,
       totalPrice: data.totalPrice,
@@ -340,6 +391,9 @@ async function createInitialBookingOnce(data: CreateInitialBookingInput): Promis
       bagCountS: data.bagCountS,
       bagCountM: data.bagCountM,
       bagCountXl: data.bagCountXl,
+      ...(source.source ? { source: source.source } : {}),
+      ...(source.sourceShopId ? { sourceShopId: source.sourceShopId } : {}),
+      ...(walkIn ? walkIn.eventMetadata : {}),
     },
   }).catch((err) => logger.error({ err, bookingId: booking.id }, "booking_event_created_failed"));
 
@@ -351,8 +405,7 @@ async function createInitialBookingOnce(data: CreateInitialBookingInput): Promis
     void bookingEventService.record({
       bookingId: booking.id,
       event: 'APPROVED',
-      actorId: data.guestId,
-      actorRole: 'GUEST',
+      ...actor,
       metadata: { autoApproved: true },
     }).catch((err) => logger.error({ err, bookingId: booking.id }, 'booking_event_approved_failed'));
   }
@@ -371,6 +424,7 @@ export async function createSlotBooking(
   assertBookingInput(data);
   const initialStatus = data.initialStatus ?? DEFAULT_INITIAL_STATUS;
   const affiliate = await affiliateFields(data);
+  const source = sourceFields(data);
   // Cakismada yeniden denenir; gerekce `@/lib/tx-retry`de.
   const booking = await retryOnWriteConflict(() => prisma.$transaction(
     async (tx) => {
@@ -443,6 +497,7 @@ export async function createSlotBooking(
       const booking = await tx.booking.create({
         data: {
           guestId: data.guestId,
+          ...source,
           // Misafirin dili: bildirimler bunu okur. Bkz. `Booking.locale`.
           locale: data.locale ?? null,
           shopId: data.shopId,
@@ -506,6 +561,7 @@ export async function createSlotBooking(
       totalPrice: data.totalPrice,
       ...(nonNegativeAmount(data.appDiscountAmount) > 0 ? { appDiscountAmount: nonNegativeAmount(data.appDiscountAmount) } : {}),
       slotBooking: true,
+      ...(source.source ? { source: source.source } : {}),
     },
   }).catch((err) => logger.error({ err, bookingId: booking.id }, "booking_event_created_failed"));
 

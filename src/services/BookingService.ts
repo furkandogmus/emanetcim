@@ -1,4 +1,5 @@
 import { Booking, BookingStatus, Prisma } from '@prisma/client';
+import type { BookingSource } from '@/lib/booking-source';
 import prisma from '@/lib/db';
 import { type SealAssignmentInput } from '@/services/SealService';
 import { moneyToNumber } from '@/lib/money';
@@ -88,6 +89,10 @@ export type CreateInitialBookingInput = {
   appDiscountAmount?: number;
   /** Uygulanan oran; `pricingSnapshot.appBookingDiscountPct`a yalnizca uygulama rezervasyonunda yazilir. */
   appDiscountPct?: number;
+  /** Kanal (istatistik): tasiyici rotasindan; afis atfi `booking-source.ts` ile dogrulanmis olmali. */
+  source?: BookingSource;
+  /** `source = poster` iken afisin dukkani. */
+  sourceShopId?: string | null;
 };
 
 export type ModifyBookingInput = {
@@ -116,7 +121,7 @@ export type PartnerBookingListItem = Prisma.BookingGetPayload<{
   select: {
     id: true; checkInTime: true; checkOutTime: true;
     totalPrice: true; bagCountS: true; bagCountM: true; bagCountXl: true;
-    status: true; createdAt: true;
+    status: true; createdAt: true; guestName: true;
     guest: { select: { name: true } };
   };
 }>;
@@ -299,7 +304,7 @@ export class BookingService implements IBookingService {
         select: {
           id: true, checkInTime: true, checkOutTime: true,
           totalPrice: true, bagCountS: true, bagCountM: true, bagCountXl: true,
-          status: true, createdAt: true,
+          status: true, createdAt: true, guestName: true,
           guest: { select: { name: true } },
         },
         orderBy: { createdAt: 'desc' },

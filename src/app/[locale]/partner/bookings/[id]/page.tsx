@@ -159,7 +159,7 @@ export default async function PartnerBookingDetailPage({
             {t("partnerBookingGuestContact")}
           </h2>
           <p className="mt-1 text-xl font-black text-gray-900">
-            {booking.guest?.name || tGuest("guestDefaultName")}
+            {booking.guest?.name || booking.guestName || tGuest("guestDefaultName")}
           </p>
           <div className="mt-4 flex flex-col gap-3 text-sm font-medium text-gray-600">
             {booking.guest?.phone ? (

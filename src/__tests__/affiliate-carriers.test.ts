@@ -198,3 +198,39 @@ describe("web: cerez", () => {
     expect(m.create).toHaveBeenCalledWith(expect.objectContaining({ affiliateCode: undefined }));
   });
 });
+
+/* Kanal ve afis atfi (2026-11-25): yalniz istatistik; tasiyici dogrulanmis atfi iletir. */
+describe("kanal: afis atfi", () => {
+  process.env.AUTH_SECRET ??= crypto.randomUUID() + crypto.randomUUID();
+
+  it("mobil: pencere icindeki afis atfi poster, yoksa app", async () => {
+    await intentPOST(mreq("intent", { posterAttribution: { shopId: SHOP, capturedAt: new Date().toISOString() } }));
+    expect(m.create).toHaveBeenLastCalledWith(expect.objectContaining({ source: "poster", sourceShopId: SHOP }));
+    await intentPOST(mreq("intent", {}));
+    expect(m.create).toHaveBeenLastCalledWith(expect.objectContaining({ source: "app", sourceShopId: null }));
+  });
+
+  it("mobil: suresi gecmis ya da bozuk atif yok sayilir, istek yine basarili", async () => {
+    const old = new Date(Date.now() - 60 * 60 * 1000).toISOString();
+    const res = (await intentPOST(mreq("intent", { posterAttribution: { shopId: SHOP, capturedAt: old } })))!;
+    expect(res.status).toBe(200);
+    expect(m.create).toHaveBeenLastCalledWith(expect.objectContaining({ source: "app" }));
+    const bad = (await intentPOST(mreq("intent", { posterAttribution: "x" })))!;
+    expect(bad.status).toBe(200);
+  });
+
+  it("web: imzali afis cerezi poster, elle yazilmis cerez web", async () => {
+    const { signPosterAttribution } = await import("@/lib/booking-source");
+    m.auth.mockResolvedValue({ user: { id: "guest-1", role: "GUEST" } });
+    const input = {
+      shopId: SHOP, bagCountS: 1, bagCountM: 0, bagCountXl: 0, unitPrice: 100, totalPrice: 1,
+      checkInTime: new Date(body.checkInTime), checkOutTime: new Date(body.checkOutTime),
+    };
+    m.cookie.mockImplementation((k: string) => (k === "bp_poster" ? { value: signPosterAttribution(SHOP) } : undefined));
+    await createBookingAction(input);
+    expect(m.create).toHaveBeenLastCalledWith(expect.objectContaining({ source: "poster", sourceShopId: SHOP }));
+    m.cookie.mockImplementation((k: string) => (k === "bp_poster" ? { value: `${SHOP}.${Date.now()}.forged` } : undefined));
+    await createBookingAction(input);
+    expect(m.create).toHaveBeenLastCalledWith(expect.objectContaining({ source: "web", sourceShopId: null }));
+  });
+});

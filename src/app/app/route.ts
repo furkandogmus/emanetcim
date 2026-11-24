@@ -11,6 +11,13 @@ import {
   normalizeAppLinkSource,
 } from "@/lib/app-stores";
 import { recordAppLinkHit } from "@/services/AppLinkService";
+import { bookingSourceService } from "@/services/BookingSourceService";
+import {
+  POSTER_COOKIE,
+  POSTER_COOKIE_MAX_AGE_S,
+  posterShopIdFromAppLinkSource,
+  signPosterAttribution,
+} from "@/lib/booking-source";
 
 /**
  * Akilli indirme bagi: afis QR'i, e-posta ve site rozetleri buraya gelir.
@@ -33,16 +40,40 @@ export async function GET(req: NextRequest) {
     await recordAppLinkHit({ source, platform, outcome: decision.outcome });
   }
 
+  const posterShopId = posterShopIdFromAppLinkSource(source);
+  /*
+    Magaza yayinda degilse afisi okutan gezgin genel acilis sayfasi yerine o dukkanin
+    rezervasyon sayfasina iner (afis tezgahta asili; Bounce'un dukkan QR'i gibi). Dukkan
+    yoksa / pasifse eski davranis.
+  */
+  const posterLanding =
+    decision.outcome === "landing" && posterShopId
+      ? await bookingSourceService.resolvePosterShop(posterShopId)
+      : null;
   const target =
     decision.outcome === "redirect"
       ? new URL(decision.url)
-      : new URL(`/${pickLocale(req)}/app`, req.nextUrl.origin);
+      : new URL(posterLanding ? `/${pickLocale(req)}/shop/${posterLanding}` : `/${pickLocale(req)}/app`, req.nextUrl.origin);
   if (decision.outcome === "landing" && source !== "direct") target.searchParams.set("kaynak", source);
 
   const res = NextResponse.redirect(target, 302);
   // Karar UA'ya ve bayraga bagli: ara bellek (nginx/CDN) bir kullanicinin kararini digerine vermesin.
   res.headers.set("Cache-Control", "private, no-store");
   res.headers.set("X-Robots-Tag", "noindex");
+  /*
+    Afis atfi (son dokunus, 30 dk): ayni tarayicida baslayan web rezervasyonu `poster`
+    sayilir. Imzali; dukkanin varligina rezervasyon aninda bakilir. Magazaya giden
+    ziyaretcide cerez uygulamaya tasinamaz (ertelenmis derin baglanti native SDK ister).
+  */
+  if (posterShopId && !isBotUserAgent(ua)) {
+    res.cookies.set(POSTER_COOKIE, signPosterAttribution(posterShopId), {
+      httpOnly: true,
+      sameSite: "lax",
+      secure: process.env.NODE_ENV === "production",
+      path: "/",
+      maxAge: POSTER_COOKIE_MAX_AGE_S,
+    });
+  }
   return res;
 }
 

@@ -180,7 +180,7 @@ export async function getPartnerBookingPreviewAction(raw: string) {
   return {
     success: true as const,
     bookingId: booking.id,
-    guestName: booking.guest?.name || "Misafir",
+    guestName: booking.guest?.name || booking.guestName || "Misafir",
     bagsLabel,
     bagCountS: booking.bagCountS,
     bagCountM: booking.bagCountM,

@@ -4,6 +4,7 @@ import { requireMobileUser } from "@/lib/mobile-auth";
 import { getEffectiveCommission } from "@/lib/commission";
 import { resolvePartnerShops } from "@/lib/partner-shop";
 import { toMobilePartnerDashboard } from "@/lib/mobile-dto";
+import { bookingSourceService } from "@/services/BookingSourceService";
 import { partnerDashboardService } from "@/services/PartnerDashboardService";
 
 /**
@@ -26,10 +27,10 @@ export async function GET(req: NextRequest) {
     getEffectiveCommission(),
   ]);
 
-  const snapshot = await partnerDashboardService.getSnapshot(
-    activeShop.id,
-    shop?.timezone,
-    commission.rate,
-  );
-  return NextResponse.json(toMobilePartnerDashboard(snapshot, activeShop, shops));
+  const [snapshot, sourceStats] = await Promise.all([
+    partnerDashboardService.getSnapshot(activeShop.id, shop?.timezone, commission.rate),
+    // Yalniz sayi: personel de gorur (web paneliyle ayni kural).
+    bookingSourceService.shopStats(activeShop.id, shop?.timezone),
+  ]);
+  return NextResponse.json(toMobilePartnerDashboard(snapshot, activeShop, shops, sourceStats));
 }

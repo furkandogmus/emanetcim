@@ -65,6 +65,7 @@ type BookingDetailSource = BookingSummarySource & {
   qrCodeToken: string | null;
   guest: { name: string | null; phone?: string | null } | null;
   guestPhone?: string | null;
+  guestName?: string | null;
   shop: {
     name: string;
     /* Sema `Float?`: koordinatsiz dukkan (henuz haritaya islenmemis) mumkun. */
@@ -123,7 +124,8 @@ export function toMobileBookingDetail(
   return {
     ...toMobileBookingSummary(b),
     qrCodeToken: b.qrCodeToken,
-    guestName: b.guest?.name ?? "",
+    // Kapidan gelen misafirin hesabi yok; adi tezgahta girildi.
+    guestName: b.guest?.name ?? b.guestName ?? "",
     latitude: b.shop.latitude,
     longitude: b.shop.longitude,
     shopPhone: opts.hideShopContact ? "" : (b.shop.owner.phone ?? ""),
@@ -162,11 +164,11 @@ export function toMobileBookingDetail(
 
 /** Esnaf rezervasyon listesi satiri: ozet + misafir adi. */
 export function toMobilePartnerBookingRow(
-  b: Omit<BookingSummarySource, "shop"> & { guest: { name: string | null } | null },
+  b: Omit<BookingSummarySource, "shop"> & { guest: { name: string | null } | null; guestName?: string | null },
   shopName: string,
 ) {
   return {
     ...toMobileBookingSummary({ ...b, shop: { name: shopName } }),
-    guestName: b.guest?.name ?? "",
+    guestName: b.guest?.name ?? b.guestName ?? "",
   };
 }

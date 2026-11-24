@@ -16,6 +16,11 @@ vi.mock("@/lib/mobile-auth", async (orig) => ({
 vi.mock("@/lib/partner-shop", () => ({ resolvePartnerShops: mockResolve }));
 vi.mock("@/lib/commission", () => ({ getEffectiveCommission: mockCommission }));
 vi.mock("@/lib/db", () => ({ default: { shop: { findUnique: mockFindUnique } } }));
+vi.mock("@/services/BookingSourceService", () => ({
+  bookingSourceService: {
+    shopStats: vi.fn().mockResolvedValue({ thisMonth: { poster: 4, walkIn: 2 }, lastMonth: { poster: 1, walkIn: 0 } }),
+  },
+}));
 vi.mock("@/services/PartnerDashboardService", () => ({
   partnerDashboardService: { getSnapshot: mockSnapshot },
 }));
@@ -60,6 +65,7 @@ describe("mobil esnaf ozeti", () => {
       monthNet: 1200,
       prevMonthNet: 0,
       monthChangePct: null,
+      sourceStats: { thisMonth: { poster: 4, walkIn: 2 }, lastMonth: { poster: 1, walkIn: 0 } },
     });
   });
 
@@ -91,5 +97,7 @@ describe("mobil esnaf ozeti", () => {
     const body = await (await GET(req()))!.json();
     expect(body).toMatchObject({ access: "staff", todayArrivals: 3, bagsInStorage: 5, monthNet: 0, prevMonthNet: 0, monthChangePct: null });
     expect(body.shops[0].access).toBe("staff");
+    // Sayilar tutar degil: personel de afis / kapidan gelen sayisini gorur.
+    expect(body.sourceStats.thisMonth).toEqual({ poster: 4, walkIn: 2 });
   });
 });

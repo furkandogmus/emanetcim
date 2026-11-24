@@ -123,7 +123,7 @@ export default async function PartnerBookingsPage({
     return {
       bookingId: b.id,
       shortRef: "EMN-" + b.id.substring(0, 6).toUpperCase(),
-      customer: b.guest?.name || tGuest("guestDefaultName"),
+      customer: b.guest?.name || b.guestName || tGuest("guestDefaultName"),
       scheduleLine: `${fmtDt(b.checkInTime, bookingTimeZone(b.shop))} — ${t("checkInWord")} · ${fmtDt(b.checkOutTime, bookingTimeZone(b.shop))} — ${t("partnerBookingsCheckOut")}`,
       listStatus,
       bookingStatus: b.status,

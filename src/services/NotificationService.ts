@@ -720,6 +720,8 @@ export class NotificationService implements INotificationService {
     bookingId: string,
     totalPrice: number,
     locale: string = "tr",
+    /** Hesapsiz (kapidan gelen) misafir: oturumlu bilet yerine yonetim bagi. */
+    opts: { ticketUrl?: string } = {},
   ): Promise<void> {
     /*
       KOK ADRES ORTAK YARDIMCIDAN (2026-08-31). Burasi yedek olarak URETIM alan
@@ -729,7 +731,7 @@ export class NotificationService implements INotificationService {
     */
     const domain = getSiteBaseUrl();
     // Yeni rezervasyon hep hesapli (2026-11-23): bilet sayfasi oturumla acilir.
-    const bookingUrl = `${domain}/${locale}/bookings/${bookingId}`;
+    const bookingUrl = opts.ticketUrl ?? `${domain}/${locale}/bookings/${bookingId}`;
     const shortId = bookingShortCode(bookingId);
     /* Eskiden ALTI dilin tutari da her gonderimde hesaplaniyordu; besi bosa. */
     const price = formatTryCurrency(Number(totalPrice), bcp47ForUiLocale(locale));

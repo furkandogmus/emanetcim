@@ -14,6 +14,7 @@ const { mockPrisma, mockRequireMobileUser } = vi.hoisted(() => ({
     jobRun: { groupBy: vi.fn(), findMany: vi.fn() },
     platformSettings: { findUnique: vi.fn() },
     notificationLog: { findMany: vi.fn(), groupBy: vi.fn(), count: vi.fn() },
+    booking: { groupBy: vi.fn().mockResolvedValue([]) },
   },
   mockRequireMobileUser: vi.fn(),
 }));
@@ -87,6 +88,18 @@ describe("analitik", () => {
     expect(r.body).toMatchObject({ days: 7, pageViews: 12, searches: 0, topPaths: [], topShops: [] });
     const bogus = await json(await analyticsRoute.GET(req("/analytics?days=365")));
     expect(bogus.body.days).toBe(30);
+  });
+
+  it("rezervasyon kanal dagilimi: walk-in ve afis ayri, kanalsiz eski kayit unknown", async () => {
+    mockPrisma.booking.groupBy.mockResolvedValueOnce([
+      { source: "app", _count: { _all: 5 } },
+      { source: "walk_in", _count: { _all: 2 } },
+      { source: "poster", _count: { _all: 1 } },
+      { source: null, _count: { _all: 7 } },
+    ]);
+    const r = await json(await analyticsRoute.GET(req("/analytics?days=30")));
+    expect(r.body.bookingSources).toEqual({ web: 0, app: 5, walkIn: 2, poster: 1, unknown: 7 });
+    expect(mockPrisma.booking.groupBy.mock.calls[0][0].where.status).toEqual({ not: "CANCELLED" });
   });
 
   it("tekil oturumu veritabaninda COUNT(DISTINCT) ile sayar, satirlari cekmez", async () => {

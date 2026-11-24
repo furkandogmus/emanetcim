@@ -73,7 +73,7 @@ export default function PartnerHistoryTab({
                     */}
                     <div className="min-w-0">
                       <h3 className="truncate font-black text-gray-900 tracking-tight">
-                        {booking.guest?.name ||
+                        {booking.guest?.name || booking.guestName ||
                           t("guestFallback", { id: booking.id.slice(0, 4) })}
                       </h3>
                       <p className="id-eyebrow text-gray-400">

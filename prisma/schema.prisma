@@ -363,6 +363,14 @@ model Booking {
   /// `null` = bilinmiyor (bu alandan ÖNCEKİ rezervasyonlar). Okuyan taraf
   /// platform diline düşer, yani eski davranış aynen korunur.
   locale                     String?
+  /// Rezervasyonun geldigi kanal (2026-11-25): `web` | `app` | `walk_in` | `poster`.
+  /// Yalnizca istatistik icindir; fiyat, indirim ve komisyon bu alani OKUMAZ.
+  /// `null` = bu alandan once acilmis rezervasyon. Yazici `booking/create`.
+  source                     String?
+  /// `poster` kaynaginda afisi asili dukkan (rezervasyonun dukkani olmayabilir).
+  sourceShopId               String?
+  /// Kapidan gelen (hesapsiz) misafirin tezgahta girilen adi. Hesapli rezervasyonda bos.
+  guestName                  String?
   createdAt                  DateTime             @default(now())
   updatedAt                  DateTime             @updatedAt
   /// Eşzamanlı durum geçişleri için optimistic sürüm (onay vb. updateMany ile artırılır).
@@ -456,6 +464,8 @@ model Booking {
   /// taraması yapıyordu. 2026-08-31'de ölçüldü.
   @@index([guestEmail])
   @@index([affiliateId])
+  @@index([source, createdAt])
+  @@index([sourceShopId, source, createdAt])
 }
 
 /// Rezervasyon başına tek ödeme defteri satırı.

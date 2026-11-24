@@ -1,3 +1,5 @@
+import type { SourceBreakdown } from "@/services/BookingSourceService";
+import { toMobileBookingSourceBreakdown } from "./walk-in";
 import type { JobHealthReport, JobRunRow } from "@/services/JobHealthService";
 import type { SystemStatusSnapshot } from "@/services/SystemStatusService";
 import type { analyticsService } from "@/services/AnalyticsService";
@@ -8,7 +10,7 @@ import type { prelaunchInterestService } from "@/services/PrelaunchInterestServi
 type AnalyticsSummary = Awaited<ReturnType<(typeof analyticsService)["getDashboardSummary"]>>;
 
 /** `admin/analytics`: huni sayilari + en cok goruntulenen sayfa/dukkan. */
-export function toMobileAdminAnalytics(s: AnalyticsSummary) {
+export function toMobileAdminAnalytics(s: AnalyticsSummary, sources?: SourceBreakdown) {
   return {
     days: s.days,
     uniqueSessions: s.uniqueSessions,
@@ -20,6 +22,7 @@ export function toMobileAdminAnalytics(s: AnalyticsSummary) {
     newUsers: s.newUsers,
     topPaths: s.topPaths.map((p) => ({ path: p.path, count: p.count })),
     topShops: s.topShops.map((p) => ({ shopId: p.shopId, name: p.name, count: p.count })),
+    ...(sources ? { bookingSources: toMobileBookingSourceBreakdown(sources) } : {}),
   };
 }
 

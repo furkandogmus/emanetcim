@@ -3,6 +3,8 @@ import { moneyToNumber } from "@/lib/money";
 import { computeSplit } from "@/lib/platform-split";
 import { collectedAt } from "@/lib/earning-collection";
 import type { PartnerDashboardSnapshot } from "@/services/PartnerDashboardService";
+import type { ShopSourceStats } from "@/services/BookingSourceService";
+import { toMobileShopSourceStats } from "./walk-in";
 
 type SealRequestSource = {
   id: string;
@@ -48,7 +50,12 @@ type ShopRef = { id: string; name: string; isActive?: boolean; relation?: "owner
  * Personelde (`access: "staff"`) kazanc ALANLARI SIFIR: personel kazanc gormez (urun
  * karari 2026-11-24). Alanlar silinmez, sayi kalir: eski istemci onlari `number` okur.
  */
-export function toMobilePartnerDashboard(s: PartnerDashboardSource, shop: ShopRef, shops: ShopRef[]) {
+export function toMobilePartnerDashboard(
+  s: PartnerDashboardSource,
+  shop: ShopRef,
+  shops: ShopRef[],
+  sourceStats?: ShopSourceStats,
+) {
   const staff = shop.relation === "staff";
   return {
     /** Ozetin ait oldugu dukkan; cok dukkanli esnafta kart hangisi oldugunu soyler. */
@@ -62,6 +69,8 @@ export function toMobilePartnerDashboard(s: PartnerDashboardSource, shop: ShopRe
     monthNet: staff ? 0 : s.monthNet,
     prevMonthNet: staff ? 0 : s.prevMonthNet,
     monthChangePct: staff ? null : s.monthChangePct,
+    /** Afisten / kapidan gelen rezervasyon sayisi (2026-11-25); tutar yok, personel de gorur. */
+    ...(sourceStats ? { sourceStats: toMobileShopSourceStats(sourceStats) } : {}),
   };
 }
 
