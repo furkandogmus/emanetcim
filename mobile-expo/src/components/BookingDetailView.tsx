@@ -276,7 +276,7 @@ export function BookingDetailView({ id, mode }: { id: string; mode: "guest" | "p
           subtitle={mode === "partner" ? b.shopName : undefined}
           audience={mode === "partner" ? "staff" : "guest"}
         />
-        {showQr ? <WalletPassButton bookingId={b.id} /> : null}
+        {showQr ? <WalletPassButton bookingId={b.id} status={b.status} /> : null}
 
         {/*
           Duzeltme muhur satirlarinin USTUNDE: tezgahta once valiz sayilir, sonra

@@ -3,6 +3,8 @@ import type { AppleWalletConfig } from "@/lib/wallet/config";
 
 const APNS_HOST = "https://api.push.apple.com";
 const APNS_TIMEOUT_MS = 10_000;
+/** Ayni anda acik push akisi; buyuk kayit listesi APNs'e yigilmasin. */
+export const APNS_CONCURRENCY = 5;
 
 export type ApnsResult = { token: string; status: number };
 
@@ -20,7 +22,12 @@ export async function sendPassUpdatePushes(cfg: AppleWalletConfig, tokens: strin
   });
   session.on("error", () => undefined);
   try {
-    return await Promise.all(tokens.map((token) => pushOne(session, cfg.passTypeId, token)));
+    const results: ApnsResult[] = [];
+    for (let i = 0; i < tokens.length; i += APNS_CONCURRENCY) {
+      const batch = tokens.slice(i, i + APNS_CONCURRENCY);
+      results.push(...(await Promise.all(batch.map((token) => pushOne(session, cfg.passTypeId, token)))));
+    }
+    return results;
   } finally {
     session.close();
   }

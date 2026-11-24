@@ -11,10 +11,10 @@ import { walletKindFor } from "@/lib/wallet";
  * omurlu bagi tarayicida acilir, Safari `.pkpass`i, Chrome kaydetme bagini cuzdana verir.
  * Resmi rozet gorseli lisans geregi pakete girmedi; siyah metin dugme.
  */
-export function WalletPassButton({ bookingId }: { bookingId: string }) {
+export function WalletPassButton({ bookingId, status }: { bookingId: string; status: string }) {
   const { t } = useTranslation();
   const config = useAppConfig();
-  const kind = walletKindFor(config.data, Platform.OS);
+  const kind = walletKindFor(config.data, Platform.OS, status);
   const [busy, setBusy] = useState(false);
   if (!kind) return null;
 

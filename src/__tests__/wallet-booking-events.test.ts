@@ -28,6 +28,11 @@ describe("wallet guncelleme tetigi", () => {
     expect(mockNotify).not.toHaveBeenCalled();
   });
 
+  it("odeme defteri kaydi (walletRefresh: false) ikinci kez tetiklemez", async () => {
+    await bookingEventService.record({ bookingId: "bk-1", event: "CANCELLED", walletRefresh: false });
+    expect(mockNotify).not.toHaveBeenCalled();
+  });
+
   it("guncelleme hatasi olay kaydini dusurmez", async () => {
     mockNotify.mockRejectedValue(new Error("apns down"));
     await expect(bookingEventService.record({ bookingId: "bk-1", event: "CANCELLED" })).resolves.toBeUndefined();

@@ -53,10 +53,13 @@ export async function verifyWalletLinkToken(token: string, kind: WalletKind): Pr
 
 /**
  * PassKit web servisinin kart basina sifresi (`authenticationToken`). Saklanmaz:
- * seri numarasindan ayri bir anahtarla turetilir, cihaz her istekte geri yollar.
+ * seri numarasindan turetilir, cihaz her istekte geri yollar. Sir degisirse
+ * verilmis kartlar guncelleme alamaz (ops/SECRETS.md); ayri sir AUTH_SECRET
+ * rotasyonunu kartlardan ayirir.
  */
 export function passAuthenticationToken(serialNumber: string): string {
-  const key = createHmac("sha256", rawSecret()).update("bagajpark:wallet-pass-auth").digest();
+  const secret = process.env.WALLET_PASS_AUTH_SECRET?.trim() || rawSecret();
+  const key = createHmac("sha256", secret).update("bagajpark:wallet-pass-auth").digest();
   return createHmac("sha256", key).update(serialNumber).digest("base64url");
 }
 

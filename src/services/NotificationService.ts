@@ -85,13 +85,16 @@ async function bookingEmailAppBadges(
   return badges.length > 0 ? { label: copy.appRow, badges } : undefined;
 }
 
-/** Onay e-postasindaki Wallet dugmeleri; yapilandirma yoksa ya da kart verilemiyorsa bos. */
-async function bookingEmailWalletButtons(bookingId: string, locale: string): Promise<EmailWalletButton[]> {
-  const links = await walletPassService.linksForEmail(bookingId).catch((err) => {
+/**
+ * Onay e-postasindaki Wallet dugmeleri; yapilandirma yoksa ya da kart verilemiyorsa bos.
+ * Hedef oturumlu bilet sayfasi, imzali kart bagi degil (bkz. `emailWalletKinds`).
+ */
+async function bookingEmailWalletButtons(bookingId: string, bookingUrl: string, locale: string): Promise<EmailWalletButton[]> {
+  const kinds = await walletPassService.emailWalletKinds(bookingId).catch((err) => {
     logger.warn({ err, bookingId }, "wallet_email_links_failed");
     return [];
   });
-  if (links.length === 0) return [];
+  if (kinds.length === 0) return [];
   const copy = pickLocale({
     tr: { apple: "Apple Cüzdan'a Ekle", google: "Google Cüzdan'a Ekle" },
     en: { apple: "Add to Apple Wallet", google: "Add to Google Wallet" },
@@ -101,7 +104,7 @@ async function bookingEmailWalletButtons(bookingId: string, locale: string): Pro
     fa: { apple: "افزودن به Apple Wallet", google: "افزودن به Google Wallet" },
     ru: { apple: "Добавить в Apple Wallet", google: "Добавить в Google Кошелёк" },
   }, locale);
-  return links.map((l) => ({ href: l.url, label: l.kind === "apple" ? copy.apple : copy.google }));
+  return kinds.map((k) => ({ href: bookingUrl, label: k === "apple" ? copy.apple : copy.google }));
 }
 
 /** `excludeUserIds`: push'u tetikleyen yonetici kendi istegini bildirim olarak almaz. */
@@ -834,7 +837,7 @@ export class NotificationService implements INotificationService {
         { label: content.row2, value: price },
       ],
       cta: { href: bookingUrl, label: content.cta, variant: "button" },
-      walletButtons: await bookingEmailWalletButtons(bookingId, locale),
+      walletButtons: await bookingEmailWalletButtons(bookingId, bookingUrl, locale),
       appBadges: await bookingEmailAppBadges(domain, content),
       footer: content.footer,
     });
