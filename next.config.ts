@@ -3,18 +3,12 @@ import createNextIntlPlugin from 'next-intl/plugin';
 
 const withNextIntl = createNextIntlPlugin();
 
-const hstsHeader =
-  process.env.ENABLE_HSTS_HEADERS === "true"
-    ? [
-        {
-          key: "Strict-Transport-Security",
-          value: "max-age=63072000; includeSubDomains; preload",
-        },
-      ]
-    : [];
-
+/*
+  HSTS burada YOK: `headers()` build aninda donar ve CI imaji `ENABLE_HSTS_HEADERS`
+  olmadan kuruyordu, yani bayrak uretimde hic etki etmiyordu. Baslik nginx'te
+  (nginx/conf.d/default.conf, 443 server bloklari).
+*/
 const securityHeaders = [
-  ...hstsHeader,
   { key: "X-Frame-Options", value: "DENY" },
   { key: "X-Content-Type-Options", value: "nosniff" },
   /*

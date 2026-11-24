@@ -56,6 +56,15 @@ eski dump'ları siler. Yetki EC2 rolünden gelir (statik anahtar yok). Güncel b
 `infra/aws/stack/variables.tf` → `deploy_config_bucket` (Terraform çıktısı
 `backup_bucket_name`). Log: `/opt/emanetci/logs/backup.log`.
 
+**Şifreleme (age):** SSM'de `BACKUP_AGE_RECIPIENT` (age genel anahtarı, `age1...`) varsa
+`backup-s3.sh` dump'ı `age -r` ile şifreleyip `backups/<dosya>.dump.age` olarak yükler;
+değer tanımlıyken `age` yoksa ya da şifreleme düşerse **hiç yüklemez** (düz metne düşmez,
+log'da `ERROR`). Tanımsızsa her koşuda `WARN` basar ve düz yükler. Sunucuda `age` kurulu
+olmalı. Özel anahtar sunucuda **tutulmaz**: anahtar çifti sunucu dışında üretilir
+(`age-keygen -o bagajpark-backup.key`), yalnız genel anahtar SSM'e yazılır, özel anahtar
+parola yöneticisinde/çevrimdışı saklanır. S3'te `backups/` öneki 35 günde süresi dolar
+(`infra/aws/bootstrap` yaşam döngüsü kuralı).
+
 **Elle yedek** (sunucuda, onarım betiklerinden önce zorunlu):
 
 ```bash
@@ -75,6 +84,14 @@ curl -s http://127.0.0.1/api/health/live   # sonra
 ```
 
 S3'teki bir yedeği geri yüklemek için önce `aws s3 cp s3://<yedek-bucket>/backups/<dosya> backups/`.
+Dosya `.dump.age` ise özel anahtarın bulunduğu makinede çözülür, sunucuya yalnız çözülmüş
+dump gider (anahtar sunucuya kopyalanmaz):
+
+```bash
+age -d -i bagajpark-backup.key -o emanetci_<tarih>.dump emanetci_<tarih>.dump.age
+scp emanetci_<tarih>.dump <sunucu>:/opt/emanetci/backups/
+```
+
 Tam dump şemayı da taşıdığı için ayrıca `prisma migrate deploy` gerekmez; `web` başlarken
 zaten koşar. `pg_restore`'un `EXTENSION`/sahip uyarıları kritik hata değildir. Hesap
 taşımalarında aynı iki betik kullanıldı (`infra/aws/README.md`).

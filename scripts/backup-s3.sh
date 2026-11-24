@@ -4,6 +4,13 @@
 # NEDEN: Hetzner'de yedekler yalnizca sunucunun kendi diskindeydi -- sunucu
 # giderse yedek de gider. AWS'te instance rolu `s3:PutObject` ile
 # `bagajpark-backups-*/backups/` onekine yazar; statik anahtar yok.
+#
+# SIFRELEME: `BACKUP_AGE_RECIPIENT` (age genel anahtari, `age1...`) ortamda ya da
+# <app-dir>/docker-compose.env icinde (SSM'den uretilir) tanimliysa dump S3'e
+# `age -r` ile sifrelenip `.dump.age` olarak gider. Tanimliyken sifreleme
+# basarisizsa YUKLEME YAPILMAZ (duz metne dusulmez). Tanimsizsa yuksek sesle
+# uyarir ve eskisi gibi duz yukler. Ozel anahtar sunucuda TUTULMAZ; geri yukleme
+# ops/README.md § Yedek ve geri yukleme.
 set -e
 export PATH=$PATH:/usr/local/bin:/usr/bin:/bin
 
@@ -47,6 +54,18 @@ function assert_is_installed() {
   fi
 }
 
+# Ortam > docker-compose.env. Dosya `source` edilmez: yalniz bu satir okunur.
+function resolve_age_recipient() {
+  local -r app_dir="$1"
+  if [ -n "${BACKUP_AGE_RECIPIENT:-}" ]; then
+    echo "$BACKUP_AGE_RECIPIENT"; return
+  fi
+  local -r env_file="$app_dir/docker-compose.env"
+  if [ -r "$env_file" ]; then
+    grep -E '^BACKUP_AGE_RECIPIENT=' "$env_file" | tail -1 | cut -d= -f2- | tr -d '"' || true
+  fi
+}
+
 function main() {
   local bucket=""
   local prefix="$DEFAULT_PREFIX"
@@ -79,10 +98,27 @@ function main() {
   latest=$(ls -t "$backup_dir"/emanetci_*.dump 2>/dev/null | head -1)
   assert_not_empty "son dump" "$latest"
 
-  log_info "S3'e kopyalaniyor: s3://$bucket/$prefix/$(basename "$latest")"
-  if ! aws s3 cp "$latest" "s3://$bucket/$prefix/$(basename "$latest")" --only-show-errors; then
+  local recipient upload="$latest"
+  recipient=$(resolve_age_recipient "$app_dir")
+  if [ -n "$recipient" ]; then
+    if ! command -v age >/dev/null 2>&1; then
+      log_error "BACKUP_AGE_RECIPIENT tanimli ama 'age' kurulu degil -- duz metin YUKLENMEDI."; exit 1
+    fi
+    upload="$latest.age"
+    if ! age -r "$recipient" -o "$upload" "$latest"; then
+      rm -f "$upload"
+      log_error "age sifrelemesi basarisiz -- duz metin YUKLENMEDI."; exit 1
+    fi
+  else
+    log_warn "!!! BACKUP_AGE_RECIPIENT tanimsiz: yedek S3'e SIFRESIZ gidiyor (yalniz SSE-S3). !!!"
+  fi
+
+  log_info "S3'e kopyalaniyor: s3://$bucket/$prefix/$(basename "$upload")"
+  if ! aws s3 cp "$upload" "s3://$bucket/$prefix/$(basename "$upload")" --only-show-errors; then
     log_error "S3 kopyasi basarisiz -- yerel dump duruyor: $latest"; exit 1
   fi
+  # Sifreli kopya yalniz yukleme icindi; yerelde duz dump kalir (restore.sh onu okur).
+  if [ "$upload" != "$latest" ]; then rm -f "$upload"; fi
 
   local removed
   removed=$(find "$backup_dir" -name 'emanetci_*.dump' -mtime +"$keep_days" -print -delete | wc -l | tr -d ' ')
