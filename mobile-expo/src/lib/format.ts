@@ -107,3 +107,8 @@ export function formatMonthShort(d: Date | string) {
 export function formatRating(r: number) {
   return numberFmt({ maximumFractionDigits: 1, minimumFractionDigits: 1 }).format(r);
 }
+
+/** Tam sayi, dil ayiriciyla ("12.480" / "12,480"). */
+export function formatCount(n: number) {
+  return numberFmt({ maximumFractionDigits: 0 }).format(n);
+}

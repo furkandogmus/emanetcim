@@ -30,6 +30,14 @@ export default function AdminLayout() {
       <Stack.Screen name="admin/payments" />
       <Stack.Screen name="admin/platform-settings" />
       <Stack.Screen name="admin/feature-flags" />
+      <Stack.Screen name="admin/campaigns" />
+      <Stack.Screen name="admin/partner-new" />
+
+      {/* Gorunurluk (salt okuma) */}
+      <Stack.Screen name="admin/analytics" />
+      <Stack.Screen name="admin/system" />
+      <Stack.Screen name="admin/notifications" />
+      <Stack.Screen name="admin/prelaunch" />
     </Stack>
   );
 }
