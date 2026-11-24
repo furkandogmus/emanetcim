@@ -518,8 +518,11 @@ class AccountPrivacyService {
   private async eraseWithinTx(tx: Prisma.TransactionClient, userId: string): Promise<void> {
     const anonEmail = `gdpr_${userId.replace(/-/g, "").slice(0, 20)}${ANONYMIZED_EMAIL_DOMAIN}`;
     // E-postaya bagli (userId'siz) satirlar: sifirlama kodu, sifirlama/dogrulama token'lari.
-    const current = await tx.user.findUnique({ where: { id: userId }, select: { email: true, role: true } });
+    const current = await tx.user.findUnique({ where: { id: userId }, select: { email: true, phone: true, role: true } });
     const email = current?.email?.trim().toLowerCase();
+    // Kodla giris satiri telefon kimligiyle de acilir (SMS acilirsa).
+    const phoneIdentity = current?.phone ? normalizeTrGsm10(current.phone) : null;
+    if (phoneIdentity) await tx.mobileLoginCode.deleteMany({ where: { identity: phoneIdentity } });
 
     if (email) {
       await tx.passwordResetCode.deleteMany({ where: { email } });

@@ -11,8 +11,9 @@ import { setOwnPassword, type SetOwnPasswordResult } from "@/services/auth/set-o
 
 /**
  * Web profil sayfasi. Kurallar mobil `PUT /auth/me` ve `/auth/me/password` ile
- * AYNI servislerde; burasi yalnizca kimlik + hata anahtari esler. Web'de
- * goruntuleme oturumu yok, yani `impersonatedBy` gecilmez.
+ * AYNI servislerde; burasi yalnizca kimlik + hata anahtari esler. Web
+ * "olarak goruntule" oturumunda `requireUser` reddeder (salt okunur), mobil uc
+ * `forbidWhileImpersonating` ile; ikisinde de sifre yazilmaz.
  */
 
 const PROFILE_ERROR_TO_KEY: Record<Extract<UpdateOwnProfileResult, { ok: false }>["reason"], string> = {

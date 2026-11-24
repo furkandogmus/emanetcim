@@ -66,26 +66,36 @@ export async function POST(req: Request) {
 
   // Tek aktif kod, hash'li saklama, ADMIN reddi ve Play inceleme kodu: `mobile-login-code.ts`.
   const issued = await issueMobileLoginCode(normalizedIdentity, isEmail ? "email" : "phone");
-  // Inceleme hesabi ve ADMIN: gonderim yok, yanit ayni.
+  /*
+    Gonderim atesle-unut, her yolda: beklenirse SMTP/SMS gidis-donusu ve
+    gonderim hatasi (500) yalnizca normal hesaplarda gorunur, ADMIN ve inceleme
+    hesabi hemen 200 donerdi; sure ve durum kodu rolu sizdirirdi.
+  */
   if (issued.kind === "deliver") {
     const { code } = issued;
-    if (isEmail) {
-      await sendMobileOtp(normalizedIdentity, code, resolveRequestLocale(req.headers.get("accept-language")));
-    } else if (isNetgsmConfigured()) {
-      const smsResult = await sendNetgsmRestSms({
-        to10: normalizedIdentity,
-        message: `BagajPark giris kodunuz: ${code}. Kod 5 dakika gecerlidir.`,
-      });
-      if (!smsResult.ok) {
-        console.error(`[mobile-otp-sms-fail] ${normalizedIdentity} => ${smsResult.error}`);
-      }
-    } else {
-      logger.warn({ phone: normalizedIdentity }, "mobile_otp_sms_skipped_no_netgsm");
-    }
+    void deliverCode(isEmail, normalizedIdentity, code, resolveRequestLocale(req.headers.get("accept-language"))).catch(
+      (err) => logger.error({ err }, "mobile_otp_delivery_failed"),
+    );
     if (process.env.NODE_ENV !== "production") {
       console.log(`[mobile-otp] ${normalizedIdentity} => ${code}`);
     }
   }
 
   return NextResponse.json({ ok: true });
+}
+
+async function deliverCode(isEmail: boolean, identity: string, code: string, locale: string): Promise<void> {
+  if (isEmail) {
+    await sendMobileOtp(identity, code, locale);
+    return;
+  }
+  if (!isNetgsmConfigured()) {
+    logger.warn({ phone: identity }, "mobile_otp_sms_skipped_no_netgsm");
+    return;
+  }
+  const smsResult = await sendNetgsmRestSms({
+    to10: identity,
+    message: `BagajPark giris kodunuz: ${code}. Kod 5 dakika gecerlidir.`,
+  });
+  if (!smsResult.ok) logger.error({ error: smsResult.error }, "mobile_otp_sms_failed");
 }

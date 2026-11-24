@@ -2,6 +2,7 @@ import crypto from "crypto";
 import type { User } from "@prisma/client";
 import prisma from "@/lib/db";
 import logger from "@/lib/logger";
+import { rateLimit } from "@/lib/rate-limit";
 import {
   generatePasswordResetCode,
   hashScopedCode,
@@ -20,8 +21,10 @@ import {
  *
  *   - kimlik basina TEK aktif kod (yeni istek eskisini ezer),
  *   - yalnizca HMAC'i saklanir, sabit zamanli karsilastirilir,
- *   - kod basina 5 yanlis, kimlik basina 24 saatte 10 yanlis; ikisi de
- *     karsilastirmadan ONCE atomik artirilir,
+ *   - kod basina 5 yanlis; 24 saatte kimlik+IP basina 10 deneme ve kimlik
+ *     basina 50 yanlis tavan, hepsi karsilastirmadan ONCE artirilir. Tavan
+ *     kimlik+IP'den yuksek: baska IP'den 10 yanlis kurbani kilitleyemez,
+ *     6 hanede tek aktif kodla 50 tahmin yine ihmal edilebilir sans,
  *   - ADMIN hesabina kodla giris YOK: sifre (ve mevcut akis) zorunlu. Kod
  *     gonderilmez ama yanit ayni, hesabin rolu disaridan okunamaz.
  */
@@ -31,7 +34,10 @@ export const MOBILE_LOGIN_CODE_SCOPE = "mobile-login";
 export const MOBILE_LOGIN_CODE_TTL_MS = 5 * 60 * 1000;
 export const MOBILE_LOGIN_CODE_MAX_ATTEMPTS = 5;
 export const MOBILE_LOGIN_CODE_WINDOW_MS = 24 * 60 * 60 * 1000;
-export const MOBILE_LOGIN_CODE_WINDOW_MAX_FAILURES = 10;
+/** Kimlik basina tavan (tum IP'ler); yeni kod istemek sifirlamaz. */
+export const MOBILE_LOGIN_CODE_WINDOW_MAX_FAILURES = 50;
+/** Kimlik+IP basina deneme (dogru kod dahil) siniri, ayni pencerede. */
+export const MOBILE_LOGIN_CODE_IP_WINDOW_MAX_ATTEMPTS = 10;
 const CLEANUP_BATCH = 100;
 
 export type MobileLoginChannel = "email" | "phone";
@@ -145,9 +151,19 @@ export async function verifyMobileLoginCode(
   identity: string,
   channel: MobileLoginChannel,
   rawCode: unknown,
+  ip: string,
 ): Promise<VerifyMobileLoginCodeResult> {
   const code = typeof rawCode === "string" ? rawCode.trim() : "";
   if (!identity || !isWellFormedResetCode(code)) return { ok: false, code: "INVALID_CODE" };
+  if (
+    !(await rateLimit(
+      `mobile_login_code:${identity}:${ip}`,
+      MOBILE_LOGIN_CODE_IP_WINDOW_MAX_ATTEMPTS,
+      MOBILE_LOGIN_CODE_WINDOW_MS,
+    ))
+  ) {
+    return { ok: false, code: "TOO_MANY_ATTEMPTS" };
+  }
 
   const now = new Date();
   await prisma.mobileLoginCode.updateMany({
@@ -181,8 +197,21 @@ export async function verifyMobileLoginCode(
     return { ok: false, code: exhausted ? "TOO_MANY_ATTEMPTS" : "INVALID_CODE" };
   }
 
-  // Tek tuketim: ayni dogru kodla gelen ikinci istek satiri bulamaz.
-  const consumed = await prisma.mobileLoginCode.deleteMany({ where: { identity, codeHash: row.codeHash } });
+  /*
+    Tek tuketim, ama satir SILINMEZ: silmek pencere sayacini sifirlardi ve
+    kurbanin her girisi saldirgana taze bir pencere verirdi. Hash eslesmez
+    bir degerle ezilir; dogru deneme yanlis sayilmaz.
+  */
+  const consumed = await prisma.mobileLoginCode.updateMany({
+    where: { identity, codeHash: row.codeHash },
+    data: {
+      codeHash: crypto.randomBytes(32).toString("hex"),
+      // Gecmise: ayni milisaniyedeki istek de suresi dolmus gorur. Cok gecmise
+      // degil: temizlik satiri pencereden once silmesin.
+      expires: new Date(now.getTime() - 1),
+      windowFailures: { decrement: 1 },
+    },
+  });
   if (consumed.count !== 1) return { ok: false, code: "INVALID_CODE" };
 
   const user = await findUserByMobileIdentity(identity, channel);

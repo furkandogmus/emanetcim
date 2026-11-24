@@ -37,6 +37,12 @@ vi.mock("@/lib/netgsm", () => ({
   sendNetgsmRestSms: vi.fn(),
 }));
 
+// IP kovasi (10/5dk) bu dosyadaki istek sayisina yakin; sinirlar kendi testlerinde.
+vi.mock("@/lib/rate-limit", async (orig) => ({
+  ...(await orig<typeof import("@/lib/rate-limit")>()),
+  rateLimit: vi.fn(async () => true),
+}));
+
 vi.mock("@/lib/mail", () => ({
   sendMobileOtp: vi.fn(),
 }));
@@ -175,6 +181,29 @@ describe("Mobile API - Auth OTP", () => {
     vi.stubEnv("AUTH_SECRET", "test-secret-for-login-codes");
     expect(res.status).toBe(200);
     expect(sendMobileOtp).toHaveBeenCalled();
+  });
+
+  it("e-posta gonderimi beklenmez ve patlasa da yanit ayni (200 ok): rol zamandan ya da durumdan okunamaz", async () => {
+    let release: () => void = () => {};
+    vi.mocked(sendMobileOtp).mockImplementationOnce(() => new Promise<void>((r) => (release = r)));
+    const { POST } = await import("@/app/api/mobile/auth/otp/route");
+    const pending = await POST(
+      new Request("http://localhost/api/mobile/auth/otp", { method: "POST", body: JSON.stringify({ email: "slow@example.com" }) }),
+    );
+    // Gonderim hala bekliyor, yanit zaten dondu.
+    expect(pending.status).toBe(200);
+    expect(await pending.json()).toEqual({ ok: true });
+    release();
+
+    vi.mocked(sendMobileOtp).mockRejectedValueOnce(new Error("smtp down"));
+    const failed = await POST(
+      new Request("http://localhost/api/mobile/auth/otp", { method: "POST", body: JSON.stringify({ email: "fail@example.com" }) }),
+    );
+    expect(failed.status).toBe(200);
+    expect(await failed.json()).toEqual({ ok: true });
+    await new Promise((r) => setTimeout(r, 0));
+    const logger = (await import("@/lib/logger")).default;
+    expect(logger.error).toHaveBeenCalledWith(expect.anything(), "mobile_otp_delivery_failed");
   });
 
   it("telefon kimligine kod gondermez: sms_unavailable, kod saklanmaz", async () => {

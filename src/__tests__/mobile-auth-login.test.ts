@@ -134,6 +134,6 @@ describe("auth/session", () => {
     expect([admin.status, (await admin.json()).error]).toEqual([403, "password_login_required"]);
     expect(signAccess).not.toHaveBeenCalled();
     expect(mockPrisma.user.create).not.toHaveBeenCalled();
-    expect(verifyCode).toHaveBeenCalledWith("a@example.com", "email", "000000");
+    expect(verifyCode).toHaveBeenCalledWith("a@example.com", "email", "000000", "203.0.113.7");
   });
 });

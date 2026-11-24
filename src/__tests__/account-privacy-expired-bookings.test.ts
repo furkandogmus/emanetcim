@@ -87,6 +87,13 @@ describe("hesap silme ve suresi dolmus rezervasyonlar", () => {
     });
   });
 
+  it("telefon kimlikli kodla giris satiri da silinir", async () => {
+    m.prisma.booking.count.mockResolvedValue(0);
+    m.prisma.user.findUnique.mockResolvedValueOnce({ email: null, phone: "+905550000000" });
+    await accountPrivacyService.anonymizeSelf({ userId: "g1", role: "GUEST", ip: null });
+    expect(m.prisma.mobileLoginCode.deleteMany).toHaveBeenCalledWith({ where: { identity: "5550000000" } });
+  });
+
   it("kullanicinin acik bildirimleri yorumlarin kuyruk sayacindan duser", async () => {
     m.prisma.booking.count.mockResolvedValue(0);
     m.prisma.reviewReport.findMany.mockResolvedValueOnce([{ reviewId: "r1" }, { reviewId: "r2" }]);
