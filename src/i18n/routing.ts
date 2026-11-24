@@ -10,6 +10,9 @@ import {createNavigation} from 'next-intl/navigation';
  * buna karşılık 1 MB çeviri, 106 anahtarlık borç ve hiç denetlenmemiş çeviri
  * kalitesi taşıyorduk. Dosyalar git tarihçesinde; talep gelirse geri alınır
  * (`git log -- src/locales/ru.json`).
+ *
+ * 2026-11-24: `ru` geri eklendi (7 dil); mobil uygulamanın Rusça kullanıcısı
+ * e-posta ve site bağlantılarını İngilizce alıyordu. Çeviri sıfırdan yapıldı.
  */
 import { APP_LOCALES, DEFAULT_APP_LOCALE } from './locales';
 

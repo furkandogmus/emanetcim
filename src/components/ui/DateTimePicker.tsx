@@ -19,6 +19,7 @@ import {
   faIR,
   fr,
   ja,
+  ru,
   tr,
   type Locale as DateFnsLocale,
 } from "date-fns/locale";
@@ -48,6 +49,7 @@ const LOCALE_MAP: Record<string, DateFnsLocale> = {
   fa: faIR,
   fr,
   ja,
+  ru,
   tr,
 };
 

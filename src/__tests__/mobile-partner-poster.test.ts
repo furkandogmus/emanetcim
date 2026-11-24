@@ -57,8 +57,8 @@ describe("GET partner/poster", () => {
     expect(mockResolve).toHaveBeenCalledWith("p1", "s1");
   });
 
-  it("webde olmayan dil (ru) varsayilana duser", async () => {
-    const body = await (await GET(req("?locale=ru")))!.json();
+  it("webde olmayan dil (ko) varsayilana duser", async () => {
+    const body = await (await GET(req("?locale=ko")))!.json();
     expect(body.url).toContain("/tr/poster?t=");
   });
 

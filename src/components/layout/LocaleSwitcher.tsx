@@ -11,6 +11,7 @@ const SHORT: Record<string, string> = {
   fr: "FR",
   ja: "日本語",
   fa: "فارسی",
+  ru: "RU",
 };
 
 export default function LocaleSwitcher() {

@@ -7,6 +7,7 @@ export function openGraphLocaleForUiLocale(locale: string): string {
     fr: "fr_FR",
     ja: "ja_JP",
     fa: "fa_IR",
+    ru: "ru_RU",
   };
   return map[locale] ?? "en_US";
 }

@@ -11,8 +11,11 @@
  *
  * Kalıcı (308) yönlendirme İngilizce karşılığa: kaldırma gerekçesi zaten
  * "bu ziyaretçiler İngilizce okur"du ve her rotanın `/en` sürümü var.
+ *
+ * `ru` 2026-11-24'te geri geldi (mobil uygulama Rusça konuşuyordu, web ve
+ * e-posta konuşmuyordu); `/ru/*` artık gerçek sayfa döner.
  */
-export const RETIRED_LOCALES = ["es", "it", "zh", "ar", "ko", "ru", "bg", "pl"] as const;
+export const RETIRED_LOCALES = ["es", "it", "zh", "ar", "ko", "bg", "pl"] as const;
 
 const RETIRED_PREFIX = new RegExp(`^/(?:${RETIRED_LOCALES.join("|")})(/.*)?$`);
 
