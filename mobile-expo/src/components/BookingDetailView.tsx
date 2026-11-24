@@ -29,6 +29,7 @@ import { bookingCode } from "@/lib/booking-search";
 import { loadOfflineTicket, saveOfflineTicket, type OfflineTicket } from "@/lib/offline-tickets";
 import { colors, radius, space } from "@/theme/tokens";
 import { StaleQueryBanner } from "@/components/StaleQueryBanner";
+import { WalletPassButton } from "@/components/WalletPassButton";
 
 /** Misafirin iptal edebildigi durumlar: valiz henuz dukkana teslim edilmemis. */
 const CANCELLABLE = BEFORE_DROP_OFF;
@@ -275,6 +276,7 @@ export function BookingDetailView({ id, mode }: { id: string; mode: "guest" | "p
           subtitle={mode === "partner" ? b.shopName : undefined}
           audience={mode === "partner" ? "staff" : "guest"}
         />
+        {showQr ? <WalletPassButton bookingId={b.id} /> : null}
 
         {/*
           Duzeltme muhur satirlarinin USTUNDE: tezgahta once valiz sayilir, sonra

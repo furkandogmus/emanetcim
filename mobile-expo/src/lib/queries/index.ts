@@ -26,3 +26,4 @@ export * from "./admin-campaigns";
 export * from "./affiliate";
 export * from "./partner-parity";
 export * from "./shop-staff";
+export * from "./wallet";

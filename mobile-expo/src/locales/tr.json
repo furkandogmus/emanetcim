@@ -2410,5 +2410,10 @@
       "conflict": "Aynı anda başka bir ekip işlemi yapıldı, tekrar dene."
     },
     "closedAskOwner": "Dükkan şu an kapalı görünüyor. Saat dışı teslimi yalnızca dükkan sahibi onaylayabilir."
+  },
+  "wallet": {
+    "addApple": "Apple Cüzdan'a Ekle",
+    "addGoogle": "Google Cüzdan'a Ekle",
+    "openFailed": "Cüzdan bağlantısı açılamadı. Lütfen tekrar deneyin."
   }
 }
