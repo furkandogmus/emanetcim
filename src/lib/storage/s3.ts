@@ -111,7 +111,6 @@ export class S3Storage implements StoragePort {
         Key: key,
         // Tarayici/uygulama imzali adresi onbellege almasin; adres zaten dakikalar icinde olur.
         ResponseCacheControl: "private, no-store",
-        ResponseContentType: "image/jpeg",
       }),
       { expiresIn: expiresInSeconds },
     );

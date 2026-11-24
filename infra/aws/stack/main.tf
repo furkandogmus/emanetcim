@@ -454,12 +454,17 @@ resource "aws_iam_role_policy" "app_media_write" {
     Version = "2012-10-17"
     Statement = [
       {
+        Effect   = "Allow"
+        Action   = ["s3:PutObject", "s3:DeleteObject"]
+        Resource = "${aws_s3_bucket.media.arn}/shops/*"
+      },
+      {
+        # Muhur ve ekip sorunu fotograflari OZEL (kova politikasi acmaz); yonetici ekrani
+        # yetki kontrolunden sonra 5 dk'lik imzali GET ile okur (src/lib/storage/private-read.ts).
+        Sid    = "SealAndTeamIssuePhotosPrivate"
         Effect = "Allow"
-        Action = ["s3:PutObject", "s3:DeleteObject"]
-        # seals/ (muhur fotografi) ve team-issues/ (ekip sorunu) kodda vardi ama yetkisizdi.
-        # Ikisi de herkese acik adresle okunur; kova politikasi yalniz shops/*'i acar.
+        Action = ["s3:PutObject", "s3:GetObject", "s3:DeleteObject"]
         Resource = [
-          "${aws_s3_bucket.media.arn}/shops/*",
           "${aws_s3_bucket.media.arn}/seals/*",
           "${aws_s3_bucket.media.arn}/team-issues/*",
         ]

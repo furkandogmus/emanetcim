@@ -26,6 +26,10 @@ const { mockPrisma, mockRequireMobileUser, mockAudit, mockAuth, mockInvalidatePr
 }));
 vi.mock("@/lib/db", () => ({ default: mockPrisma }));
 vi.mock("@/lib/audit-log", () => ({ writeAuditLog: mockAudit }));
+// Muhur fotografi ozel: yonetici yolu imzali adres doner (`private-read.test.ts`).
+vi.mock("@/lib/storage/private-read", () => ({
+  presignStoredImage: async (v: string | null) => (v ? `${v}?signed` : null),
+}));
 vi.mock("@/auth", () => ({ auth: mockAuth }));
 vi.mock("@/lib/client-ip", async (orig) => ({
   ...(await orig<typeof import("@/lib/client-ip")>()),
@@ -206,7 +210,7 @@ describe("uyusmazlik", () => {
     expect(r.status).toBe(200);
     expect(r.body.description).toBe("Valizin tekerlegi kirik");
     expect(r.body.booking).toMatchObject({ totalPrice: 150.5, guestName: "Ada", shopName: "Kadikoy Bufe" });
-    expect(r.body.booking.seals[0]).toMatchObject({ sealNumber: 1001, photoUrl: "https://x/p.jpg" });
+    expect(r.body.booking.seals[0]).toMatchObject({ sealNumber: 1001, photoUrl: "https://x/p.jpg?signed" });
   });
 
   it("olmayan uyusmazlik 404", async () => {

@@ -4,6 +4,8 @@ import logger from "@/lib/logger";
 import { writeAuditLog } from "@/lib/audit-log";
 import { notificationService } from "@/services/NotificationService";
 import { bookingEventService } from "@/services/BookingEventService";
+import { presignStoredImage } from "@/lib/storage/private-read";
+import type { Prisma } from "@prisma/client";
 
 /**
  * Uyuşmazlık (hasar / hırsızlık / diğer) açma — iki taşıyıcının ORTAK gövdesi.
@@ -76,15 +78,31 @@ export function guestOutcomeStatus(from: string, to: DisputeStatus): Exclude<Dis
   return to;
 }
 
+type AdminDisputeRow = Prisma.DisputeGetPayload<{ include: typeof ADMIN_DISPUTE_INCLUDE }>;
+
+/**
+ * Muhur fotografi `seals/` altinda ve kova onu herkese acmiyor: kayitli adres 403 verir.
+ * Yalniz yonetici yollari (web `/admin/disputes`, mobil admin uclari) bunu cagirir;
+ * adres 5 dk'lik imzali GET'e cevrilir.
+ */
+async function withSignedSealPhotos(row: AdminDisputeRow): Promise<AdminDisputeRow> {
+  const seals = await Promise.all(
+    row.booking.seals.map(async (s) => ({ ...s, photoUrl: await presignStoredImage(s.photoUrl, "seals/") })),
+  );
+  return { ...row, booking: { ...row.booking, seals } };
+}
+
 class DisputeService {
   /** Yonetici listesi (web `/admin/disputes` ve mobil uc ayni sorgu). `status` taninmazsa filtresiz. */
-  listForAdmin(status?: string | null) {
+  async listForAdmin(status?: string | null) {
     const where = DISPUTE_STATUSES.includes(status as DisputeStatus) ? { status: status as DisputeStatus } : {};
-    return prisma.dispute.findMany({ where, orderBy: { createdAt: "desc" }, include: ADMIN_DISPUTE_INCLUDE });
+    const rows = await prisma.dispute.findMany({ where, orderBy: { createdAt: "desc" }, include: ADMIN_DISPUTE_INCLUDE });
+    return Promise.all(rows.map(withSignedSealPhotos));
   }
 
-  getForAdmin(id: string) {
-    return prisma.dispute.findUnique({ where: { id }, include: ADMIN_DISPUTE_INCLUDE });
+  async getForAdmin(id: string) {
+    const row = await prisma.dispute.findUnique({ where: { id }, include: ADMIN_DISPUTE_INCLUDE });
+    return row ? withSignedSealPhotos(row) : null;
   }
 
   /**
