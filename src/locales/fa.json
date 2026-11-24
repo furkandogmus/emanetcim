@@ -953,7 +953,7 @@
     "userDeleted": "کاربر حذف شد.",
     "deleteUserBlockedByRelations": "این کاربر تا وقتی فروشگاه، رزرو یا رکورد مرتبط دارد قابل حذف نیست. ابتدا آن‌ها را حذف کنید.",
     "resendSuccess": "ایمیل تأیید دوباره ارسال شد.",
-    "ipBlockedSuccess": "IP مسدود شد.",
+    "ipBlockedSuccess": "IP علامت‌گذاری شد (فقط ثبت).",
     "backToDashboard": "بازگشت به داشبورد",
     "searchUsersPlaceholder": "جستجوی کاربران...",
     "active": "فعال",
@@ -985,7 +985,7 @@
     "date": "تاریخ",
     "searchApplicationsPlaceholder": "جستجوی درخواست‌ها...",
     "noApplicationsFound": "درخواستی نیست.",
-    "blockThisIp": "مسدود کردن IP",
+    "blockThisIp": "علامت‌گذاری IP (فقط ثبت)",
     "searchShopsPlaceholder": "جستجوی فروشگاه‌ها...",
     "performance": "عملکرد",
     "inactive": "غیرفعال",
@@ -1114,7 +1114,7 @@
     "messagesBulkSelectAll": "انتخاب موارد نمایش‌داده‌شده",
     "messagesBulkDelete": "حذف موارد انتخاب‌شده",
     "messagesBulkConfirm": "پیام‌های انتخاب‌شده برای همیشه حذف شوند؟",
-    "ipBlockFailed": "مسدودسازی IP انجام نشد. قالب را بررسی کنید.",
+    "ipBlockFailed": "علامت‌گذاری IP انجام نشد. قالب را بررسی کنید.",
     "resendFailed": "ارسال ایمیل تأیید انجام نشد.",
     "campaignUpdateFailed": "به‌روزرسانی کمپین انجام نشد.",
     "campaignDeleteFailed": "حذف کمپین انجام نشد.",
@@ -1374,7 +1374,10 @@
     "partnerLeadMapsSearch": "جستجوی نشانی در Google Maps",
     "affiliatesTitle": "معرف‌ها",
     "accountDeletionsNav": "درخواست‌های حذف حساب",
-    "reviewModerationNav": "مدیریت نظرها"
+    "reviewModerationNav": "مدیریت نظرها",
+    "ipFlagConfirm": "{ip} ثبت شود؟ این کار ترافیک را مسدود نمی‌کند و فقط یک رکورد نگه می‌دارد.",
+    "deleteUserTargetIsAdmin": "حساب مدیر قابل حذف نیست. ابتدا آن را با تغییر نقش با تأیید مدیر دوم تنزل دهید.",
+    "deleteUserHasPaymentHistory": "این حساب سابقه پرداخت یا تسویه در انتظار دارد و حذف دائمی آن‌ها را هم پاک می‌کند. به‌جای آن حساب را ناشناس کنید."
   },
   "Auth": {
     "loginTitle": "ورود به BagajPark",

@@ -2280,14 +2280,14 @@
       "convertTitle": "Convert {{name}} to a partner account",
       "convertBody": "The account becomes a partner and the shop opens as an application awaiting approval. The phone becomes the partner's sign-in number.",
       "convertSubmit": "Convert to partner",
-      "blockIp": "Block IP address",
-      "blockIpTitle": "Block {{ip}}?",
-      "blockIpBody": "The IP address the user last signed in from is added to the block list. Other people on the same network may be affected.",
-      "blockIpConfirm": "Block",
-      "blockIpDone": "{{ip}} added to the block list.",
+      "blockIp": "Flag IP (record only)",
+      "blockIpTitle": "Record {{ip}}?",
+      "blockIpBody": "This does not block traffic; it only keeps a record. The IP address the user last signed in from is added to the flagged IP list.",
+      "blockIpConfirm": "Flag",
+      "blockIpDone": "{{ip}} flagged (record only).",
       "delete": "Delete account and all records",
       "deleteTitle": "Permanently delete {{name}}?",
-      "deleteBody": "The account and all linked records are deleted. This cannot be undone. Accounts with open bookings are not deleted. For a data erasure request, use \"Delete account\".",
+      "deleteBody": "The account and all linked records are deleted. This cannot be undone. Admin accounts and accounts with open bookings or payment history are not deleted. For a data erasure request, use \"Delete account\".",
       "deleteConfirm": "Delete everything",
       "deleteDone": "Account deleted.",
       "reasonLabel": "Reason",
@@ -2299,13 +2299,15 @@
         "blocked_by_relations": "Linked records prevent deleting this account.",
         "no_ip": "No IP address is recorded for this user.",
         "invalid_ip": "The recorded IP address is invalid.",
-        "own_ip": "You can't block the IP address you're using right now.",
+        "own_ip": "You can't flag the IP address you're using right now.",
         "not_found": "User not found.",
         "invalid_data": "Check the fields.",
         "location_required": "Enter a valid location (latitude, longitude or a map link).",
         "invalid_tr_phone": "Enter a valid Turkish mobile number.",
         "phone_already_registered": "This phone is registered to another partner or admin account.",
-        "not_guest": "Only a guest account can be converted to a partner."
+        "not_guest": "Only a guest account can be converted to a partner.",
+        "target_is_admin": "An admin account can't be deleted. Demote it first through the two-admin role change.",
+        "has_payment_history": "This account has payment history or a pending payout, and a permanent delete would erase them. Anonymise it with \"Delete account\" instead."
       }
     },
     "messages": {
@@ -2342,7 +2344,8 @@
       "info": "Shop details",
       "name": "Shop name",
       "address": "Address",
-      "nameRequired": "At least 2 characters."
+      "nameRequired": "At least 2 characters.",
+      "addressRequired": "Enter an address of at least {{min}} characters."
     },
     "booking": {
       "openDispute": "Open dispute",

@@ -70,6 +70,9 @@ export default function AdminShopScreen() {
   );
 }
 
+/** Esnafa cevirme semasindaki adres alt siniriyla ayni. */
+const SHOP_ADDRESS_MIN = 5;
+
 function Detail({ shop: s }: { shop: AdminShopDetail }) {
   const { t } = useTranslation();
   const queryClient = useQueryClient();
@@ -98,8 +101,9 @@ function Detail({ shop: s }: { shop: AdminShopDetail }) {
     onError: (e) => notify(t("admin.actionFailed"), errorMessage(e, "admin")),
   });
 
-  // Sunucu `adminUpdateShop`: bos ad reddedilir; adres en fazla 300 karakter.
+  // Sunucu `adminUpdateShop` bos ad ve adresi reddeder; istemci ayrica kisa adresi tutar.
   const nameValid = name.trim().length >= 2;
+  const addressValid = address.trim().length >= SHOP_ADDRESS_MIN;
   const infoDirty = name.trim() !== s.name || address.trim() !== (s.address ?? "");
   const priceNum = Number(price.replace(",", "."));
   const capNum = Number(capacity);
@@ -221,10 +225,11 @@ function Detail({ shop: s }: { shop: AdminShopDetail }) {
               multiline
               maxLength={300}
               inputStyle={{ maxHeight: 120 }}
+              hint={addressValid ? undefined : t("adminParityD1.shop.addressRequired", { min: SHOP_ADDRESS_MIN })}
             />
             <Button
               title={infoSaved && !infoDirty ? t("admin.shopSaved") : t("admin.save")}
-              disabled={!infoDirty || !nameValid}
+              disabled={!infoDirty || !nameValid || !addressValid}
               loading={update.isPending && update.variables?.name !== undefined}
               onPress={() => update.mutate({ name: name.trim(), address: address.trim() })}
             />

@@ -13,6 +13,8 @@ const m = vi.hoisted(() => ({
   prisma: {
     user: { findUnique: vi.fn(), findMany: vi.fn(), delete: vi.fn() },
     booking: { findFirst: vi.fn() },
+    paymentLog: { count: vi.fn() },
+    paymentSplit: { count: vi.fn() },
     blockedIp: { upsert: vi.fn() },
     contactMessage: { findMany: vi.fn(), groupBy: vi.fn(), count: vi.fn(), deleteMany: vi.fn(), updateMany: vi.fn() },
     partnerLead: { updateMany: vi.fn() },
@@ -40,6 +42,8 @@ beforeEach(() => {
   vi.clearAllMocks();
   m.prisma.user.delete.mockResolvedValue({});
   m.prisma.booking.findFirst.mockResolvedValue(null);
+  m.prisma.paymentLog.count.mockResolvedValue(0);
+  m.prisma.paymentSplit.count.mockResolvedValue(0);
   m.prisma.blockedIp.upsert.mockResolvedValue({});
 });
 
@@ -54,6 +58,26 @@ describe("AdminUserService.deleteUser", () => {
     expect(await adminUserService.deleteUser("u1", actor)).toEqual({ ok: true });
     expect(m.prisma.user.delete).not.toHaveBeenCalled();
     expect(m.audit).not.toHaveBeenCalled();
+  });
+
+  it("yonetici hesabi silinmez (once iki admin onayli rol dusurme)", async () => {
+    m.prisma.user.findUnique.mockResolvedValue({ isBanned: false, role: "ADMIN" });
+    expect(await adminUserService.deleteUser("u1", actor)).toEqual({ ok: false, error: "target_is_admin" });
+    expect(m.prisma.user.delete).not.toHaveBeenCalled();
+  });
+
+  it("odeme gecmisi ya da bekleyen hakedis varsa silinmez (cascade defteri silerdi); zorla iptal de denenmez", async () => {
+    m.prisma.user.findUnique.mockResolvedValue({ isBanned: true, role: "PARTNER" });
+    m.prisma.paymentLog.count.mockResolvedValueOnce(1);
+    expect(await adminUserService.deleteUser("u1", actor)).toEqual({ ok: false, error: "has_payment_history" });
+    expect(m.prisma.paymentLog.count.mock.calls[0][0].where).toEqual({
+      booking: { OR: [{ guestId: "u1" }, { shop: { ownerId: "u1" } }] },
+    });
+    m.prisma.paymentSplit.count.mockResolvedValueOnce(2);
+    expect(await adminUserService.deleteUser("u1", actor)).toEqual({ ok: false, error: "has_payment_history" });
+    expect(m.prisma.paymentSplit.count.mock.calls[1][0].where).toEqual({ shop: { ownerId: "u1" }, status: "PENDING" });
+    expect(m.forceCancel).not.toHaveBeenCalled();
+    expect(m.prisma.user.delete).not.toHaveBeenCalled();
   });
 
   it("normal hesapta acik rezervasyon (misafir ya da dukkan sahibi) silmeyi engeller", async () => {

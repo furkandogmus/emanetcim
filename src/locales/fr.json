@@ -953,7 +953,7 @@
     "userDeleted": "Utilisateur supprimé.",
     "deleteUserBlockedByRelations": "Cet utilisateur ne peut pas être supprimé tant qu'il a encore un commerce, des réservations ou d'autres enregistrements liés. Supprimez-les d'abord.",
     "resendSuccess": "E-mail de vérification renvoyé.",
-    "ipBlockedSuccess": "Adresse IP bloquée.",
+    "ipBlockedSuccess": "Adresse IP signalée (enregistrement seul).",
     "backToDashboard": "RETOUR AU TABLEAU DE BORD",
     "searchUsersPlaceholder": "Rechercher des utilisateurs...",
     "active": "ACTIVE",
@@ -985,7 +985,7 @@
     "date": "Date",
     "searchApplicationsPlaceholder": "Rechercher des candidatures...",
     "noApplicationsFound": "No applications.",
-    "blockThisIp": "Block IP",
+    "blockThisIp": "Signaler l'IP (enregistrement seul)",
     "searchShopsPlaceholder": "Rechercher des commerces...",
     "performance": "Performance",
     "inactive": "INACTIVE",
@@ -1114,7 +1114,7 @@
     "messagesBulkSelectAll": "Sélectionner les visibles",
     "messagesBulkDelete": "Supprimer la sélection",
     "messagesBulkConfirm": "Supprimer définitivement les messages sélectionnés ?",
-    "ipBlockFailed": "Impossible de bloquer l'IP. Vérifiez le format.",
+    "ipBlockFailed": "Impossible de signaler l'IP. Vérifiez le format.",
     "resendFailed": "Impossible d'envoyer l'e-mail de vérification.",
     "campaignUpdateFailed": "Impossible de mettre à jour la campagne.",
     "campaignDeleteFailed": "Impossible de supprimer la campagne.",
@@ -1374,7 +1374,10 @@
     "partnerLeadMapsSearch": "Rechercher l'adresse sur Google Maps",
     "affiliatesTitle": "Apporteurs",
     "accountDeletionsNav": "Demandes de suppression",
-    "reviewModerationNav": "Modération des avis"
+    "reviewModerationNav": "Modération des avis",
+    "ipFlagConfirm": "Enregistrer {ip} ? Cela ne bloque pas le trafic, seul un enregistrement est conservé.",
+    "deleteUserTargetIsAdmin": "Un compte administrateur ne peut pas être supprimé. Rétrogradez-le d'abord via le changement de rôle validé par un second administrateur.",
+    "deleteUserHasPaymentHistory": "Ce compte a un historique de paiements ou un versement en attente ; une suppression définitive les effacerait. Anonymisez plutôt le compte."
   },
   "Auth": {
     "loginTitle": "Connectez-vous à BagajPark",

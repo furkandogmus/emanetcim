@@ -35,7 +35,10 @@ export type AdminMailResult =
 
 export type DeleteUserResult =
   | { ok: true }
-  | { ok: false; error: "cannot_delete_self" | "has_active_booking" | "blocked_by_relations" };
+  | {
+      ok: false;
+      error: "cannot_delete_self" | "target_is_admin" | "has_payment_history" | "has_active_booking" | "blocked_by_relations";
+    };
 
 export type BlockIpResult =
   | { ok: true; ip: string }
@@ -505,6 +508,18 @@ export class AdminUserService {
 
     const target = await prisma.user.findUnique({ where: { id: userId }, select: { isBanned: true, role: true } });
     if (!target) return { ok: true };
+    // Yonetici once iki admin onayli rol akisiyla dusurulur; silme onun yan kapisi olmasin.
+    if (target.role === "ADMIN") return { ok: false, error: "target_is_admin" };
+    /*
+      Kalici silme Booking -> PaymentLog -> PaymentSplit zincirini cascade siler:
+      dukkanin bekleyen hakedisi ve odeme gecmisi kaybolurdu. Odeme izi olan hesap
+      silinmez; yol anonimlestirme (`AccountPrivacyService`), o kayitlari korur.
+    */
+    const [payments, pendingPayouts] = await Promise.all([
+      prisma.paymentLog.count({ where: { booking: { OR: [{ guestId: userId }, { shop: { ownerId: userId } }] } } }),
+      prisma.paymentSplit.count({ where: { shop: { ownerId: userId }, status: "PENDING" } }),
+    ]);
+    if (payments > 0 || pendingPayouts > 0) return { ok: false, error: "has_payment_history" };
 
     if (target.isBanned) {
       // Gec yukleme: iptal zinciri bildirim servisini getirir; servisin diger cagiranlari onu tasimasin.

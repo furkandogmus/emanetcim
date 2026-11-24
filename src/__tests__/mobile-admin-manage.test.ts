@@ -26,6 +26,8 @@ describe("ShopService.adminUpdateShop (web + mobil admin)", () => {
     [{ capacity: 2.5 }],
     [{ pricePerDay: 0 }],
     [{ name: "  " }],
+    // Bos adres misafire dukkani bulduramaz (D1 duzeltmesi).
+    [{ address: "   " }],
     [{ longitude: 3e16 }],
   ])("gecersiz alani yazmadan reddeder: %o", async (data) => {
     await expect(shopService.adminUpdateShop("s1", data, actor)).resolves.toEqual({

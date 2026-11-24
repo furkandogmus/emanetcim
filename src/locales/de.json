@@ -953,7 +953,7 @@
     "userDeleted": "Benutzer gelöscht.",
     "deleteUserBlockedByRelations": "Dieser Benutzer kann nicht gelöscht werden, solange noch ein Geschäft, Buchungen oder andere verknüpfte Datensätze bestehen. Entfernen Sie diese zuerst.",
     "resendSuccess": "Bestätigungs-E-Mail erneut gesendet.",
-    "ipBlockedSuccess": "IP-Adresse gesperrt.",
+    "ipBlockedSuccess": "IP-Adresse markiert (nur Vermerk).",
     "backToDashboard": "ZURÜCK ZUM DASHBOARD",
     "searchUsersPlaceholder": "Benutzer suchen...",
     "active": "ACTIVE",
@@ -985,7 +985,7 @@
     "date": "Date",
     "searchApplicationsPlaceholder": "Bewerbungen suchen...",
     "noApplicationsFound": "No applications.",
-    "blockThisIp": "Block IP",
+    "blockThisIp": "IP markieren (nur Vermerk)",
     "searchShopsPlaceholder": "Geschäfte suchen...",
     "performance": "Performance",
     "inactive": "INACTIVE",
@@ -1114,7 +1114,7 @@
     "messagesBulkSelectAll": "Sichtbare auswählen",
     "messagesBulkDelete": "Ausgewählte löschen",
     "messagesBulkConfirm": "Ausgewählte Nachrichten endgültig löschen?",
-    "ipBlockFailed": "IP konnte nicht gesperrt werden. Format prüfen.",
+    "ipBlockFailed": "IP konnte nicht markiert werden. Format prüfen.",
     "resendFailed": "Bestätigungs-E-Mail konnte nicht gesendet werden.",
     "campaignUpdateFailed": "Kampagne konnte nicht aktualisiert werden.",
     "campaignDeleteFailed": "Kampagne konnte nicht gelöscht werden.",
@@ -1374,7 +1374,10 @@
     "partnerLeadMapsSearch": "Adresse in Google Maps suchen",
     "affiliatesTitle": "Vermittler",
     "accountDeletionsNav": "Löschanfragen",
-    "reviewModerationNav": "Bewertungsmoderation"
+    "reviewModerationNav": "Bewertungsmoderation",
+    "ipFlagConfirm": "{ip} vermerken? Das sperrt keinen Datenverkehr, es wird nur ein Eintrag gespeichert.",
+    "deleteUserTargetIsAdmin": "Ein Adminkonto kann nicht gelöscht werden. Stufen Sie es zuerst über den Rollenwechsel mit zweiter Admin-Freigabe herab.",
+    "deleteUserHasPaymentHistory": "Dieses Konto hat Zahlungsverlauf oder eine offene Auszahlung; endgültiges Löschen würde beides entfernen. Anonymisieren Sie das Konto stattdessen."
   },
   "Auth": {
     "loginTitle": "Melden Sie sich bei BagajPark an",
