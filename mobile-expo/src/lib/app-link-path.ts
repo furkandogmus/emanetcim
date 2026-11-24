@@ -1,4 +1,4 @@
-import { deepLinkHref } from "./deep-link-target";
+import { BOOKING_ID, deepLinkHref } from "./deep-link-target";
 import { rememberInvite, rememberReferral } from "./pending-referral";
 
 /**
@@ -26,11 +26,11 @@ export function appPathFromLink(path: string): string {
   const route = rest.join("/");
 
   if (rest.length === 2 && rest[0] === "shop" && ID.test(rest[1])) return `/shop/${rest[1]}`;
-  // `bookings/lookup` ve `bookings/manage/<jeton>` hesapsiz misafirin web akisi; burada eslesmez.
-  if (rest.length === 2 && rest[0] === "bookings" && rest[1] !== "lookup" && ID.test(rest[1])) {
+  // Yalniz UUID: `bookings/lookup`, `bookings/manage/<jeton>` ve rota adlari eslesmez.
+  if (rest.length === 2 && rest[0] === "bookings" && BOOKING_ID.test(rest[1])) {
     return deepLinkHref({ kind: "booking", id: rest[1] });
   }
-  if (rest.length === 3 && rest[0] === "partner" && rest[1] === "bookings" && ID.test(rest[2])) {
+  if (rest.length === 3 && rest[0] === "partner" && rest[1] === "bookings" && BOOKING_ID.test(rest[2])) {
     return deepLinkHref({ kind: "partner-booking", id: rest[2] });
   }
   if (route === "account/affiliate") return deepLinkHref({ kind: "affiliate" });

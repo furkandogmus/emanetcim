@@ -1,6 +1,7 @@
 import { describe, expect, it } from "@jest/globals";
 
 import {
+  clearPendingLink,
   deepLinkHref,
   parseDeepLink,
   resolveDeepLink,
@@ -42,6 +43,8 @@ describe("parseDeepLink", () => {
     expect(parseDeepLink({ kind: "booking" })).toBeNull();
     expect(parseDeepLink({ kind: "booking", id: "../x" })).toBeNull();
     expect(parseDeepLink({ kind: ["booking"], id: BK })).toBeNull();
+    expect(parseDeepLink({ kind: "booking", id: "settings" })).toBeNull();
+    expect(parseDeepLink({ kind: "partner-booking", id: "modify" })).toBeNull();
   });
 
   it("href ile ayni baglantiya geri doner", () => {
@@ -53,6 +56,12 @@ describe("parseDeepLink", () => {
 });
 
 describe("pending link", () => {
+  it("silinen hedef devam ettirilmez", () => {
+    savePendingLink(booking, 0);
+    clearPendingLink();
+    expect(takePendingLink(1)).toBeNull();
+  });
+
   it("giristen sonra bir kez devam eder", () => {
     savePendingLink(partnerBooking, 1_000);
     expect(takePendingLink(2_000)).toEqual(partnerBooking);
