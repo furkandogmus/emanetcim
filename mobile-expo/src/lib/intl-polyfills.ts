@@ -7,5 +7,7 @@
 import "@formatjs/intl-pluralrules/polyfill.js";
 import "@formatjs/intl-pluralrules/locale-data/de.js";
 import "@formatjs/intl-pluralrules/locale-data/en.js";
+import "@formatjs/intl-pluralrules/locale-data/fr.js";
+import "@formatjs/intl-pluralrules/locale-data/ja.js";
 import "@formatjs/intl-pluralrules/locale-data/ru.js";
 import "@formatjs/intl-pluralrules/locale-data/tr.js";

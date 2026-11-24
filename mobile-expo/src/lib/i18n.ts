@@ -5,18 +5,25 @@ import * as SecureStore from "expo-secure-store";
 
 import de from "@/locales/de.json";
 import en from "@/locales/en.json";
+import fr from "@/locales/fr.json";
+import ja from "@/locales/ja.json";
 import ru from "@/locales/ru.json";
 import tr from "@/locales/tr.json";
 
-import { isAppLanguage, type AppLanguage } from "./languages";
-
-const deviceLang = getLocales()[0]?.languageCode ?? "tr";
+import { deviceLanguage, isAppLanguage, type AppLanguage } from "./languages";
 
 // Adlandirilmis `use` export'u this'siz; ornek uzerinden cagrilmali.
 // eslint-disable-next-line import/no-named-as-default-member
 void i18n.use(initReactI18next).init({
-  resources: { tr: { translation: tr }, en: { translation: en }, de: { translation: de }, ru: { translation: ru } },
-  lng: isAppLanguage(deviceLang) ? deviceLang : "en",
+  resources: {
+    tr: { translation: tr },
+    en: { translation: en },
+    de: { translation: de },
+    fr: { translation: fr },
+    ja: { translation: ja },
+    ru: { translation: ru },
+  },
+  lng: deviceLanguage(getLocales().map((l) => l.languageCode)),
   // Eksik ceviri once Ingilizceye duser: yabanci kullaniciya Turkce metin gostermez.
   fallbackLng: ["en", "tr"],
   interpolation: { escapeValue: false },

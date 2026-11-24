@@ -12,7 +12,7 @@ import { colors, radius, space } from "@/theme/tokens";
 export const LANGUAGES = APP_LANGUAGES.map(({ value, label }) => ({ value, label }));
 
 /**
- * Giris ekraninin kosesindeki dil dugmesi. Telefon dili Turkce degilse uygulama zaten
+ * Giris ekraninin kosesindeki dil dugmesi. Uygulama cihaz dilinde, desteklenmiyorsa
  * Ingilizce acilir; bu dugme, Turkce telefon kullanan yabanci ya da tersi icin.
  * Dil adlari her zaman kendi dillerinde yazilir: Turkce bilmeyen "English"i bulabilmeli.
  */

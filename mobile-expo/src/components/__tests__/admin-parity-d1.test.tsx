@@ -226,7 +226,7 @@ describe("sunucu hata kodlari", () => {
     "phone_already_registered",
     "not_guest",
   ];
-  it.each(["tr", "en", "de", "ru"])("%s: her kodun metni var", async (lng) => {
+  it.each(["tr", "en", "de", "fr", "ja", "ru"])("%s: her kodun metni var", async (lng) => {
     await i18n.changeLanguage(lng);
     for (const code of CODES) {
       expect(i18n.exists(`adminParityD1.users.errors.${code}`)).toBe(true);
