@@ -615,7 +615,7 @@
       "overview": "Aperçu",
       "bookings": "Réservations",
       "shops": "Commerces",
-      "inbox": "Boîte de réception"
+      "inbox": "Messages"
     },
     "searchPlaceholder": "Rechercher un code, client, commerce ou téléphone",
     "filters": {
@@ -818,14 +818,14 @@
     "seal": "Scellé {{n}} : {{status}}",
     "sealStatus": {
       "STOCK": "en stock",
-      "ASSIGNED": "attribué à la boutique",
+      "ASSIGNED": "attribué au commerce",
       "IN_USE": "sur un bagage",
       "RETURNED": "retourné",
       "FAULTY": "défectueux"
     },
     "errors": {
       "unknown_code": "Ce code n’est pas reconnu. S’agit-il bien d’un QR code de réservation BagajPark ?",
-      "forbidden": "Cette réservation n’appartient pas à votre boutique.",
+      "forbidden": "Cette réservation n’appartient pas à votre commerce.",
       "not_found": "Réservation introuvable."
     },
     "openSettings": "Autoriser dans les Réglages",
@@ -954,7 +954,7 @@
     "savedTitle": "Réservation mise à jour",
     "savedBody": "Votre nouvel horaire et vos bagages sont enregistrés.",
     "errors": {
-      "INVALID_DATES": "L’horaire choisi est invalide ou la boutique est fermée ce jour-là. Le dépôt ne peut pas être dans le passé.",
+      "INVALID_DATES": "L’horaire choisi est invalide ou le commerce est fermé ce jour-là. Le dépôt ne peut pas être dans le passé.",
       "INVALID_STATUS": "Cette réservation ne peut plus être modifiée.",
       "PRICE_INCREASE": "Le total d’une réservation dont le paiement est enregistré ne peut pas changer. Vous pouvez annuler puis réserver à nouveau.",
       "CAPACITY": "Il n’y a pas assez de place à cet endroit pour l’horaire choisi.",
@@ -964,8 +964,8 @@
       "forbidden": "Vous ne pouvez pas modifier cette réservation.",
       "invalid_input": "Certaines informations sont invalides. Vérifiez l’horaire et le nombre de bagages.",
       "PLATFORM_HOLIDAY": "Le service n’est pas disponible à la date choisie.",
-      "SHOP_CLOSED_DAY": "La boutique est fermée l’un des jours choisis.",
-      "SHOP_CLOSED_HOURS": "La boutique est fermée à l’horaire choisi."
+      "SHOP_CLOSED_DAY": "Le commerce est fermé l’un des jours choisis.",
+      "SHOP_CLOSED_HOURS": "Le commerce est fermé à l’horaire choisi."
     }
   },
   "review": {
@@ -1028,7 +1028,7 @@
     "sent": "Votre signalement a bien été reçu. Notre équipe va l’examiner et vous contactera.",
     "errors": {
       "invalid_data": "Choisissez un type de problème et rédigez une description d’au moins 10 caractères.",
-      "booking_not_ready": "Vous pourrez signaler un problème une fois votre bagage déposé à la boutique.",
+      "booking_not_ready": "Vous pourrez signaler un problème une fois votre bagage déposé au commerce.",
       "duplicate_dispute": "Vous avez déjà signalé un problème pour cette réservation ; notre équipe l’examine.",
       "not_found": "Réservation introuvable.",
       "not_owner": "Vous ne pouvez pas signaler de problème pour cette réservation."
@@ -1043,7 +1043,7 @@
     "open": "Corriger le nombre de bagages",
     "title": "Corriger le nombre de bagages",
     "hint": "Si le client est arrivé avec un nombre de bagages différent, saisissez le nombre réel. Le nouveau total est calculé automatiquement.",
-    "hintCheckedIn": "Les bagages sont à la boutique. Une correction qui augmente le prix nécessite l’accord du client.",
+    "hintCheckedIn": "Les bagages sont au commerce. Une correction qui augmente le prix nécessite l’accord du client.",
     "delta": "{{from}} bagages → {{to}} bagages",
     "atLeastOne": "Il doit y avoir au moins un bagage.",
     "apply": "Appliquer",
@@ -1053,15 +1053,15 @@
     "approvalBody": "Cette correction augmente le prix. Le client a été invité à l’approuver ; le nouveau total s’appliquera dès son accord.",
     "errors": {
       "not_found": "Réservation introuvable.",
-      "forbidden": "Cette réservation n’appartient pas à votre boutique.",
+      "forbidden": "Cette réservation n’appartient pas à votre commerce.",
       "invalid_status": "Le nombre de bagages de cette réservation ne peut plus être modifié.",
       "at_least_one_bag": "Nombre de bagages invalide : il doit y avoir au moins un bagage, sans dépasser la limite de la plateforme.",
       "no_bag_counts": "Aucun nombre de bagages n’a été envoyé ; réessayez.",
-      "insufficient_capacity": "Votre boutique n’a pas assez de place pour autant de bagages à ces horaires. Réduisez le nombre et réessayez.",
+      "insufficient_capacity": "Votre commerce n’a pas assez de place pour autant de bagages à ces horaires. Réduisez le nombre et réessayez.",
       "seal_count_mismatch": "Les bagages sont scellés ; vous ne pouvez pas enregistrer plus de bagages que de scellés.",
       "guest_approval_required": "Cette correction nécessite l’accord du client.",
       "no_pending_revision": "Cette correction n’est plus en attente ; actualisez la page.",
-      "revision_changed": "La boutique vient de modifier la correction. Vérifiez le nouveau montant et décidez à nouveau."
+      "revision_changed": "Le commerce vient de modifier la correction. Vérifiez le nouveau montant et décidez à nouveau."
     },
     "pendingBody": "Le client a été invité à approuver {{count}} bagages pour un total de {{total}}. La réservation ne changera pas tant qu’il n’aura pas approuvé.",
     "hintCheckedInNoSeals": "Les bagages sont déposés. Une correction qui augmente le prix nécessite l’accord du client."
@@ -1101,14 +1101,14 @@
     "serialRange": "Série : {{from}} – {{to}}",
     "confirmCta": "Je l’ai reçu",
     "confirmTitle": "Avez-vous reçu l’envoi ?",
-    "confirmBody": "{{count}} scellés seront attribués à votre boutique et pourront être utilisés lors de la prise en charge.",
+    "confirmBody": "{{count}} scellés seront attribués à votre commerce et pourront être utilisés lors de la prise en charge.",
     "deliveredTitle": "Livré",
-    "deliveredBody": "{{count}} scellés ont été attribués à votre boutique.",
+    "deliveredBody": "{{count}} scellés ont été attribués à votre commerce.",
     "deliveryFailed": "Impossible de confirmer la livraison",
     "errors": {
-      "no_shop": "Aucune boutique active trouvée.",
+      "no_shop": "Aucun commerce actif trouvé.",
       "invalid_data": "La valeur saisie est invalide.",
-      "not_found": "Scellé ou demande introuvable ; il n’appartient peut-être pas à votre boutique ou n’a peut-être pas encore été expédié.",
+      "not_found": "Scellé ou demande introuvable ; il n’appartient peut-être pas à votre commerce ou n’a peut-être pas encore été expédié.",
       "seal_already_processed": "Ce scellé a déjà été utilisé et ne peut pas être signalé comme défectueux.",
       "forbidden": "Vous n’êtes pas autorisé à effectuer cette action."
     }
@@ -1124,17 +1124,17 @@
     "noCommissionBody": "Aucune commission de plateforme n’est prélevée actuellement ; rien n’est déduit de vos revenus.",
     "recent": "{{count}} dernières transactions",
     "empty": "Aucun gain pour le moment.",
-    "footnote": "Vous encaissez le paiement du client dans votre boutique : l’argent est donc déjà dans votre caisse.",
+    "footnote": "Vous encaissez le paiement du client dans votre commerce : l’argent est donc déjà dans votre caisse.",
     "guestFallback": "Client",
     "rowA11y": "{{guest}}, {{when}}, {{amount}}. Ouvrir la réservation.",
     "errors": {
-      "no_shops": "Vous n’avez aucune boutique active."
+      "no_shops": "Vous n’avez aucun commerce actif."
     }
   },
   "shopSettings": {
-    "title": "Informations de la boutique",
+    "title": "Informations du commerce",
     "basics": "Informations générales",
-    "name": "Nom de la boutique",
+    "name": "Nom du commerce",
     "capacity": "Capacité quotidienne en bagages",
     "price": "Prix journalier (₺)",
     "priceHint": "Prix journalier pour un bagage moyen. Les prix des petits et grands bagages en sont déduits ; les clients voient les trois.",
@@ -1142,17 +1142,17 @@
     "address": "Adresse",
     "district": "Quartier",
     "city": "Ville",
-    "addressHint": "Les clients trouvent votre boutique grâce à cette adresse. Vous pouvez ajuster le repère sur la carte ci-dessous.",
+    "addressHint": "Les clients trouvent votre commerce grâce à cette adresse. Vous pouvez ajuster le repère sur la carte ci-dessous.",
     "save": "Enregistrer",
     "saved": "Paramètres enregistrés.",
     "saveFailed": "Enregistrement impossible",
-    "nameInvalid": "Le nom de la boutique doit contenir au moins 2 caractères.",
+    "nameInvalid": "Le nom du commerce doit contenir au moins 2 caractères.",
     "capacityInvalid": "La capacité doit être un nombre entier égal ou supérieur à 1.",
     "priceInvalid": "Saisissez un prix valide.",
     "errors": {
       "invalid_input": "L’une des valeurs est invalide. Vérifiez-les et réessayez.",
-      "shop_update_failed": "Les informations de la boutique n’ont pas pu être enregistrées. Vérifiez les valeurs et réessayez.",
-      "no_shop": "Nous n’avons trouvé aucune boutique active pour vous.",
+      "shop_update_failed": "Les informations du commerce n’ont pas pu être enregistrées. Vérifiez les valeurs et réessayez.",
+      "no_shop": "Nous n’avons trouvé aucun commerce actif pour vous.",
       "price_out_of_range": "Le prix journalier est en dehors de la plage autorisée. La plage est indiquée sous le champ du prix."
     },
     "priceRange": "Plage autorisée : {{min}} – {{max}} ₺",
@@ -1183,7 +1183,7 @@
     "save": "Enregistrer les horaires",
     "saved": "Horaires mis à jour.",
     "closuresTitle": "Congés et jours fériés",
-    "closuresHint": "La boutique apparaît fermée ces jours-là et n’accepte aucune réservation.",
+    "closuresHint": "Le commerce apparaît fermé ces jours-là et n’accepte aucune réservation.",
     "none": "Aucune fermeture prévue.",
     "reason": "Note (facultatif)",
     "addOpen": "Ajouter une fermeture",
@@ -1198,7 +1198,7 @@
       "schedule_conflict": "Cette modification n’a pas été enregistrée.",
       "invalid_input": "Une heure ou une date est invalide. Une fermeture ne peut pas commencer dans le passé.",
       "schedule_save_failed": "Enregistrement impossible, veuillez réessayer.",
-      "no_shop": "Nous n’avons trouvé aucune boutique active à votre nom."
+      "no_shop": "Nous n’avons trouvé aucun commerce actif à votre nom."
     },
     "conflictNext": "Touchez une réservation pour joindre le client, ou contactez l’assistance."
   },
@@ -1251,11 +1251,11 @@
     "approvedTitle": "Correction approuvée",
     "approvedBody": "Nouveau montant : {{total}}",
     "rejectedTitle": "Correction refusée",
-    "rejectedBody": "Votre réservation n’a pas changé. En cas de problème, adressez-vous à la boutique."
+    "rejectedBody": "Votre réservation n’a pas changé. En cas de problème, adressez-vous au commerce."
   },
   "setup": {
-    "title": "Terminez la configuration de votre boutique",
-    "photoTitle": "Ajoutez une photo de la boutique",
+    "title": "Terminez la configuration de votre commerce",
+    "photoTitle": "Ajoutez une photo du commerce",
     "photoBody": "Les points avec photo sont plus souvent choisis sur la carte.",
     "hoursTitle": "Définissez vos horaires d’ouverture",
     "hoursBody": "Les horaires par défaut 09:00–20:00 s’affichent actuellement ; les clients s’organisent en fonction de ces horaires."
@@ -1284,14 +1284,14 @@
   "cancelReason": {
     "short": {
       "guest_cancel": "Annulée",
-      "partner_cancel": "Annulée par la boutique",
+      "partner_cancel": "Annulée par le commerce",
       "no_show": "Absence",
       "admin_cancel": "Annulée par l’admin",
       "expired_no_dropoff": "Expirée"
     },
     "long": {
       "guest_cancel": "Annulée par le client",
-      "partner_cancel": "Annulée par la boutique",
+      "partner_cancel": "Annulée par le commerce",
       "no_show": "Clôturée pour absence",
       "admin_cancel": "Annulée par un administrateur",
       "expired_no_dropoff": "Clôturée car expirée"
@@ -1342,7 +1342,7 @@
     },
     "reasons": {
       "guest_request": "Demande du client",
-      "shop_closed": "Boutique fermée",
+      "shop_closed": "Commerce fermé",
       "capacity": "Plus de place",
       "other": "Autre"
     },
@@ -1468,9 +1468,9 @@
     "eraseConfirmPlaceholder": "Saisissez l’e-mail ou le téléphone",
     "anonymizedLabel": "Compte supprimé",
     "reviewSandbox": "Compte App Review",
-    "reviewSandboxHint": "Voit aussi les boutiques de test et peut les réserver ; les vraies boutiques restent visibles",
+    "reviewSandboxHint": "Voit aussi les commerces de test et peut les réserver ; les vrais commerces restent visibles",
     "reviewSandboxConfirmTitle": "Faire de {{name}} un compte App Review ?",
-    "reviewSandboxConfirmBody": "Ce compte verra les boutiques de test dans la recherche et pourra les réserver. À utiliser pour la validation sur les stores d’applications.",
+    "reviewSandboxConfirmBody": "Ce compte verra les commerces de test dans la recherche et pourra les réserver. À utiliser pour la validation sur les stores d’applications.",
     "reviewSandboxConfirm": "Définir comme compte App Review",
     "reviewSandboxOnDone": "Le compte est désormais un compte App Review.",
     "reviewSandboxOffDone": "Le compte n’est plus un compte App Review.",
@@ -2040,8 +2040,8 @@
     "title": "Créer un partenaire",
     "modeNew": "Nouveau compte",
     "modeGuest": "Convertir un client",
-    "introNew": "Crée un compte et une boutique au nom du partenaire. Le partenaire définit lui-même son mot de passe avec le lien que vous lui envoyez.",
-    "introGuest": "Transforme un compte client existant en partenaire et lui ouvre une boutique ; aucun nouveau compte n'est créé.",
+    "introNew": "Crée un compte et un commerce au nom du partenaire. Le partenaire définit lui-même son mot de passe avec le lien que vous lui envoyez.",
+    "introGuest": "Transforme un compte client existant en partenaire et lui ouvre un commerce ; aucun nouveau compte n'est créé.",
     "guestSearch": "Nom, e-mail ou téléphone",
     "guestSearchHint": "Recherchez le client à convertir.",
     "guestNone": "Aucun compte client ne correspond à cette recherche.",
@@ -2051,29 +2051,29 @@
     "emailHint": "Facultatif.",
     "phone": "Téléphone mobile",
     "phoneHint": "Le partenaire se connecte avec ce numéro.",
-    "shopSection": "Boutique",
-    "shopName": "Nom de la boutique",
+    "shopSection": "Commerce",
+    "shopName": "Nom du commerce",
     "shopAddress": "Adresse",
     "city": "Ville",
     "district": "Quartier",
     "location": "Emplacement",
     "locationHint": "Un lien Google Maps ou « latitude, longitude ».",
-    "submitNew": "Créer le partenaire et la boutique",
+    "submitNew": "Créer le partenaire et le commerce",
     "submitConvert": "Convertir en partenaire",
     "createdTitle": "Partenaire créé",
     "convertedTitle": "Client converti en partenaire",
-    "inactiveNote": "La boutique est d'abord fermée et n'apparaît pas dans la recherche tant qu'elle n'est pas validée.",
+    "inactiveNote": "Le commerce est d'abord fermé et n'apparaît pas dans la recherche tant qu'il n'est pas validé.",
     "resetBody": "Le partenaire définit son mot de passe avec ce lien. Envoyez-le uniquement au partenaire.",
     "hasPassword": "Ce compte a déjà un mot de passe ; le partenaire se connecte avec celui-ci.",
     "shareLink": "Partager le lien du mot de passe",
     "shareMessage": "Bonjour {{name}}, votre compte partenaire BagajPark est prêt. Définissez votre mot de passe avec ce lien : {{url}}",
-    "openShop": "Ouvrir la boutique",
+    "openShop": "Ouvrir le commerce",
     "another": "Créer un autre partenaire",
     "invalid": {
       "ownerName": "Le nom doit contenir au moins 2 caractères.",
       "phone": "Saisissez un numéro de mobile valide.",
       "email": "Saisissez un e-mail valide.",
-      "shopName": "Le nom de la boutique doit contenir au moins 2 caractères.",
+      "shopName": "Le nom du commerce doit contenir au moins 2 caractères.",
       "shopAddress": "L'adresse doit contenir au moins 5 caractères.",
       "location": "L'emplacement est obligatoire."
     },
@@ -2105,7 +2105,7 @@
     "climate": "Climatisé",
     "largeItems": "Grands objets",
     "maxPriceTitle": "Prix journalier max.",
-    "maxPriceHint": "Le prix journalier de base de la boutique",
+    "maxPriceHint": "Le prix journalier de base du commerce",
     "anyPrice": "Tous",
     "upTo": "≤ {{price}}",
     "minRatingTitle": "Note minimale",
@@ -2157,7 +2157,7 @@
     "exportSentTitle": "Envoyé",
     "exportSentBody": "Le fichier a été envoyé à {{email}}. S'il n'arrive pas d'ici quelques minutes, vérifiez vos spams.",
     "exportFailedTitle": "Envoi impossible",
-    "becomePartner": "Devenir boutique partenaire",
+    "becomePartner": "Devenir commerce partenaire",
     "affiliateProgram": "Devenir apporteur, gagner une commission",
     "affiliatePanel": "Espace apporteur",
     "howItWorks": "Comment ça marche",
@@ -2261,11 +2261,11 @@
     "locationTitle": "Repère sur la carte",
     "locationSection": "Repère sur la carte",
     "locationSet": "Les clients voient cette consigne sur la carte et dans l'itinéraire.",
-    "locationMissing": "Aucun repère : votre boutique n'apparaît pas sur la carte des clients.",
+    "locationMissing": "Aucun repère : votre commerce n'apparaît pas sur la carte des clients.",
     "locationAdd": "Placer le repère sur la carte",
     "locationEdit": "Modifier le repère",
-    "locationHint": "Faites glisser la carte ou touchez un point pour placer le repère devant l'entrée de votre boutique.",
-    "locationPickFirst": "Placez le repère sur votre boutique ou utilisez votre position avant d'enregistrer.",
+    "locationHint": "Faites glisser la carte ou touchez un point pour placer le repère devant l'entrée de votre commerce.",
+    "locationPickFirst": "Placez le repère sur votre commerce ou utilisez votre position avant d'enregistrer.",
     "locationCoordsA11y": "Coordonnées sélectionnées",
     "locateMe": "Utiliser ma position",
     "locationSave": "Enregistrer le repère",
@@ -2289,8 +2289,8 @@
       "invalid_tr_phone": "Saisissez un numéro de mobile turc (5XX XXX XX XX).",
       "login_phone_locked": "Ce numéro est votre seul moyen de connexion. Ajoutez d'abord un e-mail à votre compte ou contactez l'assistance.",
       "already_registered": "Ce numéro est enregistré sur un autre compte.",
-      "no_shop": "Il vous faut d'abord une boutique.",
-      "coordinates_required": "Le repère d'une boutique en ligne ne peut pas être supprimé ; vous pouvez le déplacer."
+      "no_shop": "Il vous faut d'abord un commerce.",
+      "coordinates_required": "Le repère d'un commerce en ligne ne peut pas être supprimé ; vous pouvez le déplacer."
     }
   },
   "adminParityD1": {
@@ -2312,7 +2312,7 @@
       "lastIp": "Dernière IP : {{ip}}",
       "convert": "Convertir en partenaire",
       "convertTitle": "Convertir {{name}} en compte partenaire",
-      "convertBody": "Le compte devient partenaire et la boutique s'ouvre sous forme de demande en attente de validation. Le téléphone devient le numéro de connexion du partenaire.",
+      "convertBody": "Le compte devient partenaire et le commerce s'ouvre sous forme de demande en attente de validation. Le téléphone devient le numéro de connexion du partenaire.",
       "convertSubmit": "Convertir en partenaire",
       "blockIp": "Signaler l'IP (enregistrement seul)",
       "blockIpTitle": "Enregistrer {{ip}} ?",
@@ -2363,7 +2363,7 @@
       "bulkDeleted": "Messages supprimés : {{count}}"
     },
     "applications": {
-      "searchPlaceholder": "Rechercher une boutique, une adresse, un propriétaire ou un téléphone",
+      "searchPlaceholder": "Rechercher un commerce, une adresse, un propriétaire ou un téléphone",
       "noMatch": "Aucune demande ne correspond à votre recherche."
     },
     "leads": {
@@ -2375,8 +2375,8 @@
       }
     },
     "shop": {
-      "info": "Informations de la boutique",
-      "name": "Nom de la boutique",
+      "info": "Informations du commerce",
+      "name": "Nom du commerce",
       "address": "Adresse",
       "nameRequired": "Au moins 2 caractères.",
       "addressRequired": "Saisissez une adresse d'au moins {{min}} caractères."
@@ -2393,7 +2393,7 @@
   },
   "deepLink": {
     "partnerOnlyTitle": "Ce lien est destiné à un compte partenaire",
-    "partnerOnlyBody": "Connectez-vous avec le compte partenaire de la boutique pour ouvrir cette réservation.",
+    "partnerOnlyBody": "Connectez-vous avec le compte partenaire du commerce pour ouvrir cette réservation.",
     "switchAccount": "Se connecter avec un autre compte",
     "partnerInviteTitle": "L'inscription partenaire se fait sur le site web",
     "partnerInviteBody": "Le formulaire de candidature s'ouvre avec votre code d'invitation déjà rempli.",
