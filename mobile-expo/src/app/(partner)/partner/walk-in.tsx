@@ -5,6 +5,7 @@ import QRCode from "react-native-qrcode-svg";
 import { router } from "expo-router";
 import { useTranslation } from "react-i18next";
 
+import { BagPhotos } from "@/components/BagPhotos";
 import { StackHeader } from "@/components/StackHeader";
 import { AppText, Banner, Button, Card, Chip } from "@/components/ui";
 import { Field } from "@/components/Field";
@@ -74,6 +75,9 @@ export default function WalkInScreen() {
           <AppText variant="caption" style={{ textAlign: "center" }}>
             {done.emailQueued ? t("walkIn.emailSent") : t("walkIn.photoHint")}
           </AppText>
+          <View style={{ alignSelf: "stretch" }}>
+            <BagPhotos bookingId={done.bookingId} audience="operator" />
+          </View>
           <Button title={t("walkIn.finish")} onPress={() => router.back()} style={{ alignSelf: "stretch" }} />
         </ScrollView>
       </SafeAreaView>

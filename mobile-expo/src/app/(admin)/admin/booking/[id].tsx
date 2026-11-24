@@ -9,6 +9,7 @@ import { useTranslation } from "react-i18next";
 import { BookingTicket } from "@/components/BookingTicket";
 import { AdminBookingActions } from "@/components/AdminBookingActions";
 import { AppText, Banner, Button, Card, CenterMessage, IconButton, Loading } from "@/components/ui";
+import { BagPhotos } from "@/components/BagPhotos";
 import { errorMessage } from "@/lib/errors";
 import { formatDayTime } from "@/lib/format";
 import { SITE_ORIGIN } from "@/lib/images";
@@ -217,6 +218,7 @@ function Detail({ b, onWeb }: { b: AdminBookingDetail; onWeb: () => void }) {
         </Block>
       ) : null}
 
+      <BagPhotos bookingId={b.id} audience="admin" />
       <NotificationLogBlock bookingId={b.id} />
 
       <Button variant="ghost" title={t("admin.openInWeb")} onPress={onWeb} />

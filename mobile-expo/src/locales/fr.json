@@ -2499,5 +2499,42 @@
       "request_in_progress": "Ce formulaire est déjà en cours d'envoi, patientez quelques secondes."
     },
     "pickupNameCheck": "Vérifiez le nom avant de rendre les bagages : {{name}}"
+  },
+  "bagPhotos": {
+    "title": "Photos des bagages",
+    "operatorTitle": "Ajouter une photo du bagage",
+    "operatorHint": "Facultatif : enregistrez l'état du bagage au dépôt avec 1 à {{max}} photos. Elles servent de preuve en cas de litige pour dommage ; seuls le client, la boutique et BagajPark les voient.",
+    "guestHint": "La boutique a pris ces photos à la réception de votre bagage. Elles servent de preuve en cas de litige et sont supprimées 30 jours après le retrait.",
+    "adminHint": "Photos de l'état du bagage prises par la boutique au dépôt (preuve en cas de litige).",
+    "add": "Prendre une photo",
+    "addMore": "Ajouter une photo ({{count}}/{{max}})",
+    "retry": "Réessayer",
+    "deleteConfirm": "Supprimer cette photo ?",
+    "deletePhoto": "Supprimer la photo {{n}}",
+    "openPhoto": "Ouvrir la photo {{n}} en grand",
+    "photoAlt": "Photo du bagage {{n}}",
+    "camera": "Appareil photo",
+    "gallery": "Choisir dans la galerie",
+    "pickTitle": "Photo du bagage",
+    "pickBody": "Comment voulez-vous ajouter la photo ?",
+    "permissionDenied": "L'accès à l'appareil photo n'a pas été accordé. Autorisez-le dans les Réglages ou choisissez dans la galerie.",
+    "uploading": "Envoi…",
+    "uploadFailed": "La photo n'a pas pu être envoyée. Vous pouvez quand même poursuivre le dépôt.",
+    "deleteTitle": "Supprimer cette photo ?",
+    "delete": "Supprimer",
+    "openSettings": "Ouvrir les Réglages",
+    "errors": {
+      "generic": "Impossible de traiter la photo. Réessayez.",
+      "forbidden": "Vous n'avez pas accès aux photos de cette réservation.",
+      "read_only": "Impossible d'ajouter ou de supprimer des photos en mode consultation.",
+      "storage_unavailable": "Le stockage des photos est indisponible pour le moment.",
+      "rate_limited": "Trop de tentatives. Réessayez dans quelques minutes.",
+      "locked": "Après le dépôt, les photos sont verrouillées et ne peuvent plus être modifiées.",
+      "limit": "3 photos maximum par réservation.",
+      "empty": "Aucune photo sélectionnée.",
+      "too_large": "La photo est trop lourde (2 Mo maximum).",
+      "unsupported_type": "Ce fichier n'est pas une photo JPEG.",
+      "dimensions_too_large": "La résolution de la photo est trop élevée."
+    }
   }
 }

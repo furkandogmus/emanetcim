@@ -8,6 +8,7 @@ import { useTranslation } from "react-i18next";
 import { AdminOpsScreen, SectionTitle, opsStyles } from "@/components/AdminOps";
 import { Field } from "@/components/Field";
 import { AppText, Banner, Button, Card, Chip } from "@/components/ui";
+import { BagPhotos } from "@/components/BagPhotos";
 import { api } from "@/lib/api";
 import { DISPUTE_NOTE_MAX, DISPUTE_STATUSES, adminOpsErrorMessage, canMutateAdminOps } from "@/lib/admin-ops";
 import { formatMoney, formatStayRange } from "@/lib/format";
@@ -83,6 +84,7 @@ function DisputeBody({ dispute: d }: { dispute: AdminDispute }) {
             onPress={() => router.push(`/admin/booking/${d.booking.id}`)}
           />
         </Card>
+        <BagPhotos bookingId={d.booking.id} audience="admin" />
       </View>
 
       <View style={{ gap: space.sm }}>
