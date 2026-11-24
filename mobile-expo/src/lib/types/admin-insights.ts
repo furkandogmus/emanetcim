@@ -1,3 +1,4 @@
+import type { BookingSourceBreakdown } from "./walk-in";
 /* ===================== Yonetici gorunurluk ekranlari (kaynak: ../src/lib/mobile-dto/admin-insights.ts) ===================== */
 
 /** `toMobileAdminAnalytics`. */
@@ -12,6 +13,8 @@ export type AdminAnalytics = {
   newUsers: number;
   topPaths: { path: string; count: number }[];
   topShops: { shopId: string; name: string; count: number }[];
+  /** Rezervasyon kanallari; eski sunucuda yok. */
+  bookingSources?: BookingSourceBreakdown;
 };
 
 export type AdminSystemCheck = "ok" | "missing" | "error";

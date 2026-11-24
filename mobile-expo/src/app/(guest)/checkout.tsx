@@ -20,6 +20,7 @@ import {
   loadPendingReferral,
   normalizeReferralCode,
 } from "@/lib/pending-referral";
+import { clearPosterAttribution, loadPosterAttribution, type PosterAttribution } from "@/lib/pending-poster";
 import { formatMoney, formatStayWindow } from "@/lib/format";
 import { keys, useOnlinePayments, useShop } from "@/lib/queries";
 import { totalBags, useSearch } from "@/lib/search";
@@ -50,8 +51,12 @@ export default function CheckoutScreen() {
   const [affInput, setAffInput] = useState("");
   // Misafirin uyguladigi indirim kodu: referans kodu degisince onunla YENIDEN sorulur, dusurulmez.
   const [activeCode, setActiveCode] = useState<string | null>(null);
+  const [poster, setPoster] = useState<PosterAttribution | null>(null);
   useEffect(() => {
     let alive = true;
+    void loadPosterAttribution().then((p) => {
+      if (alive) setPoster(p);
+    });
     void loadPendingReferral().then((code) => {
       if (alive && code) setAffiliateCode((cur) => cur ?? code);
     });
@@ -109,6 +114,7 @@ export default function CheckoutScreen() {
       attempt.current = null;
       clearPendingReferral();
       clearPendingInvite();
+      clearPosterAttribution();
       void queryClient.invalidateQueries({ queryKey: keys.myBookings });
       router.replace({ pathname: "/success", params: { bookingId: res.bookingId } });
     },
@@ -238,7 +244,7 @@ export default function CheckoutScreen() {
     };
     const sig = JSON.stringify(request);
     if (attempt.current?.sig !== sig) attempt.current = { sig, key: newIdempotencyKey() };
-    mutation.mutate({ ...request, key: attempt.current.key });
+    mutation.mutate({ ...request, ...(poster ? { posterAttribution: poster } : {}), key: attempt.current.key });
   }
 
   return (
