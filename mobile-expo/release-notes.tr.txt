@@ -1,1 +1,1 @@
-Farsça dil desteği (sağdan sola düzen). Rezervasyon, esnaf rezervasyonu ve aracı paneli bağlantıları artık doğrudan uygulamada açılıyor. Uygulama güncellemeleri imzalı geliyor.
+Farsça dil desteği (sağdan sola düzen). Rezervasyon, esnaf rezervasyonu ve aracı paneli bağlantıları artık doğrudan uygulamada açılıyor.
