@@ -125,6 +125,7 @@ services:
       # Kart basina PassKit kimligi bundan turetilir (bos -> AUTH_SECRET). Degistirmek
       # verilmis kartlarin guncellemesini keser: ops/SECRETS.md § Wallet.
       WALLET_PASS_AUTH_SECRET: ${WALLET_PASS_AUTH_SECRET:-}
+      WALLET_GOOGLE_ENABLED: ${WALLET_GOOGLE_ENABLED:-}
       WALLET_GOOGLE_ISSUER_ID: ${WALLET_GOOGLE_ISSUER_ID:-}
       WALLET_GOOGLE_SA_EMAIL: ${WALLET_GOOGLE_SA_EMAIL:-}
       WALLET_GOOGLE_SA_KEY_B64: ${WALLET_GOOGLE_SA_KEY_B64:-}

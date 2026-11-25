@@ -74,6 +74,8 @@ export type WalletCapabilities = { walletApple: boolean; walletGoogle: boolean }
 export function walletCapabilities(env: NodeJS.ProcessEnv = process.env): WalletCapabilities {
   return {
     walletApple: readAppleWalletConfig(env) !== null,
-    walletGoogle: readGoogleWalletConfig(env) !== null,
+    // Google Wallet Turkiye'de yok (2026-11-25 sahip karari): kurulum dursun, acik bayrak olmadan
+    // dugme, e-posta ve uc kapali.
+    walletGoogle: str(env, "WALLET_GOOGLE_ENABLED") === "true" && readGoogleWalletConfig(env) !== null,
   };
 }
