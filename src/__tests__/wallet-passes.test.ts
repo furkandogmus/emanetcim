@@ -104,6 +104,7 @@ function enableApple() {
   vi.stubEnv("WALLET_APPLE_WWDR_CERT_B64", b64(pem.cert));
 }
 function enableGoogle() {
+  vi.stubEnv("WALLET_GOOGLE_ENABLED", "true");
   vi.stubEnv("WALLET_GOOGLE_ISSUER_ID", "3388000000000000000");
   vi.stubEnv("WALLET_GOOGLE_SA_EMAIL", "wallet@example-project.iam.gserviceaccount.test");
   vi.stubEnv("WALLET_GOOGLE_SA_KEY_B64", b64(googleKey));
@@ -165,6 +166,12 @@ describe("yapilandirma", () => {
   it("Google ancak uc degiskenle acilir", () => {
     enableGoogle();
     expect(walletCapabilities()).toEqual({ walletApple: false, walletGoogle: true });
+  });
+
+  it("Google kurulu olsa da acik bayrak olmadan kapali kalir", () => {
+    enableGoogle();
+    vi.stubEnv("WALLET_GOOGLE_ENABLED", "");
+    expect(walletCapabilities()).toEqual({ walletApple: false, walletGoogle: false });
   });
 
   it("PEM base64 ya da duz gelir; PEM olmayan deger reddedilir", () => {
