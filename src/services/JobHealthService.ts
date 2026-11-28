@@ -26,6 +26,8 @@ export type JobStatusRow = {
   lastRunStatus: string | null;
   hoursSinceSuccess: number | null;
   maxStaleHours: number;
+  /** Son calistirmanin suresi (bitmemis ya da kaydi yoksa `null`). */
+  lastDurationMs: number | null;
   /** `ok` | `stale` | `never_run` */
   status: "ok" | "stale" | "never_run";
 };
@@ -37,8 +39,18 @@ export type JobHealthReport = {
   enforcedStale: number;
   /** Hiç çalışmamış iş sayısı — enforced olmayanlar dahil, bilgi amaçlı. */
   neverRun: number;
+  /** Son calistirmasi `SLOW_JOB_MS`'i asan isler; sagligi bozmaz, erken uyaridir. */
+  slowJobs: string[];
   status: "ok" | "stale";
 };
+
+/**
+ * YAVAS IS ESIGI (2026-11-28). `scripts/call-internal-job.sh` her isi `curl --max-time 120`
+ * ile cagiriyor: 120 saniyeyi asan is YARIDA kesilir ve `stale` olana kadar (cogu iste
+ * 48-72 saat) kimse fark etmez. Slot uretimi dukkan sayisiyla dogrusal buyuyor; yarisina
+ * ulasan is, bolunmesi ya da kuyruga alinmasi gerektigini kesilmeden once soyler.
+ */
+export const SLOW_JOB_MS = 60_000;
 
 const MS_PER_HOUR = 60 * 60 * 1000;
 
@@ -91,10 +103,11 @@ export class JobHealthService {
           where: { job: { in: ranJobs } },
           orderBy: { startedAt: "desc" },
           distinct: ["job"],
-          select: { job: true, status: true },
+          select: { job: true, status: true, durationMs: true },
         })
       : [];
     const lastStatus = new Map(latestStatuses.map((r) => [r.job, r.status]));
+    const lastDuration = new Map(latestStatuses.map((r) => [r.job, r.durationMs ?? null]));
 
     const rows: JobStatusRow[] = JOB_REGISTRY.map((def: JobDefinition) => {
       const success = successAt.get(def.name) ?? null;
@@ -122,6 +135,7 @@ export class JobHealthService {
         lastRunStatus: lastStatus.get(def.name) ?? null,
         hoursSinceSuccess: hours,
         maxStaleHours: def.maxStaleHours,
+        lastDurationMs: lastDuration.get(def.name) ?? null,
         status,
       };
     });
@@ -138,14 +152,29 @@ export class JobHealthService {
       (r) => r.enforced && r.status !== "ok",
     ).length;
     const neverRun = rows.filter((r) => r.status === "never_run").length;
+    const slowJobs = rows
+      .filter((r) => r.lastDurationMs !== null && r.lastDurationMs >= SLOW_JOB_MS)
+      .map((r) => r.job);
 
     const report: JobHealthReport = {
       checkedAt: now.toISOString(),
       jobs: rows,
       enforcedStale,
       neverRun,
+      slowJobs,
       status: enforcedStale > 0 ? "stale" : "ok",
     };
+    if (slowJobs.length > 0) {
+      logger.warn(
+        {
+          slow: rows
+            .filter((r) => slowJobs.includes(r.job))
+            .map((r) => ({ job: r.job, lastDurationMs: r.lastDurationMs })),
+          thresholdMs: SLOW_JOB_MS,
+        },
+        "job_health_slow",
+      );
+    }
 
     if (report.status === "stale") {
       logger.warn(

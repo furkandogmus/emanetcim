@@ -59,6 +59,7 @@ export function toMobileAdminSystem(input: {
     jobsStatus: jobs.status,
     enforcedStale: jobs.enforcedStale,
     neverRun: jobs.neverRun,
+    slowJobs: jobs.slowJobs,
     jobs: jobs.jobs.map((j) => ({
       job: j.job,
       what: j.what,
@@ -71,6 +72,7 @@ export function toMobileAdminSystem(input: {
       lastRunStatus: j.lastRunStatus,
       hoursSinceSuccess: j.hoursSinceSuccess,
       maxStaleHours: j.maxStaleHours,
+      lastDurationMs: j.lastDurationMs,
     })),
     runs: input.runs.map((r) => ({
       id: r.id,
