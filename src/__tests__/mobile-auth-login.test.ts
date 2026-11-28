@@ -23,7 +23,9 @@ vi.mock("@/services/NotificationService", () => ({
 vi.mock("@/services/AnalyticsService", () => ({ analyticsService: { track: vi.fn() } }));
 vi.mock("@/lib/analytics-server", () => ({ resolveServerSessionId: vi.fn(async () => "s") }));
 vi.mock("@/lib/logger", () => ({ default: { warn: vi.fn(), error: vi.fn(), info: vi.fn() } }));
-vi.mock("@/services/auth/verify-email", () => ({ markEmailVerifiedByCode: vi.fn() }));
+vi.mock("@/services/auth/verify-email", () => ({
+  markEmailVerifiedByLogin: vi.fn(async () => ({ passwordDropped: false })),
+}));
 vi.mock("@/services/auth/mobile-login-code", async (orig) => ({
   ...(await orig<typeof import("@/services/auth/mobile-login-code")>()),
   verifyMobileLoginCode: verifyCode,

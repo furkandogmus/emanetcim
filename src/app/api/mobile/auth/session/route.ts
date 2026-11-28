@@ -13,7 +13,7 @@ import { analyticsService } from "@/services/AnalyticsService";
 import { resolveServerSessionId } from "@/lib/analytics-server";
 import logger from "@/lib/logger";
 import { toMobileUser } from "@/lib/mobile-dto";
-import { markEmailVerifiedByCode } from "@/services/auth/verify-email";
+import { markEmailVerifiedByLogin } from "@/services/auth/verify-email";
 import { recordMobileLegalAcceptance } from "@/services/auth/legal-acceptance";
 import { smsLoginEnabled } from "@/lib/sms-login";
 import { findUserByMobileIdentity, verifyMobileLoginCode } from "@/services/auth/mobile-login-code";
@@ -152,7 +152,13 @@ export async function POST(req: NextRequest) {
       });
     }
     // Her kodla giriste: dogrulanmis hesapta da hesapsiz rezervasyonlar baglanir.
-    if (isEmail) await markEmailVerifiedByCode(user.id);
+    // Kanittan once konmus sifre de duser; token yeni `tokenVersion` ile imzalanir.
+    if (isEmail) {
+      const proof = await markEmailVerifiedByLogin(user.id);
+      if (proof.passwordDropped) {
+        user = { ...user, passwordHash: null, emailVerified: user.emailVerified ?? new Date(), tokenVersion: proof.tokenVersion ?? user.tokenVersion + 1 };
+      }
+    }
   } else if (password) {
     /*
       Kimlik + IP: kimligin telefonu/e-postasini bilen biri baska IP'den hesabi

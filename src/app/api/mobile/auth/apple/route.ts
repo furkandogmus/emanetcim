@@ -4,7 +4,7 @@ import { z } from "zod";
 import { createRemoteJWKSet, jwtVerify } from "jose";
 import prisma from "@/lib/db";
 import { signAccessToken, signRefreshToken } from "@/lib/mobile-auth";
-import { markEmailVerifiedByProvider } from "@/services/auth/verify-email";
+import { markEmailVerifiedByLogin } from "@/services/auth/verify-email";
 import { rateLimit } from "@/lib/rate-limit";
 import { isBlockedSignupEmail } from "@/lib/disposable-emails";
 import { clientIp } from "@/lib/internal-api-guard";
@@ -97,7 +97,9 @@ export async function POST(req: NextRequest) {
       if (email) {
         user = await prisma.user.upsert({
           where: { email },
-          update: { name: fullName, emailVerified: email ? new Date() : null },
+          // `emailVerified` burada YAZILMAZ: asagidaki `markEmailVerifiedByLogin` yazar ve
+          // alan bosken konmus sifreyi dusurur; burada doldurulursa o kosul hic tutmaz.
+          update: { name: fullName },
           create: { email, name: fullName, role: "GUEST", emailVerified: email ? new Date() : null },
         });
       } else {
@@ -144,7 +146,10 @@ export async function POST(req: NextRequest) {
     }
     // Yalnizca Apple'in dogruladigi ve BU hesabin olan e-posta: baglama icin kanit.
     if (email && user.email?.toLowerCase() === email) {
-      await markEmailVerifiedByProvider(user.id);
+      const proof = await markEmailVerifiedByLogin(user.id);
+      if (proof.passwordDropped) {
+        user = { ...user, passwordHash: null, emailVerified: user.emailVerified ?? new Date(), tokenVersion: proof.tokenVersion ?? user.tokenVersion + 1 };
+      }
     }
 
     const code = parsed.data.authorizationCode;

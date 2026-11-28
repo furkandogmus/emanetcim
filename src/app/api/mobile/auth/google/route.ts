@@ -13,7 +13,7 @@ import { resolveServerSessionId } from "@/lib/analytics-server";
 import logger from "@/lib/logger";
 import { toMobileUser } from "@/lib/mobile-dto";
 import { recordMobileLegalAcceptance } from "@/services/auth/legal-acceptance";
-import { markEmailVerifiedByProvider } from "@/services/auth/verify-email";
+import { markEmailVerifiedByLogin } from "@/services/auth/verify-email";
 
 const GOOGLE_JWKS = createRemoteJWKSet(new URL("https://www.googleapis.com/oauth2/v3/certs"));
 
@@ -91,7 +91,11 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: "account_banned" }, { status: 403 });
     }
     // `email_verified === true` yukarida zorunlu: adres kanitli, hesapsiz rezervasyonlar baglanir.
-    await markEmailVerifiedByProvider(user.id);
+    // Kanittan once konmus sifre de duser; hata girisi DUSURUR (sifre dururken token verilmez).
+    const proof = await markEmailVerifiedByLogin(user.id);
+    if (proof.passwordDropped) {
+      user = { ...user, passwordHash: null, emailVerified: user.emailVerified ?? new Date(), tokenVersion: proof.tokenVersion ?? user.tokenVersion + 1 };
+    }
 
     const access = await signAccessToken(user.id, user.role, user.tokenVersion);
     const refresh = await signRefreshToken(user.id, user.role, user.tokenVersion);

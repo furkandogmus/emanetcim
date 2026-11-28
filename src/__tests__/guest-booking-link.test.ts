@@ -95,7 +95,7 @@ describe("baglama noktalari", () => {
     expect(verify.match(/linkGuestBookingsToVerifiedUser\(/g)?.length).toBe(2);
     // Sifirlama yollari (bag + kod) davranissal olarak `password-reset-code.test.ts`te.
     // Mobil kodla giris: zaten dogrulanmis hesapta da cagrilir.
-    expect(read("src/app/api/mobile/auth/session/route.ts")).toMatch(/if \(isEmail\) await markEmailVerifiedByCode\(user\.id\)/);
+    expect(read("src/app/api/mobile/auth/session/route.ts")).toMatch(/if \(isEmail\) \{\s+const proof = await markEmailVerifiedByLogin\(user\.id\)/);
   });
 
   it("sifreli kayit (dogrulanmamis) baglamaz", () => {

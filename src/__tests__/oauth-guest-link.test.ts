@@ -7,13 +7,14 @@ import path from "node:path";
  * Google/Apple'in dogruladigi e-posta da hesapsiz rezervasyonlari baglar
  * (QA #178, madde 3). Apple yalnizca `email_verified` dogruysa.
  */
-const { mockPrisma, verify, markProvider } = vi.hoisted(() => ({
+const { mockPrisma, verify, markProvider, signAccess } = vi.hoisted(() => ({
   mockPrisma: {
     user: { findUnique: vi.fn(), create: vi.fn(), upsert: vi.fn() },
     account: { findFirst: vi.fn(), create: vi.fn() },
   },
   verify: vi.fn(),
-  markProvider: vi.fn(async () => undefined),
+  markProvider: vi.fn(async (_id: string): Promise<{ passwordDropped: boolean; tokenVersion?: number }> => ({ passwordDropped: false })),
+  signAccess: vi.fn(async (_id: string, _role: string, _tv?: number) => "access"),
 }));
 
 vi.mock("@/lib/db", () => ({ default: mockPrisma }));
@@ -21,7 +22,7 @@ vi.mock("jose", () => ({ createRemoteJWKSet: () => ({}), jwtVerify: verify }));
 vi.mock("@/lib/rate-limit", () => ({ rateLimit: vi.fn(async () => true) }));
 vi.mock("@/lib/internal-api-guard", () => ({ clientIp: () => "203.0.113.7" }));
 vi.mock("@/lib/mobile-auth", () => ({
-  signAccessToken: vi.fn(async () => "access"),
+  signAccessToken: signAccess,
   signRefreshToken: vi.fn(async () => "refresh"),
 }));
 vi.mock("@/lib/mobile-dto", () => ({ toMobileUser: (u: { id: string }) => ({ id: u.id }) }));
@@ -32,7 +33,7 @@ vi.mock("@/services/AnalyticsService", () => ({ analyticsService: { track: vi.fn
 vi.mock("@/lib/analytics-server", () => ({ resolveServerSessionId: vi.fn(async () => "s") }));
 vi.mock("@/lib/logger", () => ({ default: { warn: vi.fn(), error: vi.fn(), info: vi.fn() } }));
 vi.mock("@/services/auth/legal-acceptance", () => ({ recordMobileLegalAcceptance: vi.fn() }));
-vi.mock("@/services/auth/verify-email", () => ({ markEmailVerifiedByProvider: markProvider }));
+vi.mock("@/services/auth/verify-email", () => ({ markEmailVerifiedByLogin: markProvider }));
 
 import { POST as google } from "@/app/api/mobile/auth/google/route";
 import { POST as apple } from "@/app/api/mobile/auth/apple/route";
@@ -60,6 +61,14 @@ describe("mobil Google", () => {
     mockPrisma.user.findUnique.mockResolvedValue(user());
     expect((await google(req("google", { idToken: "t" }))).status).toBe(200);
     expect(markProvider).toHaveBeenCalledWith("u1");
+  });
+
+  it("kanitsiz konmus sifre dustuyse token YENI tokenVersion ile imzalanir", async () => {
+    verify.mockResolvedValue({ payload: { email: "ada@example.com", email_verified: true } });
+    mockPrisma.user.findUnique.mockResolvedValue(user({ passwordHash: "x", emailVerified: null }));
+    markProvider.mockResolvedValueOnce({ passwordDropped: true, tokenVersion: 1 });
+    expect((await google(req("google", { idToken: "t" }))).status).toBe(200);
+    expect(signAccess).toHaveBeenCalledWith("u1", "GUEST", 1);
   });
 
   it("dogrulanmamis Google e-postasi reddedilir, baglama yok", async () => {

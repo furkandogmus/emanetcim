@@ -26,6 +26,10 @@ vi.mock("@/services/AnalyticsService", () => ({ analyticsService: { track: vi.fn
 vi.mock("@/lib/analytics-server", () => ({ resolveServerSessionId: vi.fn(async () => "s") }));
 vi.mock("@/lib/logger", () => ({ default: { warn: vi.fn(), error: vi.fn(), info: vi.fn() } }));
 vi.mock("@/services/auth/legal-acceptance", () => ({ recordMobileLegalAcceptance: record }));
+// Sifre dusurme adimi hata verirse giris de duser (2026-11-28); burada olculen o degil.
+vi.mock("@/services/auth/verify-email", () => ({
+  markEmailVerifiedByLogin: vi.fn(async () => ({ passwordDropped: false })),
+}));
 
 import { POST as google } from "@/app/api/mobile/auth/google/route";
 import { POST as apple } from "@/app/api/mobile/auth/apple/route";

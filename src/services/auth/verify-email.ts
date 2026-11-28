@@ -97,14 +97,42 @@ export async function markEmailVerifiedByCode(userId: string): Promise<void> {
   await linkGuestBookingsToVerifiedUser(userId);
 }
 
+export type LoginProofResult = {
+  /** Kanitsiz konmus sifre silindi mi. */
+  passwordDropped: boolean;
+  /** Sifre silindiyse yeni `tokenVersion`; cagiran token'i bununla imzalar. */
+  tokenVersion?: number;
+};
+
 /**
- * Google/Apple'in DOGRULANMIS dedigi e-posta da kanittir: ayni isaretleme ve
- * hesapsiz rezervasyon baglama. Cagiran yalnizca saglayicinin dogrulanmis
- * iddiasi bu hesabin e-postasiyla eslesince cagirir.
+ * GIRISLE gelen ilk e-posta kaniti (mobil kod, Google, Apple): `markEmailVerifiedByCode`
+ * + kanittan ONCE konmus sifrenin dusurulmesi.
+ *
+ * NEDEN (2026-11-28 guvenlik taramasi): `registerGuestAction` e-posta kaniti
+ * istemeden sifreli hesap aciyor. Baskasinin adresiyle hesap acan biri, adresin
+ * sahibi sonradan mobilden kodla / Google / Apple ile girdiginde AYNI hesapta
+ * kaliyordu: giris hesabi "dogrulanmis" yapiyor, hesapsiz rezervasyonlari (QR
+ * dahil) bagliyor, ama hesabi acanin sifresi gecerli kalmaya devam ediyordu.
+ *
+ * Kural: `emailVerified` BOSKEN konmus sifreyi adresin sahibi koymamis olabilir.
+ * Sahiplik ilk kez kanitlandiginda o sifre silinir ve `tokenVersion` artar (acik
+ * web/mobil oturumlar duser). Gercek sahip sifresini "sifremi unuttum" ya da
+ * profilden yeniden koyar.
+ *
+ * Sifre sifirlama BUNU CAGIRMAZ: orada sifreyi kaniti getiren kisi koyuyor.
+ * Tek `updateMany`: kosul ve yazma atomik, es zamanli iki giris iki kez artirmaz.
  */
-export async function markEmailVerifiedByProvider(userId: string): Promise<void> {
-  // Girisi dusurmez: token zaten dogrulandi, isaret bir sonraki giriste tekrar denenir.
-  await markEmailVerifiedByCode(userId).catch((err) =>
-    logger.error({ err, userId }, "provider_email_verify_mark_failed"),
-  );
+export async function markEmailVerifiedByLogin(userId: string): Promise<LoginProofResult> {
+  const dropped = await prisma.user.updateMany({
+    where: { id: userId, emailVerified: null, passwordHash: { not: null } },
+    data: { emailVerified: new Date(), passwordHash: null, tokenVersion: { increment: 1 } },
+  });
+  let result: LoginProofResult = { passwordDropped: false };
+  if (dropped.count > 0) {
+    const fresh = await prisma.user.findUnique({ where: { id: userId }, select: { tokenVersion: true } });
+    result = { passwordDropped: true, tokenVersion: fresh?.tokenVersion };
+    logger.warn({ userId }, "unverified_password_dropped_on_first_login_proof");
+  }
+  await markEmailVerifiedByCode(userId);
+  return result;
 }
