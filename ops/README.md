@@ -124,6 +124,111 @@ Tam dump şemayı da taşıdığı için ayrıca `prisma migrate deploy` gerekme
 zaten koşar. `pg_restore`'un `EXTENSION`/sahip uyarıları kritik hata değildir. Hesap
 taşımalarında aynı iki betik kullanıldı (`infra/aws/README.md`).
 
+## Kapasite ve performans izleme
+
+2026-11-28'den beri bellek sınırları ve izleme ayarları `docker-compose.yml`'de açıklamalı
+olarak duruyor. Sunucuya **salt okunur** bakmak için aşağıdaki komutlar yeter; hepsi
+`/opt/emanetci` içinde, `docker compose --env-file docker-compose.env` ile çalışır
+(aşağıda `dc` diye kısaltıldı).
+
+**Bu ayarlar ilk kez deploy edilmeden önce** (`main`'e merge = deploy), sunucuda bir kez:
+
+```bash
+dc exec -T postgres sh -c 'ls "$(pg_config --pkglibdir)/pg_stat_statements.so"'   # dosya yoksa MERGE ETME
+free -m                                                                         # "available" >= 3000 olmalı
+```
+
+`pg_stat_statements.so` yoksa Postgres yeni ayarla açılmaz ve site düşer. Merge'ün kendisi
+`postgres` ve `redis` konteynerlerini yeniden oluşturur: Postgres birkaç saniye kapanır
+(veri birimde kalır), Redis boş başlar. Redis boşalınca hız sınırı sayaçları ve mobil oturum
+yenileme kayıtları sıfırlanır; bu bugün her Redis yeniden başlatmasında da oluyor. Trafiğin
+az olduğu saatte merge edin.
+
+### Yavaş sorgular
+
+500 ms'yi aşan her sorgu Postgres loguna düşer; bağlı parametreler (e-posta, telefon)
+**yazılmaz** (`log_parameter_max_length=0`).
+
+```bash
+dc logs --since 24h postgres | grep 'duration:' | sort -t: -k5 -rn | head -20
+```
+
+Sorgu başına toplam süre için `pg_stat_statements` uzantısı bir kez oluşturulur
+(`shared_preload_libraries` zaten yüklüyor; migrasyona konmadı çünkü CI'daki Postgres
+servisinde ön yükleme yok):
+
+```bash
+dc exec -T postgres psql -U bagajpark -d bagajpark -c 'CREATE EXTENSION IF NOT EXISTS pg_stat_statements;'
+dc exec -T postgres psql -U bagajpark -d bagajpark -c "
+  SELECT calls, round(total_exec_time) AS toplam_ms, round(mean_exec_time) AS ort_ms, left(query, 120) AS sorgu
+  FROM pg_stat_statements ORDER BY total_exec_time DESC LIMIT 15;"
+```
+
+İlk sıradaki birkaç sorgu genelde toplam sürenin çoğunu taşır; indeks ya da `select`
+daraltma oradan başlar. Sayaçları sıfırlamak: `SELECT pg_stat_statements_reset();`.
+
+### Redis belleği
+
+`/api/health/jobs` → `checks.redisMemory`. Anahtar boşaltıldıysa ya da bellek %90'ı geçtiyse
+`broken` olur ve uç `503` döner; %75'te `warning` (loga `health_jobs_redis_memory`).
+
+```bash
+curl -s -H "X-Cron-Secret: $CRON_SECRET" https://bagajpark.com/api/health/jobs | jq .checks.redisMemory
+dc exec -T redis redis-cli INFO memory | grep -E 'used_memory_human|maxmemory_human|maxmemory_policy'
+dc exec -T redis redis-cli --scan --pattern 'rtjti:v1:*' | wc -l    # mobil oturum yenileme kaydı sayısı
+```
+
+Yenileme kaydı ~165 bayt ve 30 güne kadar yaşar; 192 MB yaklaşık 1,1 milyon kayıt eder. Son
+sayıyı aylık aktif mobil kullanıcıya bölmek kullanıcı başına kayıt sayısını, yani bu sınırın
+kaç kullanıcıya yettiğini verir.
+
+### Yavaş zamanlanmış işler
+
+`call-internal-job.sh` her işi 120 sn'de keser. Son çalışması 60 sn'yi geçen iş
+`checks.scheduledJobs.slowJobs`'ta görünür (loga `job_health_slow`); sağlığı bozmaz. Bir iş
+oraya düştüyse kesilmeden önce bölünmeli ya da süresi `ops/crontab.prod`'da artırılmalı.
+
+## Cloudflare önbelleği (oturumsuz sayfalar)
+
+Bugün HTML hiç önbelleklenmiyor (`cf-cache-status: DYNAMIC`); oysa ana sayfa, şehir, blog ve
+SSS sayfaları zaten `Cache-Control: s-maxage=…` gönderiyor. Bu sayfaları Cloudflare'de
+tutmak, oturumsuz trafiğin çoğunu sunucuya hiç ulaştırmaz. **En büyük kapasite kazancı ve en
+riskli değişiklik budur**; aşağıdaki doğrulamalar geçmeden açık bırakılmaz.
+
+**Risk:** Next.js aynı adrese iki farklı gövde döndürür: tarayıcıya HTML, istemci içi geçişte
+`RSC: 1` başlığıyla RSC verisi. Fark `Vary` başlığında yazılı ama Cloudflare `Vary`'i
+(Accept-Encoding dışında) kullanmaz. Kural `RSC` başlıklı istekleri dışlamazsa, tek bir
+`curl -H 'RSC: 1'` isteği sayfanın RSC verisini önbelleğe koyar ve sonraki herkes HTML yerine
+onu görür (önbellek zehirlenmesi).
+
+**Kural** (Caching → Cache Rules, tek kural):
+
+- Eşleşme: host `bagajpark.com`, yöntem `GET`, yol `/api/`, `/_next/` ile başlamıyor;
+  istekte `rsc`, `next-router-state-tree`, `next-router-prefetch`, `next-action` başlıkları
+  yok; `Cookie` başlığı `authjs.session-token` **içermiyor** (bu alt dize `__Secure-` önekli
+  ve parçalı `.0`/`.1` oturum çerezlerini de yakalar).
+- Eylem: önbelleğe uygun; kenar TTL'i "kaynağın Cache-Control'üne uy". Kaynak dinamik
+  sayfalarda zaten `private, no-store` gönderiyor, onlar önbelleğe girmez.
+
+Ücretsiz planda Cache Rules'un HTML'i önbelleğe almadığı raporları var; öyleyse aynı
+koşullarla "Cache Everything" Page Rule gerekir. Hangisinin çalıştığını aşağıdaki ilk adım
+söyler.
+
+**Doğrulama** (kural açıldıktan hemen sonra, sırayla):
+
+```bash
+U=https://bagajpark.com/tr
+curl -sI $U | grep -iE 'cf-cache-status|cache-control'                     # 2. istekte HIT
+curl -sI -H 'RSC: 1' $U | grep -iE 'cf-cache-status|content-type'          # BYPASS/DYNAMIC olmalı
+curl -s $U | head -c 200                                                    # <!DOCTYPE html> olmalı
+curl -sI -H 'Cookie: __Secure-authjs.session-token=x' $U | grep -i cf-cache-status   # HIT olmamalı
+curl -sI https://bagajpark.com/tr/bookings | grep -iE 'cf-cache-status|cache-control' # private, HIT değil
+```
+
+Herhangi biri beklenenden farklıysa kural kapatılır ve **Caching → Configuration → Purge
+Everything** yapılır. Sayfa içeriği değiştiğinde (yeni dükkan, blog yazısı) Cloudflare'deki
+kopya `s-maxage` kadar (120–300 sn) eski kalabilir.
+
 ## Kurallar
 
 - **Salt-okunur önce.** Sunucuda önce `docker compose ps`, `docker compose logs`,

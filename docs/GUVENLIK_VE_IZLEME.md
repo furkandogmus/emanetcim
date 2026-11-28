@@ -98,6 +98,11 @@ başına ~18 sorgu koştuğu için kendi nginx limiti var: `api_health`, IP baş
 `burst=6` (`location = /api/health/jobs`). `/api/health/live` limitsiz; nginx healthcheck'i onu
 5 sn'de bir çağırır.
 
+`/api/health/jobs` iki altyapı sinyali de taşır (2026-11-28): `checks.redisMemory` Redis
+anahtar boşalttıysa ya da belleği %90'ı geçtiyse `broken` (uç `503`), `checks.scheduledJobs.slowJobs`
+son çalışması 60 sn'yi aşan işleri listeler (sağlığı bozmaz). Komutlar `ops/README.md`
+§ Kapasite ve performans izleme.
+
 **Kurulacak izleme (açık iş, `docs/BACKLOG.md`):**
 
 | Monitör | URL | Aralık |
@@ -105,6 +110,9 @@ başına ~18 sorgu koştuğu için kendi nginx limiti var: `api_health`, IP baş
 | Ayakta mı | `https://bagajpark.com/api/health/live` | 1–5 dk |
 | İşler çalışıyor mu | `https://bagajpark.com/api/health/jobs` | 30 dk (sinyal günlük ritimde değişir) |
 
-İkisi de `503`'te alarm verir. UptimeRobot ücretsiz kademesi yeter; yanına `healthchecks.io`
+İkisi de `503`'te alarm verir. UptimeRobot ücretsiz kademesi yeter (2026-11 itibarıyla 50 monitör,
+en kısa aralık 5 dk; e-postanın ücretsizde olup olmadığını kurarken kontrol edin). `/api/health/jobs`
+için anahtar kelime monitörü `"status":"UP"` arayabilir: `503` gövdesi de JSON olduğundan durum
+kodu tek başına yeter ama anahtar kelime, Cloudflare'in kendi hata sayfasını da yakalar. yanına `healthchecks.io`
 tarzı "dead man's switch" konabilir. Limit doğrulaması: 10 ardışık `curl`'de ilk ~6 `200`,
 kalanı `429` dönmeli.
