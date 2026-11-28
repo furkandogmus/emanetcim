@@ -86,6 +86,10 @@ sistemi yok; tek kaynak `docker compose logs web`.
 | `/api/health` | Postgres + Redis | `503` |
 | `/api/health/jobs` | Zamanlanmış işler gerçekten çalışıyor mu | `503` |
 
+Sırsız istek yalnızca durumu görür (`/api/health`: `status`; `/api/health/jobs`: kontrol ve iş
+başına `status`). Sayılar, takvim ve yapılandırma ayrıntısı `X-Cron-Secret` ister
+(`src/lib/health-detail.ts`); HTTP durum kodu iki halde de aynıdır.
+
 `/api/health/jobs` ayrı çünkü slot üretimi 2026-07-14'te durdu ve 37 gün fark edilmedi; o süre
 `/api/health` yeşildi. Altyapı sağlığı iş sağlığı değildir. Uç tazeliği ek kayıt tutmadan ölçer
 (slot ufku günde 1 gün kısalır; 28 günün altı `503`), hiç aktif dükkan yoksa `not_applicable`

@@ -41,7 +41,7 @@ sabitlenir. Sunucuya özgü işler (6 saatlik Postgres yedeği, günlük AWS mal
 haftalık `docker image prune`) kayıt defterinde değil, `ops/crontab.prod`'un ikinci
 bölümündedir. Loglar `/opt/emanetci/logs/` altında (`ec2-user`'ın `/var/log`'a yazma izni yok).
 
-**Sağlık kontrolü:** `GET /api/health/jobs` — sır gerektirmez, sağlıksızsa **503**.
+**Sağlık kontrolü:** `GET /api/health/jobs` — sır gerektirmez, sağlıksızsa **503**. Sırsız yanıt yalnızca durumları ve iş adlarını taşır; sayılar ve takvim `X-Cron-Secret` başlığıyla gelir.
 Herhangi bir HTTP izleyici bunu izleyebilir (`docs/GUVENLIK_VE_IZLEME.md`). Beş sinyal:
 
 | Kontrol | Neyi ölçer | `stale`/`broken` ne demek |
@@ -117,7 +117,7 @@ crontab -l | grep -c call-internal-job      # doğrula
 **Ertesi gün:**
 
 ```bash
-curl -s https://bagajpark.com/api/health/jobs | jq '.checks.scheduledJobs.jobs[] | {job, lastSuccessAt, status}'
+curl -s -H "X-Cron-Secret: $CRON_SECRET" https://bagajpark.com/api/health/jobs | jq '.checks.scheduledJobs.jobs[] | {job, lastSuccessAt, status}'
 ```
 
 ---

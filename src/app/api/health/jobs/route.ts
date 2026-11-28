@@ -1,4 +1,6 @@
 import { NextResponse } from "next/server";
+import type { NextRequest } from "next/server";
+import { redactHealthChecks, wantsHealthDetail } from "@/lib/health-detail";
 import { OPERATING_SHOP_FILTER } from "@/lib/public-shop-filter";
 import prisma from "@/lib/db";
 import logger from "@/lib/logger";
@@ -36,7 +38,9 @@ const SLOT_HORIZON_MIN_DAYS = 28;
 const OVERDUE_CRITICAL_HOURS = 72;
 const MS_PER_DAY = 24 * 60 * 60 * 1000;
 
-export async function GET() {
+export async function GET(req: NextRequest) {
+  // Ayrinti yalnizca CRON_SECRET ile: `src/lib/health-detail.ts`.
+  const detail = wantsHealthDetail(req);
   try {
     const now = new Date();
 
@@ -167,17 +171,18 @@ export async function GET() {
       );
     }
 
+    const checks = {
+      slotGeneration,
+      overdueReconciliation,
+      sealIntegrity,
+      partnerReachability,
+      scheduledJobs,
+    };
     return NextResponse.json(
       {
         status: healthy ? "UP" : "DEGRADED",
-        checks: {
-          slotGeneration,
-          overdueReconciliation,
-          sealIntegrity,
-          partnerReachability,
-          scheduledJobs,
-        },
-        context: { activeShopCount },
+        checks: detail ? checks : redactHealthChecks(checks),
+        ...(detail ? { context: { activeShopCount } } : {}),
         timestamp: now.toISOString(),
       },
       { status: healthy ? 200 : 503 },

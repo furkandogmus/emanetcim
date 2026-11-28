@@ -72,7 +72,13 @@ vi.mock("@/lib/logger", () => ({
   default: { warn: vi.fn(), error: vi.fn(), info: vi.fn() },
 }));
 
-const { GET } = await import("../app/api/health/jobs/route");
+const { GET: rawGET } = await import("../app/api/health/jobs/route");
+const { NextRequest } = await import("next/server");
+
+// Ayrintili govde CRON_SECRET ister (2026-11-28); bu dosyadaki kontroller ayrintiyi olcuyor.
+process.env.CRON_SECRET = "test-cron-secret";
+const GET = () =>
+  rawGET(new NextRequest("http://localhost/api/health/jobs", { headers: { "x-cron-secret": "test-cron-secret" } }));
 
 const MS_PER_DAY = 24 * 60 * 60 * 1000;
 

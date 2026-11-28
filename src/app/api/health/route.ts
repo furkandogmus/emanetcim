@@ -1,4 +1,6 @@
 import { NextResponse } from "next/server";
+import type { NextRequest } from "next/server";
+import { wantsHealthDetail } from "@/lib/health-detail";
 import prisma from "@/lib/db";
 import logger from "@/lib/logger";
 import { getRedis, isDistributedRateLimitRequired } from "@/lib/rate-limit";
@@ -11,7 +13,7 @@ export const dynamic = "force-dynamic";
  * Readiness: Postgres `SELECT 1` — load balancer / uptime “dependency check”.
  * Safsız liveness için `/api/health/live` kullanın.
  */
-export async function GET() {
+export async function GET(req: NextRequest) {
   try {
     await prisma.$queryRaw`SELECT 1`;
 
@@ -56,6 +58,10 @@ export async function GET() {
       postgis = "missing";
     }
 
+    // Sirsiz istege yalnizca durum: yapilandirma ayrintisi `CRON_SECRET` ile (`health-detail.ts`).
+    if (!wantsHealthDetail(req)) {
+      return NextResponse.json({ status: "UP", timestamp: new Date().toISOString() }, { status: 200 });
+    }
     return NextResponse.json(
       {
         status: "UP",
