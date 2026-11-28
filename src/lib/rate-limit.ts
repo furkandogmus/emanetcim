@@ -120,11 +120,18 @@ async function redisRateLimit(
   const now = Date.now();
   const windowId = Math.floor(now / windowMs);
   const redisKey = `rl:v1:${key}:${windowId}`;
-  const count = await redis.incr(redisKey);
-  if (count === 1) {
-    await redis.pexpire(redisKey, windowMs);
-  }
-  return count <= max;
+  /*
+    SAYAC VE SURESI TEK ISLEMDE (2026-11-28). Onceki hali `INCR`, sonra ayri bir
+    `PEXPIRE` gonderiyordu: ikisinin arasinda baglanti koparsa ya da surec duserse
+    anahtar SURESIZ kaliyordu. Redis `volatile-ttl` ile calisiyor (docker-compose.yml):
+    o politika yalnizca suresi olan anahtarlari bosaltir, suresiz sayaclar hic
+    gitmez ve bellek dolunca yazmalar reddedilir. `PEXPIRE ... NX` yalnizca ilk
+    artista sure koyar, pencere sonraki istekte uzamaz.
+  */
+  const replies = await redis.multi().incr(redisKey).pexpire(redisKey, windowMs, "NX").exec();
+  const [incrError, count] = replies?.[0] ?? [new Error("rate_limit_multi_aborted"), null];
+  if (incrError) throw incrError;
+  return Number(count) <= max;
 }
 
 /**
