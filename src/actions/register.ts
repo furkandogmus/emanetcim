@@ -221,7 +221,12 @@ export async function registerPartnerApplicationAction(data: unknown) {
     const user = await tx.user.create({
       data: {
         email: email || null,
-        emailVerified: email ? new Date() : null,
+        /*
+          `emailVerified` YAZILMAZ (2026-11-28): basvuru formu adresi kanitlamaz. Eskiden
+          hesap "dogrulanmis" aciliyordu; baskasinin adresiyle basvuran biri, adresin
+          sahibi sonradan girdiginde sifresiyle ayni hesapta kaliyordu. Kanit dogrulama
+          baglantisiyla ya da girisle gelir (`markEmailVerifiedByLogin`).
+        */
         name: parsed.data.name.trim(),
         phone: phoneNorm,
         role: Role.PARTNER,
@@ -260,6 +265,13 @@ export async function registerPartnerApplicationAction(data: unknown) {
 
     return user.id;
   });
+
+  if (email) {
+    // Atesle-unut: misafir kaydiyla ayni; basvuru e-posta hatasina takilmasin.
+    void generateVerificationToken(email)
+      .then((verificationToken) => sendVerificationEmail(email, verificationToken.token, locale))
+      .catch((err) => logger.error({ err, userId: newPartnerId }, "send_verification_email_failed"));
+  }
 
   void notificationService
     .notifyAdminsForNewUser({

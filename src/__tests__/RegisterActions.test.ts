@@ -238,6 +238,28 @@ describe("Register Actions", () => {
       }));
     });
 
+    it("e-postayi kanitsiz dogrulanmis ISARETLEMEZ, dogrulama baglantisi gonderir (2026-11-28)", async () => {
+      mockPrisma.user.findUnique.mockResolvedValue(null);
+      mockMail.mockClear();
+
+      const result = await registerPartnerApplicationAction({
+        name: "New Partner",
+        email: "victim@example.com",
+        phone: "0555 555 55 77",
+        password: "password123",
+        shopName: "Excellent Shop",
+        shopAddress: "Besiktas, Istanbul",
+        shopLatitude: 41.0431,
+        shopLongitude: 29.0083,
+      });
+
+      expect(result.success).toBe(true);
+      const created = mockPrisma.user.create.mock.calls.at(-1)?.[0] as { data: Record<string, unknown> };
+      expect(created.data.email).toBe("victim@example.com");
+      expect(created.data).not.toHaveProperty("emailVerified");
+      await vi.waitFor(() => expect(mockMail).toHaveBeenCalledWith("victim@example.com", "token123", "tr"));
+    });
+
     it("attributes a partner-to-partner referral when the code belongs to a PARTNER", async () => {
       mockPrisma.user.findUnique
         .mockResolvedValueOnce(null) // phone-exists check
