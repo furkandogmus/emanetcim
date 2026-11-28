@@ -9,7 +9,9 @@ import { describe, it, expect, vi, beforeEach } from "vitest";
  * kırmızı yanan bir sağlık kontrolü, hiç olmayandan daha kötüdür — kimse bakmaz.
  */
 
-const { mockPrisma, mockOverdueScan, mockSealCheck, mockReachCheck, mockJobHealth } = vi.hoisted(() => ({
+const { mockPrisma, mockOverdueScan, mockSealCheck, mockReachCheck, mockJobHealth, mockRedisMemory } = vi.hoisted(() => ({
+  // Varsayilan: Redis bellegi saglam.
+  mockRedisMemory: vi.fn().mockResolvedValue({ status: "ok", reasons: [] }),
   // Varsayilan: tum enforced isler taze.
   mockJobHealth: vi.fn().mockResolvedValue({
     checkedAt: new Date().toISOString(),
@@ -67,6 +69,9 @@ vi.mock("@/services/PartnerReachabilityService", () => ({
 }));
 vi.mock("@/services/JobHealthService", () => ({
   jobHealthService: { check: mockJobHealth },
+}));
+vi.mock("@/lib/redis-health", () => ({
+  checkRedisMemory: mockRedisMemory,
 }));
 vi.mock("@/lib/logger", () => ({
   default: { warn: vi.fn(), error: vi.fn(), info: vi.fn() },
@@ -425,5 +430,28 @@ describe("GET /api/health/jobs — is calistirma defteri", () => {
 
     expect(res.status).toBe(503);
     expect(body.checks.scheduledJobs.jobs[0].hoursSinceSuccess).toBe(888);
+  });
+});
+
+describe("GET /api/health/jobs — Redis bellegi (2026-11-28)", () => {
+  beforeEach(() => {
+    mockRedisMemory.mockResolvedValue({ status: "ok", reasons: [] });
+  });
+
+  it("Redis anahtar bosalttiysa 503 doner", async () => {
+    setup({ horizonDays: 30, activeShops: 1, futureSlots: 100 });
+    mockRedisMemory.mockResolvedValueOnce({ status: "broken", reasons: ["keys_evicted"], evictedKeys: 12 });
+    const res = await GET();
+    expect(res.status).toBe(503);
+    const body = await res.json();
+    expect(body.checks.redisMemory.status).toBe("broken");
+  });
+
+  it("uyari, bilinmeyen ve tanimsiz durum sagligi bozmaz", async () => {
+    for (const status of ["warning", "unknown", "not_configured"]) {
+      setup({ horizonDays: 30, activeShops: 1, futureSlots: 100 });
+      mockRedisMemory.mockResolvedValueOnce({ status, reasons: [] });
+      expect((await GET()).status).toBe(200);
+    }
   });
 });

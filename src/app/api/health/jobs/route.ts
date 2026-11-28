@@ -8,6 +8,7 @@ import { overdueBookingService } from "@/services/OverdueBookingService";
 import { sealIntegrityService } from "@/services/SealIntegrityService";
 import { partnerReachabilityService } from "@/services/PartnerReachabilityService";
 import { jobHealthService } from "@/services/JobHealthService";
+import { checkRedisMemory } from "@/lib/redis-health";
 
 export const dynamic = "force-dynamic";
 
@@ -138,13 +139,30 @@ export async function GET(req: NextRequest) {
      */
     const scheduledJobs = await jobHealthService.check(now);
 
+    // Oturum yenileme ve hiz siniri kayitlari Redis'te: bellek dolup bosaltilirsa
+    // koruma sessizce zayiflar. Ayrinti `src/lib/redis-health.ts`.
+    const redisMemory = await checkRedisMemory();
+
     const healthy =
       slotGeneration.status !== "stale" &&
       overdueReconciliation.status !== "stale" &&
       sealIntegrity.status !== "broken" &&
       partnerReachability.status !== "broken" &&
-      scheduledJobs.status !== "stale";
+      scheduledJobs.status !== "stale" &&
+      redisMemory.status !== "broken";
 
+    if (redisMemory.status === "broken" || redisMemory.status === "warning") {
+      logger.warn(
+        {
+          status: redisMemory.status,
+          reasons: redisMemory.reasons,
+          usageRatio: redisMemory.usageRatio,
+          evictedKeys: redisMemory.evictedKeys,
+          policy: redisMemory.policy,
+        },
+        "health_jobs_redis_memory",
+      );
+    }
     if (slotGeneration.status === "stale") {
       logger.warn(
         { horizonDays, futureSlotCount, activeShopCount },
@@ -177,6 +195,7 @@ export async function GET(req: NextRequest) {
       sealIntegrity,
       partnerReachability,
       scheduledJobs,
+      redisMemory,
     };
     return NextResponse.json(
       {
@@ -198,6 +217,7 @@ export async function GET(req: NextRequest) {
           sealIntegrity: { status: "unknown" },
           partnerReachability: { status: "unknown" },
           scheduledJobs: { status: "unknown" },
+          redisMemory: { status: "unknown" },
         },
         timestamp: new Date().toISOString(),
       },

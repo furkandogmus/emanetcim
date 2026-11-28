@@ -2,7 +2,17 @@ services:
   redis:
     image: redis:7-alpine
     restart: unless-stopped
-    command: redis-server --save "" --appendonly no --maxmemory 64mb --maxmemory-policy allkeys-lru
+    # BELLEK VE BOSALTMA POLITIKASI (2026-11-28). Redis hiz siniri sayaclarini ve mobil
+    # oturum yenileme kayitlarini (`src/lib/refresh-token-store.ts`) tutuyor. Eskiden 64 MB +
+    # `allkeys-lru` idi: bellek dolunca EN AZ OKUNAN anahtar silinir, o da bir kez yazilip
+    # 30 gune kadar bekleyen yenileme kaydidir. Silinen kayit, calinmis bir yenileme
+    # token'inin tekrarini "ilk kullanim" sayar. Yerel olcum (Redis 7.0, 12 MB sinir,
+    # 40 bin yenileme kaydi + 80 bin sayac): `allkeys-lru` 40 binin 26 binini sildi,
+    # `volatile-ttl` hicbirini; o politika suresi EN YAKIN biteni, yani dakikalik
+    # sayaclari siler. Butun anahtarlar sureli yaziliyor (`rate-limit.ts` MULTI ile).
+    # Olculen boyut: yenileme kaydi ~165 B, sayac ~134 B. 192 MB ~1,1 milyon yenileme
+    # kaydi eder. Doluluk `/api/health/jobs` -> `redisMemory` (`src/lib/redis-health.ts`).
+    command: redis-server --save "" --appendonly no --maxmemory 192mb --maxmemory-policy volatile-ttl
     healthcheck:
       test: ["CMD", "redis-cli", "ping"]
       interval: 5s
@@ -16,7 +26,8 @@ services:
     deploy:
       resources:
         limits:
-          memory: 96m
+          # maxmemory (192 MB) + Redis'in kendi yuku + parcalanma payi.
+          memory: 256m
         reservations:
           memory: 16m
 
