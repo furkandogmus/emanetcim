@@ -1,0 +1,5 @@
+# Guvenlik acigi bildirimi / Reporting security issues (RFC 9116)
+Contact: mailto:destek@bagajpark.com
+Expires: 2027-11-28T00:00:00.000Z
+Preferred-Languages: tr, en
+Canonical: https://bagajpark.com/.well-known/security.txt
