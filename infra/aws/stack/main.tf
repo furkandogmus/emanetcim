@@ -363,6 +363,17 @@ resource "aws_instance" "app" {
     volume_type = "gp3"
   }
 
+  # IMDSv2 ZORUNLU, acikca (2026-11-28 guvenlik taramasi). Onceden blok yoktu ve davranis
+  # AMI varsayilanina kaliyordu: AL2023 bugun v2 istiyor ama `ami` ignore_changes'te, yani
+  # varsayilan bizim kontrolumuzde degil. Hop siniri 2 MEVCUT davranis (konteynerden IMDS'e
+  # ulasilir). Uygulama S3'e anahtarla eristigi dogrulaninca 1'e indirin: web konteyneri
+  # sunucu rolune (SSM sirlari, yedek kovasi) hic ulasamaz.
+  metadata_options {
+    http_endpoint               = "enabled"
+    http_tokens                 = "required"
+    http_put_response_hop_limit = 2
+  }
+
   user_data = templatefile("${path.module}/cloud-init.sh.tftpl", {
     ssh_port      = var.ssh_port
     region        = var.region
