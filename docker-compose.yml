@@ -38,15 +38,42 @@ services:
       POSTGRES_USER: ${POSTGRES_USER:-bagajpark}
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?POSTGRES_PASSWORD zorunlu -- uretimde Parameter Store'dan gelir (ops/SECRETS.md), yerelde docker-compose.env icinde tanimlayin}
       POSTGRES_DB: ${POSTGRES_DB:-bagajpark}
-    # pg_stat_statements için shared_preload_libraries PostGIS imajında ayrı ele alınmalı (çakışma riski).
+    # AYARLAR (2026-11-28). Sunucu 4 GB; olculen kullanim ~424 MiB (infra/aws/README.md).
+    #   - Bellek siniri 512m -> 1g: `shared_buffers` (256 MB) eski sinirin yarisiydi; baglanti
+    #     basina bellek ve sorgu bellegi (`work_mem`) kalan yariya sigmak zorundaydi.
+    #   - `max_connections` 200 -> 100: uygulama havuzu varsayilan 10 (`src/lib/db.ts`); 200
+    #     baglanti 1 GB'a sigmaz, cekirdek Postgres'i oldurur.
+    #   - Yavas sorgu kaydi: 500 ms'yi asan sorgu loga yazilir. `log_parameter_max_length=0`
+    #     ZORUNLU: varsayilan (-1) Prisma'nin bagli parametrelerini (e-posta, telefon) loga
+    #     aynen yazar; yerelde olculdu.
+    #   - `pg_stat_statements`: sorgu basina toplam sure ve cagri sayisi. Onceki not "PostGIS
+    #     imajinda cakisma riski" diyordu; PostGIS 3 on yukleme istemez ve imaj
+    #     `shared_preload_libraries` ayarlamaz. PG 16 + PostGIS 3.4 ile yerelde birlikte
+    #     calistigi dogrulandi. Uzanti bir kez elle olusturulur: ops/README.md § Yavas sorgular.
     command:
       - postgres
       - -c
       - shared_buffers=256MB
       - -c
+      - effective_cache_size=768MB
+      - -c
       - work_mem=8MB
       - -c
-      - max_connections=200
+      - max_connections=100
+      - -c
+      - shared_preload_libraries=pg_stat_statements
+      - -c
+      - pg_stat_statements.track=top
+      - -c
+      - pg_stat_statements.max=5000
+      - -c
+      - log_min_duration_statement=500
+      - -c
+      - log_parameter_max_length=0
+      - -c
+      - log_lock_waits=on
+      - -c
+      - log_temp_files=10240
     volumes:
       - postgres_data:/var/lib/postgresql/data
     ports:
@@ -64,7 +91,7 @@ services:
     deploy:
       resources:
         limits:
-          memory: 512m
+          memory: 1g
         reservations:
           memory: 64m
 
