@@ -115,13 +115,14 @@ export async function POST(req: NextRequest) {
   }
 }
 
-/** GET /api/admin/setup — endpoint durumunu döndürür (key göstermez). */
+/**
+ * GET /api/admin/setup: yalnizca acik/kapali. Kullanim tarifi donmez: uc herkese
+ * acik ve tarif, kapali bir kurulum ucunun nasil cagrilacagini anlatiyordu
+ * (2026-11-28 guvenlik taramasi). Govde sozlesmesi bu dosyanin basinda yazili.
+ */
 export async function GET() {
   const enabled =
     process.env.ADMIN_SETUP_ENABLED?.trim() === "true" &&
     !!process.env.ADMIN_SETUP_KEY?.trim();
-  return NextResponse.json({
-    enabled,
-    usage: enabled ? "POST with { setupKey, email, password, role? }" : "disabled",
-  });
+  return NextResponse.json({ enabled });
 }
